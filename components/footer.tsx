@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Dumbbell, Github, Instagram, Twitter, Youtube } from "lucide-react";
+import { Github, Instagram, Twitter, Youtube } from "lucide-react";
+import { Logo } from "./brand/logo";
+import { Wordmark } from "./brand/wordmark";
 import { useT } from "@/lib/i18n-provider";
 
 export function Footer() {
@@ -48,13 +50,11 @@ export function Footer() {
         <div className="md:col-span-4">
           <Link
             href="/"
-            className="flex items-center gap-2 font-display font-bold"
+            className="flex items-center gap-2.5"
             aria-label="FitConnect — home"
           >
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-400 to-accent-500 text-ink-950">
-              <Dumbbell aria-hidden="true" className="h-5 w-5" />
-            </div>
-            FitConnect
+            <Logo className="h-9 w-9" />
+            <Wordmark size={18} />
           </Link>
           <p className="mt-4 text-sm text-ink-400 max-w-xs leading-relaxed">
             {t("footer", "tagline")}

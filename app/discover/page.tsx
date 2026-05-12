@@ -9,6 +9,7 @@ import { TrainerCardSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { DemoBanner } from "@/components/demo-banner";
+import { Atmosphere } from "@/components/marketing/atmosphere";
 import { SPORTS, TRAINERS, type Modality, type Sport } from "@/lib/data";
 import {
   ArrowRight,
@@ -218,37 +219,42 @@ function DiscoverInner() {
       <DemoBanner />
       <Nav />
       <main id="main" className="mx-auto max-w-7xl px-6 py-10">
-        <header className="flex flex-wrap items-end justify-between gap-4 mb-2">
-          <div>
-            <h1 className="font-display text-4xl md:text-5xl font-bold">
-              {sport === "all" ? "Find your specialist" : `${sport} specialists`}
-            </h1>
-            <p className="mt-2 text-ink-400">
-              {loading
-                ? "Loading 12,418 verified coaches…"
-                : `${filtered.length} of 12,418 specialists match your filters`}
-            </p>
+        <div className="relative isolate -mx-6 px-6 mb-4 pt-2 pb-6">
+          <div className="pointer-events-none absolute inset-x-0 -top-12 bottom-0 -z-10 overflow-hidden [mask-image:linear-gradient(to_bottom,black,transparent_85%)]">
+            <Atmosphere bandsOnly />
           </div>
-          <div className="flex items-center gap-2">
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value as SortKey)}
-              className="bg-ink-900/60 border border-ink-800 rounded-xl px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/60"
-            >
-              {Object.entries(sortLabels).map(([k, label]) => (
-                <option key={k} value={k}>
-                  {label}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={() => setDrawerOpen(true)}
-              className="lg:hidden inline-flex items-center gap-1.5 rounded-xl border border-ink-800 bg-ink-900/60 h-10 px-3 text-sm"
-            >
-              <Filter className="h-4 w-4" /> Filters
-            </button>
-          </div>
-        </header>
+          <header className="flex flex-wrap items-end justify-between gap-4 mb-2">
+            <div>
+              <h1 className="fc-vt-hero font-display text-4xl md:text-5xl font-bold">
+                {sport === "all" ? "Find your specialist" : `${sport} specialists`}
+              </h1>
+              <p className="mt-2 text-ink-400">
+                {loading
+                  ? "Loading 12,418 verified coaches…"
+                  : `${filtered.length} of 12,418 specialists match your filters`}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortKey)}
+                className="bg-ink-900/60 border border-ink-800 rounded-xl px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/60"
+              >
+                {Object.entries(sortLabels).map(([k, label]) => (
+                  <option key={k} value={k}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => setDrawerOpen(true)}
+                className="lg:hidden inline-flex items-center gap-1.5 rounded-xl border border-ink-800 bg-ink-900/60 h-10 px-3 text-sm"
+              >
+                <Filter className="h-4 w-4" /> Filters
+              </button>
+            </div>
+          </header>
+        </div>
 
         {hasActiveFilters && (
           <div className="flex items-center gap-2 flex-wrap mb-6 mt-2">

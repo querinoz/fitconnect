@@ -2,24 +2,21 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { useLanguage, useT } from "@/lib/i18n-provider";
+import { Brain, MessageSquare, Sparkles } from "lucide-react";
 import {
-  Activity,
-  Award,
-  BadgeCheck,
-  Brain,
-  CalendarCheck,
-  CreditCard,
-  HeartPulse,
-  MessageSquare,
-  ShieldCheck,
-  Sparkles,
-  Trophy,
-  Video
-} from "lucide-react";
+  CalendarStreakIcon,
+  CertificationIcon,
+  DumbbellSetIcon,
+  HeartRateIcon,
+  RecoveryRingIcon,
+  StopwatchIcon,
+  TargetIcon,
+  VideoRoomIcon
+} from "@/components/brand/icons";
 
 const items = [
   {
-    icon: ShieldCheck,
+    icon: CertificationIcon,
     titleEn: "Verified specialists",
     titlePt: "Especialistas verificados",
     bodyEn:
@@ -29,7 +26,7 @@ const items = [
     color: "text-accent-400 bg-accent-500/10 ring-accent-500/30"
   },
   {
-    icon: Video,
+    icon: VideoRoomIcon,
     titleEn: "Built-in HD video room",
     titlePt: "Sala de vídeo HD integrada",
     bodyEn:
@@ -39,7 +36,7 @@ const items = [
     color: "text-brand-300 bg-brand-500/10 ring-brand-500/30"
   },
   {
-    icon: CalendarCheck,
+    icon: CalendarStreakIcon,
     titleEn: "Smart scheduling",
     titlePt: "Agenda inteligente",
     bodyEn:
@@ -49,7 +46,7 @@ const items = [
     color: "text-plasma-400 bg-plasma-500/10 ring-plasma-500/30"
   },
   {
-    icon: CreditCard,
+    icon: StopwatchIcon,
     titleEn: "Stripe Connect payouts",
     titlePt: "Pagamentos via Stripe Connect",
     bodyEn:
@@ -59,7 +56,7 @@ const items = [
     color: "text-signal-400 bg-signal-500/10 ring-signal-500/30"
   },
   {
-    icon: HeartPulse,
+    icon: HeartRateIcon,
     titleEn: "Recovery-aware coaching",
     titlePt: "Coaching consciente da recuperação",
     bodyEn:
@@ -89,7 +86,7 @@ const items = [
     color: "text-brand-300 bg-brand-500/10 ring-brand-500/30"
   },
   {
-    icon: Activity,
+    icon: RecoveryRingIcon,
     titleEn: "Multi-sport athlete",
     titlePt: "Atleta multi-desporto",
     bodyEn:
@@ -99,7 +96,7 @@ const items = [
     color: "text-accent-400 bg-accent-500/10 ring-accent-500/30"
   },
   {
-    icon: Trophy,
+    icon: DumbbellSetIcon,
     titleEn: "Programs library",
     titlePt: "Biblioteca de programas",
     bodyEn:
@@ -109,7 +106,7 @@ const items = [
     color: "text-amber-400 bg-amber-500/10 ring-amber-500/30"
   },
   {
-    icon: BadgeCheck,
+    icon: TargetIcon,
     titleEn: "Free 15-min intro call",
     titlePt: "Intro grátis de 15 min",
     bodyEn:
@@ -119,7 +116,7 @@ const items = [
     color: "text-accent-400 bg-accent-500/10 ring-accent-500/30"
   },
   {
-    icon: Award,
+    icon: HeartRateIcon,
     titleEn: "Athlete community",
     titlePt: "Comunidade de atletas",
     bodyEn:

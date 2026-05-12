@@ -138,7 +138,7 @@ export default function DashboardPage() {
               <Activity aria-hidden="true" className="h-3.5 w-3.5" />{" "}
               {t("dashboard", "eyebrow")}
             </p>
-            <h1 className="mt-2 font-display text-3xl md:text-4xl font-bold">
+            <h1 className="fc-vt-hero mt-2 font-display text-3xl md:text-4xl font-bold">
               {t("dashboard", "welcome")}
             </h1>
             <p className="text-ink-400">{t("dashboard", "streak")}</p>

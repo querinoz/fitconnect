@@ -9,6 +9,7 @@ import { ComparisonTable } from "@/components/comparison-table";
 import { Faqs } from "@/components/faqs";
 import { DemoBanner } from "@/components/demo-banner";
 import { Button } from "@/components/ui/button";
+import { Atmosphere } from "@/components/marketing/atmosphere";
 import {
   ArrowRight,
   Check,
@@ -139,13 +140,13 @@ export default function PricingPage() {
       <DemoBanner />
       <Nav />
       <main id="main">
-        <section className="relative overflow-hidden pt-16 pb-12">
-          <div className="absolute inset-0 -z-10 gradient-bg" />
+        <section className="relative isolate overflow-hidden pt-16 pb-12">
+          <Atmosphere />
           <div className="mx-auto max-w-5xl px-6 text-center">
             <p className="eyebrow inline-flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5" /> Pricing
             </p>
-            <h1 className="mt-4 font-display text-5xl md:text-6xl font-bold leading-[0.95] text-balance">
+            <h1 className="fc-vt-hero mt-4 font-display text-5xl md:text-6xl font-bold leading-[0.95] text-balance">
               Honest pricing for{" "}
               <span className="gradient-text">honest training</span>.
             </h1>

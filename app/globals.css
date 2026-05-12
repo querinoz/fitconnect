@@ -9,6 +9,27 @@
   --muted-foreground: 215 16% 47%;
   --border: 214 32% 91%;
   --ring: 188 95% 43%;
+
+  /* FitConnect design tokens (round 2) */
+  --bg: #020617;
+  --bg-elevated: #0b1224;
+  --surface: #0f172a;
+  --surface-high: #1e293b;
+  --text: #f8fafc;
+  --text-dim: #94a3b8;
+  --text-mute: #64748b;
+  --ring-color: rgba(34, 211, 238, 0.6);
+  --shadow-glow: 0 0 40px -8px rgba(34, 211, 238, 0.45);
+  --shadow-warm: 0 0 36px -8px rgba(244, 63, 94, 0.4);
+  --shadow-plasma: 0 0 36px -8px rgba(168, 85, 247, 0.45);
+
+  /* Brand colour channels */
+  --brand: #22d3ee;
+  --brand-deep: #06b6d4;
+  --accent: #84cc16;
+  --accent-bright: #a3e635;
+  --signal: #f43f5e;
+  --plasma: #a855f7;
 }
 
 .dark {
@@ -22,8 +43,8 @@
 
 html,
 body {
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background: var(--bg);
+  color: var(--text);
   font-feature-settings: "ss01", "cv01";
 }
 
@@ -55,14 +76,14 @@ body {
 }
 
 .gradient-text {
-  background: linear-gradient(90deg, #22d3ee, #84cc16);
+  background: linear-gradient(90deg, var(--brand), var(--accent));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .gradient-text-warm {
-  background: linear-gradient(90deg, #f43f5e, #a855f7);
+  background: linear-gradient(90deg, var(--signal), var(--plasma));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -237,9 +258,316 @@ a:focus-visible,
 [role="button"]:focus-visible,
 input:focus-visible,
 select:focus-visible,
-textarea:focus-visible {
-  box-shadow: 0 0 0 2px rgba(2, 6, 23, 1), 0 0 0 4px rgba(34, 211, 238, 0.6);
+textarea:focus-visible,
+summary:focus-visible {
+  box-shadow: 0 0 0 2px rgba(2, 6, 23, 1), 0 0 0 4px var(--ring-color);
   border-radius: inherit;
+}
+
+/* ============================================================
+   ROUND 2 — Signature visual identity
+   ============================================================ */
+
+/* Kinetic atmosphere — soft cyan→lime→violet bands drifting on
+   layered radial-gradients. Used by <Atmosphere/>. */
+.fc-kinetic {
+  background:
+    radial-gradient(
+      60% 80% at 18% 30%,
+      rgba(34, 211, 238, 0.28),
+      transparent 70%
+    ),
+    radial-gradient(
+      55% 70% at 82% 60%,
+      rgba(132, 204, 22, 0.22),
+      transparent 70%
+    ),
+    radial-gradient(
+      40% 55% at 50% 90%,
+      rgba(168, 85, 247, 0.2),
+      transparent 70%
+    );
+  background-size: 220% 220%, 220% 220%, 220% 220%;
+  background-repeat: no-repeat;
+  animation: kinetic-drift 28s ease-in-out infinite;
+  filter: saturate(1.1);
+}
+
+/* Wave path used by atmosphere SVG */
+@keyframes fc-wave-shift {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -1200;
+  }
+}
+.fc-wave-1 {
+  animation: fc-wave-shift 22s linear infinite;
+}
+.fc-wave-2 {
+  animation: fc-wave-shift 38s linear infinite reverse;
+}
+.fc-wave-3 {
+  animation: fc-wave-shift 30s linear infinite;
+}
+
+/* Word-stagger — used on the wordmark hero */
+.fc-word > span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(40%);
+  animation: word-stagger 0.95s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.fc-word > span:nth-child(1) {
+  animation-delay: 0.06s;
+}
+.fc-word > span:nth-child(2) {
+  animation-delay: 0.18s;
+}
+.fc-word > span:nth-child(3) {
+  animation-delay: 0.30s;
+}
+.fc-word > span:nth-child(4) {
+  animation-delay: 0.42s;
+}
+.fc-word > span:nth-child(5) {
+  animation-delay: 0.54s;
+}
+
+@keyframes word-stagger {
+  from {
+    opacity: 0;
+    transform: translateY(40%) skewY(6deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) skewY(0deg);
+  }
+}
+
+/* Animated stroke path on the brand mark */
+@keyframes fc-mark-trace {
+  0% {
+    stroke-dashoffset: 220;
+  }
+  60% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+.fc-mark-trace {
+  stroke-dasharray: 220;
+  stroke-dashoffset: 220;
+  animation: fc-mark-trace 2.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Card-flip 3D plate used by demo-coach-flip */
+.fc-flip-scene {
+  perspective: 1100px;
+}
+.fc-flip-card {
+  position: relative;
+  transform-style: preserve-3d;
+  animation: fc-flip 7.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+.fc-flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 1.25rem;
+  overflow: hidden;
+}
+.fc-flip-back {
+  transform: rotateY(180deg);
+}
+@keyframes fc-flip {
+  0%,
+  40% {
+    transform: rotateY(0deg);
+  }
+  50%,
+  90% {
+    transform: rotateY(180deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+/* Ring-fill for the readiness demo — loops cleanly */
+@keyframes fc-ring-loop {
+  0% {
+    stroke-dashoffset: 226;
+  }
+  35% {
+    stroke-dashoffset: 51;
+  }
+  60% {
+    stroke-dashoffset: 51;
+  }
+  85% {
+    stroke-dashoffset: 226;
+  }
+  100% {
+    stroke-dashoffset: 226;
+  }
+}
+.fc-ring-loop {
+  stroke-dasharray: 226;
+  animation: fc-ring-loop 5.2s ease-in-out infinite;
+}
+
+/* Match demo carousel */
+@keyframes fc-step-cycle {
+  0%,
+  20% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  25%,
+  45% {
+    transform: translateX(-100%);
+    opacity: 1;
+  }
+  50%,
+  70% {
+    transform: translateX(-200%);
+    opacity: 1;
+  }
+  75%,
+  95% {
+    transform: translateX(-300%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+.fc-step-cycle {
+  animation: fc-step-cycle 9s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* Animated cursor used by product-mockup */
+@keyframes fc-cursor-path {
+  0% {
+    transform: translate(20%, 28%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  35% {
+    transform: translate(34%, 30%);
+  }
+  55% {
+    transform: translate(60%, 42%);
+  }
+  72% {
+    transform: translate(70%, 76%);
+  }
+  86% {
+    transform: translate(70%, 76%);
+  }
+  100% {
+    transform: translate(20%, 28%);
+    opacity: 0;
+  }
+}
+.fc-cursor {
+  animation: fc-cursor-path 6.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes fc-toast-in {
+  0%,
+  72% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.94);
+  }
+  78%,
+  90% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  96%,
+  100% {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+}
+.fc-toast {
+  animation: fc-toast-in 6.4s ease-in-out infinite;
+}
+
+@keyframes fc-bar-pop {
+  from {
+    transform: scaleY(0.2);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+.fc-bar-pop {
+  transform-origin: bottom;
+  animation: fc-bar-pop 1.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Number tick — reveals two digits on a 6.4s loop */
+@keyframes fc-tick-flip {
+  0%,
+  60% {
+    transform: translateY(0%);
+  }
+  70%,
+  100% {
+    transform: translateY(-50%);
+  }
+}
+.fc-tick-flip {
+  animation: fc-tick-flip 6.4s ease-in-out infinite;
+}
+
+/* HRV sparkline */
+@keyframes fc-spark-trace {
+  from {
+    stroke-dashoffset: 240;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.fc-spark-trace {
+  stroke-dasharray: 240;
+  animation: fc-spark-trace 5.6s ease-in-out infinite alternate;
+}
+
+/* Cross-page view transitions — gated behind reduced-motion */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.5s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  ::view-transition-old(fc-wordmark),
+  ::view-transition-new(fc-wordmark) {
+    animation-duration: 0.5s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  ::view-transition-old(fc-hero-title),
+  ::view-transition-new(fc-hero-title) {
+    animation-duration: 0.55s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .fc-vt-wordmark {
+    view-transition-name: fc-wordmark;
+  }
+  .fc-vt-hero {
+    view-transition-name: fc-hero-title;
+  }
 }
 
 /* Reduced-motion guard.
@@ -254,7 +582,25 @@ textarea:focus-visible {
     scroll-behavior: auto !important;
   }
   .animate-marquee,
-  .animate-marquee-slow {
+  .animate-marquee-slow,
+  .fc-kinetic,
+  .fc-wave-1,
+  .fc-wave-2,
+  .fc-wave-3,
+  .fc-flip-card,
+  .fc-ring-loop,
+  .fc-step-cycle,
+  .fc-cursor,
+  .fc-toast,
+  .fc-bar-pop,
+  .fc-tick-flip,
+  .fc-spark-trace,
+  .fc-mark-trace {
+    animation: none !important;
+  }
+  .fc-word > span {
+    opacity: 1;
+    transform: none;
     animation: none !important;
   }
   /* Keep skeletons visible — but kill the shimmer movement. */

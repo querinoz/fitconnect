@@ -33,6 +33,7 @@ const config: Config = {
           900: "#164e63"
         },
         accent: {
+          200: "#d9f99d",
           300: "#bef264",
           400: "#a3e635",
           500: "#84cc16",
@@ -40,14 +41,24 @@ const config: Config = {
           700: "#4d7c0f"
         },
         signal: {
+          300: "#fda4af",
           400: "#fb7185",
           500: "#f43f5e",
-          600: "#e11d48"
+          600: "#e11d48",
+          700: "#be123c"
         },
         plasma: {
+          300: "#d8b4fe",
           400: "#c084fc",
           500: "#a855f7",
-          600: "#9333ea"
+          600: "#9333ea",
+          700: "#7e22ce"
+        },
+        surface: {
+          low: "#020617",
+          DEFAULT: "#070d1c",
+          high: "#0f172a",
+          higher: "#1e293b"
         },
         ink: {
           50: "#f8fafc",
@@ -95,6 +106,33 @@ const config: Config = {
         "gradient-pan": {
           "0%, 100%": { backgroundPosition: "0% 50%" },
           "50%": { backgroundPosition: "100% 50%" }
+        },
+        "kinetic-drift": {
+          "0%, 100%": {
+            backgroundPosition: "0% 50%, 100% 50%, 50% 0%"
+          },
+          "33%": {
+            backgroundPosition: "60% 30%, 30% 70%, 70% 40%"
+          },
+          "66%": {
+            backgroundPosition: "40% 70%, 70% 30%, 30% 60%"
+          }
+        },
+        "stroke-trace": {
+          from: { strokeDashoffset: "1200" },
+          to: { strokeDashoffset: "0" }
+        },
+        "word-stagger": {
+          from: { opacity: "0", transform: "translateY(40%) skewY(6deg)" },
+          to: { opacity: "1", transform: "translateY(0) skewY(0deg)" }
+        },
+        "tick-up": {
+          from: { transform: "translateY(100%)", opacity: "0" },
+          to: { transform: "translateY(0)", opacity: "1" }
+        },
+        flip: {
+          "0%, 100%": { transform: "rotateY(0deg)" },
+          "50%": { transform: "rotateY(180deg)" }
         }
       },
       animation: {
@@ -105,7 +143,10 @@ const config: Config = {
         "marquee-slow": "marquee 60s linear infinite",
         float: "float 6s ease-in-out infinite",
         "ring-progress": "ring-progress 1.6s ease-out forwards",
-        "gradient-pan": "gradient-pan 12s ease infinite"
+        "gradient-pan": "gradient-pan 12s ease infinite",
+        "kinetic-drift": "kinetic-drift 28s ease-in-out infinite",
+        "stroke-trace": "stroke-trace 8s ease-in-out infinite alternate",
+        "word-stagger": "word-stagger 1s cubic-bezier(0.16, 1, 0.3, 1) both"
       },
       backgroundImage: {
         "grid-light":
@@ -119,6 +160,8 @@ const config: Config = {
       },
       boxShadow: {
         glow: "0 0 30px -5px rgba(34,211,238,0.5)",
+        "glow-warm": "0 0 30px -5px rgba(244,63,94,0.4)",
+        "glow-plasma": "0 0 30px -5px rgba(168,85,247,0.5)",
         elevated:
           "0 10px 40px -10px rgba(0,0,0,0.4), 0 4px 12px -2px rgba(34,211,238,0.15)"
       },
