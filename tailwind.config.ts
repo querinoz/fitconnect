@@ -8,6 +8,16 @@ const config: Config = {
     "./lib/**/*.{ts,tsx}"
   ],
   theme: {
+    container: {
+      center: true,
+      padding: {
+        DEFAULT: "1.5rem",
+        lg: "2rem"
+      },
+      screens: {
+        "2xl": "1280px"
+      }
+    },
     extend: {
       colors: {
         brand: {
@@ -23,8 +33,21 @@ const config: Config = {
           900: "#164e63"
         },
         accent: {
+          300: "#bef264",
+          400: "#a3e635",
           500: "#84cc16",
-          600: "#65a30d"
+          600: "#65a30d",
+          700: "#4d7c0f"
+        },
+        signal: {
+          400: "#fb7185",
+          500: "#f43f5e",
+          600: "#e11d48"
+        },
+        plasma: {
+          400: "#c084fc",
+          500: "#a855f7",
+          600: "#9333ea"
         },
         ink: {
           50: "#f8fafc",
@@ -52,17 +75,56 @@ const config: Config = {
         shimmer: {
           "0%": { backgroundPosition: "200% 0" },
           "100%": { backgroundPosition: "-200% 0" }
+        },
+        "pulse-glow": {
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(34,211,238,0.4)" },
+          "50%": { boxShadow: "0 0 0 14px rgba(34,211,238,0)" }
+        },
+        marquee: {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-50%)" }
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" }
+        },
+        "ring-progress": {
+          from: { strokeDashoffset: "283" },
+          to: { strokeDashoffset: "60" }
+        },
+        "gradient-pan": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" }
         }
       },
       animation: {
         "fade-up": "fade-up 0.6s ease-out forwards",
-        shimmer: "shimmer 3s linear infinite"
+        shimmer: "shimmer 3s linear infinite",
+        "pulse-glow": "pulse-glow 2.4s ease-in-out infinite",
+        marquee: "marquee 40s linear infinite",
+        "marquee-slow": "marquee 60s linear infinite",
+        float: "float 6s ease-in-out infinite",
+        "ring-progress": "ring-progress 1.6s ease-out forwards",
+        "gradient-pan": "gradient-pan 12s ease infinite"
       },
       backgroundImage: {
         "grid-light":
           "linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px)",
         "grid-dark":
-          "linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)"
+          "linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)",
+        "noise":
+          "url(\"data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>\")",
+        "radial-fade":
+          "radial-gradient(ellipse at center, rgba(34,211,238,0.18), transparent 60%)"
+      },
+      boxShadow: {
+        glow: "0 0 30px -5px rgba(34,211,238,0.5)",
+        elevated:
+          "0 10px 40px -10px rgba(0,0,0,0.4), 0 4px 12px -2px rgba(34,211,238,0.15)"
+      },
+      transitionTimingFunction: {
+        "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",
+        spring: "cubic-bezier(0.25, 1.5, 0.5, 1)"
       }
     }
   },

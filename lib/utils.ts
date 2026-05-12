@@ -31,3 +31,22 @@ export function initials(name: string) {
     .join("")
     .toUpperCase();
 }
+
+export function formatCompact(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: 1
+  }).format(value);
+}
+
+export function pluralize(value: number, singular: string, plural?: string) {
+  return value === 1 ? `${value} ${singular}` : `${value} ${plural ?? singular + "s"}`;
+}
+
+export function pct(value: number) {
+  return `${Math.round(value * 100)}%`;
+}
+
+export function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
