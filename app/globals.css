@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --border: 214 32% 91%;
+  --ring: 188 95% 43%;
+}
+
+.dark {
+  --background: 222 47% 6%;
+  --foreground: 210 40% 98%;
+  --muted: 217 33% 12%;
+  --muted-foreground: 215 20% 65%;
+  --border: 217 33% 18%;
+  --ring: 188 95% 43%;
+}
+
+html,
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-feature-settings: "ss01", "cv01";
+}
+
+/* nice scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* utility */
+.text-balance {
+  text-wrap: balance;
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #22d3ee, #84cc16);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-bg {
+  background: radial-gradient(
+      ellipse at top left,
+      rgba(34, 211, 238, 0.18),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at bottom right,
+      rgba(132, 204, 22, 0.18),
+      transparent 50%
+    );
+}
+
+.card-glow {
+  position: relative;
+}
+.card-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(34, 211, 238, 0.5),
+    rgba(132, 204, 22, 0.3)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
