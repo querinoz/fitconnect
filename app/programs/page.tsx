@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 import { Cta } from "@/components/cta";
+import { DemoBanner } from "@/components/demo-banner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PROGRAMS, SPORTS, TRAINERS, type Sport } from "@/lib/data";
 import {
@@ -42,8 +43,9 @@ export default function ProgramsPage() {
 
   return (
     <>
+      <DemoBanner />
       <Nav />
-      <main>
+      <main id="main">
         <section className="relative overflow-hidden pt-16 pb-12">
           <div className="absolute inset-0 -z-10 gradient-bg opacity-70" />
           <div className="mx-auto max-w-7xl px-6">

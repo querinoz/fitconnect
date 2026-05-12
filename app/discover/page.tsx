@@ -8,6 +8,7 @@ import { TrainerCard } from "@/components/trainer-card";
 import { TrainerCardSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
+import { DemoBanner } from "@/components/demo-banner";
 import { SPORTS, TRAINERS, type Modality, type Sport } from "@/lib/data";
 import {
   ArrowRight,
@@ -39,8 +40,9 @@ export default function DiscoverPage() {
 function DiscoverFallback() {
   return (
     <>
+      <DemoBanner />
       <Nav />
-      <main className="mx-auto max-w-7xl px-6 py-10">
+      <main id="main" className="mx-auto max-w-7xl px-6 py-10">
         <div className="h-10 w-72 skeleton mb-4" />
         <div className="grid lg:grid-cols-[280px_1fr] gap-8">
           <div className="h-[320px] rounded-2xl skeleton" />
@@ -213,8 +215,9 @@ function DiscoverInner() {
 
   return (
     <>
+      <DemoBanner />
       <Nav />
-      <main className="mx-auto max-w-7xl px-6 py-10">
+      <main id="main" className="mx-auto max-w-7xl px-6 py-10">
         <header className="flex flex-wrap items-end justify-between gap-4 mb-2">
           <div>
             <h1 className="font-display text-4xl md:text-5xl font-bold">

@@ -7,6 +7,7 @@ import { Footer } from "@/components/footer";
 import { Cta } from "@/components/cta";
 import { ComparisonTable } from "@/components/comparison-table";
 import { Faqs } from "@/components/faqs";
+import { DemoBanner } from "@/components/demo-banner";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
@@ -135,8 +136,9 @@ export default function PricingPage() {
   const [period, setPeriod] = useState<Period>("annual");
   return (
     <>
+      <DemoBanner />
       <Nav />
-      <main>
+      <main id="main">
         <section className="relative overflow-hidden pt-16 pb-12">
           <div className="absolute inset-0 -z-10 gradient-bg" />
           <div className="mx-auto max-w-5xl px-6 text-center">

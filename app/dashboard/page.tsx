@@ -5,6 +5,8 @@ import { Footer } from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AIAssistant } from "@/components/ai-assistant";
+import { useT } from "@/lib/i18n-provider";
 import { TRAINERS } from "@/lib/data";
 import {
   Area,
@@ -125,21 +127,21 @@ const messages = [
 ];
 
 export default function DashboardPage() {
+  const t = useT();
   return (
     <>
       <Nav />
-      <main className="mx-auto max-w-7xl px-6 py-10 space-y-8">
+      <main id="main" className="mx-auto max-w-7xl px-6 py-10 space-y-8">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="eyebrow inline-flex items-center gap-1.5">
-              <Activity className="h-3.5 w-3.5" /> Your athlete OS
+              <Activity aria-hidden="true" className="h-3.5 w-3.5" />{" "}
+              {t("dashboard", "eyebrow")}
             </p>
             <h1 className="mt-2 font-display text-3xl md:text-4xl font-bold">
-              Welcome back, Inês.
+              {t("dashboard", "welcome")}
             </h1>
-            <p className="text-ink-400">
-              You&apos;re on a 5-week PR streak — green light to push today.
-            </p>
+            <p className="text-ink-400">{t("dashboard", "streak")}</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline">
@@ -605,6 +607,7 @@ export default function DashboardPage() {
         </section>
       </main>
       <Footer />
+      <AIAssistant />
     </>
   );
 }

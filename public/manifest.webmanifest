@@ -1,0 +1,48 @@
+{
+  "name": "FitConnect — Train with world-class specialists",
+  "short_name": "FitConnect",
+  "description": "Connect with verified specialist personal trainers across yoga, surf, climbing, BJJ and more — in person or online. Built around HRV, sleep and recovery-aware coaching.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#020617",
+  "theme_color": "#22d3ee",
+  "categories": ["health", "fitness", "lifestyle", "sports"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "180x180",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Find a coach",
+      "short_name": "Discover",
+      "url": "/discover",
+      "description": "Browse 12,000+ verified specialist coaches"
+    },
+    {
+      "name": "Athlete dashboard",
+      "short_name": "Dashboard",
+      "url": "/dashboard",
+      "description": "Today's readiness, plan and coach messages"
+    },
+    {
+      "name": "Community",
+      "short_name": "Community",
+      "url": "/community",
+      "description": "PRs, check-ins and meet-ups"
+    }
+  ]
+}

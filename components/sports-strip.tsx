@@ -1,8 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { SPORTS } from "@/lib/data";
+import { useT } from "@/lib/i18n-provider";
 
 const meta: Record<
   string,
@@ -36,19 +37,19 @@ const meta: Record<
 };
 
 export function SportsStrip() {
+  const t = useT();
+  const reduce = useReducedMotion();
   return (
     <section className="border-y border-ink-800/60 bg-ink-900/30">
       <div className="mx-auto max-w-7xl px-6 py-12">
         <div className="flex items-baseline justify-between flex-wrap gap-4 mb-7">
           <div>
-            <p className="eyebrow">10 sports. 0 generalists.</p>
+            <p className="eyebrow">{t("sports", "eyebrow")}</p>
             <h3 className="mt-2 font-display text-xl md:text-2xl font-bold">
-              A specialist for every discipline
+              {t("sports", "title")}
             </h3>
           </div>
-          <p className="text-xs text-ink-500">
-            Hover a tile · live counts updated 5 minutes ago
-          </p>
+          <p className="text-xs text-ink-500">{t("sports", "note")}</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-3">
           {SPORTS.map((s, i) => {
@@ -56,10 +57,10 @@ export function SportsStrip() {
             return (
               <motion.div
                 key={s}
-                initial={{ opacity: 0, y: 8 }}
+                initial={{ opacity: 0, y: reduce ? 0 : 8 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: i * 0.03 }}
+                transition={{ duration: reduce ? 0 : 0.3, delay: reduce ? 0 : i * 0.03 }}
               >
                 <Link
                   href={`/discover?sport=${encodeURIComponent(s)}`}

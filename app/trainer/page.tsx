@@ -2,6 +2,7 @@ import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 import { Cta } from "@/components/cta";
 import { Button } from "@/components/ui/button";
+import { DemoBanner } from "@/components/demo-banner";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -83,8 +84,9 @@ const onboarding = [
 export default function TrainerCtaPage() {
   return (
     <>
+      <DemoBanner />
       <Nav />
-      <main>
+      <main id="main">
         <section className="relative overflow-hidden pt-12 pb-16">
           <div className="absolute inset-0 -z-10 gradient-bg" />
           <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-12 items-center">

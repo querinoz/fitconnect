@@ -1,6 +1,7 @@
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 import { Cta } from "@/components/cta";
+import { DemoBanner } from "@/components/demo-banner";
 import { METHODOLOGY } from "@/lib/data";
 import { ArrowDown, BookOpen, FlaskConical, ShieldCheck, Microscope, Quote } from "lucide-react";
 
@@ -36,8 +37,9 @@ const evidence = [
 export default function MethodologyPage() {
   return (
     <>
+      <DemoBanner />
       <Nav />
-      <main>
+      <main id="main">
         <section className="relative overflow-hidden pt-16 pb-20">
           <div className="absolute inset-0 -z-10 gradient-bg opacity-70" />
           <div className="mx-auto max-w-4xl px-6 text-center">

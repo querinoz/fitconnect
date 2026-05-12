@@ -10,26 +10,28 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
+import { LangPicker } from "./lang-picker";
+import { useT } from "@/lib/i18n-provider";
 import { cn } from "@/lib/utils";
 
-const primaryLinks = [
-  { href: "/discover", label: "Find a coach" },
-  { href: "/programs", label: "Programs" },
-  { href: "/community", label: "Community" },
-  { href: "/methodology", label: "Methodology" },
-  { href: "/pricing", label: "Pricing" }
-];
-
-const moreLinks = [
-  { href: "/dashboard", label: "Athlete dashboard" },
-  { href: "/trainer", label: "For coaches" }
-];
-
 export function Nav() {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [progress, setProgress] = useState(0);
   const [moreOpen, setMoreOpen] = useState(false);
+
+  const primaryLinks = [
+    { href: "/discover", label: t("nav", "findCoach") },
+    { href: "/programs", label: t("nav", "programs") },
+    { href: "/community", label: t("nav", "community") },
+    { href: "/methodology", label: t("nav", "methodology") },
+    { href: "/pricing", label: t("nav", "pricing") }
+  ];
+  const moreLinks = [
+    { href: "/dashboard", label: t("nav", "dashboard") },
+    { href: "/trainer", label: t("nav", "forCoaches") }
+  ];
 
   useEffect(() => {
     function onScroll() {
@@ -67,17 +69,24 @@ export function Nav() {
           <Link
             href="/"
             className="flex items-center gap-2 font-display font-bold text-lg"
+            aria-label="FitConnect — home"
           >
             <div className="relative grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-400 to-accent-500 text-ink-950 shadow-glow">
-              <Dumbbell className="h-5 w-5" />
-              <span className="absolute -inset-0.5 -z-10 rounded-xl bg-gradient-to-br from-brand-400 to-accent-500 opacity-40 blur" />
+              <Dumbbell className="h-5 w-5" aria-hidden="true" />
+              <span
+                aria-hidden="true"
+                className="absolute -inset-0.5 -z-10 rounded-xl bg-gradient-to-br from-brand-400 to-accent-500 opacity-40 blur"
+              />
             </div>
             <span>
               Fit<span className="text-brand-400">Connect</span>
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-6 text-sm text-ink-300">
+          <nav
+            aria-label="Primary"
+            className="hidden lg:flex items-center gap-6 text-sm text-ink-300"
+          >
             {primaryLinks.map((l) => (
               <Link
                 key={l.href}
@@ -91,10 +100,13 @@ export function Nav() {
             <div className="relative" data-more>
               <button
                 onClick={() => setMoreOpen((v) => !v)}
+                aria-haspopup="menu"
+                aria-expanded={moreOpen}
                 className="flex items-center gap-1 hover:text-ink-50 transition-colors py-1.5"
               >
-                More
+                {t("nav", "more")}
                 <ChevronDown
+                  aria-hidden="true"
                   className={cn(
                     "h-3.5 w-3.5 transition-transform",
                     moreOpen && "rotate-180"
@@ -102,11 +114,15 @@ export function Nav() {
                 />
               </button>
               {moreOpen && (
-                <div className="absolute top-full left-0 mt-2 w-52 rounded-2xl border border-ink-800 bg-ink-950/95 backdrop-blur-xl shadow-elevated p-2">
+                <div
+                  role="menu"
+                  className="absolute top-full left-0 mt-2 w-52 rounded-2xl border border-ink-800 bg-ink-950/95 backdrop-blur-xl shadow-elevated p-2"
+                >
                   {moreLinks.map((l) => (
                     <Link
                       key={l.href}
                       href={l.href}
+                      role="menuitem"
                       className="block rounded-lg px-3 py-2 text-sm text-ink-200 hover:bg-ink-800/60 hover:text-ink-50"
                       onClick={() => setMoreOpen(false)}
                     >
@@ -120,28 +136,45 @@ export function Nav() {
         </div>
 
         <div className="hidden md:flex items-center gap-2">
+          <LangPicker />
           <Button asChild variant="ghost" size="sm">
-            <Link href="/discover">Sign in</Link>
+            <Link href="/signin">{t("nav", "signIn")}</Link>
           </Button>
           <Button asChild size="sm" className="group">
-            <Link href="/discover" className="flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 transition-transform group-hover:rotate-12" />
-              Match me in 60s
+            <Link href="/signup" className="flex items-center gap-1.5">
+              <Sparkles
+                aria-hidden="true"
+                className="h-3.5 w-3.5 transition-transform group-hover:rotate-12"
+              />
+              {t("nav", "matchMe")}
             </Link>
           </Button>
         </div>
 
-        <button
-          aria-label="menu"
-          onClick={() => setOpen((v) => !v)}
-          className="md:hidden p-2 text-ink-100"
-        >
-          {open ? <X /> : <Menu />}
-        </button>
+        <div className="md:hidden flex items-center gap-1.5">
+          <LangPicker compact />
+          <button
+            type="button"
+            aria-label={t("nav", "menu")}
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            onClick={() => setOpen((v) => !v)}
+            className="p-2 text-ink-100"
+          >
+            {open ? (
+              <X aria-hidden="true" />
+            ) : (
+              <Menu aria-hidden="true" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Reading progress */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-ink-800/40">
+      <div
+        aria-hidden="true"
+        className="absolute bottom-0 left-0 right-0 h-px bg-ink-800/40"
+      >
         <div
           className="h-full bg-gradient-to-r from-brand-400 via-accent-500 to-plasma-500 transition-[width] duration-150"
           style={{ width: `${progress * 100}%` }}
@@ -149,12 +182,13 @@ export function Nav() {
       </div>
 
       <div
+        id="mobile-nav"
         className={cn(
           "md:hidden overflow-hidden transition-all border-t border-ink-800/60 bg-ink-950/95 backdrop-blur",
-          open ? "max-h-[480px] py-4" : "max-h-0"
+          open ? "max-h-[520px] py-4" : "max-h-0"
         )}
       >
-        <nav className="flex flex-col gap-1 px-6">
+        <nav aria-label="Mobile" className="flex flex-col gap-1 px-6">
           {[...primaryLinks, ...moreLinks].map((l) => (
             <Link
               key={l.href}
@@ -165,11 +199,18 @@ export function Nav() {
               {l.label}
             </Link>
           ))}
-          <Button asChild className="mt-4 w-full">
-            <Link href="/discover" onClick={() => setOpen(false)}>
-              Match me in 60s
-            </Link>
-          </Button>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/signin" onClick={() => setOpen(false)}>
+                {t("nav", "signIn")}
+              </Link>
+            </Button>
+            <Button asChild className="w-full">
+              <Link href="/signup" onClick={() => setOpen(false)}>
+                {t("nav", "matchMe")}
+              </Link>
+            </Button>
+          </div>
         </nav>
       </div>
     </header>

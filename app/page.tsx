@@ -17,12 +17,14 @@ import { Pricing } from "@/components/pricing";
 import { Faqs } from "@/components/faqs";
 import { Cta } from "@/components/cta";
 import { Footer } from "@/components/footer";
+import { DemoBanner } from "@/components/demo-banner";
 
 export default function Home() {
   return (
     <>
+      <DemoBanner />
       <Nav />
-      <main>
+      <main id="main">
         <Hero />
         <PressStrip />
         <SportsStrip />

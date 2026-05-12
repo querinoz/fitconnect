@@ -100,7 +100,7 @@ export default function TrainerPage({
   return (
     <>
       <Nav />
-      <main>
+      <main id="main">
         <div className="relative h-72 md:h-96 overflow-hidden">
           <img src={t.cover} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/50 to-ink-950/20" />

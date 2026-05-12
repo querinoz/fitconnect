@@ -6,6 +6,8 @@ import { Footer } from "@/components/footer";
 import { Cta } from "@/components/cta";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { CelebrationRibbon } from "@/components/celebration-ribbon";
+import { DemoBanner } from "@/components/demo-banner";
 import { COMMUNITY_POSTS, SPORTS, type Sport } from "@/lib/data";
 import {
   Award,
@@ -60,12 +62,13 @@ export default function CommunityPage() {
 
   return (
     <>
+      <DemoBanner />
       <Nav />
-      <main className="mx-auto max-w-7xl px-6 py-10">
+      <main id="main" className="mx-auto max-w-7xl px-6 py-10">
         <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="eyebrow inline-flex items-center gap-1.5">
-              <Users className="h-3.5 w-3.5" /> Community
+              <Users aria-hidden="true" className="h-3.5 w-3.5" /> Community
             </p>
             <h1 className="mt-2 font-display text-4xl md:text-5xl font-bold">
               The clubhouse, online.
@@ -77,6 +80,8 @@ export default function CommunityPage() {
           </div>
           <Button size="lg">Share a check-in</Button>
         </header>
+
+        <CelebrationRibbon />
 
         <div className="grid gap-8 lg:grid-cols-[280px_1fr_300px]">
           {/* Left sidebar */}

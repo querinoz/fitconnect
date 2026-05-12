@@ -217,3 +217,49 @@ body {
   font-weight: 600;
   color: #67e8f9;
 }
+
+/* Sign-in OAuth pending bar */
+@keyframes loading-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+/* Focus ring — applies a consistent visible ring on every keyboard focus */
+*:focus-visible {
+  outline: none;
+}
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  box-shadow: 0 0 0 2px rgba(2, 6, 23, 1), 0 0 0 4px rgba(34, 211, 238, 0.6);
+  border-radius: inherit;
+}
+
+/* Reduced-motion guard.
+   Athletes are sometimes coached through TBI / neurodivergent recovery — we honour the OS setting. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-marquee,
+  .animate-marquee-slow {
+    animation: none !important;
+  }
+  /* Keep skeletons visible — but kill the shimmer movement. */
+  .skeleton {
+    background: rgba(255, 255, 255, 0.06);
+    animation: none !important;
+  }
+}
