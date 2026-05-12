@@ -45,7 +45,7 @@ export function HeroImmersive() {
       className="relative isolate overflow-hidden pt-12 pb-24 md:pt-20 md:pb-28"
       aria-labelledby="fc-hero-title"
     >
-      <Atmosphere />
+      <Atmosphere particles={22} />
 
       <div className="mx-auto max-w-7xl px-6 grid gap-12 lg:grid-cols-12 lg:items-center">
         <div className="lg:col-span-6">
@@ -150,7 +150,7 @@ export function HeroImmersive() {
           </div>
         </div>
 
-        {/* Product mockup as artwork */}
+        {/* Product mockup + floating real-people photo cluster */}
         <motion.div
           initial={{ opacity: 0, y: reduce ? 0 : 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -158,8 +158,99 @@ export function HeroImmersive() {
           className="lg:col-span-6 relative"
         >
           <ProductMockup />
+
+          {/* Floating coach photo — top-left of the mockup. Real face from
+              hour-one signals "this is a marketplace of real people". */}
+          <FloatingCoachPhoto
+            src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=320&q=80&auto=format&fit=crop"
+            alt="Strength coach in the gym"
+            sport="Strength"
+            coachAvatar="https://i.pravatar.cc/80?img=12"
+            position="top-left"
+            anim="fc-photo-float-a"
+          />
+          <FloatingCoachPhoto
+            src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=320&q=80&auto=format&fit=crop"
+            alt="Yoga coach in a studio"
+            sport="Yoga"
+            coachAvatar="https://i.pravatar.cc/80?img=47"
+            position="bottom-right"
+            anim="fc-photo-float-b"
+          />
+          <FloatingCoachPhoto
+            src="https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?w=320&q=80&auto=format&fit=crop"
+            alt="Running coach on a coastal trail"
+            sport="Running"
+            coachAvatar="https://i.pravatar.cc/80?img=23"
+            position="middle-right"
+            anim="fc-photo-float-c"
+          />
         </motion.div>
       </div>
     </section>
+  );
+}
+
+type FloatingCoachPhotoProps = {
+  src: string;
+  alt: string;
+  sport: string;
+  coachAvatar: string;
+  position: "top-left" | "bottom-right" | "middle-right";
+  anim: "fc-photo-float-a" | "fc-photo-float-b" | "fc-photo-float-c";
+};
+
+/**
+ * Tiny coach-photo card that floats around the product mockup.
+ *
+ * Hidden under `md` to avoid crowding the product mockup on phones.
+ * Drift is via CSS keyframes (no JS scroll); reduced-motion guard is
+ * already wired in globals.css.
+ */
+function FloatingCoachPhoto({
+  src,
+  alt,
+  sport,
+  coachAvatar,
+  position,
+  anim
+}: FloatingCoachPhotoProps) {
+  const positionClass =
+    position === "top-left"
+      ? "-top-6 -left-8 hidden md:block"
+      : position === "bottom-right"
+        ? "-bottom-8 -right-6 hidden md:block"
+        : "top-1/2 -right-10 -translate-y-1/2 hidden xl:block";
+
+  return (
+    <figure
+      aria-hidden="true"
+      className={`absolute ${positionClass} w-36 lg:w-40 ${anim} z-10`}
+    >
+      <div className="relative overflow-hidden rounded-2xl border border-ink-800 shadow-elevated bg-ink-950 fc-photo-mask">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt={alt}
+          loading="eager"
+          className="h-28 w-full object-cover"
+        />
+        <div className="absolute inset-x-2 bottom-2 flex items-center gap-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={coachAvatar}
+            alt=""
+            className="h-6 w-6 rounded-full ring-2 ring-ink-950 object-cover"
+          />
+          <span className="text-[10px] font-semibold text-ink-50 leading-tight truncate">
+            {sport}
+          </span>
+          <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-ink-950/70 backdrop-blur px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-accent-300 ring-1 ring-accent-500/40">
+            <span className="fc-badge-flicker h-1 w-1 rounded-full" />
+            Live
+          </span>
+        </div>
+      </div>
+    </figure>
   );
 }

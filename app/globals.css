@@ -545,6 +545,213 @@ summary:focus-visible {
   animation: fc-spark-trace 5.6s ease-in-out infinite alternate;
 }
 
+/* ============================================================
+   ROUND 3 — Real-people photography & immersive showcases
+   ============================================================ */
+
+/* Drifting brand-tinted dust particles (used by <Atmosphere particles>) */
+@keyframes fc-particle-drift {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.85);
+  }
+  20% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.85;
+    transform: translate3d(8px, -22px, 0) scale(1.05);
+  }
+  80% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-6px, -52px, 0) scale(0.9);
+  }
+}
+.fc-particle {
+  animation: fc-particle-drift linear infinite;
+  will-change: transform, opacity;
+  filter: blur(0.5px);
+}
+
+/* Photo marquee — infinite horizontal scroll for <PhotoReel /> */
+@keyframes fc-photo-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.fc-photo-marquee {
+  animation: fc-photo-marquee 64s linear infinite;
+  will-change: transform;
+}
+.fc-photo-marquee-fast {
+  animation: fc-photo-marquee 42s linear infinite;
+}
+.fc-photo-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Subtle 3D tilt for stacked photo cards */
+.fc-photo-tilt {
+  transform-style: preserve-3d;
+  perspective: 900px;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.fc-photo-tilt:hover .fc-photo-tilt-inner {
+  transform: rotateY(-2deg) rotateX(2deg) translateZ(8px);
+}
+.fc-photo-tilt-inner {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+/* Live badge — gentle flicker on the "Live" pulse used over coach faces */
+@keyframes fc-badge-flicker {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(132, 204, 22, 0.7);
+    background-color: rgba(132, 204, 22, 1);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(132, 204, 22, 0);
+    background-color: rgba(163, 230, 53, 1);
+  }
+}
+.fc-badge-flicker {
+  animation: fc-badge-flicker 1.8s ease-in-out infinite;
+}
+
+/* Photo entrance — subtle scale + opacity fade-in for grid photos */
+@keyframes fc-photo-rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.fc-photo-rise {
+  animation: fc-photo-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Slow vertical drift used by floating hero photo cluster */
+@keyframes fc-photo-float-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-3deg);
+  }
+  50% {
+    transform: translate3d(-4px, -10px, 0) rotate(-2deg);
+  }
+}
+@keyframes fc-photo-float-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(4deg);
+  }
+  50% {
+    transform: translate3d(6px, -14px, 0) rotate(5deg);
+  }
+}
+@keyframes fc-photo-float-c {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-2deg);
+  }
+  50% {
+    transform: translate3d(-3px, 8px, 0) rotate(-3deg);
+  }
+}
+.fc-photo-float-a {
+  animation: fc-photo-float-a 9s ease-in-out infinite;
+}
+.fc-photo-float-b {
+  animation: fc-photo-float-b 11s ease-in-out infinite;
+}
+.fc-photo-float-c {
+  animation: fc-photo-float-c 13s ease-in-out infinite;
+}
+
+/* Showcase mini-mockup — small chart line trace */
+@keyframes fc-trace {
+  from {
+    stroke-dashoffset: 600;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.fc-trace {
+  stroke-dasharray: 600;
+  animation: fc-trace 4.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Booking-flow step transition */
+@keyframes fc-step-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fc-step-rise {
+  animation: fc-step-rise 0.5s ease-out both;
+}
+
+/* Duotone-ish photo treatment — subtle brand cast on raw photos */
+.fc-photo-duotone {
+  position: relative;
+}
+.fc-photo-duotone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(34, 211, 238, 0.18),
+    rgba(132, 204, 22, 0.05) 40%,
+    rgba(168, 85, 247, 0.18)
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.fc-photo-duotone-warm::after {
+  background: linear-gradient(
+    135deg,
+    rgba(244, 63, 94, 0.22),
+    rgba(168, 85, 247, 0.18)
+  );
+}
+
+/* Bottom-up photo gradient mask — for caption legibility */
+.fc-photo-mask {
+  position: relative;
+}
+.fc-photo-mask::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(2, 6, 23, 0.95) 0%,
+    rgba(2, 6, 23, 0.5) 28%,
+    rgba(2, 6, 23, 0) 60%
+  );
+  pointer-events: none;
+  border-radius: inherit;
+}
+
 /* Cross-page view transitions — gated behind reduced-motion */
 @media (prefers-reduced-motion: no-preference) {
   ::view-transition-old(root),
@@ -595,8 +802,21 @@ summary:focus-visible {
   .fc-bar-pop,
   .fc-tick-flip,
   .fc-spark-trace,
-  .fc-mark-trace {
+  .fc-mark-trace,
+  .fc-particle,
+  .fc-photo-marquee,
+  .fc-photo-marquee-fast,
+  .fc-badge-flicker,
+  .fc-photo-rise,
+  .fc-photo-float-a,
+  .fc-photo-float-b,
+  .fc-photo-float-c,
+  .fc-trace,
+  .fc-step-rise {
     animation: none !important;
+  }
+  .fc-particle {
+    opacity: 0.4;
   }
   .fc-word > span {
     opacity: 1;

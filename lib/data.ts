@@ -568,6 +568,9 @@ export interface Testimonial {
   metric: { label: string; value: string };
   rating: number;
   coachName: string;
+  /** Optional action shot — when present, the testimonial card renders
+   *  a hero photo above the quote (used for the "before/after" feel). */
+  actionPhoto?: string;
 }
 
 export const TESTIMONIALS: Testimonial[] = [
@@ -581,7 +584,9 @@ export const TESTIMONIALS: Testimonial[] = [
       "I'd plateaued for two years before Tomás. Six months in, my total went up 35 kg and my back finally feels bulletproof. I open the app every morning.",
     metric: { label: "Total added", value: "+35 kg" },
     rating: 5,
-    coachName: "Tomás Reyes"
+    coachName: "Tomás Reyes",
+    actionPhoto:
+      "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=900&q=80&auto=format&fit=crop"
   },
   {
     id: "ts-002",
@@ -593,7 +598,9 @@ export const TESTIMONIALS: Testimonial[] = [
       "Diego rewrote my entire approach to easy days. The dashboard told me I was always in zone 3, never in zone 2. Once I fixed that, the speed came on its own.",
     metric: { label: "Marathon PB", value: "−11 min" },
     rating: 5,
-    coachName: "Diego Almeida"
+    coachName: "Diego Almeida",
+    actionPhoto:
+      "https://images.unsplash.com/photo-1502904550040-7534597429ae?w=900&q=80&auto=format&fit=crop"
   },
   {
     id: "ts-003",
@@ -629,7 +636,9 @@ export const TESTIMONIALS: Testimonial[] = [
       "Three sessions with Hana and I caught my first overhead at Ribeira d'Ilhas. She reads the ocean like a book — no other coach explained wave selection like that.",
     metric: { label: "First green wave", value: "Week 1" },
     rating: 5,
-    coachName: "Hana Okafor"
+    coachName: "Hana Okafor",
+    actionPhoto:
+      "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=900&q=80&auto=format&fit=crop"
   },
   {
     id: "ts-006",

@@ -12,6 +12,9 @@ type AtmosphereProps = {
   /** Suppresses the SVG sin-wave layer for sections where the wave
    *  would conflict with foreground charts. */
   bandsOnly?: boolean;
+  /** Number of drifting brand-coloured dust particles. 0 disables the
+   *  layer (default). 18-28 is the sweet spot for the hero. */
+  particles?: number;
 };
 
 /**
@@ -32,7 +35,8 @@ type AtmosphereProps = {
 export function Atmosphere({
   className,
   tone = "default",
-  bandsOnly = false
+  bandsOnly = false,
+  particles = 0
 }: AtmosphereProps) {
   return (
     <div
@@ -42,6 +46,8 @@ export function Atmosphere({
         className
       )}
     >
+      {/* 0. Particle dust — opt-in. Pure CSS, gpu-accelerated. */}
+      {particles > 0 && <Particles count={particles} tone={tone} />}
       {/* 1. Drifting radial bands */}
       <div
         className={cn(
@@ -74,6 +80,56 @@ export function Atmosphere({
 
       {/* 5. Noise — gives the gradients tooth so they don't band on OLED */}
       <div className="absolute inset-0 bg-noise opacity-30 mix-blend-overlay" />
+    </div>
+  );
+}
+
+/**
+ * Drifting brand-tinted dust particles. Positions are deterministic
+ * (no randomness on the server) so we never get a hydration mismatch.
+ * Each dot is a tiny absolutely-positioned div animated via the
+ * `fc-particle-drift` keyframes (defined in globals.css).
+ */
+function Particles({
+  count,
+  tone
+}: {
+  count: number;
+  tone: "default" | "warm";
+}) {
+  const palette =
+    tone === "warm"
+      ? ["#fb7185", "#a855f7", "#22d3ee"]
+      : ["#22d3ee", "#a3e635", "#a855f7"];
+  const dots = Array.from({ length: count }, (_, i) => {
+    // Deterministic pseudo-random — Halton-sequence-ish.
+    const x = ((i * 47.13) % 100 + 100) % 100;
+    const y = ((i * 31.71) % 100 + 100) % 100;
+    const size = 2 + (i % 4);
+    const delay = (i % 13) * 0.7;
+    const dur = 11 + (i % 7);
+    const colour = palette[i % palette.length];
+    return { x, y, size, delay, dur, colour, i };
+  });
+  return (
+    <div className="absolute inset-0">
+      {dots.map((d) => (
+        <span
+          key={d.i}
+          className="fc-particle absolute rounded-full"
+          style={{
+            left: `${d.x}%`,
+            top: `${d.y}%`,
+            width: d.size,
+            height: d.size,
+            background: d.colour,
+            boxShadow: `0 0 ${d.size * 4}px ${d.colour}`,
+            animationDelay: `${d.delay}s`,
+            animationDuration: `${d.dur}s`,
+            opacity: 0
+          }}
+        />
+      ))}
     </div>
   );
 }
