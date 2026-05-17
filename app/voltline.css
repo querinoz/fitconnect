@@ -1,0 +1,46 @@
+:root {
+  --ink-950: #07080A;
+  --ink-900: #0E0F12;
+  --ink-800: #15171B;
+  --ink-700: #21242A;
+  --ink-600: #2E323A;
+  --ink-500: #5B606B;
+  --ink-400: #8A8F99;
+  --ink-300: #BFC3CC;
+  --ink-100: #F2F3F6;
+  --ink-50:  #FAFBFC;
+
+  --volt-300: #E9FFB5;
+  --volt-400: #DAFE7E;
+  --volt-500: #C7FB3A;
+  --volt-600: #9CD81A;
+  --volt-glow: rgba(199,251,58,.45);
+
+  --jade-500:  #2DD4BF;
+  --amber-400: #F5B844;
+  --coral-500: #FF5470;
+
+  --glass-lo:    rgba(255,255,255,.03);
+  --glass-md:    rgba(255,255,255,.06);
+  --glass-hi:    rgba(255,255,255,.10);
+  --glass-volt:  rgba(199,251,58,.06);
+  --glass-border: rgba(255,255,255,.08);
+  --glass-edge:   rgba(199,251,58,.30);
+
+  --grad-pulse: linear-gradient(135deg, #DAFE7E, #C7FB3A, #9CD81A);
+  --grad-text:  linear-gradient(135deg, #FAFBFC, #DAFE7E 60%, #C7FB3A);
+
+  --safe-top:    env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+
+  color-scheme: dark;
+}
+
+html, body {
+  background: var(--ink-950);
+  color: var(--ink-100);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
