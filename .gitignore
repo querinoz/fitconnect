@@ -12,3 +12,6 @@ next-env.d.ts
 .fitconnect/
 .superpowers/
 .worktrees/
+playwright-report/
+test-results/
+/coverage/
