@@ -20,6 +20,35 @@ const config: Config = {
     },
     extend: {
       colors: {
+        ink: {
+          50: "var(--ink-50)",
+          100: "var(--ink-100)",
+          300: "var(--ink-300)",
+          400: "var(--ink-400)",
+          500: "var(--ink-500)",
+          600: "var(--ink-600)",
+          700: "var(--ink-700)",
+          800: "var(--ink-800)",
+          900: "var(--ink-900)",
+          950: "var(--ink-950)"
+        },
+        volt: {
+          300: "var(--volt-300)",
+          400: "var(--volt-400)",
+          500: "var(--volt-500)",
+          600: "var(--volt-600)"
+        },
+        jade: { 500: "var(--jade-500)" },
+        amber: { 400: "var(--amber-400)" },
+        coral: { 500: "var(--coral-500)" },
+        glass: {
+          lo: "var(--glass-lo)",
+          md: "var(--glass-md)",
+          hi: "var(--glass-hi)",
+          volt: "var(--glass-volt)",
+          border: "var(--glass-border)",
+          edge: "var(--glass-edge)"
+        },
         brand: {
           50: "#ecfeff",
           100: "#cffafe",
@@ -59,24 +88,16 @@ const config: Config = {
           DEFAULT: "#070d1c",
           high: "#0f172a",
           higher: "#1e293b"
-        },
-        ink: {
-          50: "#f8fafc",
-          100: "#f1f5f9",
-          200: "#e2e8f0",
-          300: "#cbd5e1",
-          400: "#94a3b8",
-          500: "#64748b",
-          600: "#475569",
-          700: "#334155",
-          800: "#1e293b",
-          900: "#0f172a",
-          950: "#020617"
         }
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-        display: ["var(--font-display)", "system-ui", "sans-serif"]
+        display: [
+          "var(--font-display, ui-sans-serif)",
+          "system-ui",
+          "sans-serif"
+        ],
+        mono: ["ui-monospace", "monospace"]
       },
       keyframes: {
         "fade-up": {
@@ -156,18 +177,32 @@ const config: Config = {
         "noise":
           "url(\"data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>\")",
         "radial-fade":
-          "radial-gradient(ellipse at center, rgba(34,211,238,0.18), transparent 60%)"
+          "radial-gradient(ellipse at center, rgba(34,211,238,0.18), transparent 60%)",
+        "grad-pulse": "var(--grad-pulse)",
+        "grad-text": "var(--grad-text)"
+      },
+      borderRadius: {
+        glass: "20px",
+        "glass-lg": "28px"
+      },
+      backdropBlur: {
+        glass: "18px",
+        "glass-lg": "32px"
       },
       boxShadow: {
         glow: "0 0 30px -5px rgba(34,211,238,0.5)",
         "glow-warm": "0 0 30px -5px rgba(244,63,94,0.4)",
         "glow-plasma": "0 0 30px -5px rgba(168,85,247,0.5)",
         elevated:
-          "0 10px 40px -10px rgba(0,0,0,0.4), 0 4px 12px -2px rgba(34,211,238,0.15)"
+          "0 10px 40px -10px rgba(0,0,0,0.4), 0 4px 12px -2px rgba(34,211,238,0.15)",
+        "volt-glow": "0 8px 22px var(--volt-glow)",
+        "glass-edge":
+          "inset 0 0 0 1px var(--glass-border), 0 1px 0 var(--glass-edge)"
       },
       transitionTimingFunction: {
         "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",
-        spring: "cubic-bezier(0.25, 1.5, 0.5, 1)"
+        spring: "cubic-bezier(0.25, 1.5, 0.5, 1)",
+        soft: "cubic-bezier(0.16, 1, 0.3, 1)"
       }
     }
   },
