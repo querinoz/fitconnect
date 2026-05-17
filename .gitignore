@@ -9,3 +9,6 @@ dist/
 next-env.d.ts
 .dev.out.log
 .dev.err.log
+.fitconnect/
+.superpowers/
+.worktrees/
