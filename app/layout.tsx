@@ -5,6 +5,7 @@ import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n-provider";
 import { AuthStoreProvider } from "@/components/auth-store-provider";
 import { SkipLink } from "@/components/skip-link";
+import { ThemeProvider } from "@/lib/theme/theme-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -43,10 +44,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#020617" },
-    { media: "(prefers-color-scheme: light)", color: "#22d3ee" }
-  ],
+  themeColor: [{ color: "#07080A" }],
   colorScheme: "dark",
   width: "device-width",
   initialScale: 1
@@ -65,12 +63,14 @@ export default function RootLayout({
     >
       <body className="min-h-screen antialiased font-sans">
         <MotionConfig reducedMotion="user">
-          <LanguageProvider>
-            <AuthStoreProvider>
-              <SkipLink />
-              {children}
-            </AuthStoreProvider>
-          </LanguageProvider>
+          <ThemeProvider>
+            <LanguageProvider>
+              <AuthStoreProvider>
+                <SkipLink />
+                {children}
+              </AuthStoreProvider>
+            </LanguageProvider>
+          </ThemeProvider>
         </MotionConfig>
       </body>
     </html>
