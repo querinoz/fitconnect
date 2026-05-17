@@ -9,68 +9,28 @@ import {
   Sparkles,
   Wallet
 } from "lucide-react";
+import { useLocale } from "@/lib/i18n-provider";
 
-/**
- * Benefit proof points — the "Why FitConnect" section.
- *
- * Each card pairs an icon + a one-liner with a *concrete* metric we
- * can defend (numbers come from the lib/data.ts roster + the marketing
- * brief). The cards intentionally use compact metric pills rather than
- * vague phrases — every claim has a number a journalist could check.
- */
-const POINTS = [
-  {
-    icon: BadgeCheck,
-    title: "Verified specialists, not generalists",
-    body: "Every coach is interviewed; every certificate is checked against the issuing body.",
-    metric: "62%",
-    metricLabel: "of applicants rejected",
-    tone: "accent"
-  },
-  {
-    icon: Clock,
-    title: "Coaches reply faster than your boss",
-    body: "Median first-message response time across the platform — measured every week.",
-    metric: "<2h",
-    metricLabel: "avg coach reply time",
-    tone: "brand"
-  },
-  {
-    icon: Sparkles,
-    title: "Built around four real specialties",
-    body: "Strength, mobility, endurance, recovery — every coach is vetted in at least one.",
-    metric: "4",
-    metricLabel: "specialty tracks",
-    tone: "plasma"
-  },
-  {
-    icon: Shield,
-    title: "Your data, your dashboard",
-    body: "HRV, sleep, training load — you own them. Coaches see only what you grant.",
-    metric: "100%",
-    metricLabel: "athlete-controlled scopes",
-    tone: "brand"
-  },
-  {
-    icon: HeartHandshake,
-    title: "Free intro call, every coach",
-    body: "Talk to a real human for 15 minutes before a single euro changes hands.",
-    metric: "94%",
-    metricLabel: "athletes book the same coach again",
-    tone: "signal"
-  },
-  {
-    icon: Wallet,
-    title: "85% take-home for coaches",
-    body: "Highest payout on any specialised-coaching marketplace. Stripe Connect direct deposits.",
-    metric: "85%",
-    metricLabel: "coach take-home rate",
-    tone: "accent"
-  }
+const pointIcons = [
+  BadgeCheck,
+  Clock,
+  Sparkles,
+  Shield,
+  HeartHandshake,
+  Wallet
+] as const;
+
+const pointTones = [
+  "accent",
+  "brand",
+  "plasma",
+  "brand",
+  "signal",
+  "accent"
 ] as const;
 
 const toneStyles: Record<
-  "brand" | "accent" | "plasma" | "signal",
+  (typeof pointTones)[number],
   { ring: string; icon: string; metric: string; halo: string }
 > = {
   brand: {
@@ -100,6 +60,7 @@ const toneStyles: Record<
 };
 
 export function WhyFitConnect() {
+  const locale = useLocale();
   const reduce = useReducedMotion();
 
   return (
@@ -111,24 +72,23 @@ export function WhyFitConnect() {
 
       <div className="max-w-3xl">
         <p className="eyebrow inline-flex items-center gap-1.5">
-          <Sparkles aria-hidden="true" className="h-3.5 w-3.5" /> Why FitConnect
+          <Sparkles aria-hidden="true" className="h-3.5 w-3.5" /> {locale.why.eyebrow}
         </p>
         <h2
           id="fc-why-title"
           className="mt-3 font-display text-4xl md:text-5xl font-bold text-balance leading-tight"
         >
-          Six things every athlete asks{" "}
-          <span className="gradient-text">before the first session</span>.
+          {locale.why.title}{" "}
+          <span className="gradient-text">{locale.why.titleAccent}</span>.
         </h2>
-        <p className="mt-4 text-ink-300 text-lg">
-          We answer them with numbers, not adjectives. The metrics below come
-          straight from the marketplace dashboard updated weekly.
-        </p>
+        <p className="mt-4 text-ink-300 text-lg">{locale.why.subtitle}</p>
       </div>
 
       <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {POINTS.map((p, i) => {
-          const tone = toneStyles[p.tone];
+        {locale.why.points.map((p, i) => {
+          const toneKey = pointTones[i];
+          const tone = toneStyles[toneKey];
+          const Icon = pointIcons[i];
           return (
             <motion.li
               key={p.title}
@@ -142,17 +102,16 @@ export function WhyFitConnect() {
               }}
               className="group relative overflow-hidden rounded-2xl border border-ink-800 bg-ink-900/50 p-6 transition-all hover:-translate-y-0.5 hover:border-ink-700 hover:bg-ink-900/75"
             >
-              {/* Soft halo glows in the corner on hover */}
               <span
                 aria-hidden="true"
                 className={`pointer-events-none absolute -top-12 -right-12 h-40 w-40 rounded-full bg-gradient-radial ${tone.halo} opacity-0 transition-opacity duration-500 group-hover:opacity-100`}
                 style={{
                   background: `radial-gradient(circle, ${
-                    p.tone === "brand"
+                    toneKey === "brand"
                       ? "rgba(34,211,238,0.18)"
-                      : p.tone === "accent"
+                      : toneKey === "accent"
                         ? "rgba(132,204,22,0.16)"
-                        : p.tone === "plasma"
+                        : toneKey === "plasma"
                           ? "rgba(168,85,247,0.18)"
                           : "rgba(244,63,94,0.16)"
                   } 0%, transparent 65%)`
@@ -163,7 +122,7 @@ export function WhyFitConnect() {
                 <div
                   className={`grid h-11 w-11 place-items-center rounded-xl ring-1 ${tone.ring} ${tone.icon}`}
                 >
-                  <p.icon aria-hidden="true" className="h-5 w-5" />
+                  <Icon aria-hidden="true" className="h-5 w-5" />
                 </div>
                 <div className="text-right">
                   <p
@@ -180,9 +139,7 @@ export function WhyFitConnect() {
               <h3 className="mt-5 font-display font-semibold text-lg leading-snug text-ink-50">
                 {p.title}
               </h3>
-              <p className="mt-2 text-sm text-ink-400 leading-relaxed">
-                {p.body}
-              </p>
+              <p className="mt-2 text-sm text-ink-400 leading-relaxed">{p.body}</p>
             </motion.li>
           );
         })}

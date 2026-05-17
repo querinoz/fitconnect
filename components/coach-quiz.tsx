@@ -1,9 +1,10 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useLocale, useT } from "@/lib/i18n-provider";
 import { QUIZ_OPTIONS, SPORTS, TRAINERS, type Sport } from "@/lib/data";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
@@ -16,12 +17,12 @@ type Answers = {
   modality?: string;
 };
 
-const steps = [
-  { key: "sport", title: "What's your sport?" },
-  { key: "goal", title: "What's the goal?" },
-  { key: "experience", title: "Where are you right now?" },
-  { key: "schedule", title: "How often can you train?" },
-  { key: "modality", title: "Where do you want to train?" }
+const stepKeys = [
+  "sport",
+  "goal",
+  "experience",
+  "schedule",
+  "modality"
 ] as const;
 
 const sportIcons: Record<Sport, string> = {
@@ -38,9 +39,11 @@ const sportIcons: Record<Sport, string> = {
 };
 
 export function CoachQuiz() {
+  const t = useT();
+  const locale = useLocale();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
-  const total = steps.length;
+  const total = stepKeys.length;
 
   const match = useMemo(() => {
     if (!answers.sport) return TRAINERS[0];
@@ -68,36 +71,18 @@ export function CoachQuiz() {
     <section className="mx-auto max-w-7xl px-6 py-24">
       <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
         <div>
-          <p className="eyebrow">Coach finder</p>
+          <p className="eyebrow">{t("quiz", "eyebrow")}</p>
           <h2 className="mt-3 font-display text-4xl md:text-5xl font-bold text-balance leading-tight">
-            60 seconds.<br />
-            <span className="gradient-text">5 questions.</span><br />
-            One specialist who actually fits you.
+            {t("quiz", "title")}{" "}
+            <span className="gradient-text">{t("quiz", "titleAccent")}</span>.
           </h2>
-          <p className="mt-5 text-ink-400 text-lg max-w-md">
-            We&apos;ll match you with up to three vetted coaches based on your sport, goal,
-            experience and life. No spam, no upsell, no &quot;create an account first&quot;.
-          </p>
-          <ul className="mt-8 space-y-3 text-sm">
-            {[
-              "Filters across 12,418 verified specialists",
-              "Free 15-min intro call with your top match",
-              "Switch any time — your athlete profile travels"
-            ].map((p) => (
-              <li key={p} className="flex items-center gap-2 text-ink-300">
-                <div className="grid h-5 w-5 place-items-center rounded-full bg-accent-500/10 text-accent-400 ring-1 ring-accent-500/30">
-                  <Check className="h-3 w-3" />
-                </div>
-                {p}
-              </li>
-            ))}
-          </ul>
+          <p className="mt-5 text-ink-400 text-lg max-w-md">{t("quiz", "subtitle")}</p>
         </div>
 
         <div className="rounded-3xl border border-ink-800 bg-ink-900/50 p-6 md:p-8 shadow-elevated">
           {/* Progress */}
           <div className="flex items-center gap-1.5 mb-6">
-            {steps.map((_, i) => (
+            {stepKeys.map((_, i) => (
               <div
                 key={i}
                 className={cn(
@@ -116,7 +101,7 @@ export function CoachQuiz() {
             <AnimatePresence mode="wait">
               {!done ? (
                 <motion.div
-                  key={steps[step].key}
+                  key={stepKeys[step]}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
@@ -126,18 +111,18 @@ export function CoachQuiz() {
                     Step {step + 1} of {total}
                   </p>
                   <h3 className="mt-2 font-display text-2xl md:text-3xl font-bold">
-                    {steps[step].title}
+                    {locale.quiz.steps[step]}
                   </h3>
 
                   <div
                     className={cn(
                       "mt-6 grid gap-2",
-                      steps[step].key === "sport"
+                      stepKeys[step] === "sport"
                         ? "grid-cols-2 sm:grid-cols-3"
                         : "grid-cols-1"
                     )}
                   >
-                    {steps[step].key === "sport" &&
+                    {stepKeys[step] === "sport" &&
                       SPORTS.map((s) => (
                         <button
                           key={s}
@@ -153,7 +138,7 @@ export function CoachQuiz() {
                           <span className="text-sm font-medium">{s}</span>
                         </button>
                       ))}
-                    {steps[step].key === "goal" &&
+                    {stepKeys[step] === "goal" &&
                       QUIZ_OPTIONS.goals.map((g) => (
                         <QuizCard
                           key={g.id}
@@ -162,7 +147,7 @@ export function CoachQuiz() {
                           title={`${g.icon}  ${g.label}`}
                         />
                       ))}
-                    {steps[step].key === "experience" &&
+                    {stepKeys[step] === "experience" &&
                       QUIZ_OPTIONS.experience.map((g) => (
                         <QuizCard
                           key={g.id}
@@ -172,7 +157,7 @@ export function CoachQuiz() {
                           description={g.description}
                         />
                       ))}
-                    {steps[step].key === "schedule" &&
+                    {stepKeys[step] === "schedule" &&
                       QUIZ_OPTIONS.schedule.map((g) => (
                         <QuizCard
                           key={g.id}
@@ -181,7 +166,7 @@ export function CoachQuiz() {
                           title={g.label}
                         />
                       ))}
-                    {steps[step].key === "modality" &&
+                    {stepKeys[step] === "modality" &&
                       QUIZ_OPTIONS.modality.map((g) => (
                         <QuizCard
                           key={g.id}
@@ -204,7 +189,7 @@ export function CoachQuiz() {
                   <div className="flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-accent-400" />
                     <p className="text-xs uppercase tracking-widest text-accent-400 font-semibold">
-                      We found your match
+                      {t("quiz", "matchTitle")}
                     </p>
                   </div>
                   <div className="flex items-center gap-4 rounded-2xl border border-ink-800 bg-ink-950/40 p-5">
@@ -221,13 +206,10 @@ export function CoachQuiz() {
                       </p>
                     </div>
                   </div>
-                  <p className="text-sm text-ink-400">
-                    Plus 2 more matches in your inbox. Book the free 15-min intro and decide
-                    after.
-                  </p>
+                  <p className="text-sm text-ink-400">{t("quiz", "matchSubtitle")}</p>
                   <div className="flex flex-wrap gap-2">
                     <Button asChild>
-                      <Link href={`/trainer/${match.id}`}>View profile</Link>
+                      <Link href={`/trainer/${match.id}`}>{t("quiz", "bookIntro")}</Link>
                     </Button>
                     <Button asChild variant="outline">
                       <Link
@@ -235,17 +217,8 @@ export function CoachQuiz() {
                           answers.sport ?? ""
                         )}`}
                       >
-                        See all matches
+                        {t("quiz", "browseAll")}
                       </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        setStep(0);
-                        setAnswers({});
-                      }}
-                    >
-                      Start over
                     </Button>
                   </div>
                 </motion.div>
@@ -258,7 +231,7 @@ export function CoachQuiz() {
               onClick={back}
               className="mt-6 flex items-center gap-1.5 text-xs text-ink-400 hover:text-ink-200"
             >
-              <ArrowLeft className="h-3.5 w-3.5" /> back
+              <ArrowLeft className="h-3.5 w-3.5" /> {t("quiz", "back")}
             </button>
           )}
         </div>

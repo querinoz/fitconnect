@@ -18,7 +18,12 @@ export function DemoBanner() {
             <Sparkles className="h-3 w-3" />
             {t("demo", "label")}
           </span>
-          <span className="text-ink-300">{t("demo", "body")}</span>
+          <span className="text-ink-300">
+            <span aria-hidden="true" className="mx-1.5 text-ink-600">
+              ·
+            </span>
+            {t("demo", "body")}
+          </span>
         </p>
         <Link
           href="https://github.com/querinoz/fitconnect"

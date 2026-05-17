@@ -86,32 +86,68 @@ export function LangPicker({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function FlagSquare({ code, className }: { code: string; className?: string }) {
-  if (code === "PT") {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-        className={cn("rounded-[3px] overflow-hidden ring-1 ring-ink-800/50", className)}
-      >
-        <rect width="24" height="24" fill="#006233" />
-        <rect x="9" width="15" height="24" fill="#dd0915" />
-        <circle cx="9" cy="12" r="3.7" fill="#fdd400" stroke="#fff" strokeWidth="0.4" />
-        <circle cx="9" cy="12" r="2.4" fill="#dd0915" />
-      </svg>
-    );
-  }
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className={cn("rounded-[3px] overflow-hidden ring-1 ring-ink-800/50", className)}
-    >
-      <rect width="24" height="24" fill="#012169" />
-      <path d="M0 0L24 24M24 0L0 24" stroke="#fff" strokeWidth="3" />
-      <path d="M0 0L24 24M24 0L0 24" stroke="#C8102E" strokeWidth="1.5" />
-      <path d="M12 0V24M0 12H24" stroke="#fff" strokeWidth="5" />
-      <path d="M12 0V24M0 12H24" stroke="#C8102E" strokeWidth="3" />
-    </svg>
+function FlagSquare({
+  code,
+  className
+}: {
+  code: (typeof LANGS)[number]["flag"];
+  className?: string;
+}) {
+  const wrap = cn(
+    "rounded-[3px] overflow-hidden ring-1 ring-ink-800/50",
+    className
   );
+
+  switch (code) {
+    case "PT":
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true" className={wrap}>
+          <rect width="24" height="24" fill="#006233" />
+          <rect x="9" width="15" height="24" fill="#dd0915" />
+          <circle cx="9" cy="12" r="3.7" fill="#fdd400" stroke="#fff" strokeWidth="0.4" />
+          <circle cx="9" cy="12" r="2.4" fill="#dd0915" />
+        </svg>
+      );
+    case "ES":
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true" className={wrap}>
+          <rect width="24" height="24" fill="#c60b1e" />
+          <rect y="6" width="24" height="12" fill="#ffc400" />
+        </svg>
+      );
+    case "FR":
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true" className={wrap}>
+          <rect width="8" height="24" fill="#002395" />
+          <rect x="8" width="8" height="24" fill="#fff" />
+          <rect x="16" width="8" height="24" fill="#ed2939" />
+        </svg>
+      );
+    case "DE":
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true" className={wrap}>
+          <rect width="24" height="8" fill="#000" />
+          <rect y="8" width="24" height="8" fill="#dd0000" />
+          <rect y="16" width="24" height="8" fill="#ffce00" />
+        </svg>
+      );
+    case "IT":
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true" className={wrap}>
+          <rect width="8" height="24" fill="#009246" />
+          <rect x="8" width="8" height="24" fill="#fff" />
+          <rect x="16" width="8" height="24" fill="#ce2b37" />
+        </svg>
+      );
+    default:
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true" className={wrap}>
+          <rect width="24" height="24" fill="#012169" />
+          <path d="M0 0L24 24M24 0L0 24" stroke="#fff" strokeWidth="3" />
+          <path d="M0 0L24 24M24 0L0 24" stroke="#C8102E" strokeWidth="1.5" />
+          <path d="M12 0V24M0 12H24" stroke="#fff" strokeWidth="5" />
+          <path d="M12 0V24M0 12H24" stroke="#C8102E" strokeWidth="3" />
+        </svg>
+      );
+  }
 }

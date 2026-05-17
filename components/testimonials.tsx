@@ -2,22 +2,22 @@
 
 import { motion } from "framer-motion";
 import { Quote, Star } from "lucide-react";
+import { useLocale } from "@/lib/i18n-provider";
 import { TESTIMONIALS } from "@/lib/data";
 
 export function Testimonials() {
+  const locale = useLocale();
+
   return (
     <section className="relative mx-auto max-w-7xl px-6 py-24">
       <div className="absolute inset-0 -z-10 gradient-bg-warm opacity-50" />
       <div className="max-w-2xl">
-        <p className="eyebrow text-signal-400">Athlete stories</p>
+        <p className="eyebrow text-signal-400">{locale.testimonials.eyebrow}</p>
         <h2 className="mt-3 font-display text-4xl md:text-5xl font-bold text-balance">
-          Real coaches. Real measurable{" "}
-          <span className="gradient-text-warm">progress</span>.
+          {locale.testimonials.title}{" "}
+          <span className="gradient-text-warm">{locale.testimonials.titleAccent}</span>.
         </h2>
-        <p className="mt-4 text-lg text-ink-400">
-          Each of these athletes opted in to share their data. The metric on every card is the
-          actual change they tracked during their FitConnect program.
-        </p>
+        <p className="mt-4 text-lg text-ink-400">{locale.testimonials.subtitle}</p>
       </div>
 
       <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
@@ -60,9 +60,9 @@ export function Testimonials() {
                 className="absolute top-5 right-5 h-7 w-7 text-signal-500/20"
               />
               <div className="flex items-center gap-1 text-amber-400 mb-4">
-                {Array.from({ length: t.rating }).map((_, i) => (
+                {Array.from({ length: t.rating }).map((_, j) => (
                   <Star
-                    key={i}
+                    key={j}
                     aria-hidden="true"
                     className="h-3.5 w-3.5 fill-current"
                   />

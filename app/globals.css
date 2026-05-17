@@ -75,6 +75,10 @@ body {
   text-wrap: pretty;
 }
 
+.safe-area-pb {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+}
+
 .gradient-text {
   background: linear-gradient(90deg, var(--brand), var(--accent));
   -webkit-background-clip: text;
@@ -270,6 +274,18 @@ summary:focus-visible {
 
 /* Kinetic atmosphere — soft cyan→lime→violet bands drifting on
    layered radial-gradients. Used by <Atmosphere/>. */
+@keyframes kinetic-drift {
+  0%,
+  100% {
+    background-position: 0% 50%, 100% 50%, 50% 0%;
+  }
+  33% {
+    background-position: 60% 30%, 30% 70%, 70% 40%;
+  }
+  66% {
+    background-position: 40% 70%, 70% 30%, 30% 60%;
+  }
+}
 .fc-kinetic {
   background:
     radial-gradient(
@@ -312,27 +328,39 @@ summary:focus-visible {
   animation: fc-wave-shift 30s linear infinite;
 }
 
-/* Word-stagger — used on the wordmark hero */
-.fc-word > span {
+/* Word-stagger — per-word children (not hero block lines) */
+.fc-word-stagger > span {
   display: inline-block;
   opacity: 0;
   transform: translateY(40%);
   animation: word-stagger 0.95s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-.fc-word > span:nth-child(1) {
+.fc-word-stagger > span:nth-child(1) {
   animation-delay: 0.06s;
 }
-.fc-word > span:nth-child(2) {
+.fc-word-stagger > span:nth-child(2) {
   animation-delay: 0.18s;
 }
-.fc-word > span:nth-child(3) {
+.fc-word-stagger > span:nth-child(3) {
   animation-delay: 0.30s;
 }
-.fc-word > span:nth-child(4) {
+.fc-word-stagger > span:nth-child(4) {
   animation-delay: 0.42s;
 }
-.fc-word > span:nth-child(5) {
+.fc-word-stagger > span:nth-child(5) {
   animation-delay: 0.54s;
+}
+
+/* Hero headline lines — always visible (legacy .fc-word.block kept) */
+.fc-headline-line,
+.fc-word.block {
+  display: block;
+}
+.fc-headline-line > span,
+.fc-word.block > span {
+  opacity: 1;
+  transform: none;
+  animation: none;
 }
 
 @keyframes word-stagger {
@@ -780,51 +808,63 @@ summary:focus-visible {
 /* Reduced-motion guard.
    Athletes are sometimes coached through TBI / neurodivergent recovery — we honour the OS setting. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  html[data-motion="reduced"] *,
+  html[data-motion="reduced"] *::before,
+  html[data-motion="reduced"] *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
-  .animate-marquee,
-  .animate-marquee-slow,
-  .fc-kinetic,
-  .fc-wave-1,
-  .fc-wave-2,
-  .fc-wave-3,
-  .fc-flip-card,
-  .fc-ring-loop,
-  .fc-step-cycle,
-  .fc-cursor,
-  .fc-toast,
-  .fc-bar-pop,
-  .fc-tick-flip,
-  .fc-spark-trace,
-  .fc-mark-trace,
-  .fc-particle,
-  .fc-photo-marquee,
-  .fc-photo-marquee-fast,
-  .fc-badge-flicker,
-  .fc-photo-rise,
-  .fc-photo-float-a,
-  .fc-photo-float-b,
-  .fc-photo-float-c,
-  .fc-trace,
-  .fc-step-rise {
+  html[data-motion="reduced"] .animate-marquee,
+  html[data-motion="reduced"] .animate-marquee-slow,
+  html[data-motion="reduced"] .fc-kinetic,
+  html[data-motion="reduced"] .fc-wave-1,
+  html[data-motion="reduced"] .fc-wave-2,
+  html[data-motion="reduced"] .fc-wave-3,
+  html[data-motion="reduced"] .fc-flip-card,
+  html[data-motion="reduced"] .fc-ring-loop,
+  html[data-motion="reduced"] .fc-step-cycle,
+  html[data-motion="reduced"] .fc-cursor,
+  html[data-motion="reduced"] .fc-toast,
+  html[data-motion="reduced"] .fc-bar-pop,
+  html[data-motion="reduced"] .fc-tick-flip,
+  html[data-motion="reduced"] .fc-spark-trace,
+  html[data-motion="reduced"] .fc-mark-trace,
+  html[data-motion="reduced"] .fc-particle,
+  html[data-motion="reduced"] .fc-photo-marquee,
+  html[data-motion="reduced"] .fc-photo-marquee-fast,
+  html[data-motion="reduced"] .fc-badge-flicker,
+  html[data-motion="reduced"] .fc-photo-rise,
+  html[data-motion="reduced"] .fc-photo-float-a,
+  html[data-motion="reduced"] .fc-photo-float-b,
+  html[data-motion="reduced"] .fc-photo-float-c,
+  html[data-motion="reduced"] .fc-trace,
+  html[data-motion="reduced"] .fc-step-rise {
     animation: none !important;
   }
-  .fc-particle {
+  html[data-motion="reduced"] .fc-particle {
     opacity: 0.4;
   }
-  .fc-word > span {
+  html[data-motion="reduced"] .fc-word-stagger > span,
+  html[data-motion="reduced"] .fc-headline-line > span,
+  html[data-motion="reduced"] .fc-word.block > span {
     opacity: 1;
     transform: none;
     animation: none !important;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fc-word-stagger > span,
+  .fc-headline-line > span,
+  .fc-word.block > span {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
   /* Keep skeletons visible — but kill the shimmer movement. */
-  .skeleton {
+  html[data-motion="reduced"] .skeleton {
     background: rgba(255, 255, 255, 0.06);
     animation: none !important;
   }

@@ -4,6 +4,9 @@ import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { SPORTS } from "@/lib/data";
 import { useT } from "@/lib/i18n-provider";
+import { useMounted } from "@/lib/use-mounted";
+
+const fmt = new Intl.NumberFormat("en-US");
 
 const meta: Record<
   string,
@@ -38,6 +41,7 @@ const meta: Record<
 
 export function SportsStrip() {
   const t = useT();
+  const mounted = useMounted();
   const reduce = useReducedMotion();
   return (
     <section className="border-y border-ink-800/60 bg-ink-900/30">
@@ -57,7 +61,9 @@ export function SportsStrip() {
             return (
               <motion.div
                 key={s}
-                initial={{ opacity: 0, y: reduce ? 0 : 8 }}
+                initial={
+                  mounted && !reduce ? { opacity: 0, y: 8 } : false
+                }
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: reduce ? 0 : 0.3, delay: reduce ? 0 : i * 0.03 }}
@@ -74,7 +80,7 @@ export function SportsStrip() {
                     {s}
                   </span>
                   <span className="relative text-[10px] text-ink-500 tabular-nums">
-                    {m.coaches.toLocaleString()} · from €{m.from}
+                    {fmt.format(m.coaches)} · from €{m.from}
                   </span>
                 </Link>
               </motion.div>

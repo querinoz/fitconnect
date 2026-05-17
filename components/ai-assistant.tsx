@@ -8,77 +8,16 @@ import {
   Sparkles,
   X
 } from "lucide-react";
-import {
-  type FormEvent,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from "react";
-import { useLanguage, useT } from "@/lib/i18n-provider";
+import { type FormEvent, useEffect, useRef, useState } from "react";
+import { useLanguage, useLocale, useT } from "@/lib/i18n-provider";
 import { cn } from "@/lib/utils";
 
 type Msg = { id: string; role: "user" | "assistant"; text: string };
 
-interface CannedAnswer {
-  prompt: { en: string; pt: string };
-  answer: { en: string; pt: string };
-}
-
-const CANNED: CannedAnswer[] = [
-  {
-    prompt: {
-      en: "Suggest tomorrow's workout",
-      pt: "Sugere o treino de amanhã"
-    },
-    answer: {
-      en:
-        "Tomorrow your readiness is forecast at 78 (green). Hit the planned 5×5 back-squat at 82.5 kg, then close with 3 sets of single-leg RDLs · 12 reps each side. Keep RPE ≤ 8 and stop the squats if bar speed drops more than 15%.",
-      pt:
-        "Amanhã a tua prontidão prevista é 78 (verde). Faz o 5×5 de back-squat com 82,5 kg, depois fecha com 3 séries de RDL unilateral · 12 reps por lado. Mantém o RPE ≤ 8 e para os squats se a velocidade da barra cair mais de 15%."
-    }
-  },
-  {
-    prompt: {
-      en: "Explain my readiness score",
-      pt: "Explica o meu score de prontidão"
-    },
-    answer: {
-      en:
-        "Your readiness 82 today comes from three signals: HRV 68 ms (+4 vs 30-day baseline), sleep 7h 42m at 89% efficiency, and a moderate previous-day load (1,180 kJ). Translation: you can train hard, but cap session RPE at 8.5.",
-      pt:
-        "A tua prontidão 82 hoje vem de três sinais: HRV 68 ms (+4 vs base de 30 dias), sono 7h 42m com 89% de eficiência e carga moderada do dia anterior (1180 kJ). Tradução: podes puxar, mas não passes de RPE 8,5."
-    }
-  },
-  {
-    prompt: {
-      en: "Find me a coach for surfing in Ericeira",
-      pt: "Encontra-me um coach de surf na Ericeira"
-    },
-    answer: {
-      en:
-        "Best fit nearby: Hana Okafor — pro surfer, ISA Level 2, 4.99 stars across 96 reviews. Specialises in pop-up to first green wave plus competition prep. €70/h, books 7 days out. Want me to send a Fit.Me intro?",
-      pt:
-        "Melhor encaixe na zona: Hana Okafor — surfista profissional, ISA Nível 2, 4,99 estrelas em 96 avaliações. Especialista em pop-up até à primeira onda verde e prep para competição. 70 €/h, marcação a 7 dias. Queres que envie uma intro Fit.Me?"
-    }
-  },
-  {
-    prompt: {
-      en: "Why did Wednesday feel so heavy?",
-      pt: "Porque é que quarta-feira pesou tanto?"
-    },
-    answer: {
-      en:
-        "Wednesday HRV dropped to 49 ms (−9 vs your 30-day baseline) on 6h 24m sleep. The threshold session you ran was correctly autoregulated down 12% by your coach. The dip is consistent with your mid-week Tuesday-Wednesday pattern — try a Z1 spin to break it next week.",
-      pt:
-        "Na quarta o HRV caiu para 49 ms (−9 vs base 30 dias) com 6h 24m de sono. A sessão de threshold foi autorregulada para −12% pelo teu coach. A queda é coerente com o padrão típico ter-qua que tens — para a semana experimenta um spin Z1 para quebrar."
-    }
-  }
-];
-
 export function AIAssistant() {
   const t = useT();
   const { lang } = useLanguage();
+  const locale = useLocale();
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -87,11 +26,7 @@ export function AIAssistant() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const cannedForLang = useMemo(
-    () =>
-      CANNED.map((c) => ({ prompt: c.prompt[lang], answer: c.answer[lang] })),
-    [lang]
-  );
+  const cannedForLang = locale.ai.canned;
 
   useEffect(() => {
     if (open) {

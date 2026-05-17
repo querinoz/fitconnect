@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
+import { MotionConfig } from "framer-motion";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n-provider";
+import { AuthStoreProvider } from "@/components/auth-store-provider";
 import { SkipLink } from "@/components/skip-link";
 
 const inter = Inter({
@@ -56,12 +58,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${display.variable} dark`}>
+    <html
+      lang="en"
+      data-motion="full"
+      className={`${inter.variable} ${display.variable} dark`}
+    >
       <body className="min-h-screen antialiased font-sans">
-        <LanguageProvider>
-          <SkipLink />
-          {children}
-        </LanguageProvider>
+        <MotionConfig reducedMotion="user">
+          <LanguageProvider>
+            <AuthStoreProvider>
+              <SkipLink />
+              {children}
+            </AuthStoreProvider>
+          </LanguageProvider>
+        </MotionConfig>
       </body>
     </html>
   );

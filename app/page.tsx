@@ -1,4 +1,5 @@
 import dynamic from "next/dynamic";
+import { HeroImmersive } from "@/components/marketing/hero-immersive";
 import { Nav } from "@/components/nav";
 import { PressStrip } from "@/components/press-strip";
 import { SportsStrip } from "@/components/sports-strip";
@@ -17,37 +18,7 @@ import { Pricing } from "@/components/pricing";
 import { Faqs } from "@/components/faqs";
 import { Cta } from "@/components/cta";
 import { Footer } from "@/components/footer";
-import { DemoBanner } from "@/components/demo-banner";
-
-/**
- * Heavy decorative pieces — they don't need to ship in the initial
- * HTML and they make liberal use of CSS animations + SVGs. We code-
- * split them via `next/dynamic`. Loading skeletons keep layout stable
- * so we don't pay the CLS tax.
- */
-const HeroImmersive = dynamic(
-  () =>
-    import("@/components/marketing/hero-immersive").then((m) => m.HeroImmersive),
-  {
-    loading: () => (
-      <section className="relative overflow-hidden pt-12 pb-24 md:pt-20 md:pb-28">
-        <div className="mx-auto max-w-7xl px-6 grid gap-12 lg:grid-cols-12">
-          <div className="lg:col-span-6 space-y-6">
-            <div className="h-7 w-72 skeleton" />
-            <div className="h-12 w-full max-w-md skeleton" />
-            <div className="h-24 w-full max-w-2xl skeleton" />
-            <div className="flex gap-3">
-              <div className="h-12 w-44 skeleton" />
-              <div className="h-12 w-44 skeleton" />
-            </div>
-          </div>
-          <div className="lg:col-span-6 h-[440px] skeleton rounded-3xl" />
-        </div>
-      </section>
-    )
-  }
-);
-
+/** Below-the-fold marketing sections — code-split to keep first load lean. */
 const DemosSection = dynamic(
   () =>
     import("@/components/marketing/demos-section").then((m) => m.DemosSection),
@@ -65,11 +36,6 @@ const DemosSection = dynamic(
   }
 );
 
-/**
- * Round-3 sections — real-people photography and functionality deep-dives.
- * Code-split where the section is below the fold or visually heavy so we
- * don't bloat first-load JS for the hero.
- */
 const PhotoReel = dynamic(
   () => import("@/components/marketing/photo-reel").then((m) => m.PhotoReel),
   {
@@ -158,7 +124,6 @@ const AudienceSplit = dynamic(
 export default function Home() {
   return (
     <>
-      <DemoBanner />
       <Nav />
       <main id="main">
         <HeroImmersive />
@@ -166,6 +131,7 @@ export default function Home() {
         <PressStrip />
         <SportsStrip />
         <DemosSection />
+        <DashboardPreview />
         <StatBar />
         <WhyFitConnect />
         <Showcases />
@@ -174,7 +140,6 @@ export default function Home() {
         <TrainersGrid />
         <ProgramsStrip />
         <ComparisonTable />
-        <DashboardPreview />
         <AudienceSplit />
         <CoachQuiz />
         <Testimonials />

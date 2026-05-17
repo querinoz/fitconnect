@@ -1,30 +1,13 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ShieldCheck, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/brand/wordmark";
 import { Atmosphere } from "./atmosphere";
+import { ProductMockup } from "./product-mockup";
 import { useT } from "@/lib/i18n-provider";
-
-/**
- * The animated product mockup is heavy-ish (CSS animations, multiple
- * SVGs) and never needed for the first paint or for SEO crawlers, so
- * we ship it through `next/dynamic` with `ssr: false`. This keeps the
- * initial HTML lean and avoids any chance of hydration-time animation
- * mismatch on slow devices.
- */
-const ProductMockup = dynamic(
-  () => import("./product-mockup").then((m) => m.ProductMockup),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full max-w-[680px] mx-auto h-[440px] skeleton rounded-3xl" />
-    )
-  }
-);
 
 /**
  * Immersive landing hero.
@@ -39,6 +22,8 @@ const ProductMockup = dynamic(
 export function HeroImmersive() {
   const t = useT();
   const reduce = useReducedMotion();
+  const fadeUp = reduce ? false : { opacity: 0, y: 8 };
+  const fadeUpLg = reduce ? false : { opacity: 0, y: 24 };
 
   return (
     <section
@@ -47,10 +32,10 @@ export function HeroImmersive() {
     >
       <Atmosphere particles={22} />
 
-      <div className="mx-auto max-w-7xl px-6 grid gap-12 lg:grid-cols-12 lg:items-center">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 grid gap-12 lg:grid-cols-12 lg:items-center">
         <div className="lg:col-span-6">
           <motion.span
-            initial={{ opacity: 0, y: reduce ? 0 : 8 }}
+            initial={fadeUp}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: reduce ? 0 : 0.5 }}
             className="inline-flex items-center gap-2 rounded-full bg-brand-500/10 px-3.5 py-1.5 text-xs font-semibold text-brand-200 ring-1 ring-brand-500/30"
@@ -72,19 +57,13 @@ export function HeroImmersive() {
             id="fc-hero-title"
             className="fc-vt-hero mt-5 font-display text-5xl md:text-7xl font-bold tracking-tight text-balance leading-[0.95]"
           >
-            <span className="fc-word block">
-              <span>The</span>{" "}
-              <span>world&rsquo;s</span>{" "}
-              <span>best</span>
+            <span className="fc-headline-line">
+              {t("hero", "title1")}
             </span>
-            <span className="fc-word block">
-              <span className="gradient-text">specialists.</span>
+            <span className="fc-headline-line">
+              <span className="gradient-text">{t("hero", "titleAccent")}</span>
             </span>
-            <span className="fc-word block">
-              <span>Verified.</span>{" "}
-              <span>Vetted.</span>{" "}
-              <span>Yours.</span>
-            </span>
+            <span className="fc-headline-line">{t("hero", "title2")}</span>
           </h1>
 
           <p className="mt-6 text-lg md:text-xl text-ink-300 max-w-2xl text-balance">
@@ -152,7 +131,7 @@ export function HeroImmersive() {
 
         {/* Product mockup + floating real-people photo cluster */}
         <motion.div
-          initial={{ opacity: 0, y: reduce ? 0 : 24 }}
+          initial={fadeUpLg}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: reduce ? 0 : 0.7, delay: reduce ? 0 : 0.2 }}
           className="lg:col-span-6 relative"

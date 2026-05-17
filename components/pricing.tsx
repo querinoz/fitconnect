@@ -4,61 +4,13 @@ import { ArrowRight, Check, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { useLanguage, useT } from "@/lib/i18n-provider";
-
-const featureMatrix = {
-  free: {
-    en: [
-      "Unlimited browsing",
-      "Save 10 favourites",
-      "Read 27,000+ reviews",
-      "Coach finder quiz"
-    ],
-    pt: [
-      "Navegação ilimitada",
-      "Guarda 10 favoritos",
-      "Lê mais de 27 000 avaliações",
-      "Quiz de coach finder"
-    ]
-  },
-  athlete: {
-    en: [
-      "Unlimited bookings",
-      "Free 15-min intro with every coach",
-      "Full athlete dashboard (HRV, sleep, AI)",
-      "Programs library access",
-      "Priority support · response < 2h"
-    ],
-    pt: [
-      "Reservas ilimitadas",
-      "Intro grátis de 15 min com cada coach",
-      "Painel de atleta completo (HRV, sono, IA)",
-      "Acesso à biblioteca de programas",
-      "Suporte prioritário · resposta < 2h"
-    ]
-  },
-  coach: {
-    en: [
-      "Up to 50 active clients",
-      "Plan builder + 600+ exercise library",
-      "Stripe Connect payouts",
-      "Marketing tools + featured listings",
-      "Trainer dashboard + analytics"
-    ],
-    pt: [
-      "Até 50 clientes ativos",
-      "Construtor de planos + biblioteca de 600+ exercícios",
-      "Pagamentos via Stripe Connect",
-      "Ferramentas de marketing + destaques",
-      "Painel de coach + analytics"
-    ]
-  }
-};
+import { useLocale, useT } from "@/lib/i18n-provider";
 
 export function Pricing() {
   const t = useT();
-  const { lang } = useLanguage();
+  const locale = useLocale();
   const reduce = useReducedMotion();
+  const { features } = locale.pricing;
 
   const plans = [
     {
@@ -66,7 +18,7 @@ export function Pricing() {
       name: t("pricing", "freeName"),
       price: "0",
       desc: t("pricing", "freeDesc"),
-      features: featureMatrix.free[lang]
+      features: features.free
     },
     {
       key: "athlete" as const,
@@ -74,14 +26,14 @@ export function Pricing() {
       price: "12",
       highlight: true,
       desc: t("pricing", "athleteDesc"),
-      features: featureMatrix.athlete[lang]
+      features: features.athlete
     },
     {
       key: "coach" as const,
       name: t("pricing", "coachName"),
       price: "29",
       desc: t("pricing", "coachDesc"),
-      features: featureMatrix.coach[lang]
+      features: features.coach
     }
   ];
 

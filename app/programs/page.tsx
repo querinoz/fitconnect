@@ -19,19 +19,27 @@ import {
 } from "lucide-react";
 import { formatPrice, formatCompact } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/lib/i18n-provider";
 
-const levels = ["All", "Beginner", "Intermediate", "Advanced"] as const;
-type Level = (typeof levels)[number];
+type LevelKey = keyof ReturnType<typeof useLocale>["programsPage"]["levels"];
+const levelToData: Record<Exclude<LevelKey, "all">, string> = {
+  beginner: "Beginner",
+  intermediate: "Intermediate",
+  advanced: "Advanced"
+};
 
 export default function ProgramsPage() {
+  const locale = useLocale();
+  const pp = locale.programsPage;
   const [q, setQ] = useState("");
   const [sport, setSport] = useState<Sport | "All">("All");
-  const [level, setLevel] = useState<Level>("All");
+  const [level, setLevel] = useState<LevelKey>("all");
+  const levelKeys = Object.keys(pp.levels) as LevelKey[];
 
   const filtered = useMemo(() => {
     return PROGRAMS.filter((p) => {
       if (sport !== "All" && p.sport !== sport) return false;
-      if (level !== "All" && p.level !== level) return false;
+      if (level !== "all" && p.level !== levelToData[level]) return false;
       if (q && !`${p.title} ${p.tagline}`.toLowerCase().includes(q.toLowerCase()))
         return false;
       return true;
@@ -50,16 +58,14 @@ export default function ProgramsPage() {
           <div className="absolute inset-0 -z-10 gradient-bg opacity-70" />
           <div className="mx-auto max-w-7xl px-6">
             <p className="eyebrow inline-flex items-center gap-1.5">
-              <Layers className="h-3.5 w-3.5" /> Programs library
+              <Layers className="h-3.5 w-3.5" /> {pp.eyebrow}
             </p>
             <h1 className="mt-3 font-display text-5xl md:text-6xl font-bold leading-[0.95] text-balance">
-              84 signature programs.<br />
-              <span className="gradient-text">Written by the coaches who run them.</span>
+              {pp.titleLine1}
+              <br />
+              <span className="gradient-text">{pp.titleAccent}</span>
             </h1>
-            <p className="mt-5 text-ink-300 text-lg max-w-2xl">
-              Battle-tested, evidence-based, RPE-autoregulated. Every program ships with weekly
-              check-ins from the coach and lifetime access to updates.
-            </p>
+            <p className="mt-5 text-ink-300 text-lg max-w-2xl">{pp.subtitle}</p>
           </div>
         </section>
 
@@ -74,12 +80,12 @@ export default function ProgramsPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-r from-ink-950/80 via-ink-950/30 to-transparent" />
               <span className="absolute top-5 left-5 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-brand-400 to-accent-500 text-ink-950 px-3 py-1 text-[11px] font-bold uppercase tracking-wider">
-                <Award className="h-3 w-3" /> {featured.badge ?? "Featured"}
+                <Award className="h-3 w-3" /> {featured.badge ?? pp.featuredBadge}
               </span>
             </div>
             <div className="p-8 lg:p-10 flex flex-col justify-center">
               <p className="text-xs uppercase tracking-widest text-brand-300 font-semibold">
-                {featured.sport} · {featured.level} · {featured.weeks} weeks
+                {featured.sport} · {featured.level} · {featured.weeks} {pp.weeks}
               </p>
               <h2 className="mt-3 font-display text-3xl md:text-4xl font-bold leading-tight">
                 {featured.title}
@@ -106,7 +112,7 @@ export default function ProgramsPage() {
                   {formatPrice(featured.price)}
                 </span>
                 <span className="text-sm text-ink-400">
-                  · {formatCompact(featured.joined)} athletes joined
+                  · {formatCompact(featured.joined)} {pp.athletesJoined}
                 </span>
               </div>
               <div className="mt-6 flex gap-3">
@@ -114,13 +120,13 @@ export default function ProgramsPage() {
                   href={`/trainer/${featured.trainerId}`}
                   className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 text-ink-950 font-semibold text-sm hover:opacity-90"
                 >
-                  Join the program
+                  {pp.joinProgram}
                 </Link>
                 <Link
                   href={`/trainer/${featured.trainerId}`}
                   className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-xl border border-ink-700 text-ink-100 font-medium text-sm hover:bg-ink-900/50"
                 >
-                  See sample week
+                  {pp.seeSampleWeek}
                 </Link>
               </div>
             </div>
@@ -135,7 +141,7 @@ export default function ProgramsPage() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search programs…"
+                placeholder={pp.searchPlaceholder}
                 className="w-full bg-ink-950/60 border border-ink-800 rounded-xl pl-9 pr-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/60"
               />
             </div>
@@ -144,7 +150,7 @@ export default function ProgramsPage() {
                 onClick={() => setSport("All")}
                 className={chip(sport === "All")}
               >
-                All sports
+                {pp.allSports}
               </button>
               {SPORTS.map((s) => (
                 <button
@@ -157,13 +163,14 @@ export default function ProgramsPage() {
               ))}
             </div>
             <div className="flex gap-2">
-              {levels.map((l) => (
+              {levelKeys.map((l) => (
                 <button
                   key={l}
+                  type="button"
                   onClick={() => setLevel(l)}
                   className={chip(level === l)}
                 >
-                  {l}
+                  {pp.levels[l]}
                 </button>
               ))}
             </div>
@@ -175,9 +182,9 @@ export default function ProgramsPage() {
           {filtered.length === 0 ? (
             <EmptyState
               icon={Search}
-              title="No programs match those filters"
-              description="Try a different sport or remove the level constraint."
-              cta={{ label: "Browse all programs", href: "/programs" }}
+                title={pp.emptyTitle}
+                description={pp.emptyDesc}
+                cta={{ label: pp.browseAll, href: "/programs" }}
             />
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

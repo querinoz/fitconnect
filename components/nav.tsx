@@ -31,6 +31,7 @@ export function Nav() {
   ];
   const moreLinks = [
     { href: "/dashboard", label: t("nav", "dashboard") },
+    { href: "/coach/dashboard", label: t("nav", "coachDashboard") },
     { href: "/trainer", label: t("nav", "forCoaches") }
   ];
 

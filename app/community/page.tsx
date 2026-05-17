@@ -22,15 +22,19 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/lib/i18n-provider";
 
-const kinds = ["All", "PR", "Check-in", "Before/After", "Race", "Question"] as const;
-type Kind = (typeof kinds)[number];
+type FeedKind = keyof ReturnType<typeof useLocale>["communityFeed"]["kinds"];
 
-const sidebarStats = [
-  { label: "Posts today", value: "2,184" },
-  { label: "PRs logged this week", value: "12,604" },
-  { label: "Active clubs", value: "412" }
-];
+const postKindKey: Record<string, Exclude<FeedKind, "all">> = {
+  PR: "pr",
+  "Check-in": "checkin",
+  "Before/After": "beforeAfter",
+  Race: "race",
+  Question: "question"
+};
+
+const sidebarStatValues = ["2,184", "12,604", "412"];
 
 const clubs = [
   { name: "Sub-3 marathon", members: 1842, sport: "Running" },
@@ -47,13 +51,22 @@ const upcomingEvents = [
 ];
 
 export default function CommunityPage() {
+  const locale = useLocale();
+  const cf = locale.communityFeed;
   const [q, setQ] = useState("");
-  const [kind, setKind] = useState<Kind>("All");
+  const [kind, setKind] = useState<FeedKind>("all");
   const [sport, setSport] = useState<Sport | "All">("All");
+
+  const kindKeys = Object.keys(cf.kinds) as FeedKind[];
+  const sidebarStats = [
+    { label: cf.stats.postsToday, value: sidebarStatValues[0] },
+    { label: cf.stats.prsWeek, value: sidebarStatValues[1] },
+    { label: cf.stats.activeClubs, value: sidebarStatValues[2] }
+  ];
 
   const filtered = useMemo(() => {
     return COMMUNITY_POSTS.filter((p) => {
-      if (kind !== "All" && p.kind !== kind) return false;
+      if (kind !== "all" && postKindKey[p.kind] !== kind) return false;
       if (sport !== "All" && p.author.sport !== sport) return false;
       if (q && !p.text.toLowerCase().includes(q.toLowerCase())) return false;
       return true;
@@ -68,17 +81,12 @@ export default function CommunityPage() {
         <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="eyebrow inline-flex items-center gap-1.5">
-              <Users aria-hidden="true" className="h-3.5 w-3.5" /> Community
+              <Users aria-hidden="true" className="h-3.5 w-3.5" /> {cf.eyebrow}
             </p>
-            <h1 className="mt-2 font-display text-4xl md:text-5xl font-bold">
-              The clubhouse, online.
-            </h1>
-            <p className="mt-2 text-ink-400 max-w-xl">
-              Athletes celebrating PRs, asking real questions, posting before/afters.
-              Specialist coaches drop in. No likes-economy nonsense.
-            </p>
+            <h1 className="mt-2 font-display text-4xl md:text-5xl font-bold">{cf.title}</h1>
+            <p className="mt-2 text-ink-400 max-w-xl">{cf.subtitle}</p>
           </div>
-          <Button size="lg">Share a check-in</Button>
+          <Button size="lg">{cf.shareCta}</Button>
         </header>
 
         <CelebrationRibbon />
@@ -92,7 +100,7 @@ export default function CommunityPage() {
                 <input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="Search the feed…"
+                  placeholder={cf.searchPlaceholder}
                   className="w-full bg-ink-950/60 border border-ink-800 rounded-xl pl-9 pr-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/60"
                 />
               </div>
@@ -100,12 +108,13 @@ export default function CommunityPage() {
 
             <div className="rounded-2xl border border-ink-800 bg-ink-900/40 p-5">
               <p className="text-xs uppercase tracking-widest text-ink-500 mb-3">
-                Activity type
+                {cf.activityType}
               </p>
               <div className="flex flex-wrap gap-1.5">
-                {kinds.map((k) => (
+                {kindKeys.map((k) => (
                   <button
                     key={k}
+                    type="button"
                     onClick={() => setKind(k)}
                     className={cn(
                       "rounded-full px-3 py-1.5 text-xs border transition-colors",
@@ -114,14 +123,14 @@ export default function CommunityPage() {
                         : "border-ink-800 bg-ink-950/40 text-ink-300 hover:border-ink-700"
                     )}
                   >
-                    {k}
+                    {cf.kinds[k]}
                   </button>
                 ))}
               </div>
             </div>
 
             <div className="rounded-2xl border border-ink-800 bg-ink-900/40 p-5">
-              <p className="text-xs uppercase tracking-widest text-ink-500 mb-3">Sport</p>
+              <p className="text-xs uppercase tracking-widest text-ink-500 mb-3">{cf.sport}</p>
               <div className="grid grid-cols-2 gap-1.5">
                 <button
                   onClick={() => setSport("All")}
@@ -132,7 +141,7 @@ export default function CommunityPage() {
                       : "border-ink-800 bg-ink-950/40 text-ink-300"
                   )}
                 >
-                  All sports
+                  {cf.allSports}
                 </button>
                 {SPORTS.map((s) => (
                   <button
@@ -157,9 +166,9 @@ export default function CommunityPage() {
             {filtered.length === 0 ? (
               <EmptyState
                 icon={Search}
-                title="No posts here yet"
-                description="Try widening your filters, or be the first one to post under this combination."
-                cta={{ label: "Share a check-in", href: "/community" }}
+                title={cf.emptyTitle}
+                description={cf.emptyDesc}
+                cta={{ label: cf.shareCta, href: "/community" }}
               />
             ) : (
               filtered.map((p, i) => (
@@ -201,7 +210,7 @@ export default function CommunityPage() {
                       >
                         {p.kind === "PR" && <Award className="h-3 w-3" />}
                         {p.kind === "Race" && <TrendingUp className="h-3 w-3" />}
-                        {p.kind}
+                        {cf.kinds[postKindKey[p.kind] ?? "checkin"]}
                       </span>
                     </div>
                   </header>
@@ -246,7 +255,7 @@ export default function CommunityPage() {
           <aside className="hidden lg:block space-y-5 lg:sticky lg:top-24 self-start">
             <div className="rounded-2xl border border-ink-800 bg-ink-900/40 p-5">
               <p className="text-xs uppercase tracking-widest text-ink-500 mb-3">
-                Live activity
+                {cf.liveActivity}
               </p>
               <div className="space-y-3">
                 {sidebarStats.map((s) => (
@@ -262,7 +271,7 @@ export default function CommunityPage() {
 
             <div className="rounded-2xl border border-ink-800 bg-ink-900/40 p-5">
               <p className="text-xs uppercase tracking-widest text-ink-500 mb-3">
-                Trending clubs
+                {cf.trendingClubs}
               </p>
               <ul className="space-y-3">
                 {clubs.map((c) => (
@@ -275,11 +284,11 @@ export default function CommunityPage() {
                         {c.name}
                       </p>
                       <p className="text-xs text-ink-500">
-                        {c.sport} · {c.members.toLocaleString()} members
+                        {c.sport} · {new Intl.NumberFormat().format(c.members)} {cf.members}
                       </p>
                     </div>
                     <button className="rounded-full bg-brand-500/10 border border-brand-500/30 px-3 py-1 text-xs text-brand-200 hover:bg-brand-500/20 transition-colors">
-                      Join
+                      {cf.join}
                     </button>
                   </li>
                 ))}
@@ -288,7 +297,7 @@ export default function CommunityPage() {
 
             <div className="rounded-2xl border border-ink-800 bg-ink-900/40 p-5">
               <p className="text-xs uppercase tracking-widest text-ink-500 mb-3">
-                Upcoming meet-ups
+                {cf.upcomingMeetups}
               </p>
               <ul className="space-y-3">
                 {upcomingEvents.map((e) => (
@@ -300,7 +309,7 @@ export default function CommunityPage() {
                     <div className="min-w-0">
                       <p className="font-medium text-ink-100 truncate">{e.name}</p>
                       <p className="text-xs text-ink-500">
-                        {e.date} · {e.attendees} going
+                        {e.date} · {e.attendees} {cf.going}
                       </p>
                     </div>
                   </li>

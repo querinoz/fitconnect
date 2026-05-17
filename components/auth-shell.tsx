@@ -1,10 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { useState, type FormEvent } from "react";
-import { ArrowRight, Dumbbell, Mail, Sparkles } from "lucide-react";
-import { useLanguage, useT } from "@/lib/i18n-provider";
+import {
+  ArrowRight,
+  Dumbbell,
+  Lock,
+  LogOut,
+  Mail,
+  Sparkles,
+  User
+} from "lucide-react";
+import { dashboardPathForRole, validateCredentials } from "@/lib/auth";
+import { useAuthStore } from "@/lib/auth-store";
+import { useAuthHydrated } from "@/lib/use-auth-hydrated";
+import { formatMsg, useLocale, useT } from "@/lib/i18n-provider";
 import { Button } from "./ui/button";
 import { OAuthRow } from "./oauth-row";
 import { LangPicker } from "./lang-picker";
@@ -29,16 +41,41 @@ export function AuthShell({
   switchHref
 }: AuthShellProps) {
   const t = useT();
-  const { lang } = useLanguage();
+  const router = useRouter();
+  const login = useAuthStore((s) => s.login);
+  const logout = useAuthStore((s) => s.logout);
+  const user = useAuthStore((s) => s.user);
+  const hydrated = useAuthHydrated();
+  const locale = useLocale();
   const reduce = useReducedMotion();
+  const [identifier, setIdentifier] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
+    setError(null);
     setSubmitted(true);
-    window.setTimeout(() => setSubmitted(false), 2200);
+
+    if (mode === "signin") {
+      const user = validateCredentials(identifier, password);
+      if (!user) {
+        setError(t("auth", "invalidCredentials"));
+        setSubmitted(false);
+        return;
+      }
+      login(user);
+      setSubmitted(false);
+      router.replace(dashboardPathForRole(user.role));
+      return;
+    }
+
+    window.setTimeout(() => {
+      setSubmitted(false);
+      router.push("/signin");
+    }, 1200);
   }
 
   return (
@@ -46,7 +83,10 @@ export function AuthShell({
       id="main"
       className="relative min-h-screen overflow-hidden gradient-bg flex items-center"
     >
-      <div className="absolute -top-32 -right-24 -z-10 h-[420px] w-[420px] rounded-full bg-brand-500/15 blur-3xl" />
+      <motion.div
+        aria-hidden="true"
+        className="absolute -top-32 -right-24 -z-10 h-[420px] w-[420px] rounded-full bg-brand-500/15 blur-3xl"
+      />
       <div className="absolute -bottom-32 -left-24 -z-10 h-[420px] w-[420px] rounded-full bg-accent-500/15 blur-3xl" />
 
       <header className="absolute inset-x-0 top-0 z-10">
@@ -67,7 +107,6 @@ export function AuthShell({
       </header>
 
       <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-6 pt-24 pb-16 lg:grid-cols-2">
-        {/* Marketing rail */}
         <motion.aside
           initial={{ opacity: 0, x: reduce ? 0 : -16 }}
           animate={{ opacity: 1, x: 0 }}
@@ -89,25 +128,9 @@ export function AuthShell({
           </p>
 
           <ul className="mt-8 space-y-3">
-            {[
-              {
-                k: "verified",
-                en: "12,418 verified specialists across 10 sports",
-                pt: "12 418 especialistas verificados em 10 desportos"
-              },
-              {
-                k: "intro",
-                en: "Free 15-min intro with every coach",
-                pt: "Intro grátis de 15 min com cada coach"
-              },
-              {
-                k: "ready",
-                en: "HRV + sleep readiness signals from day one",
-                pt: "Sinais de prontidão (HRV + sono) desde o primeiro dia"
-              }
-            ].map((row, i) => (
+            {locale.auth.bullets.map((line, i) => (
               <motion.li
-                key={row.k}
+                key={i}
                 initial={{ opacity: 0, x: reduce ? 0 : -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{
@@ -119,13 +142,12 @@ export function AuthShell({
                 <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-accent-500/10 text-accent-400 ring-1 ring-accent-500/30">
                   <ArrowRight className="h-3.5 w-3.5" />
                 </span>
-                <span>{lang === "pt" ? row.pt : row.en}</span>
+                <span>{line}</span>
               </motion.li>
             ))}
           </ul>
         </motion.aside>
 
-        {/* Form card */}
         <motion.section
           initial={{ opacity: 0, y: reduce ? 0 : 14 }}
           animate={{ opacity: 1, y: 0 }}
@@ -147,57 +169,135 @@ export function AuthShell({
 
           <OAuthRow />
 
+          {mode === "signin" && hydrated && user && (
+            <motion.div
+              initial={{ opacity: 0, y: reduce ? 0 : 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-5 rounded-xl border border-brand-500/30 bg-brand-500/10 px-4 py-3"
+            >
+              <p className="text-sm text-brand-100">{t("auth", "alreadySignedIn")}</p>
+              <p className="mt-1 text-xs text-ink-300">
+                {formatMsg(t("auth", "signedInAs"), { name: user.name })}
+              </p>
+              <motion.div
+                className="mt-3 flex flex-wrap gap-2"
+              >
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => router.push(dashboardPathForRole(user.role))}
+                >
+                  {t("auth", "continueToDashboard")}
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => logout()}
+                >
+                  <LogOut className="h-3.5 w-3.5 mr-1.5" aria-hidden="true" />
+                  {t("auth", "signOut")}
+                </Button>
+              </motion.div>
+            </motion.div>
+          )}
+
           <form onSubmit={onSubmit} className="mt-5 space-y-4">
+            {error && (
+              <p
+                role="alert"
+                className="rounded-xl border border-signal-500/40 bg-signal-500/10 px-3 py-2 text-sm text-signal-300"
+              >
+                {error}
+              </p>
+            )}
+            {mode === "signin" ? (
+              <div>
+                <label
+                  htmlFor="identifier"
+                  className="text-xs uppercase tracking-widest text-ink-500"
+                >
+                  {t("auth", "usernameLabel")}
+                </label>
+                <div className="relative mt-1.5">
+                  <User
+                    aria-hidden="true"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-500"
+                  />
+                  <input
+                    id="identifier"
+                    type="text"
+                    required
+                    autoComplete="username"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    placeholder={t("auth", "usernamePlaceholder")}
+                    className="w-full rounded-xl border border-ink-800 bg-ink-900/60 pl-10 pr-3 h-11 text-sm text-ink-100 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-brand-400/60 focus:border-brand-500/40"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label
+                  htmlFor="email"
+                  className="text-xs uppercase tracking-widest text-ink-500"
+                >
+                  {t("auth", "emailLabel")}
+                </label>
+                <div className="relative mt-1.5">
+                  <Mail
+                    aria-hidden="true"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-500"
+                  />
+                  <input
+                    id="email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder={t("auth", "emailPlaceholder")}
+                    className="w-full rounded-xl border border-ink-800 bg-ink-900/60 pl-10 pr-3 h-11 text-sm text-ink-100 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-brand-400/60 focus:border-brand-500/40"
+                  />
+                </div>
+              </div>
+            )}
             <div>
               <label
-                htmlFor="email"
+                htmlFor="password"
                 className="text-xs uppercase tracking-widest text-ink-500"
               >
-                {t("auth", "emailLabel")}
+                {t("auth", "passwordLabel")}
               </label>
               <div className="relative mt-1.5">
-                <Mail
+                <Lock
                   aria-hidden="true"
                   className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-500"
                 />
                 <input
-                  id="email"
-                  type="email"
+                  id="password"
+                  type="password"
                   required
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={t("auth", "emailPlaceholder")}
+                  autoComplete={
+                    mode === "signin" ? "current-password" : "new-password"
+                  }
+                  minLength={mode === "signup" ? 8 : undefined}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={
+                    mode === "signin"
+                      ? t("auth", "signInPasswordPlaceholder")
+                      : t("auth", "passwordPlaceholder")
+                  }
                   className="w-full rounded-xl border border-ink-800 bg-ink-900/60 pl-10 pr-3 h-11 text-sm text-ink-100 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-brand-400/60 focus:border-brand-500/40"
                 />
               </div>
             </div>
-            {mode === "signup" && (
-              <div>
-                <label
-                  htmlFor="password"
-                  className="text-xs uppercase tracking-widest text-ink-500"
-                >
-                  {t("auth", "passwordLabel")}
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  required
-                  autoComplete="new-password"
-                  minLength={8}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder={t("auth", "passwordPlaceholder")}
-                  className="mt-1.5 w-full rounded-xl border border-ink-800 bg-ink-900/60 px-3 h-11 text-sm text-ink-100 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-brand-400/60 focus:border-brand-500/40"
-                />
-              </div>
-            )}
             <Button
               type="submit"
               size="lg"
               className="w-full"
-              disabled={submitted}
+              disabled={submitted || !hydrated}
             >
               {submitted ? (
                 <span className="inline-flex items-center gap-2">
@@ -231,4 +331,3 @@ export function AuthShell({
     </main>
   );
 }
-

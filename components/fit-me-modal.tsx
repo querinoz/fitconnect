@@ -4,9 +4,10 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, MapPin, Sparkles, X, Zap } from "lucide-react";
-import { useT, useLanguage } from "@/lib/i18n-provider";
+import { formatMsg, useLocale, useT } from "@/lib/i18n-provider";
 import type { Trainer } from "@/lib/data";
 import { Button } from "./ui/button";
+import { cn } from "@/lib/utils";
 
 interface FitMeModalProps {
   trainer: Trainer | null;
@@ -18,7 +19,7 @@ type Phase = "idle" | "sending" | "sent";
 
 export function FitMeModal({ trainer, open, onOpenChange }: FitMeModalProps) {
   const t = useT();
-  const { lang } = useLanguage();
+  const locale = useLocale();
   const reduce = useReducedMotion();
   const [phase, setPhase] = useState<Phase>("idle");
 
@@ -31,20 +32,12 @@ export function FitMeModal({ trainer, open, onOpenChange }: FitMeModalProps) {
 
   const intro = useMemo(() => {
     if (!trainer) return [];
-    const sport = trainer.sports[0];
-    if (lang === "pt") {
-      return [
-        `Olá ${trainer.name.split(" ")[0]}, sou a Inês — atleta intermédia em ${sport.toLowerCase()}, baseada em Lisboa.`,
-        `Procuro um plano sustentável de 8–12 semanas para um objetivo claro este trimestre, e a tua abordagem encaixa.`,
-        `Disponível para uma intro grátis de 15 min esta semana — manhãs ou pós-trabalho. Avisa-me o que dá.`
-      ];
-    }
-    return [
-      `Hi ${trainer.name.split(" ")[0]}, I'm Inês — intermediate ${sport.toLowerCase()} athlete based in Lisbon.`,
-      `I'm looking for a sustainable 8–12 week block toward one clear goal this quarter and your approach fits.`,
-      `Free for a 15-min intro this week — mornings or post-work. Let me know what works.`
-    ];
-  }, [trainer, lang]);
+    const name = trainer.name.split(" ")[0];
+    const sport = trainer.sports[0].toLowerCase();
+    return locale.fitme.introLines.map((line) =>
+      formatMsg(line, { name, sport })
+    );
+  }, [trainer, locale.fitme.introLines]);
 
   function handleSend() {
     if (phase !== "idle") return;
@@ -69,21 +62,24 @@ export function FitMeModal({ trainer, open, onOpenChange }: FitMeModalProps) {
               />
             </Dialog.Overlay>
             <Dialog.Content
-              asChild
               aria-describedby="fitme-desc"
               onOpenAutoFocus={(e) => e.preventDefault()}
+              className={cn(
+                "fixed left-1/2 top-1/2 z-[61] w-[calc(100%-2rem)] max-w-[540px] max-h-[min(90vh,720px)]",
+                "-translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-3xl",
+                "border border-ink-800 bg-ink-950 p-0 shadow-elevated focus:outline-none"
+              )}
             >
               <motion.div
-                initial={{ opacity: 0, y: reduce ? 0 : 18, scale: reduce ? 1 : 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: reduce ? 0 : 12, scale: reduce ? 1 : 0.97 }}
+                className="relative"
+                initial={{ opacity: 0, scale: reduce ? 1 : 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: reduce ? 1 : 0.96 }}
                 transition={{
                   duration: reduce ? 0 : 0.32,
                   ease: [0.16, 1, 0.3, 1]
                 }}
-                className="fixed left-1/2 top-1/2 z-[61] w-[min(540px,92vw)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-ink-800 bg-ink-950 p-0 shadow-elevated"
               >
-                {/* Ambient glow */}
                 <div
                   aria-hidden="true"
                   className="pointer-events-none absolute -top-24 left-1/2 -z-0 h-56 w-[120%] -translate-x-1/2 bg-gradient-to-br from-brand-500/30 via-accent-500/15 to-transparent blur-3xl"
@@ -115,7 +111,6 @@ export function FitMeModal({ trainer, open, onOpenChange }: FitMeModalProps) {
                 </div>
 
                 <div className="relative px-6 pb-6 pt-4">
-                  {/* Trainer chip */}
                   <div className="flex items-center gap-3 rounded-2xl border border-ink-800 bg-ink-900/50 p-3">
                     <img
                       src={trainer.avatar}
@@ -133,7 +128,6 @@ export function FitMeModal({ trainer, open, onOpenChange }: FitMeModalProps) {
                     </div>
                   </div>
 
-                  {/* Phases */}
                   <div className="mt-5 min-h-[210px]">
                     <AnimatePresence mode="wait">
                       {phase === "sent" ? (
@@ -194,7 +188,6 @@ export function FitMeModal({ trainer, open, onOpenChange }: FitMeModalProps) {
                     </AnimatePresence>
                   </div>
 
-                  {/* Footer */}
                   <div className="mt-6 flex justify-end gap-2">
                     {phase === "sent" ? (
                       <Button onClick={() => onOpenChange(false)}>

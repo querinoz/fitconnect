@@ -2,6 +2,7 @@
 
 import { Check, Minus, X } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLocale, useT } from "@/lib/i18n-provider";
 import { COMPARISON } from "@/lib/data";
 
 const competitors = [
@@ -12,17 +13,27 @@ const competitors = [
   { id: "classpass", name: "ClassPass" }
 ];
 
-function Cell({ value, highlight }: { value: string | boolean; highlight?: boolean }) {
+function Cell({
+  value,
+  highlight,
+  yesLabel,
+  noLabel
+}: {
+  value: string | boolean;
+  highlight?: boolean;
+  yesLabel: string;
+  noLabel: string;
+}) {
   if (value === true)
     return (
       <span className="inline-flex items-center justify-center gap-1.5 rounded-full bg-accent-500/10 px-2.5 py-1 text-xs font-semibold text-accent-400 ring-1 ring-accent-500/30">
-        <Check className="h-3 w-3" /> Yes
+        <Check className="h-3 w-3" /> {yesLabel}
       </span>
     );
   if (value === false)
     return (
       <span className="inline-flex items-center justify-center gap-1.5 rounded-full bg-ink-800/60 px-2.5 py-1 text-xs font-medium text-ink-500 ring-1 ring-ink-700">
-        <X className="h-3 w-3" /> No
+        <X className="h-3 w-3" /> {noLabel}
       </span>
     );
   return (
@@ -39,17 +50,20 @@ function Cell({ value, highlight }: { value: string | boolean; highlight?: boole
 }
 
 export function ComparisonTable() {
+  const locale = useLocale();
+  const t = useT();
+  const yesLabel = t("common", "yes");
+  const noLabel = t("common", "no");
+
   return (
     <section className="mx-auto max-w-7xl px-6 py-24">
       <div className="max-w-2xl">
-        <p className="eyebrow">Why FitConnect</p>
+        <p className="eyebrow">{locale.comparison.eyebrow}</p>
         <h2 className="mt-3 font-display text-4xl md:text-5xl font-bold text-balance">
-          Future is good. We&apos;re for athletes with a real{" "}
-          <span className="gradient-text">sport</span>.
+          {locale.comparison.title}{" "}
+          <span className="gradient-text">{locale.comparison.titleAccent}</span>
         </h2>
-        <p className="mt-4 text-lg text-ink-400">
-          Side-by-side with the players you&apos;ve heard of — assessed honestly, no asterisks.
-        </p>
+        <p className="mt-4 text-lg text-ink-400">{locale.comparison.subtitle}</p>
       </div>
 
       <motion.div
@@ -63,7 +77,7 @@ export function ComparisonTable() {
           <thead>
             <tr className="border-b border-ink-800">
               <th className="text-left text-xs uppercase tracking-widest text-ink-500 px-6 py-5 font-semibold">
-                Feature
+                {locale.comparison.feature}
               </th>
               {competitors.map((c) => (
                 <th
@@ -98,19 +112,32 @@ export function ComparisonTable() {
                   {row.feature}
                 </td>
                 <td className="text-center px-3 py-4 bg-brand-500/5">
-                  <Cell value={row.fitconnect} highlight />
+                  <Cell
+                    value={row.fitconnect}
+                    highlight
+                    yesLabel={yesLabel}
+                    noLabel={noLabel}
+                  />
                 </td>
                 <td className="text-center px-3 py-4">
-                  <Cell value={row.future} />
+                  <Cell value={row.future} yesLabel={yesLabel} noLabel={noLabel} />
                 </td>
                 <td className="text-center px-3 py-4">
-                  <Cell value={row.caliber} />
+                  <Cell value={row.caliber} yesLabel={yesLabel} noLabel={noLabel} />
                 </td>
                 <td className="text-center px-3 py-4">
-                  <Cell value={row.trainerize} />
+                  <Cell
+                    value={row.trainerize}
+                    yesLabel={yesLabel}
+                    noLabel={noLabel}
+                  />
                 </td>
                 <td className="text-center px-3 py-4">
-                  <Cell value={row.classpass} />
+                  <Cell
+                    value={row.classpass}
+                    yesLabel={yesLabel}
+                    noLabel={noLabel}
+                  />
                 </td>
               </tr>
             ))}

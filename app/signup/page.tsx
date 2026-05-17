@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { AuthShell } from "@/components/auth-shell";
 import { useT } from "@/lib/i18n-provider";
 

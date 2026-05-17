@@ -3,30 +3,30 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useLocale } from "@/lib/i18n-provider";
 import { TRAINERS } from "@/lib/data";
 import { TrainerCard } from "./trainer-card";
-import { formatCompact } from "@/lib/utils";
 
 export function TrainersGrid() {
+  const locale = useLocale();
+
   return (
     <section className="mx-auto max-w-7xl px-6 py-24">
       <div className="flex items-end justify-between flex-wrap gap-4 mb-10">
         <div>
-          <p className="eyebrow">Featured specialists</p>
+          <p className="eyebrow">{locale.trainers.eyebrow}</p>
           <h2 className="mt-3 font-display text-4xl md:text-5xl font-bold text-balance">
-            Real specialists. <span className="gradient-text">Real results.</span>
+            {locale.trainers.title}{" "}
+            <span className="gradient-text">{locale.trainers.titleAccent}</span>
           </h2>
-          <p className="mt-4 text-ink-400 text-lg max-w-xl">
-            Hand-picked from {formatCompact(12418)} verified coaches across 10 sports. Average
-            of 10.4 years coaching, 96% client retention.
-          </p>
+          <p className="mt-4 text-ink-400 text-lg max-w-xl">{locale.trainers.subtitle}</p>
         </div>
         <Link
           href="/discover"
           className="hidden md:inline-flex items-center gap-2 rounded-full border border-ink-700 bg-ink-900/40 px-4 py-2 text-sm font-semibold text-ink-100 hover:border-brand-400/40 hover:bg-ink-900/70 transition-all"
         >
           <Sparkles className="h-3.5 w-3.5 text-brand-400" />
-          See all 12,418
+          {locale.trainers.seeAll}
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>

@@ -39,6 +39,12 @@
       "description": "Today's readiness, plan and coach messages"
     },
     {
+      "name": "Coach dashboard",
+      "short_name": "Coach",
+      "url": "/coach/dashboard",
+      "description": "Roster HRV, revenue and session management"
+    },
+    {
       "name": "Community",
       "short_name": "Community",
       "url": "/community",

@@ -2,43 +2,22 @@
 
 import { motion } from "framer-motion";
 import { Globe2, RefreshCw, Star, Users, Zap } from "lucide-react";
+import { useLocale } from "@/lib/i18n-provider";
 import { STATS } from "@/lib/data";
 import { formatCompact, pct } from "@/lib/utils";
 
-const stats = [
-  {
-    icon: Users,
-    value: formatCompact(STATS.athletes),
-    label: "Active athletes"
-  },
-  {
-    icon: Zap,
-    value: formatCompact(STATS.trainers),
-    label: "Verified specialists"
-  },
-  {
-    icon: RefreshCw,
-    value: formatCompact(STATS.sessions),
-    label: "Sessions completed"
-  },
-  {
-    icon: Globe2,
-    value: `${STATS.countries}`,
-    label: "Countries · 6 continents"
-  },
-  {
-    icon: Star,
-    value: STATS.avgRating.toFixed(2),
-    label: "Average coach rating"
-  },
-  {
-    icon: RefreshCw,
-    value: pct(STATS.rebookRate),
-    label: "Athletes rebook within 30 days"
-  }
-];
-
 export function StatBar() {
+  const locale = useLocale();
+
+  const stats = [
+    { icon: Users, value: formatCompact(STATS.athletes), label: locale.stats.athletes },
+    { icon: Zap, value: formatCompact(STATS.trainers), label: locale.stats.specialists },
+    { icon: RefreshCw, value: formatCompact(STATS.sessions), label: locale.stats.sessions },
+    { icon: Globe2, value: `${STATS.countries}`, label: locale.stats.countries },
+    { icon: Star, value: STATS.avgRating.toFixed(2), label: locale.stats.rating },
+    { icon: RefreshCw, value: pct(STATS.rebookRate), label: locale.stats.rebook }
+  ];
+
   return (
     <section className="mx-auto max-w-7xl px-6 py-14">
       <div className="rounded-3xl border border-ink-800/80 bg-ink-900/40 p-1">

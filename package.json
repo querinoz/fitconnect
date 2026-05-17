@@ -7,7 +7,14 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
-    "lint": "next lint"
+    "lint": "next lint",
+    "smoke": "node scripts/smoke-test.mjs http://localhost:3001",
+    "smoke:mobile": "node scripts/mobile-pwa-check.mjs http://localhost:3001",
+    "smoke:all": "npm run smoke && npm run smoke:mobile",
+    "env:start": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-start.ps1",
+    "env:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-stop.ps1",
+    "env:clean": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-clean.ps1",
+    "env:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-status.ps1"
   },
   "dependencies": {
     "next": "^14.2.18",
