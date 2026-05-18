@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, ShieldCheck, Star } from "lucide-react";
+import { ArrowRight, ShieldCheck, Smartphone, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/brand/wordmark";
 import { Atmosphere } from "./atmosphere";
@@ -75,6 +75,12 @@ export function HeroImmersive() {
               <Link href="/discover">
                 {t("hero", "primary")}{" "}
                 <ArrowRight aria-hidden="true" className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button asChild variant="secondary" size="lg">
+              <Link href="/mobile">
+                <Smartphone aria-hidden="true" className="h-4 w-4" />
+                Open mobile app
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg">
