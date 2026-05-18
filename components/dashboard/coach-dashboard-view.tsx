@@ -37,13 +37,13 @@ const tooltipStyle = {
   borderRadius: "12px"
 };
 
-export function CoachDashboardView() {
+export function CoachDashboardView({ wrapShell = true }: { wrapShell?: boolean }) {
   const t = useT();
   const ctx = useCoachContext();
   const { metrics, roster } = ctx;
 
-  return (
-    <DashboardShell>
+  const body = (
+    <>
       <DashboardHeader
         icon={HeartHandshake}
         eyebrow={t("coachDashboard", "eyebrow")}
@@ -267,8 +267,10 @@ export function CoachDashboardView() {
           })}
         </CardContent>
       </Card>
-    </DashboardShell>
+    </>
   );
+
+  return wrapShell ? <DashboardShell>{body}</DashboardShell> : body;
 }
 
 function CoachKpi({

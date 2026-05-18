@@ -47,22 +47,21 @@ const tooltipStyle = {
   borderRadius: "12px"
 };
 
-export function AthleteDashboardView() {
+export function AthleteDashboardView({ wrapShell = true }: { wrapShell?: boolean }) {
   const t = useT();
   const ctx = useAthleteContext();
 
   if (!ctx.athlete) {
-    return (
-      <DashboardShell>
-        <p className="text-ink-400">No athlete profile linked to this account.</p>
-      </DashboardShell>
+    const fallback = (
+      <p className="text-ink-400">No athlete profile linked to this account.</p>
     );
+    return wrapShell ? <DashboardShell>{fallback}</DashboardShell> : fallback;
   }
 
   const { athlete, plan, coach, sessions, messages, habits } = ctx;
 
-  return (
-    <DashboardShell assistant={<AIAssistant />}>
+  const body = (
+    <>
       <header className="flex flex-col sm:flex-row sm:flex-wrap sm:items-end justify-between gap-4">
         <div>
           <p className="eyebrow inline-flex items-center gap-1.5">
@@ -330,7 +329,16 @@ export function AthleteDashboardView() {
           </CardContent>
         </Card>
       </section>
-    </DashboardShell>
+    </>
+  );
+
+  return wrapShell ? (
+    <DashboardShell assistant={<AIAssistant />}>{body}</DashboardShell>
+  ) : (
+    <>
+      {body}
+      <AIAssistant />
+    </>
   );
 }
 

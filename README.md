@@ -178,8 +178,18 @@ npm run dev            # → http://localhost:3001
 
 No environment variables required for the demo — content is seeded in `lib/data.ts`.
 
+### Voltline demo (glass + realtime loops)
+
+1. Run **`npm run dev`** on port **3001**.
+2. **Athlete**: `ines@fitconnect.local` / `Athlete` → **`/dashboard`**. Append **`?demo=1`** to show the Voltline demo card (reset seed + coach shortcut).
+3. **Coach**: `tomas@fitconnect.local` / `Coach`, or **`/signin?demo=coach`** → **`/coach/dashboard`** and **`/coach/athletes/a-ines`** for live ticks and QuickDiff.
+4. **Tabs**: realtime uses `BroadcastChannel` — demo with two tabs in the **same browser profile** (same Playwright browser context).
+5. **Themes**: **`/settings/appearance`** (linked from Profile). **`marina@fitconnect.local` / `Marina`**. **Admin**: `admin@fitconnect.local` / `Admin`.
 | Script | Action |
 | --- | --- |
+| `npm run test` | Vitest unit + component suite |
+| `npm run test:e2e` | Playwright Voltline loops (requires dev server unless CI) |
+| `npm run audit:mobile` | Lighthouse mobile category scores (`localhost:3001` by default) |
 | `npm run dev` | Dev server on port **3001** |
 | `npm run build` | Production build (19 static pages) |
 | `npm run start` | Production server on port **3001** |

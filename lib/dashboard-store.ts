@@ -3,7 +3,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { initialDashboardState } from "./dashboard/seed";
-import type { CoachPlan, DashboardState, HabitItem, PlanBlock } from "./dashboard/types";
+import type {
+  CoachPlan,
+  DashboardState,
+  HabitItem,
+  LiveSessionIntent,
+  PlanBlock
+} from "./dashboard/types";
+import type { AICoPilotAlert, LiveTick, Reaction } from "./realtime/types";
 
 type DashboardStore = DashboardState & {
   toggleHabit: (habitId: string) => void;
@@ -11,11 +18,36 @@ type DashboardStore = DashboardState & {
   updatePlanSuggestion: (planId: string, suggestion: string) => void;
   markMessageRead: (messageId: string) => void;
   resetDemo: () => void;
+  startLiveSession: (athleteId: string, intent: LiveSessionIntent) => void;
+  endLiveSession: (athleteId: string) => void;
+  appendLiveTick: (athleteId: string, tick: LiveTick) => void;
+  addReaction: (achievementId: string, r: Reaction) => void;
+  pushAIAlert: (a: AICoPilotAlert) => void;
+  dismissAIAlert: (id: string) => void;
+  applyPlanDiff: (
+    planId: string,
+    diff: "lighter-day" | "swap-z2" | "add-recovery"
+  ) => void;
 };
+
+function mergePersisted(
+  persisted: unknown,
+  current: DashboardStore
+): DashboardStore {
+  if (!persisted || typeof persisted !== "object") return current;
+  const p = persisted as Partial<DashboardState>;
+  return {
+    ...current,
+    ...p,
+    liveSessions: p.liveSessions ?? current.liveSessions,
+    reactions: p.reactions ?? current.reactions,
+    aiAlerts: p.aiAlerts ?? current.aiAlerts
+  };
+}
 
 export const useDashboardStore = create<DashboardStore>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       ...initialDashboardState,
       toggleHabit: (habitId) =>
         set((s) => ({
@@ -41,7 +73,11 @@ export const useDashboardStore = create<DashboardStore>()(
         set((s) => ({
           plans: s.plans.map((p) =>
             p.id === planId
-              ? { ...p, aiSuggestion: suggestion, updatedAt: new Date().toISOString() }
+              ? {
+                  ...p,
+                  aiSuggestion: suggestion,
+                  updatedAt: new Date().toISOString()
+                }
               : p
           )
         })),
@@ -51,9 +87,78 @@ export const useDashboardStore = create<DashboardStore>()(
             m.id === messageId ? { ...m, unread: false } : m
           )
         })),
-      resetDemo: () => set({ ...initialDashboardState })
+      resetDemo: () => set({ ...initialDashboardState }),
+      startLiveSession: (athleteId, intent) =>
+        set((s) => ({
+          liveSessions: {
+            ...s.liveSessions,
+            [athleteId]: {
+              athleteId,
+              intent,
+              startedAt: new Date().toISOString(),
+              ticks: []
+            }
+          }
+        })),
+      endLiveSession: (athleteId) =>
+        set((s) => {
+          const cur = s.liveSessions[athleteId];
+          if (!cur) return {};
+          return {
+            liveSessions: {
+              ...s.liveSessions,
+              [athleteId]: { ...cur, endedAt: new Date().toISOString() }
+            }
+          };
+        }),
+      appendLiveTick: (athleteId, tick) =>
+        set((s) => {
+          const cur = s.liveSessions[athleteId];
+          if (!cur) return {};
+          return {
+            liveSessions: {
+              ...s.liveSessions,
+              [athleteId]: { ...cur, ticks: [...cur.ticks, tick] }
+            }
+          };
+        }),
+      addReaction: (achievementId, r) =>
+        set((s) => ({
+          reactions: {
+            ...s.reactions,
+            [achievementId]: [...(s.reactions[achievementId] ?? []), r]
+          }
+        })),
+      pushAIAlert: (a) =>
+        set((s) =>
+          s.aiAlerts.some((x) => x.id === a.id) ? {} : { aiAlerts: [a, ...s.aiAlerts] }
+        ),
+      dismissAIAlert: (id) =>
+        set((s) => ({
+          aiAlerts: s.aiAlerts.filter((alert) => alert.id !== id)
+        })),
+      applyPlanDiff: (planId, diff) =>
+        set((s) => ({
+          plans: s.plans.map((p) => {
+            if (p.id !== planId) return p;
+            const blocks = p.blocks.map((b, i) => {
+              if (i !== 0) return b;
+              if (diff === "lighter-day")
+                return { ...b, intensity: "Light · RPE 4" };
+              if (diff === "swap-z2")
+                return { ...b, title: "Z2 base · 45 min", intensity: "Z2 · RPE 5" };
+              if (diff === "add-recovery")
+                return { ...b, title: "Active recovery", intensity: "Recovery · RPE 2" };
+              return b;
+            });
+            return { ...p, blocks, updatedAt: new Date().toISOString() };
+          })
+        }))
     }),
-    { name: "fitconnect-dashboard" }
+    {
+      name: "fitconnect-dashboard",
+      merge: (persisted, current) => mergePersisted(persisted, current)
+    }
   )
 );
 
@@ -96,4 +201,9 @@ export function selectCoachMetrics(state: DashboardState, coachId: string) {
   );
 }
 
-export type { CoachPlan, PlanBlock, HabitItem };
+export type {
+  CoachPlan,
+  LiveSessionIntent,
+  PlanBlock,
+  HabitItem
+};

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import {
   ArrowRight,
   Dumbbell,
@@ -13,13 +13,17 @@ import {
   Sparkles,
   User
 } from "lucide-react";
-import { dashboardPathForRole, validateCredentials } from "@/lib/auth";
+import {
+  dashboardPathForRole,
+  validateCredentials
+} from "@/lib/auth";
 import { useAuthStore } from "@/lib/auth-store";
 import { useAuthHydrated } from "@/lib/use-auth-hydrated";
 import { formatMsg, useLocale, useT } from "@/lib/i18n-provider";
-import { Button } from "./ui/button";
 import { OAuthRow } from "./oauth-row";
 import { LangPicker } from "./lang-picker";
+import { GlassCard } from "./ui-glass/glass-card";
+import { VoltButton } from "./ui-glass/volt-button";
 
 interface AuthShellProps {
   mode: "signin" | "signup";
@@ -29,7 +33,14 @@ interface AuthShellProps {
   switchPrompt: string;
   switchLabel: string;
   switchHref: string;
+  /** Internal path only (validated by the sign-in page). */
+  redirectOverride?: string;
+  /** Prefill the Tomás demo coach account (sign-in only). */
+  coachDemoShortcut?: boolean;
 }
+
+const inputClass =
+  "w-full rounded-xl border border-glass-border bg-glass-md pl-10 pr-3 h-11 text-sm text-ink-100 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-volt-500/50 focus:border-volt-500/40";
 
 export function AuthShell({
   mode,
@@ -38,7 +49,9 @@ export function AuthShell({
   submitLabel,
   switchPrompt,
   switchLabel,
-  switchHref
+  switchHref,
+  redirectOverride,
+  coachDemoShortcut = false
 }: AuthShellProps) {
   const t = useT();
   const router = useRouter();
@@ -54,6 +67,12 @@ export function AuthShell({
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (mode !== "signin" || !coachDemoShortcut) return;
+    setIdentifier("tomas@fitconnect.local");
+    setPassword("Coach");
+  }, [coachDemoShortcut, mode]);
+
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
@@ -68,7 +87,7 @@ export function AuthShell({
       }
       login(user);
       setSubmitted(false);
-      router.replace(dashboardPathForRole(user.role));
+      router.replace(redirectOverride ?? dashboardPathForRole(user.role));
       return;
     }
 
@@ -81,7 +100,7 @@ export function AuthShell({
   return (
     <main
       id="main"
-      className="relative min-h-screen overflow-hidden gradient-bg flex items-center"
+      className="relative min-h-dvh overflow-hidden bg-ink-950 text-ink-100 flex items-center"
     >
       <motion.div
         aria-hidden="true"
@@ -152,8 +171,11 @@ export function AuthShell({
           initial={{ opacity: 0, y: reduce ? 0 : 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: reduce ? 0 : 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="relative rounded-3xl border border-ink-800 bg-ink-950/80 backdrop-blur-xl p-7 md:p-9 shadow-elevated card-glow"
         >
+          <GlassCard
+            tone="active"
+            className="relative rounded-3xl shadow-elevated p-7 md:p-9"
+          >
           <div className="lg:hidden mb-5">
             <h1 className="font-display text-2xl font-bold leading-tight">
               {heading}
@@ -182,22 +204,26 @@ export function AuthShell({
               <motion.div
                 className="mt-3 flex flex-wrap gap-2"
               >
-                <Button
+                <VoltButton
                   type="button"
-                  size="sm"
-                  onClick={() => router.push(dashboardPathForRole(user.role))}
+                  className="h-9 px-4 text-sm"
+                  onClick={() =>
+                    router.push(
+                      redirectOverride ?? dashboardPathForRole(user.role)
+                    )
+                  }
                 >
                   {t("auth", "continueToDashboard")}
-                </Button>
-                <Button
+                </VoltButton>
+                <VoltButton
                   type="button"
-                  size="sm"
-                  variant="outline"
+                  variant="ghost"
+                  className="h-9 px-4 text-sm"
                   onClick={() => logout()}
                 >
                   <LogOut className="h-3.5 w-3.5 mr-1.5" aria-hidden="true" />
                   {t("auth", "signOut")}
-                </Button>
+                </VoltButton>
               </motion.div>
             </motion.div>
           )}
@@ -232,7 +258,7 @@ export function AuthShell({
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     placeholder={t("auth", "usernamePlaceholder")}
-                    className="w-full rounded-xl border border-ink-800 bg-ink-900/60 pl-10 pr-3 h-11 text-sm text-ink-100 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-brand-400/60 focus:border-brand-500/40"
+                    className={inputClass}
                   />
                 </div>
               </div>
@@ -257,7 +283,7 @@ export function AuthShell({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t("auth", "emailPlaceholder")}
-                    className="w-full rounded-xl border border-ink-800 bg-ink-900/60 pl-10 pr-3 h-11 text-sm text-ink-100 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-brand-400/60 focus:border-brand-500/40"
+                    className={inputClass}
                   />
                 </div>
               </div>
@@ -289,14 +315,13 @@ export function AuthShell({
                       ? t("auth", "signInPasswordPlaceholder")
                       : t("auth", "passwordPlaceholder")
                   }
-                  className="w-full rounded-xl border border-ink-800 bg-ink-900/60 pl-10 pr-3 h-11 text-sm text-ink-100 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-brand-400/60 focus:border-brand-500/40"
+                  className={inputClass}
                 />
               </div>
             </div>
-            <Button
+            <VoltButton
               type="submit"
-              size="lg"
-              className="w-full"
+              className="w-full min-h-[48px]"
               disabled={submitted || !hydrated}
             >
               {submitted ? (
@@ -310,14 +335,14 @@ export function AuthShell({
                   <ArrowRight className="h-4 w-4" />
                 </span>
               )}
-            </Button>
+            </VoltButton>
           </form>
 
           <p className="mt-5 text-[11px] text-ink-500 leading-relaxed">
             {t("auth", "legalNote")}
           </p>
 
-          <div className="mt-5 pt-5 border-t border-ink-800 text-sm text-ink-400 text-center">
+          <div className="mt-5 pt-5 border-t border-glass-border text-sm text-ink-400 text-center">
             {switchPrompt}{" "}
             <Link
               href={switchHref}
@@ -326,6 +351,7 @@ export function AuthShell({
               {switchLabel}
             </Link>
           </div>
+          </GlassCard>
         </motion.section>
       </div>
     </main>

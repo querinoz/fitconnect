@@ -313,7 +313,10 @@ export const initialDashboardState: DashboardState = {
     { m: "Mar", rate: 92 },
     { m: "Apr", rate: 93 },
     { m: "May", rate: 94 }
-  ]
+  ],
+  liveSessions: {},
+  reactions: {},
+  aiAlerts: []
 };
 
 export function getTrainerById(id: string) {

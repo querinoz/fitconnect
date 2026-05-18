@@ -12,28 +12,29 @@ import { useT } from "@/lib/i18n-provider";
 import { useAthleteContext } from "@/lib/use-dashboard-context";
 import { useDashboardStore } from "@/lib/dashboard-store";
 
-type Props = { athleteId: string };
+type Props = { athleteId: string; wrapShell?: boolean };
 
-export function CoachAthleteDetailView({ athleteId }: Props) {
+export function CoachAthleteDetailView({ athleteId, wrapShell = true }: Props) {
   const t = useT();
   const ctx = useAthleteContext(athleteId);
   const updatePlanSuggestion = useDashboardStore((s) => s.updatePlanSuggestion);
 
   if (!ctx.athlete) {
-    return (
-      <DashboardShell>
+    const fallback = (
+      <>
         <p className="text-ink-400">{t("hub", "athleteNotFound")}</p>
         <Button asChild variant="outline" className="mt-4">
           <Link href="/coach/dashboard">{t("hub", "backToRoster")}</Link>
         </Button>
-      </DashboardShell>
+      </>
     );
+    return wrapShell ? <DashboardShell>{fallback}</DashboardShell> : fallback;
   }
 
   const { athlete, plan, messages } = ctx;
 
-  return (
-    <DashboardShell>
+  const body = (
+    <>
       <div className="flex flex-col gap-4">
         <Button asChild variant="ghost" size="sm" className="w-fit -ml-2 min-h-[44px]">
           <Link href="/coach/dashboard" className="flex items-center gap-2">
@@ -141,8 +142,10 @@ export function CoachAthleteDetailView({ athleteId }: Props) {
           </CardContent>
         </Card>
       </section>
-    </DashboardShell>
+    </>
   );
+
+  return wrapShell ? <DashboardShell>{body}</DashboardShell> : body;
 }
 
 function Stat({ label, value }: { label: string; value: string }) {

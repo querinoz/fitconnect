@@ -1,3 +1,5 @@
+import type { AICoPilotAlert, LiveTick, Reaction } from "@/lib/realtime/types";
+
 export type RecoveryStatus = "green" | "amber" | "red";
 
 export type PlanBlock = {
@@ -77,6 +79,16 @@ export type HabitItem = {
   streak: number;
 };
 
+export type LiveSessionIntent = "z2" | "intervals" | "recovery";
+
+export type LiveSession = {
+  athleteId: string;
+  intent: LiveSessionIntent;
+  startedAt: string;
+  ticks: LiveTick[];
+  endedAt?: string;
+};
+
 export type DashboardState = {
   athletes: DashboardAthlete[];
   plans: CoachPlan[];
@@ -89,4 +101,7 @@ export type DashboardState = {
   sleepWeek: SleepPoint[];
   revenueWeekly: ChartPoint[];
   retentionTrend: TrendPoint[];
+  liveSessions: Record<string, LiveSession>;
+  reactions: Record<string, Reaction[]>;
+  aiAlerts: AICoPilotAlert[];
 };

@@ -70,3 +70,19 @@ export function dashboardPathForRole(role: UserRole): string {
   if (role === "coach") return "/coach/dashboard";
   return "/dashboard";
 }
+
+/** Same-origin paths only — for optional `next` sign-in redirects. */
+export function safeInternalNextPath(
+  raw: string | null | undefined
+): string | undefined {
+  if (raw == null) return undefined;
+  let s = raw.trim();
+  try {
+    s = decodeURIComponent(s);
+  } catch {
+    return undefined;
+  }
+  if (!s.startsWith("/") || s.startsWith("//")) return undefined;
+  if (/^[a-zA-Z][a-zA-Z+.-]*:/.test(s)) return undefined;
+  return s;
+}
