@@ -36,17 +36,20 @@ export function AuthGate({ children, roles }: AuthGateProps) {
   const hydrated = useAuthHydrated();
   const user = useAuthStore((s) => s.user);
 
+  // Estabiliza roles — converte para string para comparação por valor
+  const rolesKey = roles?.join(",") ?? "";
+
   useEffect(() => {
     if (!hydrated) return;
     if (!user) {
       router.replace("/signin");
       return;
     }
-    if (!roles?.length || user.role === "admin") return;
-    if (!roles.includes(user.role)) {
+    if (!rolesKey || user.role === "admin") return;
+    if (!rolesKey.split(",").includes(user.role)) {
       router.replace(dashboardPathForRole(user.role));
     }
-  }, [hydrated, user, router, roles]);
+  }, [hydrated, user, router, rolesKey]); // ← string estável em vez de array
 
   if (!hydrated && !user) return <AuthLoading />;
   if (!user) return <AuthLoading />;

@@ -7,7 +7,7 @@ const base = process.argv[2] ?? "http://localhost:3001";
 const checks = [
   {
     name: "PWA manifest",
-    path: "/manifest.webmanifest",
+    path: "/app.webmanifest",
     test: (t) => t.includes('"display": "standalone"') && t.includes("FitConnect")
   },
   {

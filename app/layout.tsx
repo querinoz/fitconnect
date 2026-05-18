@@ -1,11 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
-import { MotionConfig } from "framer-motion";
 import "./globals.css";
-import { LanguageProvider } from "@/lib/i18n-provider";
-import { AuthStoreProvider } from "@/components/auth-store-provider";
+import { Providers } from "@/components/providers";
 import { SkipLink } from "@/components/skip-link";
-import { ThemeProvider } from "@/lib/theme/theme-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,7 +22,7 @@ export const metadata: Metadata = {
     "Connect with elite personal trainers for any sport you love. Yoga, surf, climbing, MMA and more — in person or online.",
   metadataBase: new URL("https://fitconnect.querinoz.dev"),
   applicationName: "FitConnect",
-  manifest: "/manifest.webmanifest",
+  manifest: "/app.webmanifest",
   appleWebApp: {
     capable: true,
     title: "FitConnect",
@@ -62,16 +59,10 @@ export default function RootLayout({
       className={`${inter.variable} ${display.variable} dark`}
     >
       <body className="min-h-screen antialiased font-sans">
-        <MotionConfig reducedMotion="user">
-          <ThemeProvider>
-            <LanguageProvider>
-              <AuthStoreProvider>
-                <SkipLink />
-                {children}
-              </AuthStoreProvider>
-            </LanguageProvider>
-          </ThemeProvider>
-        </MotionConfig>
+        <Providers>
+          <SkipLink />
+          {children}
+        </Providers>
       </body>
     </html>
   );

@@ -8,6 +8,7 @@ import { Wordmark } from "@/components/brand/wordmark";
 import { Atmosphere } from "./atmosphere";
 import { ProductMockup } from "./product-mockup";
 import { useT } from "@/lib/i18n-provider";
+import { useMounted } from "@/lib/use-mounted";
 
 /**
  * Immersive landing hero.
@@ -22,8 +23,12 @@ import { useT } from "@/lib/i18n-provider";
 export function HeroImmersive() {
   const t = useT();
   const reduce = useReducedMotion();
-  const fadeUp = reduce ? false : { opacity: 0, y: 8 };
-  const fadeUpLg = reduce ? false : { opacity: 0, y: 24 };
+  const mounted = useMounted();
+
+  // initial=false no SSR → sem diferença de estilos entre server e cliente.
+  // Após mount, anima normalmente (a não ser que o utilizador prefira menos movimento).
+  const fadeUp = (!mounted || reduce) ? false : { opacity: 0, y: 8 };
+  const fadeUpLg = (!mounted || reduce) ? false : { opacity: 0, y: 24 };
 
   return (
     <section
@@ -144,8 +149,6 @@ export function HeroImmersive() {
         >
           <ProductMockup />
 
-          {/* Floating coach photo — top-left of the mockup. Real face from
-              hour-one signals "this is a marketplace of real people". */}
           <FloatingCoachPhoto
             src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=320&q=80&auto=format&fit=crop"
             alt="Strength coach in the gym"

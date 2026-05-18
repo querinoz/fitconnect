@@ -1,9 +1,3 @@
-import withPWAInit from "@ducanh2912/next-pwa";
-import { pwaInitOptions } from "./lib/pwa/config.mjs";
-
-const withPWA = withPWAInit(pwaInitOptions);
-
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   images: {
@@ -15,6 +9,12 @@ const nextConfig = {
       { protocol: "https", hostname: "fastly.picsum.photos" }
     ]
   },
+  async rewrites() {
+    return [
+      {
+        source: "/manifest.webmanifest",
+        destination: "/manifest.webmanifest",
+      },
+    ];
+  },
 };
-
-export default withPWA(nextConfig);
