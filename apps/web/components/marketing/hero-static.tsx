@@ -37,7 +37,7 @@ export function HeroStatic() {
           </h1>
 
           <div className="mt-6 fc-vt-wordmark hidden sm:block">
-            <Wordmark size={36} className="drop-shadow-[0_0_30px_rgba(34,211,238,0.18)]" />
+            <Wordmark size={36} className="drop-shadow-[0_0_30px_rgba(200,255,0,0.18)]" />
           </div>
 
           <span className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand-500/10 px-3.5 py-1.5 text-xs font-semibold text-brand-200 ring-1 ring-brand-500/30">

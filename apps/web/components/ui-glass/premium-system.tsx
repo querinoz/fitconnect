@@ -7,12 +7,12 @@ type Tone = "neutral" | "brand" | "volt" | "plasma" | "signal";
 
 const toneClass: Record<Tone, string> = {
   neutral: "border-glass-border bg-glass-md",
-  brand: "border-brand-400/25 bg-brand-500/8 shadow-[0_18px_48px_-28px_rgba(34,211,238,.75)]",
+  brand: "border-brand-400/25 bg-brand-500/8 shadow-[0_18px_48px_-28px_rgba(0,221,180,.55)]",
   volt: "border-volt-500/25 bg-volt-500/8 shadow-[0_18px_48px_-28px_var(--volt-glow)]",
   plasma:
     "border-plasma-500/25 bg-plasma-500/8 shadow-[0_18px_48px_-28px_rgba(168,85,247,.75)]",
   signal:
-    "border-signal-500/25 bg-signal-500/8 shadow-[0_18px_48px_-28px_rgba(244,63,94,.75)]"
+    "border-signal-500/25 bg-signal-500/8 shadow-[0_18px_48px_-28px_rgba(255,58,92,.55)]"
 };
 
 export type PremiumCardProps = HTMLAttributes<HTMLDivElement> & {

@@ -2,156 +2,140 @@ import { cn } from "@/lib/utils";
 
 type LogoProps = {
   className?: string;
-  /**
-   * If true, the inner stroke animates a one-shot trace on mount.
-   * Animation is suppressed automatically by the global
-   * prefers-reduced-motion guard.
-   */
   animated?: boolean;
   title?: string;
 };
 
 /**
- * FitConnect brand mark.
- *
- * Concept: an asymmetric "F" upright fused with a tension stroke that
- * arcs into a "C" — two crossing strokes that read as an athlete mid-stride
- * and as a measurement line cresting into recovery.
- *
- * Renders as a 32×32 logical mark inside an inset-rounded plate so it
- * still works at 16-24px while staying crisp at 96px.
+ * FitConnect connection-node mark.
+ * Three peripheral nodes linked to a central Volt hub — athlete, coach, platform.
  */
 export function Logo({ className, animated = false, title = "FitConnect" }: LogoProps) {
   return (
     <svg
-      viewBox="0 0 40 40"
+      viewBox="0 0 52 52"
       width={36}
       height={36}
       role="img"
       aria-label={title}
-      className={cn("h-9 w-9 shrink-0", className)}
+      className={cn("h-9 w-9 shrink-0", animated && "fc-logo-pulse", className)}
     >
-      <defs>
-        <linearGradient id="fcMarkPlate" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#22d3ee" />
-          <stop offset="55%" stopColor="#7dd3a3" />
-          <stop offset="100%" stopColor="#a3e635" />
-        </linearGradient>
-        <linearGradient id="fcMarkStroke" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#020617" />
-          <stop offset="100%" stopColor="#0f172a" />
-        </linearGradient>
-        <radialGradient id="fcMarkGlow" cx="0.3" cy="0.3" r="0.85">
-          <stop offset="0%" stopColor="#a855f7" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
-        </radialGradient>
-        <linearGradient id="fcMarkTension" x1="0" y1="1" x2="1" y2="0">
-          <stop offset="0%" stopColor="#020617" />
-          <stop offset="100%" stopColor="#0f172a" />
-        </linearGradient>
-      </defs>
-
-      {/* Plate */}
-      <rect
-        x="1"
-        y="1"
-        width="38"
-        height="38"
-        rx="11"
-        fill="url(#fcMarkPlate)"
-      />
-      {/* Plasma kiss */}
-      <rect
-        x="1"
-        y="1"
-        width="38"
-        height="38"
-        rx="11"
-        fill="url(#fcMarkGlow)"
-      />
-
-      {/* "F" upright + horizontals — one continuous stroke */}
-      <path
-        d="M13 9.5 V30.5"
+      <circle
+        cx="10"
+        cy="26"
+        r="6"
         fill="none"
-        stroke="url(#fcMarkStroke)"
-        strokeWidth="3.6"
-        strokeLinecap="round"
+        stroke="rgba(255,255,255,0.2)"
+        strokeWidth="1.5"
       />
-      <path
-        d="M13 11 H27.5"
+      <circle
+        cx="42"
+        cy="10"
+        r="6"
         fill="none"
-        stroke="url(#fcMarkStroke)"
-        strokeWidth="3.6"
-        strokeLinecap="round"
+        stroke="rgba(255,255,255,0.2)"
+        strokeWidth="1.5"
       />
-      <path
-        d="M13 19.5 H22"
+      <circle
+        cx="42"
+        cy="42"
+        r="6"
         fill="none"
-        stroke="url(#fcMarkStroke)"
-        strokeWidth="3.6"
-        strokeLinecap="round"
+        stroke="rgba(255,255,255,0.2)"
+        strokeWidth="1.5"
       />
-
-      {/* Tension stroke — a second motion line that crosses the F and
-          arcs upward like a heart-rate spike + the inside of a "C". */}
-      <path
-        className={animated ? "fc-mark-trace" : undefined}
-        d="M9.2 27.6 C 14 27.6 17.5 22.2 22 22.2 C 27 22.2 28.4 31 33 28"
-        fill="none"
-        stroke="url(#fcMarkTension)"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+      <circle cx="26" cy="26" r="7" fill="var(--volt-500, #C8FF00)" />
+      <circle cx="26" cy="26" r="13" fill="rgba(200,255,0,0.12)" />
+      <line
+        x1="16"
+        y1="26"
+        x2="19"
+        y2="26"
+        stroke="rgba(255,255,255,0.2)"
+        strokeWidth="1.5"
       />
-
-      {/* Tip dot — the athlete's strike point */}
-      <circle cx="33" cy="28" r="1.6" fill="#020617" />
+      <line
+        x1="31"
+        y1="21"
+        x2="38"
+        y2="14"
+        stroke="rgba(255,255,255,0.2)"
+        strokeWidth="1.5"
+      />
+      <line
+        x1="31"
+        y1="31"
+        x2="38"
+        y2="38"
+        stroke="rgba(255,255,255,0.2)"
+        strokeWidth="1.5"
+      />
     </svg>
   );
 }
 
-/**
- * Compact monochrome variant — used inside the favicon and any
- * single-colour context where the gradient would compete with the
- * surface (e.g. a chip on the AI assistant header).
- */
 export function LogoMono({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 40 40"
+      viewBox="0 0 52 52"
       role="img"
       aria-label="FitConnect"
       className={cn("h-5 w-5", className)}
     >
-      <path
-        d="M13 9.5 V30.5"
+      <circle
+        cx="10"
+        cy="26"
+        r="6"
         fill="none"
         stroke="currentColor"
-        strokeWidth="3.6"
-        strokeLinecap="round"
+        strokeOpacity="0.35"
+        strokeWidth="1.5"
       />
-      <path
-        d="M13 11 H27.5"
+      <circle
+        cx="42"
+        cy="10"
+        r="6"
         fill="none"
         stroke="currentColor"
-        strokeWidth="3.6"
-        strokeLinecap="round"
+        strokeOpacity="0.35"
+        strokeWidth="1.5"
       />
-      <path
-        d="M13 19.5 H22"
+      <circle
+        cx="42"
+        cy="42"
+        r="6"
         fill="none"
         stroke="currentColor"
-        strokeWidth="3.6"
-        strokeLinecap="round"
+        strokeOpacity="0.35"
+        strokeWidth="1.5"
       />
-      <path
-        d="M9.2 27.6 C 14 27.6 17.5 22.2 22 22.2 C 27 22.2 28.4 31 33 28"
-        fill="none"
+      <circle cx="26" cy="26" r="7" fill="currentColor" />
+      <line
+        x1="16"
+        y1="26"
+        x2="19"
+        y2="26"
         stroke="currentColor"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        strokeOpacity="0.35"
+        strokeWidth="1.5"
+      />
+      <line
+        x1="31"
+        y1="21"
+        x2="38"
+        y2="14"
+        stroke="currentColor"
+        strokeOpacity="0.35"
+        strokeWidth="1.5"
+      />
+      <line
+        x1="31"
+        y1="31"
+        x2="38"
+        y2="38"
+        stroke="currentColor"
+        strokeOpacity="0.35"
+        strokeWidth="1.5"
       />
     </svg>
   );

@@ -36,10 +36,18 @@ const config: Config = {
           300: "var(--volt-300)",
           400: "var(--volt-400)",
           500: "var(--volt-500)",
-          600: "var(--volt-600)"
+          600: "var(--volt-600)",
+          dim: "var(--volt-dim)"
+        },
+        connect: {
+          500: "var(--connect-500)",
+          dim: "var(--connect-dim)"
         },
         jade: { 500: "var(--jade-500)" },
-        amber: { 400: "var(--amber-400)" },
+        cyan: { 500: "var(--cyan-500)", dim: "var(--cyan-dim)" },
+        amber: { 400: "var(--amber-400)", dim: "var(--amber-dim)" },
+        crimson: { 500: "var(--crimson-500)", dim: "var(--crimson-dim)" },
+        emerald: { 500: "var(--emerald-500)", dim: "var(--emerald-dim)" },
         coral: { 500: "var(--coral-500)" },
         glass: {
           lo: "var(--glass-lo)",
@@ -53,16 +61,16 @@ const config: Config = {
           edge: "var(--glass-edge)"
         },
         brand: {
-          50: "#ecfeff",
-          100: "#cffafe",
-          200: "#a5f3fc",
-          300: "#67e8f9",
-          400: "#22d3ee",
-          500: "#06b6d4",
-          600: "#0891b2",
-          700: "#0e7490",
-          800: "#155e75",
-          900: "#164e63"
+          50: "#e6fff9",
+          100: "#b3fff0",
+          200: "#80ffe6",
+          300: "#4dffd9",
+          400: "#00ddb4",
+          500: "#00c4a0",
+          600: "#00aa8a",
+          700: "#008f73",
+          800: "#00755d",
+          900: "#005a47"
         },
         accent: {
           200: "#d9f99d",
@@ -73,11 +81,11 @@ const config: Config = {
           700: "#4d7c0f"
         },
         signal: {
-          300: "#fda4af",
-          400: "#fb7185",
-          500: "#f43f5e",
-          600: "#e11d48",
-          700: "#be123c"
+          300: "#ff8fa3",
+          400: "#ff6480",
+          500: "#ff3a5c",
+          600: "#e02e4d",
+          700: "#b8243e"
         },
         plasma: {
           300: "#d8b4fe",
@@ -87,14 +95,20 @@ const config: Config = {
           700: "#7e22ce"
         },
         surface: {
-          low: "#020617",
-          DEFAULT: "#070d1c",
-          high: "#0f172a",
-          higher: "#1e293b"
+          low: "#07080b",
+          DEFAULT: "#0c0d11",
+          high: "#111318",
+          higher: "#181a22"
+        },
+        carbon: {
+          0: "var(--ink-900)",
+          1: "var(--ink-800)",
+          2: "var(--ink-700)",
+          3: "var(--ink-600)"
         }
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         display: [
           "var(--font-display, ui-sans-serif)",
           "system-ui",
@@ -112,8 +126,12 @@ const config: Config = {
           "100%": { backgroundPosition: "-200% 0" }
         },
         "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 0 0 rgba(34,211,238,0.4)" },
-          "50%": { boxShadow: "0 0 0 14px rgba(34,211,238,0)" }
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(200,255,0,0.4)" },
+          "50%": { boxShadow: "0 0 0 14px rgba(200,255,0,0)" }
+        },
+        "volt-pulse": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.35" }
         },
         marquee: {
           from: { transform: "translateX(0)" },
@@ -163,6 +181,7 @@ const config: Config = {
         "fade-up": "fade-up 0.6s ease-out forwards",
         shimmer: "shimmer 3s linear infinite",
         "pulse-glow": "pulse-glow 2.4s ease-in-out infinite",
+        "volt-pulse": "volt-pulse 1.2s ease-in-out infinite",
         marquee: "marquee 40s linear infinite",
         "marquee-slow": "marquee 60s linear infinite",
         float: "float 6s ease-in-out infinite",
@@ -195,7 +214,8 @@ const config: Config = {
         "glass-lg": "32px"
       },
       boxShadow: {
-        glow: "0 0 30px -5px rgba(34,211,238,0.5)",
+        glow: "0 0 30px -5px rgba(200,255,0,0.45)",
+        "connect-glow": "0 0 30px -5px rgba(0,221,180,0.4)",
         "glow-warm": "0 0 30px -5px rgba(244,63,94,0.4)",
         "glow-plasma": "0 0 30px -5px rgba(168,85,247,0.5)",
         elevated:

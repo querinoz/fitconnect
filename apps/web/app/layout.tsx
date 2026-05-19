@@ -1,24 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Plus_Jakarta_Sans, Syne } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SkipLink } from "@/components/skip-link";
 
-const inter = Inter({
+const sans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-sans",
   display: "swap",
   preload: true,
-  adjustFontFallback: true
+  adjustFontFallback: true,
+  weight: ["400", "500", "600", "700"]
 });
 
-const display = Space_Grotesk({
+const display = Syne({
   subsets: ["latin"],
   variable: "--font-display",
-  display: "optional",
-  preload: false,
+  display: "swap",
+  preload: true,
   adjustFontFallback: true,
-  weight: ["500", "600", "700"]
+  weight: ["600", "700", "800"]
 });
 
 export const metadata: Metadata = {
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [{ color: "#07080A" }],
+  themeColor: [{ color: "#07080B" }],
   colorScheme: "dark",
   width: "device-width",
   initialScale: 1
@@ -60,7 +61,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${display.variable} dark`}
+      className={`${sans.variable} ${display.variable} dark`}
       suppressHydrationWarning
     >
       <head>
@@ -73,7 +74,7 @@ export default function RootLayout({
         ) : null}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{document.documentElement.dataset.motion="full";}catch(e){}})();`
+            __html: `(function(){try{document.documentElement.dataset.motion="full";document.documentElement.dataset.colorMode="dark";}catch(e){}})();`
           }}
         />
       </head>

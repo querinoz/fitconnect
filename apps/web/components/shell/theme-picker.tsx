@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils";
 
 /** Per-theme orbit accent — inspired by uiverse good-chicken-7 */
 const THEME_ACCENT: Record<ThemeId, string> = {
-  voltline: "#C7FB3A",
+  voltline: "#C8FF00",
   pulse: "#FF5470",
-  tide: "#2DD4BF",
-  solar: "#F5B844",
+  tide: "#00DDB4",
+  solar: "#FFB020",
   aurora: "#9466FF"
 };
 

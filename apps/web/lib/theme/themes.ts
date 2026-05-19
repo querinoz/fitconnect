@@ -18,11 +18,11 @@ export const THEMES: Record<ThemeId, Theme> = {
     label: "Voltline",
     description: "Default — electric lime on charcoal",
     tokens: {
-      "--volt-300": "#E9FFB5",
-      "--volt-400": "#DAFE7E",
-      "--volt-500": "#C7FB3A",
-      "--volt-600": "#9CD81A",
-      "--volt-glow": "rgba(199,251,58,.45)"
+      "--volt-300": "#E4FF66",
+      "--volt-400": "#D6FF33",
+      "--volt-500": "#C8FF00",
+      "--volt-600": "#A3D600",
+      "--volt-glow": "rgba(200,255,0,.45)"
     }
   },
   pulse: {

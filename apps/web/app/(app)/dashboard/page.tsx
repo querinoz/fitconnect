@@ -18,6 +18,7 @@ import { SessionCard } from "@/components/loops/live-session/session-card";
 import { LiveMetrics } from "@/components/loops/live-session/live-metrics";
 import { NudgeToast } from "@/components/loops/live-session/nudge-toast";
 import { SessionSummary } from "@/components/loops/live-session/session-summary";
+import { StravaBrandedCard } from "@/components/sharing/strava-branded-card";
 import { CelebrationOverlay } from "@/components/loops/celebrations/celebration-overlay";
 import { InstallPrompt } from "@/components/shell/install-prompt";
 import { useAthleteListener } from "@/components/loops/morning-handshake/use-athlete-listener";
@@ -220,28 +221,60 @@ function AthleteDashboardBody() {
       )}
 
       {!session.isActive && session.ticks.length > 0 && (
-        <SessionSummary
-          distanceKm={
-            session.ticks.length
-              ? Number(
-                  (
-                    ((session.ticks.at(-1)!.elapsedSec ?? 0) / 60) *
-                    (60 / 4.5) /
-                    10
-                  ).toFixed(1)
-                )
-              : 0
-          }
-          avgHr={
-            session.ticks.length
-              ? Math.round(
-                  session.ticks.reduce((s, t) => s + t.hr, 0) / session.ticks.length
-                )
-              : 0
-          }
-          maxHr={session.ticks.reduce((m, t) => Math.max(m, t.hr), 0)}
-          durationSec={session.ticks.at(-1)?.elapsedSec ?? 0}
-        />
+        <div className="space-y-4">
+          <SessionSummary
+            distanceKm={
+              session.ticks.length
+                ? Number(
+                    (
+                      ((session.ticks.at(-1)!.elapsedSec ?? 0) / 60) *
+                      (60 / 4.5) /
+                      10
+                    ).toFixed(1)
+                  )
+                : 0
+            }
+            avgHr={
+              session.ticks.length
+                ? Math.round(
+                    session.ticks.reduce((s, t) => s + t.hr, 0) / session.ticks.length
+                  )
+                : 0
+            }
+            maxHr={session.ticks.reduce((m, t) => Math.max(m, t.hr), 0)}
+            durationSec={session.ticks.at(-1)?.elapsedSec ?? 0}
+          />
+          <StravaBrandedCard
+            athleteName={athlete.name}
+            activityName={nextBlock.title ?? "Training session"}
+            sportType={athlete.sports[0] ?? "Workout"}
+            distanceKm={
+              session.ticks.length
+                ? Number(
+                    (
+                      ((session.ticks.at(-1)!.elapsedSec ?? 0) / 60) *
+                      (60 / 4.5) /
+                      10
+                    ).toFixed(1)
+                  )
+                : 0
+            }
+            durationSec={session.ticks.at(-1)?.elapsedSec ?? 0}
+            avgHr={
+              session.ticks.length
+                ? Math.round(
+                    session.ticks.reduce((s, t) => s + t.hr, 0) / session.ticks.length
+                  )
+                : 0
+            }
+            maxHr={session.ticks.reduce((m, t) => Math.max(m, t.hr), 0)}
+            elevationM={Math.round(80 + readiness.score * 1.4)}
+            readinessScore={readiness.score}
+            coachName={coachName}
+            date={new Date()}
+            showShare
+          />
+        </div>
       )}
 
       <InstallPrompt />

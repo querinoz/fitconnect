@@ -11,26 +11,26 @@
   --border: 214 32% 91%;
   --ring: 188 95% 43%;
 
-  /* FitConnect design tokens (round 2) */
-  --bg: #020617;
-  --bg-elevated: #0b1224;
-  --surface: #0f172a;
-  --surface-high: #1e293b;
-  --text: #f8fafc;
-  --text-dim: #94a3b8;
-  --text-mute: #64748b;
-  --ring-color: rgba(34, 211, 238, 0.6);
-  --shadow-glow: 0 0 40px -8px rgba(34, 211, 238, 0.45);
-  --shadow-warm: 0 0 36px -8px rgba(244, 63, 94, 0.4);
-  --shadow-plasma: 0 0 36px -8px rgba(168, 85, 247, 0.45);
+  /* FitConnect design tokens — Kinetic Energy */
+  --bg: #07080b;
+  --bg-elevated: #0c0d11;
+  --surface: #111318;
+  --surface-high: #181a22;
+  --text: #eeeef2;
+  --text-dim: rgba(238, 238, 242, 0.52);
+  --text-mute: rgba(238, 238, 242, 0.28);
+  --ring-color: rgba(200, 255, 0, 0.55);
+  --shadow-glow: 0 0 40px -8px rgba(200, 255, 0, 0.35);
+  --shadow-warm: 0 0 36px -8px rgba(255, 58, 92, 0.4);
+  --shadow-plasma: 0 0 36px -8px rgba(0, 191, 255, 0.35);
 
-  /* Brand colour channels */
-  --brand: #22d3ee;
-  --brand-deep: #06b6d4;
-  --accent: #84cc16;
-  --accent-bright: #a3e635;
-  --signal: #f43f5e;
-  --plasma: #a855f7;
+  /* Brand colour channels — Volt identity + Connect secondary */
+  --brand: #00ddb4;
+  --brand-deep: #00aa8a;
+  --accent: #c8ff00;
+  --accent-bright: #d6ff33;
+  --signal: #ff3a5c;
+  --plasma: #00bfff;
 }
 
 .dark {
@@ -95,8 +95,8 @@ body {
 }
 
 ::selection {
-  background: rgba(34, 211, 238, 0.25);
-  color: #ecfeff;
+  background: rgba(200, 255, 0, 0.2);
+  color: #eeeef2;
 }
 
 .text-balance {
@@ -128,15 +128,15 @@ body {
   background:
     radial-gradient(
       ellipse at top left,
-      rgba(34, 211, 238, 0.22),
+      rgba(0, 221, 180, 0.12),
       transparent 50%
     ),
     radial-gradient(
       ellipse at bottom right,
-      rgba(132, 204, 22, 0.18),
+      rgba(200, 255, 0, 0.14),
       transparent 50%
     ),
-    radial-gradient(ellipse at 70% 20%, rgba(168, 85, 247, 0.1), transparent 55%);
+    radial-gradient(ellipse at 70% 20%, rgba(0, 191, 255, 0.08), transparent 55%);
 }
 
 .gradient-bg-warm {
@@ -164,8 +164,8 @@ body {
   padding: 1px;
   background: linear-gradient(
     135deg,
-    rgba(34, 211, 238, 0.5),
-    rgba(132, 204, 22, 0.3)
+    rgba(200, 255, 0, 0.45),
+    rgba(0, 221, 180, 0.25)
   );
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
@@ -211,8 +211,8 @@ body {
   border-radius: inherit;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 28%),
-    linear-gradient(135deg, rgba(34, 211, 238, 0.14), transparent 35%),
-    linear-gradient(315deg, rgba(199, 251, 58, 0.16), transparent 38%);
+    linear-gradient(135deg, rgba(0, 221, 180, 0.1), transparent 35%),
+    linear-gradient(315deg, rgba(200, 255, 0, 0.14), transparent 38%);
   mask-image: linear-gradient(#000, #000);
   opacity: 0.8;
 }
@@ -231,8 +231,8 @@ body {
 .live-orb {
   background:
     radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.9), transparent 12%),
-    radial-gradient(circle at 50% 50%, rgba(199, 251, 58, 0.95), rgba(34, 211, 238, 0.4) 48%, transparent 68%);
-  filter: drop-shadow(0 0 20px rgba(199, 251, 58, 0.45));
+    radial-gradient(circle at 50% 50%, rgba(200, 255, 0, 0.95), rgba(0, 221, 180, 0.35) 48%, transparent 68%);
+  filter: drop-shadow(0 0 20px rgba(200, 255, 0, 0.45));
 }
 
 .skeleton {
@@ -1349,7 +1349,7 @@ html[data-motion="reduced"] .fc-liquid-interactive:hover {
   height: 34px;
   border: 2px solid transparent;
   border-radius: 50%;
-  border-top-color: var(--theme-accent, #22d3ee);
+  border-top-color: var(--theme-accent, #c8ff00);
   opacity: 0;
   transform: scale(0.8);
   transition: all 0.4s ease;
@@ -1365,13 +1365,13 @@ html[data-motion="reduced"] .fc-liquid-interactive:hover {
 }
 
 .fc-theme-radio-input:checked + .fc-theme-radio-custom {
-  border-color: var(--theme-accent, #22d3ee);
+  border-color: var(--theme-accent, #c8ff00);
   transform: scale(0.9);
 }
 
 .fc-theme-radio-input:checked + .fc-theme-radio-custom::before {
   transform: scale(1);
-  background-color: var(--theme-accent, #22d3ee);
+  background-color: var(--theme-accent, #c8ff00);
 }
 
 .fc-theme-radio-input:checked + .fc-theme-radio-custom::after {
@@ -1379,8 +1379,8 @@ html[data-motion="reduced"] .fc-liquid-interactive:hover {
   transform: scale(1.3);
   animation: fc-orbit 2.5s infinite linear;
   box-shadow:
-    0 0 24px var(--theme-accent, #22d3ee),
-    0 0 60px color-mix(in srgb, var(--theme-accent, #22d3ee) 25%, transparent);
+    0 0 24px var(--theme-accent, #c8ff00),
+    0 0 60px color-mix(in srgb, var(--theme-accent, #c8ff00) 25%, transparent);
 }
 
 .fc-theme-radio-input:checked ~ .min-w-0 .fc-theme-radio-text {
@@ -1421,7 +1421,7 @@ html[data-motion="reduced"] .fc-liquid-interactive:hover {
 
 .fc-liquid-loader {
   --color-one: var(--volt-500, #c7fb3a);
-  --color-two: var(--brand-500, #22d3ee);
+  --color-two: var(--brand-400, #00ddb4);
   --color-three: color-mix(in srgb, var(--volt-500) 50%, transparent);
   --color-four: color-mix(in srgb, var(--brand-500) 50%, transparent);
   --color-five: color-mix(in srgb, var(--volt-500) 25%, transparent);
@@ -1504,4 +1504,118 @@ html[data-motion="reduced"] .fc-theme-radio-input:checked + .fc-theme-radio-cust
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ── Kinetic Energy design system utilities ── */
+.fc-motion-enter {
+  animation: fc-kinetic-enter var(--fc-motion-screen, 400ms)
+    var(--fc-ease-kinetic, cubic-bezier(0.16, 1, 0.3, 1)) both;
+}
+
+.fc-motion-micro {
+  transition: all var(--fc-motion-micro, 150ms)
+    var(--fc-ease-kinetic, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.fc-motion-ui {
+  transition: all var(--fc-motion-ui, 220ms)
+    var(--fc-ease-kinetic, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+@keyframes fc-kinetic-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fc-logo-pulse {
+  animation: fc-logo-glow 3s ease-in-out infinite;
+}
+
+@keyframes fc-logo-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgba(200, 255, 0, 0.15));
+  }
+  50% {
+    filter: drop-shadow(0 0 14px rgba(200, 255, 0, 0.4));
+  }
+}
+
+.fc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fc-badge-volt {
+  background: var(--volt-dim);
+  color: var(--volt-500);
+  border: 1px solid rgba(200, 255, 0, 0.18);
+}
+
+.fc-badge-connect {
+  background: var(--connect-dim);
+  color: var(--connect-500);
+  border: 1px solid rgba(0, 221, 180, 0.18);
+}
+
+.fc-badge-cyan {
+  background: var(--cyan-dim);
+  color: var(--cyan-500);
+  border: 1px solid rgba(0, 191, 255, 0.18);
+}
+
+.fc-badge-crimson {
+  background: var(--crimson-dim);
+  color: var(--crimson-500);
+  border: 1px solid rgba(255, 58, 92, 0.18);
+}
+
+.fc-badge-emerald {
+  background: var(--emerald-dim);
+  color: var(--emerald-500);
+  border: 1px solid rgba(0, 224, 144, 0.18);
+}
+
+.fc-bar-track {
+  height: 4px;
+  background: var(--border-xs);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.fc-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width var(--fc-motion-ui, 220ms)
+    var(--fc-ease-kinetic, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fc-motion-enter,
+  .fc-logo-pulse {
+    animation: none;
+  }
+  .fc-motion-micro,
+  .fc-motion-ui,
+  .fc-bar-fill {
+    transition: none;
+  }
+}
+
+html[data-motion="reduced"] .fc-motion-enter,
+html[data-motion="reduced"] .fc-logo-pulse {
+  animation: none;
 }

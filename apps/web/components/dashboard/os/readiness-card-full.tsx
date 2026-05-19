@@ -1,6 +1,5 @@
 "use client";
 
-import { ReadinessRing } from "@/components/ui-glass/readiness-ring";
 import { TrendingDown, TrendingUp, Minus } from "lucide-react";
 
 type ReadinessCardFullProps = {
@@ -16,6 +15,19 @@ function parseSleepHours(raw: string): number {
   return match ? Number.parseFloat(match[1]!) : 7.5;
 }
 
+function readinessArcPath(score: number) {
+  const pct = Math.min(100, Math.max(0, score)) / 100;
+  const angle = 180 * pct;
+  const rad = ((180 - angle) * Math.PI) / 180;
+  const cx = 100;
+  const cy = 96;
+  const r = 80;
+  const x = cx + r * Math.cos(rad);
+  const y = cy - r * Math.sin(rad);
+  const large = angle > 90 ? 1 : 0;
+  return `M20,96 A80,80 0 ${large},1 ${x},${y}`;
+}
+
 export function ReadinessCardFull({
   readiness,
   hrv,
@@ -26,81 +38,110 @@ export function ReadinessCardFull({
   const sleep = parseSleepHours(sleepHours);
   const diff = hrv - baselineHrv;
   const band =
-    readiness >= 75 ? "Train hard" : readiness >= 50 ? "Moderate effort" : "Recovery day";
-  const bandColor =
     readiness >= 75
-      ? "text-lime-400"
+      ? "Optimal · Intense training recommended"
       : readiness >= 50
-        ? "text-brand-400"
-        : "text-signal-500";
-  const bandBg =
-    readiness >= 75
-      ? "bg-lime-500/12 border-lime-500/25"
-      : readiness >= 50
-        ? "bg-brand-400/12 border-brand-400/25"
-        : "bg-signal-500/12 border-signal-500/25";
+        ? "Moderate · Steady effort"
+        : "Recovery · Rest prioritized";
 
   const TrendIcon = diff > 0 ? TrendingUp : diff < 0 ? TrendingDown : Minus;
-  const trendColor = diff > 0 ? "text-lime-400" : diff < 0 ? "text-signal-500" : "text-ink-500";
+  const trendColor =
+    diff > 0 ? "text-emerald-500" : diff < 0 ? "text-signal-500" : "text-ink-400";
 
   return (
-    <div className="rounded-2xl border border-ink-800 bg-ink-900/40 p-6">
-      <div className="mb-5 flex items-start justify-between">
-        <div>
-          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-ink-500">
-            Today&apos;s readiness
-          </p>
-          <div className={`inline-flex items-center gap-2 rounded-xl border ${bandBg} px-3 py-1.5`}>
-            <span className={`font-display text-sm font-bold ${bandColor}`}>{band}</span>
-          </div>
-          <p className="mt-2 text-xs text-ink-500">Based on HRV, sleep, and training load</p>
+    <div className="fc-readiness-card relative overflow-hidden rounded-[14px] border border-[var(--border-xs)] bg-carbon-2 p-6">
+      <div
+        className="pointer-events-none absolute left-1/2 top-0 h-[200px] w-[280px] -translate-x-1/2 -translate-y-[60px] bg-[radial-gradient(circle,rgba(200,255,0,0.07)_0%,transparent_70%)]"
+        aria-hidden
+      />
+
+      <p className="mb-2 text-center text-[9px] font-bold uppercase tracking-[0.26em] text-ink-400">
+        AI Readiness · Today
+      </p>
+
+      <div className="relative mx-auto mb-1 flex flex-col items-center">
+        <svg
+          width="200"
+          height="100"
+          viewBox="0 0 200 100"
+          className="-mb-5"
+          aria-hidden
+        >
+          <path
+            d="M20,96 A80,80 0 0,1 180,96"
+            fill="none"
+            stroke="rgba(255,255,255,0.06)"
+            strokeWidth="8"
+            strokeLinecap="round"
+          />
+          <path
+            d={readinessArcPath(readiness)}
+            fill="none"
+            stroke="var(--volt-500)"
+            strokeWidth="8"
+            strokeLinecap="round"
+            className="fc-motion-data"
+          />
+        </svg>
+        <div
+          className="font-display text-[clamp(3.5rem,8vw,5.5rem)] font-extrabold leading-none tracking-[-0.06em] text-volt-500"
+          style={{ textShadow: "0 0 48px rgba(200,255,0,0.22)" }}
+        >
+          {readiness}
         </div>
-        <ReadinessRing percent={readiness} label="Ready" size={96} />
+        <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-ink-400">
+          Readiness
+        </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-xl border border-ink-800/80 bg-ink-950/50 p-3.5">
-          <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-ink-500">HRV</p>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-display text-xl font-bold text-ink-100">{hrv}</span>
-            <span className="text-xs text-ink-500">ms</span>
+      <div className="mb-5 flex justify-center">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-volt-500/20 bg-volt-dim px-3 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-volt-500">
+          {band}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        <div className="rounded-lg border border-[var(--border-xs)] bg-carbon-3 p-2.5 text-center">
+          <div className="font-display text-lg font-extrabold leading-none text-connect-500">
+            {hrv}
           </div>
-          <div className={`mt-1 flex items-center gap-1 ${trendColor}`}>
+          <div className="mt-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-400">
+            HRV ms
+          </div>
+          <div className={`mt-1 flex items-center justify-center gap-0.5 ${trendColor}`}>
             <TrendIcon className="h-3 w-3" />
-            <span className="text-[10px] font-medium">
+            <span className="text-[9px] font-medium">
               {diff >= 0 ? "+" : ""}
-              {diff} vs avg
+              {diff}
             </span>
           </div>
         </div>
-        <div className="rounded-xl border border-ink-800/80 bg-ink-950/50 p-3.5">
-          <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-ink-500">
-            Sleep
-          </p>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-display text-xl font-bold text-ink-100">{sleep}</span>
-            <span className="text-xs text-ink-500">h</span>
+        <div className="rounded-lg border border-[var(--border-xs)] bg-carbon-3 p-2.5 text-center">
+          <div className="font-display text-lg font-extrabold leading-none text-cyan-500">
+            {sleep}
           </div>
-          <p className="mt-1 text-[10px] font-medium text-lime-400">{sleepQuality}</p>
+          <div className="mt-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-400">
+            Sleep h
+          </div>
+          <p className="mt-1 text-[9px] font-medium text-emerald-500">{sleepQuality}</p>
         </div>
-        <div className="rounded-xl border border-ink-800/80 bg-ink-950/50 p-3.5">
-          <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-ink-500">
-            30d avg
-          </p>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-display text-xl font-bold text-ink-100">{baselineHrv}</span>
-            <span className="text-xs text-ink-500">ms</span>
+        <div className="rounded-lg border border-[var(--border-xs)] bg-carbon-3 p-2.5 text-center">
+          <div className="font-display text-lg font-extrabold leading-none text-emerald-500">
+            {baselineHrv}
           </div>
-          <p className="mt-1 text-[10px] text-ink-500">HRV baseline</p>
+          <div className="mt-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-ink-400">
+            30d avg
+          </div>
+          <p className="mt-1 text-[9px] text-ink-400">HRV baseline</p>
         </div>
       </div>
 
-      <div className="mt-4 flex items-center gap-2 border-t border-ink-800/60 pt-4">
-        <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-lime-400" />
-        <span className="text-[10px] text-ink-500">Synced from Apple Watch · 14 min ago</span>
+      <div className="mt-4 flex items-center gap-2 border-t border-[var(--border-xs)] pt-4">
+        <div className="h-1.5 w-1.5 animate-volt-pulse rounded-full bg-volt-500" />
+        <span className="text-[10px] text-ink-400">Synced from wearables · recently</span>
         <a
           href="/settings/wearables"
-          className="ml-auto text-[10px] font-medium text-brand-400 transition-colors hover:text-brand-300"
+          className="ml-auto text-[10px] font-semibold text-connect-500 transition-colors hover:text-brand-300"
         >
           Manage wearables
         </a>

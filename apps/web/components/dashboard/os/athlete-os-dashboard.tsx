@@ -122,12 +122,12 @@ export function AthleteOsDashboard({
           <header className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div>
               <p className="mb-1.5 text-xs text-ink-500">Good morning 👋</p>
-              <h1 className="font-display text-2xl font-bold text-ink-50 md:text-3xl">
+              <h1 className="font-display text-2xl font-extrabold tracking-tight text-ink-50 md:text-3xl">
                 {firstName}&apos;s Athlete OS
               </h1>
-              <p className="mt-1 text-sm text-ink-500">
+              <p className="mt-1 text-sm text-ink-400">
                 HRV is {hrvDiff >= 0 ? "up" : "down"} {Math.abs(hrvDiff)}ms vs baseline.{" "}
-                <span className="font-medium text-lime-400">
+                <span className="font-medium text-volt-500">
                   {readiness >= 75 ? "Train hard today." : "Train smart today."}
                 </span>
               </p>
@@ -154,7 +154,7 @@ export function AthleteOsDashboard({
               <Button
                 asChild
                 size="sm"
-                className="gap-1.5 bg-gradient-to-r from-brand-500 to-lime-500 text-xs font-semibold text-ink-950"
+                className="gap-1.5 bg-volt-500 text-xs font-bold text-ink-950 hover:bg-volt-400"
               >
                 <Link href="/discover">Find a coach</Link>
               </Button>

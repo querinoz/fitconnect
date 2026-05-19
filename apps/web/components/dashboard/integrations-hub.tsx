@@ -18,6 +18,7 @@ import {
 } from "@/components/ui-glass/premium-system";
 import { liquidPress } from "@/lib/motion/liquid";
 import { cn } from "@/lib/utils";
+import { StravaBrandedCard } from "@/components/sharing/strava-branded-card";
 
 type ProviderRow = {
   id: string;
@@ -219,6 +220,25 @@ export function IntegrationsHub({ athleteId }: { athleteId: string }) {
               </li>
             ))}
           </ul>
+
+          {data.strava.activities[0] ? (
+            <div className="space-y-2 border-t border-glass-border pt-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-400">
+                Branded share card · stands out in Strava feed
+              </p>
+              <StravaBrandedCard
+                athleteName="Demo athlete"
+                activityName={data.strava.activities[0].name}
+                sportType={data.strava.activities[0].type}
+                distanceKm={data.strava.activities[0].distanceM / 1000}
+                durationSec={data.strava.activities[0].movingTimeSec}
+                avgHr={data.strava.activities[0].avgHr}
+                elevationM={180}
+                readinessScore={88}
+                date={data.strava.activities[0].startDate}
+              />
+            </div>
+          ) : null}
         </PremiumCard>
       )}
 

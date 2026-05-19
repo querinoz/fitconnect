@@ -1,4 +1,4 @@
-/* @fitconnect/design-tokens — Voltline / Osmo-compatible base */
+/* @fitconnect/design-tokens — Kinetic Energy / Architectural Precision */
 :root {
   --fc-space-1: 0.25rem;
   --fc-space-2: 0.5rem;
@@ -6,13 +6,35 @@
   --fc-space-4: 1rem;
   --fc-space-6: 1.5rem;
   --fc-space-8: 2rem;
-  --fc-radius-sm: 0.75rem;
-  --fc-radius-md: 1rem;
-  --fc-radius-lg: 1.5rem;
-  --fc-radius-xl: 2rem;
+  --fc-radius-sm: 0.625rem;
+  --fc-radius-md: 0.875rem;
+  --fc-radius-lg: 1rem;
+  --fc-radius-xl: 1.75rem;
+
+  --fc-obsidian: #07080b;
+  --fc-carbon-0: #0c0d11;
+  --fc-carbon-1: #111318;
+  --fc-carbon-2: #181a22;
+  --fc-carbon-3: #1e2029;
+
+  --fc-volt: #c8ff00;
+  --fc-connect: #00ddb4;
+  --fc-cyan: #00bfff;
+  --fc-amber: #ffb020;
+  --fc-crimson: #ff3a5c;
+  --fc-emerald: #00e090;
+
+  --fc-text-1: #eeeef2;
+  --fc-text-2: rgba(238, 238, 242, 0.52);
+  --fc-text-3: rgba(238, 238, 242, 0.28);
+  --fc-text-4: rgba(238, 238, 242, 0.14);
+
   --fc-shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 24px 80px -48px rgba(0, 0, 0, 0.9);
-  --fc-motion-micro: 180ms;
-  --fc-motion-screen: 280ms;
-  --fc-motion-entrance: 400ms;
+
+  --fc-ease-kinetic: cubic-bezier(0.16, 1, 0.3, 1);
+  --fc-motion-micro: 150ms;
+  --fc-motion-ui: 220ms;
+  --fc-motion-screen: 400ms;
+  --fc-motion-data: 1200ms;
 }

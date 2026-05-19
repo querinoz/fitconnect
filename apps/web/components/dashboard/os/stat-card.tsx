@@ -13,21 +13,27 @@ export function StatCard({
   change?: string;
   color: string;
 }) {
+  const delta = change ? Number.parseFloat(change) : null;
+
   return (
-    <div className="rounded-2xl border border-ink-800 bg-ink-900/40 p-5">
-      <div className="mb-3 flex items-center gap-1.5">
-        <Icon className={`h-4 w-4 ${color}`} />
-        <span className="text-xs font-medium text-ink-500">{label}</span>
+    <div className="fc-kpi-card rounded-[10px] border border-[var(--border-xs)] bg-carbon-2 p-4">
+      <div className="mb-1.5 flex items-center gap-1.5">
+        <Icon className={`h-3.5 w-3.5 ${color}`} />
+        <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink-400">
+          {label}
+        </span>
       </div>
       <div className="flex items-baseline gap-2">
-        <span className="font-display text-2xl font-bold text-ink-100">{value}</span>
+        <span className="font-display text-[26px] font-extrabold leading-none tracking-[-0.04em] text-ink-50">
+          {value}
+        </span>
         {change ? (
           <span
-            className={`text-xs font-semibold ${
-              parseFloat(change) >= 0 ? "text-lime-400" : "text-signal-500"
+            className={`text-[10px] font-semibold ${
+              delta !== null && delta >= 0 ? "text-emerald-500" : "text-signal-500"
             }`}
           >
-            {parseFloat(change) >= 0 ? "+" : ""}
+            {delta !== null && delta >= 0 ? "▲ " : delta !== null ? "▼ " : ""}
             {change}
           </span>
         ) : null}

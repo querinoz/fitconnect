@@ -1,55 +1,89 @@
 :root {
-  --ink-950: #07080A;
-  --ink-900: #0E0F12;
-  --ink-800: #15171B;
-  --ink-700: #21242A;
-  --ink-600: #2E323A;
-  --ink-500: #5B606B;
-  --ink-400: #8A8F99;
-  --ink-300: #BFC3CC;
-  --ink-100: #F2F3F6;
-  --ink-50:  #FAFBFC;
+  /* Obsidian + Carbon — Kinetic Energy design system */
+  --ink-950: #07080b;
+  --ink-900: #0c0d11;
+  --ink-800: #111318;
+  --ink-700: #181a22;
+  --ink-600: #1e2029;
+  --ink-500: rgba(238, 238, 242, 0.14);
+  --ink-400: rgba(238, 238, 242, 0.28);
+  --ink-300: rgba(238, 238, 242, 0.52);
+  --ink-100: #eeeef2;
+  --ink-50: #eeeef2;
 
-  --volt-300: #E9FFB5;
-  --volt-400: #DAFE7E;
-  --volt-500: #C7FB3A;
-  --volt-600: #9CD81A;
-  --volt-glow: rgba(199,251,58,.45);
+  /* Volt — primary identity */
+  --volt-300: #e4ff66;
+  --volt-400: #d6ff33;
+  --volt-500: #c8ff00;
+  --volt-600: #a3d600;
+  --volt-glow: rgba(200, 255, 0, 0.45);
+  --volt-dim: rgba(200, 255, 0, 0.1);
 
-  --jade-500:  #2DD4BF;
-  --amber-400: #F5B844;
-  --coral-500: #FF5470;
+  /* Connect — secondary trust / links */
+  --connect-500: #00ddb4;
+  --connect-dim: rgba(0, 221, 180, 0.1);
+  --connect-glow: rgba(0, 221, 180, 0.06);
 
-  --glass-lo:    rgba(255,255,255,.03);
-  --glass-md:    rgba(255,255,255,.06);
-  --glass-hi:    rgba(255,255,255,.10);
-  --glass-volt:  rgba(199,251,58,.06);
-  --glass-border: rgba(255,255,255,.08);
-  --glass-edge:   rgba(199,251,58,.30);
-  --glass-ink: rgba(7,8,10,.72);
-  --glass-wash: rgba(255,255,255,.045);
-  --glass-noise: rgba(255,255,255,.035);
+  /* Semantic accents */
+  --cyan-500: #00bfff;
+  --cyan-dim: rgba(0, 191, 255, 0.1);
+  --amber-400: #ffb020;
+  --amber-dim: rgba(255, 176, 32, 0.1);
+  --crimson-500: #ff3a5c;
+  --crimson-dim: rgba(255, 58, 92, 0.1);
+  --emerald-500: #00e090;
+  --emerald-dim: rgba(0, 224, 144, 0.1);
 
-  --grad-pulse: linear-gradient(135deg, #DAFE7E, #C7FB3A, #9CD81A);
-  --grad-text:  linear-gradient(135deg, #FAFBFC, #DAFE7E 60%, #C7FB3A);
-  --grad-live: radial-gradient(circle at 20% 10%, rgba(34,211,238,.22), transparent 36%),
-    radial-gradient(circle at 78% 12%, rgba(199,251,58,.18), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
-  --grad-depth: radial-gradient(circle at 50% -20%, rgba(199,251,58,.14), transparent 38%),
-    linear-gradient(180deg, rgba(14,15,18,.88), rgba(7,8,10,.96));
+  /* Legacy aliases */
+  --jade-500: var(--connect-500);
+  --coral-500: var(--crimson-500);
 
-  --shadow-premium: inset 0 1px 0 rgba(255,255,255,.08), 0 24px 80px -48px rgba(0,0,0,.9);
-  --shadow-focus: 0 0 0 1px rgba(199,251,58,.28), 0 18px 60px -36px var(--volt-glow);
+  /* Borders */
+  --border-xs: rgba(255, 255, 255, 0.05);
+  --border-sm: rgba(255, 255, 255, 0.09);
+  --border-md: rgba(255, 255, 255, 0.14);
 
-  --safe-top:    env(safe-area-inset-top);
+  /* Glass surfaces */
+  --glass-lo: rgba(255, 255, 255, 0.03);
+  --glass-md: rgba(255,255,255,.06);
+  --glass-hi: rgba(255, 255, 255, 0.1);
+  --glass-volt: var(--volt-dim);
+  --glass-border: var(--border-xs);
+  --glass-edge: rgba(200,255,0,.30);
+  --glass-ink: rgba(7, 8, 11, 0.72);
+  --glass-wash: rgba(255, 255, 255, 0.045);
+  --glass-noise: rgba(255, 255, 255, 0.035);
+
+  /* Gradients */
+  --grad-pulse: linear-gradient(135deg, #d6ff33, #c8ff00, #a3d600);
+  --grad-text: linear-gradient(135deg, #eeeef2, #d6ff33 55%, #c8ff00);
+  --grad-live: radial-gradient(circle at 20% 10%, rgba(0, 221, 180, 0.18), transparent 36%),
+    radial-gradient(circle at 78% 12%, rgba(200, 255, 0, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  --grad-depth: radial-gradient(circle at 50% -20%, rgba(200, 255, 0, 0.12), transparent 38%),
+    linear-gradient(180deg, rgba(12, 13, 17, 0.92), rgba(7, 8, 11, 0.98));
+
+  --shadow-premium: inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 24px 80px -48px rgba(0, 0, 0, 0.9);
+  --shadow-focus: 0 0 0 1px rgba(200, 255, 0, 0.28),
+    0 18px 60px -36px var(--volt-glow);
+
+  /* Motion — 3 kinetic patterns */
+  --fc-ease-kinetic: cubic-bezier(0.16, 1, 0.3, 1);
+  --fc-ease-snap: cubic-bezier(0.25, 1.5, 0.5, 1);
+  --fc-ease-data: ease-in-out;
+  --fc-motion-micro: 150ms;
+  --fc-motion-ui: 220ms;
+  --fc-motion-screen: 400ms;
+
+  --safe-top: env(safe-area-inset-top);
   --safe-bottom: env(safe-area-inset-bottom);
 
   color-scheme: dark;
 }
 
-html, body {
+html,
+body {
   background: var(--ink-950);
   color: var(--ink-100);
 }
-
-/* Reduced-motion guard lives in globals.css (data-motion + @media). */

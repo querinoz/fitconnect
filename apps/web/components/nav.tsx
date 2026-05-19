@@ -79,7 +79,7 @@ export function Nav() {
               <Logo className="h-9 w-9" />
               <span
                 aria-hidden="true"
-                className="absolute -inset-0.5 -z-10 rounded-xl bg-gradient-to-br from-brand-400 to-accent-500 opacity-30 blur"
+                className="absolute -inset-0.5 -z-10 rounded-xl bg-gradient-to-br from-volt-500 to-brand-400 opacity-30 blur"
               />
             </span>
             <Wordmark size={18} className="hidden sm:inline-block" />
@@ -96,7 +96,7 @@ export function Nav() {
                 className="group relative hover:text-ink-50 transition-colors py-1.5"
               >
                 {l.label}
-                <span className="absolute -bottom-0.5 left-0 h-0.5 w-0 bg-brand-400 transition-all group-hover:w-full" />
+                <span className="absolute -bottom-0.5 left-0 h-0.5 w-0 bg-volt-500 transition-all group-hover:w-full" />
               </Link>
             ))}
             <div className="relative" data-more>

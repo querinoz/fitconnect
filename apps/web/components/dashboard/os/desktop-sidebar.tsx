@@ -33,13 +33,13 @@ export function DesktopSidebar({
   const pathname = usePathname() ?? "/";
   const activeClass =
     accent === "lime"
-      ? "bg-lime-500/12 text-lime-400 font-semibold"
-      : "bg-brand-400/12 text-brand-400 font-semibold";
+      ? "bg-volt-dim text-volt-500 font-semibold before:absolute before:left-0 before:top-1 before:bottom-1 before:w-0.5 before:rounded-r before:bg-volt-500"
+      : "bg-connect-dim text-brand-400 font-semibold before:absolute before:left-0 before:top-1 before:bottom-1 before:w-0.5 before:rounded-r before:bg-brand-400";
 
   return (
     <aside
       className={cn(
-        "hidden lg:flex flex-col border-r border-ink-800 bg-ink-900/60 backdrop-blur-sm transition-all duration-200 flex-shrink-0",
+        "hidden lg:flex flex-col border-r border-[var(--border-xs)] bg-carbon-1 backdrop-blur-sm transition-all duration-200 flex-shrink-0",
         collapsed ? "w-16" : "w-60"
       )}
     >
@@ -54,8 +54,8 @@ export function DesktopSidebar({
         ) : (
           <div className="flex items-center gap-2">
             <LogoMark size={26} />
-            <span className="font-display text-lg font-bold tracking-tight">
-              Fit<span className="text-brand-400">Connect</span>
+            <span className="font-display text-lg font-extrabold tracking-tight">
+              Fit<span className="text-volt-500">Connect</span>
             </span>
           </div>
         )}
@@ -76,7 +76,7 @@ export function DesktopSidebar({
               key={item.href}
               href={item.href}
               className={cn(
-                "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all",
+                "relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-[var(--fc-motion-micro)]",
                 active
                   ? activeClass
                   : "text-ink-500 hover:bg-ink-800/60 hover:text-ink-300",
