@@ -440,6 +440,58 @@ summary:focus-visible {
   filter: saturate(1.1);
 }
 
+.fc-kinetic-smooth {
+  filter: saturate(1.05) blur(0.5px);
+  animation: kinetic-drift 42s ease-in-out infinite;
+}
+
+/* Full-page landing aurora — smooth premium backdrop */
+.fc-landing-aurora {
+  background:
+    radial-gradient(
+      ellipse 55% 45% at 20% 25%,
+      rgba(200, 255, 0, 0.11),
+      transparent 68%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 78% 18%,
+      rgba(0, 221, 180, 0.09),
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse 45% 38% at 62% 72%,
+      rgba(0, 191, 255, 0.06),
+      transparent 62%
+    );
+  background-size: 140% 140%, 130% 130%, 120% 120%;
+  animation: landing-aurora-drift 56s ease-in-out infinite;
+}
+
+@keyframes landing-aurora-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    background-position: 0% 0%, 100% 0%, 50% 100%;
+  }
+  33% {
+    transform: translate(2%, -1.5%) scale(1.03);
+    background-position: 30% 20%, 70% 10%, 40% 80%;
+  }
+  66% {
+    transform: translate(-1.5%, 2%) scale(1.02);
+    background-position: 60% 40%, 20% 30%, 60% 60%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fc-landing-aurora {
+    animation: none;
+  }
+  .fc-kinetic-smooth {
+    animation: none;
+  }
+}
+
 /* Wave path used by atmosphere SVG */
 @keyframes fc-wave-shift {
   from {

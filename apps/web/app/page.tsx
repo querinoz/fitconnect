@@ -1,6 +1,7 @@
 import dynamic from "next/dynamic";
 import { HeroStatic } from "@/components/marketing/hero-static";
 import { HeroExtras } from "@/components/marketing/hero-extras";
+import { LandingCanvas } from "@/components/marketing/landing-canvas";
 import { LazyInView } from "@/components/marketing/lazy-in-view";
 import { Nav } from "@/components/nav";
 
@@ -153,8 +154,9 @@ function Defer({
 export default function Home() {
   return (
     <>
+      <LandingCanvas />
       <Nav />
-      <main id="main">
+      <main id="main" className="relative">
         <div className="relative">
           <HeroStatic />
           <LazyInView minHeight={280} rootMargin="200px 0px">

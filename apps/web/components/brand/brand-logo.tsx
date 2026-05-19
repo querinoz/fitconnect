@@ -7,15 +7,10 @@ type BrandLogoProps = {
   className?: string;
   size?: number;
   title?: string;
-  /** Premium metallic carbon (default) or flat mono for tiny UI */
   variant?: "carbon3d" | "mono";
 };
 
-/**
- * FitConnect connection-node mark — professional SVG.
- * Hub + three nodes (athlete · coach · platform) with carbon-metallic depth.
- * Vector-only: crisp at every size (nav, PWA, dashboard, mobile header).
- */
+/** Option 01 — aerodynamic wing-F with carbon metal + Volt edge highlights. */
 export function BrandLogo({
   className,
   size = 36,
@@ -26,13 +21,6 @@ export function BrandLogo({
   const isPremium = variant === "carbon3d";
   const isMono = variant === "mono";
 
-  const hub = { cx: 32, cy: 32, r: 8.5 };
-  const nodes = [
-    { cx: 13, cy: 32, r: 5.5 },
-    { cx: 49, cy: 15, r: 5.5 },
-    { cx: 49, cy: 49, r: 5.5 }
-  ];
-
   return (
     <svg
       viewBox="0 0 64 64"
@@ -40,92 +28,49 @@ export function BrandLogo({
       height={size}
       role="img"
       aria-label={title}
-      className={cn(
-        "shrink-0",
-        isPremium && "fc-logo-premium",
-        className
-      )}
+      className={cn("shrink-0", isPremium && "fc-logo-premium", className)}
     >
       <defs>
         <linearGradient id={`${uid}-plate`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#2a2e38" />
-          <stop offset="45%" stopColor="#14161c" />
-          <stop offset="100%" stopColor="#0a0b0f" />
+          <stop offset="50%" stopColor="#12141a" />
+          <stop offset="100%" stopColor="#08090c" />
         </linearGradient>
 
-        <linearGradient id={`${uid}-plate-shine`} x1="0.5" y1="0" x2="0.5" y2="1">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.14" />
-          <stop offset="35%" stopColor="#ffffff" stopOpacity="0" />
+        <linearGradient id={`${uid}-metal`} x1="0" y1="0" x2="0.85" y2="1">
+          <stop offset="0%" stopColor="#eef0f4" />
+          <stop offset="18%" stopColor="#9aa3b2" />
+          <stop offset="48%" stopColor="#3a404c" />
+          <stop offset="78%" stopColor="#1a1d24" />
+          <stop offset="100%" stopColor="#0c0d11" />
         </linearGradient>
 
-        <pattern
-          id={`${uid}-weave`}
-          width="6"
-          height="6"
-          patternUnits="userSpaceOnUse"
-          patternTransform="rotate(35)"
-        >
-          <line x1="0" y1="0" x2="0" y2="6" stroke="#ffffff" strokeOpacity="0.04" strokeWidth="0.6" />
-          <line x1="3" y1="0" x2="3" y2="6" stroke="#000000" strokeOpacity="0.18" strokeWidth="0.6" />
-        </pattern>
-
-        <radialGradient id={`${uid}-hub`} cx="38%" cy="32%" r="68%">
-          <stop offset="0%" stopColor="#f0ffb8" />
-          <stop offset="28%" stopColor="#d6ff33" />
-          <stop offset="62%" stopColor="#c8ff00" />
-          <stop offset="100%" stopColor="#5a6600" />
-        </radialGradient>
-
-        <radialGradient id={`${uid}-hub-glow`} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#c8ff00" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="#c8ff00" stopOpacity="0" />
-        </radialGradient>
-
-        <linearGradient id={`${uid}-link`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#00ddb4" stopOpacity="0.15" />
-          <stop offset="50%" stopColor="#c8ff00" stopOpacity="0.85" />
-          <stop offset="100%" stopColor="#00ddb4" stopOpacity="0.35" />
+        <linearGradient id={`${uid}-metal-shadow`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#1a1d24" />
+          <stop offset="100%" stopColor="#050608" />
         </linearGradient>
 
-        <linearGradient id={`${uid}-ring`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#e8ebf2" stopOpacity="0.95" />
-          <stop offset="45%" stopColor="#c8ff00" />
-          <stop offset="100%" stopColor="#00ddb4" stopOpacity="0.75" />
+        <linearGradient id={`${uid}-volt-edge`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#c8ff00" stopOpacity="0.15" />
+          <stop offset="45%" stopColor="#d6ff33" />
+          <stop offset="100%" stopColor="#c8ff00" stopOpacity="0.55" />
         </linearGradient>
 
-        <filter id={`${uid}-soft`} x="-40%" y="-40%" width="180%" height="180%">
-          <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.55" />
-          <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#c8ff00" floodOpacity="0.22" />
+        <linearGradient id={`${uid}-shine`} x1="0.5" y1="0" x2="0.5" y2="1">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.16" />
+          <stop offset="40%" stopColor="#ffffff" stopOpacity="0" />
+        </linearGradient>
+
+        <filter id={`${uid}-depth`} x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="2.5" stdDeviation="2" floodColor="#000" floodOpacity="0.65" />
+          <feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="#c8ff00" floodOpacity="0.18" />
         </filter>
       </defs>
 
       {isPremium && (
         <>
-          <rect
-            x="4"
-            y="4"
-            width="56"
-            height="56"
-            rx="15"
-            fill={`url(#${uid}-plate)`}
-            filter={`url(#${uid}-soft)`}
-          />
-          <rect
-            x="4"
-            y="4"
-            width="56"
-            height="56"
-            rx="15"
-            fill={`url(#${uid}-weave)`}
-          />
-          <rect
-            x="4"
-            y="4"
-            width="56"
-            height="56"
-            rx="15"
-            fill={`url(#${uid}-plate-shine)`}
-          />
+          <rect x="4" y="4" width="56" height="56" rx="15" fill={`url(#${uid}-plate)`} />
+          <rect x="4" y="4" width="56" height="56" rx="15" fill={`url(#${uid}-shine)`} />
           <rect
             x="4.5"
             y="4.5"
@@ -133,83 +78,87 @@ export function BrandLogo({
             height="55"
             rx="14.5"
             fill="none"
-            stroke="rgba(255,255,255,0.1)"
+            stroke="rgba(255,255,255,0.08)"
             strokeWidth="0.75"
           />
+          <ellipse cx="32" cy="32" rx="22" ry="18" fill="#c8ff00" opacity="0.06" />
         </>
       )}
 
-      {isPremium && (
-        <circle
-          cx={hub.cx}
-          cy={hub.cy}
-          r="17"
-          fill={`url(#${uid}-hub-glow)`}
-          opacity="0.65"
+      <g filter={isPremium ? `url(#${uid}-depth)` : undefined}>
+        {/* Spine */}
+        <path
+          d="M18 14 L24 14 L24 50 L18 50 Z"
+          fill={isMono ? "currentColor" : `url(#${uid}-metal-shadow)`}
+          fillOpacity={isMono ? 0.85 : 1}
         />
-      )}
+        <path
+          d="M17 13 L23 13 L23 49 L17 49 Z"
+          fill={isMono ? "currentColor" : `url(#${uid}-metal)`}
+        />
 
-      <g
-        fill="none"
-        stroke={isMono ? "currentColor" : `url(#${uid}-link)`}
-        strokeWidth={isMono ? 2 : 2.25}
-        strokeLinecap="round"
-        strokeOpacity={isMono ? 0.45 : 1}
-      >
-        <line x1="18.5" y1="32" x2="23.2" y2="32" />
-        <line x1="39.5" y1="24.5" x2="44.2" y2="18.8" />
-        <line x1="39.5" y1="39.5" x2="44.2" y2="45.2" />
+        {/* Top wing — longest, most motion */}
+        <path
+          d="M23 15 L48 12 L46 21 L23 22 Z"
+          fill={isMono ? "currentColor" : `url(#${uid}-metal-shadow)`}
+          fillOpacity={isMono ? 0.7 : 1}
+        />
+        <path
+          d="M22 14 L47 11 L45 20 L22 21 Z"
+          fill={isMono ? "currentColor" : `url(#${uid}-metal)`}
+        />
+        <path
+          d="M22 14 L47 11"
+          stroke={isMono ? "currentColor" : `url(#${uid}-volt-edge)`}
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          strokeOpacity={isMono ? 0.5 : 1}
+        />
+
+        {/* Middle wing */}
+        <path
+          d="M23 27 L42 25 L40 32 L23 33 Z"
+          fill={isMono ? "currentColor" : `url(#${uid}-metal-shadow)`}
+          fillOpacity={isMono ? 0.7 : 1}
+        />
+        <path
+          d="M22 26 L41 24 L39 31 L22 32 Z"
+          fill={isMono ? "currentColor" : `url(#${uid}-metal)`}
+        />
+        <path
+          d="M22 26 L41 24"
+          stroke={isMono ? "currentColor" : `url(#${uid}-volt-edge)`}
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          strokeOpacity={isMono ? 0.45 : 0.9}
+        />
+
+        {/* Bottom wing — short accent */}
+        <path
+          d="M23 37 L34 36 L32 42 L23 43 Z"
+          fill={isMono ? "currentColor" : `url(#${uid}-metal-shadow)`}
+          fillOpacity={isMono ? 0.65 : 1}
+        />
+        <path
+          d="M22 36 L33 35 L31 41 L22 42 Z"
+          fill={isMono ? "currentColor" : `url(#${uid}-metal)`}
+        />
+        <path
+          d="M22 36 L33 35"
+          stroke={isMono ? "currentColor" : "#c8ff00"}
+          strokeWidth="1"
+          strokeLinecap="round"
+          strokeOpacity={isMono ? 0.4 : 0.75}
+        />
       </g>
 
-      {nodes.map((node) => (
-        <circle
-          key={`${node.cx}-${node.cy}`}
-          cx={node.cx}
-          cy={node.cy}
-          r={node.r}
-          fill="none"
-          stroke={isMono ? "currentColor" : `url(#${uid}-ring)`}
-          strokeWidth={isMono ? 2 : 2.25}
-          strokeOpacity={isMono ? 0.55 : 1}
-        />
-      ))}
-
-      <circle
-        cx={hub.cx}
-        cy={hub.cy}
-        r={hub.r + 4.5}
-        fill={isMono ? "currentColor" : `url(#${uid}-hub-glow)`}
-        fillOpacity={isMono ? 0.12 : 0.35}
-      />
-
-      <circle
-        cx={hub.cx}
-        cy={hub.cy}
-        r={hub.r}
-        fill={isMono ? "currentColor" : `url(#${uid}-hub)`}
-        filter={isPremium ? `url(#${uid}-soft)` : undefined}
-      />
-
       {isPremium && (
-        <ellipse
-          cx={hub.cx - 2.5}
-          cy={hub.cy - 3}
-          rx="3.2"
-          ry="2"
-          fill="#ffffff"
-          opacity="0.38"
-        />
-      )}
-
-      {isPremium && !isMono && (
-        <circle
-          cx={hub.cx}
-          cy={hub.cy}
-          r={hub.r}
-          fill="none"
+        <path
+          d="M22 14 L47 11"
           stroke="#ffffff"
-          strokeOpacity="0.12"
           strokeWidth="0.5"
+          strokeLinecap="round"
+          opacity="0.25"
         />
       )}
     </svg>

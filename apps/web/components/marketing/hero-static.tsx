@@ -21,7 +21,7 @@ export function HeroStatic() {
       className="relative isolate overflow-x-clip pt-12 pb-12 md:pt-20 md:pb-16 lg:pb-28"
       aria-labelledby="fc-hero-title"
     >
-      <Atmosphere particles={0} />
+      <Atmosphere particles={22} />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
         <div className="max-w-2xl lg:max-w-none lg:col-span-6 fc-hero-enter">
