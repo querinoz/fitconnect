@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, ShieldCheck, Star } from "lucide-react";
-import { Wordmark } from "@/components/brand/wordmark";
+import { BrandLockup } from "@/components/brand/brand-lockup";
 import { Atmosphere } from "./atmosphere";
 import { dict } from "@/lib/i18n";
 
@@ -21,7 +21,7 @@ export function HeroStatic() {
       className="relative isolate overflow-x-clip pt-12 pb-12 md:pt-20 md:pb-16 lg:pb-28"
       aria-labelledby="fc-hero-title"
     >
-      <Atmosphere particles={22} />
+      <Atmosphere particles={10} />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
         <div className="max-w-2xl lg:max-w-none lg:col-span-6 fc-hero-enter">
@@ -38,7 +38,7 @@ export function HeroStatic() {
           </h1>
 
           <div className="mt-6 fc-vt-wordmark hidden sm:block">
-            <Wordmark size={36} className="drop-shadow-[0_0_30px_rgba(200,255,0,0.18)]" />
+            <BrandLockup logoSize={44} textSize={20} tagline layout="stack" />
           </div>
 
           <span className="mt-6 inline-flex items-center gap-2 rounded-full bg-volt-dim px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-volt-500 ring-1 ring-volt-500/25">

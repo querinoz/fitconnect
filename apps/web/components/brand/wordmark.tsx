@@ -3,49 +3,53 @@ import { cn } from "@/lib/utils";
 type WordmarkProps = {
   className?: string;
   size?: number;
-  /** @deprecated Option 01 lockup uses continuous FitConnect wordmark */
-  node?: boolean;
   title?: string;
-  /** Show tagline under the name */
   tagline?: boolean;
+  /** Stack tagline under name (brand sheet layout) */
+  layout?: "inline" | "stack";
 };
 
 /**
- * FitConnect wordmark — Option 01 lockup.
- * Fit: bold silver · Connect: medium weight with Volt metallic gradient.
+ * FitConnect wordmark — brand sheet lockup.
+ * Fit: bold silver · Connect: Volt accent, lighter weight.
  */
 export function Wordmark({
   className,
   size = 22,
   title = "FitConnect",
-  tagline = false
+  tagline = false,
+  layout = "inline"
 }: WordmarkProps) {
+  const name = (
+    <span
+      role="img"
+      aria-label={title}
+      className="inline-flex items-baseline whitespace-nowrap font-display tracking-[-0.04em]"
+      style={{ fontSize: size, lineHeight: 1 }}
+    >
+      <span className="font-extrabold text-[#E6E7EA]">Fit</span>
+      <span className="font-semibold text-volt-400">Connect</span>
+    </span>
+  );
+
+  if (!tagline) {
+    return <span className={className}>{name}</span>;
+  }
+
   return (
-    <span className={cn("inline-flex flex-col", className)}>
+    <span
+      className={cn(
+        layout === "stack" ? "inline-flex flex-col gap-0.5" : "inline-flex flex-col",
+        className
+      )}
+    >
+      {name}
       <span
-        role="img"
-        aria-label={title}
-        className="inline-flex items-baseline font-display tracking-[-0.03em]"
-        style={{ fontSize: size, lineHeight: 1.05 }}
+        className="font-sans text-[0.38em] font-semibold uppercase tracking-[0.32em] text-ink-500"
+        aria-hidden
       >
-        <span className="font-extrabold text-ink-50 drop-shadow-[0_1px_0_rgba(255,255,255,0.08)]">
-          Fit
-        </span>
-        <span
-          className="font-medium bg-gradient-to-r from-ink-200 via-volt-300 to-volt-500 bg-clip-text text-transparent"
-          style={{ textShadow: "0 0 24px rgba(200,255,0,0.12)" }}
-        >
-          Connect
-        </span>
+        Connect · Track · Evolve
       </span>
-      {tagline ? (
-        <span
-          className="mt-1 text-[0.42em] font-semibold uppercase tracking-[0.28em] text-ink-500"
-          aria-hidden
-        >
-          Connect · Track · Evolve
-        </span>
-      ) : null}
     </span>
   );
 }

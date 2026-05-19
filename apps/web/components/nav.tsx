@@ -10,8 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { LangPicker } from "./lang-picker";
-import { Logo } from "./brand/logo";
-import { Wordmark } from "./brand/wordmark";
+import { BrandLockup } from "./brand/brand-lockup";
 import { useT } from "@/lib/i18n-provider";
 import { cn } from "@/lib/utils";
 
@@ -70,16 +69,22 @@ export function Nav() {
         <div className="flex min-w-0 items-center gap-4 sm:gap-8">
           <Link
             href="/"
-            className="fc-vt-wordmark group flex min-w-0 items-center gap-2"
+            className="fc-vt-wordmark group min-w-0 transition-opacity hover:opacity-95"
           >
-            <span
-              aria-hidden="true"
-              className="relative grid h-9 w-9 shrink-0 place-items-center transition-transform group-hover:scale-105"
-            >
-              <Logo className="h-9 w-9" />
-            </span>
-            <Wordmark size={16} className="truncate sm:hidden" />
-            <Wordmark size={18} className="hidden sm:inline-block" />
+            <BrandLockup
+              logoSize={34}
+              textSize={16}
+              tagline={false}
+              layout="inline"
+              className="sm:hidden"
+            />
+            <BrandLockup
+              logoSize={36}
+              textSize={17}
+              tagline
+              layout="stack"
+              className="hidden sm:inline-flex"
+            />
           </Link>
 
           <nav

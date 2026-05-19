@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { MobileAppHeader } from "@/components/brand/mobile-app-header";
+import { BrandLockup } from "@/components/brand/brand-lockup";
 import { RoleDashboardPreview } from "@/components/dashboard/role-dashboard-preview";
 import { validateCredentials } from "@/lib/auth";
 import { useAuthStore } from "@/lib/auth-store";
@@ -56,12 +56,8 @@ export function MobileAppLauncher() {
       {/* Desktop / tablet — iPhone showcase */}
       <div className="hidden md:flex min-h-dvh flex-col items-center justify-center px-6 py-12">
           <div className="mb-8 flex flex-col items-center">
-            <Link
-              href="/"
-              className="rounded-xl focus-visible:outline-none"
-              aria-label="Back to FitConnect landing page"
-            >
-              <MobileAppHeader />
+            <Link href="/" className="rounded-xl focus-visible:outline-none" aria-label="Back to FitConnect">
+              <BrandLockup logoSize={38} textSize={17} tagline layout="stack" />
             </Link>
           </div>
           <motion.div {...entrance} className="max-w-xl text-center">
@@ -113,13 +109,7 @@ export function MobileAppLauncher() {
             className="rounded-xl focus-visible:outline-none"
             aria-label="Back to FitConnect landing page"
           >
-            <MobileAppHeader
-              trailing={
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-ink-800 bg-ink-900 text-brand-300">
-                  <Smartphone className="h-5 w-5" aria-hidden />
-                </span>
-              }
-            />
+            <BrandLockup logoSize={38} textSize={17} tagline layout="stack" />
           </Link>
 
           <section className="flex flex-1 flex-col justify-center py-8">
