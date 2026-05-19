@@ -204,3 +204,116 @@ model Club {
   city        String
   memberCount Int    @default(0)
 }
+
+model StravaConnection {
+  id                String    @id @default(cuid())
+  athleteExternalId String    @unique
+  stravaAthleteId   Int       @unique
+  accessToken       String
+  refreshToken      String
+  expiresAt         DateTime
+  scope             String    @default("read,activity:read,activity:read_all,profile:read_all")
+  lastSyncAt        DateTime?
+  deauthorizedAt    DateTime?
+  webhookSubId      Int?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  activities StravaActivity[]
+}
+
+model StravaActivity {
+  id                 String    @id @default(cuid())
+  stravaId           Int       @unique
+  athleteExternalId  String
+  name               String
+  sportType          String
+  legacyType         String?
+  startDate          DateTime
+  startDateLocal     DateTime?
+  timezone           String?
+  distanceM          Float
+  movingTimeSec      Int
+  elapsedTimeSec     Int
+  avgHr              Float?
+  maxHr              Float?
+  elevationM         Float?
+  averageSpeed       Float?
+  maxSpeed           Float?
+  hasHeartrate       Boolean   @default(false)
+  deviceName         String?
+  mapPolyline        String?   @db.Text
+  mapSummaryPolyline String?   @db.Text
+  sufferScore        Float?
+  averageWatts       Float?
+  maxWatts           Float?
+  loadScore          Float?
+  trimp              Float?
+  streamsJson        Json?
+  rawData            Json?
+  deletedAt          DateTime?
+  syncedAt           DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  connection StravaConnection @relation(fields: [athleteExternalId], references: [athleteExternalId])
+  laps             StravaActivityLap[]
+  segmentEfforts   StravaSegmentEffort[]
+
+  @@index([athleteExternalId, startDate])
+  @@index([sportType])
+  @@index([deletedAt])
+}
+
+model StravaActivityLap {
+  id                 String   @id @default(cuid())
+  stravaLapId        Int?
+  activityId         String
+  lapIndex           Int
+  name               String
+  distanceM          Float
+  movingTimeSec      Int
+  elapsedTimeSec     Int
+  avgHr              Float?
+  maxHr              Float?
+  elevationM         Float?
+
+  activity StravaActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@index([activityId])
+}
+
+model StravaSegmentEffort {
+  id            String   @id @default(cuid())
+  stravaEffortId Int     @unique
+  activityId    String
+  segmentId     Int?
+  name          String
+  elapsedTimeSec Int
+  movingTimeSec Int
+  distanceM     Float
+  prRank        Int?
+  komRank       Int?
+
+  activity StravaActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@index([activityId])
+}
+
+model SessionFeedback {
+  id                String   @id @default(cuid())
+  sessionExternalId String
+  athleteExternalId String
+  rpe               Int
+  notes             String?
+  submittedAt       DateTime @default(now())
+
+  @@index([athleteExternalId, sessionExternalId])
+}
+
+model PushToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String
+  createdAt DateTime @default(now())
+}

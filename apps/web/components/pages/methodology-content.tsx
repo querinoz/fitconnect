@@ -48,7 +48,7 @@ export function MethodologyContent() {
           </div>
         </section>
 
-        <section id="pillars" className="mx-auto max-w-7xl px-6 py-20">
+        <section id="pillars" className="mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-20">
           <div className="space-y-20">
             {pillars.map((m, i) => (
               <article
@@ -93,7 +93,7 @@ export function MethodologyContent() {
           </div>
         </section>
 
-        <section className="relative mx-auto max-w-7xl px-6 py-24">
+        <section className="relative mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-24">
           <div className="absolute inset-0 -z-10 gradient-bg-warm opacity-30" />
           <div className="max-w-3xl">
             <p className="eyebrow inline-flex items-center gap-1.5">
@@ -141,7 +141,7 @@ export function MethodologyContent() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-6 py-16">
+        <section className="mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-16">
           <div className="rounded-3xl border border-ink-800 bg-ink-900/40 p-10 grid md:grid-cols-3 gap-8 text-center">
             {[
               { label: mp.stats.interviewed, value: "32,184" },

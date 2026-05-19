@@ -12,12 +12,14 @@ import {
   Watch
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { VoltButton } from "@/components/ui-glass/volt-button";
 import { DesktopSidebar } from "./desktop-sidebar";
-import { ReadinessCardFull } from "./readiness-card-full";
+import { ReadinessCardWithExplain } from "@/components/dashboard/readiness-explain-modal";
 import { HrvChartFull } from "./hrv-chart-full";
 import { SessionsPanel } from "./sessions-panel";
 import { AiInsightsPanel } from "./ai-insights-panel";
 import { IntegrationsHub } from "@/components/dashboard/integrations-hub";
+import { GamificationPanel } from "@/components/gamification/gamification-panel";
 import type { SessionSummary } from "@fitconnect/types";
 import type { ReactNode } from "react";
 
@@ -73,7 +75,7 @@ export function AthleteOsDashboard({
   const hrvDiff = hrv - baselineHrv;
 
   return (
-    <div className="flex min-h-0 lg:-mx-5">
+    <div className="fc-dashboard-os flex min-h-0 min-w-0 w-full">
       <DesktopSidebar
         collapsed={collapsed}
         setCollapsed={setCollapsed}
@@ -107,19 +109,16 @@ export function AthleteOsDashboard({
             <p className="mb-2.5 text-[10px] text-ink-500">
               HRV tracking, AI insights, full dashboard.
             </p>
-            <Button
-              size="sm"
-              className="w-full rounded-lg bg-gradient-to-r from-brand-500 to-lime-500 text-xs font-semibold text-ink-950"
-            >
+            <VoltButton className="h-9 w-full rounded-lg text-xs">
               Start — €12/mo
-            </Button>
+            </VoltButton>
           </div>
         }
       />
 
-      <main className="min-w-0 flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl p-5 md:p-8">
-          <header className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+      <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+        <div className="fc-dashboard-inner mx-auto max-w-6xl p-4 sm:p-5 md:p-8">
+          <header className="mb-6 flex flex-col items-start justify-between gap-4 sm:mb-8 sm:flex-row sm:items-center">
             <div>
               <p className="mb-1.5 text-xs text-ink-500">Good morning 👋</p>
               <h1 className="font-display text-2xl font-extrabold tracking-tight text-ink-50 md:text-3xl">
@@ -132,7 +131,7 @@ export function AthleteOsDashboard({
                 </span>
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
               <Button
                 asChild
                 variant="outline"
@@ -151,19 +150,15 @@ export function AthleteOsDashboard({
               >
                 <Bell className="h-3.5 w-3.5" />
               </Button>
-              <Button
-                asChild
-                size="sm"
-                className="gap-1.5 bg-volt-500 text-xs font-bold text-ink-950 hover:bg-volt-400"
-              >
+              <VoltButton asChild className="h-9 gap-1.5 text-xs">
                 <Link href="/discover">Find a coach</Link>
-              </Button>
+              </VoltButton>
             </div>
           </header>
 
           <div className="grid gap-5 xl:grid-cols-3">
             <div className="space-y-5 xl:col-span-2">
-              <ReadinessCardFull
+              <ReadinessCardWithExplain
                 readiness={readiness}
                 hrv={hrv}
                 baselineHrv={baselineHrv}
@@ -179,23 +174,17 @@ export function AthleteOsDashboard({
             </div>
 
             <div className="space-y-5">
+              <GamificationPanel />
               <AiInsightsPanel />
               <div className="rounded-2xl border border-ink-800 bg-ink-900/40 p-5">
                 <h3 className="mb-4 font-display text-sm font-bold text-ink-100">Quick actions</h3>
                 <div className="space-y-2.5">
-                  <Button
-                    asChild
-                    className="w-full rounded-xl bg-gradient-to-r from-brand-500 to-lime-500 text-sm font-semibold text-ink-950 hover:opacity-90"
-                  >
+                  <VoltButton asChild className="w-full rounded-xl text-sm">
                     <Link href="/discover">Find a specialist</Link>
-                  </Button>
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="w-full rounded-xl border-ink-700 text-sm text-ink-300 hover:text-ink-100"
-                  >
+                  </VoltButton>
+                  <VoltButton asChild variant="subtle" className="w-full rounded-xl text-sm">
                     <Link href="/programs">Browse programs</Link>
-                  </Button>
+                  </VoltButton>
                 </div>
               </div>
               <div className="rounded-2xl border border-ink-800 bg-ink-900/40 p-5">
@@ -228,7 +217,7 @@ export function AthleteOsDashboard({
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

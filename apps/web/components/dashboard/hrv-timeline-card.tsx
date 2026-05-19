@@ -10,6 +10,7 @@ import {
   YAxis
 } from "recharts";
 import { ChartShell } from "@/components/ui-glass/premium-system";
+import { rechartsTheme } from "@/lib/charts/recharts-theme";
 import type { generateHrvSeries } from "@/lib/readiness/compute";
 
 type HrvTimelineCardProps = {
@@ -17,8 +18,8 @@ type HrvTimelineCardProps = {
 };
 
 const tooltipStyle = {
-  background: "#0f172a",
-  border: "1px solid #1e293b",
+  background: rechartsTheme.tooltipBg,
+  border: `1px solid ${rechartsTheme.tooltipBorder}`,
   borderRadius: "12px"
 };
 
@@ -28,22 +29,22 @@ export function HrvTimelineCard({ series }: HrvTimelineCardProps) {
       <div className="h-48 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={series}>
-            <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" />
+            <CartesianGrid stroke={rechartsTheme.grid} strokeDasharray="3 3" />
             <XAxis
               dataKey="day"
-              tick={{ fill: "#94a3b8", fontSize: 10 }}
+              tick={{ fill: rechartsTheme.axis, fontSize: 10 }}
               interval={4}
             />
             <YAxis
               domain={[40, 80]}
-              tick={{ fill: "#94a3b8", fontSize: 10 }}
+              tick={{ fill: rechartsTheme.axis, fontSize: 10 }}
               width={32}
             />
             <Tooltip contentStyle={tooltipStyle} />
             <Line
               type="monotone"
               dataKey="hrv"
-              stroke="#f43f5e"
+              stroke={rechartsTheme.baseline}
               strokeWidth={2}
               dot={false}
               name="HRV (ms)"

@@ -26,7 +26,7 @@ export function DemosSection() {
   return (
     <section
       id="see-it-in-action"
-      className="relative mx-auto max-w-7xl px-6 py-24"
+      className="relative mx-auto max-w-7xl fc-section-x px-4 py-16 sm:px-6 sm:py-24"
     >
       <SectionHeader
         eyebrow={locale.demos.eyebrow}
@@ -37,7 +37,14 @@ export function DemosSection() {
           </>
         }
         body={locale.demos.subtitle}
-        action={<RealtimeBadge>Live preview</RealtimeBadge>}
+        action={
+          <span className="inline-flex items-center gap-2">
+            <span className="rounded-full border border-volt-500/30 bg-volt-dim px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-volt-500">
+              Flagship · shipped
+            </span>
+            <RealtimeBadge>Live</RealtimeBadge>
+          </span>
+        }
       />
 
       <div className="mt-12 grid gap-8 lg:grid-cols-3">

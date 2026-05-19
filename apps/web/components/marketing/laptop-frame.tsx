@@ -32,7 +32,7 @@ export function LaptopFrame({ children, className }: LaptopFrameProps) {
             fitconnect.app / dashboard
           </span>
         </div>
-        <div className="relative min-h-[380px] bg-ink-950">
+        <div className="relative min-h-[340px] bg-ink-950 sm:min-h-[360px]">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.04] via-transparent to-transparent"

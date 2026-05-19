@@ -8,9 +8,14 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { CelebrationRibbon } from "@/components/celebration-ribbon";
 import { CommunityFeed } from "@/components/community/community-feed";
+import { CreatePostModal } from "@/components/community/create-post-modal";
 import { CommunityActivityMap } from "@/components/community/community-activity-map";
 import { DemoBanner } from "@/components/demo-banner";
 import { COMMUNITY_POSTS, SPORTS, type Sport } from "@/lib/data";
+import {
+  dispatchCommunityPost,
+  saveLocalPost
+} from "@/lib/community/local-posts";
 import {
   Award,
   Bookmark,
@@ -64,6 +69,7 @@ export default function CommunityPage() {
   const [q, setQ] = useState("");
   const [kind, setKind] = useState<FeedKind>("all");
   const [sport, setSport] = useState<Sport | "All">("All");
+  const [createOpen, setCreateOpen] = useState(false);
 
   const kindKeys = Object.keys(cf.kinds) as FeedKind[];
   const sidebarStats = [
@@ -94,8 +100,19 @@ export default function CommunityPage() {
             body={cf.subtitle}
             action={<RealtimeBadge>Community live</RealtimeBadge>}
           />
-          <Button size="lg">{cf.shareCta}</Button>
+          <Button size="lg" onClick={() => setCreateOpen(true)}>
+            {cf.shareCta}
+          </Button>
         </header>
+
+        <CreatePostModal
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          onPublish={(post) => {
+            saveLocalPost(post);
+            dispatchCommunityPost(post);
+          }}
+        />
 
         <div className="mb-8 grid gap-3 sm:grid-cols-3">
           {sidebarStats.map((stat) => (

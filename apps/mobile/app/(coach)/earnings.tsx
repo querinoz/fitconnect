@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { SCROLL_BOTTOM_INSET } from "@/lib/layout";
 import { tokens } from "@/lib/tokens";
 import { formatPrice } from "@fitconnect/utils";
 import { ScrollView, StyleSheet, Text } from "react-native";
@@ -34,7 +35,7 @@ export default function CoachEarningsScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: tokens.colors.ink[950] },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
+  content: { padding: 16, gap: 12, paddingBottom: SCROLL_BOTTOM_INSET },
   title: { color: tokens.colors.ink[50], fontSize: 24, fontWeight: "800" },
   kpiLabel: { color: tokens.colors.ink[400], fontSize: 12, fontWeight: "700" },
   kpiValue: { color: tokens.colors.ink[50], fontSize: 32, fontWeight: "800", marginTop: 4 },

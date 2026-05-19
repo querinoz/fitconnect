@@ -4,6 +4,7 @@ import { Moon, Shield, Sparkles, Sun, Volume2 } from "lucide-react";
 import { ThemePicker } from "@/components/shell/theme-picker";
 import { PremiumCard } from "@/components/ui-glass/premium-system";
 import { useAppearance } from "@/lib/theme/use-appearance";
+import { useLocale } from "@/lib/i18n-provider";
 import { cn } from "@/lib/utils";
 
 function ToggleRow({
@@ -50,6 +51,7 @@ export function ProfileSettingsPanel({ compact = false }: { compact?: boolean })
     highContrast,
     setHighContrast
   } = useAppearance();
+  const { appearance, accessibility, security } = useLocale().mobileApp;
 
   return (
     <div className={cn("space-y-3", compact && "text-left")}>
@@ -57,7 +59,7 @@ export function ProfileSettingsPanel({ compact = false }: { compact?: boolean })
         <div className="mb-3 flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-volt-400" aria-hidden />
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-volt-400">
-            Appearance
+            {appearance.title}
           </p>
         </div>
         <ThemePicker variant="settings" />
@@ -74,7 +76,7 @@ export function ProfileSettingsPanel({ compact = false }: { compact?: boolean })
             )}
           >
             <Moon className="h-3.5 w-3.5" aria-hidden />
-            Dark
+            {appearance.dark}
           </button>
           <button
             type="button"
@@ -88,7 +90,7 @@ export function ProfileSettingsPanel({ compact = false }: { compact?: boolean })
             )}
           >
             <Sun className="h-3.5 w-3.5" aria-hidden />
-            Light
+            {appearance.light}
           </button>
         </div>
       </PremiumCard>
@@ -97,18 +99,18 @@ export function ProfileSettingsPanel({ compact = false }: { compact?: boolean })
         <div className="mb-1 flex items-center gap-2">
           <Volume2 className="h-4 w-4 text-brand-300" aria-hidden />
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-ink-400">
-            Accessibility
+            {accessibility.title}
           </p>
         </div>
         <ToggleRow
-          label="Reduce motion"
-          description="Calmer transitions across the app"
+          label={accessibility.reduceMotion}
+          description={accessibility.reduceMotionDesc}
           checked={reduceMotion}
           onChange={setReduceMotion}
         />
         <ToggleRow
-          label="High contrast"
-          description="Stronger text and card edges"
+          label={accessibility.highContrast}
+          description={accessibility.highContrastDesc}
           checked={highContrast}
           onChange={setHighContrast}
         />
@@ -118,24 +120,22 @@ export function ProfileSettingsPanel({ compact = false }: { compact?: boolean })
         <div className="mb-1 flex items-center gap-2">
           <Shield className="h-4 w-4 text-plasma-300" aria-hidden />
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-ink-400">
-            Security & privacy
+            {security.title}
           </p>
         </div>
         <button
           type="button"
           className="w-full rounded-xl border border-glass-border bg-glass-md px-3 py-2 text-left text-xs font-semibold text-ink-200"
         >
-          Manage connected wearables
+          {security.wearables}
         </button>
         <button
           type="button"
           className="w-full rounded-xl border border-glass-border bg-glass-md px-3 py-2 text-left text-xs font-semibold text-ink-200"
         >
-          Data export & privacy controls
+          {security.dataExport}
         </button>
-        <p className="text-[10px] leading-5 text-ink-500">
-          Demo-only controls — wire to real account settings in production.
-        </p>
+        <p className="text-[10px] leading-5 text-ink-500">{security.demoNote}</p>
       </PremiumCard>
     </div>
   );

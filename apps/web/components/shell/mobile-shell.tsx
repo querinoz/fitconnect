@@ -78,6 +78,8 @@ export function MobileShell({
         name={name}
         avatarUrl={avatarUrl}
         tabLabel={onHome ? undefined : activeTab.label}
+        roleLabel={role === "coach" ? "Coach OS" : "Athlete OS"}
+        role={role}
       />
       <main className="relative min-w-0 px-4 sm:px-5">
         <PageTransition>{children}</PageTransition>

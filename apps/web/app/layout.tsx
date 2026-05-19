@@ -23,9 +23,9 @@ const display = Syne({
 });
 
 export const metadata: Metadata = {
-  title: "FitConnect — Train with world-class specialists",
+  title: "FitConnect — Treina com especialistas de elite",
   description:
-    "Connect with elite personal trainers for any sport you love. Yoga, surf, climbing, MMA and more — in person or online.",
+    "Marketplace de coaches verificados com Readiness IA, sync Strava e sessões ao vivo. Yoga, surf, escalada, MMA e mais — presencial ou online.",
   metadataBase: new URL("https://fitconnect.querinoz.dev"),
   applicationName: "FitConnect",
   manifest: "/app.webmanifest",
@@ -39,11 +39,25 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-touch-icon.svg", sizes: "180x180", type: "image/svg+xml" }]
   },
   openGraph: {
-    title: "FitConnect — Train with world-class specialists",
+    title: "FitConnect — Treina com especialistas de elite",
     description:
-      "Discover, book and train with the best specialised personal trainers in the world.",
-    type: "website"
-  }
+      "Descobre, reserva e treina com os melhores personal trainers especializados do mundo.",
+    type: "website",
+    url: "https://fitconnect.querinoz.dev",
+    locale: "pt_PT",
+    images: [{ url: "/og-image.svg", width: 1200, height: 630, alt: "FitConnect" }]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FitConnect — Treina com especialistas de elite",
+    description:
+      "Coaches de elite para qualquer desporto. Readiness IA, Strava sync e intro grátis de 15 min.",
+    images: ["/og-image.svg"]
+  },
+  alternates: {
+    canonical: "https://fitconnect.querinoz.dev"
+  },
+  robots: { index: true, follow: true }
 };
 
 export const viewport: Viewport = {
@@ -61,7 +75,7 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="en"
+      lang="pt"
       className={`${sans.variable} ${display.variable} dark`}
       suppressHydrationWarning
     >
@@ -79,7 +93,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen overflow-x-clip antialiased font-sans">
+      <body className="min-h-dvh w-full max-w-[100vw] overflow-x-clip antialiased font-sans">
         <Providers>
           <SkipLink />
           {children}

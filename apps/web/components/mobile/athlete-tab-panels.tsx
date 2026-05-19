@@ -233,7 +233,7 @@ export function ProfileTabPanel({
       </PremiumCard>
       <div className="grid grid-cols-2 gap-3">
         <MetricTile label="Streak" value={`${streakDays}d`} icon={Zap} tone="volt" />
-        <MetricTile label="Readiness" value={String(readinessScore)} icon={Activity} tone="brand" />
+        <MetricTile label="Sessions" value="12" delta="This month" icon={Activity} tone="brand" />
       </div>
       <ProfileSettingsPanel compact />
     </div>

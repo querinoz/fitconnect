@@ -115,8 +115,10 @@ export function AuthShell({
           setSubmitted(false);
           return;
         }
+        const demoUser = validateCredentials(identifier, password, registered);
+        if (demoUser) login(demoUser);
         setSubmitted(false);
-        router.replace(redirectOverride ?? "/dashboard");
+        router.replace(redirectOverride ?? dashboardPathForRole(demoUser?.role ?? "athlete"));
         return;
       }
 

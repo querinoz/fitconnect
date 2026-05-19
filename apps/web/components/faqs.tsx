@@ -48,7 +48,7 @@ export function Faqs() {
   const list = lang === "pt" ? FAQS_PT : FAQS;
 
   return (
-    <section className="mx-auto max-w-4xl px-6 py-24">
+    <section className="mx-auto max-w-4xl fc-section-x px-4 py-16 sm:px-6 sm:py-24">
       <div className="text-center max-w-2xl mx-auto">
         <p className="eyebrow inline-flex items-center gap-1.5">
           <HelpCircle aria-hidden="true" className="h-3.5 w-3.5" />{" "}

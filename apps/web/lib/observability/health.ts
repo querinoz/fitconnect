@@ -30,7 +30,7 @@ export function buildHealthReport(env: NodeJS.ProcessEnv = process.env): HealthR
   deps.push({
     name: "realtime",
     status: "ok",
-    detail: "broadcast channel (demo)"
+    detail: resolveRealtimeDetail(env)
   });
 
   const hasDegraded = deps.some((d) => d.status !== "ok");
@@ -41,4 +41,15 @@ export function buildHealthReport(env: NodeJS.ProcessEnv = process.env): HealthR
     version: env.npm_package_version ?? "0.1.0",
     dependencies: deps
   };
+}
+
+function resolveRealtimeDetail(env: NodeJS.ProcessEnv): string {
+  const provider = env.NEXT_PUBLIC_REALTIME_PROVIDER ?? "broadcast";
+  if (provider === "convex" && env.NEXT_PUBLIC_CONVEX_URL) {
+    return "convex + supabase (hybrid)";
+  }
+  if (provider === "supabase" && env.NEXT_PUBLIC_SUPABASE_URL) {
+    return "supabase realtime";
+  }
+  return "broadcast channel (demo)";
 }

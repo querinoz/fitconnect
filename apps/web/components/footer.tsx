@@ -13,24 +13,26 @@ export function Footer() {
     { label: t("nav", "findCoach"), href: "/discover" },
     { label: t("nav", "programs"), href: "/programs" },
     { label: t("nav", "dashboard"), href: "/dashboard" },
+    { label: t("nav", "coachDashboard"), href: "/coach/dashboard?demo=coach" },
     { label: t("nav", "community"), href: "/community" },
-    { label: t("nav", "methodology"), href: "/methodology" },
+    { label: t("hero", "demoCta"), href: "/mobile" },
+    { label: t("nav", "methodology"), href: "/#methodology" },
     { label: t("nav", "pricing"), href: "/pricing" }
   ];
 
   const company = [
     { label: t("nav", "forCoaches"), href: "/trainer" },
-    { label: "About", href: "#" },
-    { label: "Careers", href: "#" },
-    { label: "Press", href: "#" },
-    { label: "Partnerships", href: "#" }
+    { label: t("footer", "about"), href: "#" },
+    { label: t("footer", "careers"), href: "#" },
+    { label: t("footer", "press"), href: "#" },
+    { label: t("footer", "partnerships"), href: "#" }
   ];
 
   const legal = [
-    { label: "Privacy", href: "#" },
-    { label: "Terms", href: "#" },
-    { label: "Trust & Safety", href: "#" },
-    { label: "Contact", href: "#" }
+    { label: t("footer", "privacy"), href: "#" },
+    { label: t("footer", "terms"), href: "#" },
+    { label: t("footer", "trustSafety"), href: "#" },
+    { label: t("footer", "contact"), href: "#" }
   ];
 
   const social = [
@@ -45,8 +47,8 @@ export function Footer() {
   ];
 
   return (
-    <footer className="border-t border-[var(--border-xs)] mt-24 bg-ink-950">
-      <div className="mx-auto max-w-7xl px-4 py-12 grid gap-10 sm:px-6 sm:py-16 md:grid-cols-12">
+    <footer className="border-t border-[var(--border-xs)] mt-12 sm:mt-16 bg-ink-950">
+      <div className="mx-auto max-w-7xl fc-section-x px-4 py-10 grid gap-10 sm:px-6 sm:py-14 md:grid-cols-12">
         <div className="md:col-span-4">
           <Link href="/" className="flex items-center gap-2.5">
             <Logo className="h-9 w-9" />
@@ -75,7 +77,7 @@ export function Footer() {
           </h4>
           <ul className="space-y-2 text-sm text-ink-400">
             {product.map((l) => (
-              <li key={l.label}>
+              <li key={l.href}>
                 <Link href={l.href} className="hover:text-ink-100 transition-colors">
                   {l.label}
                 </Link>
@@ -130,11 +132,11 @@ export function Footer() {
           </Link>
         </div>
       </div>
-      <div className="border-t border-ink-800 py-6 px-4 sm:px-6 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-500">
+      <div className="border-t border-ink-800 py-6 px-4 sm:px-6 text-center text-xs text-ink-500 font-mono">
         <p>
           © {new Date().getFullYear()} FitConnect · {t("footer", "copyright")}
         </p>
-        <p className="flex items-center gap-3">
+        <p className="mt-2 flex flex-wrap items-center justify-center gap-3">
           <span className="inline-flex items-center gap-1">
             <span
               aria-hidden="true"
@@ -142,7 +144,11 @@ export function Footer() {
             />
             {t("footer", "statusOk")}
           </span>
+          <span>·</span>
           <span>v2026.5</span>
+        </p>
+        <p className="mt-3 text-[10px] text-ink-600 max-w-lg mx-auto">
+          {t("footer", "stravaAttribution")}
         </p>
       </div>
     </footer>

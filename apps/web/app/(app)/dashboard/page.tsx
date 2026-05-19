@@ -34,6 +34,8 @@ import { RecoveryBookingModal } from "@/components/booking/recovery-booking-moda
 import { AthleteOsDashboard } from "@/components/dashboard/os/athlete-os-dashboard";
 import { useAthleteSessions } from "@/lib/api/hooks/use-athlete-sessions";
 import { computeReadiness } from "@/lib/readiness/compute";
+import { RpeFeedbackModal } from "@/components/loops/live-session/rpe-feedback-modal";
+import { recommendationFromRpe } from "@/lib/ai/rules";
 import { useLiveHrvSync } from "@/lib/hooks/use-live-hrv-sync";
 
 function intentFromPlan(blocks: PlanBlock[]): LiveSessionIntent {
@@ -68,6 +70,7 @@ function AthleteDashboardBody() {
 
   const [demoPanel, setDemoPanel] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
+  const [rpeOpen, setRpeOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -162,6 +165,7 @@ function AthleteDashboardBody() {
         });
       }
     }
+    setRpeOpen(true);
   };
 
   const liveSection = (
@@ -318,6 +322,21 @@ function AthleteDashboardBody() {
         athleteName={athlete.name}
         open={bookingOpen}
         onClose={() => setBookingOpen(false)}
+      />
+
+      <RpeFeedbackModal
+        open={rpeOpen}
+        sessionTitle={nextBlock.title}
+        onClose={() => setRpeOpen(false)}
+        onSubmit={(rpe, notes) => {
+          void fetch(`/api/v1/sessions/${plan.id}/feedback`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ athleteExternalId: athleteId, rpe, notes })
+          });
+          const diff = recommendationFromRpe(rpe);
+          if (rpe >= 8) apply(plan.id, diff === "recovery-day" ? "add-recovery" : diff);
+        }}
       />
     </>
   );

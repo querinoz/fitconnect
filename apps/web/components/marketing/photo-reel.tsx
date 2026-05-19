@@ -116,7 +116,7 @@ export function PhotoReel() {
       className="relative isolate py-16 md:py-20 overflow-hidden"
     >
       <div ref={containerRef} className="relative">
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-7xl fc-section-x px-4 sm:px-6">
         <div className="flex items-end justify-between flex-wrap gap-4 mb-8">
           <div>
             <p className="eyebrow inline-flex items-center gap-1.5">

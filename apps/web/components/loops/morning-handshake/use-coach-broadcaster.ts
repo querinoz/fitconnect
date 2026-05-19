@@ -2,6 +2,7 @@
 
 import { useChannel } from "@/lib/realtime/use-channel";
 import type { PlanUpdate } from "@/lib/realtime/types";
+import { resolveTransport } from "@/lib/platform/realtime/resolve-transport";
 
 export function useCoachBroadcaster(coachId: string) {
   const roster = useChannel(`roster:${coachId}`);
@@ -21,11 +22,7 @@ export function useCoachBroadcaster(coachId: string) {
         origin: "coach"
       };
       roster.send(msg);
-      if (typeof window !== "undefined" && "BroadcastChannel" in window) {
-        const ch = new BroadcastChannel(`athlete:${p.athleteId}`);
-        ch.postMessage(msg);
-        ch.close();
-      }
+      resolveTransport(`athlete:${p.athleteId}`).publish(`athlete:${p.athleteId}`, msg);
     }
   };
 }

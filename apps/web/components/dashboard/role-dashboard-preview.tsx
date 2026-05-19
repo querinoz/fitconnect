@@ -15,10 +15,13 @@ export type DashboardPreviewRole = "athlete" | "coach";
 type RoleDashboardPreviewProps = {
   /** `phone` wraps content in iPhone chrome; `browser` uses desktop-style frames */
   variant?: "phone" | "browser";
+  /** Smaller fixed-height frame for landing dashboard section */
+  compact?: boolean;
 };
 
 export function RoleDashboardPreview({
-  variant = "phone"
+  variant = "phone",
+  compact = false
 }: RoleDashboardPreviewProps) {
   const locale = useLocale();
   const reduce = useReducedMotion();
@@ -51,7 +54,10 @@ export function RoleDashboardPreview({
         aria-label={locale.dashboardPreview.tabsAria}
         className={cn(
           "inline-flex rounded-2xl border border-[var(--border-xs)] bg-carbon-2/90 p-1 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]",
-          frameless && "mx-2 mt-1 w-[calc(100%-1rem)] sm:mx-3 sm:w-[calc(100%-1.5rem)]"
+          frameless &&
+            (compact
+              ? "mx-auto mt-1 w-[calc(100%-0.75rem)] max-w-[280px] sm:w-[calc(100%-1rem)]"
+              : "mx-2 mt-1 w-[calc(100%-1rem)] sm:mx-3 sm:w-[calc(100%-1.5rem)]")
         )}
       >
         {tabs.map((tab) => {
@@ -65,7 +71,7 @@ export function RoleDashboardPreview({
               aria-controls={`${tabsId}-panel`}
               onClick={() => setRole(tab.id)}
               className={cn(
-                "relative flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-colors min-h-[44px]",
+                "relative flex flex-1 items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-[11px] font-semibold transition-colors min-h-[40px] sm:gap-2 sm:px-3 sm:text-xs sm:min-h-[44px]",
                 active ? "text-ink-50" : "text-ink-400 hover:text-ink-200"
               )}
             >
@@ -91,16 +97,16 @@ export function RoleDashboardPreview({
         role="tabpanel"
         id={`${tabsId}-panel`}
         aria-labelledby={`${tabsId}-${role}`}
-        className={cn(frameless ? "mt-3" : "mt-6")}
+        className={cn(frameless ? "mt-2 sm:mt-3" : "mt-6")}
       >
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={role}
-            initial={{ opacity: 0, x: reduce ? 0 : role === "coach" ? 24 : -24 }}
+            initial={{ opacity: 0, x: reduce ? 0 : role === "coach" ? 16 : -16 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: reduce ? 0 : role === "coach" ? -24 : 24 }}
+            exit={{ opacity: 0, x: reduce ? 0 : role === "coach" ? -16 : 16 }}
             transition={{
-              duration: reduce ? 0 : 0.32,
+              duration: reduce ? 0 : 0.28,
               ease: [0.16, 1, 0.3, 1]
             }}
           >
@@ -114,7 +120,6 @@ export function RoleDashboardPreview({
           </motion.div>
         </AnimatePresence>
       </div>
-
     </>
   );
 
@@ -122,11 +127,26 @@ export function RoleDashboardPreview({
     return <div className="relative">{panel}</div>;
   }
 
+  const screenHeight = compact
+    ? "flex h-[380px] flex-col overflow-hidden sm:h-[420px]"
+    : "flex min-h-[min(480px,62dvh)] max-h-[min(720px,85dvh)] flex-col sm:min-h-[540px]";
+
+  const frameWidth = compact
+    ? "mx-auto w-full max-w-[280px] sm:max-w-[300px]"
+    : "mx-auto w-full max-w-[min(100%,340px)]";
+
+  if (compact) {
+    return (
+      <div className="fc-dashboard-preview-stage mx-auto w-full max-w-[300px] sm:max-w-[320px]">
+        <IphoneFrame className={frameWidth} screenClassName={screenHeight}>
+          {panel}
+        </IphoneFrame>
+      </div>
+    );
+  }
+
   return (
-    <IphoneFrame
-      className="w-full max-w-[min(100%,340px)]"
-      screenClassName="flex min-h-[580px] max-h-[min(720px,85dvh)] flex-col"
-    >
+    <IphoneFrame className={frameWidth} screenClassName={screenHeight}>
       {panel}
     </IphoneFrame>
   );

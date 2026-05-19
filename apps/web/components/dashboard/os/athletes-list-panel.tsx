@@ -32,8 +32,11 @@ const FALLBACK = [
 
 export function AthletesListPanel({ coachId }: { coachId: string }) {
   const athletes = useDashboardStore(
-    useShallow((s) =>
-      selectAthletesForCoach(s, coachId).slice(0, 5).map((a) => ({
+    useShallow((s) => selectAthletesForCoach(s, coachId).slice(0, 5))
+  );
+
+  const rows = athletes.length
+    ? athletes.map((a) => ({
         name: a.name,
         sport: a.sports[0] ?? "Athlete",
         hrv: a.hrv,
@@ -46,10 +49,7 @@ export function AthletesListPanel({ coachId }: { coachId: string }) {
               : ("stable" as const),
         avatar: a.avatar
       }))
-    )
-  );
-
-  const rows = athletes.length ? athletes : FALLBACK;
+    : FALLBACK;
   const avg = Math.round(rows.reduce((s, a) => s + a.readiness, 0) / rows.length);
 
   return (

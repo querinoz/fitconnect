@@ -1,5 +1,7 @@
+import { OrbsLayer } from "@/components/marketing/ck/orbs-layer";
+
 /**
- * Landing backdrop — smooth mesh glow, minimal noise, premium dark depth.
+ * Landing backdrop — smooth mesh glow, floating orbs, premium dark depth.
  */
 export function LandingCanvas() {
   return (
@@ -7,6 +9,7 @@ export function LandingCanvas() {
       aria-hidden
       className="pointer-events-none fixed inset-0 -z-30 overflow-hidden bg-[#07080b]"
     >
+      <OrbsLayer />
       {/* Base luminance — soft lift at top center */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-20%,#1a1c22_0%,#0c0d11_45%,#07080b_100%)]" />
 

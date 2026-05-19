@@ -153,18 +153,28 @@ export default function AthleteOnboardingPage() {
   }
 
   if (step === 3) {
+    const athleteId = user?.athleteId ?? "a-ines";
     return (
       <OnboardingShell
         step={3}
         totalSteps={5}
         stepLabels={["Sports", "Goal", "Wearables", "Plan", "Done"]}
-        title="Connect wearables"
-        subtitle="Optional — readiness and HRV sync automatically when linked."
+        title="Connect Strava & wearables"
+        subtitle="Strava syncs activities automatically. Wearables feed your Readiness Score."
         onBack={() => setStep(2)}
         onNext={() => setStep(4)}
         nextLabel="Continue"
       >
         <div className="grid gap-3 sm:grid-cols-2">
+          <a
+            href={`/api/v1/integrations/strava/connect?athleteId=${encodeURIComponent(athleteId)}`}
+            className="rounded-xl border border-[#FC4C02]/40 bg-[#FC4C02]/10 px-4 py-4 text-left hover:border-[#FC4C02]/60"
+          >
+            <span className="font-semibold text-ink-100">Strava</span>
+            <span className="block text-xs text-ink-400 mt-1">
+              OAuth connect · activities + webhooks
+            </span>
+          </a>
           {["Garmin", "WHOOP", "Oura", "Apple Health"].map((w) => (
             <button
               key={w}
@@ -173,7 +183,7 @@ export default function AthleteOnboardingPage() {
               className="rounded-xl border border-ink-800 bg-ink-950/60 px-4 py-3 text-left text-sm hover:border-brand-500/40"
             >
               <span className="font-semibold text-ink-100">{w}</span>
-              <span className="block text-xs text-ink-500 mt-1">Demo connect</span>
+              <span className="block text-xs text-ink-500 mt-1">Coming soon</span>
             </button>
           ))}
         </div>

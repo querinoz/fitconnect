@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import type { CommunityPost, Sport } from "@/lib/data";
 import { COMMUNITY_POSTS } from "@/lib/data";
+import {
+  communityPostEventName,
+  loadLocalPosts
+} from "@/lib/community/local-posts";
 import { useChannel } from "@/lib/realtime/use-channel";
 import { Button } from "@/components/ui/button";
 import { PremiumCard } from "@/components/ui-glass/premium-system";
@@ -12,7 +16,9 @@ import { Heart, MessageCircle, Share2 } from "lucide-react";
 type FeedPost = CommunityPost & { reactions: Record<string, number> };
 
 function seedPosts(): FeedPost[] {
-  return COMMUNITY_POSTS.map((p) => ({
+  const local = typeof window !== "undefined" ? loadLocalPosts() : [];
+  const merged = [...local, ...COMMUNITY_POSTS];
+  return merged.map((p) => ({
     ...p,
     reactions: { "🔥": Math.max(1, p.likes % 7), "💪": p.likes % 5, "👏": p.comments }
   }));
@@ -27,6 +33,25 @@ export function CommunityFeed({
   const [draft, setDraft] = useState("");
   const [kind, setKind] = useState<CommunityPost["kind"]>("Check-in");
   const { messages, send } = useChannel("community:feed");
+
+  useEffect(() => {
+    function onExternalPost(e: Event) {
+      const post = (e as CustomEvent<CommunityPost>).detail;
+      if (!post) return;
+      setPosts((prev) => {
+        if (prev.some((p) => p.id === post.id)) return prev;
+        return [
+          {
+            ...post,
+            reactions: { "🔥": 1 }
+          },
+          ...prev
+        ];
+      });
+    }
+    window.addEventListener(communityPostEventName(), onExternalPost);
+    return () => window.removeEventListener(communityPostEventName(), onExternalPost);
+  }, []);
 
   useEffect(() => {
     const latest = messages.at(-1);

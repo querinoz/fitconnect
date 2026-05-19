@@ -6,7 +6,7 @@ import { FEATURED_CITIES } from "@/lib/data";
 
 export function CitiesStrip() {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-14">
+    <section className="mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-14">
       <div className="rounded-3xl border border-ink-800 bg-ink-900/40 p-8 md:p-10">
         <div className="flex items-baseline flex-wrap gap-3 mb-5">
           <p className="eyebrow">Active in 47 countries</p>

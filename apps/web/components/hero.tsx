@@ -57,7 +57,7 @@ export function Hero() {
         className="absolute -bottom-20 right-1/4 -z-10 h-[280px] w-[280px] rounded-full bg-plasma-500/15 blur-3xl"
       />
 
-      <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-12 items-center">
+      <div className="mx-auto max-w-7xl fc-section-x px-4 sm:px-6 grid lg:grid-cols-12 gap-12 items-center">
         <motion.div
           initial={{ opacity: 0, y: reduce ? 0 : 24 }}
           animate={{ opacity: 1, y: 0 }}

@@ -3,6 +3,7 @@
 import { useChannel } from "@/lib/realtime/use-channel";
 import type { AICoPilotAlert, PlanUpdate } from "@/lib/realtime/types";
 import { useDashboardStore, selectPlanForAthlete } from "@/lib/dashboard-store";
+import { resolveTransport } from "@/lib/platform/realtime/resolve-transport";
 
 type QuickDiffKey = Exclude<PlanUpdate["diff"], "custom">;
 
@@ -30,11 +31,7 @@ export function useCoPilot(coachId: string) {
         origin: "co-pilot"
       };
       roster.send(msg);
-      if (typeof window !== "undefined" && "BroadcastChannel" in window) {
-        const bc = new BroadcastChannel(`athlete:${alert.athleteId}`);
-        bc.postMessage(msg);
-        bc.close();
-      }
+      resolveTransport(`athlete:${alert.athleteId}`).publish(`athlete:${alert.athleteId}`, msg);
       useDashboardStore.getState().applyPlanDiff(plan.id, diff);
       useDashboardStore.getState().dismissAIAlert(alert.id);
     }

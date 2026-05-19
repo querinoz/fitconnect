@@ -1,6 +1,7 @@
 import { Redirect, Tabs } from "expo-router";
-import { Text } from "react-native";
+import { Platform, Text } from "react-native";
 import { useAuthStore } from "@/lib/auth-store";
+import { TAB_BAR_HEIGHT } from "@/lib/layout";
 import { tokens } from "@/lib/tokens";
 
 function TabLabel({ label }: { label: string }) {
@@ -20,9 +21,12 @@ export default function CoachLayout() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: tokens.colors.ink[950],
-          borderTopColor: tokens.colors.ink[800]
+          borderTopColor: tokens.colors.ink[800],
+          height: TAB_BAR_HEIGHT,
+          paddingBottom: Platform.OS === "ios" ? 22 : 8,
+          paddingTop: 6
         },
-        tabBarActiveTintColor: tokens.colors.brand[400],
+        tabBarActiveTintColor: tokens.colors.accent[400],
         tabBarInactiveTintColor: tokens.colors.ink[500]
       }}
     >

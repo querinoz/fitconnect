@@ -12,6 +12,7 @@ import {
   YAxis
 } from "recharts";
 import { generateHrvSeries } from "@/lib/readiness/compute";
+import { rechartsTheme } from "@/lib/charts/recharts-theme";
 
 const RANGES = [
   { label: "7d", count: 7 },
@@ -100,24 +101,24 @@ export function HrvChartFull({ baselineHrv, seed = 1 }: { baselineHrv: number; s
           <AreaChart data={data} margin={{ left: -20 }}>
             <defs>
               <linearGradient id="hrvFullOs" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#00ddb4" stopOpacity={0.25} />
-                <stop offset="100%" stopColor="#00ddb4" stopOpacity={0} />
+                <stop offset="0%" stopColor={rechartsTheme.hrv} stopOpacity={0.25} />
+                <stop offset="100%" stopColor={rechartsTheme.hrv} stopOpacity={0} />
               </linearGradient>
               <linearGradient id="sleepFullOs" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#a855f7" stopOpacity={0.2} />
-                <stop offset="100%" stopColor="#a855f7" stopOpacity={0} />
+                <stop offset="0%" stopColor={rechartsTheme.sleep} stopOpacity={0.2} />
+                <stop offset="100%" stopColor={rechartsTheme.sleep} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(51,65,85,0.2)" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={rechartsTheme.grid} vertical={false} />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 10, fill: "#64748b" }}
+              tick={{ fontSize: 10, fill: rechartsTheme.axis }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
               yAxisId="hrv"
-              tick={{ fontSize: 10, fill: "#64748b" }}
+              tick={{ fontSize: 10, fill: rechartsTheme.axis }}
               axisLine={false}
               tickLine={false}
               domain={["dataMin - 4", "dataMax + 4"]}
@@ -125,7 +126,7 @@ export function HrvChartFull({ baselineHrv, seed = 1 }: { baselineHrv: number; s
             <YAxis
               yAxisId="sleep"
               orientation="right"
-              tick={{ fontSize: 10, fill: "#64748b" }}
+              tick={{ fontSize: 10, fill: rechartsTheme.axis }}
               axisLine={false}
               tickLine={false}
               domain={[5, 10]}
@@ -133,7 +134,7 @@ export function HrvChartFull({ baselineHrv, seed = 1 }: { baselineHrv: number; s
             <ReferenceLine
               yAxisId="hrv"
               y={avg}
-              stroke="#00ddb4"
+              stroke={rechartsTheme.hrv}
               strokeDasharray="4 4"
               strokeOpacity={0.3}
             />
@@ -142,23 +143,23 @@ export function HrvChartFull({ baselineHrv, seed = 1 }: { baselineHrv: number; s
               yAxisId="hrv"
               type="monotone"
               dataKey="hrv"
-              stroke="#00ddb4"
+              stroke={rechartsTheme.hrv}
               fill="url(#hrvFullOs)"
               strokeWidth={2}
               dot={false}
               name="HRV"
-              activeDot={{ r: 4, fill: "#00ddb4", stroke: "#0f172a", strokeWidth: 2 }}
+              activeDot={{ r: 4, fill: rechartsTheme.hrv, stroke: rechartsTheme.ink, strokeWidth: 2 }}
             />
             <Area
               yAxisId="sleep"
               type="monotone"
               dataKey="sleep"
-              stroke="#a855f7"
+              stroke={rechartsTheme.sleep}
               fill="url(#sleepFullOs)"
               strokeWidth={2}
               dot={false}
               name="Sleep"
-              activeDot={{ r: 4, fill: "#a855f7", stroke: "#0f172a", strokeWidth: 2 }}
+              activeDot={{ r: 4, fill: rechartsTheme.sleep, stroke: rechartsTheme.ink, strokeWidth: 2 }}
             />
           </AreaChart>
         </ResponsiveContainer>

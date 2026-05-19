@@ -162,6 +162,11 @@ Flow:
 | `GET /api/v1/integrations/strava/connect` | OAuth start (demo fallback) |
 | `GET /api/v1/integrations/strava/callback` | OAuth callback |
 | `POST /api/v1/integrations/strava/sync` | Manual sync |
+| `POST /api/v1/integrations/strava/disconnect` | Revoke Strava OAuth + mark deauthorized |
+| `GET /api/v1/integrations/strava/endpoints` | Catalog of proxied Strava v3 paths |
+| `GET/POST/PUT/DELETE /api/v1/integrations/strava/v3/*` | Authenticated proxy to [Strava API v3 playground](https://developers.strava.com/playground/) |
+
+**Proxied endpoints include:** athlete profile/zones/clubs/activities, athlete stats/routes, activities (CRUD + comments/kudos/laps/zones/streams), clubs, gear, routes (+ GPX/TCX export), segments (explore/starred/streams), segment efforts, uploads.
 
 Dashboard widget: `components/dashboard/integrations-hub.tsx`
 

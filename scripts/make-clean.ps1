@@ -19,6 +19,10 @@ if ($ids) { $ids | ForEach-Object { docker rm -f $_ 2>$null | Out-Null } }
 
 Write-Host "==> Clearing Next.js build cache" -ForegroundColor Cyan
 Remove-Item -Recurse -Force "$Root\.next" -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force "$Root\apps\web\.next" -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force "$Root\.turbo" -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force "$Root\node_modules\.cache" -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force "$Root\node_modules\.vite" -ErrorAction SilentlyContinue
 Remove-Item -Recurse -Force "$Root\out" -ErrorAction SilentlyContinue
 Remove-Item -Recurse -Force "$Root\dist" -ErrorAction SilentlyContinue
 Remove-Item -Recurse -Force "$Root\build" -ErrorAction SilentlyContinue

@@ -10,12 +10,15 @@ import {
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { LangPicker } from "./lang-picker";
+import { CoachQuizModal } from "./coach-quiz-modal";
 import { BrandLockup } from "./brand/brand-lockup";
 import { useT } from "@/lib/i18n-provider";
+import { useQuizModalStore } from "@/lib/quiz-modal-store";
 import { cn } from "@/lib/utils";
 
 export function Nav() {
   const t = useT();
+  const setQuizOpen = useQuizModalStore((s) => s.setOpen);
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -59,13 +62,13 @@ export function Nav() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 transition-all duration-300",
+        "sticky top-0 z-50 transition-all duration-300 font-mono",
         scrolled
-          ? "premium-surface border-b border-ink-800/80 shadow-elevated"
+          ? "border-b border-ink-800/80 bg-ink-950/85 backdrop-blur-xl"
           : "bg-transparent border-b border-transparent"
       )}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6">
+      <div className="mx-auto flex w-full min-w-0 max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-6 sm:py-3">
         <div className="flex min-w-0 items-center gap-4 sm:gap-8">
           <Link
             href="/"
@@ -89,7 +92,7 @@ export function Nav() {
 
           <nav
             aria-label="Primary"
-            className="hidden lg:flex items-center gap-6 text-sm text-ink-300"
+            className="hidden lg:flex items-center gap-5 text-xs uppercase tracking-[0.12em] text-ink-400"
           >
             {primaryLinks.map((l) => (
               <Link
@@ -144,14 +147,12 @@ export function Nav() {
           <Button asChild variant="ghost" size="sm">
             <Link href="/signin">{t("nav", "signIn")}</Link>
           </Button>
-          <Button asChild size="sm" className="group">
-            <Link href="/signup" className="flex items-center gap-1.5">
-              <Sparkles
-                aria-hidden="true"
-                className="h-3.5 w-3.5 transition-transform group-hover:rotate-12"
-              />
-              {t("nav", "matchMe")}
-            </Link>
+          <Button size="sm" className="group gap-1.5" onClick={() => setQuizOpen(true)}>
+            <Sparkles
+              aria-hidden="true"
+              className="h-3.5 w-3.5 transition-transform group-hover:rotate-12"
+            />
+            {t("nav", "matchMe")}
           </Button>
         </div>
 
@@ -189,7 +190,7 @@ export function Nav() {
         id="mobile-nav"
         className={cn(
           "md:hidden overflow-hidden transition-all border-t border-ink-800/60 bg-ink-950/95 backdrop-blur",
-          open ? "max-h-[520px] py-4" : "max-h-0"
+          open ? "max-h-[min(520px,80dvh)] py-4 safe-area-pb overflow-y-auto" : "max-h-0"
         )}
       >
         <nav aria-label="Mobile" className="flex flex-col gap-1 px-4 sm:px-6">
@@ -209,14 +210,13 @@ export function Nav() {
                 {t("nav", "signIn")}
               </Link>
             </Button>
-            <Button asChild className="w-full">
-              <Link href="/signup" onClick={() => setOpen(false)}>
-                {t("nav", "matchMe")}
-              </Link>
+            <Button className="w-full" onClick={() => { setQuizOpen(true); setOpen(false); }}>
+              {t("nav", "matchMe")}
             </Button>
           </div>
         </nav>
       </div>
+      <CoachQuizModal />
     </header>
   );
 }

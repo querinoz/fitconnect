@@ -41,6 +41,24 @@ const DEMO_USERS: Array<AuthUser & { password: string }> = [
     coachId: "t-002"
   },
   {
+    id: "coach-demo",
+    username: "coach@fitconnect.com",
+    password: "demo123",
+    name: "Tomás Ribeiro",
+    email: "coach@fitconnect.com",
+    role: "coach",
+    coachId: "t-002"
+  },
+  {
+    id: "athlete-demo",
+    username: "demo@fitconnect.com",
+    password: "demo123",
+    name: "Inês M.",
+    email: "demo@fitconnect.com",
+    role: "athlete",
+    athleteId: "a-ines"
+  },
+  {
     id: "athlete-marina",
     username: "Marina",
     password: "Marina",

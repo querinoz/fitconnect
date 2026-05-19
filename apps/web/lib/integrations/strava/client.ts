@@ -1,65 +1,43 @@
+/** @deprecated Use @fitconnect/strava-integration — kept for backward compatibility. */
+export {
+  StravaClient,
+  buildStravaAuthorizeUrl,
+  buildStravaCallbackUri,
+  STRAVA_DEFAULT_SCOPES,
+  normalizeSummaryActivity,
+  formatSyncAgo
+} from "@fitconnect/strava-integration";
+
+export type { StravaTokenResponseInput as StravaTokenResponse } from "@fitconnect/strava-integration";
+
+import { StravaClient } from "@fitconnect/strava-integration";
 import type { IntegrationActivity } from "../store";
-
-const STRAVA_API = "https://www.strava.com/api/v3";
-
-export type StravaTokenResponse = {
-  access_token: string;
-  refresh_token: string;
-  expires_at: number;
-  athlete: { id: number; firstname?: string; lastname?: string };
-};
 
 export type StravaActivity = {
   id: number;
   name: string;
   type: string;
+  sport_type?: string;
   distance: number;
   moving_time: number;
+  elapsed_time?: number;
   start_date: string;
   average_heartrate?: number;
   total_elevation_gain?: number;
 };
 
-export async function exchangeStravaCode(
-  code: string,
-  redirectUri: string
-): Promise<StravaTokenResponse | null> {
+export async function exchangeStravaCode(code: string, redirectUri: string) {
   const clientId = process.env.STRAVA_CLIENT_ID;
   const clientSecret = process.env.STRAVA_CLIENT_SECRET;
   if (!clientId || !clientSecret) return null;
-
-  const res = await fetch("https://www.strava.com/oauth/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      client_id: clientId,
-      client_secret: clientSecret,
-      code,
-      grant_type: "authorization_code",
-      redirect_uri: redirectUri
-    })
-  });
-  if (!res.ok) return null;
-  return res.json() as Promise<StravaTokenResponse>;
+  return StravaClient.exchangeCode(clientId, clientSecret, code, redirectUri);
 }
 
 export async function refreshStravaToken(refreshToken: string) {
   const clientId = process.env.STRAVA_CLIENT_ID;
   const clientSecret = process.env.STRAVA_CLIENT_SECRET;
   if (!clientId || !clientSecret) return null;
-
-  const res = await fetch("https://www.strava.com/oauth/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      client_id: clientId,
-      client_secret: clientSecret,
-      refresh_token: refreshToken,
-      grant_type: "refresh_token"
-    })
-  });
-  if (!res.ok) return null;
-  return res.json() as Promise<StravaTokenResponse>;
+  return StravaClient.refreshAccessToken(clientId, clientSecret, refreshToken);
 }
 
 export async function fetchStravaActivities(
@@ -68,7 +46,7 @@ export async function fetchStravaActivities(
   perPage = 10
 ): Promise<StravaActivity[]> {
   const res = await fetch(
-    `${STRAVA_API}/athlete/activities?page=${page}&per_page=${perPage}`,
+    `https://www.strava.com/api/v3/athlete/activities?page=${page}&per_page=${perPage}`,
     { headers: { Authorization: `Bearer ${accessToken}` } }
   );
   if (!res.ok) return [];
@@ -80,7 +58,7 @@ export function mapStravaActivity(a: StravaActivity): IntegrationActivity {
     id: String(a.id),
     provider: "strava",
     name: a.name,
-    type: a.type,
+    type: a.sport_type ?? a.type,
     distanceM: a.distance,
     movingTimeSec: a.moving_time,
     startDate: a.start_date,
@@ -90,7 +68,7 @@ export function mapStravaActivity(a: StravaActivity): IntegrationActivity {
 }
 
 export async function fetchStravaAthlete(accessToken: string) {
-  const res = await fetch(`${STRAVA_API}/athlete`, {
+  const res = await fetch("https://www.strava.com/api/v3/athlete", {
     headers: { Authorization: `Bearer ${accessToken}` }
   });
   if (!res.ok) return null;

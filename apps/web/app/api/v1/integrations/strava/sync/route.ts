@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import {
-  fetchStravaActivities,
-  mapStravaActivity,
-  refreshStravaToken
-} from "@/lib/integrations/strava/client";
+  syncRecentActivities,
+  listActivitiesForAthlete,
+  toIntegrationActivity,
+  getConnectionByAthlete
+} from "@/lib/integrations/strava/service";
 import {
   DEMO_STRAVA_ACTIVITIES,
   getConnection,
@@ -11,48 +12,50 @@ import {
   setActivities,
   upsertConnection
 } from "@/lib/integrations/store";
+import { resolveIntegrationAthlete } from "@/lib/integrations/strava/route-auth";
+import { getStravaRateLimit } from "@/lib/integrations/strava/rate-limit-cache";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as { athleteId?: string };
-  const athleteId = body.athleteId ?? "a-ines";
-  const conn = getConnection(athleteId, "strava");
+  const auth = await resolveIntegrationAthlete(request, body.athleteId);
+  if ("error" in auth) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
 
-  if (!conn) {
+  const athleteId = auth.athleteId;
+  const conn = getConnection(athleteId, "strava");
+  const dbConn = await getConnectionByAthlete(athleteId);
+
+  if (!conn && !dbConn) {
     return NextResponse.json({ ok: false, error: "not_connected" }, { status: 404 });
   }
 
-  upsertConnection({ ...conn, status: "syncing" });
+  if (conn) upsertConnection({ ...conn, status: "syncing" });
 
   try {
-    let accessToken = conn.accessToken;
-
-    if (conn.refreshToken && conn.expiresAt && conn.expiresAt * 1000 < Date.now()) {
-      const refreshed = await refreshStravaToken(conn.refreshToken);
-      if (refreshed) {
-        accessToken = refreshed.access_token;
-        upsertConnection({
-          ...conn,
-          accessToken: refreshed.access_token,
-          refreshToken: refreshed.refresh_token,
-          expiresAt: refreshed.expires_at,
-          status: "syncing"
-        });
-      }
-    }
-
     let activities = DEMO_STRAVA_ACTIVITIES;
-    if (accessToken && !conn.metadata?.demo) {
-      const raw = await fetchStravaActivities(accessToken, 1, 10);
+
+    if (dbConn && !dbConn.deauthorizedAt) {
+      await syncRecentActivities(athleteId, 2);
+      const rows = await listActivitiesForAthlete(athleteId, 10);
+      activities = rows.map(toIntegrationActivity);
+    } else if (conn?.accessToken && !conn.metadata?.demo) {
+      const { fetchStravaActivities, mapStravaActivity } = await import(
+        "@/lib/integrations/strava/client"
+      );
+      const raw = await fetchStravaActivities(conn.accessToken, 1, 10);
       activities = raw.map(mapStravaActivity);
     }
 
     setActivities(athleteId, activities);
-    upsertConnection({
-      ...conn,
-      status: "connected",
-      lastSyncAt: new Date().toISOString(),
-      accessToken
-    });
+    if (conn) {
+      upsertConnection({
+        ...conn,
+        status: "connected",
+        lastSyncAt: new Date().toISOString()
+      });
+    }
+
     pushLog({
       provider: "strava",
       at: new Date().toISOString(),
@@ -61,9 +64,10 @@ export async function POST(request: Request) {
       detail: `${activities.length} activities`
     });
 
-    return NextResponse.json({ ok: true, count: activities.length, activities });
+    const rateLimit = getStravaRateLimit();
+    return NextResponse.json({ ok: true, count: activities.length, activities, rateLimit });
   } catch (e) {
-    upsertConnection({ ...conn, status: "error" });
+    if (conn) upsertConnection({ ...conn, status: "error" });
     pushLog({
       provider: "strava",
       at: new Date().toISOString(),

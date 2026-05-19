@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@fitconnect/config": "workspace:*",
+    "@fitconnect/realtime-client": "workspace:*",
     "@fitconnect/types": "workspace:*",
     "@fitconnect/utils": "workspace:*",
     "@react-native-community/netinfo": "11.4.1",

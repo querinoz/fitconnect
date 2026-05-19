@@ -31,7 +31,7 @@ export function AudienceSplit() {
   return (
     <section
       aria-labelledby="fc-audience-title"
-      className="relative mx-auto max-w-7xl px-6 py-24"
+      className="relative mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-24"
     >
       <div className="max-w-3xl">
         <p className="eyebrow inline-flex items-center gap-1.5">

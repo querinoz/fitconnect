@@ -8,12 +8,14 @@ export type ContextUser = {
 
 export type Context = {
   user: ContextUser | null;
+  strava?: import("./strava-service").StravaTrpcService;
 };
 
 export async function createContext(opts: {
   user?: ContextUser | null;
+  strava?: import("./strava-service").StravaTrpcService;
 }): Promise<Context> {
-  return { user: opts.user ?? null };
+  return { user: opts.user ?? null, strava: opts.strava };
 }
 
 export const paginationSchema = z.object({

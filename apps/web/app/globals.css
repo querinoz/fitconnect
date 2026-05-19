@@ -74,10 +74,12 @@ html[data-contrast="high"].light {
 
 html,
 body {
-  background: var(--bg);
+  background: linear-gradient(145deg, #0a0a0f 0%, #11131a 100%);
+  background-color: var(--bg);
   color: var(--text);
   font-feature-settings: "ss01", "cv01";
   overflow-x: clip;
+  scroll-behavior: smooth;
   max-width: 100%;
 }
 
@@ -96,6 +98,193 @@ article {
   .fc-section-x {
     padding-left: max(1rem, env(safe-area-inset-left));
     padding-right: max(1rem, env(safe-area-inset-right));
+  }
+}
+
+/* ── Mobile-first responsive shell ── */
+.fc-page-root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  min-width: 0;
+}
+
+.fc-marquee-track {
+  width: max-content;
+  max-width: none;
+}
+
+.fc-marquee-viewport {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  contain: inline-size;
+}
+
+@media (max-width: 767px) {
+  .fc-orb-a,
+  .fc-orb-b,
+  .fc-orb-c,
+  .fc-orb-d {
+    opacity: 0.55;
+    filter: blur(2px);
+  }
+
+  .fc-orb-a {
+    width: min(180px, 50vw);
+    height: min(180px, 50vw);
+  }
+
+  .fc-orb-b {
+    width: min(140px, 42vw);
+    height: min(140px, 42vw);
+  }
+
+  .fc-orb-c {
+    width: min(200px, 55vw);
+    height: min(160px, 45vw);
+  }
+
+  .fc-orb-d {
+    display: none;
+  }
+
+  .fc-ck-hero-line {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .fc-hero-actions > a {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .fc-device-stage {
+    height: var(--fc-device-stage-h, clamp(480px, 58dvh, 560px)) !important;
+    min-height: var(--fc-device-stage-h, clamp(480px, 58dvh, 560px)) !important;
+    max-height: var(--fc-device-stage-h, clamp(480px, 58dvh, 560px)) !important;
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+}
+
+.fc-dashboard-preview-stage {
+  width: 100%;
+}
+
+.fc-hero-shell {
+  width: 100%;
+}
+
+/* Device showcase — fixed-height stage prevents landing layout shift */
+.fc-device-stage {
+  --fc-device-stage-h: clamp(480px, 58dvh, 560px);
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height: var(--fc-device-stage-h);
+  min-height: var(--fc-device-stage-h);
+  max-height: var(--fc-device-stage-h);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+@media (min-width: 768px) {
+  .fc-device-stage {
+    --fc-device-stage-h: clamp(500px, 60dvh, 580px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .fc-device-stage {
+    --fc-device-stage-h: clamp(520px, 62dvh, 600px);
+    max-width: none;
+  }
+}
+
+.fc-device-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fc-device-layer--active {
+  position: absolute;
+  inset: 0;
+  padding-inline: 0.5rem;
+}
+
+.fc-device-layer--iphone {
+  padding-inline: 0.5rem;
+}
+
+.fc-device-layer--watch {
+  padding-top: 0.5rem;
+}
+
+.fc-device-layer--laptop {
+  padding-inline: clamp(0.5rem, 3vw, 2rem);
+}
+
+.fc-device-scaler--laptop {
+  width: min(720px, 120%);
+  transform-origin: center center;
+  transform: scale(clamp(0.52, calc(0.42 + 38vw / 720), 1));
+}
+
+@media (min-width: 640px) {
+  .fc-device-scaler--laptop {
+    transform: scale(clamp(0.68, calc(0.55 + 40vw / 720), 1));
+  }
+}
+
+@media (min-width: 1024px) {
+  .fc-device-scaler--laptop {
+    transform: scale(1);
+  }
+}
+
+.fc-device-reflection-slot {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  z-index: 5;
+  height: 1.5rem;
+  width: min(72%, 320px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* Dashboard OS inside mobile shell — avoid double padding / nested scroll */
+.fc-mobile-shell-active .fc-dashboard-os {
+  margin-left: -1rem;
+  margin-right: -1rem;
+  width: calc(100% + 2rem);
+}
+
+@media (min-width: 640px) {
+  .fc-mobile-shell-active .fc-dashboard-os {
+    margin-left: -1.25rem;
+    margin-right: -1.25rem;
+    width: calc(100% + 2.5rem);
+  }
+}
+
+.fc-mobile-shell-active .fc-dashboard-os .fc-dashboard-inner {
+  padding: 1rem 1rem 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .fc-mobile-shell-active .fc-dashboard-os {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .fc-mobile-shell-active .fc-dashboard-os .fc-dashboard-inner {
+    padding: 1.25rem 1.5rem 2rem;
   }
 }
 
@@ -201,6 +390,40 @@ article {
     rgba(244, 63, 94, 0.45),
     rgba(168, 85, 247, 0.3)
   );
+}
+
+/* FitConnect global card — glass depth + hover lift */
+.fc-card {
+  position: relative;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 28%),
+    rgba(17, 19, 26, 0.72);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 12px 40px -16px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.fc-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(200, 255, 0, 0.18);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 16px 48px -12px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(200, 255, 0, 0.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fc-card:hover {
+    transform: none;
+  }
 }
 
 .glass {
@@ -344,6 +567,135 @@ article {
   .fc-landing-blob-a,
   .fc-landing-blob-b,
   .fc-landing-blob-c {
+    animation: none;
+  }
+}
+
+/* charltonk.dev-inspired — floating orbs */
+.fc-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(1px);
+  will-change: transform;
+  mix-blend-mode: screen;
+}
+
+.fc-orb-a {
+  left: 12%;
+  top: 18%;
+  width: min(280px, 38vw);
+  height: min(280px, 38vw);
+  background: radial-gradient(circle, rgba(200, 255, 0, 0.55) 0%, rgba(200, 255, 0, 0.08) 42%, transparent 68%);
+  animation: fc-orb-drift-a 22s ease-in-out infinite;
+}
+
+.fc-orb-b {
+  right: 8%;
+  top: 28%;
+  width: min(220px, 32vw);
+  height: min(220px, 32vw);
+  background: radial-gradient(circle, rgba(0, 221, 180, 0.45) 0%, rgba(0, 221, 180, 0.06) 45%, transparent 70%);
+  animation: fc-orb-drift-b 28s ease-in-out infinite;
+}
+
+.fc-orb-c {
+  left: 42%;
+  bottom: 12%;
+  width: min(320px, 44vw);
+  height: min(320px, 44vw);
+  background: radial-gradient(circle, rgba(0, 191, 255, 0.35) 0%, transparent 65%);
+  animation: fc-orb-drift-c 34s ease-in-out infinite;
+}
+
+.fc-orb-d {
+  left: 58%;
+  top: 8%;
+  width: min(160px, 22vw);
+  height: min(160px, 22vw);
+  background: radial-gradient(circle, rgba(255, 58, 92, 0.28) 0%, transparent 68%);
+  animation: fc-orb-drift-d 18s ease-in-out infinite;
+}
+
+@keyframes fc-orb-drift-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(6%, -8%) scale(1.08);
+  }
+}
+
+@keyframes fc-orb-drift-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-8%, 6%) scale(1.06);
+  }
+}
+
+@keyframes fc-orb-drift-c {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(4%, 10%) scale(1.05);
+  }
+}
+
+@keyframes fc-orb-drift-d {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-5%, -6%) scale(1.1);
+  }
+}
+
+/* Status ticker + text marquee */
+@keyframes fc-status-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes fc-marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
+}
+
+.fc-status-ticker {
+  animation: fc-status-scroll 38s linear infinite;
+  width: max-content;
+}
+
+.fc-text-marquee {
+  animation: fc-marquee-scroll 48s linear infinite;
+  width: max-content;
+}
+
+.fc-ck-hero-line {
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fc-orb-a,
+  .fc-orb-b,
+  .fc-orb-c,
+  .fc-orb-d,
+  .fc-status-ticker,
+  .fc-text-marquee {
     animation: none;
   }
 }

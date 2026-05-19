@@ -14,12 +14,15 @@ import {
   Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { VoltButton } from "@/components/ui-glass/volt-button";
 import { DesktopSidebar } from "./desktop-sidebar";
 import { StatCard } from "./stat-card";
 import { AlertCards, PayoutSummary } from "./coach-alerts";
 import { EarningsChart } from "./earnings-chart";
 import { PlanBuilderPreview } from "./plan-builder-preview";
 import { AthletesListPanel } from "./athletes-list-panel";
+import { GamificationPanel } from "@/components/gamification/gamification-panel";
+import { CoachStravaFeed } from "@/components/dashboard/coach-strava-feed";
 
 const COACH_NAV = [
   { icon: Home, label: "Overview", href: "/coach/dashboard" },
@@ -52,7 +55,7 @@ export function CoachOsDashboard({
   const firstName = coachName.split(" ")[0] ?? coachName;
 
   return (
-    <div className="flex min-h-0 lg:-mx-5">
+    <div className="fc-dashboard-os flex min-h-0 min-w-0 w-full">
       <DesktopSidebar
         collapsed={collapsed}
         setCollapsed={setCollapsed}
@@ -82,9 +85,9 @@ export function CoachOsDashboard({
         }
       />
 
-      <main className="min-w-0 flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl p-5 md:p-8">
-          <header className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+      <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+        <div className="fc-dashboard-inner mx-auto max-w-6xl p-4 sm:p-5 md:p-8">
+          <header className="mb-6 flex flex-col items-start justify-between gap-4 sm:mb-8 sm:flex-row sm:items-center">
             <div>
               <p className="mb-1.5 text-xs text-ink-500">Welcome back 👋</p>
               <div className="flex items-center gap-2">
@@ -98,10 +101,13 @@ export function CoachOsDashboard({
                 your attention today.
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-lime-500/20 bg-lime-500/10 px-3 py-1.5 text-xs font-semibold text-lime-400">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-lime-400" /> Live
               </span>
+              <VoltButton asChild className="h-9 gap-1.5 text-xs">
+                <Link href="/coach/roster">View roster</Link>
+              </VoltButton>
               <Button
                 variant="outline"
                 size="sm"
@@ -126,10 +132,12 @@ export function CoachOsDashboard({
 
           <div className="grid gap-5 xl:grid-cols-3">
             <div className="space-y-5 xl:col-span-2">
+              <CoachStravaFeed coachId={coachId} />
               <EarningsChart />
               <PlanBuilderPreview athleteName={`${firstName}'s athlete`} />
             </div>
             <div className="space-y-5">
+              <GamificationPanel variant="coach" />
               <AthletesListPanel coachId={coachId} />
               <PayoutSummary />
               <Button asChild variant="outline" size="sm" className="w-full border-ink-700">
@@ -138,7 +146,7 @@ export function CoachOsDashboard({
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

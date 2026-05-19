@@ -58,7 +58,12 @@ export function TrainerCard({ t: trainer }: { t: Trainer }) {
               </span>
             ))}
           </div>
-          <div className="absolute top-3 right-3">
+          <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
+            {trainer.featured ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-volt-500/20 backdrop-blur px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-volt-300 ring-1 ring-volt-500/40">
+                Featured
+              </span>
+            ) : null}
             <span className="inline-flex items-center gap-1 rounded-full bg-accent-500/20 backdrop-blur px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-300 ring-1 ring-accent-500/40">
               <BadgeCheck aria-hidden="true" className="h-3 w-3" /> Verified
             </span>

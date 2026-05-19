@@ -1,4 +1,4 @@
-import { getBroadcastTransport } from "@/lib/platform/realtime/broadcast-transport";
+import { resolveTransport } from "@/lib/platform/realtime/resolve-transport";
 import type { SessionBookingMessage } from "@/lib/realtime/types";
 
 export function publishSessionBooking(input: Omit<SessionBookingMessage, "kind" | "at" | "id">) {
@@ -8,7 +8,10 @@ export function publishSessionBooking(input: Omit<SessionBookingMessage, "kind" 
     at: new Date().toISOString(),
     ...input
   };
-  getBroadcastTransport().publish(`coach:${input.coachId}:bookings`, msg);
-  getBroadcastTransport().publish("admin:events", msg);
+  resolveTransport(`coach:${input.coachId}:bookings`).publish(
+    `coach:${input.coachId}:bookings`,
+    msg
+  );
+  resolveTransport("admin:events").publish("admin:events", msg);
   return msg;
 }

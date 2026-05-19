@@ -2,6 +2,7 @@ import { SessionCard } from "@/components/session-card";
 import { Button } from "@/components/ui/button";
 import { DEMO_SESSIONS } from "@/lib/mock-data";
 import { writeSessionsCache } from "@/lib/cache";
+import { SCROLL_BOTTOM_INSET } from "@/lib/layout";
 import { scheduleDemoSessionReminder } from "@/lib/notifications";
 import { tokens } from "@/lib/tokens";
 import { useEffect } from "react";
@@ -29,6 +30,6 @@ export default function SessionsScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: tokens.colors.ink[950] },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
+  content: { padding: 16, gap: 12, paddingBottom: SCROLL_BOTTOM_INSET },
   title: { color: tokens.colors.ink[50], fontSize: 24, fontWeight: "800", marginBottom: 4 }
 });

@@ -22,9 +22,13 @@ export function AnalyticsBootstrap() {
   }, []);
 
   useEffect(() => {
-    if (pathname?.includes("/dashboard")) {
-      trackEvent("readiness_view", { path: pathname });
-    }
+    if (!pathname) return;
+    if (pathname === "/") trackEvent("landing_view", { path: pathname });
+    if (pathname === "/mobile") trackEvent("demo_open", { path: pathname });
+    if (pathname.startsWith("/discover")) trackEvent("discover_view", { path: pathname });
+    if (pathname.startsWith("/trainer/")) trackEvent("coach_profile", { path: pathname });
+    if (pathname.includes("/signup")) trackEvent("signup", { path: pathname });
+    if (pathname.includes("/dashboard")) trackEvent("readiness_view", { path: pathname });
   }, [pathname]);
 
   return null;

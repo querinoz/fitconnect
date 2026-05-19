@@ -22,7 +22,9 @@ fitconnect/
 │   ├── design-tokens/# CSS/motion tokens
 │   ├── api-client/   # Typed API client
 │   ├── config/       # Mobile token bridge
-│   └── maps/         # Map helpers
+│   ├── maps/         # Map helpers
+│   └── realtime-client/ # Shared realtime routing types
+├── convex/           # Convex schema + mutations (hybrid realtime)
 ├── prisma/           # Schema + seed (Neon-ready)
 ├── scripts/          # Dev orchestration, smoke, Lighthouse
 ├── docs/             # Deploy + agent docs
@@ -34,7 +36,7 @@ fitconnect/
 | Web | Next.js 14 App Router, TypeScript, Tailwind, Framer Motion, Zustand, tRPC |
 | Mobile | Expo 52, Expo Router, Reanimated, MMKV |
 | Data | Prisma, Supabase Auth (demo mode default) |
-| Realtime | BroadcastChannel (demo) → Convex/Supabase-ready port |
+| Realtime | **Hybrid:** Convex (nudges/live/plan sync) + Supabase Realtime (presence/chat) · BroadcastChannel for `?demo=1` |
 | Payments | Stripe demo routes |
 | CI/CD | GitHub Actions, Vercel, EAS (manual) |
 
@@ -83,9 +85,12 @@ Copy `.env.example` → `.env.local`. Minimum for demo deploy:
 | Variable | Purpose |
 |----------|---------|
 | `NEXT_PUBLIC_DEMO_MODE` | `true` = demo auth + seeded data |
-| `NEXT_PUBLIC_REALTIME_PROVIDER` | `broadcast` (default) |
-| `DATABASE_URL` | Neon Postgres (optional in demo) |
-| `NEXT_PUBLIC_SUPABASE_*` | Auth when demo off |
+| `NEXT_PUBLIC_REALTIME_PROVIDER` | `broadcast` (default), `convex`, or `supabase` |
+| `NEXT_PUBLIC_CONVEX_URL` | Convex deployment URL (coaching realtime) |
+| `DATABASE_URL` | Neon Postgres (Strava + push tokens) |
+| `STRAVA_CLIENT_ID/SECRET/WEBHOOK_VERIFY_TOKEN` | Strava OAuth + webhooks |
+| `QSTASH_TOKEN` | Upstash QStash for async Strava sync jobs |
+| `NEXT_PUBLIC_SUPABASE_*` | Auth + Realtime presence/chat |
 | `STRIPE_*` / `LIVEKIT_*` | Payments / video (optional) |
 
 Full list: [.env.example](.env.example)
@@ -138,13 +143,29 @@ Client state: Zustand (`dashboard-store`, `auth-store`) + React Query/tRPC where
 
 ## Deployment
 
-**Vercel (production):** Root Directory = `apps/web` · deploy from repo root.
+**Vercel (production):** https://fitconnect-phi.vercel.app · Root Directory = `apps/web`
 
 ```bash
 pnpm dlx vercel login
 pnpm vercel:link
 pnpm deploy:vercel:prod
 ```
+
+**Convex (realtime):** https://dashboard.convex.dev/t/eduardooquerino/fitconnect
+
+| Deployment | URL |
+|------------|-----|
+| Dev | `https://valuable-camel-828.convex.cloud` |
+| Prod | `https://striped-quail-172.convex.cloud` |
+
+```bash
+npx convex login                    # once per machine
+pnpm convex:accept-tos              # if TOS prompt blocks CI
+pnpm convex:setup                   # first-time cloud project
+pnpm convex:deploy                  # push functions to prod
+```
+
+Set on Vercel: `NEXT_PUBLIC_CONVEX_URL=https://striped-quail-172.convex.cloud` and `NEXT_PUBLIC_REALTIME_PROVIDER=convex`.
 
 Details: [docs/deploy-vercel.md](docs/deploy-vercel.md)
 

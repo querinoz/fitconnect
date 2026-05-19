@@ -10,6 +10,7 @@ import {
   YAxis
 } from "recharts";
 import { TrendingUp } from "lucide-react";
+import { rechartsTheme } from "@/lib/charts/recharts-theme";
 
 const EARNINGS_DATA = [
   { month: "Oct", earnings: 2200, sessions: 32 },
@@ -81,19 +82,19 @@ export function EarningsChart() {
           <AreaChart data={EARNINGS_DATA} margin={{ left: -20 }}>
             <defs>
               <linearGradient id="earnGradCoach" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#84cc16" stopOpacity={0.3} />
-                <stop offset="100%" stopColor="#84cc16" stopOpacity={0} />
+                <stop offset="0%" stopColor={rechartsTheme.earnings} stopOpacity={0.3} />
+                <stop offset="100%" stopColor={rechartsTheme.earnings} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(51,65,85,0.25)" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={rechartsTheme.grid} vertical={false} />
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 10, fill: "#64748b" }}
+              tick={{ fontSize: 10, fill: rechartsTheme.axis }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
-              tick={{ fontSize: 10, fill: "#64748b" }}
+              tick={{ fontSize: 10, fill: rechartsTheme.axis }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => `€${(v / 1000).toFixed(1)}k`}
@@ -102,11 +103,11 @@ export function EarningsChart() {
             <Area
               type="monotone"
               dataKey="earnings"
-              stroke="#84cc16"
+              stroke={rechartsTheme.earnings}
               fill="url(#earnGradCoach)"
               strokeWidth={2.5}
               dot={false}
-              activeDot={{ r: 5, fill: "#84cc16", stroke: "#0f172a", strokeWidth: 2 }}
+              activeDot={{ r: 5, fill: rechartsTheme.earnings, stroke: rechartsTheme.ink, strokeWidth: 2 }}
             />
           </AreaChart>
         </ResponsiveContainer>

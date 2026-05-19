@@ -5,6 +5,7 @@ import { LanguageProvider } from "@/lib/i18n-provider";
 import { AuthStoreProvider } from "@/components/auth-store-provider";
 import { AnalyticsBootstrap } from "@/components/observability/analytics-bootstrap";
 import { ToastHost } from "@/components/ui/toast-host";
+import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { AppearanceProvider } from "@/lib/theme/appearance-provider";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
 
@@ -23,14 +24,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <AppearanceProvider>
       <ThemeProvider>
-        <LanguageProvider>
-          <AuthStoreProvider>
-            <DevServiceWorkerCleanup />
-            <AnalyticsBootstrap />
-            <ToastHost />
-            {children}
-          </AuthStoreProvider>
-        </LanguageProvider>
+        <ConvexClientProvider>
+          <LanguageProvider>
+            <AuthStoreProvider>
+              <DevServiceWorkerCleanup />
+              <AnalyticsBootstrap />
+              <ToastHost />
+              {children}
+            </AuthStoreProvider>
+          </LanguageProvider>
+        </ConvexClientProvider>
       </ThemeProvider>
     </AppearanceProvider>
   );

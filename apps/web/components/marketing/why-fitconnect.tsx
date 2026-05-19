@@ -66,7 +66,7 @@ export function WhyFitConnect() {
   return (
     <section
       aria-labelledby="fc-why-title"
-      className="relative mx-auto max-w-7xl px-6 py-24"
+      className="relative mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-24"
     >
       <div className="absolute inset-x-12 top-12 -z-10 h-[420px] rounded-[3rem] bg-radial-fade opacity-60" />
 

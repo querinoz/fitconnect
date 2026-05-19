@@ -2,17 +2,17 @@
 
 import { useEffect } from "react";
 import { useDashboardStore } from "@/lib/dashboard-store";
-import { getBroadcastTransport } from "@/lib/platform/realtime/broadcast-transport";
+import { resolveTransport } from "@/lib/platform/realtime/resolve-transport";
 
-/** Demo: simulates wearable HRV sync + cross-tab broadcast every 45s. */
+/** Simulates wearable HRV sync + cross-tab broadcast every 45s. */
 export function useLiveHrvSync(athleteId: string, enabled = true) {
   const ingest = useDashboardStore((s) => s.ingestHrvReading);
 
   useEffect(() => {
     if (!enabled || !athleteId) return;
 
-    const transport = getBroadcastTransport();
     const channel = `athlete:${athleteId}:vitals`;
+    const transport = resolveTransport(channel);
 
     const unsub = transport.subscribe(channel, (msg) => {
       if (msg.kind === "vitals" && msg.athleteId === athleteId) {

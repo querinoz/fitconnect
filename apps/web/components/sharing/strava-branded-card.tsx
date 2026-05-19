@@ -3,6 +3,7 @@
 import { Share2 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Wordmark } from "@/components/brand/wordmark";
+import { StravaActivityMap } from "@/components/dashboard/strava-activity-map";
 import { cn } from "@/lib/utils";
 
 export type StravaBrandedCardProps = {
@@ -17,6 +18,8 @@ export type StravaBrandedCardProps = {
   readinessScore?: number;
   coachName?: string;
   date?: Date | string;
+  /** Optional GPS polyline for route map */
+  mapPolyline?: string;
   /** Show share action below the card */
   showShare?: boolean;
   className?: string;
@@ -65,6 +68,7 @@ export function StravaBrandedCard({
   readinessScore,
   coachName,
   date,
+  mapPolyline,
   showShare = false,
   className
 }: StravaBrandedCardProps) {
@@ -186,36 +190,36 @@ export function StravaBrandedCard({
           </p>
         ) : null}
 
-        <svg
-          viewBox="0 0 320 48"
-          className="relative mt-4 h-12 w-full opacity-90"
-          aria-hidden
-        >
-          <defs>
-            <linearGradient id="fcStravaRoute" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#00DDB4" />
-              <stop offset="55%" stopColor="#C8FF00" />
-              <stop offset="100%" stopColor="#00BFFF" />
-            </linearGradient>
-          </defs>
-          <path
-            d="M0,32 C24,28 40,18 64,22 C88,26 104,38 128,30 C152,22 168,12 192,16 C216,20 232,8 256,10 C272,11 288,14 320,6"
-            fill="none"
-            stroke="url(#fcStravaRoute)"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-          <path
-            d="M0,32 C24,28 40,18 64,22 C88,26 104,38 128,30 C152,22 168,12 192,16 C216,20 232,8 256,10 C272,11 288,14 320,6 L320,48 L0,48 Z"
-            fill="url(#fcStravaRoute)"
-            opacity="0.07"
-          />
-          <circle cx="320" cy="6" r="3.5" fill="#C8FF00" />
-        </svg>
+        <div className="relative my-4">
+          {mapPolyline ? (
+            <StravaActivityMap polyline={mapPolyline} className="h-[100px]" />
+          ) : (
+            <svg
+              viewBox="0 0 320 48"
+              className="relative h-12 w-full opacity-90"
+              aria-hidden
+            >
+              <defs>
+                <linearGradient id="fcStravaRoute" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#00DDB4" />
+                  <stop offset="55%" stopColor="#C8FF00" />
+                  <stop offset="100%" stopColor="#00BFFF" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M0,32 C24,28 40,18 64,22 C88,26 104,38 128,30 C152,22 168,12 192,16 C216,20 232,8 256,10 C272,11 288,14 320,6"
+                fill="none"
+                stroke="url(#fcStravaRoute)"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          )}
+        </div>
 
         <footer className="relative mt-4 flex items-center justify-between border-t border-[var(--border-xs)] pt-3">
           <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-ink-400">
-            Kinetic lab · FitConnect
+            Powered by Strava · FitConnect
           </p>
           <p className="font-display text-[11px] font-extrabold text-volt-500">fitconnect.app</p>
         </footer>

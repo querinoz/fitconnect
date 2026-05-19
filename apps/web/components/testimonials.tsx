@@ -9,7 +9,7 @@ export function Testimonials() {
   const locale = useLocale();
 
   return (
-    <section className="relative mx-auto max-w-7xl px-6 py-24">
+    <section className="relative mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-24">
       <div className="absolute inset-0 -z-10 gradient-bg-warm opacity-50" />
       <div className="max-w-2xl">
         <p className="eyebrow text-signal-400">{locale.testimonials.eyebrow}</p>

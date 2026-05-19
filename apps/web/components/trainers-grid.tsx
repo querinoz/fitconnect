@@ -11,7 +11,7 @@ export function TrainersGrid() {
   const locale = useLocale();
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-24">
+    <section className="mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-24">
       <div className="flex items-end justify-between flex-wrap gap-4 mb-10">
         <div>
           <p className="eyebrow">{locale.trainers.eyebrow}</p>

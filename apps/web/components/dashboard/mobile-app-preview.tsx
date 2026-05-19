@@ -33,6 +33,8 @@ import {
 } from "@/components/ui-glass/premium-system";
 import { RiftBento, RiftLabel, RiftScore } from "@/components/ui-glass/rift-bento";
 import type { DashboardPreviewRole } from "./role-dashboard-preview";
+import { useLocale } from "@/lib/i18n-provider";
+import type { Dict } from "@/lib/i18n/types";
 
 type MobileScreen = "today" | "sessions" | "coach" | "inbox" | "profile";
 
@@ -51,20 +53,21 @@ export function MobileAppPreview({
   const [streak, setStreak] = useState(35);
   const isCoach = initialRole === "coach";
   const reduce = useReducedMotion();
+  const m = useLocale().mobileApp;
 
   const nav = useMemo(
     () => [
-      { id: "today" as const, label: "Today", icon: Home },
-      { id: "sessions" as const, label: "Sessions", icon: Calendar },
+      { id: "today" as const, label: m.nav.today, icon: Home },
+      { id: "sessions" as const, label: m.nav.sessions, icon: Calendar },
       {
         id: "coach" as const,
-        label: isCoach ? "Roster" : "Coach",
+        label: isCoach ? m.nav.roster : m.nav.coach,
         icon: isCoach ? UsersRound : UserRound
       },
-      { id: "inbox" as const, label: "Inbox", icon: Bell },
-      { id: "profile" as const, label: "Profile", icon: UserRound }
+      { id: "inbox" as const, label: m.nav.inbox, icon: Bell },
+      { id: "profile" as const, label: m.nav.profile, icon: UserRound }
     ],
-    [isCoach]
+    [isCoach, m.nav]
   );
 
   return (
@@ -77,11 +80,11 @@ export function MobileAppPreview({
         <MobileAppHeader
           trailing={
             <span className="rounded-full border border-volt-500/30 bg-volt-500/10 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.16em] text-volt-300">
-              Voltline
+              {m.voltline}
             </span>
           }
-          eyebrow={isCoach ? "Coach OS" : "Athlete OS"}
-          title={isCoach ? "Good afternoon, Diego" : "Good morning, Ines"}
+          eyebrow={isCoach ? m.header.coachEyebrow : m.header.athleteEyebrow}
+          title={isCoach ? m.header.coachGreeting : m.header.athleteGreeting}
           action={
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-grad-pulse text-ink-950 shadow-volt-glow ring-1 ring-volt-500/30 sm:h-10 sm:w-10 sm:rounded-2xl">
               {isCoach ? (
@@ -93,9 +96,9 @@ export function MobileAppPreview({
           }
         />
         <div className="mt-2.5 flex items-center justify-between gap-2 rounded-full border border-volt-500/20 bg-glass-md px-3 py-1.5 backdrop-blur-glass shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-          <RealtimeBadge>Whoop synced</RealtimeBadge>
+          <RealtimeBadge>{m.header.syncBadge}</RealtimeBadge>
           <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-ink-500">
-            12s ago
+            {m.header.syncAgo}
           </span>
         </div>
       </div>
@@ -111,6 +114,7 @@ export function MobileAppPreview({
           >
             {screen === "today" && (
               <TodayScreen
+                m={m}
                 isCoach={isCoach}
                 sessionLive={sessionLive}
                 planApproved={planApproved}
@@ -124,6 +128,7 @@ export function MobileAppPreview({
             )}
             {screen === "sessions" && (
               <SessionsScreen
+                m={m}
                 sessionLive={sessionLive}
                 onStart={() => setSessionLive(true)}
                 onEnd={() => {
@@ -134,6 +139,7 @@ export function MobileAppPreview({
             )}
             {screen === "coach" && (
               <CoachScreen
+                m={m}
                 isCoach={isCoach}
                 messageSent={messageSent}
                 onSend={() => {
@@ -144,20 +150,21 @@ export function MobileAppPreview({
             )}
             {screen === "inbox" && (
               <InboxScreen
+                m={m}
                 planApproved={planApproved}
                 messageSent={messageSent}
                 onApprove={() => setPlanApproved(true)}
               />
             )}
             {screen === "profile" && (
-              <ProfileScreen streak={streak} isCoach={isCoach} />
+              <ProfileScreen m={m} streak={streak} isCoach={isCoach} />
             )}
           </motion.div>
         </AnimatePresence>
       </div>
 
       <nav
-        aria-label="Preview app navigation"
+        aria-label={m.nav.ariaLabel}
         className="mx-2 mb-2 mt-auto shrink-0 rounded-glass-lg border border-glass-border bg-glass-md px-1 py-1.5 backdrop-blur-glass-lg shadow-volt-glow safe-area-pb sm:mx-3 sm:mb-2 sm:px-1.5 sm:py-2"
       >
         <ul className="flex items-center justify-between">
@@ -190,6 +197,7 @@ export function MobileAppPreview({
 }
 
 function TodayScreen({
+  m,
   isCoach,
   sessionLive,
   planApproved,
@@ -197,6 +205,7 @@ function TodayScreen({
   onStart,
   onApprove
 }: {
+  m: Dict["mobileApp"];
   isCoach: boolean;
   sessionLive: boolean;
   planApproved: boolean;
@@ -204,18 +213,19 @@ function TodayScreen({
   onStart: () => void;
   onApprove: () => void;
 }) {
+  const t = m.today;
   const readiness = isCoach ? 84 : 82;
 
   return (
     <div className="grid grid-cols-2 auto-rows-[minmax(72px,auto)] gap-2.5">
       <RiftBento tone="volt" span="md" className="min-h-[148px] !p-3.5">
-        <RiftLabel>AI Readiness</RiftLabel>
+        <RiftLabel>{t.readiness}</RiftLabel>
         <div className="mt-1 flex items-end justify-between gap-2">
           <div>
             <RiftScore value={readiness} className="text-[2.75rem]" />
             <p className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-volt-400">
               <Zap className="h-3 w-3" aria-hidden />
-              {isCoach ? "Roster green" : "Train hard"}
+              {isCoach ? t.rosterGreen : t.trainHard}
             </p>
           </div>
           <svg viewBox="0 0 80 80" className="h-16 w-16 shrink-0 -rotate-90" aria-hidden>
@@ -239,46 +249,46 @@ function TodayScreen({
           className="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-grad-pulse text-xs font-semibold text-ink-950 shadow-volt-glow transition hover:scale-[1.01]"
         >
           <Dumbbell className="h-3.5 w-3.5" />
-          {sessionLive ? "Return to live" : "Start session"}
+          {sessionLive ? t.returnToLive : t.startSession}
         </button>
       </RiftBento>
 
       <RiftBento tone="neutral" className="!p-3">
-        <RiftLabel>HRV</RiftLabel>
+        <RiftLabel>{t.hrv}</RiftLabel>
         <p className="mt-1 font-display text-xl font-extrabold text-ink-50">
           {isCoach ? "3" : "68"}
         </p>
         <p className="text-[9px] font-semibold text-emerald-500">
-          {isCoach ? "amber alerts" : "+4 ms"}
+          {isCoach ? t.amberAlerts : t.msDelta}
         </p>
       </RiftBento>
 
       <RiftBento tone="neutral" className="!p-3">
-        <RiftLabel>Streak</RiftLabel>
+        <RiftLabel>{t.streak}</RiftLabel>
         <p className="mt-1 font-display text-xl font-extrabold text-brand-400">{streak}d</p>
-        <p className="text-[9px] text-ink-400">personal best</p>
+        <p className="text-[9px] text-ink-400">{t.personalBest}</p>
       </RiftBento>
 
       <RiftBento tone="connect" className="!p-3">
-        <RiftLabel>Sleep</RiftLabel>
+        <RiftLabel>{t.sleep}</RiftLabel>
         <p className="mt-1 font-display text-xl font-extrabold text-ink-50">7h42</p>
-        <p className="text-[9px] font-semibold text-brand-400">89% quality</p>
+        <p className="text-[9px] font-semibold text-brand-400">{t.sleepQuality}</p>
       </RiftBento>
 
       <RiftBento tone="cyan" className="!p-3">
-        <RiftLabel>Load</RiftLabel>
+        <RiftLabel>{t.load}</RiftLabel>
         <p className="mt-1 font-display text-xl font-extrabold text-cyan-500">6.4k</p>
-        <p className="text-[9px] text-ink-400">7-day</p>
+        <p className="text-[9px] text-ink-400">{t.sevenDay}</p>
       </RiftBento>
 
       <RiftBento tone="neutral" span="full" className="!p-3">
         <div className="mb-2 flex items-center justify-between">
-          <p className="text-xs font-semibold text-ink-100">Weekly load</p>
+          <p className="text-xs font-semibold text-ink-100">{t.weeklyLoad}</p>
           <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-volt-500">
-            On target
+            {t.onTarget}
           </span>
         </div>
-        <div className="flex h-14 items-end gap-1.5" role="img" aria-label="Weekly training load">
+        <div className="flex h-14 items-end gap-1.5" role="img" aria-label={t.weeklyLoad}>
           {athleteLoad.map((h, i) => (
             <div
               key={i}
@@ -296,14 +306,10 @@ function TodayScreen({
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold leading-snug text-ink-100">
-              {isCoach
-                ? "AI flagged 3 athletes for lighter Thursday."
-                : "AI suggests moving threshold to Thursday."}
+              {isCoach ? t.coachAiFlag : t.athleteAiSuggest}
             </p>
             <p className="mt-1 text-[10px] text-ink-400">
-              {planApproved
-                ? "Plan update approved"
-                : "Based on HRV, sleep and last session load."}
+              {planApproved ? t.planApproved : t.basedOnSignals}
             </p>
             {!planApproved ? (
               <button
@@ -312,7 +318,7 @@ function TodayScreen({
                 className="mt-2 inline-flex h-8 items-center gap-1.5 rounded-lg border border-volt-500/30 bg-volt-500/10 px-2.5 text-[10px] font-semibold text-volt-300"
               >
                 <Check className="h-3 w-3" />
-                Approve update
+                {t.approveUpdate}
               </button>
             ) : null}
           </div>
@@ -323,26 +329,25 @@ function TodayScreen({
 }
 
 function SessionsScreen({
+  m,
   sessionLive,
   onStart,
   onEnd
 }: {
+  m: Dict["mobileApp"];
   sessionLive: boolean;
   onStart: () => void;
   onEnd: () => void;
 }) {
+  const s = m.sessions;
   return (
     <div className="space-y-3">
-      <Header title="Sessions" kicker={sessionLive ? "Live now" : "Next up"} />
+      <Header title={s.title} kicker={sessionLive ? s.liveNow : s.nextUp} />
       <PremiumCard tone={sessionLive ? "brand" : "neutral"} className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="font-display text-lg font-bold">
-              Lower body strength
-            </p>
-            <p className="mt-1 text-xs text-ink-400">
-              45 min · coach Diego · RPE target 7
-            </p>
+            <p className="font-display text-lg font-bold">{s.workoutTitle}</p>
+            <p className="mt-1 text-xs text-ink-400">{s.workoutMeta}</p>
           </div>
           <span
             className={cn(
@@ -352,17 +357,17 @@ function SessionsScreen({
                 : "bg-brand-500/15 text-brand-300"
             )}
           >
-            {sessionLive ? "Live now" : "07:30"}
+            {sessionLive ? s.liveNow : "07:30"}
           </span>
         </div>
 
         <div className="mt-5 grid grid-cols-3 gap-2">
-          <Metric label="HR" value={sessionLive ? "142" : " -- "} icon={HeartPulse} compact />
-          <Metric label="Pace" value={sessionLive ? "4:38" : " -- "} icon={Activity} compact />
-          <Metric label="Load" value={sessionLive ? "68%" : " -- "} icon={Zap} compact />
+          <Metric label={s.hr} value={sessionLive ? "142" : " -- "} icon={HeartPulse} compact />
+          <Metric label={s.pace} value={sessionLive ? "4:38" : " -- "} icon={Activity} compact />
+          <Metric label={s.load} value={sessionLive ? "68%" : " -- "} icon={Zap} compact />
         </div>
 
-        <ChartShell title="Live strain curve" subtitle="HR, pace and load">
+        <ChartShell title={s.chartTitle} subtitle={s.chartSubtitle}>
           <LoadBars live={sessionLive} />
         </ChartShell>
 
@@ -376,7 +381,7 @@ function SessionsScreen({
               : "bg-grad-pulse text-ink-950 shadow-volt-glow"
           )}
         >
-          {sessionLive ? "End session" : "Start live session"}
+          {sessionLive ? s.endSession : s.startLive}
         </button>
       </PremiumCard>
     </div>
@@ -384,18 +389,21 @@ function SessionsScreen({
 }
 
 function CoachScreen({
+  m,
   isCoach,
   messageSent,
   onSend
 }: {
+  m: Dict["mobileApp"];
   isCoach: boolean;
   messageSent: boolean;
   onSend: () => void;
 }) {
-  const title = isCoach ? "Roster" : "Coach Diego";
+  const c = m.coach;
+  const title = isCoach ? c.rosterTitle : c.coachTitle;
   return (
     <div className="space-y-3">
-      <Header title={title} kicker={isCoach ? "41 active athletes" : "Online now"} />
+      <Header title={title} kicker={isCoach ? c.activeAthletes : c.onlineNow} />
       <PremiumCard className="p-4">
         {(isCoach ? ["Ines M.", "Joao R.", "Sara K."] : ["Coach Diego"]).map(
           (name, index) => (
@@ -410,7 +418,7 @@ function CoachScreen({
                 <div>
                   <p className="text-sm font-semibold text-ink-50">{name}</p>
                   <p className="text-xs text-ink-400">
-                    {index === 1 ? "Amber readiness" : "Green readiness"}
+                    {index === 1 ? c.amberReadiness : c.greenReadiness}
                   </p>
                 </div>
               </div>
@@ -427,64 +435,66 @@ function CoachScreen({
         className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-brand-500/30 bg-brand-500/10 text-sm font-semibold text-brand-200"
       >
         <Send className="h-4 w-4" />
-        {messageSent ? "Message sent" : "Send check-in"}
+        {messageSent ? c.messageSent : c.sendCheckIn}
       </button>
     </div>
   );
 }
 
 function InboxScreen({
+  m,
   planApproved,
   messageSent,
   onApprove
 }: {
+  m: Dict["mobileApp"];
   planApproved: boolean;
   messageSent: boolean;
   onApprove: () => void;
 }) {
+  const i = m.inbox;
   return (
     <div className="space-y-3">
-      <Header title="Inbox" kicker="Realtime updates" />
+      <Header title={i.title} kicker={i.kicker} />
       <MessageCard
-        title="Plan update approved"
-        body={
-          planApproved
-            ? "Thursday threshold moved. Coach has the update."
-            : "AI recommends a lighter Thursday based on recovery."
-        }
-        action={!planApproved ? "Approve" : undefined}
+        title={i.planApprovedTitle}
+        body={planApproved ? i.planApprovedBody : i.planPendingBody}
+        action={!planApproved ? i.approve : undefined}
         onAction={onApprove}
       />
       <MessageCard
-        title={messageSent ? "Check-in sent" : "Coach check-in"}
-        body={
-          messageSent
-            ? "Your note is now visible in the app preview."
-            : "How did the last set feel?"
-        }
+        title={messageSent ? i.checkInTitle : i.checkInTitle}
+        body={messageSent ? i.checkInSentBody : i.checkInPrompt}
       />
     </div>
   );
 }
 
-function ProfileScreen({ streak, isCoach }: { streak: number; isCoach: boolean }) {
+function ProfileScreen({
+  m,
+  streak,
+  isCoach
+}: {
+  m: Dict["mobileApp"];
+  streak: number;
+  isCoach: boolean;
+}) {
+  const p = m.profile;
   return (
     <div className="space-y-3">
-      <Header title="Profile" kicker={isCoach ? "Coach profile" : "Athlete profile"} />
+      <Header title={p.title} kicker={isCoach ? p.coachKicker : p.athleteKicker} />
       <PremiumCard tone="volt" className="p-4 text-center">
         <span className="mx-auto grid h-16 w-16 place-items-center rounded-3xl bg-grad-pulse text-ink-950 shadow-volt-glow ring-2 ring-volt-500/30">
           <UserRound className="h-8 w-8" />
         </span>
         <p className="mt-3 font-display text-xl font-bold">
-          {isCoach ? "Diego Alvarez" : "Ines Martins"}
+          {isCoach ? p.coachName : p.athleteName}
         </p>
-        <p className="text-xs text-ink-400">
-          {isCoach ? "Strength coach · Madrid" : "Hybrid athlete · Lisbon"}
-        </p>
+        <p className="text-xs text-ink-400">{isCoach ? p.coachRole : p.athleteRole}</p>
       </PremiumCard>
       <div className="grid grid-cols-2 gap-3">
-        <MetricTile label="Streak" value={`${streak}d`} icon={Zap} tone="volt" />
-        <MetricTile label="Score" value={isCoach ? "4.96" : "82"} icon={Activity} />
+        <MetricTile label={p.streak} value={`${streak}d`} icon={Zap} tone="volt" />
+        <MetricTile label={p.score} value={isCoach ? "4.96" : "82"} icon={Activity} />
       </div>
       <ProfileSettingsPanel compact />
     </div>

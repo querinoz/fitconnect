@@ -1,5 +1,8 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
+import { useAuthStore } from "@/lib/auth-store";
+
+const API_BASE = process.env.EXPO_PUBLIC_WEB_URL ?? "http://localhost:3001";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -25,7 +28,21 @@ export async function registerForPushNotificationsAsync() {
   }
   if (finalStatus !== "granted") return null;
 
-  return Notifications.getExpoPushTokenAsync().catch(() => null);
+  const tokenResult = await Notifications.getExpoPushTokenAsync().catch(() => null);
+  const userId = useAuthStore.getState().user?.id;
+  if (tokenResult?.data && userId) {
+    await fetch(`${API_BASE}/api/v1/push/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        token: tokenResult.data,
+        platform: Platform.OS
+      })
+    }).catch(() => undefined);
+  }
+
+  return tokenResult;
 }
 
 export async function scheduleDemoSessionReminder(coachName: string) {

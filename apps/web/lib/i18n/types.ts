@@ -15,7 +15,7 @@ export const LANGS: {
 ];
 
 export const SUPPORTED_LANGS: Lang[] = LANGS.map((l) => l.code);
-export const DEFAULT_LANG: Lang = "en";
+export const DEFAULT_LANG: Lang = "pt";
 
 export type FaqItem = { q: string; a: string };
 export type FeatureItem = { title: string; body: string };
@@ -57,17 +57,219 @@ export type Dict = {
   demo: { label: string; body: string; cta: string };
   hero: {
     livePill: string;
+    tagline: string;
     title1: string;
     titleAccent: string;
     title2: string;
     subtitle: string;
     primary: string;
     secondary: string;
+    signupCta: string;
+    coachCta: string;
     reviewsLine: string;
     rejectedTitle: string;
     rejectedBody: string;
     reassurance: string;
     demoCta: string;
+    fullScreenDemo: string;
+    avatarAthleteAlt: string;
+    avatarCoachAlt: string;
+  };
+  heroExtras: {
+    metricsReadiness: string;
+    metricsReadinessDelta: string;
+    metricsCoachFit: string;
+    metricsCoachFitDelta: string;
+    metricsLoad: string;
+    metricsLoadDelta: string;
+    cardTitle: string;
+    cardBody: string;
+    liveDemo: string;
+    sportStrength: string;
+    sportYoga: string;
+    sportRunning: string;
+  };
+  downloadSection: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    installApp: string;
+    openLiveDemo: string;
+    tryMobileDemo: string;
+  };
+  mobileApp: {
+    launcher: {
+      badge: string;
+      titleDesktop: string;
+      subtitleDesktop: string;
+      titleMobile: string;
+      subtitleMobile: string;
+      athleteTitle: string;
+      athleteSubtitle: string;
+      coachTitle: string;
+      coachSubtitle: string;
+      openAthlete: string;
+      openCoach: string;
+      useAnotherAccount: string;
+      backHomeAria: string;
+      metaTitle: string;
+      metaDescription: string;
+    };
+    nav: {
+      today: string;
+      sessions: string;
+      coach: string;
+      roster: string;
+      inbox: string;
+      profile: string;
+      ariaLabel: string;
+    };
+    header: {
+      athleteEyebrow: string;
+      coachEyebrow: string;
+      athleteGreeting: string;
+      coachGreeting: string;
+      syncBadge: string;
+      syncAgo: string;
+    };
+    today: {
+      readiness: string;
+      rosterGreen: string;
+      trainHard: string;
+      startSession: string;
+      returnToLive: string;
+      hrv: string;
+      amberAlerts: string;
+      msDelta: string;
+      streak: string;
+      personalBest: string;
+      sleep: string;
+      sleepQuality: string;
+      load: string;
+      sevenDay: string;
+      weeklyLoad: string;
+      onTarget: string;
+      coachAiFlag: string;
+      athleteAiSuggest: string;
+      planApproved: string;
+      basedOnSignals: string;
+      approveUpdate: string;
+    };
+    sessions: {
+      title: string;
+      liveNow: string;
+      nextUp: string;
+      workoutTitle: string;
+      workoutMeta: string;
+      hr: string;
+      pace: string;
+      load: string;
+      chartTitle: string;
+      chartSubtitle: string;
+      endSession: string;
+      startLive: string;
+    };
+    coach: {
+      rosterTitle: string;
+      coachTitle: string;
+      activeAthletes: string;
+      onlineNow: string;
+      greenReadiness: string;
+      amberReadiness: string;
+      sendCheckIn: string;
+      messageSent: string;
+    };
+    inbox: {
+      title: string;
+      kicker: string;
+      planApprovedTitle: string;
+      planApprovedBody: string;
+      planPendingBody: string;
+      approve: string;
+      checkInTitle: string;
+      checkInSentBody: string;
+      checkInPrompt: string;
+    };
+    profile: {
+      title: string;
+      athleteKicker: string;
+      coachKicker: string;
+      athleteName: string;
+      coachName: string;
+      athleteRole: string;
+      coachRole: string;
+      streak: string;
+      score: string;
+    };
+    appearance: {
+      title: string;
+      dark: string;
+      light: string;
+    };
+    accessibility: {
+      title: string;
+      reduceMotion: string;
+      reduceMotionDesc: string;
+      highContrast: string;
+      highContrastDesc: string;
+    };
+    security: {
+      title: string;
+      wearables: string;
+      dataExport: string;
+      demoNote: string;
+    };
+    voltline: string;
+  };
+  trustStrip: {
+    reviews: string;
+    rejected: string;
+    coaches: string;
+  };
+  featuredCoaches: {
+    eyebrow: string;
+    title: string;
+    titleAccent: string;
+    subtitle: string;
+    bookIntro: string;
+    perHour: string;
+    sessions: string;
+    verified: string;
+    seeAll: string;
+  };
+  scienceAndTech: {
+    eyebrow: string;
+    title: string;
+    titleAccent: string;
+    subtitle: string;
+    cta: string;
+    tiles: { title: string; body: string }[];
+  };
+  integrationsStrip: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    step1: string;
+    step2: string;
+    step3: string;
+    syncLabel: string;
+    syncDemo: string;
+  };
+  methodologyPreview: {
+    eyebrow: string;
+    title1: string;
+    titleAccent: string;
+    title2: string;
+    body: string;
+    cta: string;
+  };
+  pressStrip: {
+    label: string;
+  };
+  emailCapture: {
+    placeholder: string;
+    button: string;
+    success: string;
   };
   sports: { eyebrow: string; title: string; note: string };
   features: {
@@ -93,6 +295,7 @@ export type Dict = {
     athleteDesc: string;
     coachName: string;
     coachDesc: string;
+    compareNote: string;
     features: { free: string[]; athlete: string[]; coach: string[] };
   };
   faqs: {
@@ -122,6 +325,15 @@ export type Dict = {
     seeRepo: string;
     copyright: string;
     statusOk: string;
+    about: string;
+    careers: string;
+    press: string;
+    partnerships: string;
+    privacy: string;
+    terms: string;
+    trustSafety: string;
+    contact: string;
+    stravaAttribution: string;
   };
   dashboard: {
     eyebrow: string;

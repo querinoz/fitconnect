@@ -7,7 +7,7 @@
 | Severity | Open | Fixed this pass |
 |----------|------|-----------------|
 | CRITICAL | 0 | 2 |
-| HIGH | 4 | 6 |
+| HIGH | 0 | 10 |
 | MEDIUM | 8 | 1 |
 | LOW | 6 | 0 |
 
@@ -35,17 +35,16 @@
 | H4 | No hero path to live demo | `Open live demo` → `/mobile` |
 | H5 | Coach roster chart blank when empty | Empty state + link to roster |
 | H6 | App error boundary always linked to `/dashboard` | Role-aware `dashboardPathForRole` |
+| H7 | Recharts hex colors in HRV/earnings charts | Shared `rechartsTheme` from design tokens |
+| H8 | Button system split (`VoltButton` vs shadcn `Button`) | Primary CTAs unified on `VoltButton` (OS dashboards) |
+| H9 | Duplicate readiness UI on athlete dashboard | Profile tab shows Sessions instead of duplicate Readiness tile |
+| H10 | No route-level `loading.tsx` skeletons | `(app)/dashboard/loading.tsx` + coach variant |
 
 ---
 
 ## HIGH (open — follow-up)
 
-| ID | Issue | Suggested fix |
-|----|-------|---------------|
-| H7 | Recharts hex colors in HRV/earnings charts | Shared `rechartsTheme` from CSS tokens |
-| H8 | Button system split (`VoltButton` vs shadcn `Button`) | Unify primary actions on both dashboards |
-| H9 | Duplicate readiness UI on athlete dashboard | Remove `MetricTile` readiness or merge with `ReadinessCard` |
-| H10 | No route-level `loading.tsx` skeletons | Add `(app)/dashboard/loading.tsx` + coach variant |
+_None — re-run checklist before release._
 
 ---
 

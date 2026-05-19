@@ -1,4 +1,5 @@
 import { DEMO_PROGRAMS } from "@/lib/mock-data";
+import { SCROLL_BOTTOM_INSET } from "@/lib/layout";
 import { tokens } from "@/lib/tokens";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Card } from "@/components/ui/card";
@@ -25,7 +26,7 @@ export default function ProgramsScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: tokens.colors.ink[950] },
-  content: { padding: 16, gap: 12, paddingBottom: 32 },
+  content: { padding: 16, gap: 12, paddingBottom: SCROLL_BOTTOM_INSET },
   title: { color: tokens.colors.ink[50], fontSize: 24, fontWeight: "800", marginBottom: 4 },
   programTitle: { color: tokens.colors.ink[50], fontSize: 17, fontWeight: "700" },
   meta: { color: tokens.colors.ink[400], fontSize: 12, marginTop: 4, marginBottom: 10 },

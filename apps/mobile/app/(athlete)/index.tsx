@@ -6,6 +6,7 @@ import { useReadiness } from "@/hooks/useReadiness";
 import { DEMO_POSTS, DEMO_SESSIONS } from "@/lib/mock-data";
 import { readinessGreeting } from "@/lib/readiness";
 import { useAuthStore } from "@/lib/auth-store";
+import { SCROLL_BOTTOM_INSET } from "@/lib/layout";
 import { tokens } from "@/lib/tokens";
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 
@@ -70,7 +71,7 @@ export default function AthleteHomeScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: tokens.colors.ink[950] },
-  content: { padding: 16, paddingBottom: 32, gap: 14 },
+  content: { padding: 16, paddingBottom: SCROLL_BOTTOM_INSET, gap: 14 },
   greeting: { color: tokens.colors.ink[100], fontSize: 22, fontWeight: "800" },
   ringWrap: { alignItems: "center", paddingVertical: 8 },
   statsRow: { flexDirection: "row", gap: 8 },

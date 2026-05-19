@@ -5,32 +5,32 @@ import { cn } from "@/lib/utils";
 
 type LazyInViewProps = {
   children: ReactNode;
-  /** Placeholder height to avoid layout shift */
   minHeight?: number;
   className?: string;
-  /** Intersection root margin — smaller = later load */
   rootMargin?: string;
-  /** Fraction of element that must be visible before loading */
   threshold?: number;
+  /** Load immediately — for above-the-fold content */
+  eager?: boolean;
+  /** Skip content-visibility deferral (prevents frozen/blank sections) */
+  noDefer?: boolean;
 };
 
-/**
- * Defers mounting (and dynamic import) of heavy below-fold sections until
- * the user scrolls near them. Critical for landing Lighthouse mobile scores.
- */
 export function LazyInView({
   children,
   minHeight = 320,
   className,
   rootMargin = "120px 0px",
-  threshold = 0.01
+  threshold = 0.01,
+  eager = false,
+  noDefer = false
 }: LazyInViewProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(eager);
 
   useEffect(() => {
+    if (eager || visible) return;
     const el = ref.current;
-    if (!el || visible) return;
+    if (!el) return;
 
     const io = new IntersectionObserver(
       ([entry]) => {
@@ -43,12 +43,12 @@ export function LazyInView({
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [visible, rootMargin, threshold]);
+  }, [visible, rootMargin, threshold, eager]);
 
   return (
     <div
       ref={ref}
-      className={cn("fc-defer-section", className)}
+      className={cn(!noDefer && "fc-defer-section", className)}
       style={{ minHeight: visible ? undefined : minHeight }}
     >
       {visible ? children : null}

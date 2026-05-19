@@ -46,6 +46,7 @@ export function Pricing() {
           <span className="gradient-text">{t("pricing", "titleAccent")}</span>.
         </h2>
         <p className="mt-4 text-ink-400 text-lg">{t("pricing", "subtitle")}</p>
+        <p className="mt-2 text-sm text-ink-500">{t("pricing", "compareNote")}</p>
       </div>
 
       <div className="mt-12 grid gap-6 md:grid-cols-3 items-stretch">

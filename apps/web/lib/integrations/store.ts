@@ -29,6 +29,7 @@ export type IntegrationActivity = {
   startDate: string;
   avgHr?: number;
   elevationGainM?: number;
+  mapPolyline?: string;
 };
 
 export type IntegrationSyncLog = {

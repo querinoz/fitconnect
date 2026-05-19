@@ -9,7 +9,7 @@ import { formatPrice, formatCompact } from "@/lib/utils";
 export function ProgramsStrip() {
   const featured = PROGRAMS.slice(0, 6);
   return (
-    <section className="mx-auto max-w-7xl px-6 py-24">
+    <section className="mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-24">
       <div className="flex items-end justify-between flex-wrap gap-4 mb-10">
         <div>
           <p className="eyebrow">Signature programs</p>

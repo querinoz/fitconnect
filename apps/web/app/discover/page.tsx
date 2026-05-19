@@ -9,6 +9,7 @@ import { TrainerCardSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { DemoBanner } from "@/components/demo-banner";
+import { GlobalInstallPrompt } from "@/components/shell/global-install-prompt";
 import { Atmosphere } from "@/components/marketing/atmosphere";
 import { SPORTS, TRAINERS, type Modality, type Sport } from "@/lib/data";
 import {
@@ -52,6 +53,7 @@ function DiscoverFallback() {
           </div>
         </div>
       </main>
+      <GlobalInstallPrompt />
       <Footer />
     </>
   );
@@ -126,7 +128,12 @@ function DiscoverInner() {
       case "newest":
         return list.sort((a, b) => b.reviews - a.reviews);
       default:
-        return list;
+        return list.sort((a, b) => {
+          const af = a.featured ? 1 : 0;
+          const bf = b.featured ? 1 : 0;
+          if (bf !== af) return bf - af;
+          return b.rating - a.rating;
+        });
     }
   }, [q, sport, modality, maxPrice, minYears, sort, minRating, city, level]);
 
@@ -496,6 +503,7 @@ function DiscoverInner() {
           </div>
         </div>
       </main>
+      <GlobalInstallPrompt />
       <Footer />
     </>
   );

@@ -10,7 +10,7 @@ export function HowItWorks() {
   const locale = useLocale();
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-24">
+    <section className="mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-24">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         whileInView={{ opacity: 1, y: 0 }}

@@ -1,19 +1,16 @@
 "use client";
 
-import { motion } from "framer-motion";
 import {
   ArrowRight,
   Brain,
   HeartHandshake,
   HeartPulse,
   Moon,
-  Sparkles,
   TrendingUp
 } from "lucide-react";
 import Link from "next/link";
 import { useLocale } from "@/lib/i18n-provider";
 import { RoleDashboardPreview } from "@/components/dashboard/role-dashboard-preview";
-import { useInViewEntrance } from "@/lib/use-entrance-motion";
 import {
   AIInsight,
   PremiumCard,
@@ -23,7 +20,6 @@ import {
 
 export function DashboardPreview() {
   const locale = useLocale();
-  const entrance = useInViewEntrance(24);
   const features = [
     {
       icon: HeartPulse,
@@ -55,12 +51,14 @@ export function DashboardPreview() {
     <section
       id="dashboard-preview"
       aria-labelledby="fc-dashboard-preview-title"
-      className="relative mx-auto max-w-7xl fc-section-x px-4 py-16 sm:px-6 sm:py-20 md:py-28"
+      className="relative isolate z-10 mx-auto max-w-7xl fc-section-x px-4 py-16 sm:px-6 sm:py-20 md:py-28"
     >
-      <div className="absolute inset-x-6 top-12 -z-10 h-[520px] rounded-3xl bg-radial-fade" />
-      <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-center">
-        <div className="lg:col-span-5 order-2 lg:order-1">
+      <div className="pointer-events-none absolute inset-x-4 top-16 -z-10 h-[480px] rounded-3xl bg-radial-fade sm:inset-x-6" />
+
+      <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-x-12 lg:gap-y-8 xl:gap-x-16">
+        <div className="relative z-10 min-w-0 lg:col-span-5 lg:order-1">
           <SectionHeader
+            titleId="fc-dashboard-preview-title"
             eyebrow={locale.dashboardPreview.eyebrow}
             title={
               <>
@@ -73,16 +71,16 @@ export function DashboardPreview() {
             body={locale.dashboardPreview.subtitle}
             action={<RealtimeBadge>AI live</RealtimeBadge>}
           />
-          <ul className="mt-8 space-y-4">
+          <ul className="mt-8 space-y-3">
             {features.map((f) => (
               <li key={f.title}>
                 <PremiumCard className="flex items-start gap-3 p-3">
                   <div
-                    className={`grid h-9 w-9 place-items-center rounded-lg bg-ink-900 ring-1 ring-ink-800 ${f.color}`}
+                    className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-ink-900 ring-1 ring-ink-800 ${f.color}`}
                   >
                     <f.icon className="h-4 w-4" aria-hidden />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-semibold text-ink-100">{f.title}</p>
                     <p className="text-sm text-ink-400">{f.body}</p>
                   </div>
@@ -113,23 +111,23 @@ export function DashboardPreview() {
           </div>
         </div>
 
-        <motion.div
-          {...entrance}
-          className="lg:col-span-7 order-1 lg:order-2 relative min-w-0 overflow-hidden"
-        >
-          <RoleDashboardPreview />
-          <div className="absolute -bottom-6 -left-6 hidden md:flex items-center gap-3 rounded-2xl glass p-4 shadow-elevated pointer-events-none">
-            <div className="grid h-9 w-9 place-items-center rounded-lg bg-accent-500/10 text-accent-400">
-              <TrendingUp className="h-4 w-4" aria-hidden />
-            </div>
-            <div className="text-xs">
-              <p className="text-ink-100 font-semibold">
-                {locale.dashboardPreview.floatingTitle}
-              </p>
-              <p className="text-ink-400">{locale.dashboardPreview.floatingBody}</p>
+        <div className="relative z-10 min-w-0 lg:col-span-7 lg:order-2">
+          <div className="flex flex-col items-center gap-4 lg:items-end">
+            <RoleDashboardPreview compact />
+
+            <div className="hidden w-full max-w-[300px] items-center gap-3 rounded-2xl border border-ink-800/80 bg-ink-950/80 p-3 shadow-elevated backdrop-blur-sm sm:max-w-[320px] md:flex lg:self-end">
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-accent-500/10 text-accent-400">
+                <TrendingUp className="h-4 w-4" aria-hidden />
+              </div>
+              <div className="min-w-0 text-xs">
+                <p className="font-semibold text-ink-100">
+                  {locale.dashboardPreview.floatingTitle}
+                </p>
+                <p className="text-ink-400">{locale.dashboardPreview.floatingBody}</p>
+              </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

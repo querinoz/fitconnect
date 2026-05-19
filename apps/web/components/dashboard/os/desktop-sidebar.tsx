@@ -49,16 +49,21 @@ export function DesktopSidebar({
           collapsed ? "justify-center" : ""
         )}
       >
-        {collapsed ? (
+        <Link
+          href="/"
+          className={cn(
+            "flex items-center gap-2 transition-opacity hover:opacity-90",
+            collapsed ? "justify-center" : ""
+          )}
+          aria-label="FitConnect home"
+        >
           <LogoMark size={26} />
-        ) : (
-          <div className="flex items-center gap-2">
-            <LogoMark size={26} />
+          {!collapsed ? (
             <span className="font-display text-lg font-extrabold tracking-tight">
               Fit<span className="text-volt-500">Connect</span>
             </span>
-          </div>
-        )}
+          ) : null}
+        </Link>
       </div>
 
       {!collapsed && profileSlot ? (

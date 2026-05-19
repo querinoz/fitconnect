@@ -23,19 +23,243 @@ export const pt: Dict = {
   },
   hero: {
     livePill: "Ao vivo · 12 418 especialistas verificados em 10 desportos",
+    tagline: "Sistemas · entregues · especialistas verificados",
     title1: "Os melhores",
     titleAccent: "especialistas",
     title2: "do mundo. Verificados. Avaliados. Teus.",
     subtitle:
-      "Vinyasa, BJJ, escalada, surf — todos os desportos, por quem os vive. Com ferramentas de nível científico habitualmente reservadas a atletas universitários americanos.",
+      "Marketplace de coaches de elite com tooling de laboratório — Strava, Readiness IA e sessões ao vivo num só sítio.",
     primary: "Encontrar o meu especialista",
     secondary: "Como avaliamos coaches",
+    signupCta: "Começar grátis",
+    coachCta: "Tornar-me coach",
     reviewsLine: "27 840 avaliações verificadas",
     rejectedTitle: "62% rejeitados",
     rejectedBody: "Só os melhores especialistas entram",
     reassurance:
       "Intro grátis de 15 min com cada coach · €12/mês quando estiveres pronto",
-    demoCta: "Abrir demo ao vivo"
+    demoCta: "Ver demo ao vivo",
+    fullScreenDemo: "Demo em ecrã inteiro",
+    avatarAthleteAlt: "Atleta verificada",
+    avatarCoachAlt: "Coach verificado"
+  },
+  heroExtras: {
+    metricsReadiness: "Prontidão",
+    metricsReadinessDelta: "+4 HRV",
+    metricsCoachFit: "Encaixe coach",
+    metricsCoachFitDelta: "verificado",
+    metricsLoad: "Carga",
+    metricsLoadDelta: "ao vivo",
+    cardTitle: "A FitConnect torna-se o teu sistema operativo de treino.",
+    cardBody: "Marketplace de coaches, inteligência wearable e feedback ao vivo num só fluxo.",
+    liveDemo: "Demo ao vivo",
+    sportStrength: "Força",
+    sportYoga: "Yoga",
+    sportRunning: "Corrida"
+  },
+  downloadSection: {
+    eyebrow: "Mobile-first",
+    title: "Treina a partir do bolso",
+    subtitle:
+      "Instala a FitConnect como PWA para painéis offline, alertas push e sync ao vivo com o teu coach.",
+    installApp: "Instalar app",
+    openLiveDemo: "Abrir demo ao vivo",
+    tryMobileDemo: "Experimentar demo móvel"
+  },
+  mobileApp: {
+    launcher: {
+      badge: "Demo da app móvel",
+      titleDesktop: "Pré-visualiza a app antes de entrares.",
+      subtitleDesktop:
+        "Alterna entre vistas de atleta e coach e abre a demo ao vivo com um toque.",
+      titleMobile: "Escolhe a vista da app a abrir.",
+      subtitleMobile:
+        "Estes botões iniciam sessão nas contas demo e abrem as rotas reais do painel móvel com dock inferior.",
+      athleteTitle: "Painel do atleta",
+      athleteSubtitle: "Prontidão, plano de hoje, sessão ao vivo e updates do coach.",
+      coachTitle: "Painel do coach",
+      coachSubtitle: "Prontidão do plantel, alertas IA e follow-up de atletas.",
+      openAthlete: "Abrir app atleta",
+      openCoach: "Abrir app coach",
+      useAnotherAccount: "Usar outra conta",
+      backHomeAria: "Voltar à FitConnect",
+      metaTitle: "Demo da app mobile — FitConnect",
+      metaDescription: "Pré-visualização FitConnect no iPhone com painéis de atleta e coach."
+    },
+    nav: {
+      today: "Hoje",
+      sessions: "Sessões",
+      coach: "Coach",
+      roster: "Plantel",
+      inbox: "Inbox",
+      profile: "Perfil",
+      ariaLabel: "Navegação da app de pré-visualização"
+    },
+    header: {
+      athleteEyebrow: "Athlete OS",
+      coachEyebrow: "Coach OS",
+      athleteGreeting: "Bom dia, Inês",
+      coachGreeting: "Boa tarde, Diego",
+      syncBadge: "Whoop sincronizado",
+      syncAgo: "há 12 s"
+    },
+    today: {
+      readiness: "Readiness IA",
+      rosterGreen: "Plantel verde",
+      trainHard: "Puxa forte",
+      startSession: "Começar sessão",
+      returnToLive: "Voltar ao live",
+      hrv: "HRV",
+      amberAlerts: "alertas âmbar",
+      msDelta: "+4 ms",
+      streak: "Série",
+      personalBest: "melhor pessoal",
+      sleep: "Sono",
+      sleepQuality: "89% qualidade",
+      load: "Carga",
+      sevenDay: "7 dias",
+      weeklyLoad: "Carga semanal",
+      onTarget: "No alvo",
+      coachAiFlag: "IA sinalizou 3 atletas para quinta mais leve.",
+      athleteAiSuggest: "IA sugere mover o threshold para quinta.",
+      planApproved: "Atualização do plano aprovada",
+      basedOnSignals: "Com base em HRV, sono e carga da última sessão.",
+      approveUpdate: "Aprovar atualização"
+    },
+    sessions: {
+      title: "Sessões",
+      liveNow: "Ao vivo",
+      nextUp: "A seguir",
+      workoutTitle: "Força de membros inferiores",
+      workoutMeta: "45 min · coach Diego · RPE alvo 7",
+      hr: "FC",
+      pace: "Ritmo",
+      load: "Carga",
+      chartTitle: "Curva de strain ao vivo",
+      chartSubtitle: "FC, ritmo e carga",
+      endSession: "Terminar sessão",
+      startLive: "Iniciar sessão ao vivo"
+    },
+    coach: {
+      rosterTitle: "Plantel",
+      coachTitle: "Coach Diego",
+      activeAthletes: "41 atletas ativos",
+      onlineNow: "Online agora",
+      greenReadiness: "Prontidão verde",
+      amberReadiness: "Prontidão âmbar",
+      sendCheckIn: "Enviar check-in",
+      messageSent: "Mensagem enviada"
+    },
+    inbox: {
+      title: "Inbox",
+      kicker: "Atualizações em tempo real",
+      planApprovedTitle: "Atualização do plano aprovada",
+      planApprovedBody: "Threshold de quinta movido. O coach tem a atualização.",
+      planPendingBody: "IA recomenda quinta mais leve com base na recuperação.",
+      approve: "Aprovar",
+      checkInTitle: "Check-in do coach",
+      checkInSentBody: "A tua nota está visível na pré-visualização da app.",
+      checkInPrompt: "Como sentiste a última série?"
+    },
+    profile: {
+      title: "Perfil",
+      athleteKicker: "Perfil de atleta",
+      coachKicker: "Perfil de coach",
+      athleteName: "Inês Martins",
+      coachName: "Diego Alvarez",
+      athleteRole: "Atleta híbrido · Lisboa",
+      coachRole: "Coach de força · Madrid",
+      streak: "Série",
+      score: "Score"
+    },
+    appearance: {
+      title: "Aparência",
+      dark: "Escuro",
+      light: "Claro"
+    },
+    accessibility: {
+      title: "Acessibilidade",
+      reduceMotion: "Reduzir movimento",
+      reduceMotionDesc: "Transições mais calmas na app",
+      highContrast: "Alto contraste",
+      highContrastDesc: "Texto e bordas de cartões mais fortes"
+    },
+    security: {
+      title: "Segurança e privacidade",
+      wearables: "Gerir wearables ligados",
+      dataExport: "Exportação de dados e controlos de privacidade",
+      demoNote:
+        "Controlos só de demo — ligar às definições reais de conta em produção."
+    },
+    voltline: "Voltline"
+  },
+  trustStrip: {
+    reviews: "4,94 ★ · 27k+ avaliações verificadas",
+    rejected: "62% de candidatos rejeitados",
+    coaches: "12 418 coaches verificados"
+  },
+  featuredCoaches: {
+    eyebrow: "Coaches em destaque",
+    title: "Treina com",
+    titleAccent: "especialistas de elite",
+    subtitle: "Credenciais verificadas, avaliações reais, intro grátis de 15 min.",
+    bookIntro: "Marcar intro grátis",
+    perHour: "/hora",
+    sessions: "sessões",
+    verified: "Verificado",
+    seeAll: "Ver todos os coaches"
+  },
+  scienceAndTech: {
+    eyebrow: "Ciência e tecnologia",
+    title: "Ferramentas de laboratório para",
+    titleAccent: "cada atleta",
+    subtitle:
+      "Readiness IA, HRV, webhooks Strava e sessões ao vivo — não é um diretório com chat.",
+    cta: "Ler a metodologia",
+    tiles: [
+      {
+        title: "Readiness Score IA",
+        body: "HRV, sono, strain e carga num único dial em que o teu coach confia."
+      },
+      {
+        title: "Webhooks Strava",
+        body: "Atividades sincronizadas em segundos — sem polling, sem dashboards obsoletos."
+      },
+      {
+        title: "Sessões ao vivo",
+        body: "Sala de vídeo HD com overlay de FC e nudges do coach em tempo real."
+      },
+      {
+        title: "Gestão de carga",
+        body: "Ajustes automáticos quando a recuperação desce — o coach aprova num toque."
+      }
+    ]
+  },
+  integrationsStrip: {
+    eyebrow: "Dados conectados",
+    title: "Conectar · Treinar · Evoluir",
+    subtitle: "Strava, Garmin, Apple Health, Whoop e Oura alimentam o teu Readiness Score.",
+    step1: "Ligar wearables",
+    step2: "Sync automático de atividades",
+    step3: "Coach vê o quadro completo",
+    syncLabel: "Sincronizado com Strava",
+    syncDemo: "há 2 min"
+  },
+  methodologyPreview: {
+    eyebrow: "The Specialist Standard™",
+    title1: "Não construímos um marketplace. Construímos um",
+    titleAccent: "sistema de verificação",
+    title2: "que por acaso é um.",
+    body: "Seis princípios separam um especialista real de alguém com uma homepage. Exigimos todos aos nossos coaches.",
+    cta: "Ler a metodologia completa"
+  },
+  pressStrip: {
+    label: "Coaches e atletas referenciados em"
+  },
+  emailCapture: {
+    placeholder: "o.teu@email.com",
+    button: "Acesso antecipado",
+    success: "Estás na lista — verifica o email."
   },
   sports: {
     eyebrow: "10 desportos. 0 generalistas.",
@@ -117,6 +341,8 @@ export const pt: Dict = {
     coachName: "Coach",
     coachDesc:
       "Gere o teu negócio de coaching numa só app — fica com 85% de cada reserva.",
+    compareNote:
+      "vs Trainerize (~€50/mês) e TrueCoach (~€35/mês) — só pagas o coach quando marcas.",
     features: {
       free: [
         "Navegação ilimitada",
@@ -127,8 +353,9 @@ export const pt: Dict = {
       athlete: [
         "Reservas ilimitadas",
         "Intro grátis de 15 min com cada coach",
-        "Painel de atleta completo (HRV, sono, IA)",
-        "Acesso à biblioteca de programas",
+        "Sync Strava automático + Readiness IA",
+        "Painel completo (HRV, sono, carga)",
+        "Chat com coach + biblioteca de programas",
         "Suporte prioritário · resposta < 2h"
       ],
       coach: [
@@ -203,7 +430,17 @@ export const pt: Dict = {
       "A FitConnect faz parte da suite Querinoz. Lê as nossas notas de desenvolvimento e o roadmap no GitHub.",
     seeRepo: "Ver o repositório",
     copyright: "Construído em Lisboa com disciplina, sem hype",
-    statusOk: "Tudo a funcionar"
+    statusOk: "Tudo a funcionar",
+    about: "Sobre",
+    careers: "Carreiras",
+    press: "Imprensa",
+    partnerships: "Parcerias",
+    privacy: "Privacidade",
+    terms: "Termos",
+    trustSafety: "Confiança e segurança",
+    contact: "Contacto",
+    stravaAttribution:
+      "Dados de atividade Strava mostrados com permissão. Powered by Strava."
   },
   dashboard: {
     eyebrow: "O teu sistema de atleta",

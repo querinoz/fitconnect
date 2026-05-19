@@ -36,6 +36,8 @@ export interface Trainer {
   athletesCoached: number;
   retentionRate: number;
   languages: string[];
+  /** Paid marketplace tier — surfaced on /discover */
+  featured?: boolean;
 }
 
 export const SPORTS: Sport[] = [
@@ -96,7 +98,8 @@ export const TRAINERS: Trainer[] = [
     signatureProgramIds: ["p-foundations", "p-mobility-stack"],
     athletesCoached: 412,
     retentionRate: 93,
-    languages: ["English", "Portuguese", "Spanish"]
+    languages: ["English", "Portuguese", "Spanish"],
+    featured: true
   },
   {
     id: "t-002",
@@ -121,7 +124,8 @@ export const TRAINERS: Trainer[] = [
     signatureProgramIds: ["p-iron-arc", "p-meet-prep-12"],
     athletesCoached: 287,
     retentionRate: 96,
-    languages: ["English", "Spanish"]
+    languages: ["English", "Spanish"],
+    featured: true
   },
   {
     id: "t-003",
@@ -146,7 +150,8 @@ export const TRAINERS: Trainer[] = [
     signatureProgramIds: ["p-pop-up-first-wave", "p-comp-prep-surf"],
     athletesCoached: 138,
     retentionRate: 88,
-    languages: ["English", "Portuguese"]
+    languages: ["English", "Portuguese"],
+    featured: true
   },
   {
     id: "t-004",
@@ -171,7 +176,8 @@ export const TRAINERS: Trainer[] = [
     signatureProgramIds: ["p-finger-protocol", "p-send-it"],
     athletesCoached: 201,
     retentionRate: 91,
-    languages: ["English", "German", "Hebrew"]
+    languages: ["English", "German", "Hebrew"],
+    featured: true
   },
   {
     id: "t-005",

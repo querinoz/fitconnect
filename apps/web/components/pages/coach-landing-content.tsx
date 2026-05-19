@@ -52,7 +52,7 @@ export function CoachLandingContent() {
       <main id="main">
         <section className="relative overflow-hidden pt-12 pb-16">
           <div className="absolute inset-0 -z-10 gradient-bg" />
-          <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-12 items-center">
+          <div className="mx-auto max-w-7xl fc-section-x px-4 sm:px-6 grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <SectionHeader
                 as="h1"
@@ -111,7 +111,7 @@ export function CoachLandingContent() {
           </div>
         </section>
 
-        <section id="perks" className="mx-auto max-w-7xl px-6 py-16">
+        <section id="perks" className="mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-16">
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {cl.perks.map((p, i) => {
               const Icon = perkIcons[i] ?? Wallet;
@@ -131,7 +131,7 @@ export function CoachLandingContent() {
           </div>
         </section>
 
-        <section id="earnings" className="mx-auto max-w-7xl px-6 py-16">
+        <section id="earnings" className="mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-16">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>
               <p className="eyebrow">{cl.earningsTitle}</p>
@@ -183,7 +183,7 @@ export function CoachLandingContent() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-6 py-16">
+        <section className="mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-16">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="font-display text-2xl font-bold">{cl.voicesTitle}</h2>
             <p className="mt-2 text-ink-400">{cl.voicesSubtitle}</p>
@@ -213,7 +213,7 @@ export function CoachLandingContent() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-6 py-16">
+        <section className="mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-16">
           <div className="text-center max-w-2xl mx-auto">
             <p className="eyebrow">{cl.onboardingEyebrow}</p>
             <h2 className="mt-3 font-display text-3xl md:text-4xl font-bold">

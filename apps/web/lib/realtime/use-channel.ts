@@ -1,22 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getBroadcastTransport } from "@/lib/platform/realtime/broadcast-transport";
-import { getConvexTransport } from "@/lib/platform/realtime/convex-transport";
 import type { IRealtimeTransport } from "@/lib/platform/ports/realtime";
-import { getRealtimeProvider } from "@/lib/platform/stack";
+import { resolveTransport } from "@/lib/platform/realtime/resolve-transport";
 import type { RealtimeMessage } from "./types";
-
-function resolveTransport(): IRealtimeTransport {
-  const provider = getRealtimeProvider();
-  switch (provider) {
-    case "convex":
-      return getConvexTransport();
-    case "broadcast":
-    default:
-      return getBroadcastTransport();
-  }
-}
 
 export function useChannel(name: string) {
   const transportRef = useRef<IRealtimeTransport | null>(null);
@@ -30,7 +17,7 @@ export function useChannel(name: string) {
   );
 
   useEffect(() => {
-    const transport = resolveTransport();
+    const transport = resolveTransport(name);
     transportRef.current = transport;
     const unsub = transport.subscribe(name, (m) =>
       setMessages((prev) => [...prev, m])

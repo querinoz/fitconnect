@@ -1,6 +1,6 @@
 import type { Dict } from "../types";
 
-export const fr = {
+export const fr: Dict = {
   nav: {
     findCoach: "Trouver un coach",
     programs: "Programmes",
@@ -23,6 +23,7 @@ export const fr = {
   },
   hero: {
     livePill: "En direct · 12 418 spécialistes vérifiés dans 10 sports",
+    tagline: "Systèmes · livrés · spécialistes vérifiés",
     title1: "Les meilleurs",
     titleAccent: "spécialistes",
     title2: "du monde. Vérifiés. Évalués. À vous.",
@@ -30,12 +31,237 @@ export const fr = {
       "Vinyasa, BJJ, escalade, surf — chaque sport, par ceux qui le vivent. Avec des outils de niveau scientifique habituellement réservés aux athlètes universitaires d'élite.",
     primary: "Trouver mon spécialiste",
     secondary: "Comment nous évaluons les coaches",
+    signupCta: "Commencer gratuitement",
+    coachCta: "Devenir coach",
     reviewsLine: "27 840 avis vérifiés",
     rejectedTitle: "62 % refusés",
     rejectedBody: "Seuls les meilleurs spécialistes sont acceptés",
     reassurance:
       "Intro gratuite de 15 min avec chaque coach · 12 €/mois quand vous êtes prêt",
-    demoCta: "Ouvrir la démo live"
+    demoCta: "Voir la démo live",
+    fullScreenDemo: "Démo plein écran",
+    avatarAthleteAlt: "Athlète vérifiée",
+    avatarCoachAlt: "Coach vérifié"
+  },
+  heroExtras: {
+    metricsReadiness: "Préparation",
+    metricsReadinessDelta: "+4 HRV",
+    metricsCoachFit: "Match coach",
+    metricsCoachFitDelta: "vérifié",
+    metricsLoad: "Charge",
+    metricsLoadDelta: "en direct",
+    cardTitle: "FitConnect devient votre système d'entraînement.",
+    cardBody: "Marketplace de coaches, intelligence wearable et retour en direct dans un seul flux.",
+    liveDemo: "Démo live",
+    sportStrength: "Force",
+    sportYoga: "Yoga",
+    sportRunning: "Course"
+  },
+  downloadSection: {
+    eyebrow: "Mobile-first",
+    title: "Entraînez-vous depuis votre poche",
+    subtitle:
+      "Installez FitConnect en PWA pour des tableaux de bord hors ligne, des alertes push et une synchro coach en direct.",
+    installApp: "Installer l'app",
+    openLiveDemo: "Ouvrir la démo live",
+    tryMobileDemo: "Essayer la démo mobile"
+  },
+  mobileApp: {
+    launcher: {
+      badge: "Démo de l'app mobile",
+      titleDesktop: "Prévisualisez l'app avant de vous connecter.",
+      subtitleDesktop:
+        "Basculez entre les vues athlète et coach, puis lancez la démo live en un tap.",
+      titleMobile: "Choisissez la vue de l'app à ouvrir.",
+      subtitleMobile:
+        "Ces boutons se connectent aux comptes démo et ouvrent les vraies routes du tableau de bord mobile avec dock inférieur.",
+      athleteTitle: "Tableau de bord athlète",
+      athleteSubtitle: "Préparation, plan du jour, séance live et mises à jour coach.",
+      coachTitle: "Tableau de bord coach",
+      coachSubtitle: "Préparation du roster, alertes IA et suivi des athlètes.",
+      openAthlete: "Ouvrir l'app athlète",
+      openCoach: "Ouvrir l'app coach",
+      useAnotherAccount: "Utiliser un autre compte",
+      backHomeAria: "Retour à FitConnect",
+      metaTitle: "Démo app mobile — FitConnect",
+      metaDescription: "Aperçu FitConnect sur iPhone avec tableaux de bord athlète et coach."
+    },
+    nav: {
+      today: "Aujourd'hui",
+      sessions: "Séances",
+      coach: "Coach",
+      roster: "Roster",
+      inbox: "Boîte",
+      profile: "Profil",
+      ariaLabel: "Navigation de l'app de prévisualisation"
+    },
+    header: {
+      athleteEyebrow: "Athlete OS",
+      coachEyebrow: "Coach OS",
+      athleteGreeting: "Bonjour, Inês",
+      coachGreeting: "Bon après-midi, Diego",
+      syncBadge: "Whoop synchronisé",
+      syncAgo: "il y a 12 s"
+    },
+    today: {
+      readiness: "Préparation IA",
+      rosterGreen: "Roster au vert",
+      trainHard: "Poussez fort",
+      startSession: "Démarrer la séance",
+      returnToLive: "Retour au live",
+      hrv: "HRV",
+      amberAlerts: "alertes ambre",
+      msDelta: "+4 ms",
+      streak: "Série",
+      personalBest: "record personnel",
+      sleep: "Sommeil",
+      sleepQuality: "89 % de qualité",
+      load: "Charge",
+      sevenDay: "7 jours",
+      weeklyLoad: "Charge hebdo",
+      onTarget: "Dans la cible",
+      coachAiFlag: "L'IA a signalé 3 athlètes pour un jeudi plus léger.",
+      athleteAiSuggest: "L'IA suggère de déplacer le seuil à jeudi.",
+      planApproved: "Mise à jour du plan approuvée",
+      basedOnSignals: "Selon HRV, sommeil et charge de la dernière séance.",
+      approveUpdate: "Approuver la mise à jour"
+    },
+    sessions: {
+      title: "Séances",
+      liveNow: "En direct",
+      nextUp: "À suivre",
+      workoutTitle: "Force du bas du corps",
+      workoutMeta: "45 min · coach Diego · RPE cible 7",
+      hr: "FC",
+      pace: "Allure",
+      load: "Charge",
+      chartTitle: "Courbe de strain en direct",
+      chartSubtitle: "FC, allure et charge",
+      endSession: "Terminer la séance",
+      startLive: "Démarrer la séance live"
+    },
+    coach: {
+      rosterTitle: "Roster",
+      coachTitle: "Coach Diego",
+      activeAthletes: "41 athlètes actifs",
+      onlineNow: "En ligne maintenant",
+      greenReadiness: "Préparation verte",
+      amberReadiness: "Préparation ambre",
+      sendCheckIn: "Envoyer un check-in",
+      messageSent: "Message envoyé"
+    },
+    inbox: {
+      title: "Boîte",
+      kicker: "Mises à jour en temps réel",
+      planApprovedTitle: "Mise à jour du plan approuvée",
+      planApprovedBody: "Seuil du jeudi déplacé. Le coach a la mise à jour.",
+      planPendingBody: "L'IA recommande un jeudi plus léger selon la récupération.",
+      approve: "Approuver",
+      checkInTitle: "Check-in du coach",
+      checkInSentBody: "Votre note est visible dans l'aperçu de l'app.",
+      checkInPrompt: "Comment s'est sentie la dernière série ?"
+    },
+    profile: {
+      title: "Profil",
+      athleteKicker: "Profil athlète",
+      coachKicker: "Profil coach",
+      athleteName: "Inês Martins",
+      coachName: "Diego Alvarez",
+      athleteRole: "Athlète hybride · Lisbonne",
+      coachRole: "Coach force · Madrid",
+      streak: "Série",
+      score: "Score"
+    },
+    appearance: {
+      title: "Apparence",
+      dark: "Sombre",
+      light: "Clair"
+    },
+    accessibility: {
+      title: "Accessibilité",
+      reduceMotion: "Réduire les animations",
+      reduceMotionDesc: "Transitions plus calmes dans toute l'app",
+      highContrast: "Contraste élevé",
+      highContrastDesc: "Texte et bords de cartes plus marqués"
+    },
+    security: {
+      title: "Sécurité et confidentialité",
+      wearables: "Gérer les wearables connectés",
+      dataExport: "Export de données et contrôles de confidentialité",
+      demoNote:
+        "Contrôles démo uniquement — à brancher sur les vrais paramètres de compte en production."
+    },
+    voltline: "Voltline"
+  },
+  trustStrip: {
+    reviews: "4,94 ★ · 27k+ avis vérifiés",
+    rejected: "62 % de candidatures refusées",
+    coaches: "12 418 coaches vérifiés"
+  },
+  featuredCoaches: {
+    eyebrow: "Coaches en vedette",
+    title: "Entraînez-vous avec des",
+    titleAccent: "spécialistes d'élite",
+    subtitle:
+      "Certifications vérifiées, avis réels, intro gratuite de 15 min avec chaque coach.",
+    bookIntro: "Réserver intro gratuite",
+    perHour: "/heure",
+    sessions: "séances",
+    verified: "Vérifié",
+    seeAll: "Voir tous les coaches"
+  },
+  scienceAndTech: {
+    eyebrow: "Science et technologie",
+    title: "Des outils de laboratoire pour",
+    titleAccent: "chaque athlète",
+    subtitle:
+      "Préparation IA, HRV, webhooks Strava et séances live — pas un annuaire avec chat.",
+    cta: "Lire la méthodologie",
+    tiles: [
+      {
+        title: "Score de préparation IA",
+        body: "HRV, sommeil, strain et charge fusionnés en un seul indicateur de confiance pour votre coach."
+      },
+      {
+        title: "Webhooks Strava",
+        body: "Activités synchronisées en secondes — sans polling ni tableaux de bord obsolètes."
+      },
+      {
+        title: "Séances live",
+        body: "Salle vidéo HD avec overlay FC et relances coach en temps réel."
+      },
+      {
+        title: "Gestion de charge",
+        body: "Ajustements automatiques quand la récupération baisse — le coach approuve en un tap."
+      }
+    ]
+  },
+  integrationsStrip: {
+    eyebrow: "Données connectées",
+    title: "Connecter · S'entraîner · Évoluer",
+    subtitle:
+      "Strava, Garmin, Apple Health, Whoop et Oura alimentent votre score de préparation.",
+    step1: "Connecter les wearables",
+    step2: "Synchroniser les activités automatiquement",
+    step3: "Le coach voit l'image complète",
+    syncLabel: "Synchronisé avec Strava",
+    syncDemo: "il y a 2 min"
+  },
+  methodologyPreview: {
+    eyebrow: "The Specialist Standard™",
+    title1: "Nous n'avons pas construit un marketplace. Nous avons construit un",
+    titleAccent: "système de vérification",
+    title2: "qui s'avère en être un.",
+    body: "Six principes séparent un vrai spécialiste de quelqu'un avec une page web. Nous les exigeons de tous nos coaches.",
+    cta: "Lire la méthodologie complète"
+  },
+  pressStrip: {
+    label: "Coaches et athlètes cités dans"
+  },
+  emailCapture: {
+    placeholder: "vous@email.com",
+    button: "Accès anticipé",
+    success: "Vous êtes sur la liste — vérifiez votre boîte mail."
   },
   sports: {
     eyebrow: "10 sports. 0 généralistes.",
@@ -117,6 +343,8 @@ export const fr = {
     coachName: "Coach",
     coachDesc:
       "Gérez votre activité de coaching depuis une seule app — gardez 85 % de chaque réservation.",
+    compareNote:
+      "vs Trainerize (~50 €/mois) et TrueCoach (~35 €/mois) — vous ne payez votre coach que lorsque vous réservez.",
     features: {
       free: [
         "Navigation illimitée",
@@ -127,8 +355,9 @@ export const fr = {
       athlete: [
         "Réservations illimitées",
         "Intro gratuite de 15 min avec chaque coach",
-        "Tableau de bord athlète complet (HRV, sommeil, IA)",
-        "Accès à la bibliothèque de programmes",
+        "Sync Strava auto + préparation IA",
+        "Tableau de bord complet (HRV, sommeil, charge)",
+        "Chat coach + bibliothèque de programmes",
         "Support prioritaire · réponse < 2 h"
       ],
       coach: [
@@ -203,7 +432,17 @@ export const fr = {
       "FitConnect fait partie de la suite Querinoz. Consultez nos notes de build et la feuille de route sur GitHub.",
     seeRepo: "Voir le dépôt",
     copyright: "Conçu à Lisbonne avec discipline, pas du hype",
-    statusOk: "Tous les systèmes opérationnels"
+    statusOk: "Tous les systèmes opérationnels",
+    about: "À propos",
+    careers: "Carrières",
+    press: "Presse",
+    partnerships: "Partenariats",
+    privacy: "Confidentialité",
+    terms: "Conditions",
+    trustSafety: "Confiance et sécurité",
+    contact: "Contact",
+    stravaAttribution:
+      "Données d'activité Strava affichées avec permission. Powered by Strava."
   },
   dashboard: {
     eyebrow: "Votre OS athlète",
@@ -227,28 +466,32 @@ export const fr = {
     online: "En ligne",
     inPerson: "En présentiel",
     tomorrow: "Demain",
-    coachPlanTitle: "Coach plan for you",
+    coachPlanTitle: "Plan de votre coach",
     coachPlanSubtitle:
-      "Prescribed by your specialist — updates sync to your coach in real time."
+      "Prescrit par votre spécialiste — les mises à jour se synchronisent avec votre coach en temps réel.",
+    wearableSyncHint:
+      "Synchronisez votre wearable pour débloquer les ajustements IA de votre coach.",
+    noAthleteProfile:
+      "Aucun profil athlète sur ce compte. Connectez-vous en Athlete / Athlete pour la démo."
   },
   hub: {
-    mobileNav: "Dashboard navigation",
-    yourCoach: "Your coach",
+    mobileNav: "Navigation du tableau de bord",
+    yourCoach: "Votre coach",
     wearableSync: "Apple · Garmin · Whoop",
-    sessionsMonth: "Sessions this month",
-    hoursTrained: "Hours trained",
-    prStreak: "PR streak",
-    personalBest: "Personal best",
-    goalCompletion: "Goal progress",
-    roster: "Athlete roster",
-    monitor: "Monitor",
-    backToRoster: "Back to roster",
-    monitorAthlete: "Athlete monitor",
-    readiness: "Readiness",
-    recoveryNotes: "Recovery & plan notes",
-    noPlanYet: "No plan assigned yet.",
-    sendRecoveryNudge: "Send recovery nudge",
-    athleteNotFound: "Athlete not found in your roster."
+    sessionsMonth: "Séances ce mois-ci",
+    hoursTrained: "Heures d'entraînement",
+    prStreak: "Série de PR",
+    personalBest: "Record personnel",
+    goalCompletion: "Progression de l'objectif",
+    roster: "Roster",
+    monitor: "Surveiller",
+    backToRoster: "Retour au roster",
+    monitorAthlete: "Moniteur athlète",
+    readiness: "Préparation",
+    recoveryNotes: "Notes de récupération et plan",
+    noPlanYet: "Aucun plan assigné pour l'instant.",
+    sendRecoveryNudge: "Envoyer une relance récupération",
+    athleteNotFound: "Athlète introuvable dans votre roster."
   },
   coachDashboard: {
     eyebrow: "Coach OS",
@@ -581,5 +824,361 @@ export const fr = {
       "À quelle fréquence pouvez-vous vous entraîner ?",
       "Où voulez-vous vous entraîner ?"
     ]
-  }
+  },
+  communityFeed: {
+    eyebrow: "Communauté",
+    title: "Le club, en ligne.",
+    subtitle:
+      "Athlètes célébrant des PR, vraies questions, avant/après. Des coaches spécialistes passent par ici. Pas d'économie de likes.",
+    shareCta: "Partager un check-in",
+    searchPlaceholder: "Rechercher dans le fil…",
+    activityType: "Type d'activité",
+    sport: "Sport",
+    allSports: "Tous les sports",
+    liveActivity: "Activité en direct",
+    trendingClubs: "Clubs tendance",
+    upcomingMeetups: "Rencontres à venir",
+    join: "Rejoindre",
+    members: "membres",
+    going: "participants",
+    emptyTitle: "Pas encore de publications",
+    emptyDesc:
+      "Élargissez les filtres ou soyez le premier à publier avec cette combinaison.",
+    kinds: {
+      all: "Tous",
+      pr: "PR",
+      checkin: "Check-in",
+      beforeAfter: "Avant/Après",
+      race: "Course",
+      question: "Question"
+    },
+    stats: {
+      postsToday: "Publications aujourd'hui",
+      prsWeek: "PR cette semaine",
+      activeClubs: "Clubs actifs"
+    }
+  },
+  programsPage: {
+    eyebrow: "Bibliothèque de programmes",
+    titleLine1: "84 programmes signature.",
+    titleAccent: "Écrits par les coaches qui les animent.",
+    subtitle:
+      "Testés, fondés sur les preuves, avec RPE. Chaque programme inclut des check-ins hebdomadaires et des mises à jour à vie.",
+    featuredBadge: "En vedette",
+    weeks: "semaines",
+    athletesJoined: "athlètes inscrits",
+    joinProgram: "Rejoindre le programme",
+    seeSampleWeek: "Voir une semaine type",
+    searchPlaceholder: "Rechercher des programmes…",
+    allSports: "Tous les sports",
+    emptyTitle: "Aucun programme ne correspond à ces filtres",
+    emptyDesc: "Essayez un autre sport ou retirez le filtre de niveau.",
+    browseAll: "Parcourir tous les programmes",
+    levels: {
+      all: "Tous",
+      beginner: "Débutant",
+      intermediate: "Intermédiaire",
+      advanced: "Avancé"
+    }
+  },
+  pricingPage: {
+    eyebrow: "Tarifs",
+    title: "Des tarifs honnêtes pour",
+    titleAccent: "un entraînement honnête",
+    subtitle:
+      "12 €/mois pour la plateforme. Le tarif de votre coach est celui qu'il fixe. Pas de frais cachés. Pas de contrat de 12 mois. Mettez en pause quand vous en avez besoin.",
+    monthly: "Mensuel",
+    annual: "Annuel",
+    saveBadge: "Économisez 25 %",
+    perMonth: "/mois",
+    billedAnnually: "facturé annuellement",
+    sessionRatesTitle: "Tarifs de séance typiques par sport",
+    sessionRatesSubtitle:
+      "Les coaches fixent leurs tarifs. Voici les médianes du marketplace.",
+    sport: "Sport",
+    from: "À partir de",
+    typical: "Typique",
+    premium: "Premium",
+    faqTitle: "Questions sur les tarifs",
+    faqSubtitle: "Réponses directes. Pas de script commercial.",
+    plans: {
+      free: {
+        name: "Gratuit",
+        desc: "Découvrez les coaches, lisez 27 000+ avis, enregistrez des favoris.",
+        cta: "Commencer gratuitement",
+        features: [
+          "Navigation illimitée",
+          "10 favoris",
+          "Quiz coach",
+          "Tous les avis",
+          "Support par e-mail"
+        ]
+      },
+      athlete: {
+        name: "Athlète",
+        desc: "Tout pour des progrès sérieux. Payez les séances en plus.",
+        cta: "Commencer Athlète",
+        features: [
+          "Réservations illimitées",
+          "Intro gratuite de 15 min avec chaque coach",
+          "Tableau complet (HRV, sommeil, entraînement IA)",
+          "Bibliothèque de programmes + mises à jour",
+          "Support prioritaire · < 2 h",
+          "Réservations conscientes de la récupération",
+          "Communauté et clubs"
+        ]
+      },
+      team: {
+        name: "Équipe",
+        desc: "Pour les familles, clubs et partenaires d'entraînement.",
+        cta: "Commencer Équipe",
+        features: [
+          "Jusqu'à 5 profils athlète",
+          "Calendrier partagé",
+          "Réduction sur les séances de groupe (-15 %)",
+          "Facturation familiale",
+          "Tout du plan Athlète"
+        ]
+      },
+      coach: {
+        name: "Coach",
+        desc: "Gérez votre activité dans une app. Gardez 85 %.",
+        cta: "Postuler comme coach",
+        features: [
+          "Jusqu'à 50 clients actifs",
+          "Créateur de plans + 600 exercices",
+          "Paiements Stripe Connect",
+          "Marketing et annonces en vedette",
+          "Analytiques et rétention",
+          "Séances de groupe",
+          "Page coach personnalisée"
+        ]
+      }
+    },
+    reassurance: [
+      {
+        title: "Intro gratuite de 15 min",
+        body: "Avec chaque coach. Votre profil athlète vous suit si vous changez."
+      },
+      {
+        title: "Pas de contrat de 12 mois",
+        body: "Mettez en pause quand vous voulez. Nous ne facturons pas ce que vous n'utilisez pas."
+      },
+      {
+        title: "Revenu net honnête",
+        body: "Les coaches gardent 85 % — le revenu net le plus élevé du marché."
+      }
+    ],
+    faqs: [
+      {
+        q: "Pourquoi les frais de plateforme sont-ils si bas vs Future ou Caliber ?",
+        a: "Future et Caliber incluent un coach dans le prix mensuel fixe. FitConnect facture 12 €/mois et vous choisissez le coach à son tarif horaire — beaucoup d'athlètes paient 30 à 60 % de moins."
+      },
+      {
+        q: "Prenez-vous une commission sur les coaches ?",
+        a: "Oui — 15 %. Les coaches gardent 85 %, le revenu net le plus élevé du marché."
+      },
+      {
+        q: "Que se passe-t-il si mon coach annule ?",
+        a: "Remboursement intégral + 25 % de crédit. Nouveau match sous 48 h."
+      },
+      {
+        q: "Puis-je annuler à tout moment ?",
+        a: "Oui. L'abonnement se met en pause immédiatement ; vous gardez l'accès jusqu'à la fin du cycle."
+      }
+    ]
+  },
+  coachLanding: {
+    eyebrow: "Pour les coaches spécialistes",
+    title: "Coachez votre sport.",
+    titleAccent: "Gardez 85 %.",
+    subtitle:
+      "Marketplace pour athlètes vérifiés et conscients de la récupération. Médiane de 3 420 €/mois en 90 jours.",
+    applyCta: "Postuler maintenant",
+    seeEarnings: "Voir les revenus des coaches",
+    perks: [
+      {
+        title: "Gardez 85 % de chaque réservation",
+        body: "Revenu net leader — nous publions le P&L."
+      },
+      {
+        title: "Vidéo HD et planning gratuits",
+        body: "Studio intégré, sans Zoom, avec enregistrement."
+      },
+      {
+        title: "Paiements Stripe Connect",
+        body: "Fonds sur votre compte 24 h après la séance."
+      },
+      {
+        title: "Mis en avant pour 184 512 athlètes",
+        body: "Marketing inclus. Vedettes méritées."
+      },
+      {
+        title: "Plans et bibliothèque d'exercices",
+        body: "600+ exercices, blocs personnalisés."
+      },
+      {
+        title: "Badge coach vérifié",
+        body: "Specialist Standard™. Les athlètes le remarquent."
+      }
+    ],
+    earningsTitle: "Ce que vous pouvez",
+    earningsTitleAccent: "vraiment gagner",
+    earningsSubtitle:
+      "Médiane et top 10 % des revenus bruts mensuels selon l'ancienneté sur la plateforme.",
+    cohortMonths: "Mois {range}",
+    median: "médiane",
+    top10: "top 10 %",
+    voicesTitle: "Histoires de coaches",
+    voicesSubtitle: "Spécialistes sur la plateforme aujourd'hui.",
+    stats: {
+      activeCoaches: "Coaches actifs",
+      avgTakeHome: "Revenu net moyen",
+      coachNps: "NPS coaches"
+    },
+    earningsBullets: [
+      "Pas de frais sur les intros gratuites",
+      "Rabais de 9 % pour ≥ 60 h/mois",
+      "Vedettes gagnées sur la rétention, pas achetées"
+    ],
+    earningsSource:
+      "Source : cohorte active Q1 2026, revenus bruts (vérifiés Stripe).",
+    floatingMedian: "3 420 € / mois",
+    floatingMedianSub: "Médiane au mois 4",
+    floatingAthletes: "+12 nouveaux athlètes",
+    floatingAthletesSub: "Cette semaine · auto-match",
+    voices: [
+      {
+        name: "Marina Costa",
+        role: "Yoga · Lisbonne",
+        quote:
+          "Je suis passée de 6 à 41 athlètes en cinq mois. Ce sont des gens qui s'entraînent vraiment."
+      },
+      {
+        name: "Tomás Reyes",
+        role: "Powerlifting · Madrid",
+        quote: "Je garde 52 € sur chaque 60 € — pas 30 €."
+      },
+      {
+        name: "Diego Almeida",
+        role: "Marathon · Porto",
+        quote: "Je lis les tendances HRV au lieu de demander comment s'est passée la semaine."
+      }
+    ],
+    onboardingEyebrow: "Onboarding",
+    onboardingTitle: "Trois étapes. Quatorze jours.",
+    onboardingTitleAccent: "En ligne.",
+    onboardingSteps: [
+      {
+        title: "Candidature en 12 minutes",
+        body: "Sport, certifications, vidéo, planning.",
+        detail: "01"
+      },
+      {
+        title: "Entretien de 30 min",
+        body: "Technique, philosophie de programmation et éthique.",
+        detail: "02"
+      },
+      {
+        title: "Activation du profil",
+        body: "Credentials vérifiés. Vedette les 90 premiers jours.",
+        detail: "03"
+      }
+    ]
+  },
+  methodologyPage: {
+    eyebrow: "The Specialist Standard™",
+    title: "La méthodologie derrière chaque",
+    titleAccent: "coach FitConnect.",
+    subtitle:
+      "Six principes que chaque coach doit valider avant que les athlètes voient son profil — et les preuves derrière.",
+    pillarsTitle: "Lire les six piliers",
+    pillarOf: "Pilier {n} sur {total}",
+    sourceLabel: "Source :",
+    evidenceEyebrow: "Les preuves",
+    evidenceTitle: "La science sur laquelle nous nous appuyons",
+    evidenceSubtitle:
+      "Nous sommes un marketplace, pas un labo. Ces principes façonnent entretiens et approbation de programmes.",
+    evidence: [
+      {
+        title: "Distribution polarisée",
+        citation: "Seiler & Tønnessen, 2009",
+        body: "80 % facile / 20 % intense — schéma chez l'endurance d'élite."
+      },
+      {
+        title: "Entraînement guidé par le HRV",
+        citation: "Vesterinen et al., 2016",
+        body: "Ajustements par HRV avec gains égaux ou supérieurs aux plans fixes."
+      },
+      {
+        title: "Spécificité de la compétence",
+        citation: "Schmidt & Lee, 2019",
+        body: "Le transfert entre sports est faible. Les généralistes ne remplacent pas les spécialistes."
+      },
+      {
+        title: "Autorégulation via RPE",
+        citation: "Helms et al., 2016",
+        body: "Le RPE produit une hypertrophie équivalente avec une meilleure adhérence."
+      }
+    ],
+    quote:
+      "Un coach généraliste vous met en forme. Un spécialiste vous mène où vous voulez aller.",
+    quoteAuthor: "Diego Almeida, marathonien sub-2:25 et coach FitConnect",
+    stats: {
+      interviewed: "Coaches interviewés en 2026",
+      accepted: "Coaches acceptés",
+      acceptanceRate: "Taux d'acceptation"
+    },
+    auditNote: "Données auditées par une équipe externe, Q1 2026"
+  },
+  methodologyPillars: [
+    {
+      title: "Spécialiste, pas généraliste",
+      subtitle: "Des coaches qui vivent un sport",
+      body: "Les plans génériques plafonnent à la huitième semaine. Nos coaches s'engagent sur une ou deux disciplines.",
+      metricLabel: "Expérience moyenne",
+      metricValue: "10,4 ans",
+      citation: "Roster FitConnect 2026, n=12 418"
+    },
+    {
+      title: "Programmation consciente de la récupération",
+      subtitle: "HRV + sommeil guident chaque séance",
+      body: "Le tableau lit HRV, FC au repos et sommeil. Le signal de préparation arrive au coach en temps réel.",
+      metricLabel: "Blessures vs. contrôle",
+      metricValue: "−41 %",
+      citation: "Étude interne, 1 840 athlètes, 2025-26"
+    },
+    {
+      title: "Vérification réelle",
+      subtitle: "Certifications validées",
+      body: "Chaque certificat est vérifié. Entretien de 30 min. 38 % de candidats refusés.",
+      metricLabel: "Taux de refus",
+      metricValue: "62 %",
+      citation: "Onboarding 2026, Trust & Safety"
+    },
+    {
+      title: "Progression visible",
+      subtitle: "Le tableau athlète dit la vérité",
+      body: "Allure, puissance, HRV, RPE, sommeil — au même endroit.",
+      metricLabel: "Objectifs atteints à temps",
+      metricValue: "73 %",
+      citation: "Cohorte 2026 S1"
+    },
+    {
+      title: "Intro gratuite, toujours",
+      subtitle: "Ne payez jamais avant d'avoir parlé à un humain",
+      body: "Appel de 15 min sur chaque profil avant le premier euro.",
+      metricLabel: "Changement sous 30 jours",
+      metricValue: "<5 %",
+      citation: "Analyse de churn 2026"
+    },
+    {
+      title: "Multi-sport, une identité",
+      subtitle: "Vinyasa lundi, BJJ mercredi, intervalles samedi",
+      body: "Nous vous modélisons comme un athlète sur plusieurs disciplines. La récupération compte tout.",
+      metricLabel: "Utilisateurs multi-sport",
+      metricValue: "61 %",
+      citation: "Analyse utilisateurs 2026"
+    }
+  ]
 };

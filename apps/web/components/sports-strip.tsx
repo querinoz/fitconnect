@@ -45,7 +45,7 @@ export function SportsStrip() {
   const reduce = useReducedMotion();
   return (
     <section className="border-y border-ink-800/60 bg-ink-900/30">
-      <div className="mx-auto max-w-7xl px-6 py-12">
+      <div className="mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-12">
         <div className="flex items-baseline justify-between flex-wrap gap-4 mb-7">
           <div>
             <p className="eyebrow">{t("sports", "eyebrow")}</p>

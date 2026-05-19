@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { useAuthStore } from "@/lib/auth-store";
 import { registerForPushNotificationsAsync } from "@/lib/notifications";
 
+/** Expo root — push registration + stack navigator. Realtime via useMobileChannel bridge. */
+
 export default function RootLayout() {
   const user = useAuthStore((s) => s.user);
 

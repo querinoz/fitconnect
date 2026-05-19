@@ -21,7 +21,7 @@ export function MobileAppHeader({
   return (
     <header className={cn("relative shrink-0", className)}>
       <div className="flex items-start justify-between gap-2">
-        <BrandLockup logoSize={30} textSize={15} layout="stack" className="min-w-0" />
+        <BrandLockup href="/" logoSize={30} textSize={15} layout="stack" className="min-w-0" />
         {trailing ? <div className="shrink-0 pt-0.5">{trailing}</div> : null}
       </div>
 

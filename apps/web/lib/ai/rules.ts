@@ -64,3 +64,10 @@ export function evaluateRoster(
 
   return alerts;
 }
+
+/** Adjust plan recommendation based on post-workout RPE (1–10). */
+export function recommendationFromRpe(rpe: number): AICoPilotAlert["recommendation"] {
+  if (rpe >= 8) return "lighter-day";
+  if (rpe >= 6) return "swap-z2";
+  return "recovery-day";
+}

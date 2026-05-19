@@ -1,25 +1,18 @@
-/** Strava OAuth scopes for FitConnect specialist coaching platform. */
-export const STRAVA_SCOPES = [
-  "read",
-  "activity:read",
-  "activity:read_all",
-  "profile:read_all"
-] as const;
+import { buildStravaAuthorizeUrl, buildStravaCallbackUri, STRAVA_DEFAULT_SCOPES } from "@fitconnect/strava-integration";
 
-export function stravaAuthUrl(state: string, redirectUri: string) {
+export { STRAVA_DEFAULT_SCOPES };
+
+export const stravaRedirectUri = buildStravaCallbackUri;
+export const getStravaRedirectUri = buildStravaCallbackUri;
+
+export function getStravaAuthUrl(state: string, origin: string) {
   const clientId = process.env.STRAVA_CLIENT_ID;
   if (!clientId) return null;
-  const params = new URLSearchParams({
-    client_id: clientId,
-    response_type: "code",
-    redirect_uri: redirectUri,
-    approval_prompt: "auto",
-    scope: STRAVA_SCOPES.join(","),
-    state
-  });
-  return `https://www.strava.com/oauth/authorize?${params.toString()}`;
+  return buildStravaAuthorizeUrl(
+    { clientId, clientSecret: "", redirectUri: buildStravaCallbackUri(origin) },
+    state,
+    STRAVA_DEFAULT_SCOPES
+  );
 }
 
-export function stravaRedirectUri(origin: string) {
-  return `${origin}/api/v1/integrations/strava/callback`;
-}
+export const stravaAuthUrl = getStravaAuthUrl;

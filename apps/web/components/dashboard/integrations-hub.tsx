@@ -19,6 +19,8 @@ import {
 import { liquidPress } from "@/lib/motion/liquid";
 import { cn } from "@/lib/utils";
 import { StravaBrandedCard } from "@/components/sharing/strava-branded-card";
+import { StravaActivityMap } from "@/components/dashboard/strava-activity-map";
+import { getSportMeta } from "@fitconnect/types";
 
 type ProviderRow = {
   id: string;
@@ -36,6 +38,7 @@ type StatusPayload = {
   strava: {
     connected: boolean;
     lastSyncAt: string | null;
+    syncLabel?: string;
     activityCount: number;
     activities: {
       id: string;
@@ -45,6 +48,7 @@ type StatusPayload = {
       movingTimeSec: number;
       startDate: string;
       avgHr?: number;
+      mapPolyline?: string;
     }[];
     rateLimit: {
       fifteenMin: { used: number; limit: number };
@@ -164,10 +168,10 @@ export function IntegrationsHub({ athleteId }: { athleteId: string }) {
                 {data.strava.activityCount} recent activities
               </p>
               <p className="text-xs text-ink-400">
-                Last sync{" "}
-                {data.strava.lastSyncAt
-                  ? new Date(data.strava.lastSyncAt).toLocaleString()
-                  : "—"}
+                {data.strava.syncLabel ??
+                  (data.strava.lastSyncAt
+                    ? `Last sync ${new Date(data.strava.lastSyncAt).toLocaleString()}`
+                    : "Not synced yet")}
               </p>
             </div>
             <motion.button
@@ -204,21 +208,27 @@ export function IntegrationsHub({ athleteId }: { athleteId: string }) {
           </div>
 
           <ul className="space-y-2">
-            {data.strava.activities.map((a) => (
+            {data.strava.activities.map((a) => {
+              const meta = getSportMeta(a.type);
+              return (
               <li
                 key={a.id}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-glass-border bg-ink-950/40 px-3 py-2.5 fc-liquid-glass fc-liquid-interactive"
+                className="space-y-2 rounded-2xl border border-glass-border bg-ink-950/40 px-3 py-2.5 fc-liquid-glass fc-liquid-interactive"
               >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-ink-50">{a.name}</p>
-                  <p className="text-[10px] text-ink-400">
-                    {a.type} · {fmtDistance(a.distanceM)} · {fmtDuration(a.movingTimeSec)}
-                    {a.avgHr ? ` · ${Math.round(a.avgHr)} bpm` : ""}
-                  </p>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-ink-50">{a.name}</p>
+                    <p className="text-[10px] text-ink-400">
+                      {meta.icon} {meta.labelPt} · {fmtDistance(a.distanceM)} · {fmtDuration(a.movingTimeSec)}
+                      {a.avgHr ? ` · ${Math.round(a.avgHr)} bpm` : ""}
+                    </p>
+                  </div>
+                  <Activity className="h-4 w-4 shrink-0 text-volt-400" />
                 </div>
-                <Activity className="h-4 w-4 shrink-0 text-volt-400" />
+                {a.mapPolyline ? <StravaActivityMap polyline={a.mapPolyline} /> : null}
               </li>
-            ))}
+            );
+            })}
           </ul>
 
           {data.strava.activities[0] ? (

@@ -37,7 +37,7 @@ export function Showcases() {
     <section
       id="showcases"
       aria-labelledby="fc-showcases-title"
-      className="relative mx-auto max-w-7xl px-6 py-24"
+      className="relative mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-24"
     >
       <SectionHeader
         titleId="fc-showcases-title"
