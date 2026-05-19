@@ -38,7 +38,7 @@ export function Pricing() {
   ];
 
   return (
-    <section id="pricing" className="mx-auto max-w-7xl px-6 py-24">
+    <section id="pricing" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24">
       <div className="text-center max-w-2xl mx-auto">
         <p className="eyebrow">{t("pricing", "eyebrow")}</p>
         <h2 className="mt-3 font-display text-4xl md:text-5xl font-bold text-balance">

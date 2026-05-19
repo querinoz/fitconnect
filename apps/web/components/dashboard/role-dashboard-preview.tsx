@@ -51,7 +51,7 @@ export function RoleDashboardPreview({
         aria-label={locale.dashboardPreview.tabsAria}
         className={cn(
           "inline-flex rounded-2xl border border-[var(--border-xs)] bg-carbon-2/90 p-1 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]",
-          frameless && "mx-3 mt-1 w-[calc(100%-1.5rem)]"
+          frameless && "mx-2 mt-1 w-[calc(100%-1rem)] sm:mx-3 sm:w-[calc(100%-1.5rem)]"
         )}
       >
         {tabs.map((tab) => {
@@ -123,7 +123,10 @@ export function RoleDashboardPreview({
   }
 
   return (
-    <IphoneFrame screenClassName="min-h-[640px] max-h-[700px]">
+    <IphoneFrame
+      className="w-full max-w-[min(100%,340px)]"
+      screenClassName="flex min-h-[580px] max-h-[min(720px,85dvh)] flex-col"
+    >
       {panel}
     </IphoneFrame>
   );

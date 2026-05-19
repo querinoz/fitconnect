@@ -50,7 +50,8 @@ export const viewport: Viewport = {
   themeColor: [{ color: "#07080B" }],
   colorScheme: "dark",
   width: "device-width",
-  initialScale: 1
+  initialScale: 1,
+  viewportFit: "cover"
 };
 
 export default function RootLayout({
@@ -78,7 +79,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen antialiased font-sans">
+      <body className="min-h-screen overflow-x-clip antialiased font-sans">
         <Providers>
           <SkipLink />
           {children}

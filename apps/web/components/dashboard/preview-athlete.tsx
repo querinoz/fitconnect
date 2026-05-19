@@ -9,7 +9,7 @@ const loadBars = [55, 30, 80, 25, 92, 40, 70];
 /** Athlete dashboard mini-preview — Rift-style bento grid. */
 export function PreviewAthlete({ frameless = false }: { frameless?: boolean }) {
   const body = (
-    <div className="grid grid-cols-4 auto-rows-[minmax(88px,auto)] gap-3">
+    <div className="grid grid-cols-2 auto-rows-[minmax(88px,auto)] gap-3 md:grid-cols-4">
       <RiftBento tone="volt" span="md" className="flex flex-col justify-between min-h-[168px]">
         <RiftLabel>AI Readiness</RiftLabel>
         <div className="flex items-end justify-between gap-3">

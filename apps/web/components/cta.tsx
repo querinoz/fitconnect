@@ -8,7 +8,7 @@ import { useT } from "@/lib/i18n-provider";
 export function Cta() {
   const t = useT();
   return (
-    <section className="mx-auto max-w-7xl px-6 py-20">
+    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
       <div className="relative overflow-hidden rounded-3xl border border-volt-500/25 p-10 md:p-16 text-center bg-gradient-to-br from-volt-dim via-transparent to-connect-dim">
         <div aria-hidden="true" className="absolute inset-0 bg-noise opacity-50" />
         <div

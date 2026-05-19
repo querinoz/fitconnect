@@ -19,7 +19,7 @@ export function StatBar() {
   ];
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-14">
+    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14">
       <div className="rounded-3xl border border-[var(--border-xs)] bg-carbon-1/60 p-1">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-y md:divide-y-0 md:divide-x divide-ink-800/60">
           {stats.map((s, i) => (

@@ -23,7 +23,7 @@ export function HeroStatic() {
     >
       <Atmosphere particles={0} />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
         <div className="max-w-2xl lg:max-w-none lg:col-span-6 fc-hero-enter">
           <p className="eyebrow mb-4">FitConnect · Kinetic Energy Lab</p>
           <h1

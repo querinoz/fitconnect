@@ -41,7 +41,7 @@ export function ProductMockup({ className }: { className?: string }) {
           </span>
         </div>
 
-        <div className="relative grid auto-rows-[minmax(88px,auto)] grid-cols-4 gap-3 p-5">
+        <div className="relative grid auto-rows-[minmax(88px,auto)] grid-cols-2 gap-3 p-4 sm:p-5 md:grid-cols-4">
           <RiftBento tone="volt" span="md" className="min-h-[168px]">
             <RiftLabel>AI Readiness</RiftLabel>
             <div className="flex items-end justify-between gap-3">

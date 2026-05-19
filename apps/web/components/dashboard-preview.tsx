@@ -55,7 +55,7 @@ export function DashboardPreview() {
     <section
       id="dashboard-preview"
       aria-labelledby="fc-dashboard-preview-title"
-      className="relative mx-auto max-w-7xl px-6 py-20 md:py-28"
+      className="relative mx-auto max-w-7xl fc-section-x px-4 py-16 sm:px-6 sm:py-20 md:py-28"
     >
       <div className="absolute inset-x-6 top-12 -z-10 h-[520px] rounded-3xl bg-radial-fade" />
       <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 items-center">
@@ -115,7 +115,7 @@ export function DashboardPreview() {
 
         <motion.div
           {...entrance}
-          className="lg:col-span-7 order-1 lg:order-2 relative"
+          className="lg:col-span-7 order-1 lg:order-2 relative min-w-0 overflow-hidden"
         >
           <RoleDashboardPreview />
           <div className="absolute -bottom-6 -left-6 hidden md:flex items-center gap-3 rounded-2xl glass p-4 shadow-elevated pointer-events-none">

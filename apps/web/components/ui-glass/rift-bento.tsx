@@ -25,18 +25,19 @@ export function RiftBento({
 }) {
   const spanClass =
     span === "lg"
-      ? "col-span-2 row-span-2"
+      ? "col-span-2 row-span-2 md:col-span-2"
       : span === "md"
         ? "col-span-2"
         : span === "full"
-          ? "col-span-2 sm:col-span-4"
+          ? "col-span-2 md:col-span-4"
           : "";
 
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-[1.35rem] border p-4 backdrop-blur-xl",
-        "before:pointer-events-none before:absolute before:inset-x-3 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/15 before:to-transparent",
+        "relative overflow-hidden rounded-[1.35rem] border p-4 backdrop-blur-xl premium-rim",
+        "shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_20px_60px_-40px_rgba(0,0,0,0.85)]",
+        "before:pointer-events-none before:absolute before:inset-x-3 before:top-0 before:z-[2] before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/15 before:to-transparent",
         toneClass[tone],
         spanClass,
         className

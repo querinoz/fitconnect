@@ -66,15 +66,15 @@ export function Nav() {
           : "bg-transparent border-b border-transparent"
       )}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
-        <div className="flex items-center gap-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6">
+        <div className="flex min-w-0 items-center gap-4 sm:gap-8">
           <Link
             href="/"
-            className="fc-vt-wordmark group flex items-center gap-2.5"
+            className="fc-vt-wordmark group flex min-w-0 items-center gap-2"
           >
             <span
               aria-hidden="true"
-              className="relative grid h-9 w-9 place-items-center rounded-xl shadow-glow transition-transform group-hover:rotate-3"
+              className="relative grid h-9 w-9 shrink-0 place-items-center rounded-xl shadow-glow transition-transform group-hover:rotate-3"
             >
               <Logo className="h-9 w-9" />
               <span
@@ -82,6 +82,7 @@ export function Nav() {
                 className="absolute -inset-0.5 -z-10 rounded-xl bg-gradient-to-br from-volt-500 to-brand-400 opacity-30 blur"
               />
             </span>
+            <Wordmark size={16} className="truncate sm:hidden" />
             <Wordmark size={18} className="hidden sm:inline-block" />
           </Link>
 
@@ -190,7 +191,7 @@ export function Nav() {
           open ? "max-h-[520px] py-4" : "max-h-0"
         )}
       >
-        <nav aria-label="Mobile" className="flex flex-col gap-1 px-6">
+        <nav aria-label="Mobile" className="flex flex-col gap-1 px-4 sm:px-6">
           {[...primaryLinks, ...moreLinks].map((l) => (
             <Link
               key={l.href}

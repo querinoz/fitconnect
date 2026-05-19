@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Logo } from "@/components/brand/logo";
+import { MobileAppHeader } from "@/components/brand/mobile-app-header";
 import { ProfileSettingsPanel } from "@/components/mobile/profile-settings-panel";
 import { cn } from "@/lib/utils";
 import {
@@ -68,47 +68,39 @@ export function MobileAppPreview({
   );
 
   return (
-    <div className="relative flex min-h-[560px] flex-col overflow-hidden bg-ink-950 text-ink-100 premium-grid">
+    <div className="relative flex min-h-0 w-full max-w-full flex-1 flex-col overflow-hidden bg-ink-950 text-ink-100 premium-grid">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-volt-500/14 via-brand-500/6 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-volt-500/12 via-brand-500/5 to-transparent"
       />
-      <div className="relative px-4 pb-3 pt-2">
-        <div className="mb-3 flex items-center gap-2">
-          <Logo className="h-7 w-7" />
-          <span className="font-display text-sm font-bold tracking-tight">
-            Fit<span className="text-volt-400">Connect</span>
-          </span>
-          <span className="ml-auto rounded-full border border-volt-500/35 bg-volt-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-volt-300">
-            Voltline OS
-          </span>
-        </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.18em] text-volt-400/80">
-              {isCoach ? "Coach OS" : "Athlete OS"}
-            </p>
-            <h2 className="font-display text-xl font-bold">
-              {isCoach ? "Good afternoon, Diego" : "Good morning, Ines"}
-            </h2>
-          </div>
-          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-grad-pulse text-ink-950 shadow-volt-glow ring-1 ring-volt-500/30">
-            {isCoach ? (
-              <UsersRound className="h-5 w-5" />
-            ) : (
-              <Zap className="h-5 w-5" />
-            )}
-          </span>
-        </div>
-        <div className="mt-3 flex items-center justify-between rounded-full border border-volt-500/20 bg-glass-md px-3 py-2 backdrop-blur-glass shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <div className="relative shrink-0 px-3 pb-2 pt-1 sm:px-4">
+        <MobileAppHeader
+          trailing={
+            <span className="rounded-full border border-volt-500/30 bg-volt-500/10 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.16em] text-volt-300">
+              Voltline
+            </span>
+          }
+          eyebrow={isCoach ? "Coach OS" : "Athlete OS"}
+          title={isCoach ? "Good afternoon, Diego" : "Good morning, Ines"}
+          action={
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-grad-pulse text-ink-950 shadow-volt-glow ring-1 ring-volt-500/30 sm:h-10 sm:w-10 sm:rounded-2xl">
+              {isCoach ? (
+                <UsersRound className="h-4 w-4 sm:h-5 sm:w-5" />
+              ) : (
+                <Zap className="h-4 w-4 sm:h-5 sm:w-5" />
+              )}
+            </span>
+          }
+        />
+        <div className="mt-2.5 flex items-center justify-between gap-2 rounded-full border border-volt-500/20 bg-glass-md px-3 py-1.5 backdrop-blur-glass shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
           <RealtimeBadge>Whoop synced</RealtimeBadge>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-500">
+          <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-ink-500">
             12s ago
           </span>
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3 hide-scrollbar">
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 pb-2 hide-scrollbar sm:px-4">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={screen}
@@ -166,7 +158,7 @@ export function MobileAppPreview({
 
       <nav
         aria-label="Preview app navigation"
-        className="mx-3 mb-2 mt-2 rounded-glass-lg border border-glass-border bg-glass-md px-1.5 py-2 backdrop-blur-glass-lg shadow-volt-glow"
+        className="mx-2 mb-2 mt-auto shrink-0 rounded-glass-lg border border-glass-border bg-glass-md px-1 py-1.5 backdrop-blur-glass-lg shadow-volt-glow safe-area-pb sm:mx-3 sm:mb-2 sm:px-1.5 sm:py-2"
       >
         <ul className="flex items-center justify-between">
           {nav.map((item) => {

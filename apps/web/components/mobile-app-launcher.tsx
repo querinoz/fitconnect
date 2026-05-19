@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/brand/logo";
+import { MobileAppHeader } from "@/components/brand/mobile-app-header";
 import { RoleDashboardPreview } from "@/components/dashboard/role-dashboard-preview";
 import { validateCredentials } from "@/lib/auth";
 import { useAuthStore } from "@/lib/auth-store";
@@ -52,20 +52,19 @@ export function MobileAppLauncher() {
   }
 
   return (
-    <main className="min-h-dvh bg-ink-950 text-ink-100">
+    <main className="min-h-dvh w-full max-w-full overflow-x-clip bg-ink-950 text-ink-100 premium-grid">
       {/* Desktop / tablet — iPhone showcase */}
       <div className="hidden md:flex min-h-dvh flex-col items-center justify-center px-6 py-12">
-        <motion.div {...entrance} className="mb-8 max-w-xl text-center">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 rounded-xl focus-visible:outline-none"
-            aria-label="Back to FitConnect landing page"
-          >
-            <Logo className="h-9 w-9" animated />
-            <span className="font-display text-lg font-bold">
-              Fit<span className="text-brand-400">Connect</span>
-            </span>
-          </Link>
+          <div className="mb-8 flex flex-col items-center">
+            <Link
+              href="/"
+              className="rounded-xl focus-visible:outline-none"
+              aria-label="Back to FitConnect landing page"
+            >
+              <MobileAppHeader />
+            </Link>
+          </div>
+          <motion.div {...entrance} className="max-w-xl text-center">
           <p className="mt-6 inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-200">
             <Smartphone className="h-3.5 w-3.5" aria-hidden />
             Mobile app demo
@@ -77,7 +76,7 @@ export function MobileAppLauncher() {
             Swipe between athlete and coach views, then launch the live demo
             with one tap.
           </p>
-        </motion.div>
+          </motion.div>
 
         <RoleDashboardPreview variant="phone" />
 
@@ -108,23 +107,20 @@ export function MobileAppLauncher() {
 
       {/* Phone — full-width launcher (real device UX) */}
       <div className="md:hidden">
-        <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col px-5 py-5">
-          <header className="flex items-center justify-between">
-            <button
-              type="button"
-              onClick={() => router.push("/")}
-              className="flex items-center gap-2 rounded-xl text-left focus-visible:outline-none"
-              aria-label="Back to FitConnect landing page"
-            >
-              <Logo className="h-10 w-10" animated />
-              <span className="font-display text-lg font-bold">
-                Fit<span className="text-brand-400">Connect</span>
-              </span>
-            </button>
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-ink-800 bg-ink-900 text-brand-300">
-              <Smartphone className="h-5 w-5" aria-hidden />
-            </span>
-          </header>
+        <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col px-4 py-5 sm:px-5">
+          <Link
+            href="/"
+            className="rounded-xl focus-visible:outline-none"
+            aria-label="Back to FitConnect landing page"
+          >
+            <MobileAppHeader
+              trailing={
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-ink-800 bg-ink-900 text-brand-300">
+                  <Smartphone className="h-5 w-5" aria-hidden />
+                </span>
+              }
+            />
+          </Link>
 
           <section className="flex flex-1 flex-col justify-center py-8">
             <p className="inline-flex w-fit items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-200">

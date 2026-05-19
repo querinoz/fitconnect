@@ -68,7 +68,7 @@ export function MobileShell({
   }, []);
 
   return (
-    <div className="fc-mobile-shell relative min-h-dvh bg-ink-950 text-ink-100 premium-grid pb-[calc(96px+env(safe-area-inset-bottom))]">
+    <div className="fc-mobile-shell relative min-h-dvh w-full max-w-full overflow-x-clip bg-ink-950 text-ink-100 premium-grid pb-[calc(96px+env(safe-area-inset-bottom))]">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-volt-500/12 via-brand-500/5 to-transparent"
@@ -79,7 +79,7 @@ export function MobileShell({
         avatarUrl={avatarUrl}
         tabLabel={onHome ? undefined : activeTab.label}
       />
-      <main className="relative px-5">
+      <main className="relative min-w-0 px-4 sm:px-5">
         <PageTransition>{children}</PageTransition>
       </main>
       <FloatingDock items={items} active={pathname} activeLabel={activeTab.label} />

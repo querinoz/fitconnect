@@ -15,7 +15,7 @@ const roster = [
 /** Coach dashboard mini-preview — Rift-style bento grid. */
 export function PreviewCoach({ frameless = false }: { frameless?: boolean }) {
   const body = (
-    <div className="grid grid-cols-4 auto-rows-[minmax(88px,auto)] gap-3">
+    <div className="grid grid-cols-2 auto-rows-[minmax(88px,auto)] gap-3 md:grid-cols-4">
       <RiftBento tone="connect" span="md" className="min-h-[168px]">
         <RiftLabel>Roster health</RiftLabel>
         <RiftScore value={81} className="text-brand-400" />

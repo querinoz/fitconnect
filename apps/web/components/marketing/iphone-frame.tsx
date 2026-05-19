@@ -20,7 +20,7 @@ export function IphoneFrame({
   return (
     <div
       className={cn(
-        "relative mx-auto w-full max-w-[320px] sm:max-w-[340px]",
+        "relative mx-auto w-full max-w-[min(100%,340px)] px-1 sm:max-w-[340px]",
         className
       )}
     >
@@ -67,7 +67,7 @@ export function IphoneFrame({
 
         <div
           className={cn(
-            "relative overflow-hidden rounded-[2.35rem] bg-ink-950",
+            "relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[2.35rem] bg-ink-950",
             "ring-1 ring-black/80",
             screenClassName
           )}
@@ -90,7 +90,7 @@ export function IphoneFrame({
               </span>
             </div>
           )}
-          <div className="relative z-10">{children}</div>
+          <div className="relative z-10 flex min-h-0 flex-1 flex-col">{children}</div>
         </div>
 
         <div

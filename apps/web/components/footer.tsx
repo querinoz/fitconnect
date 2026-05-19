@@ -46,7 +46,7 @@ export function Footer() {
 
   return (
     <footer className="border-t border-[var(--border-xs)] mt-24 bg-ink-950">
-      <div className="mx-auto max-w-7xl px-6 py-16 grid gap-10 md:grid-cols-12">
+      <div className="mx-auto max-w-7xl px-4 py-12 grid gap-10 sm:px-6 sm:py-16 md:grid-cols-12">
         <div className="md:col-span-4">
           <Link href="/" className="flex items-center gap-2.5">
             <Logo className="h-9 w-9" />
@@ -130,7 +130,7 @@ export function Footer() {
           </Link>
         </div>
       </div>
-      <div className="border-t border-ink-800 py-6 px-6 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-500">
+      <div className="border-t border-ink-800 py-6 px-4 sm:px-6 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-500">
         <p>
           © {new Date().getFullYear()} FitConnect · {t("footer", "copyright")}
         </p>

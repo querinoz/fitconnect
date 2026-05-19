@@ -142,7 +142,7 @@ export function Features() {
   const { lang } = useLanguage();
   const reduce = useReducedMotion();
   return (
-    <section id="features" className="mx-auto max-w-7xl px-6 py-24">
+    <section id="features" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24">
       <div className="max-w-2xl">
         <p className="eyebrow">{t("features", "eyebrow")}</p>
         <h2 className="mt-3 font-display text-4xl md:text-5xl font-bold text-balance">
