@@ -111,7 +111,7 @@ body {
 }
 
 .gradient-text {
-  background: linear-gradient(90deg, var(--brand), var(--accent));
+  background: linear-gradient(135deg, #eeeef2, #d6ff33 55%, #c8ff00);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -275,11 +275,11 @@ body {
 .ring-conic {
   background: conic-gradient(
     from 220deg at 50% 50%,
-    #22d3ee,
-    #84cc16,
-    #a855f7,
-    #f43f5e,
-    #22d3ee
+    #00ddb4,
+    #c8ff00,
+    #00bfff,
+    #ff3a5c,
+    #00ddb4
   );
 }
 
@@ -312,11 +312,11 @@ body {
 }
 
 .eyebrow {
-  font-size: 0.75rem;
-  letter-spacing: 0.18em;
+  font-size: 0.625rem;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  font-weight: 600;
-  color: #67e8f9;
+  font-weight: 700;
+  color: var(--volt-400, #d6ff33);
 }
 
 /* Sign-in OAuth pending bar */
@@ -366,17 +366,17 @@ summary:focus-visible {
   background:
     radial-gradient(
       60% 80% at 18% 30%,
-      rgba(34, 211, 238, 0.28),
+      rgba(0, 221, 180, 0.14),
       transparent 70%
     ),
     radial-gradient(
       55% 70% at 82% 60%,
-      rgba(132, 204, 22, 0.22),
+      rgba(200, 255, 0, 0.16),
       transparent 70%
     ),
     radial-gradient(
       40% 55% at 50% 90%,
-      rgba(168, 85, 247, 0.2),
+      rgba(0, 191, 255, 0.08),
       transparent 70%
     );
   background-size: 220% 220%, 220% 220%, 220% 220%;

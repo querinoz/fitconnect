@@ -1,123 +1,104 @@
 "use client";
 
-import {
-  Calendar,
-  HeartPulse,
-  MessageSquare,
-  TrendingUp,
-  Users,
-  Wallet
-} from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { BrowserFrame } from "./browser-frame";
-import { KpiTile } from "./kpi-tile";
+import { RiftBento, RiftLabel, RiftScore } from "@/components/ui-glass/rift-bento";
 
 const revenueBars = [42, 58, 51, 72, 68, 84, 91];
 
 const roster = [
-  { name: "Inês M.", hrv: 68, status: "green" as const },
-  { name: "João R.", hrv: 49, status: "amber" as const },
-  { name: "Sara K.", hrv: 71, status: "green" as const }
+  { name: "Inês M.", score: 94, status: "volt" as const },
+  { name: "João R.", score: 62, status: "amber" as const },
+  { name: "Sara K.", score: 88, status: "connect" as const }
 ];
 
-/** Coach dashboard mini-preview — mirrors /coach/dashboard visual language. */
+/** Coach dashboard mini-preview — Rift-style bento grid. */
 export function PreviewCoach({ frameless = false }: { frameless?: boolean }) {
   const body = (
-      <div className={frameless ? "grid gap-3" : "grid gap-4 sm:grid-cols-3"}>
-        <div className={`${frameless ? "col-span-1" : "sm:col-span-1"} rounded-2xl border border-ink-800 bg-ink-950/60 p-4`}>
-          <p className="text-[10px] uppercase tracking-widest text-ink-500">
-            Active athletes
-          </p>
-          <p className="mt-3 font-display text-4xl font-bold tabular-nums text-ink-50">
-            41
-          </p>
-          <p className="text-[11px] text-accent-400 mt-1">+6 this month</p>
-          <div className="mt-4 space-y-2">
-            {roster.map((a) => (
-              <div
-                key={a.name}
-                className="flex items-center justify-between rounded-xl border border-ink-800 bg-ink-900/50 px-3 py-2 text-xs"
+    <div className="grid grid-cols-4 auto-rows-[minmax(88px,auto)] gap-3">
+      <RiftBento tone="connect" span="md" className="min-h-[168px]">
+        <RiftLabel>Roster health</RiftLabel>
+        <RiftScore value={81} className="text-brand-400" />
+        <p className="mt-1 text-[10px] font-semibold text-emerald-500">12 athletes · 3 alerts</p>
+        <div className="mt-4 space-y-2">
+          {roster.map((a) => (
+            <div
+              key={a.name}
+              className="flex items-center justify-between rounded-xl border border-[var(--border-xs)] bg-carbon-3/80 px-3 py-2 text-xs"
+            >
+              <span className="font-semibold text-ink-100">{a.name}</span>
+              <span
+                className={`font-display text-sm font-extrabold ${
+                  a.status === "volt"
+                    ? "text-volt-500"
+                    : a.status === "connect"
+                      ? "text-brand-400"
+                      : "text-amber-400"
+                }`}
               >
-                <span className="text-ink-200 font-medium">{a.name}</span>
-                <span className="flex items-center gap-2 tabular-nums text-ink-400">
-                  <HeartPulse className="h-3 w-3 text-signal-400" aria-hidden />
-                  {a.hrv} ms
-                  <span
-                    className={`h-2 w-2 rounded-full ${
-                      a.status === "green"
-                        ? "bg-accent-400"
-                        : "bg-amber-400"
-                    }`}
-                    aria-hidden
-                  />
-                </span>
-              </div>
-            ))}
-          </div>
+                {a.score}
+              </span>
+            </div>
+          ))}
         </div>
+      </RiftBento>
 
-        <div className={`${frameless ? "col-span-1" : "sm:col-span-2"} grid grid-cols-2 gap-3`}>
-          <KpiTile
-            icon={Wallet}
-            iconClassName="text-accent-400"
-            label="Revenue MTD"
-            value="€4,280"
-            delta="+18%"
-          />
-          <KpiTile
-            icon={Calendar}
-            iconClassName="text-brand-300"
-            label="Sessions"
-            value="62"
-            delta="this week"
-          />
-          <KpiTile
-            icon={Users}
-            iconClassName="text-plasma-400"
-            label="Retention"
-            value="94%"
-            delta="90-day"
-          />
-          <KpiTile
-            icon={TrendingUp}
-            iconClassName="text-signal-400"
-            label="Rebook rate"
-            value="71%"
-            delta="+4 pts"
-          />
-        </div>
+      <RiftBento tone="volt">
+        <RiftLabel>Revenue</RiftLabel>
+        <p className="mt-2 font-display text-2xl font-extrabold text-volt-500">€4.3k</p>
+        <p className="text-[10px] text-emerald-500 font-semibold">+18% MTD</p>
+      </RiftBento>
 
-        <div className={`${frameless ? "col-span-1" : "sm:col-span-3"} rounded-2xl border border-ink-800 bg-ink-950/60 p-4`}>
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-semibold text-ink-100">Weekly revenue</p>
-            <span className="text-[10px] uppercase tracking-widest text-brand-300 font-semibold">
-              Stripe · live
-            </span>
-          </div>
-          <div className="flex items-end gap-2 h-24" role="img" aria-label="Weekly revenue chart">
-            {revenueBars.map((h, i) => (
-              <div
-                key={i}
-                className="flex-1 rounded-md bg-gradient-to-t from-plasma-500 to-brand-500"
-                style={{ height: `${h}%`, opacity: 0.55 + i * 0.05 }}
-              />
-            ))}
-          </div>
-        </div>
+      <RiftBento tone="neutral">
+        <RiftLabel>Sessions</RiftLabel>
+        <p className="mt-2 font-display text-2xl font-extrabold text-ink-50">62</p>
+        <p className="text-[10px] text-ink-400">this week</p>
+      </RiftBento>
 
-        <div className={`${frameless ? "col-span-1" : "sm:col-span-3"} rounded-2xl border border-brand-500/30 bg-brand-500/5 p-4 flex items-start gap-3`}>
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-brand-500/10 text-brand-300 shrink-0">
-            <MessageSquare className="h-4 w-4" aria-hidden />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-ink-100">
-              3 athletes flagged amber · adjust Thursday intensity
-            </p>
-            <p className="text-xs text-ink-400 mt-1">
-              HRV dips synced from wearables. One-tap plan nudges ready to send.
-            </p>
-          </div>
+      <RiftBento tone="neutral">
+        <RiftLabel>Retention</RiftLabel>
+        <p className="mt-2 font-display text-2xl font-extrabold text-ink-50">94%</p>
+        <p className="text-[10px] text-ink-400">90-day</p>
+      </RiftBento>
+
+      <RiftBento tone="connect">
+        <RiftLabel>Rebook</RiftLabel>
+        <p className="mt-2 font-display text-2xl font-extrabold text-brand-400">71%</p>
+        <p className="text-[10px] text-emerald-500 font-semibold">+4 pts</p>
+      </RiftBento>
+
+      <RiftBento tone="neutral" span="full">
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-sm font-semibold text-ink-100">Weekly revenue</p>
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-400">
+            Stripe live
+          </span>
         </div>
-      </div>
+        <div className="flex h-20 items-end gap-2" role="img" aria-label="Weekly revenue chart">
+          {revenueBars.map((h, i) => (
+            <div
+              key={i}
+              className="flex-1 rounded-lg bg-gradient-to-t from-brand-600 to-brand-400"
+              style={{ height: `${h}%`, opacity: 0.45 + i * 0.06 }}
+            />
+          ))}
+        </div>
+      </RiftBento>
+
+      <RiftBento tone="live" span="full" className="flex items-start gap-3">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-signal-500/10 text-signal-400 ring-1 ring-signal-500/20">
+          <MessageSquare className="h-4 w-4" aria-hidden />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-ink-100">
+            3 athletes flagged · adjust Thursday intensity
+          </p>
+          <p className="mt-1 text-xs text-ink-400">
+            HRV dips synced from wearables. One-tap plan nudges ready.
+          </p>
+        </div>
+      </RiftBento>
+    </div>
   );
 
   if (frameless) {

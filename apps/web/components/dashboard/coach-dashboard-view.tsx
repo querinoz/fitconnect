@@ -142,8 +142,8 @@ export function CoachDashboardView({ wrapShell = true }: { wrapShell?: boolean }
                 <AreaChart data={ctx.retentionTrend}>
                   <defs>
                     <linearGradient id="coachRet" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#22d3ee" stopOpacity={0.05} />
+                      <stop offset="5%" stopColor="#00ddb4" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#00ddb4" stopOpacity={0.05} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke="#1e293b" vertical={false} />
@@ -153,7 +153,7 @@ export function CoachDashboardView({ wrapShell = true }: { wrapShell?: boolean }
                   <Area
                     type="monotone"
                     dataKey="rate"
-                    stroke="#22d3ee"
+                    stroke="#00ddb4"
                     fill="url(#coachRet)"
                     strokeWidth={2}
                   />

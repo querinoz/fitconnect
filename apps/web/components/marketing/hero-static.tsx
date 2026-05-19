@@ -5,10 +5,10 @@ import { Atmosphere } from "./atmosphere";
 import { dict } from "@/lib/i18n";
 
 const AVATAR_COLORS = [
-  "from-brand-400 to-brand-600",
   "from-volt-400 to-volt-600",
-  "from-plasma-400 to-plasma-600",
-  "from-accent-400 to-accent-600",
+  "from-brand-400 to-brand-600",
+  "from-brand-400 to-brand-700",
+  "from-emerald-500 to-brand-600",
   "from-signal-400 to-signal-600"
 ];
 
@@ -25,9 +25,10 @@ export function HeroStatic() {
 
       <div className="relative z-10 mx-auto max-w-7xl px-6">
         <div className="max-w-2xl lg:max-w-none lg:col-span-6 fc-hero-enter">
+          <p className="eyebrow mb-4">FitConnect · Kinetic Energy Lab</p>
           <h1
             id="fc-hero-title"
-            className="fc-vt-hero font-sans text-5xl md:text-7xl font-bold tracking-tight text-balance leading-[0.95]"
+            className="fc-vt-hero font-display text-5xl md:text-7xl font-extrabold tracking-tight text-balance leading-[0.92]"
           >
             <span className="fc-headline-line">{h.title1}</span>
             <span className="fc-headline-line">
@@ -40,10 +41,10 @@ export function HeroStatic() {
             <Wordmark size={36} className="drop-shadow-[0_0_30px_rgba(200,255,0,0.18)]" />
           </div>
 
-          <span className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand-500/10 px-3.5 py-1.5 text-xs font-semibold text-brand-200 ring-1 ring-brand-500/30">
+          <span className="mt-6 inline-flex items-center gap-2 rounded-full bg-volt-dim px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-volt-500 ring-1 ring-volt-500/25">
             <span aria-hidden="true" className="relative flex h-2 w-2">
-              <span className="absolute inset-0 motion-safe:animate-ping rounded-full bg-brand-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-400" />
+              <span className="absolute inset-0 motion-safe:animate-ping rounded-full bg-volt-500 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-volt-500" />
             </span>
             {h.livePill}
           </span>
@@ -52,26 +53,26 @@ export function HeroStatic() {
             {h.subtitle}
           </p>
 
-          <p className="mt-4 text-sm font-medium text-brand-200/90 max-w-2xl">
+          <p className="mt-4 text-sm font-medium text-brand-400/90 max-w-2xl">
             {h.reassurance}
           </p>
 
           <div className="mt-9 flex flex-wrap gap-3">
             <Link
               href="/discover"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 px-6 py-3 text-sm font-medium text-ink-950 shadow-premium hover:opacity-90"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-volt-500 px-6 py-3 text-sm font-bold text-ink-950 shadow-volt-glow hover:bg-volt-400 fc-motion-micro"
             >
               {h.primary} <ArrowRight aria-hidden className="h-4 w-4" />
             </Link>
             <Link
               href="#see-it-in-action"
-              className="inline-flex items-center justify-center rounded-xl border border-ink-700 bg-ink-950/40 px-6 py-3 text-sm font-medium text-ink-100 hover:border-brand-400/50"
+              className="inline-flex items-center justify-center rounded-xl border border-[var(--border-sm)] bg-carbon-1/80 px-6 py-3 text-sm font-semibold text-ink-100 hover:border-volt-500/35 fc-motion-micro"
             >
               {h.secondary}
             </Link>
             <Link
               href="/mobile"
-              className="inline-flex items-center justify-center rounded-xl border border-volt-500/40 bg-volt-500/10 px-6 py-3 text-sm font-medium text-volt-300 hover:border-volt-400/60"
+              className="inline-flex items-center justify-center rounded-xl border border-brand-400/35 bg-connect-dim px-6 py-3 text-sm font-semibold text-brand-400 hover:border-brand-400/55 fc-motion-micro"
             >
               {h.demoCta}
             </Link>
@@ -100,7 +101,7 @@ export function HeroStatic() {
               </div>
             </div>
             <div className="flex items-start gap-3 text-sm">
-              <div className="grid h-9 w-9 place-items-center rounded-lg bg-accent-500/10 text-accent-500 ring-1 ring-accent-500/30">
+              <div className="grid h-9 w-9 place-items-center rounded-lg bg-volt-dim text-volt-500 ring-1 ring-volt-500/25">
                 <ShieldCheck aria-hidden className="h-4 w-4" />
               </div>
               <div>

@@ -140,7 +140,7 @@ export function OAuthRow({
             <span className="sm:hidden">{p.label}</span>
             {pending === p.id && (
               <span className="absolute inset-x-2 -bottom-px h-px overflow-hidden rounded-full bg-ink-800">
-                <span className="block h-full w-1/2 animate-[loading-bar_1.4s_linear] bg-gradient-to-r from-brand-400 to-accent-500" />
+                <span className="block h-full w-1/2 animate-[loading-bar_1.4s_linear] bg-gradient-to-r from-volt-500 to-volt-400" />
               </span>
             )}
           </button>

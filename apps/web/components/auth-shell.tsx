@@ -209,7 +209,7 @@ export function AuthShell({
             href="/"
             className="flex items-center gap-2 font-display font-bold text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 rounded-xl"
           >
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-400 to-accent-500 text-ink-950 shadow-glow">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-volt-500 to-volt-400 text-ink-950 shadow-glow">
               <Dumbbell className="h-5 w-5" aria-hidden="true" />
             </span>
             <span>

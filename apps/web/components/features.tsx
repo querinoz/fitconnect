@@ -23,7 +23,7 @@ const items = [
       "Every trainer is interviewed and certifications are validated against the issuing body. 38% acceptance rate.",
     bodyPt:
       "Cada coach é entrevistado e as certificações são validadas junto da entidade emissora. Taxa de aceitação de 38%.",
-    color: "text-accent-400 bg-accent-500/10 ring-accent-500/30"
+    color: "text-volt-500 bg-volt-dim ring-volt-500/25"
   },
   {
     icon: VideoRoomIcon,
@@ -33,7 +33,7 @@ const items = [
       "Run remote sessions in the app, with screen share, drawing tools and auto-recordings for review.",
     bodyPt:
       "Sessões remotas dentro da app, com partilha de ecrã, ferramentas de desenho e gravações automáticas para rever.",
-    color: "text-brand-300 bg-brand-500/10 ring-brand-500/30"
+    color: "text-brand-400 bg-connect-dim ring-brand-400/25"
   },
   {
     icon: CalendarStreakIcon,
@@ -43,7 +43,7 @@ const items = [
       "Two-way calendar sync. Auto-rebooking. Time-zone aware. Coaches see availability in one tap.",
     bodyPt:
       "Sincronização de calendário em duas vias. Remarcação automática. Consciente de fusos. Coaches veem disponibilidade num toque.",
-    color: "text-plasma-400 bg-plasma-500/10 ring-plasma-500/30"
+    color: "text-cyan-500 bg-cyan-dim ring-cyan-500/25"
   },
   {
     icon: StopwatchIcon,
@@ -73,7 +73,7 @@ const items = [
       "Bad sleep last night? Your interval session quietly becomes a Z2 ride. Your coach approves.",
     bodyPt:
       "Má noite? A tua sessão de intervalos passa silenciosamente a um spin Z2. O teu coach aprova.",
-    color: "text-plasma-400 bg-plasma-500/10 ring-plasma-500/30"
+    color: "text-cyan-500 bg-cyan-dim ring-cyan-500/25"
   },
   {
     icon: MessageSquare,
@@ -83,7 +83,7 @@ const items = [
       "Voice notes, attachments, form-check uploads — stay private between you and your coach.",
     bodyPt:
       "Notas de voz, anexos, vídeos de técnica — privados entre ti e o teu coach.",
-    color: "text-brand-300 bg-brand-500/10 ring-brand-500/30"
+    color: "text-brand-400 bg-connect-dim ring-brand-400/25"
   },
   {
     icon: RecoveryRingIcon,
@@ -93,7 +93,7 @@ const items = [
       "Yoga Monday, BJJ Wednesday, run Saturday — one identity, one unified recovery score.",
     bodyPt:
       "Yoga à segunda, BJJ à quarta, corrida ao sábado — uma identidade, uma pontuação de recuperação unificada.",
-    color: "text-accent-400 bg-accent-500/10 ring-accent-500/30"
+    color: "text-volt-500 bg-volt-dim ring-volt-500/25"
   },
   {
     icon: DumbbellSetIcon,
@@ -113,7 +113,7 @@ const items = [
       "Try every coach risk-free. Switch any time. Your athlete profile travels with you.",
     bodyPt:
       "Experimenta cada coach sem risco. Troca quando quiseres. O teu perfil de atleta viaja contigo.",
-    color: "text-accent-400 bg-accent-500/10 ring-accent-500/30"
+    color: "text-volt-500 bg-volt-dim ring-volt-500/25"
   },
   {
     icon: HeartRateIcon,
@@ -133,7 +133,7 @@ const items = [
       "Ship every two weeks. The product you sign up for in March looks better in May.",
     bodyPt:
       "Lançamentos a cada duas semanas. O produto em que entras em março fica melhor em maio.",
-    color: "text-plasma-400 bg-plasma-500/10 ring-plasma-500/30"
+    color: "text-cyan-500 bg-cyan-dim ring-cyan-500/25"
   }
 ];
 
@@ -165,7 +165,7 @@ export function Features() {
               viewport={{ once: true }}
               transition={{ duration: reduce ? 0 : 0.45, delay: reduce ? 0 : (i % 4) * 0.06 }}
               whileHover={reduce ? undefined : { y: -4 }}
-              className="group rounded-2xl border border-ink-800 bg-ink-900/40 p-5 hover:bg-ink-900/70 hover:border-ink-700 transition-all"
+              className="group rounded-2xl border border-[var(--border-xs)] bg-carbon-2/60 p-5 hover:bg-carbon-2 hover:border-volt-500/20 transition-all"
             >
               <div
                 className={`grid h-11 w-11 place-items-center rounded-xl ring-1 ${it.color}`}

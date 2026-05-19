@@ -20,7 +20,7 @@ describe("<MobileAppPreview />", () => {
     renderPreview();
 
     expect(screen.getByText("Today")).toBeInTheDocument();
-    expect(screen.getByText("Readiness")).toBeInTheDocument();
+    expect(screen.getByText("AI Readiness")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /sessions/i }));
     await waitFor(() =>

@@ -90,7 +90,7 @@ export function CoachEarningsDashboard({ coachId }: { coachId: string }) {
                 contentStyle={tooltipStyle}
                 formatter={(v: number) => [`€${v.toFixed(0)}`, "Net"]}
               />
-              <Bar dataKey="net" fill="#22d3ee" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="net" fill="#00ddb4" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

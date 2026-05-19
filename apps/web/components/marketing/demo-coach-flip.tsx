@@ -148,7 +148,7 @@ function Avatar() {
     <svg viewBox="0 0 56 56" className="absolute inset-0 h-full w-full">
       <defs>
         <linearGradient id="fcAv" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#22d3ee" />
+          <stop offset="0%" stopColor="#00ddb4" />
           <stop offset="100%" stopColor="#84cc16" />
         </linearGradient>
         <linearGradient id="fcAv2" x1="0" y1="0" x2="0" y2="1">

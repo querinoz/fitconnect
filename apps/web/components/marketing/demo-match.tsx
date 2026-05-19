@@ -30,7 +30,7 @@ export function DemoMatch({ className }: { className?: string }) {
 
       {/* Progress bar */}
       <div className="mt-3 h-1.5 w-full rounded-full bg-ink-800 overflow-hidden">
-        <div className="fc-step-cycle h-full w-1/4 rounded-full bg-gradient-to-r from-brand-400 to-accent-500 origin-left" />
+        <div className="fc-step-cycle h-full w-1/4 rounded-full bg-gradient-to-r from-volt-500 to-volt-400 origin-left" />
       </div>
 
       <div className="mt-5 overflow-hidden">
@@ -119,7 +119,7 @@ function Result() {
       </div>
       <div className="mt-3 rounded-2xl border border-ink-800 bg-gradient-to-br from-brand-500/10 via-ink-950 to-accent-500/10 p-4">
         <div className="flex items-start gap-3">
-          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-brand-400 to-accent-500 text-ink-950 ring-2 ring-brand-400/40">
+          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-volt-500 to-volt-400 text-ink-950 ring-2 ring-brand-400/40">
             <TargetIcon className="h-5 w-5" />
           </span>
           <div className="flex-1 min-w-0">

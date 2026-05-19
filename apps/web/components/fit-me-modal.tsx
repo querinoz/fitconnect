@@ -87,7 +87,7 @@ export function FitMeModal({ trainer, open, onOpenChange }: FitMeModalProps) {
 
                 <div className="relative px-6 pt-6 pb-2">
                   <div className="flex items-start gap-3">
-                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand-400 to-accent-500 text-ink-950 shadow-glow">
+                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-volt-500 to-volt-400 text-ink-950 shadow-glow">
                       <Zap className="h-5 w-5" />
                     </span>
                     <div className="flex-1 min-w-0">

@@ -45,7 +45,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="border-t border-ink-800/80 mt-24 bg-ink-950">
+    <footer className="border-t border-[var(--border-xs)] mt-24 bg-ink-950">
       <div className="mx-auto max-w-7xl px-6 py-16 grid gap-10 md:grid-cols-12">
         <div className="md:col-span-4">
           <Link href="/" className="flex items-center gap-2.5">
@@ -61,7 +61,7 @@ export function Footer() {
                 key={s.label}
                 href={s.href}
                 aria-label={s.label}
-                className="grid h-9 w-9 place-items-center rounded-lg border border-ink-800 text-ink-400 hover:text-ink-100 hover:border-brand-400/40 transition-colors"
+                className="grid h-9 w-9 place-items-center rounded-lg border border-[var(--border-xs)] text-ink-400 hover:text-volt-500 hover:border-volt-500/35 transition-colors"
               >
                 <s.icon aria-hidden="true" className="h-4 w-4" />
               </Link>
@@ -138,7 +138,7 @@ export function Footer() {
           <span className="inline-flex items-center gap-1">
             <span
               aria-hidden="true"
-              className="h-1.5 w-1.5 rounded-full bg-accent-500 animate-pulse"
+              className="h-1.5 w-1.5 rounded-full bg-volt-500 animate-volt-pulse"
             />
             {t("footer", "statusOk")}
           </span>

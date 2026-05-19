@@ -26,7 +26,7 @@ function Cell({
 }) {
   if (value === true)
     return (
-      <span className="inline-flex items-center justify-center gap-1.5 rounded-full bg-accent-500/10 px-2.5 py-1 text-xs font-semibold text-accent-400 ring-1 ring-accent-500/30">
+      <span className="inline-flex items-center justify-center gap-1.5 rounded-full bg-volt-dim px-2.5 py-1 text-xs font-bold uppercase tracking-[0.06em] text-volt-500 ring-1 ring-volt-500/25">
         <Check className="h-3 w-3" /> {yesLabel}
       </span>
     );

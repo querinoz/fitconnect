@@ -100,8 +100,8 @@ export function HrvChartFull({ baselineHrv, seed = 1 }: { baselineHrv: number; s
           <AreaChart data={data} margin={{ left: -20 }}>
             <defs>
               <linearGradient id="hrvFullOs" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.25} />
-                <stop offset="100%" stopColor="#22d3ee" stopOpacity={0} />
+                <stop offset="0%" stopColor="#00ddb4" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="#00ddb4" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="sleepFullOs" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#a855f7" stopOpacity={0.2} />
@@ -133,7 +133,7 @@ export function HrvChartFull({ baselineHrv, seed = 1 }: { baselineHrv: number; s
             <ReferenceLine
               yAxisId="hrv"
               y={avg}
-              stroke="#22d3ee"
+              stroke="#00ddb4"
               strokeDasharray="4 4"
               strokeOpacity={0.3}
             />
@@ -142,12 +142,12 @@ export function HrvChartFull({ baselineHrv, seed = 1 }: { baselineHrv: number; s
               yAxisId="hrv"
               type="monotone"
               dataKey="hrv"
-              stroke="#22d3ee"
+              stroke="#00ddb4"
               fill="url(#hrvFullOs)"
               strokeWidth={2}
               dot={false}
               name="HRV"
-              activeDot={{ r: 4, fill: "#22d3ee", stroke: "#0f172a", strokeWidth: 2 }}
+              activeDot={{ r: 4, fill: "#00ddb4", stroke: "#0f172a", strokeWidth: 2 }}
             />
             <Area
               yAxisId="sleep"

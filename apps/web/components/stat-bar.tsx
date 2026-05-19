@@ -20,7 +20,7 @@ export function StatBar() {
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-14">
-      <div className="rounded-3xl border border-ink-800/80 bg-ink-900/40 p-1">
+      <div className="rounded-3xl border border-[var(--border-xs)] bg-carbon-1/60 p-1">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-y md:divide-y-0 md:divide-x divide-ink-800/60">
           {stats.map((s, i) => (
             <motion.div
@@ -31,7 +31,7 @@ export function StatBar() {
               transition={{ duration: 0.4, delay: i * 0.05 }}
               className="p-6 text-center"
             >
-              <div className="mx-auto grid h-9 w-9 place-items-center rounded-lg bg-brand-500/10 text-brand-300">
+              <div className="mx-auto grid h-9 w-9 place-items-center rounded-lg bg-volt-dim text-volt-500">
                 <s.icon className="h-4 w-4" />
               </div>
               <p className="mt-3 font-display text-3xl font-bold tabular-nums gradient-text">

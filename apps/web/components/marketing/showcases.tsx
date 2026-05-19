@@ -185,7 +185,7 @@ function DiscoverMockup({ reduce }: { reduce: boolean }) {
             <div className="mt-3 h-1.5 rounded-full bg-ink-800 overflow-hidden">
               <div
                 className={cn(
-                  "h-full rounded-full bg-gradient-to-r from-brand-500 to-accent-500",
+                  "h-full rounded-full bg-gradient-to-r from-volt-500 to-volt-400",
                   !reduce && "fc-bar-pop"
                 )}
                 style={{ width: "65%", transformOrigin: "left center" }}
@@ -382,7 +382,7 @@ function BookingMockup() {
                     !s.selected &&
                     "bg-ink-900/60 ring-ink-800 text-ink-200",
                   s.selected &&
-                    "bg-gradient-to-r from-brand-500 to-accent-500 text-ink-950 ring-brand-400 shadow-lg shadow-brand-500/20"
+                    "bg-gradient-to-r from-volt-500 to-volt-400 text-ink-950 ring-brand-400 shadow-lg shadow-brand-500/20"
                 )}
                 style={{ animationDelay: `${i * 0.06}s` }}
               >
@@ -407,7 +407,7 @@ function BookingMockup() {
               </p>
             </div>
           </div>
-          <span className="rounded-lg bg-gradient-to-r from-brand-500 to-accent-500 text-ink-950 text-[11px] font-bold px-3 py-1.5">
+          <span className="rounded-lg bg-gradient-to-r from-volt-500 to-volt-400 text-ink-950 text-[11px] font-bold px-3 py-1.5">
             Confirm · €45
           </span>
         </div>
@@ -509,7 +509,7 @@ function ProgressMockup() {
                 x2="1"
                 y2="0"
               >
-                <stop offset="0%" stopColor="#22d3ee" />
+                <stop offset="0%" stopColor="#00ddb4" />
                 <stop offset="100%" stopColor="#a3e635" />
               </linearGradient>
               <linearGradient
@@ -519,8 +519,8 @@ function ProgressMockup() {
                 x2="0"
                 y2="1"
               >
-                <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.35" />
-                <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
+                <stop offset="0%" stopColor="#00ddb4" stopOpacity="0.35" />
+                <stop offset="100%" stopColor="#00ddb4" stopOpacity="0" />
               </linearGradient>
             </defs>
             {/* Soft grid */}

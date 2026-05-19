@@ -55,7 +55,7 @@ export function ProgramsStrip() {
                   </span>
                 </div>
                 {p.badge && (
-                  <span className="absolute top-3 right-3 rounded-full bg-gradient-to-r from-brand-400 to-accent-500 text-ink-950 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider">
+                  <span className="absolute top-3 right-3 rounded-full bg-gradient-to-r from-volt-500 to-volt-400 text-ink-950 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider">
                     {p.badge}
                   </span>
                 )}

@@ -21,12 +21,12 @@ const pointIcons = [
 ] as const;
 
 const pointTones = [
-  "accent",
+  "volt",
   "brand",
-  "plasma",
+  "cyan",
   "brand",
   "signal",
-  "accent"
+  "volt"
 ] as const;
 
 const toneStyles: Record<
@@ -34,22 +34,22 @@ const toneStyles: Record<
   { ring: string; icon: string; metric: string; halo: string }
 > = {
   brand: {
-    ring: "ring-brand-500/30",
-    icon: "text-brand-300 bg-brand-500/10",
-    metric: "text-brand-300",
-    halo: "from-brand-500/20 to-transparent"
+    ring: "ring-brand-400/30",
+    icon: "text-brand-400 bg-connect-dim",
+    metric: "text-brand-400",
+    halo: "from-brand-400/20 to-transparent"
   },
-  accent: {
-    ring: "ring-accent-500/30",
-    icon: "text-accent-400 bg-accent-500/10",
-    metric: "text-accent-400",
-    halo: "from-accent-500/20 to-transparent"
+  volt: {
+    ring: "ring-volt-500/30",
+    icon: "text-volt-500 bg-volt-dim",
+    metric: "text-volt-500",
+    halo: "from-volt-500/20 to-transparent"
   },
-  plasma: {
-    ring: "ring-plasma-500/30",
-    icon: "text-plasma-300 bg-plasma-500/10",
-    metric: "text-plasma-300",
-    halo: "from-plasma-500/20 to-transparent"
+  cyan: {
+    ring: "ring-cyan-500/25",
+    icon: "text-cyan-500 bg-cyan-dim",
+    metric: "text-cyan-500",
+    halo: "from-cyan-500/15 to-transparent"
   },
   signal: {
     ring: "ring-signal-500/30",
@@ -108,12 +108,12 @@ export function WhyFitConnect() {
                 style={{
                   background: `radial-gradient(circle, ${
                     toneKey === "brand"
-                      ? "rgba(34,211,238,0.18)"
-                      : toneKey === "accent"
-                        ? "rgba(132,204,22,0.16)"
-                        : toneKey === "plasma"
-                          ? "rgba(168,85,247,0.18)"
-                          : "rgba(244,63,94,0.16)"
+                      ? "rgba(0,221,180,0.16)"
+                      : toneKey === "volt"
+                        ? "rgba(200,255,0,0.16)"
+                        : toneKey === "cyan"
+                          ? "rgba(0,191,255,0.14)"
+                          : "rgba(255,58,92,0.16)"
                   } 0%, transparent 65%)`
                 }}
               />

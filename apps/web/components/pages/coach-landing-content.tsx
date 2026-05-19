@@ -166,7 +166,7 @@ export function CoachLandingContent() {
                       </div>
                       <div className="relative h-7 rounded-full bg-ink-800/50 overflow-hidden">
                         <div
-                          className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-brand-500 to-accent-500"
+                          className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-volt-500 to-volt-400"
                           style={{ width: `${(row.median / max) * 100}%` }}
                         />
                         <div

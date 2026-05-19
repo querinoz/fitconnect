@@ -50,7 +50,7 @@ export function RoleDashboardPreview({
         role="tablist"
         aria-label={locale.dashboardPreview.tabsAria}
         className={cn(
-          "inline-flex p-1 rounded-2xl border border-ink-800 bg-ink-950/80 backdrop-blur-sm",
+          "inline-flex rounded-2xl border border-[var(--border-xs)] bg-carbon-2/90 p-1 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]",
           frameless && "mx-3 mt-1 w-[calc(100%-1.5rem)]"
         )}
       >
@@ -72,7 +72,7 @@ export function RoleDashboardPreview({
               {active && (
                 <motion.span
                   layoutId={tabLayoutId}
-                  className="absolute inset-0 rounded-xl bg-gradient-to-r from-brand-500/20 to-accent-500/20 ring-1 ring-brand-400/40"
+                  className="absolute inset-0 rounded-xl bg-[linear-gradient(145deg,rgba(200,255,0,0.14),rgba(0,221,180,0.08))] ring-1 ring-volt-500/25"
                   transition={
                     reduce
                       ? { duration: 0 }

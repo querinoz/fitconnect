@@ -58,12 +58,12 @@ export function Pricing() {
             transition={{ duration: reduce ? 0 : 0.4, delay: reduce ? 0 : i * 0.08 }}
             className={`relative flex flex-col rounded-3xl border p-8 ${
               p.highlight
-                ? "border-brand-400/60 bg-gradient-to-b from-brand-500/15 via-brand-500/5 to-transparent shadow-glow"
-                : "border-ink-800 bg-ink-900/40"
+                ? "border-volt-500/40 bg-gradient-to-b from-volt-dim via-transparent to-transparent shadow-volt-glow"
+                : "border-[var(--border-xs)] bg-carbon-2/60"
             }`}
           >
             {p.highlight && (
-              <span className="absolute -top-3 left-6 inline-flex items-center gap-1 rounded-full bg-brand-400 text-ink-950 px-3 py-0.5 text-xs font-bold">
+              <span className="absolute -top-3 left-6 inline-flex items-center gap-1 rounded-full bg-volt-500 text-ink-950 px-3 py-0.5 text-xs font-bold">
                 <Sparkles aria-hidden="true" className="h-3 w-3" />{" "}
                 {t("pricing", "mostPopular")}
               </span>
@@ -79,7 +79,7 @@ export function Pricing() {
             <ul className="mt-6 space-y-3 flex-1">
               {p.features.map((f) => (
                 <li key={f} className="flex items-start gap-2 text-sm text-ink-200">
-                  <div className="mt-0.5 grid h-4 w-4 place-items-center rounded-full bg-accent-500/15 text-accent-400">
+                  <div className="mt-0.5 grid h-4 w-4 place-items-center rounded-full bg-volt-dim text-volt-500">
                     <Check aria-hidden="true" className="h-3 w-3" />
                   </div>
                   {f}

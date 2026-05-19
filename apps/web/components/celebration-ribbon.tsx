@@ -230,7 +230,7 @@ function CelebrationCard({
 }
 
 function Confetti({ delay }: { delay: number }) {
-  const palette = ["#22d3ee", "#84cc16", "#a855f7", "#f43f5e", "#fde047"];
+  const palette = ["#00ddb4", "#84cc16", "#a855f7", "#f43f5e", "#fde047"];
   const bits = Array.from({ length: 9 }, (_, i) => i);
   return (
     <div

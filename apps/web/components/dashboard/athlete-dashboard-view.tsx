@@ -151,7 +151,7 @@ export function AthleteDashboardView({ wrapShell = true }: { wrapShell?: boolean
           delta={`${athlete.sleepEfficiency}%`}
           chart={
             <BarChart data={ctx.sleepWeek}>
-              <Bar dataKey="sleep" fill="#22d3ee" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="sleep" fill="#00ddb4" radius={[2, 2, 0, 0]} />
             </BarChart>
           }
         />
@@ -235,7 +235,7 @@ export function AthleteDashboardView({ wrapShell = true }: { wrapShell?: boolean
                   <XAxis dataKey="d" stroke="#64748b" fontSize={12} />
                   <YAxis stroke="#64748b" fontSize={12} />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="load" radius={[8, 8, 0, 0]} fill="#22d3ee" />
+                  <Bar dataKey="load" radius={[8, 8, 0, 0]} fill="#00ddb4" />
                 </BarChart>
               </ResponsiveContainer>
             </div>

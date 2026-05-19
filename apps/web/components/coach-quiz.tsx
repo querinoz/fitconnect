@@ -87,7 +87,7 @@ export function CoachQuiz() {
                 className={cn(
                   "h-1.5 flex-1 rounded-full transition-all duration-500",
                   i < step
-                    ? "bg-gradient-to-r from-brand-400 to-accent-500"
+                    ? "bg-gradient-to-r from-volt-500 to-volt-400"
                     : i === step
                       ? "bg-brand-400/40"
                       : "bg-ink-800"

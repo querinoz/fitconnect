@@ -72,7 +72,7 @@ export function DemosSection() {
         </div>
         <Link
           href="/discover"
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 text-ink-950 font-semibold px-5 h-11 hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60"
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-volt-500 to-volt-400 text-ink-950 font-semibold px-5 h-11 hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60"
         >
           {locale.demos.ctaButton}{" "}
           <ArrowRight aria-hidden="true" className="h-4 w-4" />

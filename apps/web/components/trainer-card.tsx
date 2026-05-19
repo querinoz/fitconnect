@@ -138,7 +138,7 @@ export function TrainerCard({ t: trainer }: { t: Trainer }) {
             type="button"
             onClick={openFitMe}
             aria-label={`${t("fitme", "cta")} ${trainer.name}`}
-            className="group/cta relative flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 text-ink-950 font-bold text-sm py-2.5 shadow-lg shadow-brand-500/15 transition-all hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/80"
+            className="group/cta relative flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-volt-500 to-volt-400 text-ink-950 font-bold text-sm py-2.5 shadow-lg shadow-brand-500/15 transition-all hover:shadow-glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/80"
           >
             <Zap
               aria-hidden="true"

@@ -9,22 +9,22 @@ export function Cta() {
   const t = useT();
   return (
     <section className="mx-auto max-w-7xl px-6 py-20">
-      <div className="relative overflow-hidden rounded-3xl border border-brand-400/30 p-10 md:p-16 text-center bg-gradient-to-br from-brand-500/15 via-transparent to-accent-500/15">
+      <div className="relative overflow-hidden rounded-3xl border border-volt-500/25 p-10 md:p-16 text-center bg-gradient-to-br from-volt-dim via-transparent to-connect-dim">
         <div aria-hidden="true" className="absolute inset-0 bg-noise opacity-50" />
         <div
           aria-hidden="true"
-          className="absolute -top-32 left-1/4 -z-10 h-72 w-72 rounded-full bg-brand-500/30 blur-3xl"
+          className="absolute -top-32 left-1/4 -z-10 h-72 w-72 rounded-full bg-volt-500/20 blur-3xl"
         />
         <div
           aria-hidden="true"
-          className="absolute -bottom-32 right-1/4 -z-10 h-72 w-72 rounded-full bg-accent-500/25 blur-3xl"
+          className="absolute -bottom-32 right-1/4 -z-10 h-72 w-72 rounded-full bg-brand-400/15 blur-3xl"
         />
         <div
           aria-hidden="true"
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 h-[420px] w-[420px] rounded-full bg-plasma-500/10 blur-3xl"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 h-[420px] w-[420px] rounded-full bg-cyan-500/8 blur-3xl"
         />
 
-        <span className="relative inline-flex items-center gap-1.5 rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-200 ring-1 ring-brand-500/30">
+        <span className="relative inline-flex items-center gap-1.5 rounded-full bg-volt-dim px-3 py-1 text-xs font-bold uppercase tracking-[0.08em] text-volt-500 ring-1 ring-volt-500/25">
           <Sparkles aria-hidden="true" className="h-3 w-3" /> {t("cta", "pill")}
         </span>
         <h2 className="relative mt-5 font-display text-4xl md:text-6xl font-bold text-balance">

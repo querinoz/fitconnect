@@ -25,13 +25,13 @@ import { Logo } from "@/components/brand/logo";
 import { ProfileSettingsPanel } from "@/components/mobile/profile-settings-panel";
 import { cn } from "@/lib/utils";
 import {
-  AIInsight,
   ChartShell,
   MetricTile,
   PremiumCard,
   RealtimeBadge,
   SectionHeader
 } from "@/components/ui-glass/premium-system";
+import { RiftBento, RiftLabel, RiftScore } from "@/components/ui-glass/rift-bento";
 import type { DashboardPreviewRole } from "./role-dashboard-preview";
 
 type MobileScreen = "today" | "sessions" | "coach" | "inbox" | "profile";
@@ -75,7 +75,7 @@ export function MobileAppPreview({
       />
       <div className="relative px-4 pb-3 pt-2">
         <div className="mb-3 flex items-center gap-2">
-          <Logo className="h-7 w-7" animated />
+          <Logo className="h-7 w-7" />
           <span className="font-display text-sm font-bold tracking-tight">
             Fit<span className="text-volt-400">Connect</span>
           </span>
@@ -212,63 +212,120 @@ function TodayScreen({
   onStart: () => void;
   onApprove: () => void;
 }) {
+  const readiness = isCoach ? 84 : 82;
+
   return (
-    <div className="space-y-3">
-      <PremiumCard tone="volt" className="p-4">
-        <div className="flex items-center justify-between">
+    <div className="grid grid-cols-2 auto-rows-[minmax(72px,auto)] gap-2.5">
+      <RiftBento tone="volt" span="md" className="min-h-[148px] !p-3.5">
+        <RiftLabel>AI Readiness</RiftLabel>
+        <div className="mt-1 flex items-end justify-between gap-2">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.18em] text-ink-500">
-              Readiness
-            </p>
-            <p className="mt-1 font-display text-5xl font-bold gradient-text">
-              {isCoach ? "84" : "82"}
+            <RiftScore value={readiness} className="text-[2.75rem]" />
+            <p className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-volt-400">
+              <Zap className="h-3 w-3" aria-hidden />
+              {isCoach ? "Roster green" : "Train hard"}
             </p>
           </div>
-          <div className="ring-conic grid h-20 w-20 place-items-center rounded-full p-1 ring-1 ring-volt-500/30">
-            <div className="grid h-full w-full place-items-center rounded-full bg-ink-950">
-              <HeartPulse className="h-7 w-7 text-accent-400" />
-            </div>
-          </div>
+          <svg viewBox="0 0 80 80" className="h-16 w-16 shrink-0 -rotate-90" aria-hidden>
+            <circle cx="40" cy="40" r="32" fill="transparent" stroke="rgba(255,255,255,0.06)" strokeWidth="7" />
+            <circle
+              cx="40"
+              cy="40"
+              r="32"
+              fill="transparent"
+              stroke="#C8FF00"
+              strokeWidth="7"
+              strokeLinecap="round"
+              strokeDasharray={2 * Math.PI * 32}
+              strokeDashoffset={2 * Math.PI * 32 * (1 - readiness / 100)}
+            />
+          </svg>
         </div>
         <button
           type="button"
           onClick={onStart}
-          className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-grad-pulse font-semibold text-ink-950 shadow-volt-glow transition hover:scale-[1.01]"
+          className="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-grad-pulse text-xs font-semibold text-ink-950 shadow-volt-glow transition hover:scale-[1.01]"
         >
-          <Dumbbell className="h-4 w-4" />
-          {sessionLive ? "Return to live session" : "Start live session"}
+          <Dumbbell className="h-3.5 w-3.5" />
+          {sessionLive ? "Return to live" : "Start session"}
         </button>
-      </PremiumCard>
+      </RiftBento>
 
-      <div className="grid grid-cols-2 gap-3">
-        <MetricTile label="HRV" value={isCoach ? "3 amber" : "68 ms"} icon={Activity} />
-        <MetricTile label="Streak" value={`${streak} days`} icon={Zap} tone="brand" />
-      </div>
+      <RiftBento tone="neutral" className="!p-3">
+        <RiftLabel>HRV</RiftLabel>
+        <p className="mt-1 font-display text-xl font-extrabold text-ink-50">
+          {isCoach ? "3" : "68"}
+        </p>
+        <p className="text-[9px] font-semibold text-emerald-500">
+          {isCoach ? "amber alerts" : "+4 ms"}
+        </p>
+      </RiftBento>
 
-      <AIInsight
-        title={
-          isCoach
-            ? "AI flagged 3 athletes for a lighter Thursday."
-            : "AI suggests moving threshold to Thursday."
-        }
-        body={
-          planApproved
-            ? "Plan update approved"
-            : "Based on HRV, sleep and last session load."
-        }
-        action={
-          !planApproved ? (
-          <button
-            type="button"
-            onClick={onApprove}
-            className="mt-3 inline-flex h-9 items-center gap-2 rounded-xl border border-volt-500/30 bg-volt-500/10 px-3 text-xs font-semibold text-volt-300"
-          >
-            <Check className="h-3.5 w-3.5" />
-            Approve update
-          </button>
-          ) : null
-        }
-      />
+      <RiftBento tone="neutral" className="!p-3">
+        <RiftLabel>Streak</RiftLabel>
+        <p className="mt-1 font-display text-xl font-extrabold text-brand-400">{streak}d</p>
+        <p className="text-[9px] text-ink-400">personal best</p>
+      </RiftBento>
+
+      <RiftBento tone="connect" className="!p-3">
+        <RiftLabel>Sleep</RiftLabel>
+        <p className="mt-1 font-display text-xl font-extrabold text-ink-50">7h42</p>
+        <p className="text-[9px] font-semibold text-brand-400">89% quality</p>
+      </RiftBento>
+
+      <RiftBento tone="cyan" className="!p-3">
+        <RiftLabel>Load</RiftLabel>
+        <p className="mt-1 font-display text-xl font-extrabold text-cyan-500">6.4k</p>
+        <p className="text-[9px] text-ink-400">7-day</p>
+      </RiftBento>
+
+      <RiftBento tone="neutral" span="full" className="!p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-xs font-semibold text-ink-100">Weekly load</p>
+          <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-volt-500">
+            On target
+          </span>
+        </div>
+        <div className="flex h-14 items-end gap-1.5" role="img" aria-label="Weekly training load">
+          {athleteLoad.map((h, i) => (
+            <div
+              key={i}
+              className="flex-1 rounded-md bg-gradient-to-t from-volt-600 to-volt-400"
+              style={{ height: `${h}%`, opacity: 0.45 + i * 0.06 }}
+            />
+          ))}
+        </div>
+      </RiftBento>
+
+      <RiftBento tone="cyan" span="full" className="!p-3">
+        <div className="flex items-start gap-2.5">
+          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-cyan-dim text-cyan-500 ring-1 ring-cyan-500/20">
+            <Activity className="h-3.5 w-3.5" aria-hidden />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold leading-snug text-ink-100">
+              {isCoach
+                ? "AI flagged 3 athletes for lighter Thursday."
+                : "AI suggests moving threshold to Thursday."}
+            </p>
+            <p className="mt-1 text-[10px] text-ink-400">
+              {planApproved
+                ? "Plan update approved"
+                : "Based on HRV, sleep and last session load."}
+            </p>
+            {!planApproved ? (
+              <button
+                type="button"
+                onClick={onApprove}
+                className="mt-2 inline-flex h-8 items-center gap-1.5 rounded-lg border border-volt-500/30 bg-volt-500/10 px-2.5 text-[10px] font-semibold text-volt-300"
+              >
+                <Check className="h-3 w-3" />
+                Approve update
+              </button>
+            ) : null}
+          </div>
+        </div>
+      </RiftBento>
     </div>
   );
 }
@@ -454,7 +511,7 @@ function LoadBars({ live }: { live: boolean }) {
       {athleteLoad.map((h, i) => (
         <span
           key={i}
-          className="flex-1 rounded-md bg-gradient-to-t from-brand-500 to-accent-500 transition-all duration-300"
+          className="flex-1 rounded-md bg-gradient-to-t from-volt-500 to-volt-400 transition-all duration-300"
           style={{ height: `${live ? h + 6 : h}%`, opacity: 0.55 + i * 0.05 }}
         />
       ))}

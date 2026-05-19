@@ -28,7 +28,7 @@ export function HowItWorks() {
       <motion.div className="mt-14 grid gap-6 md:grid-cols-3 relative">
         <div
           aria-hidden
-          className="hidden md:block absolute top-16 left-[16%] right-[16%] h-px bg-gradient-to-r from-transparent via-brand-400/50 to-transparent"
+          className="hidden md:block absolute top-16 left-[16%] right-[16%] h-px bg-gradient-to-r from-transparent via-volt-500/40 to-transparent"
         />
         {locale.how.steps.map((s, i) => {
           const Icon = stepIcons[i];

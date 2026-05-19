@@ -33,19 +33,19 @@ export function DashboardPreview() {
     },
     {
       icon: Brain,
-      color: "text-plasma-400",
+      color: "text-cyan-500",
       title: locale.dashboardPreview.features[1]?.title ?? "",
       body: locale.dashboardPreview.features[1]?.body ?? ""
     },
     {
       icon: Moon,
-      color: "text-brand-300",
+      color: "text-brand-400",
       title: locale.dashboardPreview.features[2]?.title ?? "",
       body: locale.dashboardPreview.features[2]?.body ?? ""
     },
     {
       icon: TrendingUp,
-      color: "text-accent-400",
+      color: "text-volt-500",
       title: locale.dashboardPreview.features[3]?.title ?? "",
       body: locale.dashboardPreview.features[3]?.body ?? ""
     }

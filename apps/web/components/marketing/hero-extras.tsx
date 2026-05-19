@@ -74,7 +74,7 @@ function FloatingCoachPhoto({ src, sport, position, anim }: FloatingCoachPhotoPr
           className="h-28 w-full object-cover"
         />
         <div className="absolute inset-x-2 bottom-2 flex items-center gap-2">
-          <span className="h-6 w-6 rounded-full ring-2 ring-ink-950 bg-gradient-to-br from-brand-400 to-plasma-500" />
+          <span className="h-6 w-6 rounded-full ring-2 ring-ink-950 bg-gradient-to-br from-volt-500 to-brand-400" />
           <span className="text-[10px] font-semibold text-ink-50 leading-tight truncate">
             {sport}
           </span>

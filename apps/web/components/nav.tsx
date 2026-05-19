@@ -178,7 +178,7 @@ export function Nav() {
         className="absolute bottom-0 left-0 right-0 h-px bg-ink-800/40"
       >
         <div
-          className="h-full bg-gradient-to-r from-brand-400 via-accent-500 to-plasma-500 transition-[width] duration-150"
+          className="h-full bg-gradient-to-r from-volt-500 via-brand-400 to-cyan-500 transition-[width] duration-150"
           style={{ width: `${progress * 100}%` }}
         />
       </div>

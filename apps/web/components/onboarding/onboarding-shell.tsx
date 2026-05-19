@@ -59,7 +59,7 @@ export function OnboardingShell({
         <div className="mb-8">
           <div className="h-1.5 rounded-full bg-ink-900 overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-brand-400 to-accent-500"
+              className="h-full bg-gradient-to-r from-volt-500 to-volt-400"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: reduce ? 0 : 0.4 }}

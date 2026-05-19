@@ -152,7 +152,7 @@ export function MobileAppLauncher() {
                     className="group w-full rounded-2xl border border-ink-800 bg-ink-900/80 p-4 text-left shadow-lg shadow-black/20 transition hover:border-brand-500/40 hover:bg-ink-900 focus-visible:outline-none"
                   >
                     <span className="flex items-center gap-3">
-                      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-400 to-accent-500 text-ink-950">
+                      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-volt-500 to-volt-400 text-ink-950">
                         <Icon className="h-5 w-5" aria-hidden />
                       </span>
                       <span className="min-w-0 flex-1">

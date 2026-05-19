@@ -97,7 +97,7 @@ export function AudienceSplit() {
             <div className="mt-7 flex items-center justify-between gap-4">
               <Link
                 href="/discover"
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-500 to-accent-500 text-ink-950 font-bold px-5 py-2.5 text-sm shadow-lg shadow-brand-500/15 hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-volt-500 to-volt-400 text-ink-950 font-bold px-5 py-2.5 text-sm shadow-lg shadow-brand-500/15 hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60"
               >
                 Find your coach
                 <ArrowRight aria-hidden="true" className="h-4 w-4" />

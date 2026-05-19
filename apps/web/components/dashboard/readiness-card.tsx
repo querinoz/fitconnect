@@ -32,7 +32,7 @@ export function ReadinessCard({ score }: { score: number }) {
           />
           <defs>
             <linearGradient id="fcReadiness" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#22d3ee" />
+              <stop offset="0%" stopColor="#00ddb4" />
               <stop offset="100%" stopColor="#84cc16" />
             </linearGradient>
           </defs>
