@@ -259,66 +259,27 @@ article {
     40px 40px;
 }
 
-/* 3D metallic carbon logo shell */
-.logo-carbon-3d {
-  border-radius: 0.85rem;
-  transform-style: preserve-3d;
-  perspective: 420px;
+/* Premium SVG logo — subtle ambient pulse (vector-native, no PNG overlay) */
+.fc-logo-premium {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45));
+  animation: fc-logo-premium-idle 5s ease-in-out infinite;
 }
 
-.logo-carbon-3d__glow {
-  position: absolute;
-  inset: -35%;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(200, 255, 0, 0.22) 0%,
-    rgba(0, 221, 180, 0.08) 42%,
-    transparent 68%
-  );
-  animation: logo-carbon-pulse 4.2s ease-in-out infinite;
-  pointer-events: none;
-}
-
-.logo-carbon-3d__rim {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.22) 0%,
-    rgba(60, 64, 72, 0.55) 18%,
-    rgba(18, 20, 26, 0.95) 52%,
-    rgba(255, 255, 255, 0.08) 100%
-  );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.45),
-    0 10px 28px -8px rgba(0, 0, 0, 0.65),
-    0 0 24px -6px rgba(200, 255, 0, 0.25);
-  pointer-events: none;
-}
-
-.logo-carbon-3d__mark {
-  filter: saturate(1.12) contrast(1.08) brightness(1.05);
-}
-
-@keyframes logo-carbon-pulse {
+@keyframes fc-logo-premium-idle {
   0%,
   100% {
-    opacity: 0.55;
-    transform: scale(0.92);
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45))
+      drop-shadow(0 0 8px rgba(200, 255, 0, 0.12));
   }
   50% {
-    opacity: 1;
-    transform: scale(1.05);
+    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.5))
+      drop-shadow(0 0 18px rgba(200, 255, 0, 0.28));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .logo-carbon-3d__glow {
+  .fc-logo-premium {
     animation: none;
-    opacity: 0.65;
   }
 }
 

@@ -74,13 +74,9 @@ export function Nav() {
           >
             <span
               aria-hidden="true"
-              className="relative grid h-9 w-9 shrink-0 place-items-center rounded-xl shadow-glow transition-transform group-hover:rotate-3"
+              className="relative grid h-9 w-9 shrink-0 place-items-center transition-transform group-hover:scale-105"
             >
               <Logo className="h-9 w-9" />
-              <span
-                aria-hidden="true"
-                className="absolute -inset-0.5 -z-10 rounded-xl bg-gradient-to-br from-volt-500 to-brand-400 opacity-30 blur"
-              />
             </span>
             <Wordmark size={16} className="truncate sm:hidden" />
             <Wordmark size={18} className="hidden sm:inline-block" />
