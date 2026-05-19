@@ -15,3 +15,10 @@ next-env.d.ts
 playwright-report/
 test-results/
 /coverage/
+**/coverage/
+.turbo/
+**/.turbo/
+
+# Generated PWA service worker (production build only — breaks dev if cached)
+apps/web/public/sw.js
+apps/web/public/workbox-*.js

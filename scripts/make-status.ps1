@@ -66,7 +66,19 @@ if (Test-Path (Join-Path $Root "node_modules")) {
   Write-Host "node_modules:  present" -ForegroundColor Green
 } else {
   Write-Host ""
-  Write-Host "node_modules:  missing (make start will install)" -ForegroundColor Yellow
+  Write-Host "node_modules:  missing (make setup will install)" -ForegroundColor Yellow
+}
+
+if (Test-Path (Join-Path $Root ".env.local")) {
+  Write-Host ".env.local:    present" -ForegroundColor Green
+} else {
+  Write-Host ".env.local:    missing (make setup will create)" -ForegroundColor Yellow
+}
+
+if (Test-Path (Join-Path $Root "node_modules\@prisma\client")) {
+  Write-Host "Prisma client: generated" -ForegroundColor Green
+} else {
+  Write-Host "Prisma client: not generated" -ForegroundColor Yellow
 }
 
 Write-Host ""

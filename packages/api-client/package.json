@@ -1,0 +1,13 @@
+{
+  "name": "@fitconnect/api-client",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@fitconnect/types": "workspace:*",
+    "@trpc/server": "^11.1.0",
+    "superjson": "^2.2.2",
+    "zod": "^3.24.2"
+  }
+}

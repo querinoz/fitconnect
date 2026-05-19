@@ -1,0 +1,55 @@
+:root {
+  --ink-950: #07080A;
+  --ink-900: #0E0F12;
+  --ink-800: #15171B;
+  --ink-700: #21242A;
+  --ink-600: #2E323A;
+  --ink-500: #5B606B;
+  --ink-400: #8A8F99;
+  --ink-300: #BFC3CC;
+  --ink-100: #F2F3F6;
+  --ink-50:  #FAFBFC;
+
+  --volt-300: #E9FFB5;
+  --volt-400: #DAFE7E;
+  --volt-500: #C7FB3A;
+  --volt-600: #9CD81A;
+  --volt-glow: rgba(199,251,58,.45);
+
+  --jade-500:  #2DD4BF;
+  --amber-400: #F5B844;
+  --coral-500: #FF5470;
+
+  --glass-lo:    rgba(255,255,255,.03);
+  --glass-md:    rgba(255,255,255,.06);
+  --glass-hi:    rgba(255,255,255,.10);
+  --glass-volt:  rgba(199,251,58,.06);
+  --glass-border: rgba(255,255,255,.08);
+  --glass-edge:   rgba(199,251,58,.30);
+  --glass-ink: rgba(7,8,10,.72);
+  --glass-wash: rgba(255,255,255,.045);
+  --glass-noise: rgba(255,255,255,.035);
+
+  --grad-pulse: linear-gradient(135deg, #DAFE7E, #C7FB3A, #9CD81A);
+  --grad-text:  linear-gradient(135deg, #FAFBFC, #DAFE7E 60%, #C7FB3A);
+  --grad-live: radial-gradient(circle at 20% 10%, rgba(34,211,238,.22), transparent 36%),
+    radial-gradient(circle at 78% 12%, rgba(199,251,58,.18), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+  --grad-depth: radial-gradient(circle at 50% -20%, rgba(199,251,58,.14), transparent 38%),
+    linear-gradient(180deg, rgba(14,15,18,.88), rgba(7,8,10,.96));
+
+  --shadow-premium: inset 0 1px 0 rgba(255,255,255,.08), 0 24px 80px -48px rgba(0,0,0,.9);
+  --shadow-focus: 0 0 0 1px rgba(199,251,58,.28), 0 18px 60px -36px var(--volt-glow);
+
+  --safe-top:    env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+
+  color-scheme: dark;
+}
+
+html, body {
+  background: var(--ink-950);
+  color: var(--ink-100);
+}
+
+/* Reduced-motion guard lives in globals.css (data-motion + @media). */

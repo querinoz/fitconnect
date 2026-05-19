@@ -1,0 +1,23 @@
+# Keep upload under Vercel CLI 100 MB limit (Hobby). Remote install runs pnpm install.
+node_modules
+**/node_modules
+.next
+**/.next
+out
+**/out
+dist
+**/dist
+.git
+coverage
+**/coverage
+playwright-report
+test-results
+.turbo
+**/.turbo
+apps/mobile
+.fitconnect
+.superpowers
+.worktrees
+docs
+*.log
+.env*.local

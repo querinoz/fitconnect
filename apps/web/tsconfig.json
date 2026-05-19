@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [{ "name": "next" }],
+    "paths": {
+      "@/*": ["./*"],
+      "@fitconnect/types": ["../../packages/types/src/index.ts"],
+      "@fitconnect/types/*": ["../../packages/types/src/*"],
+      "@fitconnect/design-tokens": ["../../packages/design-tokens/index.ts"],
+      "@fitconnect/design-tokens/*": ["../../packages/design-tokens/*"],
+      "@fitconnect/maps": ["../../packages/maps/src/index.ts"],
+      "@fitconnect/ai": ["../../packages/ai/src/index.ts"],
+      "@fitconnect/utils": ["../../packages/utils/src/index.ts"],
+      "@fitconnect/api-client": ["../../packages/api-client/src/index.ts"],
+      "@fitconnect/api-client/*": ["../../packages/api-client/src/*"],
+      "@fitconnect/config/tokens": ["../../packages/config/src/tokens.ts"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

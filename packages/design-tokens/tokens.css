@@ -1,0 +1,18 @@
+/* @fitconnect/design-tokens — Voltline / Osmo-compatible base */
+:root {
+  --fc-space-1: 0.25rem;
+  --fc-space-2: 0.5rem;
+  --fc-space-3: 0.75rem;
+  --fc-space-4: 1rem;
+  --fc-space-6: 1.5rem;
+  --fc-space-8: 2rem;
+  --fc-radius-sm: 0.75rem;
+  --fc-radius-md: 1rem;
+  --fc-radius-lg: 1.5rem;
+  --fc-radius-xl: 2rem;
+  --fc-shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 24px 80px -48px rgba(0, 0, 0, 0.9);
+  --fc-motion-micro: 180ms;
+  --fc-motion-screen: 280ms;
+  --fc-motion-entrance: 400ms;
+}

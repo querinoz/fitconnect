@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ATHLETE
+  COACH
+  ADMIN
+  FEDERATION
+  GYM_OWNER
+}
+
+enum RecoveryStatus {
+  GREEN
+  AMBER
+  RED
+}
+
+enum SessionMode {
+  ONLINE
+  IN_PERSON
+}
+
+enum SessionStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+}
+
+enum WearableProvider {
+  APPLE_HEALTH
+  HEALTH_CONNECT
+  GARMIN
+  WHOOP
+  OURA
+  POLAR
+  STRAVA
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      UserRole @default(ATHLETE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  athleteProfile AthleteProfile?
+  coachProfile   CoachProfile?
+}
+
+model AthleteProfile {
+  id              String         @id @default(cuid())
+  userId          String?        @unique
+  externalId      String         @unique
+  name            String
+  avatar          String
+  sports          String[]
+  coachExternalId String
+  readiness       Int            @default(0)
+  hrv             Int            @default(0)
+  sleepHours      String         @default("")
+  sleepEfficiency Int            @default(0)
+  vo2max          Float          @default(0)
+  recoveryStatus  RecoveryStatus @default(GREEN)
+  goalTitle       String         @default("")
+  goalProgress    Int            @default(0)
+  streakWeeks     Int            @default(0)
+
+  user              User?               @relation(fields: [userId], references: [id])
+  readinessHistory  ReadinessSnapshot[]
+  wearableLinks     WearableConnection[]
+  sessions          Session[]
+  messages          Message[]
+}
+
+model CoachProfile {
+  id              String  @id @default(cuid())
+  userId          String? @unique
+  externalId      String  @unique
+  name            String
+  avatar          String
+  headline        String
+  city            String
+  country         String
+  sports          String[]
+  rating          Float   @default(0)
+  reviews         Int     @default(0)
+  hourlyRate      Int     @default(0)
+  athletesCoached Int     @default(0)
+  retentionRate   Int     @default(0)
+
+  user User? @relation(fields: [userId], references: [id])
+}
+
+model Program {
+  id          String @id @default(cuid())
+  externalId  String @unique
+  title       String
+  description String
+  sport       String
+  weeks       Int
+  level       String
+}
+
+model Session {
+  id                String        @id @default(cuid())
+  externalId        String        @unique
+  athleteExternalId String
+  coachExternalId   String
+  scheduledAt       DateTime
+  type              String
+  mode              SessionMode
+  intensity         String
+  status            SessionStatus @default(SCHEDULED)
+
+  athlete AthleteProfile @relation(fields: [athleteExternalId], references: [externalId])
+}
+
+model Message {
+  id                String   @id @default(cuid())
+  externalId        String   @unique
+  athleteExternalId String
+  coachExternalId   String
+  fromRole          String
+  preview           String
+  sentAt            DateTime
+  unread            Boolean  @default(true)
+
+  athlete AthleteProfile @relation(fields: [athleteExternalId], references: [externalId])
+}
+
+model WearableConnection {
+  id                String           @id @default(cuid())
+  athleteExternalId String
+  provider          WearableProvider
+  connectedAt       DateTime         @default(now())
+  lastSyncAt        DateTime?
+  status            String           @default("active")
+
+  athlete AthleteProfile @relation(fields: [athleteExternalId], references: [externalId])
+}
+
+model BiometricSample {
+  id                String   @id @default(cuid())
+  athleteExternalId String
+  provider          WearableProvider
+  metric            String
+  value             Float
+  unit              String
+  recordedAt        DateTime
+
+  @@index([athleteExternalId, recordedAt])
+}
+
+model ReadinessSnapshot {
+  id                String         @id @default(cuid())
+  athleteExternalId String
+  score             Int
+  hrvMs             Int
+  sleepHours        String
+  sleepEfficiency   Int
+  recoveryStatus    RecoveryStatus
+  capturedAt        DateTime       @default(now())
+
+  athlete AthleteProfile @relation(fields: [athleteExternalId], references: [externalId])
+}
+
+model TrainingPlan {
+  id                String @id @default(cuid())
+  externalId        String @unique
+  athleteExternalId String
+  coachExternalId   String
+  weekLabel         String
+  aiSuggestion      String
+  approvedLabel     String
+}
+
+model PlanBlock {
+  id         String  @id @default(cuid())
+  planId     String
+  externalId String
+  day        String
+  title      String
+  detail     String
+  intensity  String
+  completed  Boolean @default(false)
+}
+
+model Route {
+  id        String @id @default(cuid())
+  name      String
+  sport     String
+  geoJson   Json
+  createdAt DateTime @default(now())
+}
+
+model Club {
+  id          String @id @default(cuid())
+  name        String
+  city        String
+  memberCount Int    @default(0)
+}

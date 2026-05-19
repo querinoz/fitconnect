@@ -2,11 +2,13 @@
 param(
   [int]$Port = 3001,
   [switch]$NoBrowser,
-  [switch]$NoSmoke
+  [switch]$NoSmoke,
+  [switch]$SkipSetup
 )
 
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
+$WebDir = Join-Path $Root "apps\web"
 Set-Location $Root
 
 $StateDir = Join-Path $Root ".fitconnect"
@@ -17,27 +19,33 @@ $BaseUrl = "http://localhost:$Port"
 
 function Write-Step($msg) { Write-Host "==> $msg" -ForegroundColor Cyan }
 
-if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-  Write-Host "Node.js is required. Install from https://nodejs.org/" -ForegroundColor Red
-  exit 1
+if (-not $SkipSetup) {
+  & "$PSScriptRoot\make-setup.ps1"
+  if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
 New-Item -ItemType Directory -Force -Path $StateDir | Out-Null
 
 Write-Step "Stopping any existing dev server on port $Port"
-& "$PSScriptRoot\make-stop.ps1" -Port $Port -Quiet | Out-Null
-
-if (-not (Test-Path (Join-Path $Root "node_modules"))) {
-  Write-Step "Installing dependencies (npm install)"
-  npm install
-  if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+& "$PSScriptRoot\make-stop.ps1" -Port $Port -Quiet -Strict
+if ($LASTEXITCODE -ne 0) {
+  Write-Host "Port $Port is still in use. Run 'npm run env:stop' or use -Port 3002" -ForegroundColor Red
+  exit 1
 }
 
 Write-Step "Starting Next.js dev server on $BaseUrl"
-$npm = (Get-Command npm.cmd -ErrorAction Stop).Source
-$proc = Start-Process -FilePath $npm -ArgumentList "run", "dev" `
-  -WorkingDirectory $Root -PassThru -WindowStyle Hidden `
-  -RedirectStandardOutput $OutLog -RedirectStandardError $ErrLog
+$env:PORT = "$Port"
+$pnpmCmd = Get-Command pnpm.cmd -ErrorAction SilentlyContinue
+if ($pnpmCmd) {
+  $proc = Start-Process -FilePath $pnpmCmd.Source -ArgumentList "exec", "next", "dev", "-p", "$Port", "-H", "0.0.0.0" `
+    -WorkingDirectory $WebDir -PassThru -WindowStyle Hidden `
+    -RedirectStandardOutput $OutLog -RedirectStandardError $ErrLog
+} else {
+  $npx = (Get-Command npx.cmd -ErrorAction Stop).Source
+  $proc = Start-Process -FilePath $npx -ArgumentList "next", "dev", "-p", "$Port", "-H", "0.0.0.0" `
+    -WorkingDirectory $WebDir -PassThru -WindowStyle Hidden `
+    -RedirectStandardOutput $OutLog -RedirectStandardError $ErrLog
+}
 $proc.Id | Out-File -Encoding utf8 $PidFile
 
 Write-Step "Waiting for server to be ready"
@@ -63,11 +71,13 @@ if (-not $ready) {
 Write-Host ""
 Write-Host "FitConnect is running at $BaseUrl" -ForegroundColor Green
 Write-Host "  PID: $($proc.Id)  |  logs: .dev.out.log / .dev.err.log"
+Write-Host "  Routes: /  /dashboard  /coach/dashboard  /community  /settings/wearables"
 Write-Host ""
 
 if (-not $NoSmoke) {
   Write-Step "Running smoke tests"
-  npm run smoke:all
+  node scripts/smoke-test.mjs $BaseUrl
+  node scripts/mobile-pwa-check.mjs $BaseUrl
   if ($LASTEXITCODE -ne 0) {
     Write-Host "Smoke tests failed - server is up but some checks did not pass." -ForegroundColor Yellow
   }
@@ -86,3 +96,4 @@ if (-not $NoBrowser) {
 
 Write-Host ""
 Write-Host "Demo sign-in: Athlete/Athlete | Coach/Coach | Admin/Admin" -ForegroundColor DarkGray
+Write-Host "Stop with: make stop  or  npm run env:stop" -ForegroundColor DarkGray

@@ -5,6 +5,7 @@ set -euo pipefail
 PORT="${PORT:-3001}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
+WEB_DIR="$ROOT/apps/web"
 
 STATE_DIR="$ROOT/.fitconnect"
 PID_FILE="$STATE_DIR/dev.pid"
@@ -14,23 +15,35 @@ BASE_URL="http://localhost:$PORT"
 
 NO_BROWSER="${NO_BROWSER:-0}"
 NO_SMOKE="${NO_SMOKE:-0}"
+SKIP_SETUP="${SKIP_SETUP:-0}"
 
 step() { echo "==> $*"; }
 
-command -v node >/dev/null || { echo "Node.js required"; exit 1; }
+if [[ "$SKIP_SETUP" != "1" ]]; then
+  bash "$ROOT/scripts/make-setup.sh"
+fi
 
 mkdir -p "$STATE_DIR"
 
 step "Stopping any existing dev server on port $PORT"
-bash "$ROOT/scripts/make-stop.sh" "$PORT" 2>/dev/null || true
+QUIET=1 STRICT=1 bash "$ROOT/scripts/make-stop.sh" "$PORT"
 
-if [[ ! -d node_modules ]]; then
-  step "Installing dependencies"
-  npm install
+if ss -tln 2>/dev/null | grep -q ":${PORT} " || { command -v lsof >/dev/null && lsof -ti:"$PORT" >/dev/null 2>&1; }; then
+  echo "Port $PORT is still in use after stop."
+  echo "Try: make stop   or   PORT=3002 make start"
+  if grep -qi microsoft /proc/version 2>/dev/null; then
+    echo "From Windows PowerShell: npm run env:stop"
+  fi
+  exit 1
 fi
 
 step "Starting Next.js dev server on $BASE_URL"
-nohup npm run dev >"$OUT_LOG" 2>"$ERR_LOG" &
+export PORT
+if command -v pnpm >/dev/null 2>&1; then
+  nohup bash -c "cd \"$WEB_DIR\" && pnpm exec next dev -p \"$PORT\" -H 0.0.0.0" >"$OUT_LOG" 2>"$ERR_LOG" &
+else
+  nohup bash -c "cd \"$WEB_DIR\" && npx next dev -p \"$PORT\" -H 0.0.0.0" >"$OUT_LOG" 2>"$ERR_LOG" &
+fi
 echo $! >"$PID_FILE"
 
 step "Waiting for server to be ready"
@@ -53,11 +66,13 @@ fi
 echo ""
 echo "FitConnect is running at $BASE_URL"
 echo "  PID: $(cat "$PID_FILE")  |  logs: .dev.out.log / .dev.err.log"
+echo "  Routes: /  /dashboard  /coach/dashboard  /community  /settings/wearables"
 echo ""
 
 if [[ "$NO_SMOKE" != "1" ]]; then
   step "Running smoke tests"
-  npm run smoke:all || echo "Smoke tests reported failures (server is up)."
+  node scripts/smoke-test.mjs "$BASE_URL" || true
+  node scripts/mobile-pwa-check.mjs "$BASE_URL" || echo "Smoke tests reported failures (server is up)."
 fi
 
 if [[ "$NO_BROWSER" != "1" ]]; then
@@ -71,3 +86,4 @@ if [[ "$NO_BROWSER" != "1" ]]; then
 fi
 
 echo "Demo sign-in: Athlete/Athlete | Coach/Coach | Admin/Admin"
+echo "Stop with: make stop"

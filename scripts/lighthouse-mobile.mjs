@@ -5,7 +5,7 @@
  */
 
 import lighthouse from "lighthouse";
-import chromeLauncher from "chrome-launcher";
+import * as chromeLauncher from "chrome-launcher";
 
 const url = process.argv[2] ?? "http://localhost:3001";
 

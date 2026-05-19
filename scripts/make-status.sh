@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # FitConnect — environment status (Unix / Git Bash)
-PORT="${PORT:-3001}"
+PORT="${1:-${PORT:-3001}}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PID_FILE="$ROOT/.fitconnect/dev.pid"
 BASE_URL="http://localhost:$PORT"
@@ -46,6 +46,16 @@ echo ""
 if [[ -d "$ROOT/node_modules" ]]; then
   echo "node_modules:  present"
 else
-  echo "node_modules:  missing"
+  echo "node_modules:  missing (make setup will install)"
+fi
+if [[ -f "$ROOT/.env.local" ]]; then
+  echo ".env.local:    present"
+else
+  echo ".env.local:    missing (make setup will create from .env.example)"
+fi
+if [[ -d "$ROOT/node_modules/.prisma" ]] || [[ -d "$ROOT/node_modules/@prisma/client" ]]; then
+  echo "Prisma client: generated"
+else
+  echo "Prisma client: not generated (make setup will run db:generate)"
 fi
 echo ""
