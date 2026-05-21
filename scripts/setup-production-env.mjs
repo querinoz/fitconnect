@@ -58,7 +58,11 @@ const DEFAULTS = [
   ["SUPABASE_SERVICE_ROLE_KEY", "PASTE_SERVICE_ROLE_FROM_SUPABASE_API_SETTINGS"],
   [
     "DATABASE_URL",
-    `postgresql://postgres.${SUPABASE_PROJECT}:PASTE_DB_PASSWORD@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true`
+    `postgresql://postgres.${SUPABASE_PROJECT}:PASTE_DB_PASSWORD@aws-0-eu-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true`
+  ],
+  [
+    "DIRECT_URL",
+    `postgresql://postgres.${SUPABASE_PROJECT}:PASTE_DB_PASSWORD@db.${SUPABASE_PROJECT}.supabase.co:5432/postgres`
   ],
   ["", null],
   ["NEXT_PUBLIC_DEMO_MODE", "false"],

@@ -38,7 +38,8 @@ const GROUPS = [
       { key: "NEXT_PUBLIC_SUPABASE_URL", required: true, hint: "Project Settings → API → Project URL" },
       { key: "NEXT_PUBLIC_SUPABASE_ANON_KEY", required: true, hint: "Project Settings → API → anon public" },
       { key: "SUPABASE_SERVICE_ROLE_KEY", required: true, hint: "Project Settings → API → service_role (server only)" },
-      { key: "DATABASE_URL", required: true, hint: "Project Settings → Database → Connection string (pooler)" }
+      { key: "DATABASE_URL", required: true, hint: "Supabase Connect → ORM → Prisma (pooler :6543)" },
+      { key: "DIRECT_URL", required: false, hint: "Direct db host :5432 — required for pnpm db:migrate locally" }
     ]
   },
   {
@@ -117,7 +118,7 @@ if (missingRequired > 0) {
   console.log("Next steps:");
   console.log("  1. Open https://supabase.com/dashboard/project/beuiammeedpovdkmhluw/settings/api");
   console.log("  2. Copy anon + service_role keys into .env.local");
-  console.log("  3. Database URL: Settings → Database → Connection string (Transaction pooler)");
+  console.log("  3. Database URL: Supabase Connect → ORM → Prisma (pooler :6543); DIRECT_URL for migrations");
   console.log("  4. Stripe: https://dashboard.stripe.com/apikeys");
   console.log("  5. Strava: https://www.strava.com/settings/api");
   console.log("     Callback: {NEXT_PUBLIC_APP_URL}/api/v1/integrations/strava/callback");
