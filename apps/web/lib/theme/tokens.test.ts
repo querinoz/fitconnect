@@ -9,14 +9,14 @@ describe("voltline tokens", () => {
   );
 
   it.each([
-    ["--ink-950", "#07080b"],
-    ["--ink-900", "#0c0d11"],
-    ["--volt-500", "#c8ff00"],
-    ["--volt-400", "#d6ff33"],
+    ["--ink-950", "#090402"],
+    ["--ink-900", "#0c0a08"],
+    ["--volt-500", "#bfee16"],
+    ["--volt-400", "#c9f622"],
+    ["--nivis-lime", "#bfee16"],
     ["--connect-500", "#00ddb4"],
     ["--crimson-500", "#ff3a5c"],
     ["--glass-md", "rgba(255,255,255,.06)"],
-    ["--glass-edge", "rgba(200,255,0,.30)"],
   ])("defines %s as %s", (name, expected) => {
     const re = new RegExp(`${name}\\s*:\\s*${expected.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`);
     expect(re.test(css)).toBe(true);

@@ -1,24 +1,18 @@
-import { validateCredentials, createDemoUserFromSignup } from "@/lib/auth";
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+import { isDemoMode } from "@/lib/auth/supabase/client";
 
-describe("auth", () => {
-  it("accepts valid credentials", () => {
-    const user = validateCredentials("Admin", "Admin");
-    expect(user?.username).toBe("Admin");
+describe("require-auth demo mode", () => {
+  it("treats unset DEMO_MODE as demo on", () => {
+    const prev = process.env.NEXT_PUBLIC_DEMO_MODE;
+    delete process.env.NEXT_PUBLIC_DEMO_MODE;
+    expect(isDemoMode()).toBe(true);
+    process.env.NEXT_PUBLIC_DEMO_MODE = prev;
   });
 
-  it("rejects wrong password", () => {
-    expect(validateCredentials("Admin", "wrong")).toBeNull();
-  });
-
-  it("accepts registered demo users", () => {
-    const cred = createDemoUserFromSignup({
-      name: "Test User",
-      email: "test@fitconnect.local",
-      password: "password123",
-      role: "athlete"
-    });
-    const user = validateCredentials("test@fitconnect.local", "password123", [cred]);
-    expect(user?.email).toBe("test@fitconnect.local");
+  it("respects explicit false", () => {
+    const prev = process.env.NEXT_PUBLIC_DEMO_MODE;
+    process.env.NEXT_PUBLIC_DEMO_MODE = "false";
+    expect(isDemoMode()).toBe(false);
+    process.env.NEXT_PUBLIC_DEMO_MODE = prev;
   });
 });

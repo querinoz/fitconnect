@@ -3,15 +3,18 @@ import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { AppearanceProvider } from "@/lib/theme/appearance-provider";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
+import { LanguageProvider } from "@/lib/i18n-provider";
 import { MobileAppPreview } from "./mobile-app-preview";
 
 function renderPreview() {
   return render(
-    <AppearanceProvider>
-      <ThemeProvider>
-        <MobileAppPreview initialRole="athlete" />
-      </ThemeProvider>
-    </AppearanceProvider>
+    <LanguageProvider initialLang="en">
+      <AppearanceProvider>
+        <ThemeProvider>
+          <MobileAppPreview initialRole="athlete" />
+        </ThemeProvider>
+      </AppearanceProvider>
+    </LanguageProvider>
   );
 }
 

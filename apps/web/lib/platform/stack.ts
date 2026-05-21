@@ -54,7 +54,7 @@ export const STACK = {
       "Strava"
     ]
   },
-  maps: ["Mapbox GL", "Turf.js", "Deck.gl"],
+  maps: ["MapLibre GL", "OpenFreeMap", "Turf.js", "Deck.gl"],
   video: "LiveKit",
   ai: ["OpenAI", "LangGraph", "pgvector"],
   notifications: ["Novu", "Expo Push", "Resend"],

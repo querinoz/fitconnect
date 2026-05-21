@@ -301,6 +301,13 @@ function AthleteDashboardBody() {
         goalTitle={athlete.goalTitle}
         athleteId={athleteId}
         liveSection={liveSection}
+        todayPlan={{
+          day: nextBlock.day,
+          title: nextBlock.title,
+          detail: nextBlock.detail,
+          intensity: nextBlock.intensity
+        }}
+        streakWeeks={athlete.streakWeeks}
       />
 
       {activeNudge && (

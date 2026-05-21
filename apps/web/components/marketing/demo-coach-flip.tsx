@@ -7,16 +7,11 @@ import {
   VideoRoomIcon
 } from "@/components/brand/icons";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/lib/i18n-provider";
 
-/**
- * Coach card flip — a CSS 3D rotation card that loops between the
- * profile face (avatar, name, sport) and the back face (certifications,
- * signature program, sample session).
- *
- * Uses `.fc-flip-scene` + `.fc-flip-card` defined in globals.css.
- * Reduced-motion freezes the card on its front face.
- */
 export function DemoCoachFlip({ className }: { className?: string }) {
+  const w = useLocale().demoWidgets.coachFlip;
+
   return (
     <div
       className={cn(
@@ -26,72 +21,47 @@ export function DemoCoachFlip({ className }: { className?: string }) {
     >
       <div className="flex items-center justify-between">
         <p className="text-[10px] uppercase tracking-widest text-brand-300 font-bold">
-          Coach card
+          {w.header}
         </p>
-        <p className="text-[10px] text-ink-500">Flip every 3.6s</p>
+        <p className="text-[10px] text-ink-500">{w.flipHint}</p>
       </div>
 
       <div className="fc-flip-scene mt-5">
         <div className="fc-flip-card relative h-[280px]">
-          {/* Front */}
           <div className="fc-flip-face border border-ink-800 bg-gradient-to-br from-brand-500/10 via-ink-950 to-accent-500/10 p-5">
             <div className="flex items-start gap-3">
               <span className="relative h-14 w-14 rounded-2xl ring-2 ring-brand-400/40 overflow-hidden bg-gradient-to-br from-brand-500/30 to-accent-500/20">
                 <Avatar />
               </span>
               <div className="flex-1 min-w-0">
-                <p className="font-display font-bold text-ink-50">
-                  Tomás Aguiar
-                </p>
-                <p className="text-[11px] text-ink-400 truncate">
-                  Strength &amp; conditioning · Lisbon
-                </p>
+                <p className="font-display font-bold text-ink-50">{w.coachName}</p>
+                <p className="text-[11px] text-ink-400 truncate">{w.coachMeta}</p>
                 <div className="mt-1 flex items-center gap-1 text-amber-400 text-[11px]">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star key={i} className="h-3 w-3 fill-current" />
                   ))}
                   <span className="ml-1 text-ink-200 font-semibold">4.97</span>
-                  <span className="ml-1 text-ink-500">· 184 reviews</span>
+                  <span className="ml-1 text-ink-500">{w.reviews}</span>
                 </div>
               </div>
             </div>
-            <p className="mt-4 text-[12px] text-ink-300 leading-relaxed">
-              &ldquo;I program around your readiness. If your sleep is
-              broken, I&rsquo;ll change the session before 7am.&rdquo;
-            </p>
+            <p className="mt-4 text-[12px] text-ink-300 leading-relaxed">&ldquo;{w.quote}&rdquo;</p>
             <div className="mt-4 grid grid-cols-3 gap-2">
-              <Chip label="312 athletes" />
-              <Chip label="11 years" />
-              <Chip label="€55 / h" highlight />
+              <Chip label={w.chipAthletes} />
+              <Chip label={w.chipYears} />
+              <Chip label={w.chipRate} highlight />
             </div>
           </div>
 
-          {/* Back */}
           <div className="fc-flip-face fc-flip-back border border-ink-800 bg-gradient-to-br from-plasma-500/10 via-ink-950 to-brand-500/10 p-5">
             <p className="text-[10px] uppercase tracking-widest text-plasma-300 font-bold">
-              Certifications &amp; programs
+              {w.backTitle}
             </p>
             <ul className="mt-3 space-y-2">
-              <BackRow
-                icon={CertificationIcon}
-                title="NSCA · CSCS"
-                body="Issued 2017 · validated · in good standing"
-              />
-              <BackRow
-                icon={CertificationIcon}
-                title="FMS Level 2"
-                body="Movement screen · 2021"
-              />
-              <BackRow
-                icon={TargetIcon}
-                title="Signature program"
-                body="Strong by Spring · 12 weeks · 614 joined"
-              />
-              <BackRow
-                icon={VideoRoomIcon}
-                title="Sample session"
-                body="42-min lower body block · screen share + cues"
-              />
+              <BackRow icon={CertificationIcon} title={w.cert1Title} body={w.cert1Body} />
+              <BackRow icon={CertificationIcon} title={w.cert2Title} body={w.cert2Body} />
+              <BackRow icon={TargetIcon} title={w.programTitle} body={w.programBody} />
+              <BackRow icon={VideoRoomIcon} title={w.sessionTitle} body={w.sessionBody} />
             </ul>
           </div>
         </div>
@@ -130,19 +100,13 @@ function BackRow({
         <Icon className="h-3.5 w-3.5" />
       </span>
       <div className="min-w-0">
-        <p className="text-[12px] font-semibold text-ink-100 leading-tight">
-          {title}
-        </p>
+        <p className="text-[12px] font-semibold text-ink-100 leading-tight">{title}</p>
         <p className="text-[10px] text-ink-400 truncate">{body}</p>
       </div>
     </li>
   );
 }
 
-/**
- * In-code SVG avatar — abstract athlete bust in brand gradient so we
- * never reach for a stock photo for the homepage demo.
- */
 function Avatar() {
   return (
     <svg viewBox="0 0 56 56" className="absolute inset-0 h-full w-full">
@@ -158,11 +122,7 @@ function Avatar() {
       </defs>
       <rect width="56" height="56" rx="14" fill="url(#fcAv)" />
       <circle cx="28" cy="22" r="9" fill="#020617" opacity="0.85" />
-      <path
-        d="M10 56 c4-12 14-18 18-18 s14 6 18 18"
-        fill="#020617"
-        opacity="0.85"
-      />
+      <path d="M10 56 c4-12 14-18 18-18 s14 6 18 18" fill="#020617" opacity="0.85" />
       <rect width="56" height="56" rx="14" fill="url(#fcAv2)" />
     </svg>
   );

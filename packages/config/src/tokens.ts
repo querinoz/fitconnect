@@ -1,41 +1,41 @@
 export const tokens = {
   colors: {
     brand: {
-      400: "#22d3ee",
-      500: "#06b6d4"
+      400: "#c9f622",
+      500: "#bfee16"
     },
     accent: {
-      400: "#a3e635",
-      500: "#84cc16"
+      400: "#d4ff4d",
+      500: "#bfee16"
     },
     signal: {
-      500: "#f43f5e"
+      500: "#ff3a5c"
     },
     plasma: {
       500: "#a855f7"
     },
     ink: {
       50: "#f8fafc",
-      100: "#f1f5f9",
+      100: "#eeeef2",
       200: "#e2e8f0",
       300: "#cbd5e1",
       400: "#94a3b8",
       500: "#64748b",
       700: "#334155",
-      800: "#1e293b",
-      900: "#0f172a",
-      950: "#020617"
+      800: "#1c1814",
+      900: "#0c0a08",
+      950: "#090402"
     }
   },
   typography: {
-    display: "Space Grotesk",
-    body: "Inter"
+    display: "Syne",
+    body: "Plus Jakarta Sans"
   },
   radius: {
-    sm: 6,
-    md: 8,
-    lg: 12,
-    xl: 16,
+    sm: 8,
+    md: 12,
+    lg: 16,
+    xl: 20,
     "2xl": 24,
     full: 9999
   },
@@ -44,10 +44,10 @@ export const tokens = {
     cardPadding: [20, 24, 32, 40] as const
   },
   gradients: {
-    primary: "linear-gradient(135deg, #22d3ee, #84cc16)",
-    warm: "linear-gradient(135deg, #f43f5e, #a855f7)",
+    primary: "linear-gradient(135deg, #d4ff4d, #bfee16)",
+    warm: "linear-gradient(135deg, #ff3a5c, #a855f7)",
     ambient:
-      "radial-gradient(at top left, rgba(34,211,238,0.22), transparent 50%), radial-gradient(at bottom right, rgba(132,204,22,0.18), transparent 50%), radial-gradient(at 70% 20%, rgba(168,85,247,0.10), transparent 40%)"
+      "radial-gradient(at top left, rgba(191,238,22,0.14), transparent 50%), radial-gradient(at bottom right, rgba(0,221,180,0.10), transparent 50%)"
   },
   animation: {
     easeOutExpo: "cubic-bezier(0.16, 1, 0.3, 1)",

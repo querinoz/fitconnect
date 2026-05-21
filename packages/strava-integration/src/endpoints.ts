@@ -22,7 +22,7 @@ export const STRAVA_API_ENDPOINTS: StravaEndpointRule[] = [
   { pattern: /^\/athletes\/\d+\/stats$/, methods: ["GET"] },
   { pattern: /^\/athletes\/\d+\/routes$/, methods: ["GET"] },
   { pattern: /^\/activities$/, methods: ["GET", "POST"], scopeNote: "POST requires activity:write" },
-  { pattern: /^\/activities\/\d+$/, methods: ["GET", "PUT"], scopeNote: "PUT requires activity:write" },
+  { pattern: /^\/activities\/\d+$/, methods: ["GET", "PUT", "DELETE"], scopeNote: "PUT/DELETE require activity:write" },
   { pattern: /^\/activities\/\d+\/comments$/, methods: ["GET"] },
   { pattern: /^\/activities\/\d+\/kudos$/, methods: ["GET"] },
   { pattern: /^\/activities\/\d+\/laps$/, methods: ["GET"] },

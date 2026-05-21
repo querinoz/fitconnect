@@ -1,17 +1,16 @@
 import { NextResponse } from "next/server";
-import {
-  getAthleteReadiness,
-  listAthleteMessages,
-  listAthleteSessions,
-  listCoachRoster
-} from "@/lib/db/repository";
+import { getAthleteReadiness } from "@/lib/db/repository";
+import { isAuthFailure, requireAthleteId } from "@/lib/api/require-auth";
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ athleteId: string }> }
 ) {
   const { athleteId } = await params;
-  const data = await getAthleteReadiness(athleteId);
+  const resolved = await requireAthleteId(req, athleteId);
+  if (isAuthFailure(resolved)) return resolved.response;
+
+  const data = await getAthleteReadiness(resolved.athleteId);
   if (!data) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

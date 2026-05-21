@@ -36,7 +36,14 @@
     "env:setup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-setup.ps1",
     "env:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-stop.ps1",
     "env:clean": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-clean.ps1",
-    "env:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-status.ps1"
+    "env:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-status.ps1",
+    "env:setup-prod": "node scripts/setup-production-env.mjs",
+    "env:check": "node scripts/validate-env.mjs",
+    "stripe:login": "stripe login",
+    "stripe:whsec": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stripe-print-whsec.ps1",
+    "stripe:whsec:save": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stripe-print-whsec.ps1 -Save",
+    "stripe:listen": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stripe-webhook-dev.ps1",
+    "stripe:trigger": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stripe-trigger-events.ps1"
   },
   "devDependencies": {
     "@prisma/client": "^7.8.0",

@@ -96,7 +96,7 @@ Client respects HTTP 429 with exponential backoff. Parse `X-RateLimit-Usage` / `
 
 ## Maps
 
-Routes render via `StravaActivityMap` (SVG polyline preview, no SDK). Full Mapbox integration available on community map when `NEXT_PUBLIC_MAPBOX_TOKEN` is set.
+Routes render via `StravaActivityMap` (SVG polyline preview, no SDK). Community and dashboard maps use OpenFreeMap + MapLibre GL (free, no API key).
 
 ## Tests
 

@@ -34,7 +34,7 @@ function deepMerge<T extends Record<string, unknown>>(base: T, overlay: T): T {
   return out;
 }
 
-/** Locale files may ship partial keys; English fills any gaps. */
+/** Locale files ship partial keys; English fills any gaps. */
 function locale(overlay: Record<string, unknown>): Dict {
   return deepMerge(
     structuredClone(en) as Record<string, unknown>,

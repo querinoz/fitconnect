@@ -23,5 +23,5 @@ function HeroDevicePlaceholder() {
 
 /** Loads device showcase immediately — mobile UX must not wait for idle callbacks. */
 export function HeroDeviceGate({ className }: { className?: string }) {
-  return <DeviceShowcase className={className} />;
+  return <DeviceShowcase className={className} heroLoop={false} />;
 }

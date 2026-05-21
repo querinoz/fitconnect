@@ -1,19 +1,20 @@
 import { NextResponse } from "next/server";
 import { listAthleteSessions, listCoachSessions } from "@/lib/db/repository";
+import { isAuthFailure, requireAthleteId, requireCoachId } from "@/lib/api/require-auth";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const athleteId = searchParams.get("athleteId");
   const coachId = searchParams.get("coachId");
 
   if (coachId) {
-    const sessions = await listCoachSessions(coachId);
+    const resolved = await requireCoachId(req, coachId);
+    if (isAuthFailure(resolved)) return resolved.response;
+    const sessions = await listCoachSessions(resolved.coachId);
     return NextResponse.json({ sessions });
   }
 
-  if (!athleteId) {
-    return NextResponse.json({ error: "athleteId or coachId required" }, { status: 400 });
-  }
-  const sessions = await listAthleteSessions(athleteId);
+  const resolved = await requireAthleteId(req);
+  if (isAuthFailure(resolved)) return resolved.response;
+  const sessions = await listAthleteSessions(resolved.athleteId);
   return NextResponse.json({ sessions });
 }

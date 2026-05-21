@@ -74,6 +74,35 @@ export type Dict = {
     fullScreenDemo: string;
     avatarAthleteAlt: string;
     avatarCoachAlt: string;
+    deviceMock: {
+      readinessLabel: string;
+      metricsLine: string;
+      athleteName: string;
+      activityName: string;
+      coachName: string;
+    };
+    immersive: {
+      connect: string;
+      train: string;
+      perform: string;
+      scrollHint: string;
+      tagline: string;
+      badge: string;
+      headline: string;
+      headlineAccent: string;
+      exploreMenu: string;
+      menuLabel: string;
+      menuAthletes: string;
+      menuCoaches: string;
+      menuCommunity: string;
+      menuPricing: string;
+      menuMethodology: string;
+      statAthletes: string;
+      statCoaches: string;
+      statActivities: string;
+      ctaPrimary: string;
+      ctaSecondary: string;
+    };
   };
   heroExtras: {
     metricsReadiness: string;
@@ -88,6 +117,26 @@ export type Dict = {
     sportStrength: string;
     sportYoga: string;
     sportRunning: string;
+  };
+  landingV2: {
+    scrollStory: {
+      eyebrow: string;
+      title: string;
+      titleAccent: string;
+      subtitle: string;
+      chapter: string;
+      athletesTitle: string;
+      athletesBody: string;
+      athletesCta: string;
+      coachesTitle: string;
+      coachesBody: string;
+      coachesCta: string;
+      togetherTitle: string;
+      togetherBody: string;
+      togetherCta: string;
+      footerHint: string;
+      footerCta: string;
+    };
   };
   downloadSection: {
     eyebrow: string;
@@ -118,6 +167,7 @@ export type Dict = {
     nav: {
       today: string;
       sessions: string;
+      map: string;
       coach: string;
       roster: string;
       inbox: string;
@@ -361,6 +411,74 @@ export type Dict = {
     coachPlanSubtitle: string;
     wearableSyncHint: string;
     noAthleteProfile: string;
+    os: {
+      greetingMorning: string;
+      greetingAfternoon: string;
+      greetingEvening: string;
+      greetingLateNight: string;
+      titleSuffix: string;
+      hrvTrendUp: string;
+      hrvTrendDown: string;
+      trainHard: string;
+      trainSmart: string;
+      wearables: string;
+      findCoach: string;
+      athleteRole: string;
+      upgradeTitle: string;
+      upgradeBody: string;
+      upgradeCta: string;
+      quickActions: string;
+      findSpecialist: string;
+      browsePrograms: string;
+      profile: string;
+      edit: string;
+      sports: string;
+      goal90: string;
+      wearable: string;
+      plan: string;
+      navOverview: string;
+      navMyCoach: string;
+      navPrograms: string;
+      navCommunity: string;
+      navSettings: string;
+    };
+    todayPlan: {
+      title: string;
+      startSession: string;
+      noPlan: string;
+      approvedBy: string;
+    };
+    readiness_ring: {
+      title: string;
+      subtitle: string;
+      viewDetails: string;
+    };
+    map: {
+      title: string;
+      subtitle: string;
+      viewFull: string;
+      noToken: string;
+    };
+    activity_feed: {
+      title: string;
+      live: string;
+      empty: string;
+      justNow: string;
+      hoursAgo: string;
+      daysAgo: string;
+    };
+    strava_sync: {
+      title: string;
+      synced: string;
+      lastSync: string;
+      connect: string;
+    };
+    pr_tracker: {
+      title: string;
+      streak: string;
+      recent: string;
+      weeks: string;
+    };
   };
   hub: {
     mobileNav: string;
@@ -380,6 +498,23 @@ export type Dict = {
     noPlanYet: string;
     sendRecoveryNudge: string;
     athleteNotFound: string;
+    map: {
+      title: string;
+      nearby: string;
+    };
+    activity_feed: {
+      title: string;
+      live: string;
+    };
+    strava_sync: {
+      label: string;
+    };
+    pr_tracker: {
+      label: string;
+    };
+    readiness_ring: {
+      label: string;
+    };
   };
   coachDashboard: {
     eyebrow: string;
@@ -400,6 +535,34 @@ export type Dict = {
     upcomingSessions: string;
     clientMessages: string;
     retentionInsights: string;
+    navOverview: string;
+    navAthletes: string;
+    navSessions: string;
+    navEarnings: string;
+    navSettings: string;
+    defaultCoachTitle: string;
+    thisMonth: string;
+    takeHome: string;
+    welcomeBack: string;
+    commandCenterTitle: string;
+    attentionToday: string;
+    live: string;
+    notifications: string;
+    mrr: string;
+    sessionsThisMonth: string;
+    retentionRate: string;
+    earningsStripeConnect: string;
+    rosterMapTitle: string;
+    rosterMapSubtitle: string;
+    programBuilderTitle: string;
+    programBuilderSubtitle: string;
+    saveDraft: string;
+    saved: string;
+    publishProgram: string;
+    addBlock: string;
+    dragBlock: string;
+    minutesShort: string;
+    athletePlanLabel: string;
   };
   dashboardPreview: {
     eyebrow: string;
@@ -548,6 +711,7 @@ export type Dict = {
     eyebrow: string;
     title: string;
     titleAccent: string;
+    titleSuffix: string;
     subtitle: string;
     tiles: DemoTile[];
     ctaTitle: string;
@@ -698,7 +862,78 @@ export type Dict = {
     auditNote: string;
   };
   methodologyPillars: MethodologyPillarCopy[];
+  meta: {
+    title: string;
+    description: string;
+    ogTitle: string;
+    ogDescription: string;
+    twitterDescription: string;
+  };
+  demoWidgets: {
+    readiness: {
+      label: string;
+      sleep: string;
+      hrv: string;
+      verdict: string;
+      sleepBase: string;
+      sleepTarget: string;
+      hrvBase: string;
+      hrvTarget: string;
+      verdictBase: string;
+      verdictTarget: string;
+      syncLine: string;
+    };
+    match: {
+      header: string;
+      subheader: string;
+      stepOf: string;
+      picked: string;
+      foundMatch: string;
+      coachName: string;
+      coachMeta: string;
+      coachBio: string;
+      tagStrength: string;
+      tagAm: string;
+      moreMatches: string;
+      q1: string;
+      q2: string;
+      q3: string;
+      optYoga: string;
+      optStrength: string;
+      optSurf: string;
+      optBuildStrength: string;
+      optLoseWeight: string;
+      optTrainEvent: string;
+      optWeekdayAm: string;
+      optWeekdayPm: string;
+      optWeekends: string;
+    };
+    coachFlip: {
+      header: string;
+      flipHint: string;
+      coachName: string;
+      coachMeta: string;
+      reviews: string;
+      quote: string;
+      chipAthletes: string;
+      chipYears: string;
+      chipRate: string;
+      backTitle: string;
+      cert1Title: string;
+      cert1Body: string;
+      cert2Title: string;
+      cert2Body: string;
+      programTitle: string;
+      programBody: string;
+      sessionTitle: string;
+      sessionBody: string;
+    };
+  };
 };
+
+export type PartialDict = Partial<{
+  [K in keyof Dict]: Dict[K] extends object ? Partial<Dict[K]> : Dict[K];
+}>;
 
 export type TFn = <K1 extends keyof Dict, K2 extends keyof Dict[K1]>(
   group: K1,

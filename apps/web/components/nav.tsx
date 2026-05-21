@@ -12,12 +12,13 @@ import { Button } from "./ui/button";
 import { LangPicker } from "./lang-picker";
 import { CoachQuizModal } from "./coach-quiz-modal";
 import { BrandLockup } from "./brand/brand-lockup";
-import { useT } from "@/lib/i18n-provider";
+import { useT, useLocale } from "@/lib/i18n-provider";
 import { useQuizModalStore } from "@/lib/quiz-modal-store";
 import { cn } from "@/lib/utils";
 
-export function Nav() {
+export function Nav({ variant = "default" }: { variant?: "default" | "floating" }) {
   const t = useT();
+  const locale = useLocale();
   const setQuizOpen = useQuizModalStore((s) => s.setOpen);
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -59,17 +60,36 @@ export function Nav() {
     return () => document.removeEventListener("click", onClick);
   }, []);
 
+  const floating = variant === "floating";
+
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 transition-all duration-300 font-mono",
-        scrolled
-          ? "border-b border-ink-800/80 bg-ink-950/85 backdrop-blur-xl"
-          : "bg-transparent border-b border-transparent"
+        "z-50 transition-all duration-300 font-mono",
+        floating
+          ? "absolute top-0 left-0 right-0 bg-transparent"
+          : "sticky top-0",
+        !floating &&
+          (scrolled
+            ? "border-b border-ink-800/80 bg-ink-950/85 backdrop-blur-xl"
+            : "bg-transparent border-b border-transparent")
       )}
     >
-      <div className="mx-auto flex w-full min-w-0 max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-6 sm:py-3">
-        <div className="flex min-w-0 items-center gap-4 sm:gap-8">
+      <div
+        className={cn(
+          "mx-auto flex w-full min-w-0 items-center justify-between gap-2 sm:gap-4",
+          floating
+            ? "max-w-none px-4 py-6 sm:px-6"
+            : "max-w-7xl px-3 py-3 sm:px-6 sm:py-3"
+        )}
+      >
+        <div
+          className={cn(
+            "flex min-w-0 items-center gap-4 sm:gap-8",
+            floating &&
+              "rounded-full border border-glass-border/80 bg-ink-800/90 pl-4 pr-6 py-3 backdrop-blur-xl"
+          )}
+        >
           <Link
             href="/"
             className="fc-vt-wordmark group min-w-0 transition-opacity hover:opacity-95"
@@ -92,7 +112,11 @@ export function Nav() {
 
           <nav
             aria-label="Primary"
-            className="hidden lg:flex items-center gap-5 text-xs uppercase tracking-[0.12em] text-ink-400"
+            className={cn(
+              "hidden lg:flex items-center gap-5 text-xs uppercase tracking-[0.12em] text-ink-400",
+              floating &&
+                "rounded-full border border-glass-border/80 bg-ink-800/90 px-3 py-2 backdrop-blur-xl"
+            )}
           >
             {primaryLinks.map((l) => (
               <Link
@@ -142,17 +166,30 @@ export function Nav() {
           </nav>
         </div>
 
-        <div className="hidden md:flex items-center gap-2">
-          <LangPicker />
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/signin">{t("nav", "signIn")}</Link>
-          </Button>
-          <Button size="sm" className="group gap-1.5" onClick={() => setQuizOpen(true)}>
-            <Sparkles
-              aria-hidden="true"
-              className="h-3.5 w-3.5 transition-transform group-hover:rotate-12"
-            />
-            {t("nav", "matchMe")}
+        <div className={cn("hidden md:flex items-center gap-2", floating && "gap-3")}>
+          {!floating ? <LangPicker /> : null}
+          {!floating ? (
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/signin">{t("nav", "signIn")}</Link>
+            </Button>
+          ) : null}
+          <Button
+            size="sm"
+            className={cn("group gap-1.5", floating && "rounded-full bg-volt-500 text-ink-950 hover:bg-volt-400")}
+            onClick={() => (floating ? undefined : setQuizOpen(true))}
+            asChild={floating}
+          >
+            {floating ? (
+              <Link href="/signup">{locale.hero.immersive.ctaPrimary}</Link>
+            ) : (
+              <>
+                <Sparkles
+                  aria-hidden="true"
+                  className="h-3.5 w-3.5 transition-transform group-hover:rotate-12"
+                />
+                {t("nav", "matchMe")}
+              </>
+            )}
           </Button>
         </div>
 
@@ -175,16 +212,17 @@ export function Nav() {
         </div>
       </div>
 
-      {/* Reading progress */}
-      <div
-        aria-hidden="true"
-        className="absolute bottom-0 left-0 right-0 h-px bg-ink-800/40"
-      >
+      {!floating ? (
         <div
-          className="h-full bg-gradient-to-r from-volt-500 via-brand-400 to-cyan-500 transition-[width] duration-150"
-          style={{ width: `${progress * 100}%` }}
-        />
-      </div>
+          aria-hidden="true"
+          className="absolute bottom-0 left-0 right-0 h-px bg-ink-800/40"
+        >
+          <div
+            className="h-full bg-gradient-to-r from-volt-500 via-brand-400 to-cyan-500 transition-[width] duration-150"
+            style={{ width: `${progress * 100}%` }}
+          />
+        </div>
+      ) : null}
 
       <div
         id="mobile-nav"

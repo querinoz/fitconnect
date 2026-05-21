@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Syne } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SkipLink } from "@/components/skip-link";
+import { getDictionary, getServerLang } from "@/lib/i18n/server";
 
 const sans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -22,60 +23,75 @@ const display = Syne({
   weight: ["600", "700", "800"]
 });
 
-export const metadata: Metadata = {
-  title: "FitConnect — Treina com especialistas de elite",
-  description:
-    "Marketplace de coaches verificados com Readiness IA, sync Strava e sessões ao vivo. Yoga, surf, escalada, MMA e mais — presencial ou online.",
-  metadataBase: new URL("https://fitconnect.querinoz.dev"),
-  applicationName: "FitConnect",
-  manifest: "/app.webmanifest",
-  appleWebApp: {
-    capable: true,
-    title: "FitConnect",
-    statusBarStyle: "black-translucent"
-  },
-  icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/apple-touch-icon.svg", sizes: "180x180", type: "image/svg+xml" }]
-  },
-  openGraph: {
-    title: "FitConnect — Treina com especialistas de elite",
-    description:
-      "Descobre, reserva e treina com os melhores personal trainers especializados do mundo.",
-    type: "website",
-    url: "https://fitconnect.querinoz.dev",
-    locale: "pt_PT",
-    images: [{ url: "/og-image.svg", width: 1200, height: 630, alt: "FitConnect" }]
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "FitConnect — Treina com especialistas de elite",
-    description:
-      "Coaches de elite para qualquer desporto. Readiness IA, Strava sync e intro grátis de 15 min.",
-    images: ["/og-image.svg"]
-  },
-  alternates: {
-    canonical: "https://fitconnect.querinoz.dev"
-  },
-  robots: { index: true, follow: true }
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const lang = await getServerLang();
+  const meta = getDictionary(lang).meta;
+  const localeMap: Record<string, string> = {
+    en: "en_US",
+    pt: "pt_PT",
+    es: "es_ES",
+    fr: "fr_FR",
+    de: "de_DE",
+    it: "it_IT"
+  };
+
+  return {
+    title: meta.title,
+    description: meta.description,
+    metadataBase: new URL("https://fitconnect.querinoz.dev"),
+    applicationName: "FitConnect",
+    manifest: "/app.webmanifest",
+    appleWebApp: {
+      capable: true,
+      title: "FitConnect",
+      statusBarStyle: "black-translucent"
+    },
+    icons: {
+      icon: [
+        { url: "/brand/fitconnect-logo-256.png", sizes: "256x256", type: "image/png" },
+        { url: "/favicon.svg", type: "image/svg+xml" }
+      ],
+      apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }]
+    },
+    openGraph: {
+      title: meta.ogTitle,
+      description: meta.ogDescription,
+      type: "website",
+      url: "https://fitconnect.querinoz.dev",
+      locale: localeMap[lang] ?? "en_US",
+      images: [{ url: "/brand/fitconnect-logo-512.png", width: 512, height: 512, alt: "FitConnect" }]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: meta.ogTitle,
+      description: meta.twitterDescription,
+      images: ["/brand/fitconnect-logo-512.png"]
+    },
+    alternates: {
+      canonical: "https://fitconnect.querinoz.dev"
+    },
+    robots: { index: true, follow: true }
+  };
+}
 
 export const viewport: Viewport = {
-  themeColor: [{ color: "#07080B" }],
+  themeColor: [{ color: "#090402" }],
   colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover"
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children
 }: {
   children: React.ReactNode;
 }) {
+  const initialLang = await getServerLang();
+
   return (
     <html
-      lang="pt"
+      lang={initialLang}
       className={`${sans.variable} ${display.variable} dark`}
       suppressHydrationWarning
     >
@@ -94,7 +110,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-dvh w-full max-w-[100vw] overflow-x-clip antialiased font-sans">
-        <Providers>
+        <Providers initialLang={initialLang}>
           <SkipLink />
           {children}
         </Providers>

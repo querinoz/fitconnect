@@ -7,14 +7,15 @@ type LogoProps = {
   title?: string;
 };
 
-/** FitConnect brand mark — premium SVG connection node. */
+/** FitConnect official brand mark. */
 export function Logo({ className, animated, title = "FitConnect" }: LogoProps) {
   return (
     <BrandLogo
       title={title}
       size={36}
       variant="carbon3d"
-      className={cn("h-9 w-9", animated && "fc-logo-pulse", className)}
+      animated={animated}
+      className={cn("h-9 w-auto max-w-[2.25rem]", className)}
     />
   );
 }

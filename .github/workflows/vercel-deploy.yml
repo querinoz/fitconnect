@@ -2,7 +2,7 @@ name: Vercel Production
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, feature/fitconnect]
   workflow_dispatch:
 
 concurrency:
@@ -41,7 +41,7 @@ jobs:
         run: pnpm dlx vercel@latest build --prod --token=${{ secrets.VERCEL_TOKEN }}
         working-directory: apps/web
         env:
-          NEXT_PUBLIC_DEMO_MODE: "true"
+          NEXT_PUBLIC_DEMO_MODE: "false"
           NEXT_PUBLIC_REALTIME_PROVIDER: broadcast
 
       - name: Deploy prebuilt

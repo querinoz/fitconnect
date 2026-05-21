@@ -16,7 +16,7 @@ export function StatCard({
   const delta = change ? Number.parseFloat(change) : null;
 
   return (
-    <div className="fc-kpi-card rounded-[10px] border border-[var(--border-xs)] bg-carbon-2 p-4">
+    <div className="nivis-kpi-glass fc-kpi-card p-4 transition hover:border-volt-500/25">
       <div className="mb-1.5 flex items-center gap-1.5">
         <Icon className={`h-3.5 w-3.5 ${color}`} />
         <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink-400">

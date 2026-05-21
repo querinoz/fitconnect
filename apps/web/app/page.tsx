@@ -1,12 +1,11 @@
 import dynamic from "next/dynamic";
-import { HeroStatic } from "@/components/marketing/hero-static";
-import { HeroExtras } from "@/components/marketing/hero-extras";
+import { HeroImmersive } from "@/components/marketing/landing-v2/hero-immersive";
+import { TrustStripMarquee } from "@/components/marketing/landing-v2/trust-strip-marquee";
 import { LandingCanvas } from "@/components/marketing/landing-canvas";
 import { LazyInView } from "@/components/marketing/lazy-in-view";
 import { DownloadSection } from "@/components/marketing/download-section";
-import { TrustStrip } from "@/components/marketing/trust-strip";
-import { GlobalInstallPrompt } from "@/components/shell/global-install-prompt";
-import { Nav } from "@/components/nav";
+import { AppDemoSection } from "@/components/marketing/landing-v2/app-demo-section";
+import { SocialProofSection } from "@/components/marketing/landing-v2/social-proof-section";
 
 const Footer = dynamic(
   () => import("@/components/footer").then((m) => m.Footer),
@@ -23,9 +22,22 @@ const sectionSkeleton = (height = 320) =>
     );
   };
 
-const HowItWorks = dynamic(
-  () => import("@/components/how-it-works").then((m) => m.HowItWorks),
-  { loading: sectionSkeleton(320) }
+const ScrollStory = dynamic(
+  () =>
+    import("@/components/marketing/landing-v2/scroll-story").then((m) => m.ScrollStory),
+  { loading: sectionSkeleton(480), ssr: false }
+);
+
+const SportsHub = dynamic(
+  () =>
+    import("@/components/marketing/landing-v2/sports-hub").then((m) => m.SportsHub),
+  { loading: sectionSkeleton(400) }
+);
+
+const MapHeroSection = dynamic(
+  () =>
+    import("@/components/marketing/landing-v2/map-hero-section").then((m) => m.MapHeroSection),
+  { loading: sectionSkeleton(560), ssr: false }
 );
 
 const FeaturedCoaches = dynamic(
@@ -34,40 +46,14 @@ const FeaturedCoaches = dynamic(
   { loading: sectionSkeleton(480) }
 );
 
+const HowItWorks = dynamic(
+  () => import("@/components/how-it-works").then((m) => m.HowItWorks),
+  { loading: sectionSkeleton(320) }
+);
+
 const ScienceAndTech = dynamic(
   () =>
     import("@/components/marketing/science-and-tech").then((m) => m.ScienceAndTech),
-  { loading: sectionSkeleton(360) }
-);
-
-const DemosSection = dynamic(
-  () =>
-    import("@/components/marketing/demos-section").then((m) => m.DemosSection),
-  { loading: sectionSkeleton(360) }
-);
-
-const IntegrationsStrip = dynamic(
-  () =>
-    import("@/components/marketing/integrations-strip").then(
-      (m) => m.IntegrationsStrip
-    ),
-  { loading: sectionSkeleton(280) }
-);
-
-const DashboardPreview = dynamic(
-  () =>
-    import("@/components/dashboard-preview").then((m) => m.DashboardPreview),
-  { loading: sectionSkeleton(520), ssr: false }
-);
-
-const Testimonials = dynamic(
-  () => import("@/components/testimonials").then((m) => m.Testimonials),
-  { loading: sectionSkeleton(360) }
-);
-
-const ComparisonTable = dynamic(
-  () =>
-    import("@/components/comparison-table").then((m) => m.ComparisonTable),
   { loading: sectionSkeleton(360) }
 );
 
@@ -78,12 +64,7 @@ const Pricing = dynamic(
 
 const Faqs = dynamic(
   () => import("@/components/faqs").then((m) => m.Faqs),
-  { loading: sectionSkeleton(360) }
-);
-
-const Cta = dynamic(
-  () => import("@/components/cta").then((m) => m.Cta),
-  { loading: sectionSkeleton(240) }
+  { loading: sectionSkeleton(400) }
 );
 
 function Defer({
@@ -102,6 +83,7 @@ function Defer({
   );
 }
 
+/** Landing v2 — full 14-section cinematic page (Nivis-style). */
 export default function Home() {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -118,63 +100,92 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <LandingCanvas />
-      <Nav />
-      <main id="main" className="fc-page-root relative w-full">
-        <div className="fc-hero-shell relative w-full min-w-0">
-          <div className="mx-auto grid max-w-7xl items-start gap-8 fc-section-x px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,340px)] lg:items-center lg:gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,360px)] xl:gap-12">
-            <HeroStatic />
-            <HeroExtras />
-          </div>
+      <LandingCanvas subdued />
+      <main id="main" className="fc-page-root landing-v2-root relative flex w-full flex-col">
+        {/* 1 Hero cinematic — full viewport, video bg, Nivis bar */}
+        <div className="order-1">
+          <HeroImmersive />
         </div>
 
-        <TrustStrip />
+        {/* 2 Trust strip + marquee */}
+        <div className="order-2">
+          <TrustStripMarquee />
+        </div>
 
-        <Defer minHeight={320} noDefer>
-          <HowItWorks />
-        </Defer>
+        {/* 11 Pricing — bumped up on mobile */}
+        <div className="order-4 lg:order-11">
+          <Defer minHeight={480} noDefer>
+            <Pricing />
+          </Defer>
+        </div>
 
-        <Defer minHeight={480} noDefer>
-          <FeaturedCoaches />
-        </Defer>
+        {/* 3 Scroll story flipbook */}
+        <div className="order-3 lg:order-3">
+          <Defer minHeight={480} noDefer>
+            <ScrollStory />
+          </Defer>
+        </div>
 
-        <Defer minHeight={360}>
-          <ScienceAndTech />
-        </Defer>
+        {/* 4 Sports hub */}
+        <div className="order-5 lg:order-4">
+          <Defer minHeight={400}>
+            <SportsHub />
+          </Defer>
+        </div>
 
-        <Defer minHeight={360}>
-          <DemosSection />
-        </Defer>
+        {/* 5 Map hero */}
+        <div className="order-6 lg:order-5">
+          <Defer minHeight={560}>
+            <MapHeroSection />
+          </Defer>
+        </div>
 
-        <Defer minHeight={280}>
-          <IntegrationsStrip />
-        </Defer>
+        {/* 6 Coaches marketplace */}
+        <div className="order-7 lg:order-6">
+          <Defer minHeight={480}>
+            <FeaturedCoaches />
+          </Defer>
+        </div>
 
-        <Defer minHeight={520}>
-          <DashboardPreview />
-        </Defer>
+        {/* 7 How it works */}
+        <div className="order-8 lg:order-7">
+          <Defer minHeight={320}>
+            <HowItWorks />
+          </Defer>
+        </div>
 
-        <Defer minHeight={360}>
-          <Testimonials />
-        </Defer>
+        {/* 8 Readiness science */}
+        <div className="order-9 lg:order-8">
+          <Defer minHeight={360}>
+            <ScienceAndTech />
+          </Defer>
+        </div>
 
-        <Defer minHeight={360}>
-          <ComparisonTable />
-        </Defer>
+        {/* 9 App demo */}
+        <div className="order-10 lg:order-9">
+          <Defer minHeight={520} noDefer>
+            <AppDemoSection />
+          </Defer>
+        </div>
 
-        <Defer minHeight={480} noDefer>
-          <Pricing />
-        </Defer>
+        {/* 10 Social proof */}
+        <div className="order-11 lg:order-10">
+          <Defer minHeight={480}>
+            <SocialProofSection />
+          </Defer>
+        </div>
 
-        <Defer minHeight={360}>
-          <Faqs />
-        </Defer>
+        {/* 12 FAQ */}
+        <div className="order-12">
+          <Defer minHeight={400}>
+            <Faqs />
+          </Defer>
+        </div>
 
-        <Defer minHeight={240}>
-          <Cta />
-        </Defer>
-
-        <DownloadSection />
+        {/* 13 Download */}
+        <div className="order-13">
+          <DownloadSection />
+        </div>
       </main>
       <Footer />
     </>

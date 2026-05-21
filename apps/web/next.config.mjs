@@ -21,7 +21,7 @@ const nextConfig = {
     "@fitconnect/api-client",
     "@fitconnect/design-tokens",
     "@fitconnect/maps",
-    "@fitconnect/ai"
+    "@fitconnect/maps",
   ],
   allowedDevOrigins: ["*.trycloudflare.com"],
   images: {

@@ -1,38 +1,71 @@
 import { Redirect, Tabs } from "expo-router";
-import { Platform, Text } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "@/lib/auth-store";
-import { TAB_BAR_HEIGHT } from "@/lib/layout";
-import { tokens } from "@/lib/tokens";
-
-function TabLabel({ label }: { label: string }) {
-  return <Text style={{ color: tokens.colors.ink[200], fontSize: 11 }}>{label}</Text>;
-}
+import { useT } from "@/lib/i18n-provider";
+import { NivisTabBar } from "@/components/nivis-tab-bar";
 
 export default function AthleteLayout() {
   const user = useAuthStore((s) => s.user);
+  const t = useT();
   if (!user) return <Redirect href="/(auth)/signin" />;
   if (user.role === "coach") return <Redirect href="/(coach)" />;
 
   return (
     <Tabs
+      tabBar={(props) => <NivisTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: tokens.colors.ink[950],
-          borderTopColor: tokens.colors.ink[800],
-          height: TAB_BAR_HEIGHT,
-          paddingBottom: Platform.OS === "ios" ? 22 : 8,
-          paddingTop: 6
-        },
-        tabBarActiveTintColor: tokens.colors.accent[400],
-        tabBarInactiveTintColor: tokens.colors.ink[500]
+        tabBarShowLabel: false
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Home", tabBarLabel: () => <TabLabel label="Home" /> }} />
-      <Tabs.Screen name="discover" options={{ title: "Discover", tabBarLabel: () => <TabLabel label="Discover" /> }} />
-      <Tabs.Screen name="sessions" options={{ title: "Sessions", tabBarLabel: () => <TabLabel label="Sessions" /> }} />
-      <Tabs.Screen name="programs" options={{ title: "Programs", tabBarLabel: () => <TabLabel label="Programs" /> }} />
-      <Tabs.Screen name="community" options={{ title: "Community", tabBarLabel: () => <TabLabel label="Community" /> }} />
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: t("tabs", "today"),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home-outline" color={color} size={size} />
+          )
+        }}
+      />
+      <Tabs.Screen
+        name="sessions"
+        options={{
+          title: t("tabs", "sessions"),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar-outline" color={color} size={size} />
+          )
+        }}
+      />
+      <Tabs.Screen
+        name="map"
+        options={{
+          title: t("tabs", "map"),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="map-outline" color={color} size={size} />
+          )
+        }}
+      />
+      <Tabs.Screen
+        name="coach"
+        options={{
+          title: t("tabs", "coach"),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="people-outline" color={color} size={size} />
+          )
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: t("tabs", "profile"),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-outline" color={color} size={size} />
+          )
+        }}
+      />
+      <Tabs.Screen name="discover" options={{ href: null }} />
+      <Tabs.Screen name="programs" options={{ href: null }} />
+      <Tabs.Screen name="community" options={{ href: null }} />
       <Tabs.Screen name="sessions/[id]/room" options={{ href: null }} />
     </Tabs>
   );

@@ -41,7 +41,36 @@ export const en: Dict = {
     demoCta: "See live demo",
     fullScreenDemo: "Full-screen demo",
     avatarAthleteAlt: "Verified athlete",
-    avatarCoachAlt: "Verified coach"
+    avatarCoachAlt: "Verified coach",
+    deviceMock: {
+      readinessLabel: "Readiness",
+      metricsLine: "HRV 68 ms · Sleep 7h 42m · Moderate load",
+      athleteName: "Inês Silva",
+      activityName: "Morning Run",
+      coachName: "Tomás Reyes"
+    },
+    immersive: {
+      connect: "connect.",
+      train: "train.",
+      perform: "perform.",
+      scrollHint: "scroll to explore",
+      tagline: "elevate every session",
+      badge: "built for athletes worldwide",
+      headline: "recovery science meets",
+      headlineAccent: "human performance",
+      exploreMenu: "explore fitconnect",
+      menuLabel: "menu",
+      menuAthletes: "athlete os",
+      menuCoaches: "coach os",
+      menuCommunity: "community map",
+      menuPricing: "pricing",
+      menuMethodology: "methodology",
+      statAthletes: "+12k athletes",
+      statCoaches: "+500 coaches",
+      statActivities: "+2M activities",
+      ctaPrimary: "start for free",
+      ctaSecondary: "live demo"
+    }
   },
   heroExtras: {
     metricsReadiness: "Readiness",
@@ -56,6 +85,26 @@ export const en: Dict = {
     sportStrength: "Strength",
     sportYoga: "Yoga",
     sportRunning: "Running"
+  },
+  landingV2: {
+    scrollStory: {
+      eyebrow: "how it works",
+      title: "one platform.",
+      titleAccent: "three stories.",
+      subtitle: "scroll through athlete, coach and live session flows — cinematic, not slideshow.",
+      chapter: "chapter",
+      athletesTitle: "for athletes.",
+      athletesBody: "track every move. understand your body. push your limits.",
+      athletesCta: "open athlete os",
+      coachesTitle: "for coaches.",
+      coachesBody: "build rosters. design programs. watch athletes grow.",
+      coachesCta: "open coach os",
+      togetherTitle: "together.",
+      togetherBody: "real-time sessions. live feedback. the gap closed.",
+      togetherCta: "explore community",
+      footerHint: "ready when you are",
+      footerCta: "start for free"
+    }
   },
   downloadSection: {
     eyebrow: "Mobile-first",
@@ -89,6 +138,7 @@ export const en: Dict = {
     nav: {
       today: "Today",
       sessions: "Sessions",
+      map: "Map",
       coach: "Coach",
       roster: "Roster",
       inbox: "Inbox",
@@ -468,7 +518,75 @@ export const en: Dict = {
     wearableSyncHint:
       "Sync your wearable to unlock AI adjustments from your coach.",
     noAthleteProfile:
-      "No athlete profile linked to this account. Sign in as Athlete / Athlete for the demo."
+      "No athlete profile linked to this account. Sign in as Athlete / Athlete for the demo.",
+    os: {
+      greetingMorning: "Good morning 👋",
+      greetingAfternoon: "Good afternoon 👋",
+      greetingEvening: "Good evening 👋",
+      greetingLateNight: "Late night 👋",
+      titleSuffix: "{name}'s Athlete OS",
+      hrvTrendUp: "HRV is up {delta}ms vs baseline.",
+      hrvTrendDown: "HRV is down {delta}ms vs baseline.",
+      trainHard: "Train hard today.",
+      trainSmart: "Train smart today.",
+      wearables: "Wearables",
+      findCoach: "Find a coach",
+      athleteRole: "Athlete · {tier}",
+      upgradeTitle: "Upgrade to Athlete",
+      upgradeBody: "HRV tracking, AI insights, full dashboard.",
+      upgradeCta: "Start — €12/mo",
+      quickActions: "Quick actions",
+      findSpecialist: "Find a specialist",
+      browsePrograms: "Browse programs",
+      profile: "Profile",
+      edit: "Edit",
+      sports: "Sports",
+      goal90: "90-day goal",
+      wearable: "Wearable",
+      plan: "Plan",
+      navOverview: "Overview",
+      navMyCoach: "My Coach",
+      navPrograms: "Programs",
+      navCommunity: "Community",
+      navSettings: "Settings"
+    },
+    todayPlan: {
+      title: "Today's plan",
+      startSession: "Start today's session",
+      noPlan: "No plan assigned yet.",
+      approvedBy: "Approved by {coach}"
+    },
+    readiness_ring: {
+      title: "Readiness",
+      subtitle: "HRV · sleep · load",
+      viewDetails: "View breakdown"
+    },
+    map: {
+      title: "Activity map",
+      subtitle: "Routes, coaches & training spots near you",
+      viewFull: "Open full map",
+      noToken: "OpenFreeMap · OpenStreetMap"
+    },
+    activity_feed: {
+      title: "Activity feed",
+      live: "Live",
+      empty: "No recent activities.",
+      justNow: "Just now",
+      hoursAgo: "{hours}h ago",
+      daysAgo: "{days}d ago"
+    },
+    strava_sync: {
+      title: "Strava sync",
+      synced: "Synced",
+      lastSync: "Last sync {time}",
+      connect: "Connect Strava"
+    },
+    pr_tracker: {
+      title: "PR tracker",
+      streak: "{weeks}-week PR streak",
+      recent: "Recent PR",
+      weeks: "weeks"
+    }
   },
   hub: {
     mobileNav: "Dashboard navigation",
@@ -487,7 +605,24 @@ export const en: Dict = {
     recoveryNotes: "Recovery & plan notes",
     noPlanYet: "No plan assigned yet.",
     sendRecoveryNudge: "Send recovery nudge",
-    athleteNotFound: "Athlete not found in your roster."
+    athleteNotFound: "Athlete not found in your roster.",
+    map: {
+      title: "Activity map",
+      nearby: "Nearby training"
+    },
+    activity_feed: {
+      title: "Live feed",
+      live: "Live"
+    },
+    strava_sync: {
+      label: "Strava"
+    },
+    pr_tracker: {
+      label: "PRs"
+    },
+    readiness_ring: {
+      label: "Readiness"
+    }
   },
   coachDashboard: {
     eyebrow: "Coach OS",
@@ -508,7 +643,35 @@ export const en: Dict = {
     athleteRoster: "Athlete HRV roster",
     upcomingSessions: "Upcoming sessions",
     clientMessages: "Athlete messages",
-    retentionInsights: "Retention insights"
+    retentionInsights: "Retention insights",
+    navOverview: "Overview",
+    navAthletes: "Athletes",
+    navSessions: "Sessions",
+    navEarnings: "Earnings",
+    navSettings: "Settings",
+    defaultCoachTitle: "Cycling specialist",
+    thisMonth: "This month",
+    takeHome: "take-home",
+    welcomeBack: "Welcome back 👋",
+    commandCenterTitle: "Coach Command Center",
+    attentionToday: "{count} athlete needs your attention today.",
+    live: "Live",
+    notifications: "Notifications",
+    mrr: "MRR",
+    sessionsThisMonth: "Sessions this month",
+    retentionRate: "Retention rate",
+    earningsStripeConnect: "Earnings & Stripe Connect",
+    rosterMapTitle: "Roster map",
+    rosterMapSubtitle: "{count} athletes across your coaching zones",
+    programBuilderTitle: "Program builder",
+    programBuilderSubtitle: "Drag blocks to reorder today's session template",
+    saveDraft: "Save draft",
+    saved: "Saved",
+    publishProgram: "Publish",
+    addBlock: "Add block",
+    dragBlock: "Drag to reorder",
+    minutesShort: " min",
+    athletePlanLabel: "{name}'s athlete"
   },
   dashboardPreview: {
     eyebrow: "Product preview",
@@ -773,6 +936,7 @@ export const en: Dict = {
     eyebrow: "See it in action",
     title: "Three loops that show what training with",
     titleAccent: "a real specialist",
+    titleSuffix: "looks like.",
     subtitle:
       "No videos, no marketing fluff — these are the actual interactions you'll have on day one.",
     tiles: [
@@ -1178,5 +1342,77 @@ export const en: Dict = {
       metricValue: "61%",
       citation: "2026 active user analysis"
     }
-  ]
+  ],
+  meta: {
+    title: "FitConnect — Train with elite specialists",
+    description:
+      "Verified coach marketplace with AI Readiness, Strava sync and live sessions. Yoga, surf, climbing, MMA and more — in person or online.",
+    ogTitle: "FitConnect — Train with elite specialists",
+    ogDescription:
+      "Discover, book and train with the world's best sport-specific coaches.",
+    twitterDescription:
+      "Elite coaches for every sport. AI Readiness, Strava sync and free 15-min intro."
+  },
+  demoWidgets: {
+    readiness: {
+      label: "Readiness",
+      sleep: "Sleep",
+      hrv: "HRV",
+      verdict: "Verdict",
+      sleepBase: "6h 24m",
+      sleepTarget: "7h 42m",
+      hrvBase: "58 ms",
+      hrvTarget: "68 ms",
+      verdictBase: "Easy day",
+      verdictTarget: "Train hard",
+      syncLine: "Auto-synced from Apple Watch · Garmin · Whoop"
+    },
+    match: {
+      header: "Coach finder · 60 seconds",
+      subheader: "3 questions · result",
+      stepOf: "Step {n} of 3",
+      picked: "Picked",
+      foundMatch: "We found your match",
+      coachName: "Tomás Aguiar",
+      coachMeta: "S&C · Lisbon · €55 / h",
+      coachBio:
+        "Programs around your readiness. Free 15-min intro available tomorrow at 07:30.",
+      tagStrength: "Strength match",
+      tagAm: "AM availability",
+      moreMatches: "Plus 2 more matches in your inbox.",
+      q1: "What's your sport?",
+      q2: "What's the goal?",
+      q3: "When can you train?",
+      optYoga: "Yoga",
+      optStrength: "Strength",
+      optSurf: "Surf",
+      optBuildStrength: "Build strength",
+      optLoseWeight: "Lose weight",
+      optTrainEvent: "Train for an event",
+      optWeekdayAm: "Weekday mornings",
+      optWeekdayPm: "Weekday evenings",
+      optWeekends: "Weekends only"
+    },
+    coachFlip: {
+      header: "Coach card",
+      flipHint: "Flip every 3.6s",
+      coachName: "Tomás Aguiar",
+      coachMeta: "Strength & conditioning · Lisbon",
+      reviews: "· 184 reviews",
+      quote:
+        "I program around your readiness. If your sleep is broken, I'll change the session before 7am.",
+      chipAthletes: "312 athletes",
+      chipYears: "11 years",
+      chipRate: "€55 / h",
+      backTitle: "Certifications & programs",
+      cert1Title: "NSCA · CSCS",
+      cert1Body: "Issued 2017 · validated · in good standing",
+      cert2Title: "FMS Level 2",
+      cert2Body: "Movement screen · 2021",
+      programTitle: "Signature program",
+      programBody: "Strong by Spring · 12 weeks · 614 joined",
+      sessionTitle: "Sample session",
+      sessionBody: "42-min lower body block · screen share + cues"
+    }
+  }
 };

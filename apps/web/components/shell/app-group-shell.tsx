@@ -4,7 +4,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import { MobileShell } from "./mobile-shell";
 import { OfflineBanner } from "./offline-banner";
 
-const FALLBACK_AVATAR = "/icons/icon-192.png";
+const FALLBACK_AVATAR = "/brand/fitconnect-logo-192.png";
 
 export function AppGroupShell({
   children

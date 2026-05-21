@@ -1,5 +1,5 @@
-import { LiquidLoader } from "@/components/ui-glass/liquid-loader";
+import { LogoLoader } from "@/components/brand/logo-loader";
 
 export default function AppLoading() {
-  return <LiquidLoader fullscreen label="Loading FitConnect" size="lg" />;
+  return <LogoLoader fullscreen label="Loading FitConnect" size="lg" />;
 }

@@ -9,8 +9,11 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  View
+  View,
+  Image
 } from "react-native";
+
+const LOGO = require("../../assets/brand/logo.png");
 
 export default function SignInScreen() {
   const router = useRouter();
@@ -38,6 +41,7 @@ export default function SignInScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.screen}
     >
+      <Image source={LOGO} style={styles.logo} accessibilityLabel="FitConnect" />
       <Text style={styles.title}>FitConnect</Text>
       <Text style={styles.subtitle}>Sign in to sync with web</Text>
       {error && <Text style={styles.error}>{error}</Text>}
@@ -74,8 +78,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 12
   },
-  title: { color: tokens.colors.ink[50], fontSize: 32, fontWeight: "800" },
-  subtitle: { color: tokens.colors.ink[400], marginBottom: 12 },
+  logo: { width: 88, height: 88, alignSelf: "center", marginBottom: 8, resizeMode: "contain" },
+  title: { color: tokens.colors.ink[50], fontSize: 32, fontWeight: "800", textAlign: "center" },
+  subtitle: { color: tokens.colors.ink[400], marginBottom: 12, textAlign: "center" },
   input: {
     borderWidth: 1,
     borderColor: tokens.colors.ink[800],

@@ -1,6 +1,6 @@
 import type { Dict } from "../types";
 
-export const pt: Dict = {
+export const pt = {
   nav: {
     findCoach: "Encontrar um coach",
     programs: "Programas",
@@ -41,7 +41,36 @@ export const pt: Dict = {
     demoCta: "Ver demo ao vivo",
     fullScreenDemo: "Demo em ecrã inteiro",
     avatarAthleteAlt: "Atleta verificada",
-    avatarCoachAlt: "Coach verificado"
+    avatarCoachAlt: "Coach verificado",
+    deviceMock: {
+      readinessLabel: "Prontidão",
+      metricsLine: "HRV 68 ms · Sono 7h 42m · Carga moderada",
+      athleteName: "Inês Silva",
+      activityName: "Corrida matinal",
+      coachName: "Tomás Reyes"
+    },
+    immersive: {
+      connect: "connect.",
+      train: "train.",
+      perform: "perform.",
+      scrollHint: "scroll para explorar",
+      tagline: "eleva cada sessão",
+      badge: "feito para atletas no mundo inteiro",
+      headline: "ciência da recuperação encontra",
+      headlineAccent: "performance humana",
+      exploreMenu: "explorar fitconnect",
+      menuLabel: "menu",
+      menuAthletes: "athlete os",
+      menuCoaches: "coach os",
+      menuCommunity: "mapa community",
+      menuPricing: "preços",
+      menuMethodology: "metodologia",
+      statAthletes: "+12k atletas",
+      statCoaches: "+500 coaches",
+      statActivities: "+2M atividades",
+      ctaPrimary: "começar grátis",
+      ctaSecondary: "demo live"
+    }
   },
   heroExtras: {
     metricsReadiness: "Prontidão",
@@ -56,6 +85,26 @@ export const pt: Dict = {
     sportStrength: "Força",
     sportYoga: "Yoga",
     sportRunning: "Corrida"
+  },
+  landingV2: {
+    scrollStory: {
+      eyebrow: "como funciona",
+      title: "uma plataforma.",
+      titleAccent: "três histórias.",
+      subtitle: "scroll por fluxos de atleta, coach e sessão ao vivo — cinematográfico.",
+      chapter: "capítulo",
+      athletesTitle: "para atletas.",
+      athletesBody: "cada movimento. entende o teu corpo. ultrapassa limites.",
+      athletesCta: "abrir athlete os",
+      coachesTitle: "para coaches.",
+      coachesBody: "rosters. programas. evolução dos atletas.",
+      coachesCta: "abrir coach os",
+      togetherTitle: "juntos.",
+      togetherBody: "sessões em tempo real. feedback ao vivo. gap fechado.",
+      togetherCta: "explorar community",
+      footerHint: "pronto quando tu estiveres",
+      footerCta: "começar grátis"
+    }
   },
   downloadSection: {
     eyebrow: "Mobile-first",
@@ -89,6 +138,7 @@ export const pt: Dict = {
     nav: {
       today: "Hoje",
       sessions: "Sessões",
+      map: "Mapa",
       coach: "Coach",
       roster: "Plantel",
       inbox: "Inbox",
@@ -470,7 +520,75 @@ export const pt: Dict = {
     wearableSyncHint:
       "Sincroniza o wearable para desbloquear ajustes IA do teu coach.",
     noAthleteProfile:
-      "Sem perfil de atleta nesta conta. Entra como Athlete / Athlete para a demo."
+      "Sem perfil de atleta nesta conta. Entra como Athlete / Athlete para a demo.",
+    os: {
+      greetingMorning: "Bom dia 👋",
+      greetingAfternoon: "Boa tarde 👋",
+      greetingEvening: "Boa noite 👋",
+      greetingLateNight: "Madrugada 👋",
+      titleSuffix: "Athlete OS de {name}",
+      hrvTrendUp: "HRV +{delta} ms vs linha de base.",
+      hrvTrendDown: "HRV −{delta} ms vs linha de base.",
+      trainHard: "Treina forte hoje.",
+      trainSmart: "Treina com inteligência hoje.",
+      wearables: "Wearables",
+      findCoach: "Encontrar coach",
+      athleteRole: "Atleta · {tier}",
+      upgradeTitle: "Upgrade para Athlete",
+      upgradeBody: "HRV, insights IA e painel completo.",
+      upgradeCta: "Começar — €12/mês",
+      quickActions: "Ações rápidas",
+      findSpecialist: "Encontrar especialista",
+      browsePrograms: "Explorar programas",
+      profile: "Perfil",
+      edit: "Editar",
+      sports: "Desportos",
+      goal90: "Objetivo 90 dias",
+      wearable: "Wearable",
+      plan: "Plano",
+      navOverview: "Visão geral",
+      navMyCoach: "O meu coach",
+      navPrograms: "Programas",
+      navCommunity: "Comunidade",
+      navSettings: "Definições"
+    },
+    todayPlan: {
+      title: "Plano de hoje",
+      startSession: "Iniciar sessão de hoje",
+      noPlan: "Ainda sem plano atribuído.",
+      approvedBy: "Aprovado por {coach}"
+    },
+    readiness_ring: {
+      title: "Prontidão",
+      subtitle: "HRV · sono · carga",
+      viewDetails: "Ver detalhes"
+    },
+    map: {
+      title: "Mapa de atividade",
+      subtitle: "Rotas, coaches e locais de treino perto de ti",
+      viewFull: "Abrir mapa completo",
+      noToken: "OpenFreeMap · OpenStreetMap"
+    },
+    activity_feed: {
+      title: "Feed de atividade",
+      live: "Ao vivo",
+      empty: "Sem atividades recentes.",
+      justNow: "Agora",
+      hoursAgo: "há {hours}h",
+      daysAgo: "há {days}d"
+    },
+    strava_sync: {
+      title: "Sync Strava",
+      synced: "Sincronizado",
+      lastSync: "Última sync {time}",
+      connect: "Ligar Strava"
+    },
+    pr_tracker: {
+      title: "Tracker de PRs",
+      streak: "Sequência de PRs de {weeks} semanas",
+      recent: "PR recente",
+      weeks: "semanas"
+    }
   },
   hub: {
     mobileNav: "Navegação do painel",
@@ -489,7 +607,24 @@ export const pt: Dict = {
     recoveryNotes: "Notas de recuperação e plano",
     noPlanYet: "Ainda sem plano atribuído.",
     sendRecoveryNudge: "Enviar alerta de recuperação",
-    athleteNotFound: "Atleta não encontrado no teu plantel."
+    athleteNotFound: "Atleta não encontrado no teu plantel.",
+    map: {
+      title: "Mapa de atividade",
+      nearby: "Treino perto"
+    },
+    activity_feed: {
+      title: "Feed ao vivo",
+      live: "Ao vivo"
+    },
+    strava_sync: {
+      label: "Strava"
+    },
+    pr_tracker: {
+      label: "PRs"
+    },
+    readiness_ring: {
+      label: "Prontidão"
+    }
   },
   coachDashboard: {
     eyebrow: "Coach OS",
@@ -510,7 +645,35 @@ export const pt: Dict = {
     athleteRoster: "Plantel HRV",
     upcomingSessions: "Próximas sessões",
     clientMessages: "Mensagens de atletas",
-    retentionInsights: "Insights de retenção"
+    retentionInsights: "Insights de retenção",
+    navOverview: "Visão geral",
+    navAthletes: "Atletas",
+    navSessions: "Sessões",
+    navEarnings: "Receitas",
+    navSettings: "Definições",
+    defaultCoachTitle: "Especialista em ciclismo",
+    thisMonth: "Este mês",
+    takeHome: "líquido",
+    welcomeBack: "Bem-vinda de volta 👋",
+    commandCenterTitle: "Centro de Comando do Coach",
+    attentionToday: "{count} atleta precisa da sua atenção hoje.",
+    live: "Ao vivo",
+    notifications: "Notificações",
+    mrr: "MRR",
+    sessionsThisMonth: "Sessões este mês",
+    retentionRate: "Taxa de retenção",
+    earningsStripeConnect: "Receitas e Stripe Connect",
+    rosterMapTitle: "Mapa do plantel",
+    rosterMapSubtitle: "{count} atletas nas suas zonas de coaching",
+    programBuilderTitle: "Construtor de programas",
+    programBuilderSubtitle: "Arraste blocos para reordenar o modelo de sessão",
+    saveDraft: "Guardar rascunho",
+    saved: "Guardado",
+    publishProgram: "Publicar",
+    addBlock: "Adicionar bloco",
+    dragBlock: "Arrastar para reordenar",
+    minutesShort: " min",
+    athletePlanLabel: "Atleta de {name}"
   },
   dashboardPreview: {
     eyebrow: "Pré-visualização",
@@ -777,6 +940,7 @@ export const pt: Dict = {
     eyebrow: "Vê em ação",
     title: "Três ciclos que mostram treinar com",
     titleAccent: "um especialista a sério",
+    titleSuffix: "parece.",
     subtitle:
       "Sem vídeos, sem fluff — são as interações reais que terás no primeiro dia.",
     tiles: [

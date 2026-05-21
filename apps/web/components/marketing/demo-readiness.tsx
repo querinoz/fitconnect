@@ -3,15 +3,11 @@
 import { HeartRateIcon, RecoveryRingIcon } from "@/components/brand/icons";
 import { Moon, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/lib/i18n-provider";
 
-/**
- * Readiness demo — a looping ring fill (51 → 226 stroke-dashoffset)
- * paired with a stat row whose values morph in step with the ring.
- *
- * Pure CSS. Ring uses the .fc-ring-loop animation. Stat row uses
- * fc-tick-flip for the two-state morph.
- */
 export function DemoReadiness({ className }: { className?: string }) {
+  const w = useLocale().demoWidgets.readiness;
+
   return (
     <div
       className={cn(
@@ -25,7 +21,7 @@ export function DemoReadiness({ className }: { className?: string }) {
           <RecoveryRingIcon className="h-4 w-4" />
         </span>
         <p className="text-[10px] uppercase tracking-widest text-accent-400 font-bold">
-          Readiness
+          {w.label}
         </p>
       </div>
 
@@ -69,25 +65,19 @@ export function DemoReadiness({ className }: { className?: string }) {
         </div>
 
         <div className="flex-1 min-w-0 space-y-3">
-          <Stat
-            icon={Moon}
-            label="Sleep"
-            base="6h 24m"
-            target="7h 42m"
-            tone="brand"
-          />
+          <Stat icon={Moon} label={w.sleep} base={w.sleepBase} target={w.sleepTarget} tone="brand" />
           <Stat
             icon={HeartRateIcon}
-            label="HRV"
-            base="58 ms"
-            target="68 ms"
+            label={w.hrv}
+            base={w.hrvBase}
+            target={w.hrvTarget}
             tone="signal"
           />
           <Stat
             icon={Zap}
-            label="Verdict"
-            base="Easy day"
-            target="Train hard"
+            label={w.verdict}
+            base={w.verdictBase}
+            target={w.verdictTarget}
             tone="accent"
           />
         </div>
@@ -95,7 +85,7 @@ export function DemoReadiness({ className }: { className?: string }) {
 
       <div className="mt-5 flex items-center gap-2 text-[11px] text-ink-400">
         <span className="inline-flex h-1.5 w-1.5 rounded-full bg-accent-400 animate-pulse" />
-        Auto-synced from Apple Watch · Garmin · Whoop
+        {w.syncLine}
       </div>
     </div>
   );
@@ -130,9 +120,7 @@ function Stat({
       >
         <Icon className="h-3.5 w-3.5" />
       </span>
-      <p className="text-[10px] uppercase tracking-widest text-ink-500">
-        {label}
-      </p>
+      <p className="text-[10px] uppercase tracking-widest text-ink-500">{label}</p>
       <span className="ml-auto relative inline-block h-[1.2em] overflow-hidden text-sm font-display font-semibold text-ink-50 tabular-nums">
         <span className="block fc-tick-flip">
           <span className="block">{base}</span>

@@ -1,6 +1,6 @@
 import { PrismaClient, RecoveryStatus, SessionMode, SessionStatus } from "@prisma/client";
-import { TRAINERS } from "../lib/data";
-import { initialDashboardState } from "../lib/dashboard/seed";
+import { TRAINERS } from "../apps/web/lib/data";
+import { initialDashboardState } from "../apps/web/lib/dashboard/seed";
 
 const prisma = new PrismaClient();
 

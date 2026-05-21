@@ -8,19 +8,31 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#020617",
-  "theme_color": "#22d3ee",
+  "background_color": "#090402",
+  "theme_color": "#bfee16",
   "categories": ["health", "fitness", "lifestyle", "sports"],
   "icons": [
     {
-      "src": "/favicon.svg",
-      "type": "image/svg+xml",
-      "sizes": "any",
+      "src": "/brand/fitconnect-logo-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
       "purpose": "any"
     },
     {
-      "src": "/apple-touch-icon.svg",
-      "type": "image/svg+xml",
+      "src": "/brand/fitconnect-logo-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/fitconnect-logo-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "type": "image/png",
       "sizes": "180x180",
       "purpose": "maskable"
     }

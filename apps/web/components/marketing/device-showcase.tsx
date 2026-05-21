@@ -3,6 +3,7 @@
 import { Laptop, Smartphone, Watch } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/lib/i18n-provider";
 import { IphoneFrame } from "./iphone-frame";
 import { GalaxyWatchFrame } from "./galaxy-watch-frame";
 import { LaptopFrame } from "./laptop-frame";
@@ -25,6 +26,8 @@ const DEVICES: {
 const SCREEN_H = "h-[420px] sm:h-[460px]";
 
 function HeroMockupLoop() {
+  const locale = useLocale();
+  const dm = locale.hero.deviceMock;
   const [slide, setSlide] = useState(0);
 
   useEffect(() => {
@@ -40,10 +43,8 @@ function HeroMockupLoop() {
           slide === 0 ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
         )}
       >
-        <ReadinessRing percent={82} label="Readiness" size={140} />
-        <p className="mt-4 text-center text-xs text-ink-400">
-          HRV 68 ms · Sono 7h 42m · Carga moderada
-        </p>
+        <ReadinessRing percent={82} label={dm.readinessLabel} size={140} />
+        <p className="mt-4 text-center text-xs text-ink-400">{dm.metricsLine}</p>
       </div>
       <div
         className={cn(
@@ -52,15 +53,15 @@ function HeroMockupLoop() {
         )}
       >
         <StravaBrandedCard
-          athleteName="Inês Silva"
-          activityName="Morning Run"
+          athleteName={dm.athleteName}
+          activityName={dm.activityName}
           sportType="Run"
           distanceKm={8.4}
           durationSec={2847}
           avgHr={152}
           elevationM={124}
           readinessScore={82}
-          coachName="Tomás Reyes"
+          coachName={dm.coachName}
           date={new Date()}
           className="w-full max-w-[260px] scale-90 sm:scale-100"
         />

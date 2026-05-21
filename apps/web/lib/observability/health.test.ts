@@ -14,8 +14,11 @@ describe("buildHealthReport", () => {
   it("marks auth degraded without supabase or demo", () => {
     const report = buildHealthReport({
       ...process.env,
-      NEXT_PUBLIC_DEMO_MODE: "false"
-    });
+      NEXT_PUBLIC_DEMO_MODE: "false",
+      NEXT_PUBLIC_SUPABASE_URL: undefined,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: undefined
+    } as NodeJS.ProcessEnv);
     expect(report.status).toBe("degraded");
+    expect(report.dependencies.find((d) => d.name === "auth")?.status).toBe("degraded");
   });
 });

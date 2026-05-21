@@ -41,9 +41,15 @@ function detectBrowserLang(): Lang {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
+export function LanguageProvider({
+  children,
+  initialLang
+}: {
+  children: ReactNode;
+  initialLang?: Lang;
+}) {
   const mounted = useMounted();
-  const [lang, setLangState] = useState<Lang>(DEFAULT_LANG);
+  const [lang, setLangState] = useState<Lang>(initialLang ?? DEFAULT_LANG);
 
   useEffect(() => {
     try {
@@ -61,8 +67,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  /** Match SSR until mounted — avoids hydration text mismatches from saved locale. */
-  const activeLang = mounted ? lang : DEFAULT_LANG;
+  /** Match SSR until mounted — use server-resolved lang to avoid flash. */
+  const activeLang = mounted ? lang : (initialLang ?? DEFAULT_LANG);
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);

@@ -33,7 +33,8 @@ export function DemosSection() {
         title={
           <>
             {locale.demos.title}{" "}
-            <span className="gradient-text">{locale.demos.titleAccent}</span> looks like.
+            <span className="gradient-text">{locale.demos.titleAccent}</span>{" "}
+            {locale.demos.titleSuffix}
           </>
         }
         body={locale.demos.subtitle}

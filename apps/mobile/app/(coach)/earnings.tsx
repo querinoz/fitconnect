@@ -1,7 +1,11 @@
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useAuthStore } from "@/lib/auth-store";
+import { useT } from "@/lib/i18n-provider";
 import { SCROLL_BOTTOM_INSET } from "@/lib/layout";
 import { tokens } from "@/lib/tokens";
 import { formatPrice } from "@fitconnect/utils";
+import { useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Text } from "react-native";
 
 const PAYOUTS = [
@@ -10,12 +14,15 @@ const PAYOUTS = [
 ];
 
 export default function CoachEarningsScreen() {
+  const t = useT();
+  const logout = useAuthStore((s) => s.logout);
+  const router = useRouter();
   const mrr = 1240;
   const takeHome = Math.round(mrr * 0.85);
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Earnings</Text>
+      <Text style={styles.title}>{t("tabs", "earnings")}</Text>
       <Card>
         <Text style={styles.kpiLabel}>This month</Text>
         <Text style={styles.kpiValue}>{formatPrice(mrr)}</Text>
@@ -29,6 +36,14 @@ export default function CoachEarningsScreen() {
           </Text>
         </Card>
       ))}
+      <Button
+        label={t("profile", "signOut")}
+        variant="ghost"
+        onPress={() => {
+          logout();
+          router.replace("/(auth)/signin");
+        }}
+      />
     </ScrollView>
   );
 }

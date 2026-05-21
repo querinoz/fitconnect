@@ -15,8 +15,31 @@ export const DEMO_HOTSPOTS: ActivityHotspot[] = [
   { id: "innsbruck-alps", name: "Innsbruck alpine", lat: 47.269, lng: 11.404, intensity: 0.88, sport: "Climbing" }
 ];
 
+/** OpenFreeMap vector styles — free, no API key. https://openfreemap.org */
+export const OPENFREEMAP_STYLES = {
+  dark: "https://tiles.openfreemap.org/styles/dark",
+  liberty: "https://tiles.openfreemap.org/styles/liberty",
+  positron: "https://tiles.openfreemap.org/styles/positron",
+  bright: "https://tiles.openfreemap.org/styles/bright",
+  fiord: "https://tiles.openfreemap.org/styles/fiord"
+} as const;
+
+export const DEFAULT_MAP_STYLE = OPENFREEMAP_STYLES.dark;
+
+export function getMapStyleUrl(): string {
+  const custom =
+    process.env.NEXT_PUBLIC_MAP_STYLE_URL?.trim() ||
+    process.env.EXPO_PUBLIC_MAP_STYLE_URL?.trim();
+  return custom || DEFAULT_MAP_STYLE;
+}
+
+export function isMapConfigured(): boolean {
+  return true;
+}
+
+/** @deprecated Maps use OpenFreeMap — no token required. */
 export function isMapboxConfigured(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_MAPBOX_TOKEN?.trim());
+  return isMapConfigured();
 }
 
 export function hotspotsToGeoJson(hotspots: ActivityHotspot[]) {

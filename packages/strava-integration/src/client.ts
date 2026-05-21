@@ -237,6 +237,10 @@ export class StravaClient {
     });
   }
 
+  async deleteActivity(id: number): Promise<void> {
+    await this.request<void>(`/activities/${id}`, { method: "DELETE" });
+  }
+
   async getActivityStreams(
     activityId: number,
     params: ActivityStreamsParams = {}

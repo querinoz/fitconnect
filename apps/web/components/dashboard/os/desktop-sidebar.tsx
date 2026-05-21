@@ -33,19 +33,19 @@ export function DesktopSidebar({
   const pathname = usePathname() ?? "/";
   const activeClass =
     accent === "lime"
-      ? "bg-volt-dim text-volt-500 font-semibold before:absolute before:left-0 before:top-1 before:bottom-1 before:w-0.5 before:rounded-r before:bg-volt-500"
-      : "bg-connect-dim text-brand-400 font-semibold before:absolute before:left-0 before:top-1 before:bottom-1 before:w-0.5 before:rounded-r before:bg-brand-400";
+      ? "bg-volt-dim text-volt-500 font-semibold ring-1 ring-volt-500/20"
+      : "bg-connect-dim text-brand-400 font-semibold ring-1 ring-brand-400/20";
 
   return (
     <aside
       className={cn(
-        "hidden lg:flex flex-col border-r border-[var(--border-xs)] bg-carbon-1 backdrop-blur-sm transition-all duration-200 flex-shrink-0",
+        "hidden lg:flex flex-col border-r border-nivis-glass-border nivis-glass-panel !rounded-none backdrop-blur-xl transition-all duration-200 flex-shrink-0",
         collapsed ? "w-16" : "w-60"
       )}
     >
       <div
         className={cn(
-          "flex items-center gap-2.5 border-b border-ink-800 px-4 py-5",
+          "flex items-center gap-2.5 border-b border-white/8 px-4 py-5",
           collapsed ? "justify-center" : ""
         )}
       >
@@ -59,15 +59,15 @@ export function DesktopSidebar({
         >
           <LogoMark size={26} />
           {!collapsed ? (
-            <span className="font-display text-lg font-extrabold tracking-tight">
-              Fit<span className="text-volt-500">Connect</span>
+            <span className="font-display text-lg font-extrabold tracking-tight lowercase">
+              fit<span className="text-volt-500">connect</span>
             </span>
           ) : null}
         </Link>
       </div>
 
       {!collapsed && profileSlot ? (
-        <div className="border-b border-ink-800 px-4 py-4">{profileSlot}</div>
+        <div className="border-b border-white/8 px-4 py-4">{profileSlot}</div>
       ) : null}
 
       <nav className="flex-1 space-y-1 px-2 py-4">
@@ -81,10 +81,10 @@ export function DesktopSidebar({
               key={item.href}
               href={item.href}
               className={cn(
-                "relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-[var(--fc-motion-micro)]",
+                "relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm lowercase transition-all duration-[var(--fc-motion-micro)]",
                 active
                   ? activeClass
-                  : "text-ink-500 hover:bg-ink-800/60 hover:text-ink-300",
+                  : "text-ink-500 hover:bg-white/5 hover:text-ink-200",
                 collapsed ? "justify-center" : ""
               )}
             >
@@ -96,13 +96,13 @@ export function DesktopSidebar({
       </nav>
 
       {!collapsed && footerSlot ? (
-        <div className="border-t border-ink-800 p-4">{footerSlot}</div>
+        <div className="border-t border-white/8 p-4">{footerSlot}</div>
       ) : null}
 
       <button
         type="button"
         onClick={() => setCollapsed(!collapsed)}
-        className="flex justify-center border-t border-ink-800 p-4 text-ink-600 transition-colors hover:text-ink-400"
+        className="flex justify-center border-t border-white/8 p-4 text-ink-600 transition-colors hover:text-volt-500"
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         <ChevronRight

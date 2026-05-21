@@ -12,6 +12,8 @@ COPY packages/config/package.json ./packages/config/
 COPY packages/design-tokens/package.json ./packages/design-tokens/
 COPY packages/ai/package.json ./packages/ai/
 COPY packages/maps/package.json ./packages/maps/
+COPY packages/strava-integration/package.json ./packages/strava-integration/
+COPY packages/realtime-client/package.json ./packages/realtime-client/
 RUN pnpm install --frozen-lockfile
 
 FROM base AS builder

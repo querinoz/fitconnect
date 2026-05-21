@@ -1,15 +1,12 @@
 import { Redirect, Tabs } from "expo-router";
-import { Platform, Text } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuthStore } from "@/lib/auth-store";
-import { TAB_BAR_HEIGHT } from "@/lib/layout";
-import { tokens } from "@/lib/tokens";
-
-function TabLabel({ label }: { label: string }) {
-  return <Text style={{ color: tokens.colors.ink[200], fontSize: 11 }}>{label}</Text>;
-}
+import { useT } from "@/lib/i18n-provider";
+import { NivisTabBar } from "@/components/nivis-tab-bar";
 
 export default function CoachLayout() {
   const user = useAuthStore((s) => s.user);
+  const t = useT();
   if (!user) return <Redirect href="/(auth)/signin" />;
   if (user.role !== "coach" && user.role !== "admin") {
     return <Redirect href="/(athlete)" />;
@@ -17,24 +14,58 @@ export default function CoachLayout() {
 
   return (
     <Tabs
+      tabBar={(props) => <NivisTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: tokens.colors.ink[950],
-          borderTopColor: tokens.colors.ink[800],
-          height: TAB_BAR_HEIGHT,
-          paddingBottom: Platform.OS === "ios" ? 22 : 8,
-          paddingTop: 6
-        },
-        tabBarActiveTintColor: tokens.colors.accent[400],
-        tabBarInactiveTintColor: tokens.colors.ink[500]
+        tabBarShowLabel: false
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Overview", tabBarLabel: () => <TabLabel label="Overview" /> }} />
-      <Tabs.Screen name="athletes" options={{ title: "Athletes", tabBarLabel: () => <TabLabel label="Athletes" /> }} />
-      <Tabs.Screen name="sessions" options={{ title: "Sessions", tabBarLabel: () => <TabLabel label="Sessions" /> }} />
-      <Tabs.Screen name="earnings" options={{ title: "Earnings", tabBarLabel: () => <TabLabel label="Earnings" /> }} />
-      <Tabs.Screen name="settings" options={{ title: "Settings", tabBarLabel: () => <TabLabel label="Settings" /> }} />
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: t("tabs", "overview"),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="grid-outline" color={color} size={size} />
+          )
+        }}
+      />
+      <Tabs.Screen
+        name="athletes"
+        options={{
+          title: t("tabs", "athletes"),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="people-outline" color={color} size={size} />
+          )
+        }}
+      />
+      <Tabs.Screen
+        name="map"
+        options={{
+          title: t("tabs", "map"),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="map-outline" color={color} size={size} />
+          )
+        }}
+      />
+      <Tabs.Screen
+        name="sessions"
+        options={{
+          title: t("tabs", "sessions"),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar-outline" color={color} size={size} />
+          )
+        }}
+      />
+      <Tabs.Screen
+        name="earnings"
+        options={{
+          title: t("tabs", "earnings"),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="cash-outline" color={color} size={size} />
+          )
+        }}
+      />
+      <Tabs.Screen name="settings" options={{ href: null }} />
     </Tabs>
   );
 }
