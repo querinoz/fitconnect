@@ -7,7 +7,6 @@ import {
   Bell,
   BookOpen,
   Home,
-  PlayCircle,
   Settings,
   Users,
   Watch
@@ -21,7 +20,7 @@ import { SessionsPanel } from "./sessions-panel";
 import { AiInsightsPanel } from "./ai-insights-panel";
 import { IntegrationsHub } from "@/components/dashboard/integrations-hub";
 import { GamificationPanel } from "@/components/gamification/gamification-panel";
-import { ReadinessRingWidget } from "./readiness-ring-widget";
+import { ReadinessHeroSection } from "./readiness-hero-section";
 import { MapWidget } from "./map-widget";
 import { ActivityFeedLive } from "./activity-feed-live";
 import { formatMsg, useLocale } from "@/lib/i18n-provider";
@@ -84,14 +83,12 @@ export function AthleteOsDashboard({
   const { dashboard, hub } = useLocale();
   const os = dashboard.os;
   const [collapsed, setCollapsed] = useState(false);
-  const firstName = name.split(" ")[0] ?? name;
   const initials = name
     .split(" ")
     .map((p) => p[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();
-  const hrvDiff = hrv - baselineHrv;
   const greeting = os[greetingKey()];
 
   const athleteNav: { icon: LucideIcon; label: string; href: string }[] = [
@@ -144,79 +141,43 @@ export function AthleteOsDashboard({
 
       <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
         <div className="fc-dashboard-inner mx-auto max-w-6xl p-4 sm:p-5 md:p-8">
-          <header className="mb-6 flex flex-col items-start justify-between gap-4 sm:mb-8 sm:flex-row sm:items-center">
-            <div>
-              <p className="mb-1.5 text-xs text-ink-500">{greeting}</p>
-              <h1 className="font-display text-2xl font-extrabold tracking-tight text-ink-50 md:text-3xl">
-                {formatMsg(os.titleSuffix, { name: firstName })}
-              </h1>
-              <p className="mt-1 text-sm text-ink-400">
-                {formatMsg(hrvDiff >= 0 ? os.hrvTrendUp : os.hrvTrendDown, {
-                  delta: Math.abs(hrvDiff)
-                })}{" "}
-                <span className="font-medium text-volt-500">
-                  {readiness >= 75 ? os.trainHard : os.trainSmart}
-                </span>
-              </p>
-            </div>
-            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-              <Button
-                asChild
-                variant="outline"
-                size="sm"
-                className="gap-1.5 border-ink-700 text-xs text-ink-400 hover:text-ink-200"
-              >
-                <Link href="/settings/wearables">
-                  <Watch className="h-3.5 w-3.5" /> {os.wearables}
-                </Link>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                type="button"
-                className="border-ink-700 text-xs text-ink-400 hover:text-ink-200"
-              >
-                <Bell className="h-3.5 w-3.5" />
-              </Button>
-              <VoltButton asChild className="h-9 gap-1.5 text-xs">
-                <Link href="/discover">{os.findCoach}</Link>
-              </VoltButton>
-            </div>
-          </header>
-
-          <div className="mb-5 grid gap-5 md:grid-cols-2">
-            <ReadinessRingWidget readiness={readiness} />
-            <NivisPanel id="today-plan" className="flex flex-col justify-between p-5">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink-500">
-                  {dashboard.todayPlan.title}
-                </p>
-                {todayPlan ? (
-                  <>
-                    <p className="mt-2 text-xs font-semibold text-volt-400">{todayPlan.day}</p>
-                    <h3 className="mt-1 font-display text-lg font-bold text-ink-50">
-                      {todayPlan.title}
-                    </h3>
-                    <p className="mt-2 text-sm text-ink-400">{todayPlan.detail}</p>
-                    {todayPlan.intensity ? (
-                      <p className="mt-2 text-xs text-ink-500">{todayPlan.intensity}</p>
-                    ) : null}
-                    <p className="mt-3 text-xs text-ink-500">
-                      {formatMsg(dashboard.todayPlan.approvedBy, { coach: coachName })}
-                    </p>
-                  </>
-                ) : (
-                  <p className="mt-3 text-sm text-ink-500">{dashboard.todayPlan.noPlan}</p>
-                )}
-              </div>
-              <VoltButton asChild className="mt-5 w-full rounded-xl text-sm">
-                <Link href="/sessions">
-                  <PlayCircle className="mr-2 h-4 w-4" />
-                  {dashboard.todayPlan.startSession}
-                </Link>
-              </VoltButton>
-            </NivisPanel>
-          </div>
+          <ReadinessHeroSection
+            name={name}
+            greeting={greeting}
+            readiness={readiness}
+            hrv={hrv}
+            baselineHrv={baselineHrv}
+            sleepHours={sleepHours}
+            sports={sports}
+            coachName={coachName}
+            streakWeeks={streakWeeks}
+            todayPlan={todayPlan}
+            actions={
+              <>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 border-ink-700 text-xs text-ink-400 hover:text-ink-200"
+                >
+                  <Link href="/settings/wearables">
+                    <Watch className="h-3.5 w-3.5" /> {os.wearables}
+                  </Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  className="border-ink-700 text-xs text-ink-400 hover:text-ink-200"
+                >
+                  <Bell className="h-3.5 w-3.5" />
+                </Button>
+                <VoltButton asChild className="h-9 gap-1.5 text-xs">
+                  <Link href="/discover">{os.findCoach}</Link>
+                </VoltButton>
+              </>
+            }
+          />
 
           <div id="map-widget" className="mb-5 grid gap-5 lg:grid-cols-2">
             <MapWidget />

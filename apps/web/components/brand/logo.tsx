@@ -1,4 +1,4 @@
-import { BrandLogo } from "./brand-logo";
+import { BrandLogo, OFFICIAL_LOGO_SIZE } from "./brand-logo";
 import { cn } from "@/lib/utils";
 
 type LogoProps = {
@@ -12,10 +12,11 @@ export function Logo({ className, animated, title = "FitConnect" }: LogoProps) {
   return (
     <BrandLogo
       title={title}
-      size={36}
+      size={OFFICIAL_LOGO_SIZE}
       variant="carbon3d"
       animated={animated}
-      className={cn("h-9 w-auto max-w-[2.25rem]", className)}
+      priority
+      className={cn("h-11 w-auto max-w-[2.75rem]", className)}
     />
   );
 }
