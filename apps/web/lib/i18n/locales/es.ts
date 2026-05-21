@@ -1344,5 +1344,15 @@ export const es = {
       metricValue: "61 %",
       citation: "Análisis de usuarios 2026"
     }
-  ]
+  ],
+  meta: {
+    title: "FitConnect — Entrena con especialistas de élite",
+    description:
+      "Marketplace de coaches verificados con IA Readiness, sync Strava y sesiones en vivo. Yoga, surf, escalada, MMA y más — presencial u online.",
+    ogTitle: "FitConnect — Entrena con especialistas de élite",
+    ogDescription:
+      "Descubre, reserva y entrena con los mejores coaches deportivos del mundo.",
+    twitterDescription:
+      "Coaches de élite para cada deporte. IA Readiness, sync Strava e intro gratis de 15 min."
+  }
 };

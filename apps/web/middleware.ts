@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { STORAGE_KEY } from "@/lib/i18n/server";
+import { SUPPORTED_LANGS, type Lang } from "@/lib/i18n";
 
 const PROTECTED_PREFIXES = [
   "/dashboard",
@@ -12,17 +14,45 @@ const PROTECTED_PREFIXES = [
   "/admin"
 ];
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const isProtected = PROTECTED_PREFIXES.some(
+function isLang(value: string | null): value is Lang {
+  return value !== null && (SUPPORTED_LANGS as string[]).includes(value);
+}
+
+function isProtectedPath(pathname: string) {
+  return PROTECTED_PREFIXES.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`)
   );
+}
 
-  if (!isProtected) return NextResponse.next();
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  const langParam = request.nextUrl.searchParams.get("lang");
+  if (langParam && isLang(langParam)) {
+    const clean = request.nextUrl.clone();
+    clean.searchParams.delete("lang");
+    const response = NextResponse.redirect(clean);
+    response.cookies.set(STORAGE_KEY, langParam, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax"
+    });
+    return response;
+  }
+
+  if (!isProtectedPath(pathname)) return NextResponse.next();
 
   const demoMode = process.env.NEXT_PUBLIC_DEMO_MODE !== "false";
+  const isProduction = process.env.VERCEL_ENV === "production";
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (isProduction && (demoMode || !url || !key)) {
+    const signIn = new URL("/signin", request.url);
+    signIn.searchParams.set("next", pathname);
+    signIn.searchParams.set("error", demoMode ? "demo-disabled" : "auth-unconfigured");
+    return NextResponse.redirect(signIn);
+  }
 
   if (demoMode || !url || !key) {
     return NextResponse.next();
@@ -63,13 +93,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/coach/:path*",
-    "/sessions/:path*",
-    "/inbox/:path*",
-    "/my-coach/:path*",
-    "/profile/:path*",
-    "/settings/:path*",
-    "/admin/:path*"
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|webmanifest|js|css|woff2)$|api/).*)"
   ]
 };

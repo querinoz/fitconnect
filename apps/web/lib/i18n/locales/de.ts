@@ -1346,5 +1346,15 @@ export const de = {
       metricValue: "61 %",
       citation: "Analyse utilisateurs 2026"
     }
-  ]
+  ],
+  meta: {
+    title: "FitConnect — Trainiere mit Elite-Spezialisten",
+    description:
+      "Verifizierter Coach-Marktplatz mit KI-Readiness, Strava-Sync und Live-Sessions. Yoga, Surf, Klettern, MMA und mehr — vor Ort oder online.",
+    ogTitle: "FitConnect — Trainiere mit Elite-Spezialisten",
+    ogDescription:
+      "Entdecke, buche und trainiere mit den besten sportartspezifischen Coaches der Welt.",
+    twitterDescription:
+      "Elite-Coaches für jede Sportart. KI-Readiness, Strava-Sync und kostenlose 15-Min-Intro."
+  }
 };

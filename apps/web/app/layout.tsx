@@ -3,7 +3,11 @@ import { Plus_Jakarta_Sans, Syne } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SkipLink } from "@/components/skip-link";
+import { SUPPORTED_LANGS } from "@/lib/i18n";
 import { getDictionary, getServerLang } from "@/lib/i18n/server";
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "https://fitconnect-phi.vercel.app";
 
 const sans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -35,10 +39,14 @@ export async function generateMetadata(): Promise<Metadata> {
     it: "it_IT"
   };
 
+  const langAlternates = Object.fromEntries(
+    SUPPORTED_LANGS.map((code) => [code, `${SITE_URL}?lang=${code}`])
+  ) as Record<string, string>;
+
   return {
     title: meta.title,
     description: meta.description,
-    metadataBase: new URL("https://fitconnect.querinoz.dev"),
+    metadataBase: new URL(SITE_URL),
     applicationName: "FitConnect",
     manifest: "/app.webmanifest",
     appleWebApp: {
@@ -57,7 +65,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: meta.ogTitle,
       description: meta.ogDescription,
       type: "website",
-      url: "https://fitconnect.querinoz.dev",
+      url: SITE_URL,
       locale: localeMap[lang] ?? "en_US",
       images: [{ url: "/brand/fitconnect-logo-512.png", width: 512, height: 512, alt: "FitConnect" }]
     },
@@ -68,7 +76,11 @@ export async function generateMetadata(): Promise<Metadata> {
       images: ["/brand/fitconnect-logo-512.png"]
     },
     alternates: {
-      canonical: "https://fitconnect.querinoz.dev"
+      canonical: SITE_URL,
+      languages: {
+        ...langAlternates,
+        "x-default": SITE_URL
+      }
     },
     robots: { index: true, follow: true }
   };
