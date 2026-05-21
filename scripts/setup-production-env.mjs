@@ -62,7 +62,7 @@ const DEFAULTS = [
   ],
   [
     "DIRECT_URL",
-    `postgresql://postgres.${SUPABASE_PROJECT}:PASTE_DB_PASSWORD@db.${SUPABASE_PROJECT}.supabase.co:5432/postgres`
+    `postgresql://postgres:PASTE_DB_PASSWORD@db.${SUPABASE_PROJECT}.supabase.co:5432/postgres`
   ],
   ["", null],
   ["NEXT_PUBLIC_DEMO_MODE", "false"],
