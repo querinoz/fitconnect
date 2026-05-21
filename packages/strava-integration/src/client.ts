@@ -142,7 +142,8 @@ export class StravaClient {
     });
     if (!res.ok) return null;
     const json = await res.json();
-    return stravaTokenResponseSchema.parse(json);
+    const parsed = stravaTokenResponseSchema.safeParse(json);
+    return parsed.success ? parsed.data : null;
   }
 
   /** Refresh access token. */
@@ -162,7 +163,8 @@ export class StravaClient {
       })
     });
     if (!res.ok) return null;
-    return stravaTokenResponseSchema.parse(await res.json());
+    const parsed = stravaTokenResponseSchema.safeParse(await res.json());
+    return parsed.success ? parsed.data : null;
   }
 
   async getAthlete() {

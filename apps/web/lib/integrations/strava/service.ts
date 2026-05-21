@@ -35,7 +35,15 @@ export async function saveConnection(input: {
   const prisma = getPrisma();
   if (!prisma) return null;
 
-  return prisma.stravaConnection.upsert({
+  try {
+    await prisma.stravaConnection.deleteMany({
+      where: {
+        stravaAthleteId: input.stravaAthleteId,
+        athleteExternalId: { not: input.athleteExternalId }
+      }
+    });
+
+    return await prisma.stravaConnection.upsert({
     where: { athleteExternalId: input.athleteExternalId },
     create: {
       athleteExternalId: input.athleteExternalId,
@@ -56,6 +64,10 @@ export async function saveConnection(input: {
       deauthorizedAt: null
     }
   });
+  } catch (err) {
+    console.error("[strava] saveConnection failed:", err);
+    return null;
+  }
 }
 
 export async function markDeauthorized(stravaAthleteId: number) {
