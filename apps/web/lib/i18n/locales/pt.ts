@@ -106,6 +106,91 @@ export const pt = {
       footerCta: "começar grátis"
     }
   },
+  landingEditorial: {
+    gate: { initializing: "A INICIALIZAR FITCONNECT" },
+    hero: {
+      badge: "INTRO GRÁTIS 15 MIN · €12/MÊS",
+      scroll: "↓ SCROLL",
+      statAthletes: "+12k",
+      statAthletesLabel: "ATLETAS",
+      statCoaches: "+500",
+      statCoachesLabel: "COACHES",
+      statRating: "4.94★",
+      statRatingLabel: "AVALIAÇÃO"
+    },
+    sectionBreak: {
+      connect: "CONNECT",
+      perform: "PERFORM",
+      train: "TRAIN",
+      smarter: "SMARTER",
+      track: "TRACK",
+      everyMove: "EVERY MOVE",
+      book: "BOOK",
+      yourCoach: "YOUR COACH"
+    },
+    quotes: {
+      athlete: {
+        text: "Tinha acesso a dados que antes eram reservados a atletas olímpicos. O meu coach via o meu HRV em tempo real e ajustava a sessão ao minuto.",
+        attribution: "Inês C. · Atleta FitConnect"
+      },
+      coach: {
+        text: "Cresci 340% em receita no primeiro ano. A plataforma trata dos pagamentos, eu trato dos atletas.",
+        attribution: "Tomás M. · Coach Verificado"
+      }
+    },
+    manifesto: {
+      block1: {
+        label: "BIOMETRIA PREDITIVA",
+        title: "O teu corpo fala. Nós traduzimos.",
+        body: "Análise de HRV, sono, stress e carga de treino para calcular o teu Score de Prontidão diário. A IA recomenda intensidade, timing e tipo de treino ideal.",
+        metric: "94",
+        metricLabel: "Score médio dos nossos atletas top"
+      },
+      block2: {
+        label: "CURADORIA CIENTÍFICA",
+        title: "62% dos candidatos são rejeitados.",
+        body: "Cada coach passa por verificação de credenciais, avaliação técnica e período de prova. Só os melhores chegam à plataforma.",
+        metric: "318",
+        metricLabel: "Coaches activos verificados"
+      },
+      block3: {
+        label: "INTEGRAÇÃO COMPLETA",
+        title: "O teu histórico já está aqui.",
+        body: "Sync automático com Strava, Garmin, Apple Health e Whoop. Todos os dados numa vista unificada para ti e o teu coach."
+      }
+    },
+    trust: {
+      rating: "4.94★",
+      ratingLabel: "AVALIAÇÃO",
+      reviews: "27k+",
+      reviewsLabel: "AVALIAÇÕES",
+      rejected: "62%",
+      rejectedLabel: "REJEITADOS",
+      retention: "18 meses",
+      retentionLabel: "RETORNO MÉDIO",
+      verified: "FitConnect Verified"
+    },
+    coachReel: {
+      verified: "VERIFICADO",
+      sessions: "sessões",
+      dragHint: "Arrasta para explorar coaches"
+    },
+    finalCta: {
+      eyebrow: "COMEÇA HOJE",
+      headline: "Encontra o teu coach.",
+      subheadline: "Intro grátis. Sem compromisso.",
+      primary: "Encontrar Coach →",
+      secondary: "Ver Demo Live",
+      footer: "4.94★ · 27k avaliações · Cancela quando quiseres"
+    },
+    navPill: {
+      demo: "Demo",
+      start: "Começar →",
+      discover: "Descobrir",
+      coaches: "Coaches",
+      pricing: "Preços"
+    }
+  },
   downloadSection: {
     eyebrow: "Mobile-first",
     title: "Treina a partir do bolso",

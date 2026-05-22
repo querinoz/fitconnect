@@ -106,6 +106,91 @@ export const fr = {
       footerCta: "commencer gratuitement"
     }
   },
+  landingEditorial: {
+    gate: { initializing: "INITIALIZING FITCONNECT" },
+    hero: {
+      badge: "FREE 15-MIN INTRO · €12/MO",
+      scroll: "↓ SCROLL",
+      statAthletes: "+12k",
+      statAthletesLabel: "ATHLETES",
+      statCoaches: "+500",
+      statCoachesLabel: "COACHES",
+      statRating: "4.94★",
+      statRatingLabel: "RATING"
+    },
+    sectionBreak: {
+      connect: "CONNECT",
+      perform: "PERFORM",
+      train: "TRAIN",
+      smarter: "SMARTER",
+      track: "TRACK",
+      everyMove: "EVERY MOVE",
+      book: "BOOK",
+      yourCoach: "YOUR COACH"
+    },
+    quotes: {
+      athlete: {
+        text: "I had access to data once reserved for Olympic athletes. My coach saw my HRV in real time and adjusted the session minute by minute.",
+        attribution: "Inês C. · FitConnect Athlete"
+      },
+      coach: {
+        text: "I grew revenue 340% in year one. The platform handles payments — I handle athletes.",
+        attribution: "Tomás M. · Verified Coach"
+      }
+    },
+    manifesto: {
+      block1: {
+        label: "PREDICTIVE BIOMETRICS",
+        title: "Your body speaks. We translate.",
+        body: "HRV, sleep, stress and training load analysis to calculate your daily Readiness Score. AI recommends intensity, timing and ideal session type.",
+        metric: "94",
+        metricLabel: "Average score of our top athletes"
+      },
+      block2: {
+        label: "SCIENTIFIC CURATION",
+        title: "62% of applicants are rejected.",
+        body: "Every coach passes credential verification, technical assessment and a trial period. Only the best reach the platform.",
+        metric: "318",
+        metricLabel: "Active verified coaches"
+      },
+      block3: {
+        label: "FULL INTEGRATION",
+        title: "Your history is already here.",
+        body: "Automatic sync with Strava, Garmin, Apple Health and Whoop. All data in one unified view for you and your coach."
+      }
+    },
+    trust: {
+      rating: "4.94★",
+      ratingLabel: "RATING",
+      reviews: "27k+",
+      reviewsLabel: "REVIEWS",
+      rejected: "62%",
+      rejectedLabel: "REJECTED",
+      retention: "18 mo",
+      retentionLabel: "AVG RETENTION",
+      verified: "FitConnect Verified"
+    },
+    coachReel: {
+      verified: "VERIFIED",
+      sessions: "sessions",
+      dragHint: "Drag to explore coaches"
+    },
+    finalCta: {
+      eyebrow: "START TODAY",
+      headline: "Find your coach.",
+      subheadline: "Free intro. No commitment.",
+      primary: "Find a coach →",
+      secondary: "See live demo",
+      footer: "4.94★ · 27k reviews · Cancel anytime"
+    },
+    navPill: {
+      demo: "Demo",
+      start: "Get started →",
+      discover: "Discover",
+      coaches: "Coaches",
+      pricing: "Pricing"
+    }
+  },
   downloadSection: {
     eyebrow: "Mobile-first",
     title: "Entraînez-vous depuis votre poche",

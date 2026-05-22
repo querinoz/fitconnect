@@ -138,6 +138,71 @@ export type Dict = {
       footerCta: string;
     };
   };
+  landingEditorial: {
+    gate: { initializing: string };
+    hero: {
+      badge: string;
+      scroll: string;
+      statAthletes: string;
+      statAthletesLabel: string;
+      statCoaches: string;
+      statCoachesLabel: string;
+      statRating: string;
+      statRatingLabel: string;
+    };
+    sectionBreak: {
+      connect: string;
+      perform: string;
+      train: string;
+      smarter: string;
+      track: string;
+      everyMove: string;
+      book: string;
+      yourCoach: string;
+    };
+    quotes: {
+      athlete: { text: string; attribution: string };
+      coach: { text: string; attribution: string };
+    };
+    manifesto: {
+      block1: {
+        label: string;
+        title: string;
+        body: string;
+        metric: string;
+        metricLabel: string;
+      };
+      block2: {
+        label: string;
+        title: string;
+        body: string;
+        metric: string;
+        metricLabel: string;
+      };
+      block3: { label: string; title: string; body: string };
+    };
+    trust: {
+      rating: string;
+      ratingLabel: string;
+      reviews: string;
+      reviewsLabel: string;
+      rejected: string;
+      rejectedLabel: string;
+      retention: string;
+      retentionLabel: string;
+      verified: string;
+    };
+    coachReel: { verified: string; sessions: string; dragHint: string };
+    finalCta: {
+      eyebrow: string;
+      headline: string;
+      subheadline: string;
+      primary: string;
+      secondary: string;
+      footer: string;
+    };
+    navPill: { demo: string; start: string; discover: string; coaches: string; pricing: string };
+  };
   downloadSection: {
     eyebrow: string;
     title: string;

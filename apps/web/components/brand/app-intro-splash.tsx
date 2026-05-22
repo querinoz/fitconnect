@@ -15,11 +15,12 @@ function prefersReducedMotion() {
   );
 }
 
-/** Cinematic app open intro — once per browser session. */
+/** Cinematic app open intro — once per browser session; skipped on landing (has HeroGate). */
 export function AppIntroSplash() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && window.location.pathname === "/") return;
     if (prefersReducedMotion()) return;
     try {
       if (sessionStorage.getItem(INTRO_KEY)) return;
