@@ -6,7 +6,6 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState, type FormEvent } from "react";
 import {
   ArrowRight,
-  Dumbbell,
   Lock,
   LogOut,
   Mail,
@@ -34,6 +33,7 @@ import { LangPicker } from "./lang-picker";
 import { GlassCard } from "./ui-glass/glass-card";
 import { VoltButton } from "./ui-glass/volt-button";
 import { RealtimeBadge } from "./ui-glass/premium-system";
+import { PremiumInput } from "./ui-glass/form-system";
 import { cn } from "@/lib/utils";
 
 interface AuthShellProps {
@@ -46,10 +46,12 @@ interface AuthShellProps {
   switchHref: string;
   redirectOverride?: string;
   coachDemoShortcut?: boolean;
+  /** Compact single-column layout for route modals */
+  embedded?: boolean;
 }
 
 const inputClass =
-  "w-full rounded-xl border border-glass-border bg-glass-md pl-10 pr-3 h-11 text-sm text-ink-100 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-volt-500/50 focus:border-volt-500/40";
+  "w-full rounded-2xl border border-glass-border bg-glass-md pl-10 pr-3 h-11 text-sm text-ink-100 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-volt-500/50 focus:border-volt-500/40";
 
 export function AuthShell({
   mode,
@@ -60,7 +62,8 @@ export function AuthShell({
   switchLabel,
   switchHref,
   redirectOverride,
-  coachDemoShortcut = false
+  coachDemoShortcut = false,
+  embedded = false
 }: AuthShellProps) {
   const t = useT();
   const router = useRouter();
@@ -195,39 +198,24 @@ export function AuthShell({
   }
 
   return (
-    <main
-      id="main"
-      className="relative min-h-dvh overflow-hidden bg-ink-950 text-ink-100 flex items-center"
+    <div
+      className={cn(
+        embedded
+          ? "w-full"
+          : "fc-marketing-hero fc-marketing-container flex flex-1 items-center pb-16"
+      )}
     >
-      <motion.div
-        aria-hidden="true"
-        className="absolute -top-32 -right-24 -z-10 h-[420px] w-[420px] rounded-full bg-brand-500/15 blur-3xl"
-      />
-      <div className="absolute -bottom-32 -left-24 -z-10 h-[420px] w-[420px] rounded-full bg-accent-500/15 blur-3xl" />
-
-      <header className="absolute inset-x-0 top-0 z-10">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-          <Link
-            href="/"
-            className="flex items-center gap-2 font-display font-bold text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 rounded-xl"
-          >
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-volt-500 to-volt-400 text-ink-950 shadow-glow">
-              <Dumbbell className="h-5 w-5" aria-hidden="true" />
-            </span>
-            <span>
-              Fit<span className="text-brand-400">Connect</span>
-            </span>
-          </Link>
-          <LangPicker compact />
-        </div>
-      </header>
-
-      <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-6 pt-24 pb-16 lg:grid-cols-2">
+      <div
+        className={cn(
+          "mx-auto grid w-full max-w-6xl items-center gap-12",
+          embedded ? "max-w-lg" : "lg:grid-cols-2"
+        )}
+      >
         <motion.aside
           initial={{ opacity: 0, x: reduce ? 0 : -16 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: reduce ? 0 : 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="hidden lg:block"
+          className={cn(embedded && "hidden")}
         >
           <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-200 ring-1 ring-brand-500/30">
             <Sparkles className="h-3 w-3" />
@@ -530,6 +518,6 @@ export function AuthShell({
           </GlassCard>
         </motion.section>
       </div>
-    </main>
+    </div>
   );
 }

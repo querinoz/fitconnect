@@ -6,11 +6,13 @@ import { useT } from "@/lib/i18n-provider";
 interface SignInClientProps {
   redirectOverride?: string;
   coachDemoShortcut?: boolean;
+  embedded?: boolean;
 }
 
 export function SignInClient({
   redirectOverride,
-  coachDemoShortcut = false
+  coachDemoShortcut = false,
+  embedded = false
 }: SignInClientProps) {
   const t = useT();
 
@@ -25,6 +27,7 @@ export function SignInClient({
       switchHref="/signup"
       redirectOverride={redirectOverride}
       coachDemoShortcut={coachDemoShortcut}
+      embedded={embedded}
     />
   );
 }

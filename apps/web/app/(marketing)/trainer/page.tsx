@@ -1,4 +1,4 @@
-import { CoachLandingContent } from "@/components/pages/coach-landing-content";
+import { CoachCockpitPreview } from "@/components/trainer/coach-cockpit-preview";
 
 export const metadata = {
   title: "For coaches · Run your business on FitConnect",
@@ -7,5 +7,5 @@ export const metadata = {
 };
 
 export default function TrainerCtaPage() {
-  return <CoachLandingContent />;
+  return <CoachCockpitPreview />;
 }

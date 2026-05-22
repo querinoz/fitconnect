@@ -13,11 +13,8 @@ import {
   ClipboardList,
   BadgeCheck
 } from "lucide-react";
-import { Nav } from "@/components/nav";
-import { Footer } from "@/components/footer";
 import { Cta } from "@/components/cta";
 import { Button } from "@/components/ui/button";
-import { DemoBanner } from "@/components/demo-banner";
 import { formatMsg, useLocale } from "@/lib/i18n-provider";
 import {
   MetricTile,
@@ -46,13 +43,10 @@ export function CoachLandingContent() {
   const cl = locale.coachLanding;
 
   return (
-    <>
-      <DemoBanner />
-      <Nav />
-      <main id="main">
-        <section className="relative overflow-hidden pt-12 pb-16">
-          <div className="absolute inset-0 -z-10 gradient-bg" />
-          <div className="mx-auto max-w-7xl fc-section-x px-4 sm:px-6 grid lg:grid-cols-2 gap-12 items-center">
+    <main id="main">
+      <section className="relative overflow-hidden fc-marketing-hero">
+        <div className="absolute inset-0 -z-10 gradient-bg" />
+        <div className="fc-marketing-container grid items-center gap-12 lg:grid-cols-2">
             <div>
               <SectionHeader
                 as="h1"
@@ -239,7 +233,5 @@ export function CoachLandingContent() {
 
         <Cta />
       </main>
-      <Footer />
-    </>
   );
 }

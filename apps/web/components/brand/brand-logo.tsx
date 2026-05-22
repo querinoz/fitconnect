@@ -1,10 +1,11 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-/** Official mark aspect — 170×179 master PNG (circle + heartbeat). */
-export const OFFICIAL_LOGO_ASPECT = 179 / 170;
+/** Official mark aspect — 320×340 master SVG (circle + heartbeat). */
+export const OFFICIAL_LOGO_ASPECT = 340 / 320;
 
 export const OFFICIAL_LOGO_SRC = "/brand/fitconnect-logo.png";
+export const OFFICIAL_LOGO_SVG = "/brand/fitconnect-logo-mark.svg";
 
 /** Default display size (px width) — nav, header, lockups. */
 export const OFFICIAL_LOGO_SIZE = 44;
@@ -20,7 +21,7 @@ type BrandLogoProps = {
 };
 
 /**
- * Official FitConnect logo — circular F mark + EKG pulse (Volt green).
+ * Official FitConnect logo — Volt→Connect ring, F mark, ECG pulse.
  */
 export function BrandLogo({
   className,

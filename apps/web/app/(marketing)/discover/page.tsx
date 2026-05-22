@@ -2,14 +2,10 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Nav } from "@/components/nav";
-import { Footer } from "@/components/footer";
 import { TrainerCard } from "@/components/trainer-card";
 import { TrainerCardSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
-import { DemoBanner } from "@/components/demo-banner";
-import { GlobalInstallPrompt } from "@/components/shell/global-install-prompt";
 import { Atmosphere } from "@/components/marketing/atmosphere";
 import { SPORTS, TRAINERS, type Modality, type Sport } from "@/lib/data";
 import {
@@ -23,6 +19,12 @@ import {
 import { formatMsg, useT } from "@/lib/i18n-provider";
 import { cn } from "@/lib/utils";
 import { PremiumCard, RealtimeBadge, SectionHeader } from "@/components/ui-glass/premium-system";
+import {
+  FilterChip,
+  FilterToggle,
+  PremiumInput,
+  PremiumSelect
+} from "@/components/ui-glass/form-system";
 
 type SortKey = "best-match" | "rating" | "price-asc" | "price-desc" | "newest";
 type LevelFilter = "all" | "Beginner" | "Intermediate" | "Advanced";
@@ -39,23 +41,17 @@ export default function DiscoverPage() {
 
 function DiscoverFallback() {
   return (
-    <>
-      <DemoBanner />
-      <Nav />
-      <main id="main" className="mx-auto max-w-7xl px-6 py-10">
-        <div className="h-10 w-72 skeleton mb-4" />
-        <div className="grid lg:grid-cols-[280px_1fr] gap-8">
-          <div className="h-[320px] rounded-2xl skeleton" />
-          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <TrainerCardSkeleton key={i} />
-            ))}
-          </div>
+    <main id="main" className="fc-marketing-hero fc-marketing-container pb-16">
+      <div className="h-10 w-72 skeleton mb-4" />
+      <div className="grid lg:grid-cols-[280px_1fr] gap-8">
+        <div className="h-[320px] fc-radius-card skeleton" />
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <TrainerCardSkeleton key={i} />
+          ))}
         </div>
-      </main>
-      <GlobalInstallPrompt />
-      <Footer />
-    </>
+      </div>
+    </main>
   );
 }
 
@@ -163,32 +159,13 @@ function DiscoverInner() {
 
   const sportChips = (
     <div className="flex flex-wrap gap-1.5">
-      <button
-        type="button"
-        onClick={() => setSport("all")}
-        className={cn(
-          "rounded-full border px-3 py-1 text-xs font-semibold",
-          sport === "all"
-            ? "border-brand-400/50 bg-brand-500/15 text-brand-100"
-            : "border-ink-800 text-ink-400"
-        )}
-      >
+      <FilterChip active={sport === "all"} onClick={() => setSport("all")}>
         {t("discover", "allSports")}
-      </button>
+      </FilterChip>
       {SPORTS.map((s) => (
-        <button
-          key={s}
-          type="button"
-          onClick={() => setSport(s)}
-          className={cn(
-            "rounded-full border px-3 py-1 text-xs font-semibold",
-            sport === s
-              ? "border-brand-400/50 bg-brand-500/15 text-brand-100"
-              : "border-ink-800 text-ink-400"
-          )}
-        >
+        <FilterChip key={s} active={sport === s} onClick={() => setSport(s)}>
           {s}
-        </button>
+        </FilterChip>
       ))}
     </div>
   );
@@ -199,13 +176,12 @@ function DiscoverInner() {
         <label className="text-xs uppercase tracking-widest text-ink-500">
           {t("discover", "search")}
         </label>
-        <div className="mt-2 relative">
-          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-500" />
-          <input
+        <div className="mt-2">
+          <PremiumInput
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={t("discover", "searchPlaceholder")}
-            className="w-full bg-ink-950/60 border border-ink-800 rounded-xl pl-9 pr-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/60"
+            icon={<Search className="h-4 w-4" />}
           />
         </div>
       </div>
@@ -223,19 +199,13 @@ function DiscoverInner() {
         </label>
         <div className="mt-2 grid grid-cols-2 gap-1.5">
           {(["all", "Beginner", "Intermediate", "Advanced"] as const).map((lv) => (
-            <button
+            <FilterToggle
               key={lv}
-              type="button"
+              active={level === lv}
               onClick={() => setLevel(lv === "all" ? "all" : lv)}
-              className={cn(
-                "px-2 h-9 rounded-lg text-xs border",
-                level === lv
-                  ? "bg-brand-400/15 border-brand-400/60 text-brand-100"
-                  : "bg-ink-950/60 border-ink-800 text-ink-300"
-              )}
             >
               {lv === "all" ? "All levels" : lv}
-            </button>
+            </FilterToggle>
           ))}
         </div>
       </div>
@@ -244,11 +214,11 @@ function DiscoverInner() {
         <label className="text-xs uppercase tracking-widest text-ink-500">
           Location
         </label>
-        <input
+        <PremiumInput
           value={city}
           onChange={(e) => setCity(e.target.value)}
           placeholder="City or country"
-          className="mt-2 w-full bg-ink-950/60 border border-ink-800 rounded-xl px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/60"
+          className="mt-2"
         />
       </div>
 
@@ -274,18 +244,9 @@ function DiscoverInner() {
         </label>
         <div className="mt-2 grid grid-cols-2 gap-1.5">
           {(["all", "online", "in-person", "hybrid"] as const).map((m) => (
-            <button
-              key={m}
-              onClick={() => setModality(m)}
-              className={cn(
-                "px-2 h-9 rounded-lg text-xs border capitalize",
-                modality === m
-                  ? "bg-brand-400/15 border-brand-400/60 text-brand-100"
-                  : "bg-ink-950/60 border-ink-800 text-ink-300"
-              )}
-            >
+            <FilterToggle key={m} active={modality === m} onClick={() => setModality(m)}>
               {m === "all" ? t("discover", "anyModality") : m}
-            </button>
+            </FilterToggle>
           ))}
         </div>
       </div>
@@ -337,53 +298,46 @@ function DiscoverInner() {
   );
 
   return (
-    <>
-      <DemoBanner />
-      <Nav />
-      <main id="main" className="mx-auto max-w-7xl px-6 py-10">
-        <div className="relative isolate -mx-6 px-6 mb-4 pt-2 pb-6">
-          <div className="pointer-events-none absolute inset-x-0 -top-12 bottom-0 -z-10 overflow-hidden [mask-image:linear-gradient(to_bottom,black,transparent_85%)]">
-            <Atmosphere bandsOnly />
-          </div>
-          <header className="flex flex-wrap items-end justify-between gap-4 mb-2">
-            <SectionHeader
-              as="h1"
-              className="fc-vt-hero"
-              title={
-                sport === "all"
-                  ? t("discover", "titleAll")
-                  : formatMsg(t("discover", "titleSport"), { sport })
-              }
-              body={
-                loading
-                  ? t("discover", "loading")
-                  : formatMsg(t("discover", "matchCount"), {
-                      count: filtered.length
-                    })
-              }
-              action={<RealtimeBadge>Live map</RealtimeBadge>}
-            />
-            <div className="flex items-center gap-2 shrink-0">
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value as SortKey)}
-                className="bg-ink-900/60 border border-ink-800 rounded-xl px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/60"
-              >
-                {Object.entries(sortLabels).map(([k, label]) => (
-                  <option key={k} value={k}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-              <button
-                onClick={() => setDrawerOpen(true)}
-                className="lg:hidden inline-flex items-center gap-1.5 rounded-xl border border-ink-800 bg-ink-900/60 h-10 px-3 text-sm"
-              >
-                <Filter className="h-4 w-4" /> {t("discover", "filters")}
-              </button>
-            </div>
-          </header>
+    <main id="main" className="fc-marketing-hero fc-marketing-container pb-16">
+      <div className="relative isolate mb-4 pb-6">
+        <div className="pointer-events-none absolute inset-x-0 -top-12 bottom-0 -z-10 overflow-hidden [mask-image:linear-gradient(to_bottom,black,transparent_85%)]">
+          <Atmosphere bandsOnly />
         </div>
+        <header className="mb-2 flex flex-wrap items-end justify-between gap-4">
+          <SectionHeader
+            as="h1"
+            className="fc-vt-hero"
+            title={
+              sport === "all"
+                ? t("discover", "titleAll")
+                : formatMsg(t("discover", "titleSport"), { sport })
+            }
+            body={
+              loading
+                ? t("discover", "loading")
+                : formatMsg(t("discover", "matchCount"), {
+                    count: filtered.length
+                  })
+            }
+            action={<RealtimeBadge>Live map</RealtimeBadge>}
+          />
+          <div className="flex shrink-0 items-center gap-2">
+            <PremiumSelect value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
+              {Object.entries(sortLabels).map(([k, label]) => (
+                <option key={k} value={k}>
+                  {label}
+                </option>
+              ))}
+            </PremiumSelect>
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="inline-flex h-11 items-center gap-1.5 rounded-2xl border border-glass-border bg-glass-md px-3 text-sm lg:hidden"
+            >
+              <Filter className="h-4 w-4" /> {t("discover", "filters")}
+            </button>
+          </div>
+        </header>
+      </div>
 
         {hasActiveFilters && (
           <div className="flex items-center gap-2 flex-wrap mb-6 mt-2">
@@ -424,10 +378,10 @@ function DiscoverInner() {
           {drawerOpen && (
             <div className="fixed inset-0 z-50 lg:hidden">
               <div
-                className="absolute inset-0 bg-ink-950/80 backdrop-blur"
+                className="absolute inset-0 bg-ink-950/80 backdrop-blur-xl"
                 onClick={() => setDrawerOpen(false)}
               />
-              <div className="absolute right-0 top-0 bottom-0 w-[300px] bg-ink-900 border-l border-ink-800 p-5 overflow-y-auto">
+              <div className="absolute bottom-0 right-0 top-0 w-[min(320px,92vw)] overflow-y-auto border-l border-glass-border bg-glass-ink p-5 backdrop-blur-glass">
                 <div className="flex items-center justify-between mb-5">
                   <p className="font-semibold">{t("discover", "filters")}</p>
                   <button onClick={() => setDrawerOpen(false)}>
@@ -455,9 +409,17 @@ function DiscoverInner() {
               />
             ) : (
               <>
-                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                  {paged.map((t) => (
-                    <TrainerCard key={t.id} t={t} />
+                <div className="grid auto-rows-fr gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {paged.map((trainer, idx) => (
+                    <TrainerCard
+                      key={trainer.id}
+                      t={trainer}
+                      layout={
+                        idx === 0 && trainer.featured
+                          ? "featured"
+                          : "default"
+                      }
+                    />
                   ))}
                 </div>
                 {totalPages > 1 && (
@@ -483,12 +445,12 @@ function DiscoverInner() {
                     </button>
                   </div>
                 )}
-                <div className="mt-12 rounded-3xl border border-ink-800 bg-ink-900/40 p-8 text-center">
-                  <MapPin className="h-6 w-6 text-brand-400 mx-auto" />
+                <div className="mt-12 fc-radius-card border border-glass-border bg-glass-md p-8 text-center backdrop-blur-glass">
+                  <MapPin className="mx-auto h-6 w-6 text-volt-400" />
                   <h3 className="mt-3 font-display text-xl font-bold">
                     {t("discover", "handPairTitle")}
                   </h3>
-                  <p className="mt-2 text-sm text-ink-400 max-w-md mx-auto">
+                  <p className="mx-auto mt-2 max-w-md text-sm text-ink-400">
                     {t("discover", "handPairBody")}
                   </p>
                   <Button asChild className="mt-5">
@@ -503,16 +465,13 @@ function DiscoverInner() {
           </div>
         </div>
       </main>
-      <GlobalInstallPrompt />
-      <Footer />
-    </>
   );
 }
 
 function FilterPill({ label, onClear }: { label: string; onClear: () => void }) {
   const t = useT();
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-400/40 bg-brand-500/10 text-brand-100 px-3 py-1 text-xs font-medium">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-volt-500/35 bg-volt-500/10 px-3 py-1 text-xs font-medium text-volt-300">
       {label}
       <button
         onClick={onClear}

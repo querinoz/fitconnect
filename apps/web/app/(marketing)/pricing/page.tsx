@@ -2,12 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Nav } from "@/components/nav";
-import { Footer } from "@/components/footer";
 import { Cta } from "@/components/cta";
 import { ComparisonTable } from "@/components/comparison-table";
 import { Faqs } from "@/components/faqs";
-import { DemoBanner } from "@/components/demo-banner";
 import { Button } from "@/components/ui/button";
 import { Atmosphere } from "@/components/marketing/atmosphere";
 import {
@@ -19,6 +16,8 @@ import {
   Wallet
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PremiumCard } from "@/components/ui-glass/premium-system";
+import { MagneticToggle } from "@/components/ui-glass/form-system";
 
 type Period = "monthly" | "annual";
 
@@ -136,76 +135,63 @@ const pricingFaqs = [
 export default function PricingPage() {
   const [period, setPeriod] = useState<Period>("annual");
   return (
-    <>
-      <DemoBanner />
-      <Nav />
-      <main id="main">
-        <section className="relative isolate overflow-hidden pt-16 pb-12">
-          <Atmosphere />
-          <div className="mx-auto max-w-5xl px-6 text-center">
-            <p className="eyebrow inline-flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5" /> Pricing
-            </p>
-            <h1 className="fc-vt-hero mt-4 font-display text-5xl md:text-6xl font-bold leading-[0.95] text-balance">
-              Honest pricing for{" "}
-              <span className="gradient-text">honest training</span>.
-            </h1>
-            <p className="mt-6 text-lg text-ink-300 max-w-2xl mx-auto">
-              €12/mo for the platform. Your coach&apos;s rate is whatever they set. No hidden
-              session fees. No 12-month contracts. Pause whenever your life needs it.
-            </p>
+    <main id="main">
+      <section className="relative isolate overflow-hidden fc-marketing-hero">
+        <Atmosphere />
+        <div className="fc-marketing-container text-center">
+          <p className="fc-eyebrow inline-flex items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5" /> Pricing
+          </p>
+          <h1 className="fc-display-title fc-vt-hero mt-4 text-5xl text-balance md:text-6xl">
+            Honest pricing for{" "}
+            <span className="gradient-text">honest training</span>.
+          </h1>
+          <p className="fc-body-muted mx-auto mt-6 max-w-2xl text-lg">
+            €12/mo for the platform. Your coach&apos;s rate is whatever they set. No hidden
+            session fees. No 12-month contracts. Pause whenever your life needs it.
+          </p>
 
-            <div className="mt-8 inline-flex items-center rounded-full border border-ink-800 bg-ink-900/60 p-1">
-              <button
-                onClick={() => setPeriod("monthly")}
-                className={cn(
-                  "px-4 py-1.5 text-sm font-medium rounded-full transition-colors",
-                  period === "monthly"
-                    ? "bg-ink-100 text-ink-950"
-                    : "text-ink-300 hover:text-ink-100"
-                )}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setPeriod("annual")}
-                className={cn(
-                  "px-4 py-1.5 text-sm font-medium rounded-full transition-colors flex items-center gap-2",
-                  period === "annual"
-                    ? "bg-ink-100 text-ink-950"
-                    : "text-ink-300 hover:text-ink-100"
-                )}
-              >
-                Annual
-                <span className="rounded-full bg-accent-500/20 text-accent-300 px-1.5 py-0.5 text-[10px] font-bold">
-                  −25%
-                </span>
-              </button>
-            </div>
+          <div className="mt-8">
+            <MagneticToggle
+              value={period}
+              onChange={setPeriod}
+              options={[
+                { value: "monthly" as const, label: "Monthly" },
+                {
+                  value: "annual" as const,
+                  label: "Annual",
+                  badge: (
+                    <span className="rounded-full bg-volt-500/20 px-1.5 py-0.5 text-[10px] font-bold text-volt-300">
+                      −25%
+                    </span>
+                  )
+                }
+              ]}
+            />
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="mx-auto max-w-7xl px-6 pb-12">
-          <div className="grid gap-6 lg:grid-cols-4 md:grid-cols-2">
-            {plans.map((p) => {
-              const price = period === "monthly" ? p.monthly : p.annual;
-              return (
-                <div
-                  key={p.name}
-                  className={cn(
-                    "relative flex flex-col rounded-3xl border p-7",
-                    p.highlight
-                      ? "border-brand-400/60 bg-gradient-to-b from-brand-500/15 via-brand-500/5 to-transparent shadow-glow"
-                      : "border-ink-800 bg-ink-900/40"
-                  )}
-                >
+      <section className="fc-marketing-container pb-12">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {plans.map((p) => {
+            const price = period === "monthly" ? p.monthly : p.annual;
+            return (
+              <PremiumCard
+                key={p.name}
+                tone={p.highlight ? "volt" : "neutral"}
+                className={cn(
+                  "flex flex-col p-7",
+                  p.highlight && "ring-1 ring-volt-500/30"
+                )}
+              >
                   {p.highlight && (
-                    <span className="absolute -top-3 left-6 inline-flex items-center gap-1 rounded-full bg-brand-400 text-ink-950 px-3 py-0.5 text-xs font-bold">
+                    <span className="absolute -top-3 left-6 inline-flex items-center gap-1 rounded-full bg-volt-500 px-3 py-0.5 text-xs font-bold text-ink-950">
                       <Sparkles className="h-3 w-3" /> Most popular
                     </span>
                   )}
                   {p.coach && (
-                    <span className="absolute -top-3 left-6 rounded-full bg-plasma-500 text-ink-50 px-3 py-0.5 text-xs font-bold">
+                    <span className="absolute -top-3 left-6 rounded-full bg-connect-500 px-3 py-0.5 text-xs font-bold text-ink-950">
                       For coaches
                     </span>
                   )}
@@ -228,7 +214,7 @@ export default function PricingPage() {
                         key={f}
                         className="flex items-start gap-2 text-sm text-ink-200"
                       >
-                        <div className="mt-0.5 grid h-4 w-4 place-items-center rounded-full bg-accent-500/15 text-accent-400 shrink-0">
+                        <div className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full bg-volt-500/15 text-volt-400">
                           <Check className="h-3 w-3" />
                         </div>
                         <span dangerouslySetInnerHTML={{ __html: f }} />
@@ -244,31 +230,28 @@ export default function PricingPage() {
                       {p.cta} <ArrowRight className="h-4 w-4" />
                     </Link>
                   </Button>
-                </div>
-              );
-            })}
-          </div>
+              </PremiumCard>
+            );
+          })}
+        </div>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {reassurance.map((r) => (
-              <div
-                key={r.title}
-                className="rounded-2xl border border-ink-800 bg-ink-900/30 p-5 flex gap-3"
-              >
-                <div className="grid h-9 w-9 place-items-center rounded-lg bg-brand-500/10 text-brand-300 shrink-0">
-                  <r.icon className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="font-semibold text-ink-100 text-sm">{r.title}</p>
-                  <p className="mt-1 text-sm text-ink-400 leading-relaxed">{r.body}</p>
-                </div>
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          {reassurance.map((r) => (
+            <PremiumCard key={r.title} className="flex gap-3 p-5">
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-volt-500/10 text-volt-300">
+                <r.icon className="h-4 w-4" />
               </div>
-            ))}
-          </div>
-        </section>
+              <div>
+                <p className="text-sm font-semibold text-ink-100">{r.title}</p>
+                <p className="mt-1 text-sm leading-relaxed text-ink-400">{r.body}</p>
+              </div>
+            </PremiumCard>
+          ))}
+        </div>
+      </section>
 
-        <section className="mx-auto max-w-7xl px-6 py-16">
-          <div className="rounded-3xl border border-ink-800 bg-ink-900/40 p-8 md:p-10">
+      <section className="fc-marketing-container fc-marketing-section">
+        <PremiumCard className="p-8 md:p-10">
             <div className="flex items-baseline justify-between flex-wrap gap-3">
               <div>
                 <p className="eyebrow">Per-session rates</p>
@@ -299,13 +282,13 @@ export default function PricingPage() {
               Trainers set their own rate. Most offer multi-session packs and intro discounts.
               All prices in EUR per 60-min session.
             </p>
-          </div>
-        </section>
+        </PremiumCard>
+      </section>
 
-        <section className="mx-auto max-w-7xl px-6 py-12">
-          <div className="rounded-3xl border border-accent-500/30 bg-accent-500/5 p-8 md:p-10 grid md:grid-cols-2 gap-6 items-center">
+      <section className="fc-marketing-container py-12">
+        <PremiumCard tone="volt" className="grid items-center gap-6 p-8 md:grid-cols-2 md:p-10">
             <div>
-              <p className="eyebrow text-accent-400">Price comparison</p>
+              <p className="fc-eyebrow text-volt-400">Price comparison</p>
               <h2 className="mt-2 font-display text-2xl md:text-3xl font-bold">
                 Real cost for 4 coaching sessions / month
               </h2>
@@ -322,30 +305,30 @@ export default function PricingPage() {
                 <span className="text-ink-300">Caliber (1 coach included)</span>
                 <span className="font-display font-bold text-ink-100">$200/mo</span>
               </li>
-              <li className="flex items-center justify-between rounded-xl bg-gradient-to-r from-brand-500/15 to-accent-500/15 ring-1 ring-brand-400/50 px-4 py-3">
-                <span className="text-ink-100 font-medium">FitConnect (median €55/h × 4 + €9 platform)</span>
+              <li className="flex items-center justify-between rounded-2xl bg-glass-md px-4 py-3 ring-1 ring-volt-500/30">
+                <span className="font-medium text-ink-100">
+                  FitConnect (median €55/h × 4 + €9 platform)
+                </span>
                 <span className="font-display font-bold gradient-text">€229/mo</span>
               </li>
             </ul>
-          </div>
-          <p className="mt-3 text-center text-xs text-ink-500">
+        </PremiumCard>
+        <p className="mt-3 text-center text-xs text-ink-500">
             For two or fewer sessions / month — typical for most athletes — FitConnect is 40-60%
             cheaper while giving you a real specialist.
-          </p>
-        </section>
+        </p>
+      </section>
 
-        <ComparisonTable />
+      <ComparisonTable />
 
-        <section className="mx-auto max-w-4xl px-6 py-24">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-center">
-            Pricing FAQs
-          </h2>
-          <div className="mt-8 space-y-3">
-            {pricingFaqs.map((f) => (
-              <details
-                key={f.q}
-                className="group rounded-2xl border border-ink-800 bg-ink-900/40 p-5 open:bg-ink-900/70 open:border-brand-400/40"
-              >
+      <section className="fc-marketing-container fc-marketing-section">
+        <h2 className="fc-display-title text-center text-3xl md:text-4xl">Pricing FAQs</h2>
+        <div className="mx-auto mt-8 max-w-4xl space-y-3">
+          {pricingFaqs.map((f) => (
+            <details
+              key={f.q}
+              className="group fc-radius-card border border-glass-border bg-glass-md p-5 open:border-volt-500/30 open:bg-glass-hi"
+            >
                 <summary className="cursor-pointer flex items-center justify-between gap-4 list-none">
                   <h3 className="font-semibold text-ink-100">{f.q}</h3>
                   <span className="text-ink-400 group-open:rotate-45 transition-transform text-xl">
@@ -355,14 +338,12 @@ export default function PricingPage() {
                 <p className="mt-3 text-ink-400 text-sm leading-relaxed">{f.a}</p>
               </details>
             ))}
-          </div>
-        </section>
+        </div>
+      </section>
 
-        <Faqs />
-        <Cta />
-      </main>
-      <Footer />
-    </>
+      <Faqs />
+      <Cta />
+    </main>
   );
 }
 
@@ -379,7 +360,7 @@ function Tier({
     <div
       className={cn(
         "rounded-xl p-2.5",
-        highlight ? "bg-brand-500/10 ring-1 ring-brand-500/30" : "bg-ink-900/40"
+        highlight ? "bg-volt-500/10 ring-1 ring-volt-500/30" : "bg-glass-md"
       )}
     >
       <p className="text-[10px] uppercase tracking-widest text-ink-500">{label}</p>

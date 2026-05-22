@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PROGRAMS, REVIEWS, TRAINERS } from "@/lib/data";
-import { Nav } from "@/components/nav";
-import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Cta } from "@/components/cta";
@@ -102,9 +100,7 @@ export default function TrainerPage({
     programs.length === 0 ? PROGRAMS.filter((p) => p.sport === t.sports[0]).slice(0, 2) : [];
 
   return (
-    <>
-      <Nav />
-      <main id="main">
+    <main id="main" className="fc-marketing-container pb-16">
         <div className="relative h-72 md:h-96 overflow-hidden">
           <img src={t.cover} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/50 to-ink-950/20" />
@@ -433,9 +429,7 @@ export default function TrainerPage({
         <div className="mt-20">
           <Cta />
         </div>
-      </main>
-      <Footer />
-    </>
+    </main>
   );
 }
 
