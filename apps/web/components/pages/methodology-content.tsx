@@ -8,10 +8,7 @@ import {
   Quote,
   ShieldCheck
 } from "lucide-react";
-import { Nav } from "@/components/nav";
-import { Footer } from "@/components/footer";
 import { Cta } from "@/components/cta";
-import { DemoBanner } from "@/components/demo-banner";
 import { formatMsg, useLocale } from "@/lib/i18n-provider";
 
 const pillarNumbers = ["01", "02", "03", "04", "05", "06"];
@@ -22,11 +19,8 @@ export function MethodologyContent() {
   const pillars = locale.methodologyPillars;
 
   return (
-    <>
-      <DemoBanner />
-      <Nav />
-      <main id="main">
-        <section className="relative overflow-hidden pt-16 pb-20">
+    <main id="main" className="fc-marketing-hero fc-marketing-container pb-16">
+        <section className="relative overflow-hidden pb-20">
           <div className="absolute inset-0 -z-10 gradient-bg opacity-70" />
           <div className="mx-auto max-w-4xl px-6 text-center">
             <p className="eyebrow inline-flex items-center gap-1.5">
@@ -161,8 +155,6 @@ export function MethodologyContent() {
         </section>
 
         <Cta />
-      </main>
-      <Footer />
-    </>
+    </main>
   );
 }
