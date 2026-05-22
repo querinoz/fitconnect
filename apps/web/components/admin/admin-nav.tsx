@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { eliteChipVariants } from "@/lib/design-system/variants";
+import { LabelCaps } from "@/components/elite-os/typography";
 
 const LINKS = [
   { href: "/admin", label: "Overview" },
@@ -13,30 +15,31 @@ const LINKS = [
 ];
 
 export function AdminNav() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
 
   return (
-    <nav className="flex flex-wrap gap-2 border-b border-ink-800 pb-4">
-      {LINKS.map((link) => {
-        const active =
-          link.href === "/admin"
-            ? pathname === "/admin"
-            : pathname.startsWith(link.href);
-        return (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={cn(
-              "rounded-full px-4 py-2 text-sm font-semibold transition",
-              active
-                ? "bg-brand-500/15 text-brand-200 ring-1 ring-brand-500/40"
-                : "text-ink-400 hover:text-ink-200 hover:bg-ink-900"
-            )}
-          >
-            {link.label}
-          </Link>
-        );
-      })}
+    <nav aria-label="Admin sections" className="space-y-4 border-b border-eos-outline pb-4">
+      <LabelCaps className="text-eos-iris-soft">FitConnect Admin</LabelCaps>
+      <div className="flex flex-wrap gap-2">
+        {LINKS.map((link) => {
+          const active =
+            link.href === "/admin"
+              ? pathname === "/admin"
+              : pathname.startsWith(link.href);
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                eliteChipVariants({ tone: active ? "iris" : "neutral" }),
+                !active && "hover:border-eos-iris/25 hover:text-eos-on-surface"
+              )}
+            >
+              {link.label}
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 }

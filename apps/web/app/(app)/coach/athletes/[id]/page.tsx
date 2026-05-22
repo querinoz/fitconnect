@@ -25,15 +25,16 @@ import { useCelebrations } from "@/components/loops/celebrations/use-celebration
 import type { LiveSessionIntent } from "@/lib/dashboard/types";
 import type { PlanBlock } from "@/lib/dashboard/types";
 import type { Nudge } from "@/lib/realtime/types";
-import { GlassCard } from "@/components/ui-glass/glass-card";
 import {
-  AIInsight,
-  ChartShell,
-  MetricTile,
-  RealtimeBadge,
-  SectionHeader
-} from "@/components/ui-glass/premium-system";
-import { Button } from "@/components/ui/button";
+  AiInsightCard,
+  BentoCard,
+  BentoGrid,
+  EliteButton,
+  EliteChip,
+  TelemetryShell
+} from "@/components/elite-os";
+import { EliteStatTile } from "@/components/dashboard/elite";
+import { EliteAppPage } from "@/components/shell/elite";
 import { useT } from "@/lib/i18n-provider";
 import { ArrowLeft, HeartPulse, Moon, PencilLine, Target, Zap } from "lucide-react";
 
@@ -79,23 +80,27 @@ function CoachAthleteBody({
 
   if (!athlete || !plan) {
     return (
-      <>
-        <p className="text-ink-400">{t("hub", "athleteNotFound")}</p>
-        <Button asChild variant="outline" className="mt-4">
-          <Link href="/coach/dashboard">{t("hub", "backToRoster")}</Link>
-        </Button>
-      </>
+      <EliteAppPage eyebrow="Coach OS" title={t("hub", "athleteNotFound")}>
+        <BentoCard elevation="1">
+          <p className="text-sm text-eos-on-surface-muted">{t("hub", "athleteNotFound")}</p>
+          <EliteButton asChild variant="secondary" className="mt-4">
+            <Link href="/coach/dashboard">{t("hub", "backToRoster")}</Link>
+          </EliteButton>
+        </BentoCard>
+      </EliteAppPage>
     );
   }
 
   if (athlete.coachId !== coachId) {
     return (
-      <>
-        <p className="text-ink-400">{t("hub", "athleteNotFound")}</p>
-        <Button asChild variant="outline" className="mt-4">
-          <Link href="/coach/dashboard">{t("hub", "backToRoster")}</Link>
-        </Button>
-      </>
+      <EliteAppPage eyebrow="Coach OS" title={t("hub", "athleteNotFound")}>
+        <BentoCard elevation="1">
+          <p className="text-sm text-eos-on-surface-muted">{t("hub", "athleteNotFound")}</p>
+          <EliteButton asChild variant="secondary" className="mt-4">
+            <Link href="/coach/dashboard">{t("hub", "backToRoster")}</Link>
+          </EliteButton>
+        </BentoCard>
+      </EliteAppPage>
     );
   }
 
@@ -103,43 +108,49 @@ function CoachAthleteBody({
   const nextBlock = plan.blocks.find((b) => !b.completed) ?? plan.blocks[0]!;
 
   return (
-    <div className="space-y-4 pb-6">
-      <Button asChild variant="ghost" size="sm" className="w-fit -ml-2 min-h-[44px]">
+    <EliteAppPage
+      eyebrow="Athlete detail"
+      title={`${athlete.name} performance cockpit`}
+      subtitle="Adjust plan load with live recovery, session and celebration signals visible in one place."
+      action={
+        <div className="flex flex-wrap items-center gap-2">
+          <EliteButton asChild size="sm" variant="primary">
+            <Link href={`/coach/athletes/${athleteId}/plan`}>
+              <PencilLine className="h-3.5 w-3.5" aria-hidden />
+              Plan builder
+            </Link>
+          </EliteButton>
+          {live && !live.endedAt ? (
+            <EliteChip as="span" tone="telemetry">
+              Live now
+            </EliteChip>
+          ) : null}
+        </div>
+      }
+    >
+      <EliteButton asChild variant="ghost" size="sm" className="-ml-2 w-fit min-h-[44px]">
         <Link href="/coach/dashboard" className="flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" aria-hidden />
           {t("hub", "backToRoster")}
         </Link>
-      </Button>
+      </EliteButton>
 
-      <SectionHeader
-        eyebrow="Athlete detail"
-        title={`${athlete.name} performance cockpit`}
-        body="Adjust plan load with live recovery, session and celebration signals visible in one place."
-        action={
-          <div className="flex flex-wrap items-center gap-2">
-            <Button asChild size="sm" variant="default">
-              <Link href={`/coach/athletes/${athleteId}/plan`}>
-                <PencilLine className="h-3.5 w-3.5" aria-hidden />
-                Plan builder
-              </Link>
-            </Button>
-            {live && !live.endedAt ? <RealtimeBadge>Live now</RealtimeBadge> : null}
-          </div>
-        }
-      />
-
-      <div className="grid grid-cols-2 gap-3">
-        <MetricTile
+      <BentoGrid cols={2}>
+        <EliteStatTile
           label="Readiness"
-          value={athlete.readiness}
-          delta={athlete.recoveryStatus}
+          value={String(athlete.readiness)}
           icon={Zap}
-          tone={athlete.recoveryStatus === "green" ? "volt" : "signal"}
+          tone={athlete.recoveryStatus === "green" ? "volt" : "performance"}
         />
-        <MetricTile label="HRV" value={`${athlete.hrv} ms`} icon={HeartPulse} tone="brand" />
-        <MetricTile label="Sleep" value={`${athlete.sleepHours}h`} icon={Moon} />
-        <MetricTile label="Next" value={nextBlock.intensity} delta={nextBlock.title} icon={Target} />
-      </div>
+        <EliteStatTile label="HRV" value={`${athlete.hrv} ms`} icon={HeartPulse} tone="iris" />
+        <EliteStatTile label="Sleep" value={`${athlete.sleepHours}h`} icon={Moon} />
+        <EliteStatTile
+          label="Next"
+          value={nextBlock.intensity}
+          change={nextBlock.title}
+          icon={Target}
+        />
+      </BentoGrid>
 
       <ReadinessCard
         percent={athlete.readiness}
@@ -150,35 +161,38 @@ function CoachAthleteBody({
         intent={`${intent} · ${nextBlock.title}`}
       />
 
-      <GlassCard tone="default" className="space-y-3">
-        <h2 className="text-sm uppercase tracking-[0.18em] text-ink-400">
-          Plan adjustments
-        </h2>
+      <BentoCard elevation="1" label="Plan adjustments">
         <QuickDiffChips
           onPick={(diff) =>
             broadcaster.publishDiff({ planId: plan.id, athleteId, diff })
           }
         />
-      </GlassCard>
+      </BentoCard>
 
-      <ChartShell title="Signal trend" subtitle="Recovery, sleep and training load">
+      <TelemetryShell label="Signal trend · Recovery, sleep and training load">
         <div className="flex h-28 items-end gap-2">
-          {[athlete.hrv - 9, athlete.hrv - 3, athlete.hrv + 2, athlete.hrv - 1, athlete.hrv + 4, athlete.hrv - 5, athlete.hrv].map(
-            (value, i) => (
-              <span
-                key={i}
-                className="flex-1 rounded-t-xl bg-gradient-to-t from-plasma-500/70 via-brand-500/70 to-volt-400"
-                style={{
-                  height: `${Math.max(30, Math.min(95, value))}%`,
-                  opacity: 0.48 + i * 0.07
-                }}
-              />
-            )
-          )}
+          {[
+            athlete.hrv - 9,
+            athlete.hrv - 3,
+            athlete.hrv + 2,
+            athlete.hrv - 1,
+            athlete.hrv + 4,
+            athlete.hrv - 5,
+            athlete.hrv
+          ].map((value, i) => (
+            <span
+              key={i}
+              className="flex-1 rounded-t-xl bg-gradient-to-t from-eos-iris/70 via-eos-voltline/70 to-eos-voltline"
+              style={{
+                height: `${Math.max(30, Math.min(95, value))}%`,
+                opacity: 0.48 + i * 0.07
+              }}
+            />
+          ))}
         </div>
-      </ChartShell>
+      </TelemetryShell>
 
-      <AIInsight
+      <AiInsightCard
         title="Coach action"
         body={`Keep ${nextBlock.title.toLowerCase()} adaptive. If live HR drift rises, send a recovery nudge before the final block.`}
       />
@@ -207,9 +221,9 @@ function CoachAthleteBody({
       )}
 
       {celebrations.lastAchievement && (
-        <GlassCard tone="active" className="space-y-3">
+        <BentoCard elevation="2" className="space-y-3 border-eos-voltline/20">
           <p className="text-sm">
-            <span className="text-volt-500 font-bold">
+            <span className="font-bold text-eos-voltline">
               {celebrations.lastAchievement.title}
             </span>{" "}
             · {celebrations.lastAchievement.value}{" "}
@@ -226,11 +240,11 @@ function CoachAthleteBody({
             }}
           />
           {lastReaction && (
-            <p className="text-xs text-ink-400">Sent {lastReaction}</p>
+            <p className="text-xs text-eos-on-surface-muted">Sent {lastReaction}</p>
           )}
-        </GlassCard>
+        </BentoCard>
       )}
-    </div>
+    </EliteAppPage>
   );
 }
 

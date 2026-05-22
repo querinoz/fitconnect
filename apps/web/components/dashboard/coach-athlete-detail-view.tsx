@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, HeartPulse, MessageSquare } from "lucide-react";
+import { ArrowLeft, HeartPulse, Moon, Target } from "lucide-react";
 import { DashboardShell } from "./dashboard-shell";
 import { CoachPlanPanel } from "./coach-plan-panel";
 import { ReadinessCard } from "./readiness-card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { BentoCard, BentoGrid, EliteButton, EliteChip } from "@/components/elite-os";
+import { EliteStatTile } from "@/components/dashboard/elite";
+import { EliteAppPageHeader } from "@/components/shell/elite";
 import { useT } from "@/lib/i18n-provider";
 import { useAthleteContext } from "@/lib/use-dashboard-context";
 import { useDashboardStore } from "@/lib/dashboard-store";
@@ -21,12 +21,12 @@ export function CoachAthleteDetailView({ athleteId, wrapShell = true }: Props) {
 
   if (!ctx.athlete) {
     const fallback = (
-      <>
-        <p className="text-ink-400">{t("hub", "athleteNotFound")}</p>
-        <Button asChild variant="outline" className="mt-4">
+      <BentoCard elevation="1">
+        <p className="text-sm text-eos-on-surface-muted">{t("hub", "athleteNotFound")}</p>
+        <EliteButton asChild variant="secondary" className="mt-4">
           <Link href="/coach/dashboard">{t("hub", "backToRoster")}</Link>
-        </Button>
-      </>
+        </EliteButton>
+      </BentoCard>
     );
     return wrapShell ? <DashboardShell>{fallback}</DashboardShell> : fallback;
   }
@@ -35,52 +35,35 @@ export function CoachAthleteDetailView({ athleteId, wrapShell = true }: Props) {
 
   const body = (
     <>
-      <div className="flex flex-col gap-4">
-        <Button asChild variant="ghost" size="sm" className="w-fit -ml-2 min-h-[44px]">
-          <Link href="/coach/dashboard" className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            {t("hub", "backToRoster")}
-          </Link>
-        </Button>
+      <EliteButton asChild variant="ghost" size="sm" className="-ml-2 w-fit min-h-[44px]">
+        <Link href="/coach/dashboard" className="flex items-center gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          {t("hub", "backToRoster")}
+        </Link>
+      </EliteButton>
 
-        <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div className="flex items-center gap-4">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={athlete.avatar}
-              alt=""
-              className="h-14 w-14 rounded-2xl ring-2 ring-ink-800 object-cover"
-            />
-            <div>
-              <p className="eyebrow">{t("hub", "monitorAthlete")}</p>
-              <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink-50">
-                {athlete.name}
-              </h1>
-              <p className="text-sm text-ink-400">{athlete.sports.join(" · ")}</p>
-            </div>
-          </div>
-          <Badge
-            className={
-              athlete.recoveryStatus === "green"
-                ? "bg-accent-500/10 text-accent-300"
-                : "bg-amber-500/10 text-amber-300"
-            }
+      <EliteAppPageHeader
+        eyebrow={t("hub", "monitorAthlete")}
+        title={athlete.name}
+        subtitle={athlete.sports.join(" · ")}
+        action={
+          <EliteChip
+            as="span"
+            tone={athlete.recoveryStatus === "green" ? "performance" : "recovery"}
           >
             {t("hub", "readiness")} {athlete.readiness}
-          </Badge>
-        </header>
-      </div>
+          </EliteChip>
+        }
+      />
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <ReadinessCard score={athlete.readiness} />
-          </CardContent>
-        </Card>
-        <Stat label={t("dashboard", "hrvLabel")} value={`${athlete.hrv} ms`} />
-        <Stat label={t("dashboard", "sleepRecovery")} value={athlete.sleepHours} />
-        <Stat label={t("hub", "goalCompletion")} value={`${athlete.goalProgress}%`} />
-      </section>
+      <BentoGrid cols={4}>
+        <BentoCard elevation="1">
+          <ReadinessCard score={athlete.readiness} />
+        </BentoCard>
+        <EliteStatTile label={t("dashboard", "hrvLabel")} value={`${athlete.hrv} ms`} icon={HeartPulse} />
+        <EliteStatTile label={t("dashboard", "sleepRecovery")} value={athlete.sleepHours} icon={Moon} tone="iris" />
+        <EliteStatTile label={t("hub", "goalCompletion")} value={`${athlete.goalProgress}%`} icon={Target} tone="volt" />
+      </BentoGrid>
 
       {plan && (
         <CoachPlanPanel
@@ -90,71 +73,50 @@ export function CoachAthleteDetailView({ athleteId, wrapShell = true }: Props) {
         />
       )}
 
-      <section className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <HeartPulse className="h-4 w-4" />
-              {t("hub", "recoveryNotes")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-ink-300 leading-relaxed">
-              {plan?.aiSuggestion ?? t("hub", "noPlanYet")}
-            </p>
-            {plan && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="mt-4 min-h-[44px]"
-                onClick={() =>
-                  updatePlanSuggestion(
-                    plan.id,
-                    "Adjusted: lighter Thursday — strides only until HRV normalises."
-                  )
-                }
-              >
-                {t("hub", "sendRecoveryNudge")}
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <BentoCard elevation="1" label={t("hub", "recoveryNotes")}>
+          <p className="text-sm leading-relaxed text-eos-on-surface-muted">
+            {plan?.aiSuggestion ?? t("hub", "noPlanYet")}
+          </p>
+          {plan && (
+            <EliteButton
+              size="sm"
+              variant="secondary"
+              className="mt-4 min-h-[44px]"
+              onClick={() =>
+                updatePlanSuggestion(
+                  plan.id,
+                  "Adjusted: lighter Thursday — strides only until HRV normalises."
+                )
+              }
+            >
+              {t("hub", "sendRecoveryNudge")}
+            </EliteButton>
+          )}
+        </BentoCard>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              {t("dashboard", "messages")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
+        <BentoCard elevation="1" label={t("dashboard", "messages")}>
+          <div className="space-y-2">
             {messages.map((m) => (
               <div
                 key={m.id}
                 className={`rounded-xl border p-3 text-sm ${
-                  m.unread ? "border-brand-400/40 bg-brand-500/5" : "border-ink-800"
+                  m.unread
+                    ? "border-eos-iris/40 bg-eos-iris-glow/10"
+                    : "border-eos-outline"
                 }`}
               >
-                <p className="text-xs text-ink-500 capitalize">{m.from} · {m.when}</p>
-                <p className="text-ink-200 mt-1">{m.preview}</p>
+                <p className="text-xs capitalize text-eos-on-surface-muted">
+                  {m.from} · {m.when}
+                </p>
+                <p className="mt-1 text-ink-200">{m.preview}</p>
               </div>
             ))}
-          </CardContent>
-        </Card>
-      </section>
+          </div>
+        </BentoCard>
+      </div>
     </>
   );
 
   return wrapShell ? <DashboardShell>{body}</DashboardShell> : body;
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <Card>
-      <CardContent className="pt-6">
-        <p className="text-2xl font-display font-bold tabular-nums">{value}</p>
-        <p className="text-xs text-ink-400 mt-1">{label}</p>
-      </CardContent>
-    </Card>
-  );
 }

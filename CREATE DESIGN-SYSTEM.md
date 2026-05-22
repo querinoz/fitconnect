@@ -118,7 +118,7 @@ import { eliteSpring, eliteModal, eliteSheet, eliteStagger } from "@/lib/motion/
 6. **Marketing page migration** ✅ — `/community`, `/programs`, `/methodology` under `(marketing)` + `MarketingShell`
 7. **Page refactors · mobile · audits** ✅ — `/mobile`, `/onboarding/*` on MarketingShell; Elite onboarding; route audit
 8. **App pages · landing polish** ✅ — `EliteAppPage`, secondary routes on Bento/Elite; landing download EOS
-9. Remaining refactors · admin · legacy views
+9. **Remaining refactors · admin · legacy views** ✅ — `AdminShell`, admin pages on Elite OS; coach athlete detail; legacy dashboard views migrated
 
 ### Auth overlay usage
 
@@ -183,3 +183,14 @@ import { BentoCard, EliteButton } from "@/components/elite-os";
 - **Secondary routes:** `/sessions`, `/inbox`, `/profile`, `/map`, `/settings/*`, coach roster/profile
 - **Tab panels:** `athlete-tab-panels.tsx` uses `BentoCard`, `EliteStatTile`, `AiInsightCard`
 - **Landing CTA band:** `DownloadSection` uses Elite typography + `EliteButton`
+
+### Admin shell usage
+
+```tsx
+import { AdminShell } from "@/components/shell/admin-shell";
+import { EliteAppPage } from "@/components/shell/elite";
+import { BentoCard, BentoGrid, EliteButton, EliteChip } from "@/components/elite-os";
+```
+
+- **Admin routes:** `/admin/*` use `AdminShell` (MarketingNav minimal + Elite floor) — no legacy `Nav`/`Footer`
+- **Legacy preview views:** `athlete-dashboard-view`, `coach-dashboard-view`, `coach-athlete-detail-view` use Elite OS primitives inside `DashboardShell`

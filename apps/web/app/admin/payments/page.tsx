@@ -1,7 +1,9 @@
 "use client";
 
+import { BentoCard } from "@/components/elite-os";
 import { ADMIN_PAYMENTS } from "@/lib/admin/kpis";
 import { formatPrice } from "@/lib/utils";
+import { EliteAppPage } from "@/components/shell/elite";
 
 export default function AdminPaymentsPage() {
   const paid = ADMIN_PAYMENTS.filter((p) => p.status === "paid");
@@ -9,30 +11,27 @@ export default function AdminPaymentsPage() {
   const revenue = paid.reduce((sum, p) => sum + p.amountEur, 0);
 
   return (
-    <>
-      <h1 className="font-display text-3xl font-bold">Payments</h1>
-      <p className="mt-2 text-sm text-ink-400">
-        Revenue {formatPrice(revenue)} · {pending.length} pending payouts
-      </p>
-      <div className="mt-8 space-y-3">
+    <EliteAppPage
+      eyebrow="Admin"
+      title="Payments"
+      subtitle={`Revenue ${formatPrice(revenue)} · ${pending.length} pending payouts`}
+    >
+      <div className="space-y-3">
         {ADMIN_PAYMENTS.map((row) => (
-          <article
-            key={row.id}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-ink-800 bg-ink-950/60 px-5 py-4"
-          >
+          <BentoCard key={row.id} elevation="1" className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="font-semibold text-ink-100">{row.party}</p>
-              <p className="text-xs text-ink-500">
+              <p className="text-xs text-eos-on-surface-muted">
                 {row.type} · {row.date}
               </p>
             </div>
             <div className="text-right">
               <p className="font-bold text-ink-50">{formatPrice(row.amountEur)}</p>
-              <p className="text-xs capitalize text-ink-400">{row.status}</p>
+              <p className="text-xs capitalize text-eos-on-surface-muted">{row.status}</p>
             </div>
-          </article>
+          </BentoCard>
         ))}
       </div>
-    </>
+    </EliteAppPage>
   );
 }
