@@ -2,6 +2,11 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { STORAGE_KEY } from "@/lib/i18n/server";
 import { SUPPORTED_LANGS, type Lang } from "@/lib/i18n";
+import {
+  isDemoModeEnv,
+  isSupabaseConfiguredEnv,
+  shouldEnforceSupabaseAuth
+} from "@/lib/auth/middleware-auth";
 
 const PROTECTED_PREFIXES = [
   "/dashboard",
@@ -42,25 +47,23 @@ export async function middleware(request: NextRequest) {
 
   if (!isProtectedPath(pathname)) return NextResponse.next();
 
-  const demoMode = process.env.NEXT_PUBLIC_DEMO_MODE !== "false";
-  const isProduction = process.env.VERCEL_ENV === "production";
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const demoMode = isDemoModeEnv(process.env.NEXT_PUBLIC_DEMO_MODE);
+  const supabaseConfigured = isSupabaseConfiguredEnv(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
 
-  if (isProduction && (demoMode || !url || !key)) {
-    const signIn = new URL("/signin", request.url);
-    signIn.searchParams.set("next", pathname);
-    signIn.searchParams.set("error", demoMode ? "demo-disabled" : "auth-unconfigured");
-    return NextResponse.redirect(signIn);
-  }
-
-  if (demoMode || !url || !key) {
+  // Demo / local auth: client Zustand + AuthGate — no server session cookie required.
+  if (!shouldEnforceSupabaseAuth({ demoMode, supabaseConfigured })) {
     return NextResponse.next();
   }
 
   let response = NextResponse.next({ request: { headers: request.headers } });
 
-  const supabase = createServerClient(url, key, {
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
     cookies: {
       get(name: string) {
         return request.cookies.get(name)?.value;

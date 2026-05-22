@@ -56,7 +56,7 @@ export async function openDemoAthleteAndCoach(browser: Browser) {
   await athlete.goto("/dashboard", { waitUntil: "load" });
   await coach.goto("/coach/dashboard", { waitUntil: "load" });
 
-  await expect(athlete.getByRole("button", { name: "Book session" })).toBeVisible({
+  await expect(athlete.getByRole("link", { name: "Find a coach" }).first()).toBeVisible({
     timeout: 20_000
   });
   await expect(coach.getByText("Roster readiness")).toBeVisible({ timeout: 20_000 });
@@ -66,9 +66,13 @@ export async function openDemoAthleteAndCoach(browser: Browser) {
 
 export async function signUpAthlete(page: Page, email: string) {
   await page.goto("/signup", { waitUntil: "load" });
-  await waitForAuthForm(page);
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Performance" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.waitForTimeout(1300);
+  await page.getByRole("button", { name: "Continue" }).click();
   await page.locator("#name").fill("E2E Athlete");
-  await page.getByRole("button", { name: "athlete", exact: true }).click();
   await page.locator("#email").fill(email);
   await page.locator("#password").fill("password123");
   await page.getByRole("checkbox").check();

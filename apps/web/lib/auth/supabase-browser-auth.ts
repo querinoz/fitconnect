@@ -87,3 +87,20 @@ export async function signInWithOAuth(
   if (error) return { ok: false, message: error.message };
   return { ok: true, mode: "supabase" };
 }
+
+export async function signOutSession(): Promise<void> {
+  if (authBackend() === "demo") return;
+  const supabase = createSupabaseBrowserClient();
+  if (!supabase) return;
+  await supabase.auth.signOut();
+}
+
+export async function fetchSupabaseAuthUser() {
+  if (authBackend() === "demo") return null;
+  const supabase = createSupabaseBrowserClient();
+  if (!supabase) return null;
+  const {
+    data: { session }
+  } = await supabase.auth.getSession();
+  return session?.user ?? null;
+}

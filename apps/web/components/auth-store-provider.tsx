@@ -2,12 +2,15 @@
 
 import { useEffect, type ReactNode } from "react";
 import { useAuthStore } from "@/lib/auth-store";
+import { useSupabaseAuthSync } from "@/lib/auth/use-supabase-auth-sync";
 
 /**
  * Rehydrates the persisted auth store once on the client.
  * Required with `skipHydration` to avoid SSR mismatch and rehydration races.
  */
 export function AuthStoreProvider({ children }: { children: ReactNode }) {
+  useSupabaseAuthSync();
+
   useEffect(() => {
     void Promise.resolve(useAuthStore.persist.rehydrate()).then(() => {
       if (process.env.NODE_ENV === "production") return;

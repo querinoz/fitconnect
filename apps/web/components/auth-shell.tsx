@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import {
   ArrowRight,
   Lock,
@@ -16,14 +16,18 @@ import {
   createDemoUserFromSignup,
   dashboardPathForRole,
   onboardingPathForRole,
+  safeInternalNextPath,
   validateCredentials
 } from "@/lib/auth";
+import { mapSupabaseUserToAuthUser } from "@/lib/auth/map-supabase-user";
 import {
   authBackend,
+  fetchSupabaseAuthUser,
   signInWithMagicLink,
   signInWithPassword,
   signUpWithPassword
 } from "@/lib/auth/supabase-browser-auth";
+import { logoutAuthSession } from "@/lib/auth/use-supabase-auth-sync";
 import { useAuthStore } from "@/lib/auth-store";
 import { useAuthHydrated } from "@/lib/use-auth-hydrated";
 import { useOnboardingStore } from "@/lib/onboarding/store";
@@ -69,8 +73,8 @@ export function AuthShell({
 }: AuthShellProps) {
   const t = useT();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const login = useAuthStore((s) => s.login);
-  const logout = useAuthStore((s) => s.logout);
   const registered = useAuthStore((s) => s.registered);
   const registerDemo = useAuthStore((s) => s.registerDemo);
   const user = useAuthStore((s) => s.user);
@@ -88,6 +92,25 @@ export function AuthShell({
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [magicSent, setMagicSent] = useState(false);
+
+  const nextFromQuery = useMemo(
+    () => safeInternalNextPath(searchParams.get("next")),
+    [searchParams]
+  );
+
+  const authErrorParam = searchParams.get("error");
+
+  function resolveRedirect(role: import("@/lib/auth").UserRole) {
+    return redirectOverride ?? nextFromQuery ?? dashboardPathForRole(role);
+  }
+
+  async function completeLogin(authUser: import("@/lib/auth").AuthUser) {
+    login(authUser);
+    setSubmitted(false);
+    const target = resolveRedirect(authUser.role);
+    router.replace(target);
+    router.refresh();
+  }
 
   useEffect(() => {
     if (mode !== "signin" || !coachDemoShortcut) return;
@@ -120,10 +143,21 @@ export function AuthShell({
           setSubmitted(false);
           return;
         }
+
         const demoUser = validateCredentials(identifier, password, registered);
-        if (demoUser) login(demoUser);
-        setSubmitted(false);
-        router.replace(redirectOverride ?? dashboardPathForRole(demoUser?.role ?? "athlete"));
+        if (demoUser) {
+          await completeLogin(demoUser);
+          return;
+        }
+
+        const supabaseUser = await fetchSupabaseAuthUser();
+        if (!supabaseUser) {
+          setError(t("auth", "invalidCredentials"));
+          setSubmitted(false);
+          return;
+        }
+
+        await completeLogin(mapSupabaseUserToAuthUser(supabaseUser));
         return;
       }
 
@@ -133,9 +167,7 @@ export function AuthShell({
         setSubmitted(false);
         return;
       }
-      login(authUser);
-      setSubmitted(false);
-      router.replace(redirectOverride ?? dashboardPathForRole(authUser.role));
+      await completeLogin(authUser);
       return;
     }
 
@@ -194,8 +226,7 @@ export function AuthShell({
     }
     const demoUser = validateCredentials(role === "coach" ? "Coach" : "Athlete", role === "coach" ? "Coach" : "Athlete");
     if (demoUser) {
-      login(demoUser);
-      router.replace(redirectOverride ?? dashboardPathForRole(demoUser.role));
+      void completeLogin(demoUser);
     }
   }
 
@@ -271,6 +302,12 @@ export function AuthShell({
               onDemoComplete={handleDemoOAuth}
             />
 
+            {authErrorParam === "auth-unconfigured" ? (
+              <EliteAuthAlert tone="error" className="mb-4">
+                Authentication is not configured for this environment. Contact support.
+              </EliteAuthAlert>
+            ) : null}
+
             {mode === "signin" && hydrated && user && (
               <motion.div
                 initial={fadeIn.initial}
@@ -288,12 +325,17 @@ export function AuthShell({
                       type="button"
                       size="sm"
                       onClick={() =>
-                        router.push(redirectOverride ?? dashboardPathForRole(user.role))
+                        router.push(resolveRedirect(user.role))
                       }
                     >
                       {t("auth", "continueToDashboard")}
                     </EliteButton>
-                    <EliteButton type="button" variant="ghost" size="sm" onClick={() => logout()}>
+                    <EliteButton
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => void logoutAuthSession()}
+                    >
                       <LogOut className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
                       {t("auth", "signOut")}
                     </EliteButton>
@@ -402,7 +444,7 @@ export function AuthShell({
                 </label>
               )}
 
-              <EliteButton type="submit" className="w-full min-h-[48px]" disabled={submitted || !hydrated}>
+              <EliteButton type="submit" className="w-full min-h-[48px]" disabled={submitted}>
                 {submitted ? (
                   <span className="inline-flex items-center gap-2">
                     <span className="h-3 w-3 animate-spin rounded-full border-2 border-eos-floor/40 border-t-eos-floor" />

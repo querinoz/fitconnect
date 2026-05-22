@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { AuthShell } from "@/components/auth-shell";
 import { useT } from "@/lib/i18n-provider";
 
@@ -9,11 +10,7 @@ interface SignInClientProps {
   embedded?: boolean;
 }
 
-export function SignInClient({
-  redirectOverride,
-  coachDemoShortcut = false,
-  embedded = false
-}: SignInClientProps) {
+function SignInContent(props: SignInClientProps) {
   const t = useT();
 
   return (
@@ -25,9 +22,17 @@ export function SignInClient({
       switchPrompt={t("auth", "noAccount")}
       switchLabel={t("auth", "createAccount")}
       switchHref="/signup"
-      redirectOverride={redirectOverride}
-      coachDemoShortcut={coachDemoShortcut}
-      embedded={embedded}
+      redirectOverride={props.redirectOverride}
+      coachDemoShortcut={props.coachDemoShortcut}
+      embedded={props.embedded}
     />
+  );
+}
+
+export function SignInClient(props: SignInClientProps) {
+  return (
+    <Suspense fallback={null}>
+      <SignInContent {...props} />
+    </Suspense>
   );
 }
