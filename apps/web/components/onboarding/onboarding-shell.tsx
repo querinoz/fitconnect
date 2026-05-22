@@ -4,8 +4,9 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { GlassCard } from "@/components/ui-glass/glass-card";
-import { VoltButton } from "@/components/ui-glass/volt-button";
+import { EliteAuthPanel } from "@/components/auth/elite-auth-panel";
+import { EliteButton } from "@/components/elite-os/elite-button";
+import { EliteChip } from "@/components/elite-os/elite-chip";
 
 type OnboardingShellProps = {
   title: string;
@@ -38,28 +39,24 @@ export function OnboardingShell({
   const progress = Math.round((step / totalSteps) * 100);
 
   return (
-    <main
-      id="main"
-      className="relative min-h-dvh overflow-hidden bg-ink-950 text-ink-100"
-    >
-      <div className="absolute -top-32 -right-24 -z-10 h-[420px] w-[420px] rounded-full bg-brand-500/15 blur-3xl" />
-      <header className="mx-auto flex max-w-3xl items-center justify-between px-6 py-6">
+    <main id="main" className="fc-marketing-hero fc-marketing-container pb-16">
+      <header className="mx-auto flex max-w-3xl items-center justify-between px-2 pb-6">
         <Link
           href="/"
-          className="text-sm text-ink-400 hover:text-ink-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 rounded-lg"
+          className="text-sm text-ink-400 transition hover:text-ink-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-eos-iris/60 rounded-lg"
         >
           FitConnect
         </Link>
-        <span className="text-xs uppercase tracking-widest text-ink-500">
+        <EliteChip tone="neutral" as="span" className="text-[10px]">
           Step {step} of {totalSteps}
-        </span>
+        </EliteChip>
       </header>
 
-      <div className="mx-auto max-w-3xl px-6 pb-16">
+      <div className="mx-auto max-w-3xl px-2">
         <div className="mb-8">
-          <div className="h-1.5 rounded-full bg-ink-900 overflow-hidden">
+          <div className="h-1.5 overflow-hidden rounded-full bg-eos-carbon eos-inner-stroke">
             <motion.div
-              className="h-full bg-gradient-to-r from-volt-500 to-volt-400"
+              className="h-full bg-gradient-to-r from-eos-voltline to-eos-telemetry"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: reduce ? 0 : 0.4 }}
@@ -71,17 +68,15 @@ export function OnboardingShell({
               const done = n < step;
               const active = n === step;
               return (
-                <li
-                  key={label}
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ring-1",
-                    done && "bg-accent-500/15 text-accent-300 ring-accent-500/30",
-                    active && "bg-brand-500/15 text-brand-200 ring-brand-500/40",
-                    !done && !active && "text-ink-500 ring-ink-800"
-                  )}
-                >
-                  {done ? <Check className="h-3 w-3" /> : null}
-                  {label}
+                <li key={label}>
+                  <EliteChip
+                    tone={done ? "volt" : active ? "iris" : "neutral"}
+                    as="span"
+                    className={cn("text-[10px]", !done && !active && "opacity-50")}
+                  >
+                    {done ? <Check className="mr-1 inline h-3 w-3" aria-hidden /> : null}
+                    {label}
+                  </EliteChip>
                 </li>
               );
             })}
@@ -94,27 +89,26 @@ export function OnboardingShell({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: reduce ? 0 : 0.35 }}
         >
-          <GlassCard tone="active" className="rounded-3xl p-7 md:p-9">
-            <h1 className="font-display text-2xl md:text-3xl font-bold">{title}</h1>
-            <p className="mt-2 text-ink-400">{subtitle}</p>
-            <div className="mt-6 space-y-4">{children}</div>
+          <EliteAuthPanel badge="Onboarding" title={title} subtitle={subtitle}>
+            <div className="space-y-4">{children}</div>
             <div className="mt-8 flex flex-wrap gap-3">
               {showBack && step > 1 && onBack && (
-                <VoltButton type="button" variant="ghost" onClick={onBack}>
-                  <ArrowLeft className="h-4 w-4 mr-1.5" aria-hidden />
+                <EliteButton type="button" variant="ghost" onClick={onBack}>
+                  <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden />
                   Back
-                </VoltButton>
+                </EliteButton>
               )}
-              <VoltButton
+              <EliteButton
                 type="button"
+                variant="primary"
                 className="min-w-[140px]"
                 disabled={nextDisabled}
                 onClick={onNext}
               >
                 {nextLabel}
-              </VoltButton>
+              </EliteButton>
             </div>
-          </GlassCard>
+          </EliteAuthPanel>
         </motion.div>
       </div>
     </main>

@@ -6,6 +6,7 @@ import { HeartHandshake, LayoutDashboard, Users } from "lucide-react";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 import { useAuthStore } from "@/lib/auth-store";
+import { useInEliteShell } from "@/lib/hooks/use-in-elite-shell";
 import { useT } from "@/lib/i18n-provider";
 import { cn } from "@/lib/utils";
 
@@ -16,8 +17,9 @@ type DashboardShellProps = {
 };
 
 export function DashboardShell({ children, assistant }: DashboardShellProps) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const user = useAuthStore((s) => s.user);
+  const inEliteShell = useInEliteShell();
   const t = useT();
 
   const tabs = [
@@ -38,6 +40,20 @@ export function DashboardShell({ children, assistant }: DashboardShellProps) {
   ];
 
   const showMobileTabs = user?.role === "admin" || user?.role === "coach";
+
+  if (inEliteShell) {
+    return (
+      <>
+        <main
+          id="main"
+          className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-8 pb-24 lg:pb-10"
+        >
+          {children}
+        </main>
+        {assistant}
+      </>
+    );
+  }
 
   return (
     <>

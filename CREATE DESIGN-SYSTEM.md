@@ -115,7 +115,9 @@ import { eliteSpring, eliteModal, eliteSheet, eliteStagger } from "@/lib/motion/
 3. ~~Motion wiring~~ ✅
 4. ~~Dashboards~~ ✅
 5. **Auth overlays** ✅ — `EliteAuthPanel`, `EliteAuthField`, modal routes
-6. Page refactors · mobile · audits
+6. **Marketing page migration** ✅ — `/community`, `/programs`, `/methodology` under `(marketing)` + `MarketingShell`
+7. **Page refactors · mobile · audits** ✅ — `/mobile`, `/onboarding/*` on MarketingShell; Elite onboarding; route audit
+8. App pages · landing polish · remaining refactors
 
 ### Auth overlay usage
 
