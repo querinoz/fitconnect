@@ -5,8 +5,13 @@ import { SUPPORTED_LANGS, type Lang } from "@/lib/i18n";
 import {
   isDemoModeEnv,
   isSupabaseConfiguredEnv,
-  shouldEnforceSupabaseAuth
+  shouldEnforceSupabaseAuth,
+  hasValidDemoSessionCookie
 } from "@/lib/auth/middleware-auth";
+import {
+  DEMO_SESSION_COOKIE,
+  isAllowedDemoSessionId
+} from "@/lib/auth/demo-session";
 
 const PROTECTED_PREFIXES = [
   "/dashboard",
@@ -86,6 +91,11 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
+    const demoCookie = request.cookies.get(DEMO_SESSION_COOKIE)?.value;
+    if (hasValidDemoSessionCookie(demoCookie, isAllowedDemoSessionId)) {
+      return response;
+    }
+
     const signIn = new URL("/signin", request.url);
     signIn.searchParams.set("next", pathname);
     return NextResponse.redirect(signIn);

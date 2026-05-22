@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   isDemoModeEnv,
   isSupabaseConfiguredEnv,
-  shouldEnforceSupabaseAuth
+  shouldEnforceSupabaseAuth,
+  hasValidDemoSessionCookie
 } from "./middleware-auth";
 
 describe("middleware auth policy", () => {
@@ -31,5 +32,12 @@ describe("middleware auth policy", () => {
   it("detects Supabase env configuration", () => {
     expect(isSupabaseConfiguredEnv("https://x.supabase.co", "anon-key")).toBe(true);
     expect(isSupabaseConfiguredEnv(undefined, "anon-key")).toBe(false);
+  });
+
+  it("accepts valid demo session cookies", () => {
+    expect(
+      hasValidDemoSessionCookie("athlete", (id) => id === "athlete")
+    ).toBe(true);
+    expect(hasValidDemoSessionCookie("%invalid", () => false)).toBe(false);
   });
 });

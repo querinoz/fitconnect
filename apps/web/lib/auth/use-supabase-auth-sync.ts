@@ -8,6 +8,11 @@ import {
 } from "@/lib/auth/supabase-browser-auth";
 import { mapSupabaseUserToAuthUser } from "@/lib/auth/map-supabase-user";
 import { createSupabaseBrowserClient } from "@/lib/auth/supabase/client";
+import {
+  clearDemoSessionCookie,
+  isAllowedDemoSessionId,
+  setDemoSessionCookie
+} from "@/lib/auth/demo-session";
 
 /**
  * Keeps Zustand auth aligned with Supabase session when demo mode is off.
@@ -51,5 +56,6 @@ export function useSupabaseAuthSync() {
 /** Log out demo Zustand state and Supabase session when configured. */
 export async function logoutAuthSession() {
   useAuthStore.getState().logout();
+  clearDemoSessionCookie();
   await signOutSession();
 }

@@ -21,6 +21,10 @@ import {
 } from "@/lib/auth";
 import { mapSupabaseUserToAuthUser } from "@/lib/auth/map-supabase-user";
 import {
+  clearDemoSessionCookie,
+  setDemoSessionCookie
+} from "@/lib/auth/demo-session";
+import {
   authBackend,
   fetchSupabaseAuthUser,
   signInWithMagicLink,
@@ -104,10 +108,22 @@ export function AuthShell({
     return redirectOverride ?? nextFromQuery ?? dashboardPathForRole(role);
   }
 
-  async function completeLogin(authUser: import("@/lib/auth").AuthUser) {
+  async function completeLogin(
+    authUser: import("@/lib/auth").AuthUser,
+    options?: { persistDemoCookie?: boolean }
+  ) {
     login(authUser);
+    if (options?.persistDemoCookie !== false) {
+      setDemoSessionCookie(authUser.id);
+    } else {
+      clearDemoSessionCookie();
+    }
     setSubmitted(false);
     const target = resolveRedirect(authUser.role);
+    if (typeof window !== "undefined") {
+      window.location.assign(target);
+      return;
+    }
     router.replace(target);
     router.refresh();
   }
@@ -136,17 +152,17 @@ export function AuthShell({
         return;
       }
 
+      const demoUser = validateCredentials(identifier, password, registered);
+      if (demoUser) {
+        await completeLogin(demoUser);
+        return;
+      }
+
       if (authBackend() === "supabase" && identifier.includes("@")) {
         const result = await signInWithPassword(identifier, password);
         if (!result.ok) {
           setError(result.message);
           setSubmitted(false);
-          return;
-        }
-
-        const demoUser = validateCredentials(identifier, password, registered);
-        if (demoUser) {
-          await completeLogin(demoUser);
           return;
         }
 
@@ -157,17 +173,14 @@ export function AuthShell({
           return;
         }
 
-        await completeLogin(mapSupabaseUserToAuthUser(supabaseUser));
+        await completeLogin(mapSupabaseUserToAuthUser(supabaseUser), {
+          persistDemoCookie: false
+        });
         return;
       }
 
-      const authUser = validateCredentials(identifier, password, registered);
-      if (!authUser) {
-        setError(t("auth", "invalidCredentials"));
-        setSubmitted(false);
-        return;
-      }
-      await completeLogin(authUser);
+      setError(t("auth", "invalidCredentials"));
+      setSubmitted(false);
       return;
     }
 
@@ -324,9 +337,10 @@ export function AuthShell({
                     <EliteButton
                       type="button"
                       size="sm"
-                      onClick={() =>
-                        router.push(resolveRedirect(user.role))
-                      }
+                      onClick={() => {
+                        setDemoSessionCookie(user.id);
+                        window.location.assign(resolveRedirect(user.role));
+                      }}
                     >
                       {t("auth", "continueToDashboard")}
                     </EliteButton>
