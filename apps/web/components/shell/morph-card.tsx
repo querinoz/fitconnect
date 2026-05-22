@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import type { HTMLMotionProps } from "framer-motion";
 import type { ReactNode } from "react";
+import { eliteMorph } from "@/lib/motion/elite-motion";
 
 type MorphCardProps = Omit<HTMLMotionProps<"div">, "layoutId"> & {
   morphId: string;
@@ -13,7 +14,7 @@ export function MorphCard({ morphId, children, className, ...rest }: MorphCardPr
   return (
     <motion.div
       layoutId={morphId}
-      transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+      transition={eliteMorph.transition}
       className={className}
       {...rest}
     >

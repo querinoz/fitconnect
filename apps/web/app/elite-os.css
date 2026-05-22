@@ -1,0 +1,241 @@
+/**
+ * FitConnect Elite OS — canonical design tokens (Stitch reference).
+ * Layered on voltline.css; use semantic Tailwind classes, not raw hex in components.
+ */
+:root {
+  /* ── Floor & surface hierarchy (MD3-inspired) ── */
+  --eos-floor: #070b14;
+  --eos-carbon: #111827;
+  --eos-elevated: #151b2d;
+  --eos-surface: #13121b;
+  --eos-surface-dim: #13121b;
+  --eos-surface-container-lowest: #0e0d16;
+  --eos-surface-container-low: #1b1b24;
+  --eos-surface-container: #1f1f28;
+  --eos-surface-container-high: #2a2933;
+  --eos-surface-container-highest: #35343e;
+
+  /* ── Brand accents ── */
+  --eos-iris: #6c63ff;
+  --eos-iris-soft: #c4c0ff;
+  --eos-iris-glow: rgba(108, 99, 255, 0.35);
+  --eos-voltline: #c8ff00;
+  --eos-voltline-dim: rgba(200, 255, 0, 0.12);
+  --eos-voltline-glow: rgba(200, 255, 0, 0.4);
+  --eos-telemetry: #3cd7ff;
+  --eos-telemetry-dim: rgba(60, 215, 255, 0.12);
+  --eos-performance: #00e090;
+  --eos-recovery: #ffb020;
+  --eos-alert: #ff3a5c;
+
+  /* ── Content ── */
+  --eos-on-surface: #e4e1ee;
+  --eos-on-surface-muted: #c7c4d8;
+  --eos-on-surface-subtle: rgba(228, 225, 238, 0.52);
+  --eos-outline: rgba(255, 255, 255, 0.08);
+  --eos-outline-strong: rgba(255, 255, 255, 0.14);
+  --eos-machined-edge: #1f1f28;
+
+  /* ── Radius (hyper-rounded) ── */
+  --eos-radius-nested: 12px;
+  --eos-radius-control: 18px;
+  --eos-radius-card: 24px;
+  --eos-radius-modal: 28px;
+  --eos-radius-pill: 9999px;
+
+  /* ── Spacing (4px base) ── */
+  --eos-unit: 4px;
+  --eos-stack-sm: 8px;
+  --eos-stack-md: 16px;
+  --eos-stack-lg: 24px;
+  --eos-gutter: 24px;
+  --eos-bento-gap: 20px;
+  --eos-container-margin: 32px;
+
+  /* ── Glass ── */
+  --eos-glass-bg: rgba(255, 255, 255, 0.06);
+  --eos-glass-border: rgba(255, 255, 255, 0.08);
+  --eos-glass-blur: 20px;
+
+  /* ── Elevation (optical layering, not drop shadows) ── */
+  --eos-elevation-0: var(--eos-floor);
+  --eos-elevation-1: var(--eos-carbon);
+  --eos-elevation-2: var(--eos-elevated);
+  --eos-elevation-glass: var(--eos-glass-bg);
+
+  /* ── Motion ── */
+  --eos-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --eos-ease-spring: cubic-bezier(0.25, 1.5, 0.5, 1);
+  --eos-duration-micro: 150ms;
+  --eos-duration-ui: 220ms;
+  --eos-duration-screen: 400ms;
+  --eos-duration-data: 1200ms;
+  --eos-spring-stiffness: 380;
+  --eos-spring-damping: 32;
+
+  /* ── Typography scale ── */
+  --eos-display-lg: clamp(2rem, 4vw, 3rem);
+  --eos-display-lg-lh: 1.12;
+  --eos-headline-md: 1.5rem;
+  --eos-headline-md-lh: 1.33;
+  --eos-body-lg: 1.125rem;
+  --eos-body-lg-lh: 1.55;
+  --eos-body-md: 1rem;
+  --eos-body-md-lh: 1.5;
+  --eos-data-metric: 1.25rem;
+  --eos-label-caps: 0.75rem;
+
+  /* Bridge legacy voltline aliases → Elite OS */
+  --ink-950: var(--eos-floor);
+  --volt-500: var(--eos-voltline);
+  --connect-500: var(--eos-telemetry);
+}
+
+/* ── Utility surfaces ── */
+.eos-floor {
+  background-color: var(--eos-floor);
+  color: var(--eos-on-surface);
+}
+
+.eos-bento-grid {
+  display: grid;
+  gap: var(--eos-bento-gap);
+}
+
+.eos-glass {
+  background: var(--eos-glass-bg);
+  backdrop-filter: blur(var(--eos-glass-blur));
+  -webkit-backdrop-filter: blur(var(--eos-glass-blur));
+  border: 1px solid var(--eos-glass-border);
+}
+
+.eos-bento-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--eos-radius-card);
+  background: var(--eos-elevation-1);
+  border: 1px solid var(--eos-outline);
+}
+
+.eos-bento-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid var(--eos-machined-edge);
+  pointer-events: none;
+}
+
+.eos-bento-card[data-elevation="2"] {
+  background: var(--eos-elevation-2);
+}
+
+.eos-bento-card[data-elevation="glass"] {
+  background: var(--eos-glass-bg);
+  backdrop-filter: blur(var(--eos-glass-blur));
+}
+
+.eos-label-caps {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: var(--eos-label-caps);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--eos-on-surface-subtle);
+}
+
+.eos-data-metric {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: var(--eos-data-metric);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--eos-on-surface);
+}
+
+.eos-display {
+  font-family: var(--font-display, inherit);
+  font-size: var(--eos-display-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: var(--eos-display-lg-lh);
+}
+
+.eos-headline {
+  font-family: var(--font-display, inherit);
+  font-size: var(--eos-headline-md);
+  font-weight: 600;
+  line-height: var(--eos-headline-md-lh);
+  letter-spacing: -0.02em;
+}
+
+.eos-body {
+  font-size: var(--eos-body-md);
+  line-height: var(--eos-body-md-lh);
+  color: var(--eos-on-surface-muted);
+}
+
+.eos-volt-glow {
+  box-shadow: 0 0 15px var(--eos-voltline-glow);
+}
+
+.eos-chart-glow {
+  box-shadow: 0 0 20px rgba(60, 215, 255, 0.2);
+}
+
+.eos-iris-focus {
+  box-shadow: 0 0 0 1px var(--eos-iris), 0 0 8px var(--eos-iris-glow);
+}
+
+/* ── App shell (Phase 2) ── */
+.eos-app-shell {
+  background-color: var(--eos-floor);
+}
+
+.eos-app-shell__workspace {
+  isolation: isolate;
+}
+
+@media (min-width: 1024px) {
+  .eos-app-shell {
+    padding-bottom: 0;
+  }
+
+  .eos-side-rail[data-collapsed="false"] {
+    width: 16rem;
+  }
+
+  .eos-side-rail[data-collapsed="true"] {
+    width: 4.75rem;
+  }
+}
+
+.eos-mobile-dock {
+  bottom: calc(0.75rem + env(safe-area-inset-bottom));
+}
+
+.eos-floating-nav {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--eos-floor) 92%, transparent) 0%,
+    transparent 100%
+  );
+}
+
+/* Dashboard cockpits inside Elite App Shell */
+html.eos-app-shell-active .eos-athlete-cockpit,
+html.eos-app-shell-active .eos-coach-command {
+  width: 100%;
+}
+
+html.eos-app-shell-active .fc-dashboard-inner {
+  max-width: 88rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --eos-duration-micro: 0ms;
+    --eos-duration-ui: 0ms;
+    --eos-duration-screen: 0ms;
+  }
+}

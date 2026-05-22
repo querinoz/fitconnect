@@ -3,6 +3,8 @@
 import { useState, type ReactNode } from "react";
 import { signInWithOAuth, authBackend } from "@/lib/auth/supabase-browser-auth";
 import { useT } from "@/lib/i18n-provider";
+import { EliteAuthDivider } from "@/components/auth/elite";
+import { LabelCaps } from "@/components/elite-os/typography";
 import { cn } from "@/lib/utils";
 
 type Provider = {
@@ -117,9 +119,9 @@ export function OAuthRow({
 
   return (
     <div className="space-y-3">
-      <p className="text-center text-xs uppercase tracking-widest text-ink-500">
+      <LabelCaps className="block text-center text-eos-on-surface-subtle">
         {t("auth", "continueWith")}
-      </p>
+      </LabelCaps>
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
         {providers.map((p) => (
           <button
@@ -129,32 +131,26 @@ export function OAuthRow({
             onClick={() => handleClick(p)}
             aria-label={`${t("auth", "continueWith")} ${p.label}`}
             className={cn(
-              "group relative inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-ink-800 bg-ink-950/60 text-sm font-semibold text-ink-100 transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60",
+              "group relative inline-flex h-12 items-center justify-center gap-2 rounded-[var(--eos-radius-control)] border border-eos-outline bg-eos-floor/60 text-sm font-semibold text-eos-on-surface transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-eos-iris/50",
               p.ring
             )}
           >
-            <span className="grid h-6 w-6 place-items-center rounded-md bg-ink-900/80 ring-1 ring-ink-800">
+            <span className="grid h-6 w-6 place-items-center rounded-[var(--eos-radius-nested)] bg-eos-carbon ring-1 ring-eos-outline">
               {p.icon}
             </span>
-            <span className="hidden sm:inline">{p.label}</span>
-            <span className="sm:hidden">{p.label}</span>
-            {pending === p.id && (
-              <span className="absolute inset-x-2 -bottom-px h-px overflow-hidden rounded-full bg-ink-800">
-                <span className="block h-full w-1/2 animate-[loading-bar_1.4s_linear] bg-gradient-to-r from-volt-500 to-volt-400" />
+            <span>{p.label}</span>
+            {pending === p.id ? (
+              <span className="absolute inset-x-2 -bottom-px h-px overflow-hidden rounded-full bg-eos-outline">
+                <span className="block h-full w-1/2 animate-[loading-bar_1.4s_linear] bg-gradient-to-r from-eos-voltline to-eos-telemetry" />
               </span>
-            )}
+            ) : null}
           </button>
         ))}
       </div>
-      {oauthError && (
-        <p className="text-center text-xs text-signal-400">{oauthError}</p>
-      )}
-      <div className="relative py-1">
-        <span className="absolute inset-x-0 top-1/2 -translate-y-1/2 border-t border-ink-800" />
-        <span className="relative mx-auto block w-fit bg-ink-950 px-3 text-[11px] uppercase tracking-widest text-ink-500">
-          {t("auth", "or")}
-        </span>
-      </div>
+      {oauthError ? (
+        <p className="text-center text-xs text-eos-alert">{oauthError}</p>
+      ) : null}
+      <EliteAuthDivider label={t("auth", "or")} />
     </div>
   );
 }

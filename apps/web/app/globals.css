@@ -1,5 +1,6 @@
 @import "./voltline.css";
 @import "./fc-system.css";
+@import "./elite-os.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

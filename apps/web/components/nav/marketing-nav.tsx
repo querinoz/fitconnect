@@ -28,8 +28,8 @@ export function MarketingNav({ minimal = false }: MarketingNavProps) {
     <header className="fixed inset-x-0 top-0 z-[90] px-4 pt-4 sm:px-6">
       <nav
         className={cn(
-          "mx-auto flex max-w-[720px] items-center justify-between gap-2 rounded-full border border-white/10",
-          "bg-ink-950/88 px-3 py-2.5 shadow-[0_24px_80px_-48px_rgba(0,0,0,.85)] backdrop-blur-xl sm:px-5"
+          "eos-glass mx-auto flex max-w-[720px] items-center justify-between gap-2 rounded-[var(--eos-radius-modal)]",
+          "px-3 py-2.5 shadow-[0_24px_80px_-48px_rgba(0,0,0,.85)] sm:px-5"
         )}
         aria-label={localeNav.homeAria}
       >

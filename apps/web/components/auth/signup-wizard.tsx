@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   ArrowRight,
@@ -25,12 +25,18 @@ import { useAuthStore } from "@/lib/auth-store";
 import { useOnboardingStore } from "@/lib/onboarding/store";
 import { useT } from "@/lib/i18n-provider";
 import { OAuthRow } from "@/components/oauth-row";
-import { GlassCard } from "@/components/ui-glass/glass-card";
-import { VoltButton } from "@/components/ui-glass/volt-button";
-import { RealtimeBadge, PremiumCard } from "@/components/ui-glass/premium-system";
-import { PremiumInput, FilterChip } from "@/components/ui-glass/form-system";
+import {
+  EliteAuthAlert,
+  EliteAuthField,
+  EliteAuthPanel
+} from "@/components/auth/elite";
+import { AiInsightCard } from "@/components/elite-os/layout-primitives";
+import { BentoCard } from "@/components/elite-os/bento-card";
+import { EliteButton } from "@/components/elite-os/elite-button";
+import { EliteChip } from "@/components/elite-os/elite-chip";
+import { Headline, LabelCaps } from "@/components/elite-os/typography";
 import { cn } from "@/lib/utils";
-import { FC_EASE } from "@/lib/motion/premium-transitions";
+import { useEliteMotion } from "@/lib/motion/use-elite-motion";
 
 const GOALS = [
   "Performance",
@@ -52,7 +58,7 @@ export function SignupWizard({ embedded = false }: SignupWizardProps) {
   const router = useRouter();
   const registerDemo = useAuthStore((s) => s.registerDemo);
   const setOnboardingRole = useOnboardingStore((s) => s.setRole);
-  const reduce = useReducedMotion();
+  const { reduced, uiTransition } = useEliteMotion();
 
   const [step, setStep] = useState(0);
   const [role, setRole] = useState<"athlete" | "coach">("athlete");
@@ -145,21 +151,22 @@ export function SignupWizard({ embedded = false }: SignupWizardProps) {
 
   return (
     <div className={cn("w-full", !embedded && "fc-marketing-hero fc-marketing-container pb-16")}>
-      <GlassCard tone="active" className="mx-auto max-w-lg rounded-3xl p-7 md:p-9">
-        <div className="mb-6 flex items-center justify-between gap-3">
-          <RealtimeBadge>Onboarding</RealtimeBadge>
-          <span className="text-xs font-semibold text-ink-500">
+      <EliteAuthPanel
+        badge="Onboarding"
+        headerAction={
+          <LabelCaps className="text-eos-on-surface-subtle">
             {step + 1} / {STEPS.length}
-          </span>
-        </div>
-
+          </LabelCaps>
+        }
+        className="mx-auto max-w-lg"
+      >
         <div className="mb-6 flex gap-1">
           {STEPS.map((label, i) => (
             <div
               key={label}
               className={cn(
                 "h-1 flex-1 rounded-full transition-colors",
-                i <= step ? "bg-volt-500" : "bg-ink-800"
+                i <= step ? "bg-eos-voltline" : "bg-eos-outline"
               )}
               aria-hidden
             />
@@ -169,15 +176,15 @@ export function SignupWizard({ embedded = false }: SignupWizardProps) {
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
-            initial={{ opacity: 0, x: reduce ? 0 : 12 }}
+            initial={{ opacity: 0, x: reduced ? 0 : 12 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: reduce ? 0 : -12 }}
-            transition={{ duration: reduce ? 0 : 0.3, ease: FC_EASE }}
+            exit={{ opacity: 0, x: reduced ? 0 : -12 }}
+            transition={uiTransition}
           >
             {step === 0 && (
               <div className="space-y-4">
-                <h2 className="font-display text-2xl font-bold">I am a…</h2>
-                <p className="text-sm text-ink-400">Choose your operating mode.</p>
+                <Headline>I am a…</Headline>
+                <p className="text-sm text-eos-on-surface-muted">Choose your operating mode.</p>
                 <div className="grid grid-cols-2 gap-3">
                   {(["athlete", "coach"] as const).map((r) => (
                     <button
@@ -185,19 +192,19 @@ export function SignupWizard({ embedded = false }: SignupWizardProps) {
                       type="button"
                       onClick={() => setRole(r)}
                       className={cn(
-                        "fc-radius-card border p-5 text-left transition",
+                        "rounded-[var(--eos-radius-card)] border p-5 text-left transition",
                         role === r
-                          ? "border-volt-500/40 bg-volt-500/10 ring-1 ring-volt-500/30"
-                          : "border-glass-border bg-glass-md hover:border-white/10"
+                          ? "border-eos-voltline/40 bg-eos-voltline-dim ring-1 ring-eos-voltline/30"
+                          : "border-eos-outline bg-eos-carbon/50 hover:border-eos-outline-strong"
                       )}
                     >
                       {r === "athlete" ? (
-                        <Dumbbell className="mb-3 h-6 w-6 text-volt-400" />
+                        <Dumbbell className="mb-3 h-6 w-6 text-eos-voltline" />
                       ) : (
-                        <Sparkles className="mb-3 h-6 w-6 text-connect-500" />
+                        <Sparkles className="mb-3 h-6 w-6 text-eos-telemetry" />
                       )}
-                      <p className="font-display font-bold capitalize">{r}</p>
-                      <p className="mt-1 text-xs text-ink-400">
+                      <p className="font-display font-bold capitalize text-eos-on-surface">{r}</p>
+                      <p className="mt-1 text-xs text-eos-on-surface-muted">
                         {r === "athlete" ? "Train smarter with AI readiness" : "Run your coaching OS"}
                       </p>
                     </button>
@@ -208,15 +215,21 @@ export function SignupWizard({ embedded = false }: SignupWizardProps) {
 
             {step === 1 && (
               <div className="space-y-4">
-                <h2 className="font-display text-2xl font-bold flex items-center gap-2">
-                  <Target className="h-6 w-6 text-volt-400" /> Your goals
-                </h2>
-                <p className="text-sm text-ink-400">Pick up to 3 — we personalize from here.</p>
+                <Headline className="flex items-center gap-2">
+                  <Target className="h-6 w-6 text-eos-voltline" /> Your goals
+                </Headline>
+                <p className="text-sm text-eos-on-surface-muted">Pick up to 3 — we personalize from here.</p>
                 <div className="flex flex-wrap gap-2">
                   {GOALS.map((g) => (
-                    <FilterChip key={g} active={goals.includes(g)} onClick={() => toggleGoal(g)}>
+                    <EliteChip
+                      key={g}
+                      tone={goals.includes(g) ? "volt" : "neutral"}
+                      as="button"
+                      type="button"
+                      onClick={() => toggleGoal(g)}
+                    >
                       {g}
-                    </FilterChip>
+                    </EliteChip>
                   ))}
                 </div>
               </div>
@@ -224,7 +237,7 @@ export function SignupWizard({ embedded = false }: SignupWizardProps) {
 
             {step === 2 && (
               <div className="space-y-4">
-                <h2 className="font-display text-2xl font-bold">Experience level</h2>
+                <Headline>Experience level</Headline>
                 <div className="grid gap-2">
                   {(["beginner", "intermediate", "advanced"] as const).map((lvl) => (
                     <button
@@ -232,10 +245,10 @@ export function SignupWizard({ embedded = false }: SignupWizardProps) {
                       type="button"
                       onClick={() => setExperience(lvl)}
                       className={cn(
-                        "rounded-2xl border px-4 py-3 text-left text-sm font-semibold capitalize transition",
+                        "rounded-[var(--eos-radius-control)] border px-4 py-3 text-left text-sm font-semibold capitalize transition",
                         experience === lvl
-                          ? "border-volt-500/40 bg-volt-500/10 text-volt-300"
-                          : "border-glass-border text-ink-300 hover:border-white/10"
+                          ? "border-eos-voltline/40 bg-eos-voltline-dim text-eos-voltline"
+                          : "border-eos-outline text-eos-on-surface-muted hover:border-eos-outline-strong"
                       )}
                     >
                       {lvl}
@@ -247,95 +260,95 @@ export function SignupWizard({ embedded = false }: SignupWizardProps) {
 
             {step === 3 && (
               <div className="space-y-4 text-center">
-                <Brain className="mx-auto h-10 w-10 text-volt-400" />
-                <h2 className="font-display text-2xl font-bold">Building your AI profile</h2>
-                <PremiumCard tone="brand" className="p-5 text-left">
-                  <p className="text-xs font-bold uppercase tracking-widest text-ink-500">
-                    AI insight
-                  </p>
-                  <p className="mt-2 text-sm text-ink-200">
-                    {aiReady
-                      ? `Optimized for ${role} · ${experience} · ${goals.join(", ") || "general fitness"}. Recovery-aware scheduling enabled.`
-                      : "Analyzing goals, experience, and readiness patterns…"}
-                  </p>
-                </PremiumCard>
+                <Brain className="mx-auto h-10 w-10 text-eos-voltline" />
+                <Headline>Building your AI profile</Headline>
+                <BentoCard elevation="glass" padding="md" className="text-left">
+                  <AiInsightCard
+                    title="AI insight"
+                    body={
+                      aiReady
+                        ? `Optimized for ${role} · ${experience} · ${goals.join(", ") || "general fitness"}. Recovery-aware scheduling enabled.`
+                        : "Analyzing goals, experience, and readiness patterns…"
+                    }
+                    className="border-0 bg-transparent p-0"
+                  />
+                </BentoCard>
               </div>
             )}
 
             {step === 4 && (
               <form onSubmit={onSubmit} className="space-y-4">
-                <h2 className="font-display text-2xl font-bold">Create account</h2>
+                <Headline>Create account</Headline>
                 <OAuthRow mode="signup" signupRole={role} onDemoComplete={handleDemoOAuth} />
-                <PremiumInput
+                <EliteAuthField
                   id="name"
+                  label="Full name"
+                  icon={User}
                   required
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
                   placeholder="Full name"
-                  icon={<User className="h-4 w-4" />}
                 />
-                <PremiumInput
+                <EliteAuthField
                   id="email"
+                  label={t("auth", "emailLabel")}
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                   placeholder={t("auth", "emailPlaceholder")}
                 />
-                <PremiumInput
+                <EliteAuthField
                   id="password"
+                  label={t("auth", "passwordLabel")}
                   type="password"
                   required
                   minLength={6}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                   placeholder={t("auth", "passwordPlaceholder")}
                 />
-                <label className="flex items-start gap-2 text-xs text-ink-400">
+                <label className="flex items-start gap-2 text-xs text-eos-on-surface-muted">
                   <input
                     type="checkbox"
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="mt-0.5 accent-volt-500"
+                    className="mt-0.5 accent-eos-voltline"
                   />
                   {t("auth", "legalNote")}
                 </label>
-                {error ? (
-                  <p role="alert" className="rounded-xl border border-signal-500/40 bg-signal-500/10 px-3 py-2 text-sm text-signal-300">
-                    {error}
-                  </p>
-                ) : null}
-                <VoltButton type="submit" disabled={submitting} className="w-full">
+                {error ? <EliteAuthAlert tone="error">{error}</EliteAuthAlert> : null}
+                <EliteButton type="submit" disabled={submitting} className="w-full">
                   {submitting ? "Creating…" : t("auth", "submitSignUp")}
-                </VoltButton>
+                </EliteButton>
               </form>
             )}
           </motion.div>
         </AnimatePresence>
 
-        <div className="mt-6 flex items-center justify-between gap-3 border-t border-glass-border pt-5">
+        <div className="mt-6 flex items-center justify-between gap-3 border-t border-eos-outline pt-5">
           <button
             type="button"
             onClick={prevStep}
             disabled={step === 0}
-            className="inline-flex items-center gap-1 text-sm text-ink-400 disabled:opacity-40 hover:text-ink-200"
+            className="inline-flex items-center gap-1 text-sm text-eos-on-surface-muted disabled:opacity-40 hover:text-eos-on-surface"
           >
             <ArrowLeft className="h-4 w-4" /> Back
           </button>
           {step < 4 ? (
-            <VoltButton type="button" onClick={nextStep} disabled={!canContinue} className="h-10 px-5">
+            <EliteButton type="button" onClick={nextStep} disabled={!canContinue} size="sm">
               Continue <ArrowRight className="h-4 w-4" />
-            </VoltButton>
+            </EliteButton>
           ) : null}
         </div>
 
-        <p className="mt-5 text-center text-sm text-ink-400">
+        <p className="mt-5 text-center text-sm text-eos-on-surface-muted">
           {t("auth", "haveAccount")}{" "}
-          <Link href="/signin" className="font-semibold text-volt-400 hover:text-volt-300">
+          <Link href="/signin" className="font-semibold text-eos-voltline hover:text-eos-voltline/80">
             {t("auth", "signInLink")}
           </Link>
         </p>
-      </GlassCard>
+      </EliteAuthPanel>
     </div>
   );
 }

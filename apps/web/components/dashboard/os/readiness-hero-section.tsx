@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { ChevronRight, Moon, PlayCircle, TrendingUp, Zap } from "lucide-react";
 import { ReadinessRing } from "@/components/ui-glass/readiness-ring";
-import { NivisPanel } from "@/components/ui-glass/nivis-panel";
+import { BentoCard } from "@/components/elite-os/bento-card";
+import { LabelCaps } from "@/components/elite-os/typography";
 import { VoltButton } from "@/components/ui-glass/volt-button";
 import { formatMsg, useLocale } from "@/lib/i18n-provider";
 import { cn } from "@/lib/utils";
@@ -58,9 +59,11 @@ export function ReadinessHeroSection({
         : dashboard.sleepRecovery;
 
   return (
-    <NivisPanel
+    <BentoCard
+      elevation="glass"
+      padding="lg"
       className={cn(
-        "fc-readiness-hero relative mb-6 overflow-hidden p-5 sm:p-6 md:p-8 lg:min-h-[min(42dvh,420px)]",
+        "fc-readiness-hero relative mb-6 overflow-hidden lg:min-h-[min(42dvh,420px)]",
         className
       )}
     >
@@ -177,7 +180,7 @@ export function ReadinessHeroSection({
           </div>
         </div>
       </div>
-    </NivisPanel>
+    </BentoCard>
   );
 }
 
@@ -195,19 +198,17 @@ function MetricTile({
   positive?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-ink-800/70 bg-ink-900/40 px-3 py-3 sm:px-4">
-      <div className="flex items-center gap-2 text-ink-500">
+    <div className="rounded-[var(--eos-radius-nested)] border border-eos-outline bg-eos-floor/40 px-3 py-3 sm:px-4">
+      <div className="flex items-center gap-2 text-eos-on-surface-subtle">
         <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
-        <span className="text-[10px] font-bold uppercase tracking-[0.18em]">{label}</span>
+        <LabelCaps className="opacity-80">{label}</LabelCaps>
       </div>
-      <p className="mt-2 font-display text-xl font-bold tabular-nums text-ink-50 sm:text-2xl">
-        {value}
-      </p>
+      <p className="eos-data-metric mt-2 text-xl sm:text-2xl">{value}</p>
       {delta ? (
         <p
           className={cn(
             "mt-1 text-xs font-medium tabular-nums",
-            positive ? "text-volt-400" : "text-coral-400"
+            positive ? "text-eos-voltline" : "text-eos-alert"
           )}
         >
           {delta} ms

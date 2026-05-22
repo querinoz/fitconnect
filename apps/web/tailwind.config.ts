@@ -105,6 +105,26 @@ const config: Config = {
           1: "var(--ink-800)",
           2: "var(--ink-700)",
           3: "var(--ink-600)"
+        },
+        eos: {
+          floor: "var(--eos-floor)",
+          carbon: "var(--eos-carbon)",
+          elevated: "var(--eos-elevated)",
+          surface: "var(--eos-surface)",
+          "surface-container": "var(--eos-surface-container)",
+          "surface-container-high": "var(--eos-surface-container-high)",
+          iris: "var(--eos-iris)",
+          "iris-soft": "var(--eos-iris-soft)",
+          voltline: "var(--eos-voltline)",
+          "voltline-dim": "var(--eos-voltline-dim)",
+          telemetry: "var(--eos-telemetry)",
+          "telemetry-dim": "var(--eos-telemetry-dim)",
+          performance: "var(--eos-performance)",
+          recovery: "var(--eos-recovery)",
+          alert: "var(--eos-alert)",
+          "on-surface": "var(--eos-on-surface)",
+          "on-surface-muted": "var(--eos-on-surface-muted)",
+          outline: "var(--eos-outline)"
         }
       },
       fontFamily: {
@@ -114,7 +134,15 @@ const config: Config = {
           "system-ui",
           "sans-serif"
         ],
-        mono: ["ui-monospace", "monospace"]
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"]
+      },
+      spacing: {
+        "eos-sm": "var(--eos-stack-sm)",
+        "eos-md": "var(--eos-stack-md)",
+        "eos-lg": "var(--eos-stack-lg)",
+        "eos-gutter": "var(--eos-gutter)",
+        "eos-bento": "var(--eos-bento-gap)",
+        "eos-container": "var(--eos-container-margin)"
       },
       keyframes: {
         "fade-up": {
@@ -207,7 +235,11 @@ const config: Config = {
       },
       borderRadius: {
         glass: "20px",
-        "glass-lg": "28px"
+        "glass-lg": "28px",
+        "eos-nested": "var(--eos-radius-nested)",
+        "eos-control": "var(--eos-radius-control)",
+        "eos-card": "var(--eos-radius-card)",
+        "eos-modal": "var(--eos-radius-modal)"
       },
       backdropBlur: {
         glass: "18px",
@@ -224,7 +256,10 @@ const config: Config = {
         premium: "var(--shadow-premium)",
         focus: "var(--shadow-focus)",
         "glass-edge":
-          "inset 0 0 0 1px var(--glass-border), 0 1px 0 var(--glass-edge)"
+          "inset 0 0 0 1px var(--glass-border), 0 1px 0 var(--glass-edge)",
+        "eos-volt": "0 0 15px var(--eos-voltline-glow)",
+        "eos-chart": "0 0 20px rgba(60, 215, 255, 0.2)",
+        "eos-iris": "0 0 8px var(--eos-iris-glow)"
       },
       transitionTimingFunction: {
         "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",

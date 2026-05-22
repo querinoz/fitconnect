@@ -12,6 +12,9 @@ import {
   Watch
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BentoCard } from "@/components/elite-os";
+import { EliteButton } from "@/components/elite-os/elite-button";
+import { LabelCaps } from "@/components/elite-os/typography";
 import { VoltButton } from "@/components/ui-glass/volt-button";
 import { DesktopSidebar } from "./desktop-sidebar";
 import { ReadinessCardWithExplain } from "@/components/dashboard/readiness-explain-modal";
@@ -23,7 +26,12 @@ import { GamificationPanel } from "@/components/gamification/gamification-panel"
 import { ReadinessHeroSection } from "./readiness-hero-section";
 import { MapWidget } from "./map-widget";
 import { ActivityFeedLive } from "./activity-feed-live";
+import {
+  EliteBentoMotion,
+  EliteBentoMotionItem
+} from "@/components/dashboard/elite";
 import { formatMsg, useLocale } from "@/lib/i18n-provider";
+import { useInEliteShell } from "@/lib/hooks/use-in-elite-shell";
 import type { SessionSummary } from "@fitconnect/types";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
@@ -82,6 +90,7 @@ export function AthleteOsDashboard({
 }: AthleteOsDashboardProps) {
   const { dashboard, hub } = useLocale();
   const os = dashboard.os;
+  const inAppShell = useInEliteShell();
   const [collapsed, setCollapsed] = useState(false);
   const initials = name
     .split(" ")
@@ -100,111 +109,111 @@ export function AthleteOsDashboard({
   ];
 
   return (
-    <div className="fc-dashboard-os flex min-h-0 min-w-0 w-full">
-      <DesktopSidebar
-        collapsed={collapsed}
-        setCollapsed={setCollapsed}
-        nav={athleteNav}
-        profileSlot={
-          <>
-            <div className="flex items-center gap-3">
-              <div className="grid h-9 w-9 place-items-center rounded-xl bg-ink-800 text-sm font-bold text-ink-400">
-                {initials}
+    <div className="fc-dashboard-os eos-athlete-cockpit flex min-h-0 min-w-0 w-full">
+      {!inAppShell ? (
+        <DesktopSidebar
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          nav={athleteNav}
+          profileSlot={
+            <>
+              <div className="flex items-center gap-3">
+                <div className="grid h-9 w-9 place-items-center rounded-xl bg-eos-carbon text-sm font-bold text-eos-on-surface-muted">
+                  {initials}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-eos-on-surface">{name}</p>
+                  <p className="text-[10px] text-eos-on-surface-subtle">
+                    {formatMsg(os.athleteRole, { tier })}
+                  </p>
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-ink-100">{name}</p>
-                <p className="text-[10px] text-ink-500">
-                  {formatMsg(os.athleteRole, { tier })}
-                </p>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {sports.slice(0, 3).map((s) => (
+                  <span
+                    key={s}
+                    className="rounded-full border border-eos-telemetry/20 bg-eos-telemetry-dim px-2 py-0.5 text-[9px] text-eos-telemetry"
+                  >
+                    {s.toLowerCase()}
+                  </span>
+                ))}
               </div>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {sports.slice(0, 3).map((s) => (
-                <span
-                  key={s}
-                  className="rounded-full border border-brand-400/20 bg-brand-400/10 px-2 py-0.5 text-[9px] text-brand-400"
-                >
-                  {s.toLowerCase()}
-                </span>
-              ))}
-            </div>
-          </>
-        }
-        footerSlot={
-          <NivisPanel className="p-3">
-            <p className="mb-1 text-xs font-bold text-brand-400">{os.upgradeTitle}</p>
-            <p className="mb-2.5 text-[10px] text-ink-500">{os.upgradeBody}</p>
-            <VoltButton className="h-9 w-full rounded-lg text-xs">{os.upgradeCta}</VoltButton>
-          </NivisPanel>
-        }
-      />
+            </>
+          }
+          footerSlot={
+            <NivisPanel className="p-3">
+              <p className="mb-1 text-xs font-bold text-eos-iris-soft">{os.upgradeTitle}</p>
+              <p className="mb-2.5 text-[10px] text-eos-on-surface-subtle">{os.upgradeBody}</p>
+              <VoltButton className="h-9 w-full rounded-lg text-xs">{os.upgradeCta}</VoltButton>
+            </NivisPanel>
+          }
+        />
+      ) : null}
 
       <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-        <div className="fc-dashboard-inner mx-auto max-w-6xl p-4 sm:p-5 md:p-8">
-          <ReadinessHeroSection
-            name={name}
-            greeting={greeting}
-            readiness={readiness}
-            hrv={hrv}
-            baselineHrv={baselineHrv}
-            sleepHours={sleepHours}
-            sports={sports}
-            coachName={coachName}
-            streakWeeks={streakWeeks}
-            todayPlan={todayPlan}
-            actions={
-              <>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5 border-ink-700 text-xs text-ink-400 hover:text-ink-200"
-                >
-                  <Link href="/settings/wearables">
-                    <Watch className="h-3.5 w-3.5" /> {os.wearables}
-                  </Link>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  type="button"
-                  className="border-ink-700 text-xs text-ink-400 hover:text-ink-200"
-                >
-                  <Bell className="h-3.5 w-3.5" />
-                </Button>
-                <VoltButton asChild className="h-9 gap-1.5 text-xs">
-                  <Link href="/discover">{os.findCoach}</Link>
-                </VoltButton>
-              </>
-            }
-          />
+        <div className="fc-dashboard-inner mx-auto max-w-[88rem] p-4 sm:p-5 md:p-8">
+          <EliteBentoMotion className="grid grid-cols-1 gap-eos-bento md:grid-cols-12">
+            <EliteBentoMotionItem className="md:col-span-12 xl:col-span-8">
+              <ReadinessHeroSection
+                name={name}
+                greeting={greeting}
+                readiness={readiness}
+                hrv={hrv}
+                baselineHrv={baselineHrv}
+                sleepHours={sleepHours}
+                sports={sports}
+                coachName={coachName}
+                streakWeeks={streakWeeks}
+                todayPlan={todayPlan}
+                actions={
+                  <>
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 border-eos-outline text-xs text-eos-on-surface-muted hover:text-eos-on-surface"
+                    >
+                      <Link href="/settings/wearables">
+                        <Watch className="h-3.5 w-3.5" /> {os.wearables}
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      type="button"
+                      className="border-eos-outline text-xs text-eos-on-surface-muted hover:text-eos-on-surface"
+                    >
+                      <Bell className="h-3.5 w-3.5" />
+                    </Button>
+                    <EliteButton asChild size="sm">
+                      <Link href="/discover">{os.findCoach}</Link>
+                    </EliteButton>
+                  </>
+                }
+              />
+            </EliteBentoMotionItem>
 
-          <div id="map-widget" className="mb-5 grid gap-5 lg:grid-cols-2">
-            <MapWidget />
-            <ActivityFeedLive />
-          </div>
+            <EliteBentoMotionItem className="flex flex-col gap-eos-bento md:col-span-12 xl:col-span-4">
+              <BentoCard padding="md" label={dashboard.strava_sync.title}>
+                <p className="text-sm font-medium text-eos-on-surface">
+                  {dashboard.strava_sync.synced} · {hub.strava_sync.label}
+                </p>
+              </BentoCard>
+              <BentoCard padding="md" label={dashboard.pr_tracker.title}>
+                <p className="eos-data-metric text-eos-voltline">
+                  {formatMsg(dashboard.pr_tracker.streak, { weeks: streakWeeks })}
+                </p>
+              </BentoCard>
+            </EliteBentoMotionItem>
 
-          <div className="mb-5 grid gap-3 sm:grid-cols-2">
-            <NivisPanel className="px-4 py-3">
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink-500">
-                {dashboard.strava_sync.title}
-              </p>
-              <p className="mt-1 text-sm font-medium text-ink-100">
-                {dashboard.strava_sync.synced} · {hub.strava_sync.label}
-              </p>
-            </NivisPanel>
-            <NivisPanel className="px-4 py-3">
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink-500">
-                {dashboard.pr_tracker.title}
-              </p>
-              <p className="mt-1 text-sm font-medium text-volt-400">
-                {formatMsg(dashboard.pr_tracker.streak, { weeks: streakWeeks })}
-              </p>
-            </NivisPanel>
-          </div>
+            <EliteBentoMotionItem id="map-widget" className="md:col-span-12 lg:col-span-6">
+              <MapWidget />
+            </EliteBentoMotionItem>
+            <EliteBentoMotionItem className="md:col-span-12 lg:col-span-6">
+              <ActivityFeedLive />
+            </EliteBentoMotionItem>
 
-          <div className="grid gap-5 xl:grid-cols-3">
-            <div className="space-y-5 xl:col-span-2">
+            <EliteBentoMotionItem className="space-y-eos-bento md:col-span-12 xl:col-span-8">
               <ReadinessCardWithExplain
                 readiness={readiness}
                 hrv={hrv}
@@ -218,36 +227,33 @@ export function AthleteOsDashboard({
                 coachName={coachName}
               />
               {liveSection}
-            </div>
+            </EliteBentoMotionItem>
 
-            <div className="space-y-5">
+            <EliteBentoMotionItem className="space-y-eos-bento md:col-span-12 xl:col-span-4">
               <GamificationPanel />
               <AiInsightsPanel />
-              <NivisPanel className="p-5">
-                <h3 className="mb-4 font-display text-sm font-bold text-ink-100">
-                  {os.quickActions}
-                </h3>
+              <BentoCard padding="md" label={os.quickActions}>
                 <div className="space-y-2.5">
-                  <VoltButton asChild className="w-full rounded-xl text-sm">
+                  <EliteButton asChild className="w-full" size="sm">
                     <Link href="/discover">{os.findSpecialist}</Link>
-                  </VoltButton>
-                  <VoltButton asChild variant="subtle" className="w-full rounded-xl text-sm">
+                  </EliteButton>
+                  <EliteButton asChild variant="secondary" className="w-full" size="sm">
                     <Link href="/programs">{os.browsePrograms}</Link>
-                  </VoltButton>
+                  </EliteButton>
                 </div>
-              </NivisPanel>
-              <NivisPanel className="p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="font-display text-sm font-bold text-ink-100">{os.profile}</h3>
-                  <Button
-                    asChild
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-2 text-xs text-ink-500 hover:text-ink-300"
+              </BentoCard>
+              <BentoCard
+                padding="md"
+                label={os.profile}
+                headerAction={
+                  <Link
+                    href="/profile"
+                    className="text-xs text-eos-on-surface-subtle hover:text-eos-on-surface"
                   >
-                    <Link href="/profile">{os.edit}</Link>
-                  </Button>
-                </div>
+                    {os.edit}
+                  </Link>
+                }
+              >
                 <div className="space-y-2.5 text-sm">
                   {[
                     { k: os.sports, v: sports.join(", ") },
@@ -255,16 +261,18 @@ export function AthleteOsDashboard({
                     { k: os.wearable, v: hub.wearableSync },
                     { k: os.plan, v: tier }
                   ].map((item) => (
-                    <div key={item.k} className="flex items-center justify-between">
-                      <span className="text-xs text-ink-500">{item.k}</span>
-                      <span className="text-xs font-medium text-ink-200">{item.v}</span>
+                    <div key={item.k} className="flex items-center justify-between gap-3">
+                      <LabelCaps className="opacity-60">{item.k}</LabelCaps>
+                      <span className="text-xs font-medium text-eos-on-surface-muted">
+                        {item.v}
+                      </span>
                     </div>
                   ))}
                 </div>
-              </NivisPanel>
+              </BentoCard>
               <IntegrationsHub athleteId={athleteId} />
-            </div>
-          </div>
+            </EliteBentoMotionItem>
+          </EliteBentoMotion>
         </div>
       </div>
     </div>

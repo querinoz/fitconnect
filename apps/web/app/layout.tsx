@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Syne } from "next/font/google";
+import { JetBrains_Mono, Plus_Jakarta_Sans, Syne } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SkipLink } from "@/components/skip-link";
+import { ModalSlot } from "@/components/shell/modal-slot";
 import { SUPPORTED_LANGS } from "@/lib/i18n";
 import { getDictionary, getServerLang } from "@/lib/i18n/server";
 
@@ -25,6 +26,14 @@ const display = Syne({
   preload: true,
   adjustFontFallback: true,
   weight: ["600", "700", "800"]
+});
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+  preload: false,
+  weight: ["400", "500", "700"]
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -106,7 +115,7 @@ export default async function RootLayout({
   return (
     <html
       lang={initialLang}
-      className={`${sans.variable} ${display.variable} dark`}
+      className={`${sans.variable} ${display.variable} ${mono.variable} dark`}
       suppressHydrationWarning
     >
       <head>
@@ -127,7 +136,7 @@ export default async function RootLayout({
         <Providers initialLang={initialLang}>
           <SkipLink />
           {children}
-          {modal}
+          <ModalSlot>{modal}</ModalSlot>
         </Providers>
       </body>
     </html>

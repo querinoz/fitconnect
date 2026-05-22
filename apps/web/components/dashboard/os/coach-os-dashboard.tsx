@@ -14,6 +14,9 @@ import {
   Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EliteButton } from "@/components/elite-os/elite-button";
+import { EliteChip } from "@/components/elite-os/elite-chip";
+import { Headline, LabelCaps } from "@/components/elite-os/typography";
 import { VoltButton } from "@/components/ui-glass/volt-button";
 import { DesktopSidebar } from "./desktop-sidebar";
 import { StatCard } from "./stat-card";
@@ -26,7 +29,13 @@ import { CoachRosterMap } from "./coach-roster-map";
 import { ProgramBuilderPanel } from "./program-builder-panel";
 import { GamificationPanel } from "@/components/gamification/gamification-panel";
 import { CoachStravaFeed } from "@/components/dashboard/coach-strava-feed";
+import { AiInsightsPanel } from "./ai-insights-panel";
+import {
+  EliteBentoMotion,
+  EliteBentoMotionItem
+} from "@/components/dashboard/elite";
 import { formatMsg, useT } from "@/lib/i18n-provider";
+import { useInEliteShell } from "@/lib/hooks/use-in-elite-shell";
 
 type CoachOsDashboardProps = {
   coachId: string;
@@ -48,6 +57,7 @@ export function CoachOsDashboard({
   demoSection
 }: CoachOsDashboardProps) {
   const t = useT();
+  const inAppShell = useInEliteShell();
   const [collapsed, setCollapsed] = useState(false);
   const firstName = coachName.split(" ")[0] ?? coachName;
   const resolvedTitle = coachTitle ?? t("coachDashboard", "defaultCoachTitle");
@@ -61,68 +71,74 @@ export function CoachOsDashboard({
   ];
 
   return (
-    <div className="fc-dashboard-os flex min-h-0 min-w-0 w-full">
-      <DesktopSidebar
-        collapsed={collapsed}
-        setCollapsed={setCollapsed}
-        nav={coachNav}
-        accent="lime"
-        profileSlot={
-          <>
-            <div className="flex items-center gap-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={coachAvatar} alt="" className="h-9 w-9 rounded-xl object-cover" />
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <p className="truncate text-sm font-semibold text-ink-100">{coachName}</p>
-                  <Shield className="h-3 w-3 shrink-0 text-brand-400" />
+    <div className="fc-dashboard-os eos-coach-command flex min-h-0 min-w-0 w-full">
+      {!inAppShell ? (
+        <DesktopSidebar
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          nav={coachNav}
+          accent="lime"
+          profileSlot={
+            <>
+              <div className="flex items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={coachAvatar} alt="" className="h-9 w-9 rounded-xl object-cover" />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <p className="truncate text-sm font-semibold text-eos-on-surface">
+                      {coachName}
+                    </p>
+                    <Shield className="h-3 w-3 shrink-0 text-eos-performance" />
+                  </div>
+                  <p className="text-[10px] text-eos-on-surface-subtle">{resolvedTitle}</p>
                 </div>
-                <p className="text-[10px] text-ink-500">{resolvedTitle}</p>
               </div>
-            </div>
-            <NivisPanel className="mt-3 p-3">
-              <p className="text-[10px] font-semibold text-lime-400">
-                {t("coachDashboard", "thisMonth")}
-              </p>
-              <p className="font-display text-base font-bold text-lime-400">
-                {netPayout}{" "}
-                <span className="text-xs text-lime-400/60">
-                  {t("coachDashboard", "takeHome")}
-                </span>
-              </p>
-            </NivisPanel>
-          </>
-        }
-      />
+              <NivisPanel className="mt-3 p-3">
+                <p className="text-[10px] font-semibold text-eos-performance">
+                  {t("coachDashboard", "thisMonth")}
+                </p>
+                <p className="font-display text-base font-bold text-eos-voltline">
+                  {netPayout}{" "}
+                  <span className="text-xs text-eos-voltline/60">
+                    {t("coachDashboard", "takeHome")}
+                  </span>
+                </p>
+              </NivisPanel>
+            </>
+          }
+        />
+      ) : null}
 
       <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-        <div className="fc-dashboard-inner mx-auto max-w-6xl p-4 sm:p-5 md:p-8">
+        <div className="fc-dashboard-inner mx-auto max-w-[100rem] p-4 sm:p-5 md:p-8">
           <header className="mb-6 flex flex-col items-start justify-between gap-4 sm:mb-8 sm:flex-row sm:items-center">
             <div>
-              <p className="mb-1.5 text-xs text-ink-500">{t("coachDashboard", "welcomeBack")}</p>
-              <div className="flex items-center gap-2">
-                <h1 className="font-display text-2xl font-bold text-ink-50 md:text-3xl">
+              <LabelCaps className="text-eos-on-surface-subtle">
+                {t("coachDashboard", "welcomeBack")}
+              </LabelCaps>
+              <div className="mt-1 flex items-center gap-2">
+                <Headline className="text-2xl md:text-3xl">
                   {t("coachDashboard", "commandCenterTitle")}
-                </h1>
-                <Shield className="h-5 w-5 text-brand-400" />
+                </Headline>
+                <Shield className="h-5 w-5 text-eos-performance" />
               </div>
-              <p className="mt-1 text-sm text-ink-500">
+              <p className="mt-1 text-sm text-eos-on-surface-muted">
                 {formatMsg(t("coachDashboard", "attentionToday"), { count: attentionCount })}
               </p>
             </div>
             <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-lime-500/20 bg-lime-500/10 px-3 py-1.5 text-xs font-semibold text-lime-400">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-lime-400" />{" "}
+              <EliteChip tone="performance" as="span" className="gap-1.5">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-eos-performance" />
                 {t("coachDashboard", "live")}
-              </span>
-              <VoltButton asChild className="h-9 gap-1.5 text-xs">
+              </EliteChip>
+              <EliteButton asChild size="sm">
                 <Link href="/coach/roster">{t("coachDashboard", "viewRoster")}</Link>
-              </VoltButton>
+              </EliteButton>
               <Button
                 variant="outline"
                 size="sm"
                 type="button"
-                className="gap-1.5 border-ink-700 text-xs text-ink-400 hover:text-ink-200"
+                className="gap-1.5 border-eos-outline text-xs text-eos-on-surface-muted hover:text-eos-on-surface"
                 aria-label={t("coachDashboard", "notifications")}
               >
                 <Bell className="h-3.5 w-3.5" />
@@ -144,7 +160,7 @@ export function CoachOsDashboard({
               icon={DollarSign}
               label={t("coachDashboard", "mrr")}
               value="€4,810"
-              change="+6.4%"
+              change="+6.4"
               color="text-lime-400"
             />
             <StatCard
@@ -158,20 +174,26 @@ export function CoachOsDashboard({
               icon={TrendingUp}
               label={t("coachDashboard", "retentionRate")}
               value="94%"
-              change="+2%"
+              change="+2"
               color="text-brand-400"
             />
           </div>
 
           {demoSection}
 
-          <div className="mb-5 grid gap-5 xl:grid-cols-2">
-            <CoachRosterMap athleteCount={34} />
-            <ProgramBuilderPanel />
-          </div>
+          <EliteBentoMotion className="grid grid-cols-1 gap-eos-bento xl:grid-cols-12">
+            <EliteBentoMotionItem className="space-y-eos-bento xl:col-span-3">
+              <AthletesListPanel coachId={coachId} />
+              <div className="hidden xl:block">
+                <CoachRosterMap athleteCount={34} />
+              </div>
+            </EliteBentoMotionItem>
 
-          <div className="grid gap-5 xl:grid-cols-3">
-            <div className="space-y-5 xl:col-span-2">
+            <EliteBentoMotionItem className="space-y-eos-bento xl:col-span-6">
+              <div className="xl:hidden">
+                <CoachRosterMap athleteCount={34} />
+              </div>
+              <ProgramBuilderPanel />
               <CoachStravaFeed coachId={coachId} />
               <EarningsChart />
               <PlanBuilderPreview
@@ -179,16 +201,17 @@ export function CoachOsDashboard({
                   name: firstName
                 })}
               />
-            </div>
-            <div className="space-y-5">
+            </EliteBentoMotionItem>
+
+            <EliteBentoMotionItem className="space-y-eos-bento xl:col-span-3">
               <GamificationPanel variant="coach" />
-              <AthletesListPanel coachId={coachId} />
+              <AiInsightsPanel />
               <PayoutSummary />
-              <Button asChild variant="outline" size="sm" className="w-full border-ink-700">
+              <VoltButton asChild variant="subtle" className="w-full rounded-xl text-sm">
                 <Link href="/coach/earnings">{t("coachDashboard", "earningsStripeConnect")}</Link>
-              </Button>
-            </div>
-          </div>
+              </VoltButton>
+            </EliteBentoMotionItem>
+          </EliteBentoMotion>
         </div>
       </div>
     </div>

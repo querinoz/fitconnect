@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion, useReducedMotion } from "framer-motion";
-import { useEffect, useState, type FormEvent } from "react";
+import { motion } from "framer-motion";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import {
   ArrowRight,
   Lock,
@@ -29,11 +29,16 @@ import { useAuthHydrated } from "@/lib/use-auth-hydrated";
 import { useOnboardingStore } from "@/lib/onboarding/store";
 import { formatMsg, useLocale, useT } from "@/lib/i18n-provider";
 import { OAuthRow } from "./oauth-row";
-import { LangPicker } from "./lang-picker";
-import { GlassCard } from "./ui-glass/glass-card";
-import { VoltButton } from "./ui-glass/volt-button";
-import { RealtimeBadge } from "./ui-glass/premium-system";
-import { PremiumInput } from "./ui-glass/form-system";
+import {
+  EliteAuthAlert,
+  EliteAuthField,
+  EliteAuthPanel,
+  EliteAuthRoleToggle
+} from "@/components/auth/elite";
+import { EliteButton } from "@/components/elite-os/elite-button";
+import { EliteChip } from "@/components/elite-os/elite-chip";
+import { BodyText, Headline, LabelCaps } from "@/components/elite-os/typography";
+import { useEliteMotion } from "@/lib/motion/use-elite-motion";
 import { cn } from "@/lib/utils";
 
 interface AuthShellProps {
@@ -49,9 +54,6 @@ interface AuthShellProps {
   /** Compact single-column layout for route modals */
   embedded?: boolean;
 }
-
-const inputClass =
-  "w-full rounded-2xl border border-glass-border bg-glass-md pl-10 pr-3 h-11 text-sm text-ink-100 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-volt-500/50 focus:border-volt-500/40";
 
 export function AuthShell({
   mode,
@@ -75,7 +77,7 @@ export function AuthShell({
   const setOnboardingRole = useOnboardingStore((s) => s.setRole);
   const hydrated = useAuthHydrated();
   const locale = useLocale();
-  const reduce = useReducedMotion();
+  const { fadeUp, fadeIn, reduced, uiTransition } = useEliteMotion();
   const [identifier, setIdentifier] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -212,36 +214,33 @@ export function AuthShell({
         )}
       >
         <motion.aside
-          initial={{ opacity: 0, x: reduce ? 0 : -16 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: reduce ? 0 : 0.5, ease: [0.16, 1, 0.3, 1] }}
+          initial={fadeUp.initial}
+          animate={fadeUp.animate}
+          transition={uiTransition}
           className={cn(embedded && "hidden")}
         >
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-200 ring-1 ring-brand-500/30">
+          <EliteChip tone="iris" as="span" className="gap-1.5">
             <Sparkles className="h-3 w-3" />
             {mode === "signin" ? t("nav", "signIn") : t("auth", "submitSignUp")}
-          </span>
-          <h1 className="mt-5 font-display text-4xl xl:text-5xl font-bold tracking-tight text-balance leading-[1.05]">
+          </EliteChip>
+          <Headline className="mt-5 text-4xl xl:text-5xl">
             {heading.split(" ").slice(0, -2).join(" ")}{" "}
-            <span className="gradient-text">
+            <span className="bg-gradient-to-r from-eos-voltline to-eos-telemetry bg-clip-text text-transparent">
               {heading.split(" ").slice(-2).join(" ")}
             </span>
-          </h1>
-          <p className="mt-4 text-ink-300 text-lg max-w-md text-balance">{subtitle}</p>
+          </Headline>
+          <BodyText className="mt-4 max-w-md text-lg">{subtitle}</BodyText>
 
           <ul className="mt-8 space-y-3">
             {locale.auth.bullets.map((line, i) => (
               <motion.li
                 key={i}
-                initial={{ opacity: 0, x: reduce ? 0 : -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{
-                  duration: reduce ? 0 : 0.4,
-                  delay: 0.1 + i * 0.06
-                }}
-                className="flex items-start gap-3 text-sm text-ink-200"
+                initial={fadeIn.initial}
+                animate={fadeIn.animate}
+                transition={{ ...uiTransition, delay: reduced ? 0 : 0.1 + i * 0.06 }}
+                className="flex items-start gap-3 text-sm text-eos-on-surface-muted"
               >
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-accent-500/10 text-accent-400 ring-1 ring-accent-500/30">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-[var(--eos-radius-nested)] bg-eos-iris-glow/20 text-eos-iris ring-1 ring-eos-iris/30">
                   <ArrowRight className="h-3.5 w-3.5" />
                 </span>
                 <span>{line}</span>
@@ -251,22 +250,20 @@ export function AuthShell({
         </motion.aside>
 
         <motion.section
-          initial={{ opacity: 0, y: reduce ? 0 : 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduce ? 0 : 0.5, ease: [0.16, 1, 0.3, 1] }}
+          initial={fadeUp.initial}
+          animate={fadeUp.animate}
+          transition={uiTransition}
         >
-          <GlassCard tone="active" className="relative rounded-3xl shadow-elevated p-7 md:p-9">
-            <div className="mb-5 flex items-center justify-between gap-3">
-              <RealtimeBadge>Secure auth</RealtimeBadge>
-            </div>
-            <div className="lg:hidden mb-5">
-              <h1 className="font-display text-2xl font-bold leading-tight">{heading}</h1>
-              <p className="mt-2 text-sm text-ink-400">{subtitle}</p>
-            </div>
-
-            <h2 className="hidden lg:block font-display text-xl font-bold mb-4">
-              {mode === "signin" ? t("auth", "submitSignIn") : t("auth", "submitSignUp")}
-            </h2>
+          <EliteAuthPanel
+            badge="Secure auth"
+            title={embedded ? heading : mode === "signin" ? t("auth", "submitSignIn") : t("auth", "submitSignUp")}
+            subtitle={embedded ? subtitle : undefined}
+          >
+            {!embedded && (
+              <div className="mb-5 lg:hidden">
+                <BodyText className="text-sm">{subtitle}</BodyText>
+              </div>
+            )}
 
             <OAuthRow
               mode={mode}
@@ -276,97 +273,62 @@ export function AuthShell({
 
             {mode === "signin" && hydrated && user && (
               <motion.div
-                initial={{ opacity: 0, y: reduce ? 0 : 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-5 rounded-xl border border-brand-500/30 bg-brand-500/10 px-4 py-3"
+                initial={fadeIn.initial}
+                animate={fadeIn.animate}
+                transition={uiTransition}
+                className="mt-5"
               >
-                <p className="text-sm text-brand-100">{t("auth", "alreadySignedIn")}</p>
-                <p className="mt-1 text-xs text-ink-300">
-                  {formatMsg(t("auth", "signedInAs"), { name: user.name })}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <VoltButton
-                    type="button"
-                    className="h-9 px-4 text-sm"
-                    onClick={() =>
-                      router.push(
-                        redirectOverride ?? dashboardPathForRole(user.role)
-                      )
-                    }
-                  >
-                    {t("auth", "continueToDashboard")}
-                  </VoltButton>
-                  <VoltButton
-                    type="button"
-                    variant="ghost"
-                    className="h-9 px-4 text-sm"
-                    onClick={() => logout()}
-                  >
-                    <LogOut className="h-3.5 w-3.5 mr-1.5" aria-hidden="true" />
-                    {t("auth", "signOut")}
-                  </VoltButton>
-                </div>
+                <EliteAuthAlert tone="info">
+                  <span className="block font-medium">{t("auth", "alreadySignedIn")}</span>
+                  <span className="mt-1 block text-xs opacity-90">
+                    {formatMsg(t("auth", "signedInAs"), { name: user.name })}
+                  </span>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <EliteButton
+                      type="button"
+                      size="sm"
+                      onClick={() =>
+                        router.push(redirectOverride ?? dashboardPathForRole(user.role))
+                      }
+                    >
+                      {t("auth", "continueToDashboard")}
+                    </EliteButton>
+                    <EliteButton type="button" variant="ghost" size="sm" onClick={() => logout()}>
+                      <LogOut className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+                      {t("auth", "signOut")}
+                    </EliteButton>
+                  </div>
+                </EliteAuthAlert>
               </motion.div>
             )}
 
-            {magicSent && (
-              <p className="mt-4 rounded-xl border border-accent-500/30 bg-accent-500/10 px-3 py-2 text-sm text-accent-200">
+            {magicSent ? (
+              <EliteAuthAlert tone="success" className="mt-4">
                 Magic link sent — check your inbox.
-              </p>
-            )}
+              </EliteAuthAlert>
+            ) : null}
 
             <form onSubmit={onSubmit} className="mt-5 space-y-4">
-              {error && (
-                <p
-                  role="alert"
-                  className="rounded-xl border border-signal-500/40 bg-signal-500/10 px-3 py-2 text-sm text-signal-300"
-                >
-                  {error}
-                </p>
-              )}
+              {error ? <EliteAuthAlert tone="error">{error}</EliteAuthAlert> : null}
 
               {mode === "signup" && (
                 <>
-                  <div>
-                    <label htmlFor="name" className="text-xs uppercase tracking-widest text-ink-500">
-                      Full name
-                    </label>
-                    <div className="relative mt-1.5">
-                      <User
-                        aria-hidden="true"
-                        className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-500"
-                      />
-                      <input
-                        id="name"
-                        type="text"
-                        required
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Inês M."
-                        className={inputClass}
-                      />
-                    </div>
-                  </div>
+                  <EliteAuthField
+                    id="name"
+                    label="Full name"
+                    icon={User}
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+                    placeholder="Inês M."
+                  />
                   <fieldset>
-                    <legend className="text-xs uppercase tracking-widest text-ink-500">
-                      I am a
+                    <legend>
+                      <LabelCaps className="text-eos-on-surface-subtle">I am a</LabelCaps>
                     </legend>
-                    <div className="mt-2 grid grid-cols-2 gap-2">
-                      {(["athlete", "coach"] as const).map((role) => (
-                        <button
-                          key={role}
-                          type="button"
-                          onClick={() => setSignupRole(role)}
-                          className={cn(
-                            "rounded-xl py-2.5 text-sm font-semibold capitalize ring-1 transition",
-                            signupRole === role
-                              ? "bg-brand-500/15 text-brand-200 ring-brand-500/40"
-                              : "text-ink-400 ring-ink-800 hover:ring-ink-600"
-                          )}
-                        >
-                          {role}
-                        </button>
-                      ))}
+                    <div className="mt-2">
+                      <EliteAuthRoleToggle value={signupRole} onChange={setSignupRole} />
                     </div>
                   </fieldset>
                 </>
@@ -374,123 +336,76 @@ export function AuthShell({
 
               {mode === "signin" ? (
                 <div>
-                  <label
-                    htmlFor="identifier"
-                    className="text-xs uppercase tracking-widest text-ink-500"
-                  >
-                    {magicLink ? "Email" : t("auth", "usernameLabel")}
-                  </label>
-                  <div className="relative mt-1.5">
-                    {magicLink ? (
-                      <Mail
-                        aria-hidden="true"
-                        className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-500"
-                      />
-                    ) : (
-                      <User
-                        aria-hidden="true"
-                        className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-500"
-                      />
-                    )}
-                    <input
-                      id="identifier"
-                      type={magicLink ? "email" : "text"}
-                      required
-                      autoComplete="username"
-                      value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
-                      placeholder={
-                        magicLink ? t("auth", "emailPlaceholder") : t("auth", "usernamePlaceholder")
-                      }
-                      className={inputClass}
-                    />
-                  </div>
+                  <EliteAuthField
+                    id="identifier"
+                    label={magicLink ? "Email" : t("auth", "usernameLabel")}
+                    icon={magicLink ? Mail : User}
+                    type={magicLink ? "email" : "text"}
+                    required
+                    autoComplete="username"
+                    value={identifier}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setIdentifier(e.target.value)}
+                    placeholder={
+                      magicLink ? t("auth", "emailPlaceholder") : t("auth", "usernamePlaceholder")
+                    }
+                  />
                   <button
                     type="button"
                     onClick={() => setMagicLink((v) => !v)}
-                    className="mt-2 text-xs text-brand-300 hover:text-brand-200"
+                    className="mt-2 text-xs text-eos-iris-soft hover:text-eos-iris"
                   >
                     {magicLink ? "Use password instead" : "Send magic link instead"}
                   </button>
                 </div>
               ) : (
-                <div>
-                  <label htmlFor="email" className="text-xs uppercase tracking-widest text-ink-500">
-                    {t("auth", "emailLabel")}
-                  </label>
-                  <div className="relative mt-1.5">
-                    <Mail
-                      aria-hidden="true"
-                      className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-500"
-                    />
-                    <input
-                      id="email"
-                      type="email"
-                      required
-                      autoComplete="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder={t("auth", "emailPlaceholder")}
-                      className={inputClass}
-                    />
-                  </div>
-                </div>
+                <EliteAuthField
+                  id="email"
+                  label={t("auth", "emailLabel")}
+                  icon={Mail}
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                  placeholder={t("auth", "emailPlaceholder")}
+                />
               )}
 
               {!magicLink && (
-                <div>
-                  <label
-                    htmlFor="password"
-                    className="text-xs uppercase tracking-widest text-ink-500"
-                  >
-                    {t("auth", "passwordLabel")}
-                  </label>
-                  <div className="relative mt-1.5">
-                    <Lock
-                      aria-hidden="true"
-                      className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-500"
-                    />
-                    <input
-                      id="password"
-                      type="password"
-                      required
-                      autoComplete={
-                        mode === "signin" ? "current-password" : "new-password"
-                      }
-                      minLength={mode === "signup" ? 8 : undefined}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder={
-                        mode === "signin"
-                          ? t("auth", "signInPasswordPlaceholder")
-                          : t("auth", "passwordPlaceholder")
-                      }
-                      className={inputClass}
-                    />
-                  </div>
-                </div>
+                <EliteAuthField
+                  id="password"
+                  label={t("auth", "passwordLabel")}
+                  icon={Lock}
+                  type="password"
+                  required
+                  autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                  minLength={mode === "signup" ? 8 : undefined}
+                  value={password}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                  placeholder={
+                    mode === "signin"
+                      ? t("auth", "signInPasswordPlaceholder")
+                      : t("auth", "passwordPlaceholder")
+                  }
+                />
               )}
 
               {mode === "signup" && (
-                <label className="flex items-start gap-2 text-xs text-ink-400 cursor-pointer">
+                <label className="flex cursor-pointer items-start gap-2 text-xs text-eos-on-surface-muted">
                   <input
                     type="checkbox"
                     checked={termsAccepted}
                     onChange={(e) => setTermsAccepted(e.target.checked)}
-                    className="mt-0.5 rounded border-ink-700"
+                    className="mt-0.5 rounded border-eos-outline accent-eos-voltline"
                   />
                   <span>I agree to the Terms of Service and Privacy Policy.</span>
                 </label>
               )}
 
-              <VoltButton
-                type="submit"
-                className="w-full min-h-[48px]"
-                disabled={submitted || !hydrated}
-              >
+              <EliteButton type="submit" className="w-full min-h-[48px]" disabled={submitted || !hydrated}>
                 {submitted ? (
                   <span className="inline-flex items-center gap-2">
-                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-ink-950/40 border-t-ink-950" />
+                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-eos-floor/40 border-t-eos-floor" />
                     {magicLink && mode === "signin" ? "Sending link…" : submitLabel}
                   </span>
                 ) : (
@@ -499,23 +414,21 @@ export function AuthShell({
                     <ArrowRight className="h-4 w-4" />
                   </span>
                 )}
-              </VoltButton>
+              </EliteButton>
             </form>
 
-            <p className="mt-5 text-[11px] text-ink-500 leading-relaxed">
-              {t("auth", "legalNote")}
-            </p>
+            <BodyText className="mt-5 text-[11px] leading-relaxed">{t("auth", "legalNote")}</BodyText>
 
-            <div className="mt-5 pt-5 border-t border-glass-border text-sm text-ink-400 text-center">
+            <div className="mt-5 border-t border-eos-outline pt-5 text-center text-sm text-eos-on-surface-muted">
               {switchPrompt}{" "}
               <Link
                 href={switchHref}
-                className="font-semibold text-brand-300 hover:text-brand-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 rounded-md"
+                className="font-semibold text-eos-voltline hover:text-eos-voltline/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-eos-iris/50 rounded-md"
               >
                 {switchLabel}
               </Link>
             </div>
-          </GlassCard>
+          </EliteAuthPanel>
         </motion.section>
       </div>
     </div>
