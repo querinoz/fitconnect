@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
 import { AuthGate } from "@/components/auth-gate";
 import { RosterList } from "@/components/app/roster-list";
-import { SectionHeader } from "@/components/ui-glass/premium-system";
+import { EliteAppPage } from "@/components/shell/elite";
 import { useAuthStore } from "@/lib/auth-store";
 import { DEMO_COACH_TOMAS_ID } from "@/lib/dashboard/seed";
 import type { DashboardAthlete } from "@/lib/dashboard/types";
@@ -33,8 +33,9 @@ export default function CoachRosterPage() {
 
   return (
     <AuthGate roles={["coach", "admin"]}>
-      <SectionHeader eyebrow="Coach OS" title="Your athletes" />
-      <RosterList roster={roster} loading={loading} />
+      <EliteAppPage eyebrow="Coach OS" title="Your athletes">
+        <RosterList roster={roster} loading={loading} />
+      </EliteAppPage>
     </AuthGate>
   );
 }

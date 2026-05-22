@@ -11,8 +11,7 @@ import {
   selectCoachMetrics
 } from "@/lib/dashboard-store";
 import { DEMO_COACH_TOMAS_ID, getTrainerById } from "@/lib/dashboard/seed";
-import { GlassCard } from "@/components/ui-glass/glass-card";
-import { VoltButton } from "@/components/ui-glass/volt-button";
+import { BentoCard, EliteButton } from "@/components/elite-os";
 import { useCoPilot } from "@/components/loops/ai-copilot/use-co-pilot";
 import { evaluateRoster } from "@/lib/ai/rules";
 import { useCoachBookingInbox } from "@/lib/hooks/use-coach-booking-inbox";
@@ -68,24 +67,20 @@ export default function CoachDashboardPage() {
 
   const demoSection =
     demoPanel ? (
-      <GlassCard tone="live" className="mb-6 space-y-3">
-        <p className="text-xs uppercase tracking-[0.18em] text-volt-500">Voltline demo</p>
+      <BentoCard elevation="2" className="mb-6 space-y-3 border-eos-voltline/20">
+        <p className="eos-label-caps text-eos-voltline">Voltline demo</p>
         <p className="text-sm text-ink-300">
           Open a second tab as Athlete to test BroadcastChannel loops.
         </p>
         <div className="flex flex-wrap gap-2">
-          <VoltButton type="button" variant="subtle" onClick={() => resetDemo()}>
+          <EliteButton type="button" variant="ghost" onClick={() => resetDemo()}>
             Reset demo data
-          </VoltButton>
-          <VoltButton
-            type="button"
-            variant="ghost"
-            onClick={() => router.push("/signin?demo=athlete")}
-          >
+          </EliteButton>
+          <EliteButton type="button" variant="secondary" onClick={() => router.push("/signin?demo=athlete")}>
             Athlete sign-in shortcut
-          </VoltButton>
+          </EliteButton>
         </div>
-      </GlassCard>
+      </BentoCard>
     ) : null;
 
   return (

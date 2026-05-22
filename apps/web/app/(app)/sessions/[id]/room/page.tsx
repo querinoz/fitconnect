@@ -7,8 +7,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import dynamicImport from "next/dynamic";
 import { AuthGate } from "@/components/auth-gate";
-import { GlassCard } from "@/components/ui-glass/glass-card";
-import { SectionHeader } from "@/components/ui-glass/premium-system";
+import { BentoCard } from "@/components/elite-os";
+import { EliteAppPageHeader } from "@/components/shell/elite";
 import { useAuthStore } from "@/lib/auth-store";
 import { ArrowLeft, Video } from "lucide-react";
 
@@ -74,28 +74,28 @@ export default function SessionRoomPage() {
           Back to sessions
         </Link>
       </div>
-      <SectionHeader eyebrow="Live session" title={`Room · ${id}`} />
+      <EliteAppPageHeader eyebrow="Live session" title={`Room · ${id}`} />
 
       {status === "loading" && (
-        <GlassCard className="mt-6 p-8 text-center">
-          <Video className="mx-auto h-12 w-12 text-volt-400" />
+        <BentoCard elevation="1" className="mt-2 p-8 text-center">
+          <Video className="mx-auto h-12 w-12 text-eos-voltline" />
           <p className="mt-4 text-sm text-ink-400">Connecting to session room…</p>
-        </GlassCard>
+        </BentoCard>
       )}
 
       {status === "demo" && (
-        <GlassCard className="mt-6 p-8 text-center">
-          <Video className="mx-auto h-12 w-12 text-volt-400" />
+        <BentoCard elevation="glass" className="mt-2 p-8 text-center">
+          <Video className="mx-auto h-12 w-12 text-eos-voltline" />
           <p className="mt-4 text-lg font-semibold text-ink-50">Demo video room</p>
           <p className="mt-2 text-sm text-ink-300">
             Configure LIVEKIT_API_KEY, LIVEKIT_API_SECRET, and LIVEKIT_URL to enable
             real-time coach form review.
           </p>
-        </GlassCard>
+        </BentoCard>
       )}
 
       {status === "ready" && token && livekitUrl && (
-        <div className="mt-6 h-[min(70vh,640px)] overflow-hidden rounded-2xl border border-ink-800">
+        <div className="mt-2 h-[min(70vh,640px)] overflow-hidden rounded-[var(--eos-radius-card)] border border-eos-outline">
           <LiveKitRoom
             token={token}
             serverUrl={livekitUrl}
@@ -111,9 +111,9 @@ export default function SessionRoomPage() {
       )}
 
       {status === "error" && (
-        <GlassCard className="mt-6 p-8 text-center">
+        <BentoCard elevation="1" className="mt-2 p-8 text-center">
           <p className="text-sm text-signal-400">Could not join session room.</p>
-        </GlassCard>
+        </BentoCard>
       )}
     </AuthGate>
   );

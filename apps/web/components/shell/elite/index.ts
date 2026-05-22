@@ -9,3 +9,4 @@ export {
   ShellWorkspace,
   ShellContentGrid
 } from "./elite-shell-layout";
+export { EliteAppPage, EliteAppPageHeader } from "./elite-app-page";

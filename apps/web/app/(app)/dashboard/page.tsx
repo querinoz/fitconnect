@@ -28,8 +28,7 @@ import { useChannel } from "@/lib/realtime/use-channel";
 import { detectPRs } from "@/lib/ai/pr-detection";
 import { tap, success } from "@/lib/pwa/haptics";
 import type { Nudge } from "@/lib/realtime/types";
-import { VoltButton } from "@/components/ui-glass/volt-button";
-import { GlassCard } from "@/components/ui-glass/glass-card";
+import { BentoCard, EliteButton } from "@/components/elite-os";
 import { RecoveryBookingModal } from "@/components/booking/recovery-booking-modal";
 import { AthleteOsDashboard } from "@/components/dashboard/os/athlete-os-dashboard";
 import { useAthleteSessions } from "@/lib/api/hooks/use-athlete-sessions";
@@ -119,11 +118,11 @@ function AthleteDashboardBody() {
 
   if (!athlete || !plan || !readiness) {
     return (
-      <GlassCard tone="default">
+      <BentoCard elevation="1">
         <p className="text-sm text-ink-300">
           No athlete profile is linked to this account.
         </p>
-      </GlassCard>
+      </BentoCard>
     );
   }
 
@@ -171,17 +170,17 @@ function AthleteDashboardBody() {
   const liveSection = (
     <>
       {demoPanel && (
-        <GlassCard tone="live" className="space-y-3">
-          <p className="text-xs uppercase tracking-[0.18em] text-volt-500">Voltline demo</p>
+        <BentoCard elevation="2" className="border-eos-voltline/20 space-y-3">
+          <p className="eos-label-caps text-eos-voltline">Voltline demo</p>
           <p className="text-sm text-ink-300">
             Open a second tab with the coach account to test BroadcastChannel loops.
           </p>
           <div className="flex flex-wrap gap-2">
-            <VoltButton type="button" variant="subtle" onClick={() => resetDemo()}>
+            <EliteButton type="button" variant="ghost" onClick={() => resetDemo()}>
               Reset demo data
-            </VoltButton>
+            </EliteButton>
           </div>
-        </GlassCard>
+        </BentoCard>
       )}
 
       {listener.pendingDiff && listener.pendingDiff.diff !== "custom" && (
@@ -218,9 +217,9 @@ function AthleteDashboardBody() {
             elapsedSec={session.elapsedSec}
             ticks={session.ticks.map((t) => t.hr)}
           />
-          <VoltButton type="button" onClick={onEnd}>
+          <EliteButton type="button" variant="primary" onClick={onEnd}>
             End session
-          </VoltButton>
+          </EliteButton>
         </>
       )}
 

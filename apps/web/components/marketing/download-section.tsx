@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { Smartphone, Download } from "lucide-react";
 import { useInstallPrompt } from "@/lib/pwa/use-install-prompt";
-import { VoltButton } from "@/components/ui-glass/volt-button";
+import { EliteButton } from "@/components/elite-os";
+import { LabelCaps, Headline, BodyText } from "@/components/elite-os/typography";
 import { useLocale } from "@/lib/i18n-provider";
 
 export function DownloadSection() {
@@ -11,30 +12,28 @@ export function DownloadSection() {
   const d = useLocale().downloadSection;
 
   return (
-    <section className="fc-section-x border-t border-ink-800/60 py-16 sm:py-20">
-      <div className="mx-auto max-w-4xl rounded-3xl border border-volt-500/20 bg-gradient-to-br from-volt-500/10 via-ink-950 to-brand-500/10 p-8 text-center sm:p-12">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-volt-500">{d.eyebrow}</p>
-        <h2 className="mt-3 font-display text-2xl font-extrabold text-ink-50 sm:text-3xl">
-          {d.title}
-        </h2>
-        <p className="mx-auto mt-3 max-w-lg text-sm text-ink-400">{d.subtitle}</p>
+    <section className="fc-section-x border-t border-eos-outline py-16 sm:py-20">
+      <div className="mx-auto max-w-4xl rounded-[var(--eos-radius-modal)] border border-eos-voltline/20 bg-gradient-to-br from-eos-voltline-dim via-eos-floor to-eos-iris-glow/10 p-8 text-center sm:p-12 eos-inner-stroke">
+        <LabelCaps className="text-eos-voltline">{d.eyebrow}</LabelCaps>
+        <Headline className="mt-3 text-2xl sm:text-3xl">{d.title}</Headline>
+        <BodyText className="mx-auto mt-3 max-w-lg text-sm">{d.subtitle}</BodyText>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           {canInstall ? (
-            <VoltButton type="button" className="gap-2" onClick={() => void prompt()}>
+            <EliteButton type="button" className="gap-2" onClick={() => void prompt()}>
               <Download className="h-4 w-4" />
               {d.installApp}
-            </VoltButton>
+            </EliteButton>
           ) : (
-            <VoltButton asChild className="gap-2">
+            <EliteButton asChild variant="primary" className="gap-2">
               <Link href="/mobile">
                 <Smartphone className="h-4 w-4" />
                 {d.openLiveDemo}
               </Link>
-            </VoltButton>
+            </EliteButton>
           )}
-          <VoltButton asChild variant="subtle">
+          <EliteButton asChild variant="secondary">
             <Link href="/mobile">{d.tryMobileDemo}</Link>
-          </VoltButton>
+          </EliteButton>
         </div>
       </div>
     </section>

@@ -5,14 +5,14 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AuthGate } from "@/components/auth-gate";
-import { GlassCard } from "@/components/ui-glass/glass-card";
-import { SectionHeader } from "@/components/ui-glass/premium-system";
+import { EliteAppPage } from "@/components/shell/elite";
+import { BentoCard, EliteButton } from "@/components/elite-os";
+import { EliteChip } from "@/components/elite-os/elite-chip";
 import { useAuthStore } from "@/lib/auth-store";
 import { DEMO_ATHLETE_ID } from "@/lib/dashboard/seed";
 import { trackEvent } from "@/lib/observability/posthog";
 import type { WearableProvider } from "@fitconnect/types";
 import { Activity, Check, ExternalLink, Link2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const PROVIDERS: { id: WearableProvider; label: string; envKey: string }[] = [
   { id: "strava", label: "Strava", envKey: "STRAVA_CLIENT_ID" },
@@ -49,59 +49,54 @@ export default function WearablesSettingsPage() {
 
   return (
     <AuthGate roles={["athlete", "coach", "admin"]}>
-      <SectionHeader
+      <EliteAppPage
         eyebrow="Recovery"
         title="Wearables & APIs"
-        body="Connect Strava, Whoop, Oura and more. Status syncs to your dashboard API monitor."
-      />
-      <ul className="mt-6 grid gap-3 sm:grid-cols-2">
-        {PROVIDERS.map((p) => {
-          const isConnected = connected.includes(p.id);
-          return (
-            <li key={p.id}>
-              <GlassCard className="flex items-center justify-between gap-3 p-4">
-                <div className="flex items-center gap-3">
-                  <Activity className="h-5 w-5 text-volt-400" />
-                  <div>
-                    <p className="font-semibold text-ink-50">{p.label}</p>
-                    <p className="text-xs text-ink-400 capitalize">{p.id.replace("_", " ")}</p>
+        subtitle="Connect Strava, Whoop, Oura and more. Status syncs to your dashboard API monitor."
+      >
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {PROVIDERS.map((p) => {
+            const isConnected = connected.includes(p.id);
+            return (
+              <li key={p.id}>
+                <BentoCard elevation="1" className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <Activity className="h-5 w-5 text-eos-voltline" />
+                    <div>
+                      <p className="font-semibold text-ink-50">{p.label}</p>
+                      <p className="text-xs text-ink-400 capitalize">{p.id.replace("_", " ")}</p>
+                    </div>
                   </div>
-                </div>
-                {isConnected ? (
-                  <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-4 py-2 text-xs font-semibold text-emerald-300">
-                    <Check className="h-3.5 w-3.5" /> Connected
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => connect(p.id)}
-                    className={cn(
-                      "inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition fc-liquid-btn",
-                      "bg-glass-md text-ink-100 border border-glass-border hover:border-volt-500/30"
-                    )}
-                  >
-                    <Link2 className="h-3.5 w-3.5" /> Connect
-                  </button>
-                )}
-              </GlassCard>
-            </li>
-          );
-        })}
-      </ul>
-      <GlassCard className="mt-6 p-4">
-        <p className="text-sm text-ink-300">
-          Strava OAuth uses scopes: <code className="text-volt-300">read, activity:read, activity:read_all, profile:read_all</code>
-        </p>
-        <Link
-          href="https://developers.strava.com/docs/reference/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-brand-300"
-        >
-          Strava API reference
-          <ExternalLink className="h-3.5 w-3.5" />
-        </Link>
-      </GlassCard>
+                  {isConnected ? (
+                    <EliteChip tone="performance" as="span" className="text-[10px]">
+                      <Check className="mr-1 inline h-3 w-3" /> Connected
+                    </EliteChip>
+                  ) : (
+                    <EliteButton type="button" variant="secondary" size="sm" onClick={() => connect(p.id)}>
+                      <Link2 className="h-3.5 w-3.5" /> Connect
+                    </EliteButton>
+                  )}
+                </BentoCard>
+              </li>
+            );
+          })}
+        </ul>
+        <BentoCard elevation="glass" className="mt-2">
+          <p className="text-sm text-ink-300">
+            Strava OAuth uses scopes:{" "}
+            <code className="text-eos-voltline">read, activity:read, activity:read_all, profile:read_all</code>
+          </p>
+          <Link
+            href="https://developers.strava.com/docs/reference/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-eos-iris-soft"
+          >
+            Strava API reference
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
+        </BentoCard>
+      </EliteAppPage>
     </AuthGate>
   );
 }
