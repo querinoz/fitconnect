@@ -16,6 +16,8 @@ import { useCoPilot } from "@/components/loops/ai-copilot/use-co-pilot";
 import { evaluateRoster } from "@/lib/ai/rules";
 import { useCoachBookingInbox } from "@/lib/hooks/use-coach-booking-inbox";
 import { CoachOsDashboard } from "@/components/dashboard/os/coach-os-dashboard";
+import { StitchTodayScreen } from "@/components/mobile/stitch-screens";
+import { useStitchMobile } from "@/lib/hooks/use-media-query";
 import { useRouter } from "next/navigation";
 
 export default function CoachDashboardPage() {
@@ -32,7 +34,10 @@ export default function CoachDashboardPage() {
   }, []);
 
   const metrics = useDashboardStore((s) => selectCoachMetrics(s, coachId));
+  const athletes = useDashboardStore((s) => selectAthletesForCoach(s, coachId));
   const coach = getTrainerById(coachId);
+  const stitchMobile = useStitchMobile();
+  const amberCount = athletes.filter((a) => a.recoveryStatus === "amber").length;
 
   useCoPilot(coachId);
   useCoachBookingInbox(coachId);
@@ -85,15 +90,33 @@ export default function CoachDashboardPage() {
 
   return (
     <AuthGate roles={["coach", "admin"]}>
-      <CoachOsDashboard
-        coachId={coachId}
-        coachName={coach?.name ?? "Coach"}
-        coachTitle={coach?.headline ?? "Verified specialist"}
-        coachAvatar={coach?.avatar}
-        netPayout={metrics.revenueMtd}
-        attentionCount={1}
-        demoSection={demoSection}
-      />
+      {stitchMobile ? (
+        <div className="space-y-4">
+          {demoSection}
+          <StitchTodayScreen
+            isCoach
+            readinessScore={84}
+            hrvMs={amberCount}
+            amberAlerts={amberCount}
+            streakDays={athletes.length * 7}
+            sleepHours="7h42"
+            sessionLive={false}
+            planApproved
+            loadLabel={`${athletes.length}k`}
+            onStartSession={() => router.push("/coach/sessions")}
+          />
+        </div>
+      ) : (
+        <CoachOsDashboard
+          coachId={coachId}
+          coachName={coach?.name ?? "Coach"}
+          coachTitle={coach?.headline ?? "Verified specialist"}
+          coachAvatar={coach?.avatar}
+          netPayout={metrics.revenueMtd}
+          attentionCount={amberCount || 1}
+          demoSection={demoSection}
+        />
+      )}
     </AuthGate>
   );
 }

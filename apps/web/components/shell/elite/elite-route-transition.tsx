@@ -3,21 +3,42 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { useStitchMobile } from "@/lib/hooks/use-media-query";
 import { useEliteMotion } from "@/lib/motion/use-elite-motion";
 
+const STITCH_EASE = [0.16, 1, 0.3, 1] as const;
+
 /**
- * Route swap — opacity-only to avoid mobile tab visibility bugs from y-offset exits.
+ * Route swap — Stitch y/scale on mobile tabs; opacity fade on desktop.
  */
 export function EliteRouteTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const reduced = useReducedMotion();
+  const stitchMobile = useStitchMobile();
   const { fadeIn } = useEliteMotion();
 
   if (reduced) {
     return (
-      <div key={pathname} className="min-h-full fc-mobile-page-enter">
+      <div key={pathname} className="min-h-full fc-stitch-screen-enter">
         {children}
       </div>
+    );
+  }
+
+  if (stitchMobile) {
+    return (
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={pathname}
+          className="min-h-full hide-scrollbar overflow-x-hidden"
+          initial={{ opacity: 0, y: 12, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -8, scale: 0.985 }}
+          transition={{ duration: 0.24, ease: STITCH_EASE }}
+        >
+          {children}
+        </motion.div>
+      </AnimatePresence>
     );
   }
 

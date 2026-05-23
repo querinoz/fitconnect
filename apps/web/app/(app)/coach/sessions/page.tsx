@@ -4,10 +4,12 @@ export const dynamic = "force-dynamic";
 
 import { AuthGate } from "@/components/auth-gate";
 import { SessionsList } from "@/components/app/sessions-list";
+import { SessionsTabPanel } from "@/components/mobile/athlete-tab-panels";
 import { SectionHeader } from "@/components/ui-glass/premium-system";
 import { useAuthStore } from "@/lib/auth-store";
 import { DEMO_COACH_TOMAS_ID } from "@/lib/dashboard/seed";
 import type { SessionSummary } from "@fitconnect/types";
+import { useStitchMobile } from "@/lib/hooks/use-media-query";
 import { useEffect, useState } from "react";
 
 export default function CoachSessionsPage() {
@@ -15,6 +17,7 @@ export default function CoachSessionsPage() {
   const coachId = user?.coachId ?? DEMO_COACH_TOMAS_ID;
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const stitchMobile = useStitchMobile();
 
   useEffect(() => {
     let cancelled = false;
@@ -33,8 +36,14 @@ export default function CoachSessionsPage() {
 
   return (
     <AuthGate roles={["coach", "admin"]}>
-      <SectionHeader eyebrow="Coach OS" title="Sessions" />
-      <SessionsList sessions={sessions} loading={loading} />
+      {stitchMobile ? (
+        <SessionsTabPanel sessions={sessions} loading={loading} coachName="You" />
+      ) : (
+        <>
+          <SectionHeader eyebrow="Coach OS" title="Sessions" />
+          <SessionsList sessions={sessions} loading={loading} />
+        </>
+      )}
     </AuthGate>
   );
 }

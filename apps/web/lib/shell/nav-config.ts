@@ -1,10 +1,9 @@
 import {
+  Bell,
   Calendar,
   Home,
-  Inbox,
-  MapPin,
-  User,
-  Users,
+  UserRound,
+  UsersRound,
   type LucideIcon
 } from "lucide-react";
 import type { UserRole } from "@/lib/auth";
@@ -20,19 +19,18 @@ export function getShellNavItems(
     return [
       { href: "/coach/dashboard", label: nav.today, icon: Home },
       { href: "/coach/sessions", label: nav.sessions, icon: Calendar },
-      { href: "/coach/roster", label: nav.roster, icon: Users },
-      { href: "/coach/inbox", label: nav.inbox, icon: Inbox },
-      { href: "/coach/profile", label: nav.profile, icon: User }
+      { href: "/coach/roster", label: nav.roster, icon: UsersRound },
+      { href: "/coach/inbox", label: nav.inbox, icon: Bell },
+      { href: "/coach/profile", label: nav.profile, icon: UserRound }
     ];
   }
 
   return [
     { href: "/dashboard", label: nav.today, icon: Home },
     { href: "/sessions", label: nav.sessions, icon: Calendar },
-    { href: "/map", label: nav.map, icon: MapPin },
-    { href: "/my-coach", label: nav.coach, icon: Users },
-    { href: "/inbox", label: nav.inbox, icon: Inbox },
-    { href: "/profile", label: nav.profile, icon: User }
+    { href: "/my-coach", label: nav.coach, icon: UserRound },
+    { href: "/inbox", label: nav.inbox, icon: Bell },
+    { href: "/profile", label: nav.profile, icon: UserRound }
   ];
 }
 

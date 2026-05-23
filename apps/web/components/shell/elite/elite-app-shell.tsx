@@ -15,6 +15,7 @@ import { EliteMobileDock } from "./elite-mobile-dock";
 import { EliteRouteTransition } from "./elite-route-transition";
 import { EliteSideRail } from "./elite-side-rail";
 import { ShellMain, ShellWorkspace } from "./elite-shell-layout";
+import { StitchMobileChrome } from "@/components/mobile/stitch-mobile-chrome";
 
 const FALLBACK_AVATAR = "/brand/fitconnect-logo-192.png";
 
@@ -59,7 +60,7 @@ export function EliteAppShell({
   }, []);
 
   return (
-    <div className="eos-app-shell eos-floor relative flex min-h-dvh w-full max-w-full overflow-x-clip pb-[calc(96px+env(safe-area-inset-bottom))] lg:pb-0">
+    <div className="eos-app-shell relative flex min-h-dvh w-full max-w-full overflow-x-clip bg-ink-950 text-ink-100 premium-grid pb-[calc(96px+env(safe-area-inset-bottom))] lg:bg-[var(--eos-floor)] lg:premium-grid-none lg:pb-0 lg:text-inherit">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-52 bg-gradient-to-b from-eos-iris/10 via-eos-voltline/5 to-transparent"
@@ -68,20 +69,24 @@ export function EliteAppShell({
       <EliteSideRail items={items} roleHome={roleHome} />
 
       <div className="eos-app-shell__workspace relative flex min-w-0 flex-1 flex-col lg:min-h-dvh">
-        <EliteFloatingNav
-          greeting={shellGreeting(dashboard.os)}
-          name={name}
-          avatarUrl={avatarUrl}
-          tabLabel={onHome ? undefined : activeTab.label}
-          roleLabel={
-            role === "coach"
-              ? mobileApp.header.coachEyebrow
-              : mobileApp.header.athleteEyebrow
-          }
-          role={role}
-        />
+        <StitchMobileChrome role={role} name={name} />
 
-        <ShellMain>
+        <div className="hidden lg:block">
+          <EliteFloatingNav
+            greeting={shellGreeting(dashboard.os)}
+            name={name}
+            avatarUrl={avatarUrl}
+            tabLabel={onHome ? undefined : activeTab.label}
+            roleLabel={
+              role === "coach"
+                ? mobileApp.header.coachEyebrow
+                : mobileApp.header.athleteEyebrow
+            }
+            role={role}
+          />
+        </div>
+
+        <ShellMain className="px-3 sm:px-4 lg:px-eos-gutter">
           <ShellWorkspace>
             <EliteRouteTransition>{children}</EliteRouteTransition>
           </ShellWorkspace>

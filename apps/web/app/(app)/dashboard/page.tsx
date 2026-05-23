@@ -31,6 +31,8 @@ import type { Nudge } from "@/lib/realtime/types";
 import { BentoCard, EliteButton } from "@/components/elite-os";
 import { RecoveryBookingModal } from "@/components/booking/recovery-booking-modal";
 import { AthleteOsDashboard } from "@/components/dashboard/os/athlete-os-dashboard";
+import { StitchTodayScreen } from "@/components/mobile/stitch-screens";
+import { useStitchMobile } from "@/lib/hooks/use-media-query";
 import { useAthleteSessions } from "@/lib/api/hooks/use-athlete-sessions";
 import { computeReadiness } from "@/lib/readiness/compute";
 import { RpeFeedbackModal } from "@/components/loops/live-session/rpe-feedback-modal";
@@ -131,6 +133,9 @@ function AthleteDashboardBody() {
   const pending = listener.pendingDiff;
   const planBannerCoach =
     pending != null ? coachFirstName(pending.coachId) : coachName;
+  const compactMobile = useStitchMobile();
+  const showStitchToday = compactMobile;
+  const planApproved = !listener.pendingDiff;
 
   const onEnd = () => {
     session.end();
@@ -198,7 +203,7 @@ function AthleteDashboardBody() {
         />
       )}
 
-      {!session.isActive && (
+      {!showStitchToday && !session.isActive && (
         <SessionCard
           title={nextBlock.title}
           durationMin={45}
@@ -286,29 +291,61 @@ function AthleteDashboardBody() {
 
   return (
     <>
-      <AthleteOsDashboard
-        name={athlete.name}
-        sports={athlete.sports}
-        readiness={readiness.score}
-        hrv={athlete.hrv}
-        baselineHrv={baselineHrv}
-        sleepHours={athlete.sleepHours}
-        hrvSeed={athlete.id.length}
-        sessions={sessions}
-        sessionsLoading={sessionsLoading}
-        coachName={coachName}
-        goalTitle={athlete.goalTitle}
-        athleteId={athleteId}
-        liveSection={liveSection}
-        todayPlan={{
-          day: nextBlock.day,
-          title: nextBlock.title,
-          detail: nextBlock.detail,
-          intensity: nextBlock.intensity
-        }}
-        streakWeeks={athlete.streakWeeks}
-        onBookSession={() => setBookingOpen(true)}
-      />
+      {showStitchToday ? (
+        <div className="space-y-4">
+          <StitchTodayScreen
+            readinessScore={readiness.score}
+            hrvMs={athlete.hrv}
+            baselineHrvMs={baselineHrv}
+            streakDays={athlete.streakWeeks * 7}
+            sleepHours={athlete.sleepHours}
+            sleepEfficiency={athlete.sleepEfficiency}
+            sessionLive={session.isActive}
+            planApproved={planApproved}
+            aiHint={plan.aiSuggestion}
+            onStartSession={() => {
+              if (session.isActive) return;
+              session.start();
+            }}
+            onApprovePlan={
+              listener.pendingDiff && listener.pendingDiff.diff !== "custom"
+                ? () => {
+                    const d = listener.pendingDiff?.diff;
+                    if (d === "lighter-day" || d === "swap-z2" || d === "add-recovery") {
+                      apply(plan.id, d);
+                      listener.dismiss();
+                    }
+                  }
+                : undefined
+            }
+          />
+          {liveSection}
+        </div>
+      ) : (
+        <AthleteOsDashboard
+          name={athlete.name}
+          sports={athlete.sports}
+          readiness={readiness.score}
+          hrv={athlete.hrv}
+          baselineHrv={baselineHrv}
+          sleepHours={athlete.sleepHours}
+          hrvSeed={athlete.id.length}
+          sessions={sessions}
+          sessionsLoading={sessionsLoading}
+          coachName={coachName}
+          goalTitle={athlete.goalTitle}
+          athleteId={athleteId}
+          liveSection={liveSection}
+          todayPlan={{
+            day: nextBlock.day,
+            title: nextBlock.title,
+            detail: nextBlock.detail,
+            intensity: nextBlock.intensity
+          }}
+          streakWeeks={athlete.streakWeeks}
+          onBookSession={() => setBookingOpen(true)}
+        />
+      )}
 
       {activeNudge && (
         <NudgeToast variant={activeNudge.variant} coachName={coachName} />

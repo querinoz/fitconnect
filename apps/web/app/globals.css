@@ -484,6 +484,34 @@ article {
     40px 40px;
 }
 
+@media (min-width: 1024px) {
+  .lg\:premium-grid-none {
+    background-color: var(--eos-floor);
+    background-image: none;
+  }
+}
+
+@keyframes fc-stitch-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fc-stitch-screen-enter {
+  animation: fc-stitch-enter 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fc-stitch-screen-enter {
+    animation: none;
+  }
+}
+
 /* Official logo mark — Volt glow + depth for any surface (light/dark/glass) */
 .fc-logo-mark {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55))
