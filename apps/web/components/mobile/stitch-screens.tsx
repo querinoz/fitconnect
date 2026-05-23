@@ -448,7 +448,7 @@ export function StitchCoachScreen({
           kicker={isCoach ? c.activeAthletes : c.onlineNow}
         />
         <PremiumCard className="p-4">
-          {rows.map((row, index) => (
+          {rows.map((row) => (
             <div
               key={row.name}
               className="flex items-center justify-between border-b border-glass-border py-3 last:border-b-0"

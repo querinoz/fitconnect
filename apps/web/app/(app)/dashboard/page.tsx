@@ -72,6 +72,7 @@ function AthleteDashboardBody() {
   const [demoPanel, setDemoPanel] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [rpeOpen, setRpeOpen] = useState(false);
+  const showStitchToday = useStitchMobile();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -133,8 +134,6 @@ function AthleteDashboardBody() {
   const pending = listener.pendingDiff;
   const planBannerCoach =
     pending != null ? coachFirstName(pending.coachId) : coachName;
-  const compactMobile = useStitchMobile();
-  const showStitchToday = compactMobile;
   const planApproved = !listener.pendingDiff;
 
   const onEnd = () => {
