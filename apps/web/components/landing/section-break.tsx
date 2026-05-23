@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, registerGsapPlugins } from "@/lib/motion/gsap-register";
+import { useLandingGate } from "@/components/landing/landing-gate-context";
 import { cn } from "@/lib/utils";
 
 type SectionBreakProps = {
@@ -14,9 +15,11 @@ type SectionBreakProps = {
 /** Editorial giant split headline — Lando "ON / TRACK" pattern. */
 export function SectionBreak({ lineOne, lineTwo, className }: SectionBreakProps) {
   const ref = useRef<HTMLElement>(null);
+  const { gateDone } = useLandingGate();
 
   useGSAP(
     () => {
+      if (!gateDone) return;
       registerGsapPlugins();
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const root = ref.current;
@@ -37,7 +40,7 @@ export function SectionBreak({ lineOne, lineTwo, className }: SectionBreakProps)
         scrollTrigger: { trigger: root, start: "top 85%" }
       });
     },
-    { scope: ref }
+    { scope: ref, dependencies: [gateDone] }
   );
 
   return (

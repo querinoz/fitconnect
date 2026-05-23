@@ -49,7 +49,7 @@ export function CoachReel() {
   }, []);
 
   return (
-    <section className="bg-ink-950 py-6 sm:py-10" aria-labelledby="coach-reel-heading">
+    <section className="bg-ink-950/80 py-6 backdrop-blur-sm sm:py-10" aria-labelledby="coach-reel-heading">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <p id="coach-reel-heading" className="sr-only">
           {copy.dragHint}

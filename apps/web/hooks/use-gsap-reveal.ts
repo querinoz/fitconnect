@@ -2,6 +2,7 @@
 
 import { useGSAP } from "@gsap/react";
 import type { RefObject } from "react";
+import { useLandingGate } from "@/components/landing/landing-gate-context";
 import { gsap, registerGsapPlugins } from "@/lib/motion/gsap-register";
 
 type RevealOptions = {
@@ -12,11 +13,12 @@ type RevealOptions = {
   delay?: number;
 };
 
-/** Scroll-triggered reveal — GSAP + ScrollTrigger; no-op when reduced motion. */
+/** Scroll-triggered reveal — GSAP + ScrollTrigger; waits for landing gate when present. */
 export function useGsapReveal(
   scopeRef: RefObject<HTMLElement | null>,
   options: RevealOptions = {}
 ) {
+  const { gateDone } = useLandingGate();
   const {
     selector = "[data-reveal]",
     y = 48,
@@ -27,6 +29,7 @@ export function useGsapReveal(
 
   useGSAP(
     () => {
+      if (!gateDone) return;
       registerGsapPlugins();
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const root = scopeRef.current;
@@ -49,6 +52,6 @@ export function useGsapReveal(
         }
       });
     },
-    { scope: scopeRef, dependencies: [selector, y, stagger, start, delay] }
+    { scope: scopeRef, dependencies: [gateDone, selector, y, stagger, start, delay] }
   );
 }

@@ -28,7 +28,7 @@ export function TrustEditorial() {
   return (
     <section
       ref={ref}
-      className="border-y border-white/5 bg-ink-950 px-4 py-14 sm:px-6 sm:py-16"
+      className="border-y border-white/5 bg-ink-950/85 px-4 py-14 backdrop-blur-sm sm:px-6 sm:py-16"
     >
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4 md:gap-4">

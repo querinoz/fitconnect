@@ -25,7 +25,7 @@ export function HeroCinematic() {
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduced) return;
 
-      const tl = gsap.timeline({ delay: 0.2 });
+      const tl = gsap.timeline({ delay: 0.15 });
       tl.from(".hero-line", {
         y: 100,
         opacity: 0,
@@ -35,10 +35,29 @@ export function HeroCinematic() {
       })
         .from(
           ".hero-stat",
-          { opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out" },
-          "-=0.3"
+          { opacity: 0, y: 24, duration: 0.6, stagger: 0.1, ease: "power2.out" },
+          "-=0.35"
         )
         .from(".hero-scroll", { opacity: 0, y: -10, duration: 0.5 }, "-=0.2");
+
+      gsap.to(".hero-kenburns", {
+        scale: 1.12,
+        duration: 18,
+        ease: "none",
+        repeat: -1,
+        yoyo: true
+      });
+
+      gsap.to(".hero-kenburns", {
+        yPercent: 12,
+        ease: "none",
+        scrollTrigger: {
+          trigger: rootRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: true
+        }
+      });
     },
     { scope: rootRef, dependencies: [gateDone] }
   );
@@ -49,19 +68,23 @@ export function HeroCinematic() {
       className="relative min-h-[100dvh] overflow-hidden bg-ink-950"
       aria-label="FitConnect hero"
     >
-      <div className="absolute inset-0">
-        <Image
-          src={HERO_IMAGE}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="hero-kenburns absolute inset-0 will-change-transform">
+          <Image
+            src={HERO_IMAGE}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
         <div
           aria-hidden
           className="absolute inset-0 bg-gradient-to-b from-ink-950/30 via-ink-950/50 to-ink-950/90"
         />
+        <div aria-hidden className="fc-landing-aurora absolute inset-0 opacity-40 mix-blend-soft-light" />
+        <div aria-hidden className="absolute inset-0 bg-noise opacity-[0.14] mix-blend-soft-light pulse-soft" />
       </div>
 
       <div className="absolute left-1/2 top-6 z-20 -translate-x-1/2">
