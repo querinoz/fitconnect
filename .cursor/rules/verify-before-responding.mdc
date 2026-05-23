@@ -1,0 +1,66 @@
+---
+description: Run all applicable tests and confirm with evidence before telling the user something works
+alwaysApply: true
+---
+
+# Verify Before Responding
+
+Never tell the user a fix is done, a bug is resolved, or behavior is correct until verification has **actually run** and passed. Evidence before assertions — always.
+
+## When This Applies
+
+- Any code change, bugfix, refactor, or deploy claim
+- "It should work", "fixed", "ready", "passing", "deployed", "no hydration errors", etc.
+- QA, smoke, regression, or production-readiness questions
+
+**Exception:** Pure explanation/review with no implementation — still verify claims against the codebase when factual.
+
+## Required Workflow (before sending the final message)
+
+1. **Identify scope** — Which apps/packages/files changed?
+2. **Run every applicable check below** — skip only what is clearly irrelevant; prefer running over skipping.
+3. **Fix failures** — Do not report success while tests are red.
+4. **Report with evidence** — Include commands run, pass/fail counts, and key output lines. Say explicitly if something was not run and why.
+
+## FitConnect verification ladder (run what applies)
+
+| Layer | Command | When |
+|-------|---------|------|
+| Unit / component | `pnpm test` (or scoped: `pnpm --filter @fitconnect/web test`) | Always after web/shared logic or UI changes |
+| Typecheck | `pnpm typecheck` | TS/types/API surface changes |
+| Lint | `pnpm lint` | Any substantive code edit |
+| Build | `pnpm build` | Routing, SSR, config, or pre-deploy |
+| Smoke HTTP | `pnpm smoke` | App serves pages; start dev on `:3001` if needed |
+| Mobile PWA smoke | `pnpm smoke:mobile` | PWA/mobile shell changes |
+| E2E Playwright | `pnpm test:e2e` or targeted spec/project | Auth, flows, cross-page behavior |
+| Targeted QA scripts | e.g. `node scripts/check-dashboard-hydration.mjs http://localhost:3001` | Bug-specific regression (hydration, login, etc.) |
+| Production check | Same QA against prod URL | Only when user cares about prod; note if fix is not deployed yet |
+
+**Real tests over assumptions:** Prefer Playwright/browser checks and running scripts over reading code alone. For SSR/hydration/locale bugs, assert stable output (no `toLocaleString()` drift) in both unit tests and a live page check.
+
+## Dev server
+
+If smoke/E2E/QA scripts need a running app:
+
+```powershell
+cd apps/web; $env:PORT=3001; pnpm dev
+```
+
+Use `;` not `&&` on Windows PowerShell.
+
+## Response format (when claiming completion)
+
+Include a short verification table or bullets:
+
+- What ran (command)
+- Result (e.g. `170/170`, `PASS`, `5/5 e2e`)
+- What was **not** verified (e.g. prod not deployed, unrelated smoke failure)
+
+Do **not** send "should be fixed" or "try it now" without this section when the task was to fix or ship something.
+
+## Hard rules
+
+- Do not skip verification because tests are slow — run them or state clearly that you could not and what remains.
+- Do not mark work complete on local reasoning alone when a test command exists for that behavior.
+- If production differs from local (uncommitted/undeployed), say so explicitly.
+- If a test fails for an unrelated reason, fix or document it; do not hide it.

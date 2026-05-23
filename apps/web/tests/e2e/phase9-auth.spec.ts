@@ -4,7 +4,7 @@ import { signInDemo, signUpAthlete } from "./helpers/auth";
 test("athlete sign-in reaches dashboard", async ({ page }) => {
   await signInDemo(page, "Athlete", "Athlete");
   await expect(page).toHaveURL(/\/dashboard/);
-  await expect(page.getByRole("link", { name: "Find a coach" }).first()).toBeVisible();
+  await expect(page.getByText("Peak Readiness").or(page.getByText("Train Smart"))).toBeVisible();
 });
 
 test("signup starts athlete onboarding wizard", async ({ page }) => {

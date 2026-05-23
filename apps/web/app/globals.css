@@ -512,13 +512,54 @@ article {
   }
 }
 
-/* Official logo mark — Volt glow + depth for any surface (light/dark/glass) */
-.fc-logo-mark {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55))
-    drop-shadow(0 8px 24px rgba(0, 0, 0, 0.45))
-    drop-shadow(0 0 20px rgba(200, 255, 0, 0.22));
+@keyframes stitch-prime-pulse {
+  0% {
+    transform: scale(0.98);
+    box-shadow: 0 0 0 0 rgba(200, 255, 0, 0.35);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 18px rgba(200, 255, 0, 0);
+  }
+  100% {
+    transform: scale(0.98);
+    box-shadow: 0 0 0 0 rgba(200, 255, 0, 0);
+  }
 }
 
+.stitch-prime-ring-glow {
+  animation: stitch-prime-pulse 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stitch-prime-ring-glow {
+    animation: none;
+  }
+}
+
+html.eos-app-shell-active .eos-app-shell {
+  background-color: #070b14;
+}
+
+html.eos-app-shell-active .eos-shell-main {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  html.eos-app-shell-active .eos-shell-main {
+    padding-left: var(--eos-gutter, 1.5rem);
+    padding-right: var(--eos-gutter, 1.5rem);
+  }
+}
+
+/* Official logo mark — universal contorno + sombra (transparent PNG) */
+.fc-logo-mark {
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.92))
+    drop-shadow(0 0 2px rgba(0, 0, 0, 0.68))
+    drop-shadow(0 1px 4px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 0 16px rgba(200, 255, 0, 0.22));
+}
 .fc-logo-elevated {
   isolation: isolate;
 }

@@ -10,13 +10,11 @@ import {
   Calendar,
   Home,
   UserRound,
-  UsersRound,
-  Zap
+  UsersRound
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { MobileAppHeader } from "@/components/brand/mobile-app-header";
+import { StitchNativeHeader } from "@/components/mobile/stitch-native-primitives";
 import { cn } from "@/lib/utils";
-import { RealtimeBadge } from "@/components/ui-glass/premium-system";
 import {
   StitchCoachScreen,
   StitchInboxScreen,
@@ -61,39 +59,16 @@ export function MobileAppPreview({
   );
 
   return (
-    <div className="relative flex min-h-0 w-full max-w-full flex-1 flex-col overflow-hidden bg-ink-950 text-ink-100 premium-grid">
+    <div className="relative flex min-h-0 w-full max-w-full flex-1 flex-col overflow-hidden bg-[#070B14] text-ink-100">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-volt-500/12 via-brand-500/5 to-transparent"
+        className="pointer-events-none absolute -left-[10%] top-[-10%] h-[50vw] w-[50vw] rounded-full bg-[#c8ff00]/5 blur-[120px]"
       />
-      <div className="relative shrink-0 px-3 pb-2 pt-1 sm:px-4">
-        <MobileAppHeader
-          trailing={
-            <span className="rounded-full border border-volt-500/30 bg-volt-500/10 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.16em] text-volt-300">
-              {m.voltline}
-            </span>
-          }
-          eyebrow={isCoach ? m.header.coachEyebrow : m.header.athleteEyebrow}
-          title={isCoach ? m.header.coachGreeting : m.header.athleteGreeting}
-          action={
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-grad-pulse text-ink-950 shadow-volt-glow ring-1 ring-volt-500/30 sm:h-10 sm:w-10 sm:rounded-2xl">
-              {isCoach ? (
-                <UsersRound className="h-4 w-4 sm:h-5 sm:w-5" />
-              ) : (
-                <Zap className="h-4 w-4 sm:h-5 sm:w-5" />
-              )}
-            </span>
-          }
-        />
-        <div className="mt-2.5 flex items-center justify-between gap-2 rounded-full border border-volt-500/20 bg-glass-md px-3 py-1.5 backdrop-blur-glass shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-          <RealtimeBadge>{m.header.syncBadge}</RealtimeBadge>
-          <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-ink-500">
-            {m.header.syncAgo}
-          </span>
-        </div>
+      <div className="relative shrink-0">
+        <StitchNativeHeader initials={isCoach ? "CD" : "PA"} />
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-3 pb-2 hide-scrollbar sm:px-4">
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-6 pb-2 hide-scrollbar">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={screen}
@@ -160,9 +135,9 @@ export function MobileAppPreview({
 
       <nav
         aria-label={m.nav.ariaLabel}
-        className="mx-2 mb-2 mt-auto shrink-0 rounded-glass-lg border border-glass-border bg-glass-md px-1 py-1.5 backdrop-blur-glass-lg shadow-volt-glow safe-area-pb sm:mx-3 sm:mb-2 sm:px-1.5 sm:py-2"
+        className="mx-auto mb-2 mt-auto w-[calc(100%-3rem)] max-w-md shrink-0 rounded-full border border-white/10 bg-[#1f1f28]/80 p-2 shadow-[0_20px_40px_rgba(0,0,0,0.5)] backdrop-blur-2xl safe-area-pb"
       >
-        <ul className="flex items-center justify-between">
+        <ul className="flex items-center justify-around">
           {nav.map((item) => {
             const Icon = item.icon;
             const active = screen === item.id;
@@ -173,13 +148,13 @@ export function MobileAppPreview({
                   aria-current={active ? "page" : undefined}
                   onClick={() => setScreen(item.id)}
                   className={cn(
-                    "grid h-11 min-w-11 place-items-center rounded-full transition-all",
+                    "grid h-12 w-12 place-items-center rounded-full transition-all",
                     active
-                      ? "bg-grad-pulse text-ink-950"
-                      : "text-ink-500 hover:text-ink-100"
+                      ? "bg-[#c0f500] text-[#161f00] shadow-[0_0_15px_rgba(200,255,0,0.4)]"
+                      : "text-ink-400 hover:bg-white/5 hover:text-[#c0f500]"
                   )}
                 >
-                  <Icon className="h-4 w-4" aria-hidden />
+                  <Icon className="h-5 w-5" aria-hidden />
                   <span className="sr-only">{item.label}</span>
                 </button>
               </li>

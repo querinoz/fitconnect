@@ -22,8 +22,8 @@ describe("<MobileAppPreview />", () => {
   it("navigates between app screens and updates session state", async () => {
     renderPreview();
 
-    expect(screen.getByText("Today")).toBeInTheDocument();
-    expect(screen.getByText("AI Readiness")).toBeInTheDocument();
+    expect(screen.getByText("FITCONNECT")).toBeInTheDocument();
+    expect(screen.getByText("Peak Readiness")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /sessions/i }));
     await waitFor(() =>

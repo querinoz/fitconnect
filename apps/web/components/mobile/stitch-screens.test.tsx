@@ -10,10 +10,10 @@ vi.mock("@/lib/i18n-provider", () => ({
         trainHard: "Train hard",
         startSession: "Start session",
         returnToLive: "Return to live",
-        hrv: "HRV",
+        hrv: "HRV Status",
         streak: "Streak",
         personalBest: "Personal best",
-        sleep: "Sleep",
+        sleep: "Sleep Performance",
         sleepQuality: "quality",
         load: "Load",
         sevenDay: "7-day",
@@ -32,13 +32,15 @@ vi.mock("@/lib/i18n-provider", () => ({
 }));
 
 describe("StitchTodayScreen", () => {
-  it("renders stitch today bento with session CTA", () => {
+  it("renders stitch native today layout with prime ring and session CTA", () => {
     render(
       <StitchTodayScreen
         readinessScore={82}
         hrvMs={68}
+        baselineHrvMs={64}
         streakDays={35}
         sleepHours="7h42"
+        sleepEfficiency={92}
         sessionLive={false}
         planApproved={false}
         onStartSession={vi.fn()}
@@ -46,8 +48,13 @@ describe("StitchTodayScreen", () => {
       />
     );
 
-    expect(screen.getByText("AI Readiness")).toBeInTheDocument();
+    expect(screen.getByText("Peak Readiness")).toBeInTheDocument();
     expect(screen.getByText("82")).toBeInTheDocument();
+    expect(screen.getByText("Primed")).toBeInTheDocument();
+    expect(screen.getByText("HRV Status")).toBeInTheDocument();
+    expect(screen.getByText("Day Strain")).toBeInTheDocument();
+    expect(screen.getByText("Sleep Performance")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /start session/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /ai coach/i })).toBeInTheDocument();
   });
 });

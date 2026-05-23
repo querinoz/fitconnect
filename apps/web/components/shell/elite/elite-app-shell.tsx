@@ -60,16 +60,24 @@ export function EliteAppShell({
   }, []);
 
   return (
-    <div className="eos-app-shell relative flex min-h-dvh w-full max-w-full overflow-x-clip bg-ink-950 text-ink-100 premium-grid pb-[calc(96px+env(safe-area-inset-bottom))] lg:bg-[var(--eos-floor)] lg:premium-grid-none lg:pb-0 lg:text-inherit">
+    <div className="eos-app-shell relative flex min-h-dvh w-full max-w-full overflow-x-clip bg-[#070B14] text-ink-100 pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:bg-[var(--eos-floor)] lg:premium-grid-none lg:pb-0 lg:text-inherit">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-52 bg-gradient-to-b from-eos-iris/10 via-eos-voltline/5 to-transparent"
+        className="pointer-events-none absolute -left-[10%] top-[-10%] h-[50vw] w-[50vw] rounded-full bg-[#c8ff00]/5 blur-[120px] lg:hidden"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-[10%] bottom-[-10%] h-[40vw] w-[40vw] rounded-full bg-[#8781ff]/5 blur-[100px] lg:hidden"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 hidden h-52 bg-gradient-to-b from-eos-iris/10 via-eos-voltline/5 to-transparent lg:block"
       />
 
       <EliteSideRail items={items} roleHome={roleHome} />
 
       <div className="eos-app-shell__workspace relative flex min-w-0 flex-1 flex-col lg:min-h-dvh">
-        <StitchMobileChrome role={role} name={name} />
+        <StitchMobileChrome role={role} name={name} avatarUrl={avatarUrl} />
 
         <div className="hidden lg:block">
           <EliteFloatingNav
@@ -86,17 +94,13 @@ export function EliteAppShell({
           />
         </div>
 
-        <ShellMain className="px-3 sm:px-4 lg:px-eos-gutter">
+        <ShellMain className="px-0 sm:px-0 lg:px-eos-gutter">
           <ShellWorkspace>
             <EliteRouteTransition>{children}</EliteRouteTransition>
           </ShellWorkspace>
         </ShellMain>
 
-        <EliteMobileDock
-          items={items}
-          active={pathname}
-          activeLabel={onHome ? undefined : activeTab.label}
-        />
+        <EliteMobileDock items={items} active={pathname} />
       </div>
     </div>
   );

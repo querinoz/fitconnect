@@ -6,8 +6,7 @@ import type { ShellNavItem } from "@/lib/shell/nav-config";
 
 export function EliteMobileDock({
   items,
-  active,
-  activeLabel
+  active
 }: {
   items: ShellNavItem[];
   active: string;
@@ -16,45 +15,35 @@ export function EliteMobileDock({
   return (
     <nav
       aria-label="Primary"
-      className="eos-mobile-dock fixed inset-x-0 z-40 flex justify-center px-2 lg:hidden"
+      className="eos-mobile-dock fixed inset-x-0 z-50 flex justify-center lg:hidden"
     >
-      <div className="w-[min(calc(100%-0.5rem),44rem)]">
-        {activeLabel ? (
-          <p
-            className="mb-2 text-center text-[9px] font-bold uppercase tracking-[0.16em] text-volt-400"
-            aria-live="polite"
-          >
-            {activeLabel}
-          </p>
-        ) : null}
-        <div className="rounded-glass-lg border border-glass-border bg-glass-md px-1 py-1.5 backdrop-blur-glass-lg shadow-volt-glow safe-area-pb sm:px-1.5 sm:py-2">
-          <ul className="flex items-center justify-between">
-            {items.map((item) => {
-              const Icon = item.icon;
-              const isActive =
-                active === item.href ||
-                (item.href !== "/" && active.startsWith(item.href));
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    aria-label={item.label}
-                    aria-current={isActive ? "page" : undefined}
-                    className={cn(
-                      "grid h-11 min-w-11 place-items-center rounded-full transition-all duration-200",
-                      isActive
-                        ? "bg-grad-pulse text-ink-950 shadow-volt-glow"
-                        : "text-ink-500 hover:text-ink-100"
-                    )}
-                  >
-                    <Icon className="h-4 w-4" strokeWidth={isActive ? 2.25 : 2} />
-                    <span className="sr-only">{item.label}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+      <div className="w-[min(calc(100%-3rem),28rem)] rounded-full border border-white/10 bg-[#1f1f28]/80 p-2 shadow-[0_20px_40px_rgba(0,0,0,0.5)] backdrop-blur-2xl safe-area-pb">
+        <ul className="flex items-center justify-around">
+          {items.map((item) => {
+            const Icon = item.icon;
+            const isActive =
+              active === item.href ||
+              (item.href !== "/" && active.startsWith(item.href));
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  aria-label={item.label}
+                  aria-current={isActive ? "page" : undefined}
+                  className={cn(
+                    "grid h-12 w-12 place-items-center rounded-full transition-all duration-200",
+                    isActive
+                      ? "bg-[#c0f500] text-[#161f00] shadow-[0_0_15px_rgba(200,255,0,0.4)]"
+                      : "text-ink-400 hover:bg-white/5 hover:text-[#c0f500]"
+                  )}
+                >
+                  <Icon className="h-5 w-5" strokeWidth={isActive ? 2.25 : 2} />
+                  <span className="sr-only">{item.label}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </nav>
   );

@@ -291,7 +291,9 @@ function AthleteDashboardBody() {
   return (
     <>
       {showStitchToday ? (
-        <div className="space-y-4">
+        session.isActive ? (
+          <div className="space-y-4">{liveSection}</div>
+        ) : (
           <StitchTodayScreen
             readinessScore={readiness.score}
             hrvMs={athlete.hrv}
@@ -318,8 +320,7 @@ function AthleteDashboardBody() {
                 : undefined
             }
           />
-          {liveSection}
-        </div>
+        )
       ) : (
         <AthleteOsDashboard
           name={athlete.name}
