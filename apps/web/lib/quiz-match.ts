@@ -1,4 +1,4 @@
-import type { Modality, Sport, Trainer } from "@/lib/data";
+import type { Sport, Trainer } from "@/lib/data";
 
 export type QuizAnswers = {
   sport?: Sport;

@@ -1,31 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 340" width="320" height="340" fill="none" role="img" aria-label="FitConnect">
   <title>FitConnect</title>
   <defs>
-    <!-- Voltline Master plus Connect cyan -->
+    <!-- Voltline green gradient (LogoBase) -->
     <linearGradient id="ringGrad" x1="15%" y1="95%" x2="85%" y2="5%">
-      <stop offset="0%" stop-color="#A3D400"/>
+      <stop offset="0%" stop-color="#7AB800"/>
       <stop offset="28%" stop-color="#C8FF00"/>
       <stop offset="52%" stop-color="#39FF14"/>
-      <stop offset="72%" stop-color="#00D4FF"/>
-      <stop offset="100%" stop-color="#00E8FF"/>
+      <stop offset="78%" stop-color="#B8F000"/>
+      <stop offset="100%" stop-color="#D6FF33"/>
     </linearGradient>
 
     <linearGradient id="ecgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#A3D400" stop-opacity="0"/>
       <stop offset="14%" stop-color="#C8FF00" stop-opacity="0.85"/>
       <stop offset="45%" stop-color="#39FF14" stop-opacity="0.95"/>
-      <stop offset="62%" stop-color="#00D4FF"/>
-      <stop offset="100%" stop-color="#00E8FF" stop-opacity="0.45"/>
+      <stop offset="72%" stop-color="#B8F000"/>
+      <stop offset="100%" stop-color="#C8FF00" stop-opacity="0.45"/>
     </linearGradient>
 
     <linearGradient id="innerRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#C8FF00" stop-opacity="0.32"/>
-      <stop offset="100%" stop-color="#00D4FF" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#39FF14" stop-opacity="0.18"/>
     </linearGradient>
 
     <linearGradient id="fGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#CCFFFE"/>
+      <stop offset="100%" stop-color="#FFFFFF"/>
     </linearGradient>
 
     <filter id="ringGlow" x="-25%" y="-25%" width="150%" height="150%">
@@ -85,10 +85,10 @@
 
     <circle cx="160" cy="162" r="110" stroke="url(#innerRingGrad)" stroke-width="1" stroke-dasharray="3 8" stroke-opacity="0.5"/>
 
-    <line x1="160" y1="32" x2="160" y2="46" stroke="#00D4FF" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
-    <line x1="160" y1="278" x2="160" y2="292" stroke="#00D4FF" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
-    <line x1="30" y1="162" x2="44" y2="162" stroke="#00D4FF" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
-    <line x1="276" y1="162" x2="290" y2="162" stroke="#00D4FF" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
+    <line x1="160" y1="32" x2="160" y2="46" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
+    <line x1="160" y1="278" x2="160" y2="292" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
+    <line x1="30" y1="162" x2="44" y2="162" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
+    <line x1="276" y1="162" x2="290" y2="162" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
 
     <g filter="url(#fGlow)">
       <rect x="126" y="122" width="16" height="82" rx="2.5" fill="url(#fGrad)"/>
@@ -105,10 +105,10 @@
         stroke-linecap="round"
         stroke-linejoin="round"
       />
-      <circle cx="258" cy="312" r="3" fill="#00D4FF"/>
-      <circle cx="258" cy="312" r="5.5" fill="none" stroke="#00D4FF" stroke-width="1" stroke-opacity="0.45"/>
-      <circle cx="258" cy="312" r="9" fill="none" stroke="#00D4FF" stroke-width="0.6" stroke-opacity="0.18"/>
-      <line x1="258" y1="312" x2="306" y2="312" stroke="#00D4FF" stroke-width="2" stroke-linecap="round" stroke-opacity="0.25"/>
+      <circle cx="258" cy="312" r="3" fill="#C8FF00"/>
+      <circle cx="258" cy="312" r="5.5" fill="none" stroke="#C8FF00" stroke-width="1" stroke-opacity="0.45"/>
+      <circle cx="258" cy="312" r="9" fill="none" stroke="#C8FF00" stroke-width="0.6" stroke-opacity="0.18"/>
+      <line x1="258" y1="312" x2="306" y2="312" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" stroke-opacity="0.25"/>
     </g>
   </g>
 </svg>

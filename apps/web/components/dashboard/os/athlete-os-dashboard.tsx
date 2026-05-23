@@ -61,6 +61,7 @@ type AthleteOsDashboardProps = {
   liveSection?: ReactNode;
   todayPlan?: TodayPlanBlock;
   streakWeeks?: number;
+  onBookSession?: () => void;
 };
 
 function greetingKey(h = new Date().getHours()) {
@@ -86,7 +87,8 @@ export function AthleteOsDashboard({
   athleteId,
   liveSection,
   todayPlan,
-  streakWeeks = 5
+  streakWeeks = 5,
+  onBookSession
 }: AthleteOsDashboardProps) {
   const { dashboard, hub } = useLocale();
   const os = dashboard.os;
@@ -225,6 +227,7 @@ export function AthleteOsDashboard({
                 sessions={sessions}
                 loading={sessionsLoading}
                 coachName={coachName}
+                onBookSession={onBookSession}
               />
               {liveSection}
             </EliteBentoMotionItem>

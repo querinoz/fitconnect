@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { EliteButton } from "@/components/elite-os/elite-button";
 import { Calendar, ChevronRight, Clock, RefreshCw, Video, X } from "lucide-react";
 import type { SessionSummary } from "@fitconnect/types";
 
@@ -27,24 +28,34 @@ const SPORT_EMOJI: Record<string, string> = {
 export function SessionsPanel({
   sessions,
   loading,
-  coachName = "Coach"
+  coachName = "Coach",
+  onBookSession
 }: {
   sessions: SessionSummary[];
   loading?: boolean;
   coachName?: string;
+  onBookSession?: () => void;
 }) {
   const upcoming = sessions.filter((s) => s.status === "scheduled" || s.status === "live");
   const past = sessions.filter((s) => s.status === "completed");
 
   return (
     <div className="rounded-2xl border border-ink-800 bg-ink-900/40 p-6">
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
         <h3 className="font-display text-base font-bold text-ink-100">Sessions</h3>
-        <Button asChild variant="ghost" size="sm" className="h-7 gap-1 text-xs text-ink-500 hover:text-ink-300">
-          <Link href="/sessions">
-            View calendar <ChevronRight className="h-3 w-3" />
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          {onBookSession ? (
+            <EliteButton type="button" size="sm" onClick={onBookSession}>
+              <Calendar className="h-3.5 w-3.5" aria-hidden />
+              Book session
+            </EliteButton>
+          ) : null}
+          <Button asChild variant="ghost" size="sm" className="h-7 gap-1 text-xs text-ink-500 hover:text-ink-300">
+            <Link href="/sessions">
+              View calendar <ChevronRight className="h-3 w-3" />
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {loading ? (

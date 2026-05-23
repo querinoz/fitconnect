@@ -18,8 +18,9 @@ describe("next-pwa config", () => {
   });
 
   it("preserves images.remotePatterns", () => {
+    const images = nextConfig.images as { remotePatterns?: unknown[] } | undefined;
     expect(nextConfig).toHaveProperty("images");
-    expect(Array.isArray((nextConfig as any).images?.remotePatterns)).toBe(true);
-    expect((nextConfig as any).images.remotePatterns.length).toBeGreaterThan(0);
+    expect(Array.isArray(images?.remotePatterns)).toBe(true);
+    expect(images!.remotePatterns!.length).toBeGreaterThan(0);
   });
 });

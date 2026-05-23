@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Calendar, HeartPulse, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { GlassCard } from "@/components/ui-glass/glass-card";
+import { BentoCard } from "@/components/elite-os/bento-card";
+import { EliteButton } from "@/components/elite-os/elite-button";
 import { publishSessionBooking } from "@/lib/realtime/publish-booking";
 import { toastSuccess } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
@@ -65,7 +65,7 @@ export function RecoveryBookingModal({
       aria-modal="true"
       aria-labelledby="recovery-booking-title"
     >
-      <GlassCard className="w-full max-w-md p-6 space-y-4">
+      <BentoCard elevation="glass" padding="lg" className="w-full max-w-md space-y-4">
         {step === "success" ? (
           <div className="text-center py-4">
             <Sparkles className="mx-auto h-8 w-8 text-accent-400" aria-hidden />
@@ -132,22 +132,22 @@ export function RecoveryBookingModal({
 
             {step === "confirm" && (
               <div className="flex gap-2 pt-2">
-                <Button type="button" className="flex-1" onClick={handleConfirm}>
+                <EliteButton type="button" className="flex-1" onClick={handleConfirm}>
                   <Calendar className="h-4 w-4" aria-hidden />
                   Confirm
-                </Button>
-                <Button type="button" variant="outline" onClick={() => setStep("prompt")}>
+                </EliteButton>
+                <EliteButton type="button" variant="secondary" onClick={() => setStep("prompt")}>
                   Back
-                </Button>
+                </EliteButton>
               </div>
             )}
 
-            <Button type="button" variant="ghost" className="w-full" onClick={resetAndClose}>
+            <EliteButton type="button" variant="ghost" className="w-full" onClick={resetAndClose}>
               Cancel
-            </Button>
+            </EliteButton>
           </>
         )}
-      </GlassCard>
+      </BentoCard>
     </div>
   );
 }

@@ -18,7 +18,7 @@ import { EliteButton } from "@/components/elite-os/elite-button";
 import { EliteChip } from "@/components/elite-os/elite-chip";
 import { Headline, BodyText } from "@/components/elite-os/typography";
 import { validateCredentials } from "@/lib/auth";
-import { useAuthStore } from "@/lib/auth-store";
+import { persistClientAuthSession, navigateAfterLogin } from "@/lib/auth/complete-login";
 import { useEntrance } from "@/lib/use-entrance-motion";
 import { useLocale } from "@/lib/i18n-provider";
 
@@ -35,8 +35,7 @@ type DemoCard = {
 
 export function MobileAppLauncher() {
   const router = useRouter();
-  const login = useAuthStore((s) => s.login);
-  const entrance = useEntrance(20);
+  const entrance = useEntrance();
   const l = useLocale().mobileApp.launcher;
 
   const demos: DemoCard[] = [
@@ -65,8 +64,8 @@ export function MobileAppLauncher() {
   function openDemo(username: string, password: string, href: string) {
     const user = validateCredentials(username, password);
     if (!user) return;
-    login(user);
-    router.push(href);
+    persistClientAuthSession(user);
+    navigateAfterLogin(href);
   }
 
   return (

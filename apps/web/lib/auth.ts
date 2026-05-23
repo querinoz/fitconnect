@@ -84,7 +84,8 @@ export function validateCredentials(
       u.email.toLowerCase() === id
   );
   if (!match || match.password !== password) return null;
-  const { password: _pw, ...user } = match;
+  const { password: _password, ...user } = match;
+  void _password;
   return user;
 }
 

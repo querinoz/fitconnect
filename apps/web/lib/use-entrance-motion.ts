@@ -11,7 +11,7 @@ export const MOTION = {
 };
 
 /** Stable entrance — never flips to opacity:0 after mount (prevents stuck/infinite loops). */
-export function useEntrance(_y = 20) {
+export function useEntrance() {
   return {
     initial: false as const,
     animate: { opacity: 1, y: 0 }

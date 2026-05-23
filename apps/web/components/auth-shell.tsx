@@ -21,9 +21,12 @@ import {
 } from "@/lib/auth";
 import { mapSupabaseUserToAuthUser } from "@/lib/auth/map-supabase-user";
 import {
-  clearDemoSessionCookie,
   setDemoSessionCookie
 } from "@/lib/auth/demo-session";
+import {
+  navigateAfterLogin,
+  persistClientAuthSession
+} from "@/lib/auth/complete-login";
 import {
   authBackend,
   fetchSupabaseAuthUser,
@@ -78,7 +81,6 @@ export function AuthShell({
   const t = useT();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const login = useAuthStore((s) => s.login);
   const registered = useAuthStore((s) => s.registered);
   const registerDemo = useAuthStore((s) => s.registerDemo);
   const user = useAuthStore((s) => s.user);
@@ -112,20 +114,10 @@ export function AuthShell({
     authUser: import("@/lib/auth").AuthUser,
     options?: { persistDemoCookie?: boolean }
   ) {
-    login(authUser);
-    if (options?.persistDemoCookie !== false) {
-      setDemoSessionCookie(authUser.id);
-    } else {
-      clearDemoSessionCookie();
-    }
+    persistClientAuthSession(authUser, options);
     setSubmitted(false);
     const target = resolveRedirect(authUser.role);
-    if (typeof window !== "undefined") {
-      window.location.assign(target);
-      return;
-    }
-    router.replace(target);
-    router.refresh();
+    navigateAfterLogin(target);
   }
 
   useEffect(() => {

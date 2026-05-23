@@ -38,6 +38,7 @@ function OrbitRadio({
       style={{ ["--theme-accent" as string]: accent }}
     >
       <input
+        id={`fc-theme-${id}`}
         type="radio"
         name="fc-theme"
         className="fc-theme-radio-input"

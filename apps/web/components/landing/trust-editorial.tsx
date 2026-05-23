@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useRef } from "react";
 import { useLocale } from "@/lib/i18n-provider";
 import { useGsapReveal } from "@/hooks/use-gsap-reveal";
-import { cn } from "@/lib/utils";
 
 const BRANDS = [
   { src: "/brands/strava.svg", alt: "Strava" },

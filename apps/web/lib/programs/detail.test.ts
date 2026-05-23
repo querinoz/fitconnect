@@ -16,7 +16,7 @@ describe("program detail", () => {
   it("returns week preview blocks", () => {
     const program = getProgramById("p-iron-arc");
     expect(program).toBeTruthy();
-    const weeks = getProgramWeekPreview(program!);
+    const weeks = getProgramWeekPreview();
     expect(weeks.length).toBeGreaterThanOrEqual(3);
   });
 });

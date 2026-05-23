@@ -7,6 +7,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import { useAuthHydrated } from "@/lib/use-auth-hydrated";
 import type { UserRole } from "@/lib/auth";
 import { dashboardPathForRole, validateCredentials } from "@/lib/auth";
+import { persistClientAuthSession } from "@/lib/auth/complete-login";
 import { LiquidLoader } from "@/components/ui-glass/liquid-loader";
 import { VoltButton } from "@/components/ui-glass/volt-button";
 
@@ -33,7 +34,6 @@ export function AuthGate({ children, roles }: AuthGateProps) {
   const router = useRouter();
   const pathname = usePathname();
   const hydrated = useAuthHydrated();
-  const login = useAuthStore((s) => s.login);
   const user = useAuthStore((s) => s.user);
   const [timedOut, setTimedOut] = useState(false);
   const [demoParam, setDemoParam] = useState<string | null>(null);
@@ -71,8 +71,8 @@ export function AuthGate({ children, roles }: AuthGateProps) {
       (explicitDemo && user.role !== demoUser.role) ||
       (pathDemo && !user && !demoParam);
 
-    if (shouldSwitch) login(demoUser);
-  }, [hydrated, user, isDemoMode, demoParam, pathname, login]);
+    if (shouldSwitch) persistClientAuthSession(demoUser);
+  }, [hydrated, user, isDemoMode, demoParam, pathname]);
 
   useEffect(() => {
     if (!hydrated && !timedOut) return;

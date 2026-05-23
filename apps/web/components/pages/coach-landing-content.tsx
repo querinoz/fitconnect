@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   Check,
-  HeartHandshake,
   Users,
   Video,
   Wallet,
@@ -18,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { formatMsg, useLocale } from "@/lib/i18n-provider";
 import {
   MetricTile,
-  PremiumCard,
   RealtimeBadge,
   SectionHeader
 } from "@/components/ui-glass/premium-system";

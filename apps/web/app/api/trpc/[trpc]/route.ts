@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/auth/supabase/server";
 import { createStravaTrpcService } from "@/lib/integrations/strava/trpc-service";
 import { appRouter, createContext } from "@fitconnect/api-client";

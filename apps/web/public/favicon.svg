@@ -1,22 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="40 24 240 250" fill="none" role="img" aria-label="FitConnect">
   <defs>
     <linearGradient id="ringGrad" x1="15%" y1="95%" x2="85%" y2="5%">
-      <stop offset="0%" stop-color="#A3D400"/>
+      <stop offset="0%" stop-color="#7AB800"/>
       <stop offset="28%" stop-color="#C8FF00"/>
       <stop offset="52%" stop-color="#39FF14"/>
-      <stop offset="72%" stop-color="#00D4FF"/>
-      <stop offset="100%" stop-color="#00E8FF"/>
+      <stop offset="78%" stop-color="#B8F000"/>
+      <stop offset="100%" stop-color="#D6FF33"/>
     </linearGradient>
     <linearGradient id="fGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#CCFFFE"/>
+      <stop offset="100%" stop-color="#FFFFFF"/>
     </linearGradient>
   </defs>
   <circle cx="160" cy="148" r="108" stroke="url(#ringGrad)" stroke-width="5"/>
-  <line x1="160" y1="36" x2="160" y2="48" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/>
-  <line x1="160" y1="248" x2="160" y2="260" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/>
-  <line x1="50" y1="148" x2="62" y2="148" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/>
-  <line x1="258" y1="148" x2="270" y2="148" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/>
+  <line x1="160" y1="36" x2="160" y2="48" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
+  <line x1="160" y1="248" x2="160" y2="260" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
+  <line x1="50" y1="148" x2="62" y2="148" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
+  <line x1="258" y1="148" x2="270" y2="148" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
   <rect x="126" y="112" width="14" height="72" rx="2.5" fill="url(#fGrad)"/>
   <rect x="126" y="112" width="54" height="14" rx="2.5" fill="url(#fGrad)"/>
   <rect x="126" y="144" width="20" height="12" rx="2.5" fill="#C8FF00"/>

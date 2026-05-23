@@ -42,7 +42,7 @@ function makeGamificationStore(getDaily: () => MissionDef[], storageName: string
           const state = get();
           const today = todayKey();
           const isNewDay = state.lastActiveDate !== today;
-          let completedToday = isNewDay ? [] : [...state.completedToday];
+          const completedToday = isNewDay ? [] : [...state.completedToday];
 
           if (completedToday.includes(missionId)) {
             return { leveledUp: false };
@@ -52,7 +52,7 @@ function makeGamificationStore(getDaily: () => MissionDef[], storageName: string
           const prevLevel = levelFromXp(state.xp).level;
           let bonusXp = xpReward;
           let streakDays = state.streakDays;
-          let badges = [...state.badges];
+          const badges = [...state.badges];
 
           if (isNewDay) {
             const yesterday = new Date();
@@ -141,16 +141,15 @@ function useGamificationSummaryFromStore(
 }
 
 export function useGamificationSummary(variant: "athlete" | "coach" = "athlete") {
-  if (variant === "coach") {
-    return useGamificationSummaryFromStore(
-      useCoachGamificationStore,
-      coachDailyMissionsForDate,
-      coachWeeklySuperMission
-    );
-  }
-  return useGamificationSummaryFromStore(
+  const athleteSummary = useGamificationSummaryFromStore(
     useGamificationStore,
     dailyMissionsForDate,
     weeklySuperMission
   );
+  const coachSummary = useGamificationSummaryFromStore(
+    useCoachGamificationStore,
+    coachDailyMissionsForDate,
+    coachWeeklySuperMission
+  );
+  return variant === "coach" ? coachSummary : athleteSummary;
 }

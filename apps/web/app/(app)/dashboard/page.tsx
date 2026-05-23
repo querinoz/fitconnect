@@ -307,6 +307,7 @@ function AthleteDashboardBody() {
           intensity: nextBlock.intensity
         }}
         streakWeeks={athlete.streakWeeks}
+        onBookSession={() => setBookingOpen(true)}
       />
 
       {activeNudge && (

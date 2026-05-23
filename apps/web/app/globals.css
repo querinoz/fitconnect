@@ -488,7 +488,7 @@ article {
 .fc-logo-mark {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55))
     drop-shadow(0 8px 24px rgba(0, 0, 0, 0.45))
-    drop-shadow(0 0 20px rgba(191, 238, 22, 0.22));
+    drop-shadow(0 0 20px rgba(200, 255, 0, 0.22));
 }
 
 .fc-logo-elevated {

@@ -15,7 +15,7 @@ export function useRelayAthleteRealtime(athleteId: string) {
 
   useEffect(() => {
     consumed.current = ch.messages.length;
-  }, [athleteId]);
+  }, [athleteId, ch.messages.length]);
 
   useEffect(() => {
     while (consumed.current < ch.messages.length) {

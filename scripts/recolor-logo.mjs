@@ -6,7 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
 
-const VOLT = { r: 191, g: 238, b: 22 };
+const VOLT = { r: 200, g: 255, b: 0 }; // #C8FF00 Voltline
 
 function isBluePixel(r, g, b, a) {
   if (a < 12) return false;
@@ -86,8 +86,7 @@ async function exportSizes(inputPath, outDir) {
 }
 
 const input =
-  process.argv[2] ??
-  "C:/Users/duhqu/.cursor/projects/d-fitconnect/assets/c__Users_duhqu_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_image-7346b706-e80f-4ccf-82a1-cfeb2100e08c.png";
+  process.argv[2] ?? path.resolve("LogoBase.png");
 const outDir = process.argv[3] ?? path.resolve("apps/web/public/brand");
 
 await exportSizes(input, outDir);

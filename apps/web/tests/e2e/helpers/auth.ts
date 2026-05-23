@@ -59,7 +59,9 @@ export async function openDemoAthleteAndCoach(browser: Browser) {
   await expect(athlete.getByRole("link", { name: "Find a coach" }).first()).toBeVisible({
     timeout: 20_000
   });
-  await expect(coach.getByText("Roster readiness")).toBeVisible({ timeout: 20_000 });
+  await expect(coach.getByRole("heading", { name: "Coach Command Center" })).toBeVisible({
+    timeout: 20_000
+  });
 
   return { context, athlete, coach };
 }

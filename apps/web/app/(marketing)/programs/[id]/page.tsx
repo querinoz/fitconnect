@@ -36,7 +36,7 @@ export default function ProgramDetailPage({ params }: { params: { id: string } }
     );
   }
 
-  const weeks = getProgramWeekPreview(program);
+  const weeks = getProgramWeekPreview();
   const sample = getSampleWorkout(program);
   const programId = program.id;
   const programPrice = program.price;

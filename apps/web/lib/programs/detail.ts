@@ -21,7 +21,7 @@ export function getProgramCoach(program: Program) {
   return TRAINERS.find((t) => t.id === program.trainerId);
 }
 
-export function getProgramWeekPreview(program: Program): ProgramWeekBlock[] {
+export function getProgramWeekPreview(): ProgramWeekBlock[] {
   const base = [
     { focus: "Foundation & movement quality", sessions: ["Technique audit", "Base volume", "Mobility reset"] },
     { focus: "Progressive overload", sessions: ["Primary lift A", "Accessory density", "Recovery flush"] },

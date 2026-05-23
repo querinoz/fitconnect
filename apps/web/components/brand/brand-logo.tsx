@@ -21,7 +21,7 @@ type BrandLogoProps = {
 };
 
 /**
- * Official FitConnect logo — Volt→Connect ring, F mark, ECG pulse.
+ * Official FitConnect logo — LogoBase mark; cyan/blue accents recolored to Voltline (#C8FF00).
  */
 export function BrandLogo({
   className,

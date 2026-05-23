@@ -23,6 +23,7 @@ import {
   Video,
   Zap
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { formatPrice, formatCompact } from "@/lib/utils";
 import {
   PremiumCard,
@@ -438,7 +439,7 @@ function StatTile({
   label,
   value
 }: {
-  icon: any;
+  icon: LucideIcon;
   label: string;
   value: string;
 }) {

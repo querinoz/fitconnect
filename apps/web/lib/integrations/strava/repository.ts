@@ -10,12 +10,8 @@ export {
 } from "./service";
 
 import { syncRecentActivities } from "./service";
-import type { StravaActivity } from "./client";
 
-export async function upsertStravaActivities(
-  athleteExternalId: string,
-  _activities: StravaActivity[]
-) {
+export async function upsertStravaActivities(athleteExternalId: string) {
   return syncRecentActivities(athleteExternalId, 1);
 }
 

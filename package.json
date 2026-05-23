@@ -39,6 +39,7 @@
     "env:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-status.ps1",
     "env:setup-prod": "node scripts/setup-production-env.mjs",
     "env:check": "node scripts/validate-env.mjs",
+    "brand:logo": "node scripts/recolor-logo.mjs",
     "stripe:login": "stripe login",
     "stripe:whsec": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stripe-print-whsec.ps1",
     "stripe:whsec:save": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stripe-print-whsec.ps1 -Save",
@@ -49,6 +50,7 @@
     "@prisma/client": "^7.8.0",
     "convex": "^1.39.1",
     "prisma": "^7.8.0",
+    "sharp": "^0.34.5",
     "tsx": "^4.22.2",
     "turbo": "^2.5.4",
     "typescript": "^5.6.3"

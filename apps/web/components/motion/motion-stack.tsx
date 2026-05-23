@@ -16,7 +16,6 @@ export function MotionStack({
   children: ReactNode;
   className?: string;
 }) {
-  const reduce = useReducedMotion();
   return (
     <motion.div
       className={cn(className)}

@@ -3,8 +3,9 @@
 import { useEffect, type ReactNode } from "react";
 import { useAuthStore } from "@/lib/auth-store";
 import { useSupabaseAuthSync } from "@/lib/auth/use-supabase-auth-sync";
+import { persistClientAuthSession } from "@/lib/auth/complete-login";
 import { authBackend } from "@/lib/auth/supabase-browser-auth";
-import { isAllowedDemoSessionId, setDemoSessionCookie } from "@/lib/auth/demo-session";
+import { isAllowedDemoSessionId } from "@/lib/auth/demo-session";
 
 /**
  * Rehydrates the persisted auth store once on the client.
@@ -17,7 +18,7 @@ export function AuthStoreProvider({ children }: { children: ReactNode }) {
     void Promise.resolve(useAuthStore.persist.rehydrate()).then(() => {
       const user = useAuthStore.getState().user;
       if (user && authBackend() === "supabase" && isAllowedDemoSessionId(user.id)) {
-        setDemoSessionCookie(user.id);
+        persistClientAuthSession(user);
       }
 
       if (process.env.NODE_ENV === "production") return;

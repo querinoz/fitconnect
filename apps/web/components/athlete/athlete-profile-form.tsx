@@ -28,7 +28,7 @@ export function AthleteProfileForm() {
     if (!athlete) return;
     setGoal(athlete.goalTitle);
     setSports(athlete.sports as Sport[]);
-  }, [athlete?.id, athlete?.goalTitle, athlete?.sports]);
+  }, [athlete, athlete?.id, athlete?.goalTitle, athlete?.sports]);
 
   if (!athlete) return null;
 

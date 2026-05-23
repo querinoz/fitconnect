@@ -46,7 +46,7 @@ export async function GET(request: Request) {
     connections = listConnections(athleteId);
   }
 
-  let stravaConn = getConnection(athleteId, "strava");
+  const stravaConn = getConnection(athleteId, "strava");
   let activities = getActivities(athleteId, 10);
   let lastSyncAt = stravaConn?.lastSyncAt ?? null;
   let connected = stravaConn?.status === "connected";

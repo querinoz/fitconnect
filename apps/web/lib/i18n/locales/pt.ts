@@ -1,5 +1,3 @@
-import type { Dict } from "../types";
-
 export const pt = {
   nav: {
     findCoach: "Encontrar um coach",
