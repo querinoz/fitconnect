@@ -81,14 +81,14 @@ export function ScrollStory() {
   );
 
   return (
-    <section ref={rootRef} id="scroll-story" className="relative bg-ink-950">
+    <section ref={rootRef} id="scroll-story" className="relative bg-[var(--eos-floor)] border-t border-white/5">
       <div className="mx-auto max-w-7xl fc-section-x px-4 py-16 sm:px-6">
-        <p className="nivis-micro-label nivis-micro-label--accent mb-3">{s.eyebrow}</p>
-        <h2 className="nivis-headline max-w-3xl lowercase">
+        <p className="eos-label-caps text-eos-voltline mb-3">{s.eyebrow}</p>
+        <h2 className="eos-display max-w-3xl lowercase">
           {s.title}{" "}
-          <span className="text-volt-500">{s.titleAccent}</span>
+          <span className="text-eos-voltline">{s.titleAccent}</span>
         </h2>
-        <p className="mt-4 max-w-xl text-sm lowercase text-ink-400">{s.subtitle}</p>
+        <p className="mt-4 max-w-xl text-sm lowercase text-eos-on-surface-subtle">{s.subtitle}</p>
       </div>
 
       {PANELS.map((panel, index) => {
@@ -99,23 +99,23 @@ export function ScrollStory() {
             className="scroll-story-panel relative flex min-h-[100dvh] items-end overflow-hidden"
           >
             <Image src={panel.image} alt="" fill className="object-cover opacity-55" sizes="100vw" priority={index === 0} />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/55 to-ink-950/20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--eos-floor)] via-[var(--eos-floor)]/55 to-[var(--eos-floor)]/20" />
 
             <div className="relative z-10 mx-auto w-full max-w-7xl fc-section-x px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-6">
               <div
-                className="scroll-story-card nivis-menu-card !aspect-auto min-h-[280px] max-w-md p-6 sm:p-8"
+                className="scroll-story-card eos-bento-card !aspect-auto min-h-[280px] max-w-md p-6 sm:p-8 border border-white/10 transition duration-300 hover:border-eos-voltline/30"
                 style={{ backgroundColor: panel.tone }}
               >
-                <p className="nivis-micro-label mb-4 text-ink-300">
+                <p className="eos-label-caps mb-4 text-eos-on-surface-subtle">
                   {String(index + 1).padStart(2, "0")} · {s.chapter}
                 </p>
-                <h3 className="hero-title font-display text-[clamp(2rem,8vw,4rem)] font-medium lowercase text-ink-50">
+                <h3 className="hero-title font-display text-[clamp(2rem,8vw,4rem)] font-medium lowercase text-eos-on-surface">
                   {c.title}
                 </h3>
-                <p className="mt-3 max-w-sm text-sm lowercase leading-relaxed text-ink-300">{c.body}</p>
+                <p className="mt-3 max-w-sm text-sm lowercase leading-relaxed text-eos-on-surface-muted">{c.body}</p>
                 <Link
                   href={panel.href}
-                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-volt-500 px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.16em] text-ink-950 transition hover:bg-volt-400"
+                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-eos-voltline px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#070b14] transition hover:shadow-[0_0_24px_rgba(200,255,0,0.4)]"
                 >
                   {c.cta}
                   <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
@@ -128,8 +128,8 @@ export function ScrollStory() {
 
       <div className="mx-auto max-w-7xl fc-section-x px-4 py-12 sm:px-6">
         <NivisPanel className="flex flex-wrap items-center justify-between gap-4 p-5">
-          <p className="nivis-micro-label">{s.footerHint}</p>
-          <Link href="/signup" className="text-sm font-semibold lowercase text-volt-500 hover:text-volt-400">
+          <p className="eos-label-caps">{s.footerHint}</p>
+          <Link href="/signup" className="text-sm font-semibold lowercase text-eos-voltline hover:text-volt-400">
             {s.footerCta} →
           </Link>
         </NivisPanel>

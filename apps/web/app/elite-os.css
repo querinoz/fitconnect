@@ -1,9 +1,32 @@
 /**
- * FitConnect Elite OS — canonical design tokens (Stitch reference).
- * Layered on voltline.css; use semantic Tailwind classes, not raw hex in components.
+ * ═══════════════════════════════════════════════════════════════════════
+ * FITCONNECT ELITE OS™ — UNIFIED DESIGN SYSTEM
+ * ═══════════════════════════════════════════════════════════════════════
+ *
+ * Single canonical design system for the entire FitConnect product.
+ * All other CSS files (voltline, fc-system, motion) are consolidated here.
+ *
+ * Usage: import ONLY this file for design tokens. Use semantic classes,
+ * never raw hex in components.
+ *
+ * Hierarchy:
+ *   1. Floor & Surface (MD3-inspired elevation)
+ *   2. Brand Accents (Volt identity)
+ *   3. Content & Text
+ *   4. Glass System
+ *   5. Radius & Spacing
+ *   6. Motion & Easing
+ *   7. Typography Scale
+ *   8. Gradients & Shadows
+ *   9. Safe Areas & Layout
+ *   10. Utility Classes
  */
+
+/* ═══════════════════════════════════════════════════════════════
+   1. FLOOR & SURFACE HIERARCHY
+   ═══════════════════════════════════════════════════════════════ */
 :root {
-  /* ── Floor & surface hierarchy (MD3-inspired) ── */
+  /* ── Floor: the deepest background ── */
   --eos-floor: #070b14;
   --eos-carbon: #111827;
   --eos-elevated: #151b2d;
@@ -15,26 +38,118 @@
   --eos-surface-container-high: #2a2933;
   --eos-surface-container-highest: #35343e;
 
-  /* ── Brand accents ── */
-  --eos-iris: #6c63ff;
-  --eos-iris-soft: #c4c0ff;
-  --eos-iris-glow: rgba(108, 99, 255, 0.35);
+  /* ── Elevation aliases ── */
+  --eos-elevation-0: var(--eos-floor);
+  --eos-elevation-1: var(--eos-carbon);
+  --eos-elevation-2: var(--eos-elevated);
+  --eos-elevation-glass: var(--eos-glass-bg);
+
+  /* ── Legacy Voltline → EOS bridge (backward compat) ── */
+  --ink-950: var(--eos-floor);
+  --ink-900: #0b0f19;
+  --ink-800: var(--eos-carbon);
+  --ink-700: var(--eos-elevated);
+  --ink-600: var(--eos-surface-container);
+  --ink-500: rgba(238, 238, 242, 0.14);
+  --ink-400: rgba(238, 238, 242, 0.28);
+  --ink-300: rgba(238, 238, 242, 0.52);
+  --ink-100: #eeeef2;
+  --ink-50: #eeeef2;
+
+  /* ── Nivis → EOS bridge ── */
+  --nivis-lime: var(--eos-voltline);
+  --nivis-void: var(--eos-floor);
+  --nivis-glass: rgba(9, 4, 2, 0.55);
+  --nivis-glass-border: var(--eos-glass-border);
+  --nivis-glass-highlight: rgba(191, 238, 22, 0.12);
+
+/* ═══════════════════════════════════════════════════════════════
+   2. BRAND ACCENTS — Volt Identity
+   ═══════════════════════════════════════════════════════════════ */
+
+  /* ── Primary: Volt (voltline) ── */
   --eos-voltline: #c8ff00;
   --eos-voltline-dim: rgba(200, 255, 0, 0.12);
   --eos-voltline-glow: rgba(200, 255, 0, 0.4);
+
+  --volt-300: #d4ff4d;
+  --volt-400: #d0ff33;
+  --volt-500: var(--eos-voltline);
+  --volt-600: #a8d700;
+  --volt-glow: rgba(200, 255, 0, 0.45);
+  --volt-dim: rgba(200, 255, 0, 0.1);
+
+  /* ── Secondary: Iris ── */
+  --eos-iris: #6c63ff;
+  --eos-iris-soft: #c4c0ff;
+  --eos-iris-glow: rgba(108, 99, 255, 0.35);
+
+  /* ── Telemetry & Data ── */
   --eos-telemetry: #3cd7ff;
   --eos-telemetry-dim: rgba(60, 215, 255, 0.12);
+
+  /* ── Semantic accents ── */
   --eos-performance: #00e090;
   --eos-recovery: #ffb020;
   --eos-alert: #ff3a5c;
 
-  /* ── Content ── */
+  /* ── Connect (secondary trust / links) ── */
+  --connect-500: #00ddb4;
+  --connect-dim: rgba(0, 221, 180, 0.1);
+  --connect-glow: rgba(0, 221, 180, 0.06);
+
+  /* ── Extended palette ── */
+  --cyan-500: #00bfff;
+  --cyan-dim: rgba(0, 191, 255, 0.1);
+  --amber-400: #ffb020;
+  --amber-dim: rgba(255, 176, 32, 0.1);
+  --crimson-500: #ff3a5c;
+  --crimson-dim: rgba(255, 58, 92, 0.1);
+  --emerald-500: #00e090;
+  --emerald-dim: rgba(0, 224, 144, 0.1);
+
+  /* ── Legacy aliases ── */
+  --jade-500: var(--connect-500);
+  --coral-500: var(--crimson-500);
+
+/* ═══════════════════════════════════════════════════════════════
+   3. CONTENT & TEXT
+   ═══════════════════════════════════════════════════════════════ */
+
   --eos-on-surface: #e4e1ee;
   --eos-on-surface-muted: #c7c4d8;
   --eos-on-surface-subtle: rgba(228, 225, 238, 0.52);
   --eos-outline: rgba(255, 255, 255, 0.08);
   --eos-outline-strong: rgba(255, 255, 255, 0.14);
   --eos-machined-edge: #1f1f28;
+
+  /* ── Borders ── */
+  --border-xs: rgba(255, 255, 255, 0.05);
+  --border-sm: rgba(255, 255, 255, 0.09);
+  --border-md: rgba(255, 255, 255, 0.14);
+
+/* ═══════════════════════════════════════════════════════════════
+   4. GLASS SYSTEM
+   ═══════════════════════════════════════════════════════════════ */
+
+  --eos-glass-bg: rgba(255, 255, 255, 0.06);
+  --eos-glass-border: rgba(255, 255, 255, 0.08);
+  --eos-glass-blur: 20px;
+
+  /* ── Glass surface tiers ── */
+  --glass-lo: rgba(255, 255, 255, 0.03);
+  --glass-md: rgba(255, 255, 255, 0.06);
+  --glass-hi: rgba(255, 255, 255, 0.1);
+  --glass-volt: var(--volt-dim);
+  --glass-border: var(--border-xs);
+  --glass-edge: rgba(200, 255, 0, 0.30);
+  --glass-ink: rgba(7, 8, 11, 0.72);
+  --glass-wash: rgba(255, 255, 255, 0.045);
+  --glass-noise: rgba(255, 255, 255, 0.035);
+
+/* ═══════════════════════════════════════════════════════════════
+   5. RADIUS & SPACING
+   ═══════════════════════════════════════════════════════════════ */
 
   /* ── Radius (hyper-rounded) ── */
   --eos-radius-nested: 12px;
@@ -43,7 +158,14 @@
   --eos-radius-modal: 28px;
   --eos-radius-pill: 9999px;
 
-  /* ── Spacing (4px base) ── */
+  /* ── FC System radius (marketing compat) ── */
+  --fc-radius-sm: 12px;
+  --fc-radius-md: 16px;
+  --fc-radius-lg: 24px;
+  --fc-radius-xl: 32px;
+  --fc-radius-full: 9999px;
+
+  /* ── Spacing (4px base grid) ── */
   --eos-unit: 4px;
   --eos-stack-sm: 8px;
   --eos-stack-md: 16px;
@@ -52,18 +174,17 @@
   --eos-bento-gap: 20px;
   --eos-container-margin: 32px;
 
-  /* ── Glass ── */
-  --eos-glass-bg: rgba(255, 255, 255, 0.06);
-  --eos-glass-border: rgba(255, 255, 255, 0.08);
-  --eos-glass-blur: 20px;
+  /* ── Marketing layout tokens ── */
+  --fc-space-section-y: clamp(3rem, 6vw, 6rem);
+  --fc-space-block: clamp(1.25rem, 2.5vw, 2rem);
+  --fc-content-max: 80rem;
+  --fc-nav-height: 4.25rem;
+  --fc-marketing-nav-offset: calc(var(--fc-nav-height) + 1.25rem);
 
-  /* ── Elevation (optical layering, not drop shadows) ── */
-  --eos-elevation-0: var(--eos-floor);
-  --eos-elevation-1: var(--eos-carbon);
-  --eos-elevation-2: var(--eos-elevated);
-  --eos-elevation-glass: var(--eos-glass-bg);
+/* ═══════════════════════════════════════════════════════════════
+   6. MOTION & EASING
+   ═══════════════════════════════════════════════════════════════ */
 
-  /* ── Motion ── */
   --eos-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --eos-ease-spring: cubic-bezier(0.25, 1.5, 0.5, 1);
   --eos-duration-micro: 150ms;
@@ -73,7 +194,22 @@
   --eos-spring-stiffness: 380;
   --eos-spring-damping: 32;
 
-  /* ── Typography scale ── */
+  /* ── Legacy motion aliases ── */
+  --fc-ease-kinetic: var(--eos-ease-out);
+  --fc-ease-snap: var(--eos-ease-spring);
+  --fc-ease-data: ease-in-out;
+  --fc-motion-micro: var(--eos-duration-micro);
+  --fc-motion-ui: var(--eos-duration-ui);
+  --fc-motion-screen: var(--eos-duration-screen);
+
+  /* ── Motion policy (from styles/motion.css) ── */
+  --motion-duration: 300ms;
+  --motion-easing: cubic-bezier(0.4, 0, 0.2, 1);
+
+/* ═══════════════════════════════════════════════════════════════
+   7. TYPOGRAPHY SCALE
+   ═══════════════════════════════════════════════════════════════ */
+
   --eos-display-lg: clamp(2rem, 4vw, 3rem);
   --eos-display-lg-lh: 1.12;
   --eos-headline-md: 1.5rem;
@@ -85,23 +221,88 @@
   --eos-data-metric: 1.25rem;
   --eos-label-caps: 0.75rem;
 
-  /* Bridge legacy voltline aliases → Elite OS */
-  --ink-950: var(--eos-floor);
-  --volt-500: var(--eos-voltline);
-  --connect-500: var(--eos-telemetry);
+/* ═══════════════════════════════════════════════════════════════
+   8. GRADIENTS & SHADOWS
+   ═══════════════════════════════════════════════════════════════ */
+
+  --grad-pulse: linear-gradient(135deg, #d4ff4d, #c8ff00, #9bc412);
+  --grad-text: linear-gradient(135deg, #eeeef2, #d6ff33 55%, #c8ff00);
+  --grad-live: radial-gradient(circle at 20% 10%, rgba(0, 221, 180, 0.18), transparent 36%),
+    radial-gradient(circle at 78% 12%, rgba(200, 255, 0, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  --grad-depth: radial-gradient(circle at 50% -20%, rgba(200, 255, 0, 0.12), transparent 38%),
+    linear-gradient(180deg, rgba(12, 13, 17, 0.92), rgba(7, 8, 11, 0.98));
+
+  --shadow-premium: inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 24px 80px -48px rgba(0, 0, 0, 0.9);
+  --shadow-focus: 0 0 0 1px rgba(200, 255, 0, 0.28),
+    0 18px 60px -36px var(--volt-glow);
+
+/* ═══════════════════════════════════════════════════════════════
+   9. SAFE AREAS & LAYOUT
+   ═══════════════════════════════════════════════════════════════ */
+
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+
+  color-scheme: dark;
 }
 
-/* ── Utility surfaces ── */
+/* ═══════════════════════════════════════════════════════════════
+   MOTION POLICY — Reduced motion compliance
+   ═══════════════════════════════════════════════════════════════ */
+
+html[data-motion="reduced"] {
+  --motion-duration: 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"]) {
+    --motion-duration: 0ms;
+  }
+
+  :root {
+    --eos-duration-micro: 0ms;
+    --eos-duration-ui: 0ms;
+    --eos-duration-screen: 0ms;
+  }
+}
+
+.fc-motion-ui,
+.landing-editorial .hero-line,
+.landing-editorial .hero-stat,
+.landing-editorial .hero-scroll {
+  transition-duration: var(--motion-duration);
+  transition-timing-function: var(--motion-easing);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE: html, body
+   ═══════════════════════════════════════════════════════════════ */
+
+html,
+body {
+  background: var(--eos-floor);
+  color: var(--ink-100);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   10. UTILITY CLASSES — Surfaces & Layout
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Floor ── */
 .eos-floor {
   background-color: var(--eos-floor);
   color: var(--eos-on-surface);
 }
 
+/* ── Bento grid ── */
 .eos-bento-grid {
   display: grid;
   gap: var(--eos-bento-gap);
 }
 
+/* ── Glass surface ── */
 .eos-glass {
   background: var(--eos-glass-bg);
   backdrop-filter: blur(var(--eos-glass-blur));
@@ -109,6 +310,7 @@
   border: 1px solid var(--eos-glass-border);
 }
 
+/* ── Bento card ── */
 .eos-bento-card {
   position: relative;
   overflow: hidden;
@@ -135,6 +337,7 @@
   backdrop-filter: blur(var(--eos-glass-blur));
 }
 
+/* ── Typography utility classes ── */
 .eos-label-caps {
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: var(--eos-label-caps);
@@ -175,6 +378,71 @@
   color: var(--eos-on-surface-muted);
 }
 
+/* ── Marketing layout classes (from fc-system.css) ── */
+.fc-radius-card {
+  border-radius: var(--fc-radius-lg);
+}
+
+.fc-radius-control {
+  border-radius: var(--fc-radius-md);
+}
+
+.fc-marketing-main {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.fc-marketing-section {
+  padding-top: var(--fc-space-section-y);
+  padding-bottom: var(--fc-space-section-y);
+}
+
+.fc-marketing-container {
+  width: 100%;
+  max-width: var(--fc-content-max);
+  margin-inline: auto;
+  padding-inline: max(1rem, env(safe-area-inset-left)) max(1rem, env(safe-area-inset-right));
+}
+
+@media (min-width: 640px) {
+  .fc-marketing-container {
+    padding-inline: max(1.5rem, env(safe-area-inset-left)) max(1.5rem, env(safe-area-inset-right));
+  }
+}
+
+.fc-marketing-hero {
+  padding-top: calc(var(--fc-marketing-nav-offset) + 1.5rem);
+  padding-bottom: clamp(2rem, 4vw, 3.5rem);
+}
+
+.fc-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--volt-400);
+}
+
+.fc-display-title {
+  font-family: var(--font-display, inherit);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  color: var(--ink-50);
+}
+
+.fc-body-muted {
+  color: var(--ink-300);
+  line-height: 1.6;
+}
+
+/* ── Glow effects ── */
 .eos-volt-glow {
   box-shadow: 0 0 15px var(--eos-voltline-glow);
 }
@@ -187,7 +455,10 @@
   box-shadow: 0 0 0 1px var(--eos-iris), 0 0 8px var(--eos-iris-glow);
 }
 
-/* ── App shell (Phase 2) ── */
+/* ═══════════════════════════════════════════════════════════════
+   APP SHELL — Phase 2
+   ═══════════════════════════════════════════════════════════════ */
+
 .eos-app-shell {
   background-color: var(--eos-floor);
 }
@@ -232,7 +503,10 @@ html.eos-app-shell-active .fc-dashboard-inner {
   max-width: 88rem;
 }
 
-/* ── Stitch decorative backgrounds ── */
+/* ═══════════════════════════════════════════════════════════════
+   DECORATIVE BACKGROUNDS — Crosshair / Telemetry Grid
+   ═══════════════════════════════════════════════════════════════ */
+
 .eos-crosshair-bg {
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
@@ -263,12 +537,4 @@ html.eos-app-shell-active .fc-dashboard-inner {
   width: 40vw;
   height: 40vw;
   background: rgba(108, 99, 255, 0.05);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --eos-duration-micro: 0ms;
-    --eos-duration-ui: 0ms;
-    --eos-duration-screen: 0ms;
-  }
 }

@@ -23,9 +23,13 @@ declare global {
 
 let initialized = false;
 
+function configured(value: string | undefined): value is string {
+  return Boolean(value && !value.includes("PASTE_") && !value.includes("your-"));
+}
+
 export function initPostHog() {
-  const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-  if (!key || typeof window === "undefined" || initialized) return;
+  const key = process.env.NEXT_PUBLIC_POSTHOG_KEY?.trim();
+  if (!configured(key) || typeof window === "undefined" || initialized) return;
 
   void import("posthog-js").then(({ default: posthog }) => {
     posthog.init(key, {

@@ -1,9 +1,13 @@
 /** Sentry client — active when NEXT_PUBLIC_SENTRY_DSN is set. */
 let initialized = false;
 
+function configured(value: string | undefined): value is string {
+  return Boolean(value && !value.includes("PASTE_") && !value.includes("your-"));
+}
+
 export function initSentryClient() {
   const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN?.trim();
-  if (!dsn || typeof window === "undefined" || initialized) return;
+  if (!configured(dsn) || typeof window === "undefined" || initialized) return;
 
   void import("@sentry/browser").then((Sentry) => {
     Sentry.init({
@@ -19,7 +23,7 @@ export function initSentryClient() {
 
 export function captureException(error: unknown, context?: Record<string, unknown>) {
   const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN?.trim();
-  if (dsn && typeof window !== "undefined") {
+  if (configured(dsn) && typeof window !== "undefined") {
     void import("@sentry/browser").then((Sentry) => {
       Sentry.captureException(error, context ? { extra: context } : undefined);
     });

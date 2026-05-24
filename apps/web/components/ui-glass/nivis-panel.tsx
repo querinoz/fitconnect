@@ -1,7 +1,10 @@
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
-/** Nivis glass surface for dashboard / landing panels */
+/**
+ * Elite OS glass surface — unified panel used across dashboard & landing.
+ * Migrated from legacy Nivis glass to EOS bento system.
+ */
 export function NivisPanel({
   children,
   className,
@@ -17,8 +20,11 @@ export function NivisPanel({
     <div
       id={id}
       className={cn(
-        "nivis-glass-panel rounded-2xl",
-        interactive && "fc-liquid-interactive transition hover:border-volt-500/25",
+        "eos-bento-card relative rounded-[var(--eos-radius-card)] border border-[var(--eos-glass-border)]",
+        "bg-[linear-gradient(180deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0.02)_100%)]",
+        "backdrop-blur-[24px] [backdrop-filter:blur(24px)_saturate(130%)]",
+        "shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_24px_80px_-40px_rgba(0,0,0,0.85)]",
+        interactive && "transition hover:border-[var(--eos-voltline-dim)]",
         className
       )}
     >
@@ -26,3 +32,4 @@ export function NivisPanel({
     </div>
   );
 }
+

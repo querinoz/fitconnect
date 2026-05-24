@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>FitConnect — 20 Logo Variations · Green Gradient</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #111;
+    font-family: system-ui, sans-serif;
+    padding: 40px;
+  }
+  h1 {
+    color: #C8FF00;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  p {
+    color: rgba(255,255,255,.35);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-align: center;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .item svg {
+    width: 100%;
+    max-width: 180px;
+    height: auto;
+  }
+  .label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.3);
+    text-align: center;
+  }
+  .hex {
+    font-size: 9px;
+    font-family: monospace;
+    color: rgba(255,255,255,.18);
+    text-align: center;
+    margin-top: 2px;
+  }
+
+  /* ── Preview on white background (toggle) ── */
+  .white-preview {
+    background: #fff;
+    border-radius: 10px;
+    padding: 4px;
+  }
+</style>
+</head>
+<body>
+
+<h1>FitConnect · Logo Variations</h1>
+<p>Design idêntico ao original · Apenas o gradiente azul substituído por verde</p>
+
+<div class="grid">
+
+<!-- ─────────────────────────────────────────────
+     MACRO LOGO SVG — reutilizado 20x via <use>
+     Apenas os gradientes mudam em cada variação
+───────────────────────────────────────────────── -->
+
+<!-- ══ VARIATION 1: Volt → Lime ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle1" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#0d1a0d"/>
+      <stop offset="100%" stop-color="#050a05"/>
+    </radialGradient>
+    <linearGradient id="ring1" x1="20%" y1="100%" x2="80%" y2="0%">
+      <stop offset="0%" stop-color="#C8FF00"/>
+      <stop offset="60%" stop-color="#39FF14"/>
+      <stop offset="100%" stop-color="#00FF88"/>
+    </linearGradient>
+    <filter id="gR1" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="gE1" x="-5%" y="-400%" width="110%" height="900%">
+      <feGaussianBlur stdDeviation="2.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="gF1" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- dark bg circle -->
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle1)"/>
+  <!-- outer ring glow halo -->
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#39FF14" stroke-width="18" stroke-opacity=".07"/>
+  <!-- main ring -->
+  <circle cx="140" cy="138" r="100" stroke="url(#ring1)" stroke-width="5" filter="url(#gR1)"/>
+  <!-- inner ring thin -->
+  <circle cx="140" cy="138" r="93" stroke="url(#ring1)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <!-- crosshair ticks -->
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" filter="url(#gE1)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" filter="url(#gE1)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" filter="url(#gE1)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" filter="url(#gE1)"/>
+  <!-- horizontal crosshair arms (thin, extend outside ring) -->
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#39FF14" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#39FF14" stroke-width=".6" stroke-opacity=".3"/>
+  <!-- Letter F -->
+  <g filter="url(#gF1)">
+    <!-- vertical stem -->
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <!-- top bar -->
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <!-- mid bar — left portion cyan accent, right white -->
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#39FF14"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <!-- ECG line -->
+  <g filter="url(#gE1)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276"
+      stroke="url(#ring1)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#39FF14"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#39FF14" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#39FF14" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">01 · Volt → Lime</div>
+<div class="hex">#C8FF00 → #39FF14</div>
+</div>
+
+<!-- ══ VARIATION 2: Pure Volt ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle2" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#0d1a0d"/><stop offset="100%" stop-color="#050a05"/></radialGradient>
+    <linearGradient id="ring2" x1="20%" y1="100%" x2="80%" y2="0%"><stop offset="0%" stop-color="#A3D400"/><stop offset="50%" stop-color="#C8FF00"/><stop offset="100%" stop-color="#EEFF66"/></linearGradient>
+    <filter id="gR2" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE2" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF2" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle2)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#C8FF00" stroke-width="18" stroke-opacity=".07"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring2)" stroke-width="5" filter="url(#gR2)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring2)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#C8FF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE2)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#C8FF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE2)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#C8FF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE2)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#C8FF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE2)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#C8FF00" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#C8FF00" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF2)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#C8FF00"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE2)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#C8FF00"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#C8FF00" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#C8FF00" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#C8FF00" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">02 · Volt Pure</div>
+<div class="hex">#A3D400 → #C8FF00</div>
+</div>
+
+<!-- ══ VARIATION 3: Volt → Mint ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle3" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#0a1810"/><stop offset="100%" stop-color="#04080a"/></radialGradient>
+    <linearGradient id="ring3" x1="20%" y1="100%" x2="80%" y2="0%"><stop offset="0%" stop-color="#C8FF00"/><stop offset="55%" stop-color="#00FFB8"/><stop offset="100%" stop-color="#00FFE0"/></linearGradient>
+    <filter id="gR3" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE3" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF3" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle3)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#00FFB8" stroke-width="18" stroke-opacity=".07"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring3)" stroke-width="5" filter="url(#gR3)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring3)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#00FFB8" stroke-width="1.8" stroke-linecap="round" filter="url(#gE3)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#00FFB8" stroke-width="1.8" stroke-linecap="round" filter="url(#gE3)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#00FFB8" stroke-width="1.8" stroke-linecap="round" filter="url(#gE3)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#00FFB8" stroke-width="1.8" stroke-linecap="round" filter="url(#gE3)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#00FFB8" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#00FFB8" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF3)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#00FFB8"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE3)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring3)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#00FFB8"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#00FFB8" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#00FFB8" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#00FFB8" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">03 · Volt → Mint</div>
+<div class="hex">#C8FF00 → #00FFB8</div>
+</div>
+
+<!-- ══ VARIATION 4: Volt → Emerald ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle4" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#081510"/><stop offset="100%" stop-color="#030808"/></radialGradient>
+    <linearGradient id="ring4" x1="20%" y1="100%" x2="80%" y2="0%"><stop offset="0%" stop-color="#C8FF00"/><stop offset="55%" stop-color="#00E575"/><stop offset="100%" stop-color="#00FF88"/></linearGradient>
+    <filter id="gR4" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE4" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF4" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle4)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#00E575" stroke-width="18" stroke-opacity=".07"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring4)" stroke-width="5" filter="url(#gR4)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring4)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#00E575" stroke-width="1.8" stroke-linecap="round" filter="url(#gE4)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#00E575" stroke-width="1.8" stroke-linecap="round" filter="url(#gE4)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#00E575" stroke-width="1.8" stroke-linecap="round" filter="url(#gE4)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#00E575" stroke-width="1.8" stroke-linecap="round" filter="url(#gE4)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#00E575" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#00E575" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF4)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#00E575"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE4)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#00E575"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#00E575" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#00E575" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#00E575" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">04 · Volt → Emerald</div>
+<div class="hex">#C8FF00 → #00E575</div>
+</div>
+
+<!-- ══ VARIATION 5: Neon Green ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle5" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#0a1a08"/><stop offset="100%" stop-color="#040904"/></radialGradient>
+    <linearGradient id="ring5" x1="20%" y1="100%" x2="80%" y2="0%"><stop offset="0%" stop-color="#39FF14"/><stop offset="50%" stop-color="#7FFF00"/><stop offset="100%" stop-color="#CCFF33"/></linearGradient>
+    <filter id="gR5" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE5" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF5" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle5)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#7FFF00" stroke-width="18" stroke-opacity=".07"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring5)" stroke-width="5" filter="url(#gR5)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring5)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#7FFF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE5)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#7FFF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE5)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#7FFF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE5)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#7FFF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE5)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#7FFF00" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#7FFF00" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF5)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#7FFF00"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE5)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring5)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#7FFF00"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#7FFF00" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#7FFF00" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#7FFF00" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">05 · Neon → Chartreuse</div>
+<div class="hex">#39FF14 → #CCFF33</div>
+</div>
+
+<!-- ══ VARIATION 6: Volt → Sea Green ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle6" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#081612"/><stop offset="100%" stop-color="#030a07"/></radialGradient>
+    <linearGradient id="ring6" x1="20%" y1="100%" x2="80%" y2="0%"><stop offset="0%" stop-color="#C8FF00"/><stop offset="60%" stop-color="#00DDB4"/><stop offset="100%" stop-color="#00FFC8"/></linearGradient>
+    <filter id="gR6" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE6" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF6" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle6)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#00DDB4" stroke-width="18" stroke-opacity=".07"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring6)" stroke-width="5" filter="url(#gR6)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring6)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#00DDB4" stroke-width="1.8" stroke-linecap="round" filter="url(#gE6)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#00DDB4" stroke-width="1.8" stroke-linecap="round" filter="url(#gE6)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#00DDB4" stroke-width="1.8" stroke-linecap="round" filter="url(#gE6)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#00DDB4" stroke-width="1.8" stroke-linecap="round" filter="url(#gE6)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#00DDB4" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#00DDB4" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF6)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#00DDB4"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE6)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring6)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#00DDB4"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#00DDB4" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#00DDB4" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#00DDB4" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">06 · Volt → Teal</div>
+<div class="hex">#C8FF00 → #00DDB4</div>
+</div>
+
+<!-- ══ VARIATION 7: Yellow-Green → Lime ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle7" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#111a06"/><stop offset="100%" stop-color="#060a03"/></radialGradient>
+    <linearGradient id="ring7" x1="20%" y1="100%" x2="80%" y2="0%"><stop offset="0%" stop-color="#E0FF00"/><stop offset="50%" stop-color="#B8FF00"/><stop offset="100%" stop-color="#39FF14"/></linearGradient>
+    <filter id="gR7" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE7" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF7" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle7)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#B8FF00" stroke-width="18" stroke-opacity=".07"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring7)" stroke-width="5" filter="url(#gR7)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring7)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" filter="url(#gE7)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" filter="url(#gE7)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" filter="url(#gE7)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" filter="url(#gE7)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#39FF14" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#39FF14" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF7)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#39FF14"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE7)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring7)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#39FF14"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#39FF14" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#39FF14" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">07 · YellowGrn → Lime</div>
+<div class="hex">#E0FF00 → #39FF14</div>
+</div>
+
+<!-- ══ VARIATION 8: Deep Volt Radial ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle8" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#0d1a0d"/><stop offset="100%" stop-color="#050a05"/></radialGradient>
+    <radialGradient id="ring8" cx="30%" cy="70%" r="70%"><stop offset="0%" stop-color="#C8FF00"/><stop offset="50%" stop-color="#80FF20"/><stop offset="100%" stop-color="#39FF14"/></radialGradient>
+    <filter id="gR8" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE8" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF8" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle8)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#80FF20" stroke-width="18" stroke-opacity=".07"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring8)" stroke-width="5" filter="url(#gR8)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring8)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#80FF20" stroke-width="1.8" stroke-linecap="round" filter="url(#gE8)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#80FF20" stroke-width="1.8" stroke-linecap="round" filter="url(#gE8)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#80FF20" stroke-width="1.8" stroke-linecap="round" filter="url(#gE8)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#80FF20" stroke-width="1.8" stroke-linecap="round" filter="url(#gE8)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#80FF20" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#80FF20" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF8)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#80FF20"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE8)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring8)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#80FF20"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#80FF20" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#80FF20" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#80FF20" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">08 · Volt Radial</div>
+<div class="hex">#C8FF00 → #39FF14 radial</div>
+</div>
+
+<!-- ══ VARIATION 9: Forest → Neon ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle9" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#081208"/><stop offset="100%" stop-color="#030703"/></radialGradient>
+    <linearGradient id="ring9" x1="20%" y1="100%" x2="80%" y2="0%"><stop offset="0%" stop-color="#00A020"/><stop offset="50%" stop-color="#39FF14"/><stop offset="100%" stop-color="#C8FF00"/></linearGradient>
+    <filter id="gR9" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE9" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF9" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle9)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#39FF14" stroke-width="18" stroke-opacity=".07"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring9)" stroke-width="5" filter="url(#gR9)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring9)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" filter="url(#gE9)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" filter="url(#gE9)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" filter="url(#gE9)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" filter="url(#gE9)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#39FF14" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#39FF14" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF9)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#39FF14"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE9)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#C8FF00"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#C8FF00" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#C8FF00" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#C8FF00" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">09 · Forest → Volt</div>
+<div class="hex">#00A020 → #C8FF00</div>
+</div>
+
+<!-- ══ VARIATION 10: Acid Green ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle10" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#121a06"/><stop offset="100%" stop-color="#070a03"/></radialGradient>
+    <linearGradient id="ring10" x1="0%" y1="50%" x2="100%" y2="50%"><stop offset="0%" stop-color="#C8FF00"/><stop offset="40%" stop-color="#AAFF00"/><stop offset="100%" stop-color="#66FF00"/></linearGradient>
+    <filter id="gR10" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE10" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF10" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle10)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#AAFF00" stroke-width="18" stroke-opacity=".07"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring10)" stroke-width="5" filter="url(#gR10)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring10)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#AAFF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE10)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#AAFF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE10)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#AAFF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE10)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#AAFF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE10)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#AAFF00" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#AAFF00" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF10)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#AAFF00"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE10)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring10)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#AAFF00"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#AAFF00" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#AAFF00" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#AAFF00" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">10 · Acid Green</div>
+<div class="hex">#C8FF00 → #66FF00</div>
+</div>
+
+<!-- ══ VARIATION 11: Volt → SpringGreen ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle11" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#081812"/><stop offset="100%" stop-color="#030a08"/></radialGradient>
+    <linearGradient id="ring11" x1="20%" y1="100%" x2="80%" y2="0%"><stop offset="0%" stop-color="#C8FF00"/><stop offset="55%" stop-color="#00FF7F"/><stop offset="100%" stop-color="#00FFA0"/></linearGradient>
+    <filter id="gR11" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE11" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF11" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle11)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#00FF7F" stroke-width="18" stroke-opacity=".07"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring11)" stroke-width="5" filter="url(#gR11)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring11)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#00FF7F" stroke-width="1.8" stroke-linecap="round" filter="url(#gE11)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#00FF7F" stroke-width="1.8" stroke-linecap="round" filter="url(#gE11)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#00FF7F" stroke-width="1.8" stroke-linecap="round" filter="url(#gE11)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#00FF7F" stroke-width="1.8" stroke-linecap="round" filter="url(#gE11)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#00FF7F" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#00FF7F" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF11)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#00FF7F"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE11)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring11)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#00FF7F"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#00FF7F" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#00FF7F" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#00FF7F" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">11 · Volt → SpringGreen</div>
+<div class="hex">#C8FF00 → #00FF7F</div>
+</div>
+
+<!-- ══ VARIATION 12: Bright Lime ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle12" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#0e1a06"/><stop offset="100%" stop-color="#070b03"/></radialGradient>
+    <linearGradient id="ring12" x1="20%" y1="100%" x2="80%" y2="0%"><stop offset="0%" stop-color="#D4FF1A"/><stop offset="50%" stop-color="#C8FF00"/><stop offset="100%" stop-color="#BAFF00"/></linearGradient>
+    <filter id="gR12" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE12" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF12" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle12)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#C8FF00" stroke-width="18" stroke-opacity=".08"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring12)" stroke-width="5" filter="url(#gR12)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring12)" stroke-width=".8" stroke-opacity=".3" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#D4FF1A" stroke-width="1.8" stroke-linecap="round" filter="url(#gE12)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#D4FF1A" stroke-width="1.8" stroke-linecap="round" filter="url(#gE12)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#D4FF1A" stroke-width="1.8" stroke-linecap="round" filter="url(#gE12)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#D4FF1A" stroke-width="1.8" stroke-linecap="round" filter="url(#gE12)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#D4FF1A" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#D4FF1A" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF12)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#D4FF1A"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE12)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring12)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#D4FF1A"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#D4FF1A" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#D4FF1A" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#D4FF1A" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">12 · Bright Lime</div>
+<div class="hex">#D4FF1A → #BAFF00</div>
+</div>
+
+<!-- ══ VARIATION 13: Volt → Aqua ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle13" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#081814"/><stop offset="100%" stop-color="#030a08"/></radialGradient>
+    <linearGradient id="ring13" x1="20%" y1="100%" x2="80%" y2="0%"><stop offset="0%" stop-color="#C8FF00"/><stop offset="60%" stop-color="#00FFD4"/><stop offset="100%" stop-color="#00FFEE"/></linearGradient>
+    <filter id="gR13" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE13" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF13" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle13)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#00FFD4" stroke-width="18" stroke-opacity=".07"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring13)" stroke-width="5" filter="url(#gR13)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring13)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#00FFD4" stroke-width="1.8" stroke-linecap="round" filter="url(#gE13)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#00FFD4" stroke-width="1.8" stroke-linecap="round" filter="url(#gE13)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#00FFD4" stroke-width="1.8" stroke-linecap="round" filter="url(#gE13)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#00FFD4" stroke-width="1.8" stroke-linecap="round" filter="url(#gE13)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#00FFD4" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#00FFD4" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF13)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#00FFD4"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE13)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring13)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#00FFD4"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#00FFD4" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#00FFD4" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#00FFD4" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">13 · Volt → Aqua</div>
+<div class="hex">#C8FF00 → #00FFEE</div>
+</div>
+
+<!-- ══ VARIATION 14: Dark Volt (muted) ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle14" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#0d1a0d"/><stop offset="100%" stop-color="#050a05"/></radialGradient>
+    <linearGradient id="ring14" x1="20%" y1="100%" x2="80%" y2="0%"><stop offset="0%" stop-color="#7AB800"/><stop offset="50%" stop-color="#A3D400"/><stop offset="100%" stop-color="#C8FF00"/></linearGradient>
+    <filter id="gR14" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE14" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF14" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle14)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#A3D400" stroke-width="18" stroke-opacity=".07"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring14)" stroke-width="5" filter="url(#gR14)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring14)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#C8FF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE14)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#C8FF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE14)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#C8FF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE14)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#C8FF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE14)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#C8FF00" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#C8FF00" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF14)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#C8FF00"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE14)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring14)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#C8FF00"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#C8FF00" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#C8FF00" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#C8FF00" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">14 · Dark Volt</div>
+<div class="hex">#7AB800 → #C8FF00</div>
+</div>
+
+<!-- ══ VARIATION 15: Volt → NeonGreen ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle15" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#0a1a0a"/><stop offset="100%" stop-color="#040a04"/></radialGradient>
+    <linearGradient id="ring15" x1="20%" y1="100%" x2="80%" y2="0%"><stop offset="0%" stop-color="#C8FF00"/><stop offset="45%" stop-color="#55FF00"/><stop offset="100%" stop-color="#00FF44"/></linearGradient>
+    <filter id="gR15" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE15" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF15" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle15)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#55FF00" stroke-width="18" stroke-opacity=".07"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring15)" stroke-width="5" filter="url(#gR15)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring15)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#55FF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE15)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#55FF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE15)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#55FF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE15)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#55FF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE15)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#55FF00" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#55FF00" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF15)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#55FF00"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE15)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring15)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#55FF00"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#55FF00" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#55FF00" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#55FF00" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">15 · Volt → NeonGrn</div>
+<div class="hex">#C8FF00 → #00FF44</div>
+</div>
+
+<!-- ══ VARIATION 16: Conical Volt ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle16" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#0d1a0d"/><stop offset="100%" stop-color="#050a05"/></radialGradient>
+    <linearGradient id="ring16" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#EEFF88"/><stop offset="35%" stop-color="#C8FF00"/><stop offset="70%" stop-color="#88FF00"/><stop offset="100%" stop-color="#44DD00"/></linearGradient>
+    <filter id="gR16" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE16" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF16" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle16)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#C8FF00" stroke-width="18" stroke-opacity=".07"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring16)" stroke-width="5" filter="url(#gR16)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring16)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#EEFF88" stroke-width="1.8" stroke-linecap="round" filter="url(#gE16)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#44DD00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE16)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#C8FF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE16)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#C8FF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE16)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#C8FF00" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#C8FF00" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF16)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#C8FF00"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE16)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring16)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#C8FF00"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#C8FF00" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#C8FF00" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#C8FF00" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">16 · Volt Spectrum</div>
+<div class="hex">#EEFF88 → #44DD00</div>
+</div>
+
+<!-- ══ VARIATION 17: Volt → GrassGreen ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle17" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#0a1808"/><stop offset="100%" stop-color="#050a04"/></radialGradient>
+    <linearGradient id="ring17" x1="20%" y1="100%" x2="80%" y2="0%"><stop offset="0%" stop-color="#C8FF00"/><stop offset="55%" stop-color="#4DFF4D"/><stop offset="100%" stop-color="#00CC44"/></linearGradient>
+    <filter id="gR17" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE17" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF17" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle17)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#4DFF4D" stroke-width="18" stroke-opacity=".07"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring17)" stroke-width="5" filter="url(#gR17)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring17)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#4DFF4D" stroke-width="1.8" stroke-linecap="round" filter="url(#gE17)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#4DFF4D" stroke-width="1.8" stroke-linecap="round" filter="url(#gE17)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#4DFF4D" stroke-width="1.8" stroke-linecap="round" filter="url(#gE17)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#4DFF4D" stroke-width="1.8" stroke-linecap="round" filter="url(#gE17)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#4DFF4D" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#4DFF4D" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF17)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#4DFF4D"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE17)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring17)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#4DFF4D"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#4DFF4D" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#4DFF4D" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#4DFF4D" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">17 · Volt → Grass</div>
+<div class="hex">#C8FF00 → #00CC44</div>
+</div>
+
+<!-- ══ VARIATION 18: Volt Tricolor ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle18" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#0d1a0d"/><stop offset="100%" stop-color="#050a05"/></radialGradient>
+    <linearGradient id="ring18" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#A3D400"/><stop offset="33%" stop-color="#C8FF00"/><stop offset="66%" stop-color="#39FF14"/><stop offset="100%" stop-color="#00FF88"/></linearGradient>
+    <filter id="gR18" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE18" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF18" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle18)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#39FF14" stroke-width="18" stroke-opacity=".08"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring18)" stroke-width="5.5" filter="url(#gR18)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring18)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#C8FF00" stroke-width="1.8" stroke-linecap="round" filter="url(#gE18)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#00FF88" stroke-width="1.8" stroke-linecap="round" filter="url(#gE18)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" filter="url(#gE18)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" filter="url(#gE18)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#39FF14" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#39FF14" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF18)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#39FF14"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE18)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring18)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#39FF14"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#39FF14" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#39FF14" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#39FF14" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">18 · Volt Tricolor</div>
+<div class="hex">#A3D400 → #C8FF00 → #00FF88</div>
+</div>
+
+<!-- ══ VARIATION 19: Volt → IceGreen ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle19" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#0a1a14"/><stop offset="100%" stop-color="#040a08"/></radialGradient>
+    <linearGradient id="ring19" x1="20%" y1="100%" x2="80%" y2="0%"><stop offset="0%" stop-color="#C8FF00"/><stop offset="60%" stop-color="#AAFFCC"/><stop offset="100%" stop-color="#CCFFE8"/></linearGradient>
+    <filter id="gR19" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gE19" x="-5%" y="-400%" width="110%" height="900%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gF19" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle19)"/>
+  <circle cx="140" cy="138" r="106" fill="none" stroke="#AAFFCC" stroke-width="18" stroke-opacity=".07"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring19)" stroke-width="5" filter="url(#gR19)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring19)" stroke-width=".8" stroke-opacity=".25" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="38" stroke="#AAFFCC" stroke-width="1.8" stroke-linecap="round" filter="url(#gE19)"/>
+  <line x1="140" y1="238" x2="140" y2="250" stroke="#AAFFCC" stroke-width="1.8" stroke-linecap="round" filter="url(#gE19)"/>
+  <line x1="28" y1="138" x2="40" y2="138" stroke="#AAFFCC" stroke-width="1.8" stroke-linecap="round" filter="url(#gE19)"/>
+  <line x1="240" y1="138" x2="252" y2="138" stroke="#AAFFCC" stroke-width="1.8" stroke-linecap="round" filter="url(#gE19)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#AAFFCC" stroke-width=".6" stroke-opacity=".3"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#AAFFCC" stroke-width=".6" stroke-opacity=".3"/>
+  <g filter="url(#gF19)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#AAFFCC"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE19)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring19)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="2.5" fill="#AAFFCC"/>
+    <circle cx="220" cy="276" r="5" fill="none" stroke="#AAFFCC" stroke-width=".9" stroke-opacity=".45"/>
+    <circle cx="220" cy="276" r="8" fill="none" stroke="#AAFFCC" stroke-width=".5" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#AAFFCC" stroke-width="1.8" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">19 · Volt → IceGreen</div>
+<div class="hex">#C8FF00 → #CCFFE8</div>
+</div>
+
+<!-- ══ VARIATION 20: VOLTLINE MASTER (recommended) ══ -->
+<div class="item">
+<svg viewBox="0 0 280 310" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="bgCircle20" cx="50%" cy="45%" r="50%"><stop offset="0%" stop-color="#0e1e0a"/><stop offset="100%" stop-color="#050a03"/></radialGradient>
+    <linearGradient id="ring20" x1="15%" y1="95%" x2="85%" y2="5%">
+      <stop offset="0%"   stop-color="#A3D400"/>
+      <stop offset="35%"  stop-color="#C8FF00"/>
+      <stop offset="70%"  stop-color="#39FF14"/>
+      <stop offset="100%" stop-color="#C8FF00"/>
+    </linearGradient>
+    <filter id="gR20" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="gE20" x="-5%" y="-400%" width="110%" height="900%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="gF20" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <circle cx="140" cy="138" r="108" fill="url(#bgCircle20)"/>
+  <!-- double halo for extra punch -->
+  <circle cx="140" cy="138" r="107" fill="none" stroke="#C8FF00" stroke-width="26" stroke-opacity=".05"/>
+  <circle cx="140" cy="138" r="104" fill="none" stroke="#39FF14" stroke-width="14" stroke-opacity=".06"/>
+  <circle cx="140" cy="138" r="100" stroke="url(#ring20)" stroke-width="6" filter="url(#gR20)"/>
+  <circle cx="140" cy="138" r="93" stroke="url(#ring20)" stroke-width="1" stroke-opacity=".3" stroke-dasharray="2 7"/>
+  <line x1="140" y1="26" x2="140" y2="40" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#gE20)"/>
+  <line x1="140" y1="236" x2="140" y2="250" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#gE20)"/>
+  <line x1="26" y1="138" x2="40" y2="138" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#gE20)"/>
+  <line x1="240" y1="138" x2="254" y2="138" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#gE20)"/>
+  <line x1="50" y1="138" x2="88" y2="138" stroke="#C8FF00" stroke-width=".7" stroke-opacity=".35"/>
+  <line x1="192" y1="138" x2="230" y2="138" stroke="#C8FF00" stroke-width=".7" stroke-opacity=".35"/>
+  <g filter="url(#gF20)">
+    <rect x="110" y="104" width="14" height="72" rx="2" fill="white"/>
+    <rect x="110" y="104" width="54" height="14" rx="2" fill="white"/>
+    <rect x="110" y="135" width="22" height="12" rx="2" fill="#C8FF00"/>
+    <rect x="132" y="135" width="30" height="12" rx="2" fill="white"/>
+  </g>
+  <g filter="url(#gE20)">
+    <path d="M10,276 L75,276 L86,262 L98,294 L110,250 L122,280 L134,276 L220,276" stroke="url(#ring20)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="220" cy="276" r="3" fill="#C8FF00"/>
+    <circle cx="220" cy="276" r="6"  fill="none" stroke="#C8FF00" stroke-width="1"   stroke-opacity=".5"/>
+    <circle cx="220" cy="276" r="10" fill="none" stroke="#C8FF00" stroke-width=".6" stroke-opacity=".2"/>
+    <line x1="220" y1="276" x2="270" y2="276" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" stroke-opacity=".2"/>
+  </g>
+</svg>
+<div class="label">20 · ★ VOLTLINE MASTER</div>
+<div class="hex">#A3D400 → #C8FF00 → #39FF14</div>
+</div>
+
+</div><!-- /grid -->
+
+<!-- Download note -->
+<p style="margin-top:40px;font-size:11px;color:rgba(255,255,255,.2);text-align:center;letter-spacing:.1em">
+  Para exportar um SVG individual: inspecionar elemento → copiar o &lt;svg&gt; da variação escolhida
+</p>
+
+</body>
+</html>
