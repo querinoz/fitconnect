@@ -1,0 +1,344 @@
+{
+  "consumer": {
+    "name": "fitconnect-web"
+  },
+  "interactions": [
+    {
+      "description": "a health check request",
+      "providerStates": [
+        {
+          "name": "health endpoint is available"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/health"
+      },
+      "response": {
+        "body": {
+          "dependencies": [],
+          "status": "ok",
+          "timestamp": "2026-05-18T12:00:00.000Z",
+          "version": "1.0.0"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.dependencies": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.timestamp": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T"
+                }
+              ]
+            },
+            "$.version": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {},
+          "status": {}
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a paginated sessions list request",
+      "providerStates": [
+        {
+          "name": "athlete has sessions"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/sessions",
+        "query": {
+          "limit": [
+            "20"
+          ],
+          "page": [
+            "1"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "data": [],
+          "meta": {
+            "limit": 20,
+            "page": 1,
+            "total": 0
+          }
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.data": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.meta.limit": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.meta.page": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.meta.total": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          },
+          "header": {},
+          "status": {}
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a readiness compute request",
+      "providerStates": [
+        {
+          "name": "readiness inputs are valid"
+        }
+      ],
+      "request": {
+        "body": {
+          "hrvMs": 62
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/v1/readiness/compute"
+      },
+      "response": {
+        "body": {
+          "breakdown": {
+            "hrv": 80,
+            "sleep": 70,
+            "strain": 65
+          },
+          "score": 75,
+          "status": "good"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.breakdown.hrv": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.breakdown.sleep": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.breakdown.strain": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.score": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {},
+          "status": {}
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a strava callback response",
+      "providerStates": [
+        {
+          "name": "strava oauth succeeded"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/integrations/strava/callback",
+        "query": {
+          "format": [
+            "json"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "accessToken": "token",
+          "athlete": {
+            "id": 1
+          },
+          "expiresAt": 1779615054,
+          "refreshToken": "refresh"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.accessToken": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.athlete": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.expiresAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.refreshToken": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {},
+          "status": {}
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a webhook with invalid signature",
+      "providerStates": [
+        {
+          "name": "stripe webhook rejects bad signature"
+        }
+      ],
+      "request": {
+        "body": {},
+        "headers": {
+          "Content-Type": "application/json",
+          "stripe-signature": "bad"
+        },
+        "method": "POST",
+        "path": "/api/stripe/webhook"
+      },
+      "response": {
+        "body": {
+          "error": "Webhook verification failed"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "status": {}
+        },
+        "status": 400
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "13.2.0"
+    },
+    "pactRust": {
+      "ffi": "0.4.22",
+      "models": "1.2.3"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "fitconnect-api"
+  }
+}

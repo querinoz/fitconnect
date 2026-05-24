@@ -1,4 +1,4 @@
-import type { RecoveryStatus } from "@fitconnect/types";
+import type { ReadinessComputeResult, ReadinessComputeStatus, RecoveryStatus } from "@fitconnect/types";
 
 export type ReadinessInputs = {
   hrvMs: number;
@@ -6,6 +6,7 @@ export type ReadinessInputs = {
   sleepHours: number;
   sleepEfficiency: number;
   strainScore: number;
+  historyDays?: 1 | 7;
 };
 
 export type ReadinessResult = {
@@ -22,23 +23,42 @@ function clamp(n: number, min: number, max: number) {
 }
 
 export function computeReadiness(input: ReadinessInputs): ReadinessResult {
-  const hrvRatio = input.baselineHrvMs > 0 ? input.hrvMs / input.baselineHrvMs : 1;
+  const hrvMs = clamp(Number.isFinite(input.hrvMs) ? input.hrvMs : 0, 0, 200);
+  const baselineHrvMs = clamp(
+    Number.isFinite(input.baselineHrvMs) ? input.baselineHrvMs : 58,
+    1,
+    200
+  );
+  const sleepHours =
+    input.sleepHours == null || Number.isNaN(input.sleepHours) ? 7.5 : input.sleepHours;
+  const sleepEfficiency = clamp(
+    Number.isFinite(input.sleepEfficiency) ? input.sleepEfficiency : 85,
+    0,
+    100
+  );
+  const strainScore = Number.isFinite(input.strainScore) ? clamp(input.strainScore, 0, 100) : 0;
+
+  const historyWeight =
+    input.historyDays === 7 ? 1.04 : input.historyDays === 1 ? 0.96 : 1;
+
+  const hrvRatio = baselineHrvMs > 0 ? hrvMs / baselineHrvMs : 1;
   const hrvComponent = clamp(hrvRatio * 100, 0, 100);
 
   const sleepTarget = 8;
   const sleepComponent = clamp(
-    (input.sleepHours / sleepTarget) * 100 * (input.sleepEfficiency / 100),
+    (sleepHours / sleepTarget) * 100 * (sleepEfficiency / 100),
     0,
     100
   );
 
-  const strainComponent = clamp(100 - input.strainScore, 0, 100);
+  const strainComponent = clamp(100 - strainScore, 0, 100);
 
-  const score = Math.round(
+  const rawScore =
     hrvComponent * WEIGHTS.hrv +
-      sleepComponent * WEIGHTS.sleep +
-      strainComponent * WEIGHTS.strain
-  );
+    sleepComponent * WEIGHTS.sleep +
+    strainComponent * WEIGHTS.strain;
+
+  const score = Math.round(clamp(rawScore * historyWeight, 0, 100));
 
   let recoveryStatus: RecoveryStatus = "green";
   if (score < 40) recoveryStatus = "red";
@@ -56,6 +76,48 @@ export function computeReadiness(input: ReadinessInputs): ReadinessResult {
     recoveryStatus,
     label,
     weights: { ...WEIGHTS }
+  };
+}
+
+export function mapRecoveryToComputeStatus(
+  score: number,
+  recoveryStatus: RecoveryStatus
+): ReadinessComputeStatus {
+  if (score >= 85 || recoveryStatus === "green") return score >= 85 ? "optimal" : "good";
+  if (recoveryStatus === "amber" || score >= 40) return "moderate";
+  return "poor";
+}
+
+export function computeReadinessForApi(input: ReadinessInputs): ReadinessComputeResult {
+  const result = computeReadiness(input);
+  const hrvMs = clamp(Number.isFinite(input.hrvMs) ? input.hrvMs : 0, 0, 200);
+  const baselineHrvMs = clamp(
+    Number.isFinite(input.baselineHrvMs) ? input.baselineHrvMs : 58,
+    1,
+    200
+  );
+  const sleepHours =
+    input.sleepHours == null || Number.isNaN(input.sleepHours) ? 7.5 : input.sleepHours;
+  const sleepEfficiency = clamp(
+    Number.isFinite(input.sleepEfficiency) ? input.sleepEfficiency : 85,
+    0,
+    100
+  );
+  const strainScore = Number.isFinite(input.strainScore) ? clamp(input.strainScore, 0, 100) : 0;
+
+  const hrvRatio = baselineHrvMs > 0 ? hrvMs / baselineHrvMs : 1;
+  const hrvComponent = clamp(hrvRatio * 100, 0, 100);
+  const sleepComponent = clamp((sleepHours / 8) * 100 * (sleepEfficiency / 100), 0, 100);
+  const strainComponent = clamp(100 - strainScore, 0, 100);
+
+  return {
+    score: result.score,
+    status: mapRecoveryToComputeStatus(result.score, result.recoveryStatus),
+    breakdown: {
+      hrv: Math.round(hrvComponent),
+      sleep: Math.round(sleepComponent),
+      strain: Math.round(strainComponent)
+    }
   };
 }
 

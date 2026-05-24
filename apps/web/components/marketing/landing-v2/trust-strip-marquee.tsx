@@ -5,7 +5,7 @@ import { TrustStrip } from "@/components/marketing/trust-strip";
 /** Trust strip with continuous logo marquee (landing v2). */
 export function TrustStripMarquee() {
   return (
-    <div className="landing-v2-trust relative z-10 -mt-px border-b border-white/5 bg-ink-950/80 backdrop-blur-md">
+    <div className="landing-v2-trust relative z-10 -mt-px border-b border-white/5 bg-[var(--eos-floor)]/80 backdrop-blur-md">
       <TrustStrip />
       <div className="overflow-hidden border-t border-white/5 py-3" aria-hidden>
         <div className="landing-v2-marquee flex w-max gap-10 px-4">

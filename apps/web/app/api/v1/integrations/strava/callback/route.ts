@@ -7,6 +7,17 @@ import { saveConnection, syncRecentActivities } from "@/lib/integrations/strava/
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
+
+  if (searchParams.get("format") === "json" && process.env.NEXT_PUBLIC_DEMO_MODE !== "false") {
+    const expiresAt = Math.floor(Date.now() / 1000) + 3600;
+    return NextResponse.json({
+      accessToken: "demo-access-token",
+      refreshToken: "demo-refresh-token",
+      expiresAt,
+      athlete: { id: 12345, firstname: "Demo", lastname: "Athlete" }
+    });
+  }
+
   const dest = new URL("/settings/wearables", origin);
 
   try {

@@ -239,14 +239,26 @@ export function AuthShell({
     <div
       className={cn(
         embedded
-          ? "w-full"
-          : "fc-marketing-hero fc-marketing-container flex flex-1 items-center pb-16"
+          ? "relative w-full"
+          : "relative flex min-h-[80dvh] flex-1 items-center overflow-hidden pb-16 eos-floor"
       )}
     >
+      {!embedded ? (
+        <>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-[10%] -top-[20%] h-[70vw] w-[70vw] rounded-full bg-eos-voltline/20 blur-[120px]"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-[20%] top-[40%] h-[60vw] w-[60vw] rounded-full bg-eos-telemetry/30 blur-[120px]"
+          />
+        </>
+      ) : null}
       <div
         className={cn(
-          "mx-auto grid w-full max-w-6xl items-center gap-12",
-          embedded ? "max-w-lg" : "lg:grid-cols-2"
+          "relative z-10 mx-auto grid w-full max-w-6xl items-center gap-12 px-4",
+          embedded ? "max-w-lg" : "fc-marketing-container lg:grid-cols-2"
         )}
       >
         <motion.aside
@@ -291,7 +303,7 @@ export function AuthShell({
           transition={uiTransition}
         >
           <EliteAuthPanel
-            badge="Secure auth"
+            badge="Authenticate to access telemetry."
             title={embedded ? heading : mode === "signin" ? t("auth", "submitSignIn") : t("auth", "submitSignUp")}
             subtitle={embedded ? subtitle : undefined}
           >

@@ -6,7 +6,6 @@ import { TrainerCard } from "@/components/trainer-card";
 import { TrainerCardSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
-import { Atmosphere } from "@/components/marketing/atmosphere";
 import { SPORTS, TRAINERS, type Modality, type Sport } from "@/lib/data";
 import {
   ArrowRight,
@@ -17,7 +16,8 @@ import {
   X
 } from "lucide-react";
 import { formatMsg, useT } from "@/lib/i18n-provider";
-import { PremiumCard, RealtimeBadge, SectionHeader } from "@/components/ui-glass/premium-system";
+import { LabelCaps } from "@/components/elite-os/typography";
+import { BentoCard } from "@/components/elite-os/bento-card";
 import {
   FilterChip,
   FilterToggle,
@@ -40,7 +40,7 @@ export default function DiscoverPage() {
 
 function DiscoverFallback() {
   return (
-    <main id="main" className="fc-marketing-hero fc-marketing-container pb-16">
+    <main id="main" className="eos-floor fc-marketing-container pb-16 pt-8">
       <div className="h-10 w-72 skeleton mb-4" />
       <div className="grid lg:grid-cols-[280px_1fr] gap-8">
         <div className="h-[320px] fc-radius-card skeleton" />
@@ -297,29 +297,46 @@ function DiscoverInner() {
   );
 
   return (
-    <main id="main" className="fc-marketing-hero fc-marketing-container pb-16">
-      <div className="relative isolate mb-4 pb-6">
-        <div className="pointer-events-none absolute inset-x-0 -top-12 bottom-0 -z-10 overflow-hidden [mask-image:linear-gradient(to_bottom,black,transparent_85%)]">
-          <Atmosphere bandsOnly />
+    <main id="main" className="eos-floor fc-marketing-container pb-16 pt-8">
+      <header className="mb-8 px-2">
+        <h1 className="font-display text-4xl font-bold tracking-tighter text-eos-on-surface md:text-5xl">
+          Elite Discovery
+        </h1>
+        <p className="mt-2 max-w-2xl text-eos-on-surface-muted">
+          Connect with world-class performance specialists. Matches optimized by FitConnect telemetry data.
+        </p>
+      </header>
+
+      <div className="sticky top-[72px] z-40 mb-8">
+        <div className="flex gap-3 overflow-x-auto rounded-xl border border-white/10 bg-eos-surface-container/80 p-2 backdrop-blur-xl no-scrollbar">
+          <FilterChip active={sport === "all"} onClick={() => setSport("all")}>
+            ALL SPECIALISTS
+          </FilterChip>
+          {SPORTS.slice(0, 5).map((s) => (
+            <FilterChip key={s} active={sport === s} onClick={() => setSport(s)}>
+              {s.toUpperCase()}
+            </FilterChip>
+          ))}
+          <button
+            type="button"
+            onClick={() => setDrawerOpen(true)}
+            className="ml-auto inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/5 bg-eos-surface-container-high/50 lg:hidden"
+            aria-label={t("discover", "filters")}
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+          </button>
         </div>
+      </div>
+
+      <div className="relative isolate mb-4 pb-2">
         <header className="mb-2 flex flex-wrap items-end justify-between gap-4">
-          <SectionHeader
-            as="h1"
-            className="fc-vt-hero"
-            title={
-              sport === "all"
-                ? t("discover", "titleAll")
-                : formatMsg(t("discover", "titleSport"), { sport })
-            }
-            body={
-              loading
+          <div>
+            <LabelCaps className="opacity-50">
+              {loading
                 ? t("discover", "loading")
-                : formatMsg(t("discover", "matchCount"), {
-                    count: filtered.length
-                  })
-            }
-            action={<RealtimeBadge>Live map</RealtimeBadge>}
-          />
+                : formatMsg(t("discover", "matchCount"), { count: filtered.length })}
+            </LabelCaps>
+          </div>
           <div className="flex shrink-0 items-center gap-2">
             <PremiumSelect value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
               {Object.entries(sortLabels).map(([k, label]) => (
@@ -330,7 +347,7 @@ function DiscoverInner() {
             </PremiumSelect>
             <button
               onClick={() => setDrawerOpen(true)}
-              className="inline-flex h-11 items-center gap-1.5 rounded-2xl border border-glass-border bg-glass-md px-3 text-sm lg:hidden"
+              className="inline-flex h-11 items-center gap-1.5 rounded-2xl border border-white/10 bg-eos-glass px-3 text-sm lg:hidden"
             >
               <Filter className="h-4 w-4" /> {t("discover", "filters")}
             </button>
@@ -369,9 +386,9 @@ function DiscoverInner() {
         )}
 
         <div className="grid lg:grid-cols-[280px_1fr] gap-8">
-          <PremiumCard className="hidden lg:block h-fit sticky top-24 p-5">
+          <BentoCard elevation="glass" className="hidden h-fit p-5 lg:sticky lg:top-28 lg:block">
             {Sidebar}
-          </PremiumCard>
+          </BentoCard>
 
           {/* Mobile drawer */}
           {drawerOpen && (

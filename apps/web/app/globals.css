@@ -1,6 +1,8 @@
 @import "./voltline.css";
+@import "./styles/motion.css";
 @import "./fc-system.css";
 @import "./elite-os.css";
+@import "../../../packages/design-tokens/tokens.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,11 +15,11 @@
   --border: 214 32% 91%;
   --ring: 188 95% 43%;
 
-  /* FitConnect design tokens — Kinetic Energy */
-  --bg: #07080b;
-  --bg-elevated: #0c0d11;
-  --surface: #111318;
-  --surface-high: #181a22;
+  /* FitConnect design tokens — Elite OS floor */
+  --bg: #070b14;
+  --bg-elevated: #111827;
+  --surface: #151b2d;
+  --surface-high: #1f1f28;
   --text: #eeeef2;
   --text-dim: rgba(238, 238, 242, 0.52);
   --text-mute: rgba(238, 238, 242, 0.28);
@@ -76,7 +78,7 @@ html[data-contrast="high"].light {
 
 html,
 body {
-  background: linear-gradient(145deg, #0a0a0f 0%, #11131a 100%);
+  background: linear-gradient(180deg, #070b14 0%, #0b0f19 50%, #070b14 100%);
   background-color: var(--bg);
   color: var(--text);
   font-feature-settings: "ss01", "cv01";
@@ -577,7 +579,7 @@ html.eos-app-shell-active .eos-shell-main {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--nivis-void, #090402);
+  background: var(--nivis-void, #070b14);
 }
 
 .fc-logo-loader-wrap {
@@ -850,6 +852,13 @@ html.eos-app-shell-active .eos-shell-main {
   .fc-landing-blob-c {
     animation: none;
   }
+}
+
+html[data-motion="reduced"] .fc-landing-blob-a,
+html[data-motion="reduced"] .fc-landing-blob-b,
+html[data-motion="reduced"] .fc-landing-blob-c,
+html[data-motion="reduced"] .fc-landing-aurora {
+  animation: none;
 }
 
 /* charltonk.dev-inspired — floating orbs */
@@ -2634,7 +2643,7 @@ html[data-motion="reduced"] .nivis-hero-kenburns {
 
 /* Landing v2 layout helpers */
 .landing-v2-root {
-  background: var(--nivis-void, #090402);
+  background: var(--nivis-void, #070b14);
 }
 
 .landing-v2-marquee {
@@ -2658,6 +2667,18 @@ html[data-motion="full"] .landing-editorial .hero-line,
 html[data-motion="full"] .landing-editorial .hero-stat,
 html[data-motion="full"] .landing-editorial .hero-scroll {
   opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-motion="full"] .landing-editorial .hero-line,
+  html[data-motion="full"] .landing-editorial .hero-stat,
+  html[data-motion="full"] .landing-editorial .hero-scroll {
+    opacity: 1;
+  }
+
+  html[data-motion="full"] .landing-editorial .hero-kenburns {
+    transform: none !important;
+  }
 }
 
 html[data-motion="reduced"] .landing-editorial .hero-line,

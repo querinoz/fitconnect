@@ -3,6 +3,7 @@
 import { useEffect, type ReactNode } from "react";
 import Lenis from "lenis";
 import { registerGsapPlugins, gsap, ScrollTrigger } from "@/lib/motion/gsap-register";
+import { shouldReduceMotion } from "@/lib/motion/should-reduce-motion";
 
 interface LenisProviderProps {
   children: ReactNode;
@@ -11,10 +12,7 @@ interface LenisProviderProps {
 /** Smooth scroll via Lenis synced with GSAP ScrollTrigger; disabled when reduced motion. */
 export function LenisProvider({ children }: LenisProviderProps) {
   useEffect(() => {
-    const reduced =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return;
+    if (shouldReduceMotion()) return;
 
     registerGsapPlugins();
 

@@ -17,7 +17,7 @@ export function AppDemoSection() {
   const d = locale.dashboardPreview;
 
   return (
-    <section className="landing-v2-section nivis-section-grid mx-auto max-w-7xl fc-section-x px-4 py-20 sm:px-6 sm:py-28">
+    <section id="demo" className="landing-v2-section eos-bento-grid mx-auto max-w-7xl fc-section-x px-4 py-20 sm:px-6 sm:py-28">
       <SectionHeader
         eyebrow={d.eyebrow}
         title={d.title}

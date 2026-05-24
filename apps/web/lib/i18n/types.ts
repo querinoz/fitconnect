@@ -82,6 +82,12 @@ export type Dict = {
       coachName: string;
     };
     immersive: {
+      statusLabel: string;
+      statusValue: string;
+      headlineLine1: string;
+      headlineLine2: string;
+      headlineLine3: string;
+      subtitle: string;
       connect: string;
       train: string;
       perform: string;
@@ -90,6 +96,7 @@ export type Dict = {
       badge: string;
       headline: string;
       headlineAccent: string;
+      immersiveAccent: string;
       exploreMenu: string;
       menuLabel: string;
       menuAthletes: string;

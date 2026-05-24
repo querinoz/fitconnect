@@ -8,6 +8,12 @@ import sharp from "sharp";
 
 const VOLT = { r: 200, g: 255, b: 0 }; // #C8FF00 Voltline
 
+function isBackgroundPixel(r, g, b, a) {
+  if (a < 8) return true;
+  // Remove solid black / near-black canvas from LogoBase exports
+  return r <= 26 && g <= 26 && b <= 30;
+}
+
 function isBluePixel(r, g, b, a) {
   if (a < 12) return false;
   const max = Math.max(r, g, b);
@@ -34,6 +40,10 @@ async function recolor(inputPath, outputPath) {
     const g = data[i + 1];
     const b = data[i + 2];
     const a = data[i + 3];
+    if (isBackgroundPixel(r, g, b, a)) {
+      data[i + 3] = 0;
+      continue;
+    }
     if (!isBluePixel(r, g, b, a)) continue;
     const next = toVolt(r, g, b);
     data[i] = next.r;
@@ -45,7 +55,9 @@ async function recolor(inputPath, outputPath) {
     raw: { width: info.width, height: info.height, channels: 4 }
   })
     .png({ compressionLevel: 9, quality: 100 })
-    .toFile(outputPath);
+    .toFile(`${outputPath}.tmp`);
+
+  fs.renameSync(`${outputPath}.tmp`, outputPath);
 }
 
 async function exportSizes(inputPath, outDir) {
@@ -77,10 +89,21 @@ async function exportSizes(inputPath, outDir) {
     path.join(outDir, "..", "apple-touch-icon.png")
   );
 
-  // Mobile asset
+  // Expo / React Native — transparent PNG
   const mobileDir = path.resolve("apps/mobile/assets/brand");
   fs.mkdirSync(mobileDir, { recursive: true });
-  await sharp(master).resize(512, 512, { fit: "contain", background: { r: 9, g: 4, b: 2, alpha: 1 } }).png().toFile(path.join(mobileDir, "logo.png"));
+  await sharp(master)
+    .resize(512, 512, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png({ compressionLevel: 9 })
+    .toFile(path.join(mobileDir, "logo.png"));
+  await sharp(master)
+    .resize(256, 256, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png({ compressionLevel: 9 })
+    .toFile(path.join(mobileDir, "logo@2x.png"));
+  await sharp(master)
+    .resize(128, 128, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png({ compressionLevel: 9 })
+    .toFile(path.join(mobileDir, "logo@3x.png"));
 
   console.log("Exported:", outDir);
 }

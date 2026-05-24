@@ -93,6 +93,7 @@ export function AthleteOsDashboard({
   const { dashboard, hub } = useLocale();
   const os = dashboard.os;
   const inAppShell = useInEliteShell();
+  const compactCockpit = inAppShell;
   const [collapsed, setCollapsed] = useState(false);
   const initials = name
     .split(" ")
@@ -196,24 +197,33 @@ export function AthleteOsDashboard({
             </EliteBentoMotionItem>
 
             <EliteBentoMotionItem className="flex flex-col gap-eos-bento md:col-span-12 xl:col-span-4">
-              <BentoCard padding="md" label={dashboard.strava_sync.title}>
-                <p className="text-sm font-medium text-eos-on-surface">
-                  {dashboard.strava_sync.synced} · {hub.strava_sync.label}
-                </p>
-              </BentoCard>
-              <BentoCard padding="md" label={dashboard.pr_tracker.title}>
-                <p className="eos-data-metric text-eos-voltline">
-                  {formatMsg(dashboard.pr_tracker.streak, { weeks: streakWeeks })}
-                </p>
-              </BentoCard>
+              {!compactCockpit ? (
+                <>
+                  <BentoCard padding="md" label={dashboard.strava_sync.title}>
+                    <p className="text-sm font-medium text-eos-on-surface">
+                      {dashboard.strava_sync.synced} · {hub.strava_sync.label}
+                    </p>
+                  </BentoCard>
+                  <BentoCard padding="md" label={dashboard.pr_tracker.title}>
+                    <p className="eos-data-metric text-eos-voltline">
+                      {formatMsg(dashboard.pr_tracker.streak, { weeks: streakWeeks })}
+                    </p>
+                  </BentoCard>
+                </>
+              ) : null}
+              <AiInsightsPanel />
             </EliteBentoMotionItem>
 
+            {!compactCockpit ? (
+              <>
             <EliteBentoMotionItem id="map-widget" className="md:col-span-12 lg:col-span-6">
               <MapWidget />
             </EliteBentoMotionItem>
             <EliteBentoMotionItem className="md:col-span-12 lg:col-span-6">
               <ActivityFeedLive />
             </EliteBentoMotionItem>
+              </>
+            ) : null}
 
             <EliteBentoMotionItem className="space-y-eos-bento md:col-span-12 xl:col-span-8">
               <ReadinessCardWithExplain
@@ -222,7 +232,9 @@ export function AthleteOsDashboard({
                 baselineHrv={baselineHrv}
                 sleepHours={sleepHours}
               />
-              <HrvChartFull baselineHrv={baselineHrv} seed={hrvSeed} />
+              {!compactCockpit ? (
+                <HrvChartFull baselineHrv={baselineHrv} seed={hrvSeed} />
+              ) : null}
               <SessionsPanel
                 sessions={sessions}
                 loading={sessionsLoading}
@@ -233,8 +245,8 @@ export function AthleteOsDashboard({
             </EliteBentoMotionItem>
 
             <EliteBentoMotionItem className="space-y-eos-bento md:col-span-12 xl:col-span-4">
-              <GamificationPanel />
-              <AiInsightsPanel />
+              {!compactCockpit ? <GamificationPanel /> : null}
+              {!compactCockpit ? (
               <BentoCard padding="md" label={os.quickActions}>
                 <div className="space-y-2.5">
                   <EliteButton asChild className="w-full" size="sm">
@@ -245,6 +257,8 @@ export function AthleteOsDashboard({
                   </EliteButton>
                 </div>
               </BentoCard>
+              ) : null}
+              {!compactCockpit ? (
               <BentoCard
                 padding="md"
                 label={os.profile}
@@ -273,7 +287,8 @@ export function AthleteOsDashboard({
                   ))}
                 </div>
               </BentoCard>
-              <IntegrationsHub athleteId={athleteId} />
+              ) : null}
+              {!compactCockpit ? <IntegrationsHub athleteId={athleteId} /> : null}
             </EliteBentoMotionItem>
           </EliteBentoMotion>
         </div>

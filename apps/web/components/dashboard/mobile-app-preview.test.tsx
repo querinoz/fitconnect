@@ -25,7 +25,7 @@ describe("<MobileAppPreview />", () => {
     expect(screen.getByText("FITCONNECT")).toBeInTheDocument();
     expect(screen.getByText("Peak Readiness")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /sessions/i }));
+    fireEvent.click(screen.getByRole("button", { name: /metrics/i }));
     await waitFor(() =>
       expect(screen.getByText("Lower body strength")).toBeInTheDocument()
     );
@@ -36,14 +36,14 @@ describe("<MobileAppPreview />", () => {
     );
     expect(screen.getAllByText("Live now").length).toBeGreaterThan(0);
 
-    fireEvent.click(screen.getByRole("button", { name: /coach/i }));
+    fireEvent.click(screen.getByRole("button", { name: /goals/i }));
     await waitFor(() =>
       expect(screen.getAllByText("Coach Diego").length).toBeGreaterThan(0)
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /inbox/i }));
+    fireEvent.click(screen.getByRole("button", { name: /settings/i }));
     await waitFor(() =>
-      expect(screen.getByText("Plan update approved")).toBeInTheDocument()
+      expect(screen.getByText("Inês Martins")).toBeInTheDocument()
     );
   });
 });

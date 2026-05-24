@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { BentoCard, EliteButton, EliteChip, LabelCaps, MetricDisplay } from "@/components/elite-os";
+import { BentoCard, EliteButton, EliteChip, LabelCaps, MetricDisplay, CornerTicks, CrosshairBg } from "@/components/elite-os";
 
 describe("Elite OS design system", () => {
   it("renders bento card with telemetry label", () => {
@@ -26,5 +26,15 @@ describe("Elite OS design system", () => {
   it("renders label caps typography", () => {
     render(<LabelCaps>Telemetry</LabelCaps>);
     expect(screen.getByText("Telemetry")).toHaveClass("eos-label-caps");
+  });
+
+  it("renders stitch decorative primitives", () => {
+    const { container } = render(
+      <CrosshairBg data-testid="crosshair">
+        <CornerTicks />
+      </CrosshairBg>
+    );
+    expect(container.querySelector(".eos-crosshair-bg")).toBeTruthy();
+    expect(container.querySelectorAll("[aria-hidden]").length).toBeGreaterThan(0);
   });
 });

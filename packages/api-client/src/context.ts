@@ -19,6 +19,8 @@ export async function createContext(opts: {
 }
 
 export const paginationSchema = z.object({
-  limit: z.number().min(1).max(100).default(20),
-  cursor: z.string().optional()
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20)
 });
+
+export { paginate, parsePagination, type PaginationInput } from "./pagination";

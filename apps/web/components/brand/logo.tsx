@@ -5,14 +5,15 @@ type LogoProps = {
   className?: string;
   animated?: boolean;
   title?: string;
+  size?: number;
 };
 
-/** FitConnect official brand mark. */
-export function Logo({ className, animated, title = "FitConnect" }: LogoProps) {
+/** FitConnect official brand mark (transparent PNG). */
+export function Logo({ className, animated, title = "FitConnect", size }: LogoProps) {
   return (
     <BrandLogo
       title={title}
-      size={OFFICIAL_LOGO_SIZE}
+      size={size ?? OFFICIAL_LOGO_SIZE}
       variant="carbon3d"
       animated={animated}
       priority

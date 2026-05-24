@@ -48,6 +48,14 @@ export const de = {
       coachName: "Tomás Reyes"
     },
     immersive: {
+      statusLabel: "SYS.STATUS:",
+      statusValue: "ONLINE",
+      headlineLine1: "THE ULTIMATE",
+      headlineAccent: "ELITE OS",
+      headlineLine2: "FOR HUMAN",
+      headlineLine3: "PERFORMANCE.",
+      subtitle:
+        "Unleash your genetic potential with high-end telemetry, predictive AI, and real-time biological feedback engineered for professional athletes.",
       connect: "connect.",
       train: "train.",
       perform: "perform.",
@@ -55,7 +63,7 @@ export const de = {
       tagline: "hebe jede session",
       badge: "für athleten weltweit gebaut",
       headline: "recovery science trifft",
-      headlineAccent: "menschliche performance",
+      immersiveAccent: "menschliche performance",
       exploreMenu: "fitconnect entdecken",
       menuLabel: "menü",
       menuAthletes: "athlete os",
@@ -66,8 +74,8 @@ export const de = {
       statAthletes: "+12k Athleten",
       statCoaches: "+500 Coaches",
       statActivities: "+2M Aktivitäten",
-      ctaPrimary: "kostenlos starten",
-      ctaSecondary: "live demo"
+      ctaPrimary: "INITIALIZE SESSION",
+      ctaSecondary: "EXPLORE TELEMETRY"
     }
   },
   heroExtras: {

@@ -3,12 +3,8 @@
 import { useEffect, useState } from "react";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { useLocale } from "@/lib/i18n-provider";
+import { shouldReduceMotion } from "@/lib/motion/should-reduce-motion";
 import { cn } from "@/lib/utils";
-
-function prefersReducedMotion() {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
 
 type HeroGateProps = {
   onComplete: () => void;
@@ -21,7 +17,7 @@ export function HeroGate({ onComplete }: HeroGateProps) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    if (prefersReducedMotion()) {
+    if (shouldReduceMotion()) {
       onComplete();
       setVisible(false);
       return;

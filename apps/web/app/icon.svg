@@ -11,14 +11,28 @@
       <stop offset="0%" stop-color="#FFFFFF"/>
       <stop offset="100%" stop-color="#FFFFFF"/>
     </linearGradient>
+    <filter id="universalShadow" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+      <feMorphology operator="dilate" radius="1.1" in="SourceAlpha" result="stroke"/>
+      <feFlood flood-color="#000000" flood-opacity="0.88" result="strokeColor"/>
+      <feComposite in="strokeColor" in2="stroke" operator="in" result="outline"/>
+      <feGaussianBlur in="outline" stdDeviation="0.35" result="outlineSoft"/>
+      <feDropShadow dx="0" dy="1.5" stdDeviation="2.5" flood-color="#000000" flood-opacity="0.5" result="shadow"/>
+      <feMerge>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="outlineSoft"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <circle cx="160" cy="148" r="108" stroke="url(#ringGrad)" stroke-width="5"/>
-  <line x1="160" y1="36" x2="160" y2="48" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
-  <line x1="160" y1="248" x2="160" y2="260" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
-  <line x1="50" y1="148" x2="62" y2="148" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
-  <line x1="258" y1="148" x2="270" y2="148" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
-  <rect x="126" y="112" width="14" height="72" rx="2.5" fill="url(#fGrad)"/>
-  <rect x="126" y="112" width="54" height="14" rx="2.5" fill="url(#fGrad)"/>
-  <rect x="126" y="144" width="20" height="12" rx="2.5" fill="#C8FF00"/>
-  <rect x="146" y="144" width="24" height="12" rx="2.5" fill="url(#fGrad)"/>
+  <g filter="url(#universalShadow)">
+    <circle cx="160" cy="148" r="108" stroke="url(#ringGrad)" stroke-width="5"/>
+    <line x1="160" y1="36" x2="160" y2="48" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
+    <line x1="160" y1="248" x2="160" y2="260" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
+    <line x1="50" y1="148" x2="62" y2="148" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
+    <line x1="258" y1="148" x2="270" y2="148" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
+    <rect x="126" y="112" width="14" height="72" rx="2.5" fill="url(#fGrad)"/>
+    <rect x="126" y="112" width="54" height="14" rx="2.5" fill="url(#fGrad)"/>
+    <rect x="126" y="144" width="20" height="12" rx="2.5" fill="#C8FF00"/>
+    <rect x="146" y="144" width="24" height="12" rx="2.5" fill="url(#fGrad)"/>
+  </g>
 </svg>

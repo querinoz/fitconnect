@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Coach × athlete training, live.",
     start_url: "/dashboard",
     display: "standalone",
-    background_color: "#090402",
-    theme_color: "#bfee16",
+    background_color: "#070B14",
+    theme_color: "#C8FF00",
     orientation: "portrait",
     icons: [
       {

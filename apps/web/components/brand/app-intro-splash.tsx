@@ -2,18 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { BrandLogo } from "./brand-logo";
+import { shouldReduceMotion } from "@/lib/motion/should-reduce-motion";
 import { cn } from "@/lib/utils";
 
 const INTRO_KEY = "fc-intro-seen";
 const INTRO_MS = 3200;
-
-function prefersReducedMotion() {
-  if (typeof window === "undefined") return true;
-  return (
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-    document.documentElement.dataset.motion === "reduced"
-  );
-}
 
 /** Cinematic app open intro — once per browser session; skipped on landing (has HeroGate). */
 export function AppIntroSplash() {
@@ -21,7 +14,7 @@ export function AppIntroSplash() {
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.pathname === "/") return;
-    if (prefersReducedMotion()) return;
+    if (shouldReduceMotion()) return;
     try {
       if (sessionStorage.getItem(INTRO_KEY)) return;
       sessionStorage.setItem(INTRO_KEY, "1");

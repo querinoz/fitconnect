@@ -1,0 +1,20 @@
+{
+  "name": "@fitconnect/db",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "test:integration": "vitest run src/__tests__/migrations.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.8.0"
+  },
+  "devDependencies": {
+    "@testcontainers/postgresql": "^10.28.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.9"
+  }
+}

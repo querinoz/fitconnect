@@ -1,0 +1,24 @@
+name: SAST
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+jobs:
+  semgrep:
+    name: Semgrep + Gitleaks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Semgrep
+        run: pnpm dlx semgrep --config p/typescript --config p/nodejs --error --quiet .
+
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

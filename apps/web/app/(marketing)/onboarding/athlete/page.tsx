@@ -11,6 +11,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import { useOnboardingStore } from "@/lib/onboarding/store";
 import { startSubscription } from "@/lib/stripe/client";
 import { cn } from "@/lib/utils";
+import { BentoCard } from "@/components/elite-os/bento-card";
 
 const SPORTS = ["Running", "Cycling", "Swimming", "Strength", "Triathlon", "Climbing"];
 const LEVELS = ["Beginner", "Intermediate", "Advanced"] as const;
@@ -212,29 +213,25 @@ export default function AthleteOnboardingPage() {
         <div className="grid gap-3 sm:grid-cols-2">
           {(
             [
-              { id: "free" as const, title: "Browse", price: "€0" },
-              { id: "pro" as const, title: "Pro", price: "€12/mo" }
+              { id: "free" as const, title: "Browse", price: "€0", desc: "Discover coaches · book intro calls" },
+              { id: "pro" as const, title: "Athlete OS Pro", price: "€12/mo", desc: "Stripe test mode · cancel anytime" }
             ] as const
           ).map((plan) => (
-            <button
+            <BentoCard
               key={plan.id}
-              type="button"
+              interactive
+              elevation={athlete.subscription === plan.id ? "glass" : "1"}
+              padding="md"
               onClick={() => patchAthlete({ subscription: plan.id })}
               className={cn(
-                "rounded-2xl border p-5 text-left ring-1 transition",
-                athlete.subscription === plan.id
-                  ? "border-brand-500/50 bg-brand-500/10 ring-brand-500/40"
-                  : "border-ink-800 ring-ink-800"
+                "cursor-pointer text-left transition",
+                athlete.subscription === plan.id && "border-eos-voltline/35"
               )}
             >
               <p className="font-display text-lg font-bold">{plan.title}</p>
-              <p className="text-2xl font-bold mt-1">{plan.price}</p>
-              <p className="text-xs text-ink-500 mt-2">
-                {plan.id === "pro"
-                  ? "Stripe test mode · cancel anytime"
-                  : "Discover coaches · book intro calls"}
-              </p>
-            </button>
+              <p className="mt-1 text-2xl font-bold">{plan.price}</p>
+              <p className="mt-2 text-xs text-ink-500">{plan.desc}</p>
+            </BentoCard>
           ))}
         </div>
       </OnboardingShell>

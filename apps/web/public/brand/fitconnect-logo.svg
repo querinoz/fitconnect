@@ -1,7 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 340" width="320" height="340" fill="none" role="img" aria-label="FitConnect">
   <title>FitConnect</title>
   <defs>
-    <!-- Voltline green gradient (LogoBase) -->
     <linearGradient id="ringGrad" x1="15%" y1="95%" x2="85%" y2="5%">
       <stop offset="0%" stop-color="#7AB800"/>
       <stop offset="28%" stop-color="#C8FF00"/>
@@ -32,7 +31,6 @@
       <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
-        <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
@@ -40,7 +38,6 @@
     <filter id="ecgGlow" x="-5%" y="-300%" width="110%" height="700%">
       <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
       <feMerge>
-        <feMergeNode in="blur"/>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
@@ -62,16 +59,17 @@
       </feMerge>
     </filter>
 
-    <filter id="universalShadow" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
-      <feDropShadow dx="0" dy="0" stdDeviation="16" flood-color="#000000" flood-opacity="0.72" result="shadowBlack"/>
-      <feDropShadow dx="0" dy="2" stdDeviation="8" flood-color="#000000" flood-opacity="0.55" result="shadowBlack2"/>
-      <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blurVolt"/>
-      <feFlood flood-color="#C8FF00" flood-opacity="0.2" result="voltFlood"/>
-      <feComposite in="voltFlood" in2="blurVolt" operator="in" result="voltHalo"/>
+    <filter id="universalShadow" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+      <feMorphology operator="dilate" radius="1.25" in="SourceAlpha" result="stroke"/>
+      <feFlood flood-color="#000000" flood-opacity="0.9" result="strokeColor"/>
+      <feComposite in="strokeColor" in2="stroke" operator="in" result="outline"/>
+      <feGaussianBlur in="outline" stdDeviation="0.4" result="outlineSoft"/>
+      <feDropShadow dx="0" dy="2" stdDeviation="3.5" flood-color="#000000" flood-opacity="0.55" result="shadow"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#C8FF00" flood-opacity="0.24" result="glow"/>
       <feMerge>
-        <feMergeNode in="voltHalo"/>
-        <feMergeNode in="shadowBlack"/>
-        <feMergeNode in="shadowBlack2"/>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="outlineSoft"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
@@ -80,9 +78,7 @@
   <g filter="url(#universalShadow)">
     <circle cx="160" cy="162" r="124" fill="none" stroke="#C8FF00" stroke-width="22" stroke-opacity="0.05"/>
     <circle cx="160" cy="162" r="120" fill="none" stroke="#39FF14" stroke-width="14" stroke-opacity="0.06"/>
-
     <circle cx="160" cy="162" r="118" stroke="url(#ringGrad)" stroke-width="5.5" filter="url(#ringGlow)"/>
-
     <circle cx="160" cy="162" r="110" stroke="url(#innerRingGrad)" stroke-width="1" stroke-dasharray="3 8" stroke-opacity="0.5"/>
 
     <line x1="160" y1="32" x2="160" y2="46" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>

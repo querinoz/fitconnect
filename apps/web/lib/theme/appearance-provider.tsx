@@ -8,6 +8,12 @@ import {
   useState,
   type ReactNode
 } from "react";
+import {
+  MOTION_STORAGE_KEY,
+  parseStoredMotion,
+  resolveEffectiveReduced,
+  type MotionPreference
+} from "@fitconnect/design-tokens/src/motion-policy";
 
 type ColorMode = "dark" | "light";
 
@@ -21,32 +27,45 @@ type AppearanceContextValue = {
 };
 
 const KEY_COLOR = "fitconnect.colorMode";
-const KEY_REDUCE = "fitconnect.reduceMotion";
+const KEY_REDUCE_LEGACY = "fitconnect.reduceMotion";
 const KEY_CONTRAST = "fitconnect.highContrast";
 
-export const AppearanceContext = createContext<AppearanceContextValue | null>(
-  null
-);
+function readMotionOverride(): MotionPreference {
+  const stored = parseStoredMotion(localStorage.getItem(MOTION_STORAGE_KEY));
+  if (stored) return stored;
+  const legacy = localStorage.getItem(KEY_REDUCE_LEGACY);
+  if (legacy === "1") return "reduced";
+  if (legacy === "0") return "full";
+  return null;
+}
+
+function applyMotionDataset(reduced: boolean) {
+  document.documentElement.dataset.motion = reduced ? "reduced" : "full";
+}
+
+export const AppearanceContext = createContext<AppearanceContextValue | null>(null);
 
 export function AppearanceProvider({ children }: { children: ReactNode }) {
   const [colorMode, setColorModeState] = useState<ColorMode>("dark");
-  const [reduceMotion, setReduceMotionState] = useState(false);
+  const [motionOverride, setMotionOverride] = useState<MotionPreference>(null);
+  const [osReduced, setOsReduced] = useState(false);
   const [highContrast, setHighContrastState] = useState(false);
+
+  const reduceMotion = resolveEffectiveReduced(osReduced, motionOverride);
 
   useEffect(() => {
     const savedColor = localStorage.getItem(KEY_COLOR);
     if (savedColor === "light" || savedColor === "dark") {
       setColorModeState(savedColor);
     }
-
-    const savedReduce = localStorage.getItem(KEY_REDUCE);
-    if (savedReduce === "1") {
-      setReduceMotionState(true);
-    } else if (savedReduce === "0") {
-      setReduceMotionState(false);
-    }
-
+    setMotionOverride(readMotionOverride());
     setHighContrastState(localStorage.getItem(KEY_CONTRAST) === "1");
+
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setOsReduced(mq.matches);
+    const onChange = (event: MediaQueryListEvent) => setOsReduced(event.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
   }, []);
 
   useEffect(() => {
@@ -57,7 +76,7 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
   }, [colorMode]);
 
   useEffect(() => {
-    document.documentElement.dataset.motion = reduceMotion ? "reduced" : "full";
+    applyMotionDataset(reduceMotion);
     document.documentElement.dataset.contrast = highContrast ? "high" : "normal";
   }, [reduceMotion, highContrast]);
 
@@ -67,9 +86,12 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setReduceMotion = useCallback((v: boolean) => {
-    setReduceMotionState(v);
-    localStorage.setItem(KEY_REDUCE, v ? "1" : "0");
-  }, []);
+    const next: MotionPreference = v ? "reduced" : "full";
+    setMotionOverride(next);
+    localStorage.setItem(MOTION_STORAGE_KEY, next);
+    localStorage.setItem(KEY_REDUCE_LEGACY, v ? "1" : "0");
+    applyMotionDataset(resolveEffectiveReduced(osReduced, next));
+  }, [osReduced]);
 
   const setHighContrast = useCallback((v: boolean) => {
     setHighContrastState(v);
@@ -88,7 +110,5 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
     [colorMode, setColorMode, reduceMotion, setReduceMotion, highContrast, setHighContrast]
   );
 
-  return (
-    <AppearanceContext.Provider value={value}>{children}</AppearanceContext.Provider>
-  );
+  return <AppearanceContext.Provider value={value}>{children}</AppearanceContext.Provider>;
 }

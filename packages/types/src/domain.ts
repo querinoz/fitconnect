@@ -43,7 +43,26 @@ export type SessionSummary = {
   type: string;
   mode: "Online" | "In-person";
   intensity: string;
-  status: "scheduled" | "live" | "completed" | "cancelled";
+  status: "scheduled" | "live" | "completed" | "cancelled" | "pending" | "confirmed";
+};
+
+export type PaginatedMeta = {
+  total: number;
+  page: number;
+  limit: number;
+};
+
+export type PaginatedSessionsResponse = {
+  data: SessionSummary[];
+  meta: PaginatedMeta;
+};
+
+export type ReadinessComputeStatus = "optimal" | "good" | "moderate" | "poor";
+
+export type ReadinessComputeResult = {
+  score: number;
+  status: ReadinessComputeStatus;
+  breakdown: { hrv: number; sleep: number; strain: number };
 };
 
 export type ThreadMessage = {

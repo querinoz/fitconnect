@@ -7,6 +7,7 @@ import {
   BadgeCheck,
   Clock,
   MapPin,
+  Sparkles,
   Star,
   Users,
   Video,
@@ -17,7 +18,8 @@ import { formatPrice } from "@/lib/utils";
 import { useT } from "@/lib/i18n-provider";
 import { cn } from "@/lib/utils";
 import { FitMeModal } from "./fit-me-modal";
-import { PremiumCard } from "@/components/ui-glass/premium-system";
+import { BentoCard } from "@/components/elite-os/bento-card";
+import { aiMatchScore } from "@/lib/coach/ai-match-score";
 import {
   availabilityLabel,
   availabilityTone,
@@ -35,6 +37,7 @@ export function TrainerCard({ t: trainer, layout = "default" }: TrainerCardProps
   const [open, setOpen] = useState(false);
   const availability = getCoachAvailability(trainer.id);
   const isFeatured = layout === "featured";
+  const matchPct = aiMatchScore(trainer.id);
 
   function openFitMe(e: MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
@@ -49,13 +52,15 @@ export function TrainerCard({ t: trainer, layout = "default" }: TrainerCardProps
 
   return (
     <>
-      <PremiumCard
+      <BentoCard
         interactive
-        tone={isFeatured ? "volt" : trainer.featured ? "brand" : "neutral"}
+        elevation={isFeatured ? "glass" : "1"}
+        padding="none"
         onClick={openProfile}
         className={cn(
-          "group flex cursor-pointer flex-col overflow-hidden p-0",
-          isFeatured && "md:col-span-2 md:row-span-2"
+          "group flex cursor-pointer flex-col overflow-hidden",
+          isFeatured &&
+            "border-eos-voltline/25 shadow-[0_0_40px_-12px_rgba(200,255,0,0.25)] md:col-span-2 md:row-span-2"
         )}
       >
         <div className={cn("relative overflow-hidden", isFeatured ? "aspect-[16/10]" : "aspect-[5/3]")}>
@@ -64,18 +69,22 @@ export function TrainerCard({ t: trainer, layout = "default" }: TrainerCardProps
             alt=""
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/25 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-eos-floor via-eos-floor/25 to-transparent" />
           <div className="absolute left-3 top-3 flex gap-2">
             {trainer.sports.slice(0, isFeatured ? 3 : 2).map((s) => (
               <span
                 key={s}
-                className="rounded-full border border-white/10 bg-ink-950/70 px-2.5 py-0.5 text-xs font-medium text-ink-100 backdrop-blur"
+                className="rounded-full border border-white/10 bg-eos-floor/70 px-2.5 py-0.5 text-xs font-medium text-ink-100 backdrop-blur"
               >
                 {s}
               </span>
             ))}
           </div>
           <div className="absolute right-3 top-3 flex flex-col items-end gap-1.5">
+            <span className="inline-flex items-center gap-1 rounded-full border border-eos-voltline/30 bg-eos-voltline/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-eos-voltline backdrop-blur">
+              <Sparkles className="h-3 w-3" aria-hidden />
+              AI {matchPct}% match
+            </span>
             {trainer.featured ? (
               <span className="inline-flex items-center gap-1 rounded-full bg-volt-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-volt-300 ring-1 ring-volt-500/40 backdrop-blur">
                 Featured
@@ -90,7 +99,7 @@ export function TrainerCard({ t: trainer, layout = "default" }: TrainerCardProps
               src={trainer.avatar}
               alt={trainer.name}
               className={cn(
-                "rounded-2xl object-cover ring-2 ring-ink-950",
+                "rounded-2xl object-cover ring-2 ring-eos-floor",
                 isFeatured ? "h-16 w-16" : "h-12 w-12"
               )}
             />
@@ -116,10 +125,10 @@ export function TrainerCard({ t: trainer, layout = "default" }: TrainerCardProps
           </div>
 
           {isFeatured ? (
-            <p className="text-sm leading-relaxed text-ink-400 line-clamp-2">{trainer.bio}</p>
+            <p className="line-clamp-2 text-sm leading-relaxed text-ink-400">{trainer.bio}</p>
           ) : null}
 
-          <div className="flex items-center justify-between border-t border-glass-border pt-2 text-xs text-ink-400">
+          <div className="flex items-center justify-between border-t border-eos-outline pt-2 text-xs text-ink-400">
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" /> {trainer.responseTime}
             </span>
@@ -159,14 +168,14 @@ export function TrainerCard({ t: trainer, layout = "default" }: TrainerCardProps
             <button
               type="button"
               onClick={openFitMe}
-              className="flex flex-1 items-center justify-center gap-1 rounded-2xl bg-volt-500 py-2 text-xs font-bold text-ink-950 hover:bg-volt-400"
+              className="flex flex-1 items-center justify-center gap-1 rounded-2xl bg-eos-voltline py-2 text-xs font-bold text-eos-floor hover:shadow-[0_0_15px_rgba(200,255,0,0.35)]"
             >
               <Zap className="h-3.5 w-3.5" />
               {t("fitme", "cta")}
             </button>
           </div>
         </div>
-      </PremiumCard>
+      </BentoCard>
 
       <FitMeModal trainer={trainer} open={open} onOpenChange={setOpen} />
     </>

@@ -16,6 +16,7 @@ import { EliteRouteTransition } from "./elite-route-transition";
 import { EliteSideRail } from "./elite-side-rail";
 import { ShellMain, ShellWorkspace } from "./elite-shell-layout";
 import { StitchMobileChrome } from "@/components/mobile/stitch-mobile-chrome";
+import { getEffectiveMotionDataset } from "@/lib/motion/should-reduce-motion";
 
 const FALLBACK_AVATAR = "/brand/fitconnect-logo-192.png";
 
@@ -46,7 +47,7 @@ export function EliteAppShell({
   const roleHome = role === "coach" ? "/coach/dashboard" : "/dashboard";
 
   useEffect(() => {
-    document.documentElement.dataset.motion = "full";
+    document.documentElement.dataset.motion = getEffectiveMotionDataset();
     document.documentElement.classList.add(
       "fc-mobile-shell-active",
       "eos-app-shell-active"

@@ -232,6 +232,39 @@ html.eos-app-shell-active .fc-dashboard-inner {
   max-width: 88rem;
 }
 
+/* ── Stitch decorative backgrounds ── */
+.eos-crosshair-bg {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: var(--eos-crosshair-size, 40px) var(--eos-crosshair-size, 40px);
+}
+
+.eos-crosshair-glow::before,
+.eos-crosshair-glow::after {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(120px);
+}
+
+.eos-crosshair-glow::before {
+  top: -10%;
+  left: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: rgba(200, 255, 0, 0.05);
+}
+
+.eos-crosshair-glow::after {
+  bottom: -10%;
+  right: -10%;
+  width: 40vw;
+  height: 40vw;
+  background: rgba(108, 99, 255, 0.05);
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --eos-duration-micro: 0ms;

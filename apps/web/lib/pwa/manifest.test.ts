@@ -3,10 +3,10 @@ import manifest from "@/app/manifest";
 
 describe("web manifest", () => {
   const m = manifest();
-  it("is standalone with Voltline theme colors", () => {
+  it("is standalone with Elite OS theme colors", () => {
     expect(m.display).toBe("standalone");
-    expect(m.theme_color).toBe("#bfee16");
-    expect(m.background_color).toBe("#090402");
+    expect(m.theme_color).toBe("#C8FF00");
+    expect(m.background_color).toBe("#070B14");
   });
   it("declares maskable icons", () => {
     expect(m.icons?.some((i) => i.purpose === "maskable")).toBe(true);

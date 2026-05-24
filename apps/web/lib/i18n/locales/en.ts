@@ -50,6 +50,14 @@ export const en: Dict = {
       coachName: "Tomás Reyes"
     },
     immersive: {
+      statusLabel: "SYS.STATUS:",
+      statusValue: "ONLINE",
+      headlineLine1: "THE ULTIMATE",
+      headlineAccent: "ELITE OS",
+      headlineLine2: "FOR HUMAN",
+      headlineLine3: "PERFORMANCE.",
+      subtitle:
+        "Unleash your genetic potential with high-end telemetry, predictive AI, and real-time biological feedback engineered for professional athletes.",
       connect: "connect.",
       train: "train.",
       perform: "perform.",
@@ -57,7 +65,7 @@ export const en: Dict = {
       tagline: "elevate every session",
       badge: "built for athletes worldwide",
       headline: "recovery science meets",
-      headlineAccent: "human performance",
+      immersiveAccent: "human performance",
       exploreMenu: "explore fitconnect",
       menuLabel: "menu",
       menuAthletes: "athlete os",
@@ -68,8 +76,8 @@ export const en: Dict = {
       statAthletes: "+12k athletes",
       statCoaches: "+500 coaches",
       statActivities: "+2M activities",
-      ctaPrimary: "start for free",
-      ctaSecondary: "live demo"
+      ctaPrimary: "INITIALIZE SESSION",
+      ctaSecondary: "EXPLORE TELEMETRY"
     }
   },
   heroExtras: {

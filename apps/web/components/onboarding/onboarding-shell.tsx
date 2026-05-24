@@ -39,7 +39,7 @@ export function OnboardingShell({
   const progress = Math.round((step / totalSteps) * 100);
 
   return (
-    <main id="main" className="fc-marketing-hero fc-marketing-container pb-16">
+    <main id="main" className="eos-floor fc-marketing-container min-h-dvh pb-16 pt-8">
       <header className="mx-auto flex max-w-3xl items-center justify-between px-2 pb-6">
         <Link
           href="/"

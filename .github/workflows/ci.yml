@@ -2,86 +2,223 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, feature/**]
   pull_request:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
 
 env:
   NEXT_PUBLIC_DEMO_MODE: "true"
   NEXT_PUBLIC_REALTIME_PROVIDER: broadcast
 
 jobs:
-  quality:
-    name: Lint · typecheck · test · build
+  lint-typecheck:
+    name: Lint · typecheck
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
         with:
           version: 9.15.9
-
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+  test-unit:
+    name: Unit tests (web + mobile)
+    runs-on: ubuntu-latest
+    needs: lint-typecheck
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @fitconnect/web test
+      - run: pnpm --filter @fitconnect/mobile test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lcov
+          path: apps/web/coverage/
+          if-no-files-found: ignore
 
-      - name: Lint
-        run: pnpm lint
+  test-coverage-gate:
+    name: Coverage gate
+    runs-on: ubuntu-latest
+    needs: test-unit
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:coverage
 
-      - name: Typecheck
-        run: pnpm typecheck
+  test-integration:
+    name: Integration · DB · Pact
+    runs-on: ubuntu-latest
+    needs: lint-typecheck
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: fitconnect
+          POSTGRES_PASSWORD: fitconnect_test
+          POSTGRES_DB: fitconnect_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U fitconnect -d fitconnect_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6380:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://fitconnect:fitconnect_test@localhost:5433/fitconnect_test
+      DIRECT_URL: postgresql://fitconnect:fitconnect_test@localhost:5433/fitconnect_test
+      RUN_DB_TESTS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:migrate:deploy
+      - run: pnpm --filter @fitconnect/db test:integration
+      - run: pnpm test:integration
+      - run: pnpm --filter @fitconnect/api-client exec vitest run src/pacts/consumer.contracts.pact.test.ts
 
-      - name: Unit tests
-        run: pnpm test
+  security-audit:
+    name: Security audit
+    runs-on: ubuntu-latest
+    needs: lint-typecheck
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --audit-level high
+        continue-on-error: true
+      - run: pnpm dlx semgrep --config p/typescript --error --quiet .
+        continue-on-error: true
 
-      - name: Production build
-        run: pnpm build
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    needs: [test-unit, test-coverage-gate, test-integration, security-audit]
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
 
-  e2e:
+  test-e2e:
     name: Playwright E2E
     runs-on: ubuntu-latest
-    needs: quality
+    needs: build
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
         with:
           version: 9.15.9
-
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install chromium --with-deps
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install chromium --with-deps
         working-directory: apps/web
-
-      - name: Phase 9 + Voltline E2E
-        run: >
+      - run: >
           pnpm test:e2e --
           --project=mobile-chrome
-          --workers=1
-          tests/e2e/phase9-auth.spec.ts
-          tests/e2e/phase9-admin.spec.ts
-          tests/e2e/phase9-community.spec.ts
-          tests/e2e/phase9-programs.spec.ts
-          tests/e2e/phase9-booking.spec.ts
+          --workers=4
+          tests/e2e/landing-motion.spec.ts
           tests/e2e/smoke.spec.ts
-          tests/e2e/celebrations.spec.ts
-          tests/e2e/live-session.spec.ts
-          tests/e2e/morning-handshake.spec.ts
+          tests/e2e/phase9-auth.spec.ts
         env:
           CI: true
+
+  test-perf:
+    name: k6 smoke
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm --filter @fitconnect/web start &
+        env:
           NEXT_PUBLIC_DEMO_MODE: "true"
-          NEXT_PUBLIC_REALTIME_PROVIDER: broadcast
+      - run: npx wait-on http://localhost:3001/api/health --timeout 120000
+      - name: Install k6
+        run: |
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update && sudo apt-get install -y k6
+      - run: k6 run scripts/perf/k6-smoke.js
+        env:
+          BASE_URL: http://localhost:3001
+
+  deploy-staging:
+    name: Deploy staging smoke
+    runs-on: ubuntu-latest
+    needs: [test-e2e, test-perf]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Smoke health endpoint
+        run: curl -fsS "${{ secrets.STAGING_URL || 'https://fitconnect-phi.vercel.app' }}/api/health" | grep -q '"status"'

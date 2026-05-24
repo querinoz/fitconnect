@@ -1,0 +1,24 @@
+name: Security DAST
+
+on:
+  schedule:
+    - cron: "0 2 * * 1"
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+jobs:
+  zap-scan:
+    name: OWASP ZAP full scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ZAP Full Scan
+        uses: zaproxy/action-full-scan@v0.10.0
+        with:
+          target: ${{ secrets.STAGING_URL || 'https://fitconnect-phi.vercel.app' }}
+          rules_file_name: .zap/rules.tsv
+          cmd_options: "-a -j -l WARN"
+          fail_action: true

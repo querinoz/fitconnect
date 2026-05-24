@@ -109,7 +109,7 @@ export function HeroImmersive() {
               <h1 className="nivis-headline max-w-2xl lowercase">
                 {h.headline}{" "}
                 <span className="inline-flex items-center gap-2">
-                  <span className="text-volt-500">{h.headlineAccent}</span>
+                  <span className="text-volt-500">{h.immersiveAccent}</span>
                   <Link
                     href="/signup"
                     className="inline-grid h-8 w-8 place-items-center rounded-md bg-volt-500 text-ink-950 transition hover:bg-volt-400"

@@ -16,7 +16,7 @@ import { useCoPilot } from "@/components/loops/ai-copilot/use-co-pilot";
 import { evaluateRoster } from "@/lib/ai/rules";
 import { useCoachBookingInbox } from "@/lib/hooks/use-coach-booking-inbox";
 import { CoachOsDashboard } from "@/components/dashboard/os/coach-os-dashboard";
-import { StitchTodayScreen } from "@/components/mobile/stitch-screens";
+import { StitchCoachScreen } from "@/components/mobile/stitch-screens";
 import { useStitchMobile } from "@/lib/hooks/use-media-query";
 import { useRouter } from "next/navigation";
 
@@ -93,17 +93,20 @@ export default function CoachDashboardPage() {
       {stitchMobile ? (
         <div className="space-y-4">
           {demoSection}
-          <StitchTodayScreen
+          <StitchCoachScreen
             isCoach
-            readinessScore={84}
-            hrvMs={amberCount}
-            amberAlerts={amberCount}
-            streakDays={athletes.length * 7}
-            sleepHours="7h42"
-            sessionLive={false}
-            planApproved
-            loadLabel={`${athletes.length}k`}
-            onStartSession={() => router.push("/coach/sessions")}
+            coachName={coach?.name ?? "Coach"}
+            roster={athletes.slice(0, 5).map((a) => ({
+              name: a.name,
+              readinessLabel:
+                a.recoveryStatus === "green"
+                  ? "Optimal"
+                  : a.recoveryStatus === "amber"
+                    ? "Building"
+                    : "Recovery",
+              hrvMs: a.hrv
+            }))}
+            onSendCheckIn={() => router.push("/coach/inbox")}
           />
         </div>
       ) : (

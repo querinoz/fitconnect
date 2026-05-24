@@ -16,7 +16,8 @@ import {
   Wallet
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PremiumCard } from "@/components/ui-glass/premium-system";
+import { BentoCard } from "@/components/elite-os/bento-card";
+import { LabelCaps } from "@/components/elite-os/typography";
 import { MagneticToggle } from "@/components/ui-glass/form-system";
 
 type Period = "monthly" | "annual";
@@ -135,16 +136,16 @@ const pricingFaqs = [
 export default function PricingPage() {
   const [period, setPeriod] = useState<Period>("annual");
   return (
-    <main id="main">
+    <main id="main" className="eos-floor">
       <section className="relative isolate overflow-hidden fc-marketing-hero">
         <Atmosphere />
         <div className="fc-marketing-container text-center">
-          <p className="fc-eyebrow inline-flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5" /> Pricing
-          </p>
+          <LabelCaps className="inline-flex items-center gap-1.5 text-eos-voltline">
+            <Sparkles className="h-3.5 w-3.5" /> PRICING TELEMETRY
+          </LabelCaps>
           <h1 className="fc-display-title fc-vt-hero mt-4 text-5xl text-balance md:text-6xl">
-            Honest pricing for{" "}
-            <span className="gradient-text">honest training</span>.
+            Deploy{" "}
+            <span className="gradient-text">Athlete OS & Coach OS</span>
           </h1>
           <p className="fc-body-muted mx-auto mt-6 max-w-2xl text-lg">
             €12/mo for the platform. Your coach&apos;s rate is whatever they set. No hidden
@@ -177,12 +178,12 @@ export default function PricingPage() {
           {plans.map((p) => {
             const price = period === "monthly" ? p.monthly : p.annual;
             return (
-              <PremiumCard
+              <BentoCard
                 key={p.name}
-                tone={p.highlight ? "volt" : "neutral"}
+                elevation={p.highlight ? "glass" : "1"}
                 className={cn(
-                  "flex flex-col p-7",
-                  p.highlight && "ring-1 ring-volt-500/30"
+                  "relative flex flex-col p-7",
+                  p.highlight && "border-eos-voltline/30 shadow-[0_0_40px_-12px_rgba(200,255,0,0.25)]"
                 )}
               >
                   {p.highlight && (
@@ -230,14 +231,14 @@ export default function PricingPage() {
                       {p.cta} <ArrowRight className="h-4 w-4" />
                     </Link>
                   </Button>
-              </PremiumCard>
+              </BentoCard>
             );
           })}
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           {reassurance.map((r) => (
-            <PremiumCard key={r.title} className="flex gap-3 p-5">
+            <BentoCard key={r.title} elevation="1" className="flex gap-3 p-5">
               <div className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-volt-500/10 text-volt-300">
                 <r.icon className="h-4 w-4" />
               </div>
@@ -245,13 +246,13 @@ export default function PricingPage() {
                 <p className="text-sm font-semibold text-ink-100">{r.title}</p>
                 <p className="mt-1 text-sm leading-relaxed text-ink-400">{r.body}</p>
               </div>
-            </PremiumCard>
+            </BentoCard>
           ))}
         </div>
       </section>
 
       <section className="fc-marketing-container fc-marketing-section">
-        <PremiumCard className="p-8 md:p-10">
+        <BentoCard elevation="1" className="p-8 md:p-10">
             <div className="flex items-baseline justify-between flex-wrap gap-3">
               <div>
                 <p className="eyebrow">Per-session rates</p>
@@ -282,11 +283,11 @@ export default function PricingPage() {
               Trainers set their own rate. Most offer multi-session packs and intro discounts.
               All prices in EUR per 60-min session.
             </p>
-        </PremiumCard>
+        </BentoCard>
       </section>
 
       <section className="fc-marketing-container py-12">
-        <PremiumCard tone="volt" className="grid items-center gap-6 p-8 md:grid-cols-2 md:p-10">
+        <BentoCard elevation="glass" className="grid items-center gap-6 p-8 md:grid-cols-2 md:p-10">
             <div>
               <p className="fc-eyebrow text-volt-400">Price comparison</p>
               <h2 className="mt-2 font-display text-2xl md:text-3xl font-bold">
@@ -312,7 +313,7 @@ export default function PricingPage() {
                 <span className="font-display font-bold gradient-text">€229/mo</span>
               </li>
             </ul>
-        </PremiumCard>
+        </BentoCard>
         <p className="mt-3 text-center text-xs text-ink-500">
             For two or fewer sessions / month — typical for most athletes — FitConnect is 40-60%
             cheaper while giving you a real specialist.

@@ -1,17 +1,23 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { HeroCinematic } from "@/components/landing/hero-cinematic";
-import { TrustEditorial } from "@/components/landing/trust-editorial";
-import { SectionBreak } from "@/components/landing/section-break";
-import { CoachReel } from "@/components/landing/coach-reel";
-import { PullQuote } from "@/components/landing/pull-quote";
-import { FeatureManifesto } from "@/components/landing/feature-manifesto";
-import { FinalCta } from "@/components/landing/final-cta";
-import { LandingShell } from "@/components/landing/landing-shell";
+import { LandingShellV2 } from "@/components/landing/landing-shell-v2";
 import { LazyInView } from "@/components/marketing/lazy-in-view";
 import { DownloadSection } from "@/components/marketing/download-section";
-import { useLocale } from "@/lib/i18n-provider";
+import { HeroEliteOs } from "@/components/marketing/landing-v2/hero-elite-os";
+import { TrustStripMarquee } from "@/components/marketing/landing-v2/trust-strip-marquee";
+import { ScrollStory } from "@/components/marketing/landing-v2/scroll-story";
+import { MapHeroSection } from "@/components/marketing/landing-v2/map-hero-section";
+import { SportsHub } from "@/components/marketing/landing-v2/sports-hub";
+import { SocialProofSection } from "@/components/marketing/landing-v2/social-proof-section";
+import { FeatureManifesto } from "@/components/landing/feature-manifesto";
+import { FinalCta } from "@/components/landing/final-cta";
+
+const AppDemoSection = dynamic(
+  () =>
+    import("@/components/marketing/landing-v2/app-demo-section").then((m) => m.AppDemoSection),
+  { loading: () => <section className="mx-auto h-[720px] max-w-7xl skeleton" aria-hidden id="demo" /> }
+);
 
 const Pricing = dynamic(
   () => import("@/components/pricing").then((m) => m.Pricing),
@@ -21,12 +27,6 @@ const Pricing = dynamic(
 const Faqs = dynamic(
   () => import("@/components/faqs").then((m) => m.Faqs),
   { loading: () => <section className="mx-auto h-[400px] max-w-7xl skeleton" aria-hidden /> }
-);
-
-const ScienceAndTech = dynamic(
-  () =>
-    import("@/components/marketing/science-and-tech").then((m) => m.ScienceAndTech),
-  { loading: () => <section className="mx-auto h-[360px] max-w-7xl skeleton" aria-hidden /> }
 );
 
 function Defer({
@@ -43,34 +43,36 @@ function Defer({
   );
 }
 
+/** Elite OS landing — landing-v2 sections wired to production home. */
 export function LandingPageContent() {
-  const { landingEditorial: copy } = useLocale();
-  const sb = copy.sectionBreak;
-  const q = copy.quotes;
-
   return (
-    <LandingShell>
-      <HeroCinematic />
-      <TrustEditorial />
-      <SectionBreak lineOne={sb.connect} lineTwo={sb.perform} />
-      <CoachReel />
-      <PullQuote text={q.athlete.text} attribution={q.athlete.attribution} />
-      <SectionBreak lineOne={sb.train} lineTwo={sb.smarter} />
-      <FeatureManifesto />
-      <PullQuote text={q.coach.text} attribution={q.coach.attribution} />
-      <SectionBreak lineOne={sb.track} lineTwo={sb.everyMove} />
-      <Defer minHeight={360}>
-        <ScienceAndTech />
+    <LandingShellV2>
+      <HeroEliteOs />
+      <TrustStripMarquee />
+      <Defer minHeight={720}>
+        <AppDemoSection />
       </Defer>
-      <SectionBreak lineOne={sb.book} lineTwo={sb.yourCoach} />
-      <FinalCta />
+      <ScrollStory />
+      <div id="manifesto">
+        <FeatureManifesto />
+      </div>
+      <Defer minHeight={400}>
+        <MapHeroSection />
+      </Defer>
+      <Defer minHeight={360}>
+        <SportsHub />
+      </Defer>
+      <Defer minHeight={400}>
+        <SocialProofSection />
+      </Defer>
       <Defer minHeight={480}>
         <Pricing />
       </Defer>
+      <FinalCta />
       <Defer minHeight={400}>
         <Faqs />
       </Defer>
       <DownloadSection />
-    </LandingShell>
+    </LandingShellV2>
   );
 }

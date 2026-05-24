@@ -96,7 +96,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: [{ color: "#090402" }],
+  themeColor: [{ color: "#070B14" }],
   colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
@@ -128,7 +128,7 @@ export default async function RootLayout({
         ) : null}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{document.documentElement.dataset.motion="full";document.documentElement.dataset.colorMode="dark";}catch(e){}})();`
+            __html: `(function(){try{var m=localStorage.getItem('fitconnect:motion');var os=window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(m==='reduced'){document.documentElement.dataset.motion='reduced';}else if(m==='full'){document.documentElement.dataset.motion='full';}else{document.documentElement.dataset.motion=os?'reduced':'full';}document.documentElement.dataset.colorMode='dark';}catch(e){document.documentElement.dataset.motion='full';}})();`
           }}
         />
       </head>

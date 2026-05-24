@@ -150,7 +150,7 @@ export function SignupWizard({ embedded = false }: SignupWizardProps) {
     step === 4;
 
   return (
-    <div className={cn("w-full", !embedded && "fc-marketing-hero fc-marketing-container pb-16")}>
+    <div className={cn("w-full", !embedded && "eos-floor fc-marketing-hero fc-marketing-container pb-16")}>
       <EliteAuthPanel
         badge="Onboarding"
         headerAction={
@@ -186,28 +186,39 @@ export function SignupWizard({ embedded = false }: SignupWizardProps) {
                 <Headline>I am a…</Headline>
                 <p className="text-sm text-eos-on-surface-muted">Choose your operating mode.</p>
                 <div className="grid grid-cols-2 gap-3">
-                  {(["athlete", "coach"] as const).map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setRole(r)}
+                  {(
+                    [
+                      {
+                        id: "athlete" as const,
+                        title: "Athlete OS",
+                        desc: "Human performance cockpit · readiness telemetry",
+                        icon: Dumbbell,
+                        accent: "text-eos-voltline"
+                      },
+                      {
+                        id: "coach" as const,
+                        title: "Coach OS",
+                        desc: "Command center · roster intelligence",
+                        icon: Sparkles,
+                        accent: "text-eos-telemetry"
+                      }
+                    ] as const
+                  ).map(({ id, title, desc, icon: Icon, accent }) => (
+                    <BentoCard
+                      key={id}
+                      interactive
+                      elevation={role === id ? "glass" : "1"}
+                      padding="md"
+                      onClick={() => setRole(id)}
                       className={cn(
-                        "rounded-[var(--eos-radius-card)] border p-5 text-left transition",
-                        role === r
-                          ? "border-eos-voltline/40 bg-eos-voltline-dim ring-1 ring-eos-voltline/30"
-                          : "border-eos-outline bg-eos-carbon/50 hover:border-eos-outline-strong"
+                        "text-left transition",
+                        role === id && "border-eos-voltline/35 shadow-[0_0_24px_-8px_rgba(200,255,0,0.3)]"
                       )}
                     >
-                      {r === "athlete" ? (
-                        <Dumbbell className="mb-3 h-6 w-6 text-eos-voltline" />
-                      ) : (
-                        <Sparkles className="mb-3 h-6 w-6 text-eos-telemetry" />
-                      )}
-                      <p className="font-display font-bold capitalize text-eos-on-surface">{r}</p>
-                      <p className="mt-1 text-xs text-eos-on-surface-muted">
-                        {r === "athlete" ? "Train smarter with AI readiness" : "Run your coaching OS"}
-                      </p>
-                    </button>
+                      <Icon className={cn("mb-3 h-6 w-6", accent)} aria-hidden />
+                      <p className="font-display font-bold text-eos-on-surface">{title}</p>
+                      <p className="mt-1 text-xs text-eos-on-surface-muted">{desc}</p>
+                    </BentoCard>
                   ))}
                 </div>
               </div>

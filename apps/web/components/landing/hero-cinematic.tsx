@@ -9,6 +9,7 @@ import { useLocale } from "@/lib/i18n-provider";
 import { HERO_IMAGE } from "@/lib/landing/coach-reel-data";
 import { StatsCorner } from "@/components/landing/stats-corner";
 import { useLandingGate } from "@/components/landing/landing-gate-context";
+import { shouldReduceMotion } from "@/lib/motion/should-reduce-motion";
 import { cn } from "@/lib/utils";
 
 export function HeroCinematic() {
@@ -22,8 +23,11 @@ export function HeroCinematic() {
     () => {
       if (!gateDone) return;
       registerGsapPlugins();
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduced) return;
+      const reduced = shouldReduceMotion();
+      if (reduced) {
+        gsap.set(".hero-line, .hero-stat, .hero-scroll", { opacity: 1, y: 0 });
+        return;
+      }
 
       const tl = gsap.timeline({ delay: 0.15 });
       tl.from(".hero-line", {

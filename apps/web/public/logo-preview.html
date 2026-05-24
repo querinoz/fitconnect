@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FitConnect — Logo preview</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        background: #0a0a0a;
+        color: #f5f5f5;
+      }
+      h1 { font-size: 1.25rem; margin: 0 0 0.25rem; }
+      p { margin: 0; opacity: 0.65; font-size: 0.85rem; }
+      .wrap { max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+      .swatch {
+        border-radius: 1rem;
+        padding: 1.5rem 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+      .swatch img { width: 88px; height: auto; }
+      .swatch.small img { width: 44px; }
+      .swatch label {
+        margin-top: 1rem;
+        font-size: 0.7rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.55;
+      }
+      .dark { background: #090402; }
+      .premium {
+        background-color: #090402;
+        background-image:
+          radial-gradient(ellipse 80% 50% at 50% -20%, rgba(200,255,0,0.07), transparent 55%),
+          linear-gradient(to right, rgba(255,255,255,0.035) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(255,255,255,0.035) 1px, transparent 1px);
+        background-size: 100% 100%, 40px 40px, 40px 40px;
+      }
+      .light { background: #ffffff; color: #111; }
+      .light label { color: #666; }
+      .glass {
+        background: rgba(255,255,255,0.06);
+        backdrop-filter: blur(12px);
+      }
+      .volt { background: linear-gradient(135deg, #c8ff00 0%, #39ff14 100%); }
+      .volt label { color: rgba(0,0,0,0.55); }
+      .row { margin-top: 2rem; }
+      .sizes { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-end; margin-top: 1rem; }
+      .sizes figure { margin: 0; text-align: center; }
+      .sizes img { display: block; margin: 0 auto; }
+      .sizes figcaption { font-size: 0.65rem; opacity: 0.5; margin-top: 0.35rem; }
+      .fc-logo-mark {
+        filter: drop-shadow(0 0 1px rgba(0,0,0,0.92))
+          drop-shadow(0 0 2px rgba(0,0,0,0.68))
+          drop-shadow(0 1px 4px rgba(0,0,0,0.5))
+          drop-shadow(0 0 16px rgba(200,255,0,0.22));
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>FitConnect logo — preview</h1>
+      <p>PNG transparente + contorno/sombra · Voltline #C8FF00</p>
+
+      <div class="grid">
+        <div class="swatch dark">
+          <img class="fc-logo-mark" src="/brand/fitconnect-logo.png" alt="FitConnect" width="88" />
+          <label>Fundo escuro</label>
+        </div>
+        <div class="swatch premium">
+          <img class="fc-logo-mark" src="/brand/fitconnect-logo.png" alt="FitConnect" width="88" />
+          <label>Premium grid (app)</label>
+        </div>
+        <div class="swatch light">
+          <img class="fc-logo-mark" src="/brand/fitconnect-logo.png" alt="FitConnect" width="88" />
+          <label>Fundo branco</label>
+        </div>
+        <div class="swatch glass">
+          <img class="fc-logo-mark" src="/brand/fitconnect-logo.png" alt="FitConnect" width="88" />
+          <label>Glass</label>
+        </div>
+        <div class="swatch volt">
+          <img class="fc-logo-mark" src="/brand/fitconnect-logo.png" alt="FitConnect" width="88" />
+          <label>Voltline sólido</label>
+        </div>
+        <div class="swatch dark">
+          <img class="fc-logo-mark" src="/brand/fitconnect-logo.png" alt="FitConnect PNG" width="88" />
+          <label>PNG transparente</label>
+        </div>
+      </div>
+
+      <div class="row">
+        <h1>Tamanhos (nav → splash)</h1>
+        <div class="sizes premium" style="padding:1.5rem;border-radius:1rem;border:1px solid rgba(255,255,255,0.08);">
+          <figure><img class="fc-logo-mark" src="/brand/fitconnect-logo.png" width="28" alt="" /><figcaption>28px</figcaption></figure>
+          <figure><img class="fc-logo-mark" src="/brand/fitconnect-logo.png" width="44" alt="" /><figcaption>44px nav</figcaption></figure>
+          <figure><img class="fc-logo-mark" src="/brand/fitconnect-logo.png" width="64" alt="" /><figcaption>64px hero</figcaption></figure>
+          <figure><img class="fc-logo-mark" src="/brand/fitconnect-logo.png" width="128" alt="" /><figcaption>128px splash</figcaption></figure>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap, registerGsapPlugins } from "@/lib/motion/gsap-register";
 import { useLandingGate } from "@/components/landing/landing-gate-context";
+import { shouldReduceMotion } from "@/lib/motion/should-reduce-motion";
 import { cn } from "@/lib/utils";
 
 type SectionBreakProps = {
@@ -21,7 +22,7 @@ export function SectionBreak({ lineOne, lineTwo, className }: SectionBreakProps)
     () => {
       if (!gateDone) return;
       registerGsapPlugins();
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reduced = shouldReduceMotion();
       const root = ref.current;
       if (!root || reduced) return;
 

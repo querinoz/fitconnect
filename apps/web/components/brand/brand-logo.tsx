@@ -1,11 +1,11 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-/** Official mark aspect — 320×340 master SVG (circle + heartbeat). */
+/** Official mark aspect — 320×340 master (LogoBase). */
 export const OFFICIAL_LOGO_ASPECT = 340 / 320;
 
+/** Transparent PNG — single source for all in-app surfaces. */
 export const OFFICIAL_LOGO_SRC = "/brand/fitconnect-logo.png";
-export const OFFICIAL_LOGO_SVG = "/brand/fitconnect-logo-mark.svg";
 
 /** Default display size (px width) — nav, header, lockups. */
 export const OFFICIAL_LOGO_SIZE = 44;
@@ -21,7 +21,8 @@ type BrandLogoProps = {
 };
 
 /**
- * Official FitConnect logo — LogoBase mark; cyan/blue accents recolored to Voltline (#C8FF00).
+ * Official FitConnect logo — transparent PNG (Voltline #C8FF00, white F).
+ * Universal shadow via `.fc-logo-mark` for light/dark/glass surfaces.
  */
 export function BrandLogo({
   className,

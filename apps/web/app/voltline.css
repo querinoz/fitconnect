@@ -1,30 +1,30 @@
 :root {
-  /* Nivis-inspired cinematic palette (Awwwards #BFEE16 / #090402) */
-  --nivis-lime: #bfee16;
-  --nivis-void: #090402;
+  /* Elite OS floor — canonical (Stitch reference) */
+  --nivis-lime: #c8ff00;
+  --nivis-void: #070b14;
   --nivis-glass: rgba(9, 4, 2, 0.55);
   --nivis-glass-border: rgba(255, 255, 255, 0.08);
   --nivis-glass-highlight: rgba(191, 238, 22, 0.12);
 
-  /* Obsidian + Carbon — Kinetic Energy design system */
-  --ink-950: #090402;
-  --ink-900: #0c0a08;
-  --ink-800: #14110e;
-  --ink-700: #1c1814;
-  --ink-600: #242019;
+  /* Obsidian + Carbon — aligned to Elite OS */
+  --ink-950: #070b14;
+  --ink-900: #0b0f19;
+  --ink-800: #111827;
+  --ink-700: #151b2d;
+  --ink-600: #1f1f28;
   --ink-500: rgba(238, 238, 242, 0.14);
   --ink-400: rgba(238, 238, 242, 0.28);
   --ink-300: rgba(238, 238, 242, 0.52);
   --ink-100: #eeeef2;
   --ink-50: #eeeef2;
 
-  /* Volt — primary identity (aligned with Nivis lime) */
+  /* Volt — primary identity (Elite OS voltline) */
   --volt-300: #d4ff4d;
-  --volt-400: #c9f622;
-  --volt-500: #bfee16;
-  --volt-600: #9bc412;
-  --volt-glow: rgba(191, 238, 22, 0.45);
-  --volt-dim: rgba(191, 238, 22, 0.1);
+  --volt-400: #d0ff33;
+  --volt-500: #c8ff00;
+  --volt-600: #a8d700;
+  --volt-glow: rgba(200, 255, 0, 0.45);
+  --volt-dim: rgba(200, 255, 0, 0.1);
 
   /* Connect — secondary trust / links */
   --connect-500: #00ddb4;
@@ -62,7 +62,7 @@
   --glass-noise: rgba(255, 255, 255, 0.035);
 
   /* Gradients */
-  --grad-pulse: linear-gradient(135deg, #d4ff4d, #bfee16, #9bc412);
+  --grad-pulse: linear-gradient(135deg, #d4ff4d, #c8ff00, #9bc412);
   --grad-text: linear-gradient(135deg, #eeeef2, #d6ff33 55%, #c8ff00);
   --grad-live: radial-gradient(circle at 20% 10%, rgba(0, 221, 180, 0.18), transparent 36%),
     radial-gradient(circle at 78% 12%, rgba(200, 255, 0, 0.16), transparent 34%),

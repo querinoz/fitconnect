@@ -5,3 +5,4 @@ export { EliteInput } from "./elite-input";
 export { EliteChip } from "./elite-chip";
 export { LabelCaps, MetricDisplay, DisplayTitle, Headline, BodyText } from "./typography";
 export { BentoGrid, AiInsightCard, TelemetryShell } from "./layout-primitives";
+export { CornerTicks, CrosshairBg, EosLabel } from "./decorators";

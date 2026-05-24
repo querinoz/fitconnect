@@ -6,18 +6,16 @@ import {
   useReducedMotion
 } from "framer-motion";
 import {
-  Bell,
-  Calendar,
+  Activity,
   Home,
-  UserRound,
-  UsersRound
+  Settings,
+  Trophy
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { StitchNativeHeader } from "@/components/mobile/stitch-native-primitives";
 import { cn } from "@/lib/utils";
 import {
   StitchCoachScreen,
-  StitchInboxScreen,
   StitchProfileScreen,
   StitchSessionsScreen,
   StitchTodayScreen
@@ -25,7 +23,7 @@ import {
 import type { DashboardPreviewRole } from "./role-dashboard-preview";
 import { useLocale } from "@/lib/i18n-provider";
 
-type MobileScreen = "today" | "sessions" | "coach" | "inbox" | "profile";
+type MobileScreen = "today" | "sessions" | "coach" | "profile";
 
 type MobileAppPreviewProps = {
   initialRole?: DashboardPreviewRole;
@@ -45,17 +43,12 @@ export function MobileAppPreview({
 
   const nav = useMemo(
     () => [
-      { id: "today" as const, label: m.nav.today, icon: Home },
-      { id: "sessions" as const, label: m.nav.sessions, icon: Calendar },
-      {
-        id: "coach" as const,
-        label: isCoach ? m.nav.roster : m.nav.coach,
-        icon: isCoach ? UsersRound : UserRound
-      },
-      { id: "inbox" as const, label: m.nav.inbox, icon: Bell },
-      { id: "profile" as const, label: m.nav.profile, icon: UserRound }
+      { id: "today" as const, label: "Dashboard", icon: Home },
+      { id: "sessions" as const, label: "Metrics", icon: Activity },
+      { id: "coach" as const, label: isCoach ? "Roster" : "Goals", icon: Trophy },
+      { id: "profile" as const, label: "Settings", icon: Settings }
     ],
-    [isCoach, m.nav]
+    [isCoach]
   );
 
   return (
@@ -107,17 +100,7 @@ export function MobileAppPreview({
               <StitchCoachScreen
                 isCoach={isCoach}
                 messageSent={messageSent}
-                onSendCheckIn={() => {
-                  setMessageSent(true);
-                  setScreen("inbox");
-                }}
-              />
-            )}
-            {screen === "inbox" && (
-              <StitchInboxScreen
-                planApproved={planApproved}
-                messageSent={messageSent}
-                onApprovePlan={() => setPlanApproved(true)}
+                onSendCheckIn={() => setMessageSent(true)}
               />
             )}
             {screen === "profile" && (

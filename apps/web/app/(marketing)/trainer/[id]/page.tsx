@@ -25,10 +25,8 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { formatPrice, formatCompact } from "@/lib/utils";
-import {
-  PremiumCard,
-  RealtimeBadge
-} from "@/components/ui-glass/premium-system";
+import { BentoCard } from "@/components/elite-os/bento-card";
+import { RealtimeBadge } from "@/components/ui-glass/premium-system";
 
 const samplePlan = [
   {
@@ -101,7 +99,7 @@ export default function TrainerPage({
     programs.length === 0 ? PROGRAMS.filter((p) => p.sport === t.sports[0]).slice(0, 2) : [];
 
   return (
-    <main id="main" className="fc-marketing-container pb-16">
+    <main id="main" className="eos-floor fc-marketing-container pb-16">
         <div className="relative h-72 md:h-96 overflow-hidden">
           <img src={t.cover} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/50 to-ink-950/20" />
@@ -355,7 +353,7 @@ export default function TrainerPage({
           </section>
 
           <aside className="lg:sticky lg:top-24 self-start space-y-4">
-            <PremiumCard tone="brand" className="p-6 shadow-elevated">
+            <BentoCard elevation="glass" className="p-6">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm text-ink-400">Starting from</p>
                 <RealtimeBadge>Available</RealtimeBadge>
@@ -380,9 +378,9 @@ export default function TrainerPage({
                 Free cancellation up to 24h before · Verified specialist · Secure Stripe
                 payments
               </p>
-            </PremiumCard>
+            </BentoCard>
 
-            <div className="rounded-2xl border border-ink-800 bg-ink-900/40 p-6 text-sm space-y-3">
+            <BentoCard elevation="1" className="p-6 text-sm space-y-3">
               <p className="font-semibold text-ink-100">This coach is great if you…</p>
               <ul className="space-y-2 text-ink-300">
                 <li className="flex items-start gap-2">
@@ -402,9 +400,9 @@ export default function TrainerPage({
                   honest, kind, data-backed feedback
                 </li>
               </ul>
-            </div>
+            </BentoCard>
 
-            <div className="rounded-2xl border border-ink-800 bg-ink-900/40 p-6 text-sm">
+            <BentoCard elevation="1" className="p-6 text-sm">
               <p className="font-semibold text-ink-100">Availability</p>
               <div className="mt-4 grid grid-cols-7 gap-1">
                 {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
@@ -423,7 +421,7 @@ export default function TrainerPage({
               <p className="mt-3 text-xs text-ink-500">
                 Most available this week. Next opening: Tomorrow 07:30.
               </p>
-            </div>
+            </BentoCard>
           </aside>
         </div>
 
@@ -444,13 +442,13 @@ function StatTile({
   value: string;
 }) {
   return (
-    <div className="rounded-xl border border-ink-800 bg-ink-900/40 p-4">
+    <BentoCard elevation="1" className="p-4">
       <div className="flex items-center gap-2 text-ink-400">
         <Icon className="h-3.5 w-3.5 text-brand-300" />
-        <span className="text-[10px] uppercase tracking-widest">{label}</span>
+        <span className="font-mono text-[10px] uppercase tracking-widest">{label}</span>
       </div>
       <p className="mt-2 font-display text-2xl font-bold tabular-nums">{value}</p>
-    </div>
+    </BentoCard>
   );
 }
 

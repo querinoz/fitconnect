@@ -118,6 +118,9 @@ model Session {
   status            SessionStatus @default(SCHEDULED)
 
   athlete AthleteProfile @relation(fields: [athleteExternalId], references: [externalId])
+
+  @@index([athleteExternalId])
+  @@index([scheduledAt])
 }
 
 model Message {
@@ -167,6 +170,8 @@ model ReadinessSnapshot {
   capturedAt        DateTime       @default(now())
 
   athlete AthleteProfile @relation(fields: [athleteExternalId], references: [externalId])
+
+  @@index([athleteExternalId])
 }
 
 model TrainingPlan {
@@ -316,4 +321,22 @@ model PushToken {
   token     String   @unique
   platform  String
   createdAt DateTime @default(now())
+}
+
+model ProcessedStripeEvent {
+  stripeEventId String   @id
+  eventType     String
+  processedAt   DateTime @default(now())
+}
+
+model UserSubscription {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  stripeCustomerId     String?
+  stripeSubscriptionId String?  @unique
+  planId               String   @default("pro")
+  status               String   @default("active")
+  gracePeriodEndsAt    DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 }

@@ -4,6 +4,7 @@ import { useGSAP } from "@gsap/react";
 import type { RefObject } from "react";
 import { useLandingGate } from "@/components/landing/landing-gate-context";
 import { gsap, registerGsapPlugins } from "@/lib/motion/gsap-register";
+import { shouldReduceMotion } from "@/lib/motion/should-reduce-motion";
 
 type RevealOptions = {
   selector?: string;
@@ -31,7 +32,7 @@ export function useGsapReveal(
     () => {
       if (!gateDone) return;
       registerGsapPlugins();
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reduced = shouldReduceMotion();
       const root = scopeRef.current;
       if (!root || reduced) return;
 
