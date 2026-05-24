@@ -69,12 +69,13 @@
     "stripe": "^22.1.1",
     "superjson": "^2.2.2",
     "tailwind-merge": "^2.5.4",
+    "zod": "^3.24.2",
     "zustand": "^5.0.1"
   },
   "devDependencies": {
+    "@pact-foundation/pact": "^13.2.0",
     "@playwright/test": "^1.52.0",
     "@testcontainers/postgresql": "^10.28.0",
-    "@pact-foundation/pact": "^13.2.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
