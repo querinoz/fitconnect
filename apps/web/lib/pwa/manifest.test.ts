@@ -11,6 +11,10 @@ describe("web manifest", () => {
   it("declares maskable icons", () => {
     expect(m.icons?.some((i) => i.purpose === "maskable")).toBe(true);
   });
+  it("supports window controls overlay and shortcuts", () => {
+    expect(m.display_override).toContain("window-controls-overlay");
+    expect(m.shortcuts?.length).toBeGreaterThanOrEqual(3);
+  });
   it("links the app start url", () => {
     expect(m.start_url).toBe("/dashboard");
   });

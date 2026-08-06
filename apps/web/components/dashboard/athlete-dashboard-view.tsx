@@ -36,10 +36,11 @@ import {
   XAxis,
   YAxis
 } from "recharts";
+import { rechartsTheme } from "@/lib/charts/recharts-theme";
 
 const tooltipStyle = {
-  background: "#0f172a",
-  border: "1px solid #1e293b",
+  background: rechartsTheme.tooltipBg,
+  border: `1px solid ${rechartsTheme.tooltipBorder}`,
   borderRadius: "12px"
 };
 
@@ -116,7 +117,7 @@ export function AthleteDashboardView({ wrapShell = true }: { wrapShell?: boolean
           delta="+4"
           chart={
             <LineChart data={ctx.sleepWeek}>
-              <Line type="monotone" dataKey="hrv" stroke="#f43f5e" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="hrv" stroke={rechartsTheme.hrv} strokeWidth={2} dot={false} />
             </LineChart>
           }
         />
@@ -128,7 +129,7 @@ export function AthleteDashboardView({ wrapShell = true }: { wrapShell?: boolean
           delta={`${athlete.sleepEfficiency}%`}
           chart={
             <BarChart data={ctx.sleepWeek}>
-              <Bar dataKey="sleep" fill="#00ddb4" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="sleep" fill={rechartsTheme.sleep} radius={[2, 2, 0, 0]} />
             </BarChart>
           }
         />
@@ -143,8 +144,8 @@ export function AthleteDashboardView({ wrapShell = true }: { wrapShell?: boolean
               <Area
                 type="monotone"
                 dataKey="kpi"
-                stroke="#84cc16"
-                fill="#84cc16"
+                stroke={rechartsTheme.trend}
+                fill={rechartsTheme.trend}
                 fillOpacity={0.2}
                 strokeWidth={2}
               />
@@ -206,11 +207,11 @@ export function AthleteDashboardView({ wrapShell = true }: { wrapShell?: boolean
           <div className="h-48 sm:h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={ctx.weeklyVolume}>
-                <CartesianGrid stroke="#1e293b" vertical={false} />
-                <XAxis dataKey="d" stroke="#64748b" fontSize={12} />
-                <YAxis stroke="#64748b" fontSize={12} />
+                <CartesianGrid stroke={rechartsTheme.gridBorder} vertical={false} />
+                <XAxis dataKey="d" stroke={rechartsTheme.axis} fontSize={12} />
+                <YAxis stroke={rechartsTheme.axis} fontSize={12} />
                 <Tooltip contentStyle={tooltipStyle} />
-                <Bar dataKey="load" radius={[8, 8, 0, 0]} fill="#00ddb4" />
+                <Bar dataKey="load" radius={[8, 8, 0, 0]} fill={rechartsTheme.load} />
               </BarChart>
             </ResponsiveContainer>
           </div>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ArrowRight, Bolt, Check, Terminal } from "lucide-react";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "motion/react";
 import { useLocale, useT } from "@/lib/i18n-provider";
 import { BentoCard } from "@/components/elite-os/bento-card";
 import { LabelCaps } from "@/components/elite-os/typography";

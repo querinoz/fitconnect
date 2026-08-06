@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useStitchMobile } from "@/lib/hooks/use-media-query";

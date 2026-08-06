@@ -27,7 +27,7 @@ export function Wordmark({
       className="inline-flex items-baseline whitespace-nowrap font-display tracking-[-0.04em]"
       style={{ fontSize: size, lineHeight: 1 }}
     >
-      <span className="font-extrabold text-[#E6E7EA]">Fit</span>
+      <span className="font-extrabold text-eos-on-surface">Fit</span>
       <span className="font-semibold text-volt-400">Connect</span>
     </span>
   );

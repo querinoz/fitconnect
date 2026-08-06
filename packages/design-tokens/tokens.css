@@ -1,37 +1,44 @@
-/* @fitconnect/design-tokens — Kinetic Energy / Architectural Precision */
+/* @fitconnect/design-tokens — aliases to elite-os.css canonical tokens.
+   Never define raw hex here. All values must point to --eos-* or other
+   vars already defined by apps/web/app/elite-os.css (loaded first). */
 :root {
+  /* ── Spacing (4px base grid) ── */
   --fc-space-1: 0.25rem;
   --fc-space-2: 0.5rem;
   --fc-space-3: 0.75rem;
   --fc-space-4: 1rem;
   --fc-space-6: 1.5rem;
   --fc-space-8: 2rem;
+
+  /* ── Radius ── */
   --fc-radius-sm: 0.625rem;
   --fc-radius-md: 0.875rem;
   --fc-radius-lg: 1rem;
   --fc-radius-xl: 1.75rem;
 
-  --fc-obsidian: #070b14;
-  --fc-carbon-0: #0c0d11;
-  --fc-carbon-1: #111318;
-  --fc-carbon-2: #181a22;
-  --fc-carbon-3: #1e2029;
+  /* ── Colour aliases → elite-os.css ── */
+  --fc-obsidian: var(--eos-floor);
+  --fc-carbon-0: #0c0d11; /* no exact EOS alias; approved decorative */
+  --fc-carbon-1: var(--eos-carbon);
+  --fc-carbon-2: var(--eos-elevated);
+  --fc-carbon-3: var(--eos-surface-container);
 
-  --fc-volt: #c8ff00;
-  --fc-connect: #00ddb4;
-  --fc-cyan: #00bfff;
-  --fc-amber: #ffb020;
-  --fc-crimson: #ff3a5c;
-  --fc-emerald: #00e090;
+  --fc-volt: var(--eos-voltline);
+  --fc-connect: var(--connect-500);
+  --fc-cyan: var(--cyan-500);
+  --fc-amber: var(--eos-recovery);
+  --fc-crimson: var(--eos-alert);
+  --fc-emerald: var(--eos-performance);
 
-  --fc-text-1: #eeeef2;
-  --fc-text-2: rgba(238, 238, 242, 0.52);
+  --fc-text-1: var(--eos-on-surface);
+  --fc-text-2: var(--eos-on-surface-subtle);
   --fc-text-3: rgba(238, 238, 242, 0.28);
   --fc-text-4: rgba(238, 238, 242, 0.14);
 
   --fc-shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 24px 80px -48px rgba(0, 0, 0, 0.9);
 
+  /* ── Motion (kept raw — not colour tokens) ── */
   --fc-ease-kinetic: cubic-bezier(0.16, 1, 0.3, 1);
   --fc-motion-micro: 150ms;
   --fc-motion-ui: 220ms;

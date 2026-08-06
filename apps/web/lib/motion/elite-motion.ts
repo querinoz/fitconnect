@@ -1,5 +1,5 @@
 import { EOS_MOTION } from "@/lib/design-system/tokens";
-import type { Transition } from "framer-motion";
+import type { Transition } from "motion/react";
 
 export type EliteMotionPreset = {
   initial: Record<string, number | string>;

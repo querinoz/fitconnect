@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Quote, Star } from "lucide-react";
 import { useLocale } from "@/lib/i18n-provider";
 import { TESTIMONIALS } from "@/lib/data";

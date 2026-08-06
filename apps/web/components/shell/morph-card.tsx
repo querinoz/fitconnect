@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import type { HTMLMotionProps } from "framer-motion";
+import { motion } from "motion/react";
+import type { HTMLMotionProps } from "motion/react";
 import type { ReactNode } from "react";
 import { eliteMorph } from "@/lib/motion/elite-motion";
 

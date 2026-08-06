@@ -45,54 +45,48 @@ fitconnect/
 
 ---
 
-## 3. Design System — Identidade Voltline
+## 3. Design System — Elite OS (canonical)
 
-### Paleta de Cores (manter sempre)
+> **ADR-001:** `--eos-*` is the single source of truth. Voltline soul preserved via `--eos-voltline` / `--eos-connect`.
 
-```css
-/* Primárias */
---volt: #C8FF00;          /* verde elétrico — cor principal */
---volt-dim: #A3D400;      /* volt escuro */
---lime: #39FF14;          /* lime accent */
---ink: #0A0A0A;           /* preto profundo */
---ink-800: #141414;
---ink-700: #1C1C1C;
---ink-600: #242424;
---ink-500: #3A3A3A;
---ink-400: #5A5A5A;
+### Paleta (não substituir hues)
 
-/* Secundárias */
---glass: rgba(255,255,255,0.06);
---glass-border: rgba(255,255,255,0.10);
---glass-hover: rgba(255,255,255,0.10);
+| Token | Valor | Uso |
+|-------|-------|-----|
+| `--eos-floor` | `#070B14` | Fundo obsidian |
+| `--eos-voltline` | `#C8FF00` | CTA, athlete, picos |
+| `--eos-connect` | `#00DDB4` | Telemetria, confiança |
+| `--eos-telemetry` | `#3CD7FF` | Dados live |
+| `--eos-iris` | `#6C63FF` | Focus secundário |
+| `--eos-performance` | `#00E090` | Sucesso |
+| `--eos-recovery` | `#FFB020` | Amber |
+| `--eos-alert` | `#FF3A5C` | Alerta |
 
-/* Roles */
---athlete-primary: var(--volt);     /* volt para athlete */
---coach-primary: #39FF14;          /* lime para coach */
+### Ficheiros
 
-```
+- `apps/web/app/elite-os.css` — CSS vars canónicas
+- `packages/design-tokens/` — `COLOR_TOKENS` (web + mobile)
+- `apps/web/lib/design-system/tokens.ts` — `EOS_COLORS` (deriva de COLOR_TOKENS)
+- `voltline.css` — **deprecated aliases** only
+- `components/elite-os/` — BentoCard, EliteAppShell, decorators
+- `docs/DESIGN_SYSTEM.md` — documentação completa
 
-### Tokens existentes
+### Tipografia
 
-- `voltline.css` — tokens base
-- `ui-glass/*` — componentes glass morphism
-- `globals.css` — safe-area, fc-section-x, reduced motion, aurora/mesh
-- `appearance-provider` — tema/contrast provider
+- **Syne** — display / headlines
+- **Plus Jakarta Sans** — body
+- **JetBrains Mono** — métricas, labels SYS.*
 
-### Tipografia atual
+### Regras
 
-- Display: a definir (ver AGENT_PROMPT.md para upgrade)
-- Body: sistema atual
-- `hero-title`: letter-spacing: -0.04em; line-height: 0.95
+- Zero hex hardcoded em componentes novos — tokens only
+- Dark-first · `prefers-reduced-motion` + `data-motion="reduced"`
+- i18n: 6 locales via `apps/web/lib/i18n/`
 
-### Filosofia visual
+### Legacy (migrar gradualmente)
 
-- Glass morphism premium
-- Aurora / mesh gradient backgrounds
-- Dark-first (fundo #0A0A0A)
-- Volt (#C8FF00) como accent dominante
-- Roles visuais: athlete = volt, coach = lime
-- Cinematográfico, imersivo, sem generic AI aesthetics
+- `ui-glass/` — ~47 imports, não apagar até migração completa
+- `--volt-*` / `--ink-*` — aliases em `voltline.css`
 
 ---
 

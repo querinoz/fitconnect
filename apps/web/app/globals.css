@@ -2693,3 +2693,37 @@ html[data-motion="reduced"] .landing-editorial .hero-kenburns {
 html[data-motion="reduced"] .landing-v2-marquee {
   animation: none;
 }
+
+/* ── PWA: Window Controls Overlay (Windows / Edge standalone) ── */
+@media (display-mode: standalone) {
+  .pwa-titlebar {
+    position: fixed;
+    top: 0;
+    left: env(titlebar-area-x, 0);
+    width: env(titlebar-area-width, 100%);
+    height: env(titlebar-area-height, 0);
+    -webkit-app-region: drag;
+    app-region: drag;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    padding-inline: max(1rem, env(titlebar-area-x, 0));
+    pointer-events: none;
+  }
+
+  .pwa-titlebar__brand {
+    pointer-events: none;
+    font-family: var(--font-display, ui-sans-serif);
+    font-weight: 700;
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--eos-on-surface);
+    opacity: 0.85;
+  }
+
+  .pwa-titlebar ~ .elite-app-shell,
+  .pwa-titlebar ~ main {
+    padding-top: max(0px, env(titlebar-area-height, 0));
+  }
+}

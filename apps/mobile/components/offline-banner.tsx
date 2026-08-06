@@ -1,6 +1,8 @@
 import { tokens } from "@/lib/tokens";
 import { StyleSheet, Text, View } from "react-native";
 
+const recoveryColor = tokens.colors.recovery[500];
+
 export function OfflineBanner() {
   return (
     <View style={styles.banner} accessibilityRole="text">
@@ -11,14 +13,14 @@ export function OfflineBanner() {
 
 const styles = StyleSheet.create({
   banner: {
-    backgroundColor: "rgba(250,204,21,0.15)",
+    backgroundColor: `${recoveryColor}26`, // 15% opacity
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(250,204,21,0.35)",
+    borderBottomColor: `${recoveryColor}59`, // 35% opacity
     paddingVertical: 8,
     paddingHorizontal: 16
   },
   text: {
-    color: "#fde68a",
+    color: recoveryColor,
     fontSize: 12,
     fontWeight: "600",
     textAlign: "center"

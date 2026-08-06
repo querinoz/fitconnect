@@ -10,7 +10,7 @@ const nextConfig = {
     optimizeCss: true,
     optimizePackageImports: [
       "lucide-react",
-      "framer-motion",
+      "motion",
       "recharts",
       "@radix-ui/react-tabs"
     ]
@@ -52,11 +52,18 @@ const nextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "ik.imagekit.io" },
       { protocol: "https", hostname: "api.dicebear.com" },
       { protocol: "https", hostname: "i.pravatar.cc" },
       { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "fastly.picsum.photos" }
-    ]
+    ],
+    ...(process.env.NEXT_PUBLIC_IMAGEKIT_URL
+      ? {
+          loader: "custom",
+          loaderFile: "./lib/media/imagekit-loader.ts"
+        }
+      : {})
   },
 };
 

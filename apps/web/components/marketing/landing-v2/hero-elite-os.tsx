@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { Activity, ArrowRight, Play, Radio, ShieldCheck } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, registerGsapPlugins } from "@/lib/motion/gsap-register";
+import { gsap, registerGsapPlugins, registerGsapPremium } from "@/lib/motion/gsap-register";
+import type { GsapPremiumPlugins } from "@/lib/motion/gsap-register";
 import { shouldReduceMotion } from "@/lib/motion/should-reduce-motion";
 import { useLocale } from "@/lib/i18n-provider";
+import { useLandingGate } from "@/components/landing/landing-gate-context";
 import { CornerTicks, CrosshairBg, LabelCaps } from "@/components/elite-os";
 
 const proofStats = [
@@ -25,7 +27,20 @@ export function HeroEliteOs() {
   const { hero } = useLocale();
   const h = hero.immersive;
   const rootRef = useRef<HTMLElement>(null);
+  const { gateDone } = useLandingGate();
 
+  const plugins = useRef<GsapPremiumPlugins | null>(null);
+  const [pluginsReady, setPluginsReady] = useState(false);
+
+  useEffect(() => {
+    if (plugins.current) return;
+    registerGsapPremium()
+      .then((p) => { plugins.current = p; setPluginsReady(true); })
+      .catch(() => {});
+  }, []);
+
+  // Block-level fade+rise for all hero elements except the headline.
+  // The headline is held at opacity:0 until SplitText char stagger fires.
   useGSAP(
     () => {
       registerGsapPlugins();
@@ -33,8 +48,12 @@ export function HeroEliteOs() {
       if (shouldReduceMotion()) {
         gsap.set(".hero-eos-reveal", { opacity: 1, y: 0 });
         gsap.set(".hero-eos-meter", { scaleX: 1 });
+        gsap.set(".hero-eos-headline", { opacity: 1 });
         return;
       }
+
+      // Hold headline invisible — SplitText takes over.
+      gsap.set(".hero-eos-headline", { opacity: 0 });
 
       gsap.from(".hero-eos-reveal", {
         y: 32,
@@ -64,6 +83,40 @@ export function HeroEliteOs() {
       });
     },
     { scope: rootRef }
+  );
+
+  // Clip-path character stagger — fires after gate dissolves + premium plugins load.
+  useGSAP(
+    () => {
+      if (!gateDone || !pluginsReady || !plugins.current) return;
+      if (shouldReduceMotion()) {
+        gsap.set(".hero-eos-headline", { opacity: 1 });
+        return;
+      }
+
+      const { SplitText } = plugins.current;
+      const h1 = rootRef.current?.querySelector<HTMLElement>(".hero-eos-headline");
+      if (!h1) return;
+
+      // Unhide the element before splitting.
+      gsap.set(h1, { opacity: 1 });
+
+      const split = new SplitText(h1, {
+        type: "chars,words",
+        charsClass: "gsap-char",
+        wordsClass: "gsap-word"
+      });
+
+      gsap.from(split.chars, {
+        clipPath: "inset(0 110% 0 0)",
+        y: 10,
+        duration: 0.55,
+        stagger: { amount: 0.55, from: "start" },
+        ease: "power3.out",
+        onComplete: () => split.revert()
+      });
+    },
+    { scope: rootRef, dependencies: [gateDone, pluginsReady] }
   );
 
   return (
@@ -128,7 +181,7 @@ export function HeroEliteOs() {
             {h.statusLabel} <span className="text-eos-voltline">{h.statusValue}</span>
           </div>
 
-          <h1 className="max-w-[9ch] font-display text-[clamp(3rem,13vw,7.2rem)] font-extrabold uppercase leading-[0.82] tracking-tight text-eos-on-surface">
+          <h1 className="hero-eos-headline max-w-[9ch] font-display text-[clamp(3rem,13vw,7.2rem)] font-extrabold uppercase leading-[0.82] tracking-tight text-eos-on-surface">
             <span className="block">Train on</span>
             <span className="block">live data.</span>
           </h1>

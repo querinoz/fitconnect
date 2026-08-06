@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { BadgeCheck, MapPin, Star } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "motion/react";
 import { TRAINERS } from "@/lib/data";
 import { formatPrice } from "@/lib/utils";
 import { useLocale } from "@/lib/i18n-provider";

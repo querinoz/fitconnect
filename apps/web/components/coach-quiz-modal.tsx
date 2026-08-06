@@ -1,7 +1,7 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { X } from "lucide-react";
 import { CoachQuizFlow } from "@/components/coach-quiz";
 import { useQuizModalStore } from "@/lib/quiz-modal-store";

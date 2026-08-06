@@ -1,22 +1,25 @@
 /**
  * FitConnect Elite OS — TypeScript design tokens (Stitch reference).
- * Single source for programmatic access; CSS vars live in elite-os.css.
+ * Colour values derive from @fitconnect/design-tokens (single source of truth).
+ * CSS vars live in elite-os.css — keep in sync via tokens-sync.test.ts.
  */
 
+import { COLOR_TOKENS } from "@fitconnect/design-tokens";
+
 export const EOS_COLORS = {
-  floor: "#070B14",
-  carbon: "#111827",
-  elevated: "#151B2D",
-  surface: "#13121B",
-  iris: "#6C63FF",
-  irisSoft: "#C4C0FF",
-  voltline: "#C8FF00",
-  telemetry: "#3CD7FF",
-  performance: "#00E090",
-  recovery: "#FFB020",
-  alert: "#FF3A5C",
-  onSurface: "#E4E1EE",
-  onSurfaceMuted: "#C7C4D8",
+  floor: COLOR_TOKENS.floor,
+  carbon: COLOR_TOKENS.carbon,
+  elevated: COLOR_TOKENS.elevated,
+  surface: COLOR_TOKENS.surface,
+  iris: COLOR_TOKENS.iris,
+  irisSoft: COLOR_TOKENS.irisSoft,
+  voltline: COLOR_TOKENS.voltline,
+  telemetry: COLOR_TOKENS.telemetry,
+  performance: COLOR_TOKENS.performance,
+  recovery: COLOR_TOKENS.recovery,
+  alert: COLOR_TOKENS.alert,
+  onSurface: COLOR_TOKENS.onSurface,
+  onSurfaceMuted: COLOR_TOKENS.onSurfaceMuted,
   glassBg: "rgba(255,255,255,0.06)",
   glassBorder: "rgba(255,255,255,0.08)"
 } as const;

@@ -94,7 +94,8 @@
   --eos-alert: #ff3a5c;
 
   /* ── Connect (secondary trust / links) ── */
-  --connect-500: #00ddb4;
+  --eos-connect: #00ddb4;
+  --connect-500: var(--eos-connect); /* legacy alias */
   --connect-dim: rgba(0, 221, 180, 0.1);
   --connect-glow: rgba(0, 221, 180, 0.06);
 

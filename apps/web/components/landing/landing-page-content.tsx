@@ -11,6 +11,7 @@ import { MapHeroSection } from "@/components/marketing/landing-v2/map-hero-secti
 import { SportsHub } from "@/components/marketing/landing-v2/sports-hub";
 import { SocialProofSection } from "@/components/marketing/landing-v2/social-proof-section";
 import { FeatureManifesto } from "@/components/landing/feature-manifesto";
+import { CinematicBreak } from "@/components/landing/cinematic-break";
 import { FinalCta } from "@/components/landing/final-cta";
 
 const AppDemoSection = dynamic(
@@ -46,12 +47,13 @@ function Defer({
 /** Elite OS landing — landing-v2 sections wired to production home. */
 export function LandingPageContent() {
   return (
-    <LandingShellV2>
+    <LandingShellV2 withBootGate>
       <HeroEliteOs />
       <TrustStripMarquee />
       <Defer minHeight={720}>
         <AppDemoSection />
       </Defer>
+      <CinematicBreak lineOne="Your body" lineTwo="knows first." />
       <ScrollStory />
       <div id="manifesto">
         <FeatureManifesto />

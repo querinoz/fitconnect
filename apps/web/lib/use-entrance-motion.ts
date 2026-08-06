@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "motion/react";
 
 /** Standard FitConnect motion timings (seconds). */
 export const MOTION = {

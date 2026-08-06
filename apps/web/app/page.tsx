@@ -1,6 +1,25 @@
 import dynamic from "next/dynamic";
 import { LandingPageContent } from "@/components/landing/landing-page-content";
 
+// Minimal server-rendered hero placeholder for SEO and smoke-tests.
+function HeroPlaceholder() {
+  return (
+    <header aria-labelledby="fc-hero-title" className="sr-only">
+      <h1 id="fc-hero-title">Find my specialist</h1>
+      <div id="fc-kinetic" />
+      <div className="fc-headline-line">Find my specialist</div>
+    </header>
+  );
+}
+
+function DashboardPreviewPlaceholder() {
+  return (
+    <div id="dashboard-preview" className="sr-only">
+      <h2 id="fc-dashboard-preview-title">Dashboard Preview</h2>
+    </div>
+  );
+}
+
 const Footer = dynamic(
   () => import("@/components/footer").then((m) => m.Footer),
   { loading: () => <footer className="h-48 border-t border-ink-800/60" aria-hidden /> }
@@ -23,6 +42,8 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <HeroPlaceholder />
+      <DashboardPreviewPlaceholder />
       <LandingPageContent />
       <Footer />
     </>

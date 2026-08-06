@@ -4,7 +4,7 @@ import {
   AnimatePresence,
   motion,
   useReducedMotion
-} from "framer-motion";
+} from "motion/react";
 import {
   Activity,
   Home,
@@ -52,10 +52,10 @@ export function MobileAppPreview({
   );
 
   return (
-    <div className="relative flex min-h-0 w-full max-w-full flex-1 flex-col overflow-hidden bg-[#070B14] text-ink-100">
+    <div className="relative flex min-h-0 w-full max-w-full flex-1 flex-col overflow-hidden bg-eos-floor text-ink-100">
       <div
         aria-hidden
-        className="pointer-events-none absolute -left-[10%] top-[-10%] h-[50vw] w-[50vw] rounded-full bg-[#c8ff00]/5 blur-[120px]"
+        className="pointer-events-none absolute -left-[10%] top-[-10%] h-[50vw] w-[50vw] rounded-full bg-eos-voltline/5 blur-[120px]"
       />
       <div className="relative shrink-0">
         <StitchNativeHeader initials={isCoach ? "CD" : "PA"} />
@@ -118,7 +118,7 @@ export function MobileAppPreview({
 
       <nav
         aria-label={m.nav.ariaLabel}
-        className="mx-auto mb-2 mt-auto w-[calc(100%-3rem)] max-w-md shrink-0 rounded-full border border-white/10 bg-[#1f1f28]/80 p-2 shadow-[0_20px_40px_rgba(0,0,0,0.5)] backdrop-blur-2xl safe-area-pb"
+        className="mx-auto mb-2 mt-auto w-[calc(100%-3rem)] max-w-md shrink-0 rounded-full border border-white/10 bg-eos-surface-container/80 p-2 shadow-[0_20px_40px_rgba(0,0,0,0.5)] backdrop-blur-2xl safe-area-pb"
       >
         <ul className="flex items-center justify-around">
           {nav.map((item) => {
@@ -133,8 +133,8 @@ export function MobileAppPreview({
                   className={cn(
                     "grid h-12 w-12 place-items-center rounded-full transition-all",
                     active
-                      ? "bg-[#c0f500] text-[#161f00] shadow-[0_0_15px_rgba(200,255,0,0.4)]"
-                      : "text-ink-400 hover:bg-white/5 hover:text-[#c0f500]"
+                      ? "bg-volt-400 text-eos-floor shadow-[0_0_15px_var(--eos-voltline-glow)]"
+                      : "text-ink-400 hover:bg-white/5 hover:text-volt-400"
                   )}
                 >
                   <Icon className="h-5 w-5" aria-hidden />

@@ -1,7 +1,7 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";

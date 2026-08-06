@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useRef } from "react";
 import { useLocale } from "@/lib/i18n-provider";
 import { useGsapReveal } from "@/hooks/use-gsap-reveal";
+import { useSplitTextReveal } from "@/hooks/use-split-text-reveal";
+import { useLandingGate } from "@/components/landing/landing-gate-context";
 
 const BRAND_ICONS = [
   { src: "/brands/strava.svg", alt: "Strava" },
@@ -15,7 +17,18 @@ const BRAND_ICONS = [
 export function FeatureManifesto() {
   const m = useLocale().landingEditorial.manifesto;
   const ref = useRef<HTMLElement>(null);
+  const { gateDone } = useLandingGate();
+
+  // Block-level fade+rise on scroll
   useGsapReveal(ref, { selector: "[data-block]", y: 56, stagger: 0.15 });
+
+  // Per-word stagger on headlines — runs after block reveal
+  useSplitTextReveal(ref, {
+    selector: "[data-split]",
+    stagger: 0.04,
+    start: "top 80%",
+    ready: gateDone
+  });
 
   const blocks = [
     { ...m.block1, hasMetric: true as const },
@@ -36,7 +49,10 @@ export function FeatureManifesto() {
               <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-volt-500">
                 {block.label}
               </p>
-              <h3 className="mt-4 font-display text-[clamp(1.75rem,4vw,3rem)] font-bold leading-tight tracking-[-0.03em] text-ink-50">
+              <h3
+                data-split
+                className="mt-4 font-display text-[clamp(1.75rem,4vw,3rem)] font-bold leading-tight tracking-[-0.03em] text-ink-50"
+              >
                 {block.title}
               </h3>
             </div>

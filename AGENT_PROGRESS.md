@@ -1,20 +1,23 @@
 # FitConnect Agent Progress
 
-> Last updated: 2026-05-19
+> Last updated: 2026-08-06
 
 | Fase | Status | Notas |
 |------|--------|-------|
 | 1 - Monorepo | ✅ | pnpm + `apps/web` + packages + Supabase SQL + tRPC |
-| 2 - Landing | ✅ | LazyInView sections, server hero, perf **~90** mobile (was ~68). a11y 90 |
+| 2 - Landing | ✅ | Elite OS landing v2 · perf **84–90** mobile · a11y 90 |
 | 3 - Athlete Dashboard | ✅ | Readiness, HRV chart, booking, live sync, sessions, profile |
 | 4 - Coach Dashboard | ✅ | Plan builder, earnings, Stripe Connect mock |
 | 5 - Discover/Programs/Community | ✅ | Filters, program detail + enroll, community feed + realtime posts |
 | 6 - Auth, Onboarding & Payments | ✅ | Supabase-ready auth, 5-step onboarding, Stripe demo APIs, admin verification |
 | 7 - Mobile App (Expo) | ✅ | Athlete/coach tabs, recovery ring, quiz, video room UI, offline cache, push stub |
 | 8 - Realtime & Admin | ✅ | Health API, admin KPIs, toasts, booking realtime, error boundaries |
-| 9 - Tests & QA | ✅ | 133 unit tests, 15 E2E (Phase 9 + @voltline 4/4), ~84% lib coverage |
-| 10 - Deployment & CI/CD | ✅ | Live: https://fitconnect-phi.vercel.app · monorepo Root Directory apps/web |
+| 9 - Tests & QA | ✅ | 221+ unit tests, E2E + visual regression baselines |
+| 10 - Deployment & CI/CD | ✅ | Live: https://fitconnect-phi.vercel.app · Vercel monorepo |
 | 11 - UI/UX Audit | 🔄 | CRITICAL/HIGH fixes applied; see `AUDIT_FINDINGS.md` |
+| **12 - Voltline OS v2 foundation** | ✅ | Token ADR, EOS unification, PWA/WCO, ImageKit scaffold, CI gates — see `docs/VOLTLINE_OS_V2.md` |
+| 13 - Voltline cinematic landing | ⏳ | 9-act GSAP scroll · WebGL hero · Phase 2 |
+| 14 - Media pipeline | ⏳ | ImageKit migration + Higgsfield art |
 
 ## Lighthouse mobile (production, `/`)
 
@@ -109,12 +112,15 @@
 ```bash
 pnpm dev          # http://localhost:3001
 pnpm dev:mobile   # Expo dev server
-node scripts/lighthouse-mobile.mjs http://127.0.0.1:3001  # prod server required
+pnpm codemod:tokens              # audit hex / legacy classes
+pnpm lighthouse:mobile http://127.0.0.1:3001
 pnpm test && pnpm build
-pnpm test:e2e -- --project=mobile-chrome tests/e2e/phase9-*.spec.ts
+pnpm test:e2e -- --project=mobile-chrome tests/e2e/visual-regression.spec.ts
 pnpm test:e2e:voltline
 pnpm test:coverage
 cd apps/mobile && pnpm typecheck
 ```
+
+See also: `docs/VOLTLINE_OS_V2.md`
 
 Demo: **Athlete / Athlete** → `/dashboard` · **Coach / Coach** → `/coach/dashboard`

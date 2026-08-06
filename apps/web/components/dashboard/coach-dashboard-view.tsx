@@ -25,10 +25,11 @@ import {
   XAxis,
   YAxis
 } from "recharts";
+import { rechartsTheme } from "@/lib/charts/recharts-theme";
 
 const tooltipStyle = {
-  background: "#0f172a",
-  border: "1px solid #1e293b",
+  background: rechartsTheme.tooltipBg,
+  border: `1px solid ${rechartsTheme.tooltipBorder}`,
   borderRadius: "12px"
 };
 
@@ -108,11 +109,11 @@ export function CoachDashboardView({ wrapShell = true }: { wrapShell?: boolean }
           <div className="h-48 sm:h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={ctx.revenueWeekly}>
-                <CartesianGrid stroke="#1e293b" vertical={false} />
-                <XAxis dataKey="d" stroke="#64748b" fontSize={12} />
-                <YAxis stroke="#64748b" fontSize={12} />
+                <CartesianGrid stroke={rechartsTheme.gridBorder} vertical={false} />
+                <XAxis dataKey="d" stroke={rechartsTheme.axis} fontSize={12} />
+                <YAxis stroke={rechartsTheme.axis} fontSize={12} />
                 <Tooltip contentStyle={tooltipStyle} />
-                <Bar dataKey="rev" radius={[8, 8, 0, 0]} fill="#a855f7" />
+                <Bar dataKey="rev" radius={[8, 8, 0, 0]} fill={rechartsTheme.revenue} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -123,18 +124,18 @@ export function CoachDashboardView({ wrapShell = true }: { wrapShell?: boolean }
               <AreaChart data={ctx.retentionTrend}>
                 <defs>
                   <linearGradient id="coachRet" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#00ddb4" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#00ddb4" stopOpacity={0.05} />
+                    <stop offset="5%" stopColor={rechartsTheme.retention} stopOpacity={0.8} />
+                    <stop offset="95%" stopColor={rechartsTheme.retention} stopOpacity={0.05} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="#1e293b" vertical={false} />
-                <XAxis dataKey="m" stroke="#64748b" fontSize={12} />
-                <YAxis stroke="#64748b" domain={[85, 100]} fontSize={12} />
+                <CartesianGrid stroke={rechartsTheme.gridBorder} vertical={false} />
+                <XAxis dataKey="m" stroke={rechartsTheme.axis} fontSize={12} />
+                <YAxis stroke={rechartsTheme.axis} domain={[85, 100]} fontSize={12} />
                 <Tooltip contentStyle={tooltipStyle} />
                 <Area
                   type="monotone"
                   dataKey="rate"
-                  stroke="#00ddb4"
+                  stroke={rechartsTheme.retention}
                   fill="url(#coachRet)"
                   strokeWidth={2}
                 />

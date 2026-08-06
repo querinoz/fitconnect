@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis
 } from "recharts";
+import { rechartsTheme } from "@/lib/charts/recharts-theme";
 import {
   COACH_TAKE_HOME_RATE,
   formatEur,
@@ -28,8 +29,8 @@ import { CreditCard, Download, TrendingUp, Wallet } from "lucide-react";
 import { useState } from "react";
 
 const tooltipStyle = {
-  background: "#0f172a",
-  border: "1px solid #1e293b",
+  background: rechartsTheme.tooltipBg,
+  border: `1px solid ${rechartsTheme.tooltipBorder}`,
   borderRadius: "12px"
 };
 
@@ -83,14 +84,14 @@ export function CoachEarningsDashboard({ coachId }: { coachId: string }) {
         <div className="h-56 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
-              <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" />
-              <XAxis dataKey="month" tick={{ fill: "#94a3b8", fontSize: 11 }} />
-              <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} width={40} />
+              <CartesianGrid stroke={rechartsTheme.gridBorder} strokeDasharray="3 3" />
+              <XAxis dataKey="month" tick={{ fill: rechartsTheme.axisTick, fontSize: 11 }} />
+              <YAxis tick={{ fill: rechartsTheme.axisTick, fontSize: 11 }} width={40} />
               <Tooltip
                 contentStyle={tooltipStyle}
                 formatter={(v: number) => [`€${v.toFixed(0)}`, "Net"]}
               />
-              <Bar dataKey="net" fill="#00ddb4" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="net" fill={rechartsTheme.earnings} radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { BrandLockup } from "@/components/brand/brand-lockup";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { cn } from "@/lib/utils";

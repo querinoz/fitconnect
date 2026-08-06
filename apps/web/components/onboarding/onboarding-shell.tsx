@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "motion/react";
 import { ArrowLeft, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EliteAuthPanel } from "@/components/auth/elite-auth-panel";

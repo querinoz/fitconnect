@@ -40,8 +40,8 @@ export function ProfilePowerRing({
           />
           <defs>
             <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#c8ff00" />
-              <stop offset="100%" stopColor="#00ddb4" />
+              <stop offset="0%" style={{ stopColor: "var(--eos-voltline)" }} />
+              <stop offset="100%" style={{ stopColor: "var(--connect-500)" }} />
             </linearGradient>
           </defs>
         </svg>

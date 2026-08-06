@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Minus, X } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useLocale, useT } from "@/lib/i18n-provider";
 import { COMPARISON } from "@/lib/data";
 

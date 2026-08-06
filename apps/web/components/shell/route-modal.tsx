@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { X } from "lucide-react";
 import { useEliteMotion } from "@/lib/motion/use-elite-motion";
 import { cn } from "@/lib/utils";

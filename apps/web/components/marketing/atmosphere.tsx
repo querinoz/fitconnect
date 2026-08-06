@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { COLOR_TOKENS } from "@fitconnect/design-tokens";
 
 type AtmosphereProps = {
   className?: string;
@@ -49,8 +50,8 @@ function Particles({
 }) {
   const palette =
     tone === "warm"
-      ? ["#ff3a5c", "#ff6480", "#00ddb4"]
-      : ["#c8ff00", "#d6ff33", "#00ddb4"];
+      ? [COLOR_TOKENS.alert, "#ff6480" /* decorative tint */, COLOR_TOKENS.connect]
+      : [COLOR_TOKENS.voltline, COLOR_TOKENS.volt300, COLOR_TOKENS.connect];
   const dots = Array.from({ length: count }, (_, i) => {
     const x = ((i * 47.13) % 100 + 100) % 100;
     const y = ((i * 31.71) % 100 + 100) % 100;
@@ -86,8 +87,8 @@ function Particles({
 function Waves({ tone }: { tone: "default" | "warm" }) {
   const stops =
     tone === "warm"
-      ? { a: "#ff3a5c", b: "#ff6480", c: "#00ddb4" }
-      : { a: "#00ddb4", b: "#c8ff00", c: "#00bfff" };
+      ? { a: COLOR_TOKENS.alert, b: "#ff6480" /* decorative tint */, c: COLOR_TOKENS.connect }
+      : { a: COLOR_TOKENS.connect, b: COLOR_TOKENS.voltline, c: COLOR_TOKENS.cyan };
   return (
     <svg
       viewBox="0 0 1440 720"

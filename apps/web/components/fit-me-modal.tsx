@@ -1,7 +1,7 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, MapPin, Sparkles, X, Zap } from "lucide-react";
 import { formatMsg, useLocale, useT } from "@/lib/i18n-provider";

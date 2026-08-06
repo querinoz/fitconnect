@@ -177,10 +177,39 @@ jobs:
           --project=mobile-chrome
           --workers=4
           tests/e2e/landing-motion.spec.ts
+          tests/e2e/visual-regression.spec.ts
           tests/e2e/smoke.spec.ts
           tests/e2e/phase9-auth.spec.ts
         env:
           CI: true
+
+  lighthouse-mobile:
+    name: Lighthouse mobile gate
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/feature/')
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @fitconnect/web start &
+        env:
+          NEXT_PUBLIC_DEMO_MODE: "true"
+      - run: npx wait-on http://localhost:3001/api/health --timeout 120000
+      - run: node scripts/lighthouse-mobile.mjs http://localhost:3001
+        env:
+          CI: "true"
+          LIGHTHOUSE_MIN_PERF: "84"
+          LIGHTHOUSE_MIN_A11Y: "90"
+          LIGHTHOUSE_MIN_BP: "95"
+          LIGHTHOUSE_MIN_SEO: "95"
 
   test-perf:
     name: k6 smoke

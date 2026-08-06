@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { LayoutDashboard, UserRound } from "lucide-react";
 import { useId, useState } from "react";
 import { cn } from "@/lib/utils";

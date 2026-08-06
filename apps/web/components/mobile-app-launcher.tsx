@@ -11,7 +11,7 @@ import {
   UsersRound
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { RoleDashboardPreview } from "@/components/dashboard/role-dashboard-preview";
 import { BentoCard } from "@/components/elite-os/bento-card";
 import { EliteButton } from "@/components/elite-os/elite-button";

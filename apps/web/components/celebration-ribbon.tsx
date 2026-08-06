@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "motion/react";
 import { Award, Flame, Sparkles, Trophy, UserPlus2 } from "lucide-react";
 import { useT } from "@/lib/i18n-provider";
 import { cn } from "@/lib/utils";

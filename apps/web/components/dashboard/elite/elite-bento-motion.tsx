@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import { eliteFadeUp } from "@/lib/motion/elite-motion";
 import { useEliteMotion } from "@/lib/motion/use-elite-motion";

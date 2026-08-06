@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, Activity, Brain, Radio, Zap } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "motion/react";
 import { useLocale } from "@/lib/i18n-provider";
 
 const ICONS = [Brain, Zap, Radio, Activity];
