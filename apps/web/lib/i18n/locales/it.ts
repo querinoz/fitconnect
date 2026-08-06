@@ -207,6 +207,19 @@ export const it = {
     openLiveDemo: "Apri demo live",
     tryMobileDemo: "Prova demo mobile"
   },
+  commandPalette: {
+    placeholder: "Cerca comandi…",
+    noResults: "Nessun risultato",
+    navigation: "Navigazione",
+    actions: "Azioni",
+    openDemo: "Apri pannello demo",
+    goDashboard: "Vai alla dashboard",
+    goSessions: "Vai alle sessioni",
+    goDiscover: "Scopri coach",
+    goSettings: "Impostazioni aspetto",
+    goRoster: "Roster atleti",
+    hint: "⌘K per aprire"
+  },
   mobileApp: {
     launcher: {
       badge: "Demo app mobile",

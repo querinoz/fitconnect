@@ -124,6 +124,7 @@ const config: Config = {
           alert: "var(--eos-alert)",
           "on-surface": "var(--eos-on-surface)",
           "on-surface-muted": "var(--eos-on-surface-muted)",
+          "on-surface-subtle": "var(--eos-on-surface-subtle)",
           outline: "var(--eos-outline)"
         }
       },

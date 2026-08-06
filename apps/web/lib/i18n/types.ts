@@ -218,6 +218,19 @@ export type Dict = {
     openLiveDemo: string;
     tryMobileDemo: string;
   };
+  commandPalette: {
+    placeholder: string;
+    noResults: string;
+    navigation: string;
+    actions: string;
+    openDemo: string;
+    goDashboard: string;
+    goSessions: string;
+    goDiscover: string;
+    goSettings: string;
+    goRoster: string;
+    hint: string;
+  };
   mobileApp: {
     launcher: {
       badge: string;

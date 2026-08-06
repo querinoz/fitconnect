@@ -208,6 +208,19 @@ export const en: Dict = {
     openLiveDemo: "Open live demo",
     tryMobileDemo: "Try mobile demo"
   },
+  commandPalette: {
+    placeholder: "Search commands…",
+    noResults: "No matches",
+    navigation: "Navigation",
+    actions: "Actions",
+    openDemo: "Open demo panel",
+    goDashboard: "Go to dashboard",
+    goSessions: "Go to sessions",
+    goDiscover: "Discover coaches",
+    goSettings: "Appearance settings",
+    goRoster: "Coach roster",
+    hint: "⌘K to open"
+  },
   mobileApp: {
     launcher: {
       badge: "Mobile app demo",

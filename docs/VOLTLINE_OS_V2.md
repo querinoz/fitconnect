@@ -1,6 +1,6 @@
 # Voltline OS v2 — Progress & Runbook
 
-> **Status:** Foundation complete · Cinematic landing & media pipeline = Phase 2+  
+> **Status:** Phases 2–4 shipped · Media pipeline = Phase 5  
 > **Production:** https://fitconnect-phi.vercel.app  
 > **Branch:** `feature/fitconnect`
 
@@ -17,6 +17,9 @@
 | ImageKit scaffold | ✅ | `lib/media/imagekit.ts` + optional custom loader |
 | CI | ✅ | Visual regression E2E + Lighthouse gate job |
 | Hero gate EOS | ✅ | `hero-gate.tsx` → `bg-eos-*` classes |
+| Cinematic landing | ✅ | 9-act narrative · coach reel pin · pull quote scrub |
+| Command palette | ✅ | ⌘K · g d / g s · role-aware nav |
+| PWA titlebar | ✅ | WCO brand strip in app shell |
 
 ## Performance targets (Voltline v2 full)
 
@@ -77,9 +80,11 @@ See mega-prompt checklist. Foundation phase closes when:
 - [x] PWA manifest + WCO CSS
 - [x] CI visual regression + Lighthouse job
 - [x] ImageKit scaffold + `.env.example`
-- [ ] Full 9-act landing (Phase 2)
+- [x] Full 9-act landing (Phase 2)
+- [x] Command palette + keyboard shortcuts (Phase 3)
 - [ ] ImageKit asset migration (Phase 5)
 - [ ] Lighthouse ≥92 / a11y 100 (Phase 2+ perf pass)
+- [ ] Mobile Skia readiness ring (Phase 4)
 
 ## Honest assessment
 

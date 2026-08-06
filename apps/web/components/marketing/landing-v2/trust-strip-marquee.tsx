@@ -72,7 +72,7 @@ export function TrustStripMarquee() {
               {BRANDS.map((name) => (
                 <span
                   key={`${copy}-${name}`}
-                  className="text-[11px] font-semibold uppercase tracking-[0.22em] text-ink-500"
+                  className="text-[11px] font-semibold uppercase tracking-[0.22em] text-eos-on-surface-subtle"
                 >
                   {name}
                 </span>

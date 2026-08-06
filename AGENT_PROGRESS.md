@@ -15,9 +15,10 @@
 | 9 - Tests & QA | ✅ | 221+ unit tests, E2E + visual regression baselines |
 | 10 - Deployment & CI/CD | ✅ | Live: https://fitconnect-phi.vercel.app · Vercel monorepo |
 | 11 - UI/UX Audit | 🔄 | CRITICAL/HIGH fixes applied; see `AUDIT_FINDINGS.md` |
-| **12 - Voltline OS v2 foundation** | ✅ | Token ADR, EOS unification, PWA/WCO, ImageKit scaffold, CI gates — see `docs/VOLTLINE_OS_V2.md` |
-| 13 - Voltline cinematic landing | ⏳ | 9-act GSAP scroll · WebGL hero · Phase 2 |
-| 14 - Media pipeline | ⏳ | ImageKit migration + Higgsfield art |
+| **12 - Voltline OS v2 foundation** | ✅ | Token ADR, EOS unification, PWA/WCO, ImageKit scaffold, CI gates |
+| **13 - Voltline cinematic landing** | ✅ | 9-act narrative, GSAP reel/quotes/breaks, hero perf guard |
+| **14 - Web app depth** | ✅ | Command palette ⌘K, g d / g s shortcuts, PWA titlebar |
+| 15 - Media pipeline | ⏳ | ImageKit migration + Higgsfield art |
 
 ## Lighthouse mobile (production, `/`)
 

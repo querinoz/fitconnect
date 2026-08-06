@@ -28,6 +28,18 @@ export function HeroEliteOs() {
   const h = hero.immersive;
   const rootRef = useRef<HTMLElement>(null);
   const { gateDone } = useLandingGate();
+  const [showVideo, setShowVideo] = useState(false);
+
+  useEffect(() => {
+    if (shouldReduceMotion()) return;
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
+      ?.saveData;
+    const lowMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory;
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
+    if (!saveData && !(lowMemory !== undefined && lowMemory < 4) && !mobile) {
+      setShowVideo(true);
+    }
+  }, []);
 
   const plugins = useRef<GsapPremiumPlugins | null>(null);
   const [pluginsReady, setPluginsReady] = useState(false);
@@ -128,17 +140,24 @@ export function HeroEliteOs() {
       <CrosshairBg className="pointer-events-none absolute inset-0" showGlow />
 
       <div className="absolute inset-0">
-        <video
-          aria-hidden="true"
-          className="nivis-hero-kenburns h-full w-full object-cover opacity-50 saturate-[0.72]"
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster="/brand/fitconnect-logo-1024.png"
-        >
-          <source src="/hero-training.mp4" type="video/mp4" />
-        </video>
+        {showVideo ? (
+          <video
+            aria-hidden="true"
+            className="nivis-hero-kenburns h-full w-full object-cover opacity-50 saturate-[0.72]"
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="/brand/fitconnect-logo-1024.png"
+          >
+            <source src="/hero-training.mp4" type="video/mp4" />
+          </video>
+        ) : (
+          <div
+            aria-hidden
+            className="h-full w-full bg-[radial-gradient(circle_at_30%_40%,rgba(200,255,0,0.08),transparent_40%),radial-gradient(circle_at_70%_60%,rgba(60,215,255,0.06),transparent_35%),linear-gradient(180deg,var(--eos-floor),#0b0f19)]"
+          />
+        )}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_38%,rgba(200,255,0,0.16),transparent_28%),linear-gradient(90deg,rgba(7,11,20,0.98)_0%,rgba(7,11,20,0.84)_36%,rgba(7,11,20,0.46)_64%,rgba(7,11,20,0.92)_100%)]" />
         <div className="absolute inset-x-0 bottom-0 h-52 bg-gradient-to-t from-[var(--eos-floor)] to-transparent" />
       </div>
@@ -167,7 +186,7 @@ export function HeroEliteOs() {
           </nav>
           <Link
             href="/signup"
-            className="hidden min-h-11 items-center rounded-full bg-eos-voltline px-6 py-2.5 eos-label-caps text-[#070b14] transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eos-voltline active:translate-y-px md:inline-flex"
+            className="hidden min-h-11 items-center rounded-full bg-eos-voltline px-6 py-2.5 eos-label-caps text-eos-floor transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eos-voltline active:translate-y-px md:inline-flex"
           >
             INITIALIZE
           </Link>
@@ -193,7 +212,7 @@ export function HeroEliteOs() {
           <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-center">
             <Link
               href="/signup"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-eos-voltline px-8 py-4 eos-label-caps text-[#070b14] transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eos-voltline active:translate-y-px"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-eos-voltline px-8 py-4 eos-label-caps text-eos-floor transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eos-voltline active:translate-y-px"
             >
               Find my coach
               <ArrowRight className="h-4 w-4" aria-hidden />
