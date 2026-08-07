@@ -14,7 +14,9 @@
       "steps": "Load / in pt or es locale → hero card shows English only",
       "expected": "All hero strings from i18n (6 locales)",
       "actual": "Threshold recalibration, Diego..., proofStats, telemetry labels hardcoded",
-      "attempts": 0
+      "attempts": 1,
+      "fixedIn": "cycle-01",
+      "fixNote": "landingEditorial.heroElite i18n + hero-elite-os.tsx wired"
     },
     {
       "id": "QA-002",
@@ -98,7 +100,7 @@
     {
       "id": "QA-008",
       "severity": "P1",
-      "status": "open",
+      "status": "fixed",
       "platform": "web",
       "area": "i18n",
       "title": "sectionBreak keys untranslated in non-EN locales",
@@ -107,7 +109,9 @@
       "steps": "Switch locale to pt → cinematic breaks show CONNECT/PERFORM in English",
       "expected": "Localized section break copy",
       "actual": "sectionBreak values identical to English in pt/es/fr/de/it",
-      "attempts": 0
+      "attempts": 1,
+      "fixedIn": "cycle-01",
+      "fixNote": "sectionBreak translated in pt/es/fr/de/it"
     },
     {
       "id": "QA-009",
