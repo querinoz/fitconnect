@@ -64,6 +64,69 @@ pub fn training_stress_score(duration_s: u32, np: f64, ftp: f64) -> Option<f64> 
     Some((f64::from(duration_s) * np * if_) / (ftp * 3600.0) * 100.0)
 }
 
+/// The fixed duration ladder for power curves (spec §1.4), in seconds:
+/// 1s, 5s, 15s, 30s, 1m, 2m, 5m, 10m, 20m, 30m, 1h, 2h, 3h, 4h, 5h.
+/// Durations longer than the activity are clipped (simply absent from the
+/// result), per spec.
+const POWER_CURVE_DURATIONS_S: [u32; 15] = [
+    1, 5, 15, 30, 60, 120, 300, 600, 1200, 1800, 3600, 7200, 10800, 14400, 18000,
+];
+
+/// One point of a power curve: the best (maximum) mean power the athlete
+/// sustained for exactly `duration_s`, anywhere in the activity.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct PowerCurvePoint {
+    pub duration_s: u32,
+    pub max_mean_w: f64,
+}
+
+/// Power curve per spec §1.4: best-effort mean power for each duration in
+/// the fixed ladder, via a sliding window over the 1 Hz resampled series.
+///
+/// Returns `None` when there is no power channel or the streams fail
+/// validation; otherwise the result contains exactly the ladder durations
+/// that fit inside the activity (possibly empty for a sub-second recording).
+///
+/// Season/all-time curves are per-duration maxima across activities and
+/// belong to the caller (server/app layer), not here — this function is
+/// deliberately per-activity only.
+pub fn power_curve(streams: &ActivityStreams) -> Option<Vec<PowerCurvePoint>> {
+    if streams.validate().is_err() {
+        return None;
+    }
+    let power = streams.power_w.as_ref()?;
+    let per_second = resample_1hz_sample_and_hold(&streams.time_s, power);
+
+    // Prefix sums make every window mean O(1): sum of samples [i, i+d) is
+    // prefix[i + d] - prefix[i]. One O(n) pass per duration instead of
+    // O(n × d) naive rescanning — a 5h ride at 1 Hz is 18 000 samples.
+    let mut prefix = Vec::with_capacity(per_second.len() + 1);
+    prefix.push(0.0_f64);
+    for value in &per_second {
+        prefix.push(prefix.last().copied().unwrap_or(0.0) + value);
+    }
+
+    let mut curve = Vec::new();
+    for &duration_s in &POWER_CURVE_DURATIONS_S {
+        let window = duration_s as usize;
+        if window > per_second.len() {
+            break; // ladder is ascending; nothing longer fits either
+        }
+        let mut best_sum = f64::NEG_INFINITY;
+        for start in 0..=(per_second.len() - window) {
+            let sum = prefix[start + window] - prefix[start];
+            if sum > best_sum {
+                best_sum = sum;
+            }
+        }
+        curve.push(PowerCurvePoint {
+            duration_s,
+            max_mean_w: best_sum / window as f64,
+        });
+    }
+    Some(curve)
+}
+
 /// Expands an irregularly-sampled series onto a 1 Hz grid from the first
 /// to the last timestamp, holding the previous value across gaps
 /// ("sample-and-hold", spec §1.1 step 1).
@@ -143,6 +206,52 @@ mod tests {
         s.power_w = Some(vec![250, 250]);
         let np = normalized_power(&s).unwrap();
         assert!((np - 250.0).abs() < 1e-9, "NP {np} should equal 250");
+    }
+
+    #[test]
+    fn power_curve_of_constant_power_is_flat() {
+        // 10 minutes at 220W: every ladder duration ≤ 600s reports 220.
+        let curve = power_curve(&constant_power(600, 220)).unwrap();
+        let durations: Vec<u32> = curve.iter().map(|p| p.duration_s).collect();
+        assert_eq!(durations, vec![1, 5, 15, 30, 60, 120, 300, 600]);
+        for point in &curve {
+            assert!(
+                (point.max_mean_w - 220.0).abs() < 1e-9,
+                "{}s point should be 220, got {}",
+                point.duration_s,
+                point.max_mean_w
+            );
+        }
+    }
+
+    #[test]
+    fn power_curve_finds_the_best_effort_not_the_first() {
+        // 60s easy (100W), 60s hard (300W): best 60s must be 300, and the
+        // 120s point is the whole-ride average 200.
+        let mut s = ActivityStreams::with_time((0..120).collect());
+        let mut watts = vec![100_u16; 60];
+        watts.extend(vec![300_u16; 60]);
+        s.power_w = Some(watts);
+
+        let curve = power_curve(&s).unwrap();
+        let best_60 = curve.iter().find(|p| p.duration_s == 60).unwrap();
+        let best_120 = curve.iter().find(|p| p.duration_s == 120).unwrap();
+        assert!((best_60.max_mean_w - 300.0).abs() < 1e-9);
+        assert!((best_120.max_mean_w - 200.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn power_curve_clips_durations_to_activity_length() {
+        // 45s activity: only the 1/5/15/30s rungs fit.
+        let curve = power_curve(&constant_power(45, 150)).unwrap();
+        let durations: Vec<u32> = curve.iter().map(|p| p.duration_s).collect();
+        assert_eq!(durations, vec![1, 5, 15, 30]);
+    }
+
+    #[test]
+    fn power_curve_is_none_without_power() {
+        let s = ActivityStreams::with_time((0..120).collect());
+        assert_eq!(power_curve(&s), None);
     }
 
     #[test]

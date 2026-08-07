@@ -1,7 +1,7 @@
 # `metrics` — power metrics (spec §1)
 
-Implements `docs/sports-metrics.md` §1.1–1.3: Normalized Power, Intensity
-Factor, Training Stress Score. The spec is normative — if the implementation
+Implements `docs/sports-metrics.md` §1.1–1.4: Normalized Power, Intensity
+Factor, Training Stress Score, and the per-activity power curve. The spec is normative — if the implementation
 ever needs to diverge, the spec changes first (ADR-006 rule). Later F1
 slices add power curves (§1.4), pace/GAP (§3), HR metrics (§2) and
 physiology (§5) alongside this file.
@@ -37,6 +37,11 @@ one place (`streams`), not re-checked at every array access.
 - The two-cursor loop in `resample_1hz_sample_and_hold` never moves
   backwards, so the resample is O(samples + seconds), not O(samples ×
   seconds) — worth knowing because activities can be 5h+ at 1 Hz.
+- The power curve uses **prefix sums**: `prefix[i]` is the sum of the
+  first `i` samples, so any window's sum is one subtraction
+  (`prefix[i+d] - prefix[i]`). That turns "best mean for every ladder
+  duration" into one cheap pass per duration. The curve is per-activity
+  only — season/all-time aggregation is the caller's job (spec §1.4).
 
 ## What NOT to worry about
 
