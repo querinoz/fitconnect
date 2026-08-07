@@ -123,17 +123,48 @@ export const de = {
       statCoaches: "+500",
       statCoachesLabel: "COACHES",
       statRating: "4.94★",
-      statRatingLabel: "RATING"
+      statRatingLabel: "BEWERTUNG"
+    },
+    heroElite: {
+      navOverview: "OS-ÜBERSICHT",
+      navTelemetry: "TELEMETRIE",
+      navManifesto: "MANIFEST",
+      navInitialize: "STARTEN",
+      headlineLine1: "Trainiere mit",
+      headlineLine2: "Live-Daten.",
+      subtitle:
+        "FitConnect verbindet verifizierte Spezial-Coaches mit Live-Readiness, Wearable-Telemetrie und Session-Feedback — jede Trainingsentscheidung hat ein Signal.",
+      ctaPrimary: "Coach finden",
+      ctaSecondary: "OS ansehen",
+      statCoaches: "12.418",
+      statCoachesLabel: "verifizierte Coaches",
+      statRating: "4,94",
+      statRatingLabel: "Athleten-Bewertung",
+      statRejected: "62%",
+      statRejectedLabel: "abgelehnte Bewerber",
+      liveSession: "Live-Session",
+      liveSessionTitle: "Schwellen-Rekalibrierung",
+      liveBadge: "Live",
+      telemetryHrv: "HRV",
+      telemetryLoad: "Load",
+      telemetrySleep: "Schlaf",
+      coachAction: "Coach-Aktion",
+      coachActionBody: "Diego strich das letzte Intervall, als HF-Drift die Baseline überschritt.",
+      readinessIndex: "READINESS_INDEX",
+      coachSignal: "COACH_SIGNAL",
+      coachSignalBadge: "ANGEPASST",
+      coachSignalValue: "4,2",
+      coachSignalUnit: "% Load-Abfall"
     },
     sectionBreak: {
-      connect: "CONNECT",
-      perform: "PERFORM",
-      train: "TRAIN",
+      connect: "VERBINDE",
+      perform: "PERFORME",
+      train: "TRAINIERE",
       smarter: "SMARTER",
-      track: "TRACK",
-      everyMove: "EVERY MOVE",
-      book: "BOOK",
-      yourCoach: "YOUR COACH"
+      track: "TRACKE",
+      everyMove: "JEDE BEWEGUNG",
+      book: "BUCHE",
+      yourCoach: "DEIN COACH"
     },
     quotes: {
       athlete: {

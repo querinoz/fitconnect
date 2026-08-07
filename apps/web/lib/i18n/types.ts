@@ -157,6 +157,36 @@ export type Dict = {
       statRating: string;
       statRatingLabel: string;
     };
+    heroElite: {
+      navOverview: string;
+      navTelemetry: string;
+      navManifesto: string;
+      navInitialize: string;
+      headlineLine1: string;
+      headlineLine2: string;
+      subtitle: string;
+      ctaPrimary: string;
+      ctaSecondary: string;
+      statCoaches: string;
+      statCoachesLabel: string;
+      statRating: string;
+      statRatingLabel: string;
+      statRejected: string;
+      statRejectedLabel: string;
+      liveSession: string;
+      liveSessionTitle: string;
+      liveBadge: string;
+      telemetryHrv: string;
+      telemetryLoad: string;
+      telemetrySleep: string;
+      coachAction: string;
+      coachActionBody: string;
+      readinessIndex: string;
+      coachSignal: string;
+      coachSignalBadge: string;
+      coachSignalValue: string;
+      coachSignalUnit: string;
+    };
     sectionBreak: {
       connect: string;
       perform: string;

@@ -123,17 +123,48 @@ export const it = {
       statCoaches: "+500",
       statCoachesLabel: "COACHES",
       statRating: "4.94★",
-      statRatingLabel: "RATING"
+      statRatingLabel: "VALUTAZIONE"
+    },
+    heroElite: {
+      navOverview: "PANORAMICA OS",
+      navTelemetry: "TELEMETRIA",
+      navManifesto: "MANIFESTO",
+      navInitialize: "AVVIA",
+      headlineLine1: "Allenati con",
+      headlineLine2: "dati live.",
+      subtitle:
+        "FitConnect collega coach specialisti verificati a readiness in tempo reale, telemetria wearable e feedback di sessione — ogni decisione di allenamento ha un segnale.",
+      ctaPrimary: "Trova coach",
+      ctaSecondary: "Guarda l'OS",
+      statCoaches: "12.418",
+      statCoachesLabel: "coach verificati",
+      statRating: "4,94",
+      statRatingLabel: "valutazione atleti",
+      statRejected: "62%",
+      statRejectedLabel: "candidati rifiutati",
+      liveSession: "Sessione live",
+      liveSessionTitle: "Ricalibrazione soglia",
+      liveBadge: "Live",
+      telemetryHrv: "HRV",
+      telemetryLoad: "Carico",
+      telemetrySleep: "Sonno",
+      coachAction: "Azione coach",
+      coachActionBody: "Diego ha tagliato l'ultimo intervallo quando il drift FC ha superato la baseline.",
+      readinessIndex: "INDICE_READINESS",
+      coachSignal: "SEGNALE_COACH",
+      coachSignalBadge: "REGOLATO",
+      coachSignalValue: "4,2",
+      coachSignalUnit: "% calo carico"
     },
     sectionBreak: {
-      connect: "CONNECT",
-      perform: "PERFORM",
-      train: "TRAIN",
-      smarter: "SMARTER",
-      track: "TRACK",
-      everyMove: "EVERY MOVE",
-      book: "BOOK",
-      yourCoach: "YOUR COACH"
+      connect: "CONNETTI",
+      perform: "PERFORMA",
+      train: "ALLENA",
+      smarter: "PIÙ SMART",
+      track: "TRACCIA",
+      everyMove: "OGNI MOVIMENTO",
+      book: "PRENOTA",
+      yourCoach: "IL TUO COACH"
     },
     quotes: {
       athlete: {
