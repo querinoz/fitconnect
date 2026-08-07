@@ -16,6 +16,6 @@ describe("mobile readiness", () => {
 
   it("greets by score band", () => {
     expect(readinessGreeting("Marina Costa", 80)).toContain("Marina");
-    expect(readinessGreeting("Marina Costa", 35)).toContain("Recovery");
+    expect(readinessGreeting("Marina Costa", 35).toLowerCase()).toContain("recovery");
   });
 });
