@@ -17,6 +17,7 @@
 
 pub mod metrics;
 pub mod streams;
+pub mod zones;
 
 /// Returns the crate version, as a trivial cross-target build probe.
 pub fn version() -> &'static str {
