@@ -1,0 +1,66 @@
+name: elite-core (Rust)
+
+on:
+  push:
+    branches: [main, master, feature/**]
+    paths: ["elite-core/**", ".github/workflows/elite-core-rust.yml"]
+  pull_request:
+    paths: ["elite-core/**", ".github/workflows/elite-core-rust.yml"]
+
+concurrency:
+  group: elite-core-rust-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
+
+defaults:
+  run:
+    working-directory: elite-core
+
+jobs:
+  fmt-clippy:
+    name: fmt · clippy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: elite-core
+      - run: cargo fmt --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+
+  test-native:
+    name: Test (native, linux host builds all four per ADR-006)
+    runs-on: ubuntu-latest
+    needs: fmt-clippy
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: elite-core
+      - run: cargo test --workspace
+
+  build-wasm:
+    name: Build (wasm32-unknown-unknown)
+    runs-on: ubuntu-latest
+    needs: fmt-clippy
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: elite-core
+      - run: cargo build -p elite-core-wasm --target wasm32-unknown-unknown
+
+  # Android ABI cross-compiles (aarch64/armv7/x86_64/i686-linux-android) need
+  # an NDK-equipped image and are deliberately not wired up yet — this is
+  # exactly the "CI needs a Rust matrix (linux host builds all four; Android
+  # ABIs via NDK docker image)" item from ADR-006's consequences. Added once
+  # android/ exists and the JNI crate has real exports to build.

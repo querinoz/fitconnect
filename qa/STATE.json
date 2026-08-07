@@ -1,59 +1,50 @@
 {
-  "operation": "ZERO-DEFEITOS",
-  "cycle": 1,
-  "phase": "1-static-audit-complete",
-  "nextPhase": "2-dynamic-testing",
-  "startedAt": "2026-08-07T12:26:00Z",
-  "lastUpdated": "2026-08-07T12:30:00Z",
-  "environment": {
-    "os": "win32",
-    "iosSimulator": "BLOCKED",
-    "iosBlockReason": "No macOS — iOS simulator unavailable on Windows",
-    "iosPlanB": "EAS Build + GitHub Actions macOS runner + Maestro (not yet configured)",
-    "androidEmulator": "NOT_STARTED",
-    "productionUrl": "https://fitconnect-phi.vercel.app",
-    "localProdPort": 3001
+  "protocol": "FitConnect v1 — Elite Core / native Android rewrite",
+  "phase": "F1",
+  "phaseGate": "Mesmo FIT → mesmo output em JNI, WASM e napi. ≥15 golden files, desvio <1% vs Golden Cheetah.",
+  "status": "IN_PROGRESS",
+  "pauseReason": null,
+  "startedAt": "2026-08-07T00:00:00Z",
+  "lastUpdated": "2026-08-07T14:05:00Z",
+  "decisionsApplied": {
+    "D1": "ADR-005 accepted. Engineering writes Kotlin/Rust, owner reviews. Kill switch documented in ADR-005, checked at F2 gate.",
+    "D2": "ADR-009 written. Supabase Postgres for v1, TimescaleDB/Neon deferred with explicit migration triggers.",
+    "D3": "OPEN — hardware not specified. Blocks F4/F5 gates only. See HUMAN-QUEUE.md.",
+    "D4": "OPEN — legal review status unknown. F8 scoped without archive-ZIP import (F8b when cleared).",
+    "D5": "Done — empty compiling wear/ module exists. Build decision revisited at F13 gate.",
+    "D6": "Claude Code + Cowork chosen by owner; this session ran in Cursor with substitutes (web search for docs, gradle/cargo/adb CLI). MCP 'verify with eyes' gap still open in HUMAN-QUEUE."
   },
-  "tooling": {
-    "typecheck": "pass",
-    "lint": "pass-with-warnings",
-    "unitTests": "236/236",
-    "build": "pass",
-    "knip": "not-installed",
-    "jscpd": "not-installed",
-    "routeCrawler": "not-built",
-    "maestro": "not-installed",
-    "axePlaywright": "partial-via-e2e",
-    "lighthouse": "available",
-    "gitleaks": "not-run"
-  },
-  "counts": {
-    "findingsOpen": { "P0": 0, "P1": 8, "P2": 14, "P3": 6 },
-    "findingsFixed": { "P0": 0, "P1": 0, "P2": 0, "P3": 0 },
-    "findingsBlocked": { "P0": 0, "P1": 3, "P2": 0, "P3": 0 }
+  "gates": {
+    "F0": "CLOSED 2026-08-07 — see qa/reports/gate-F0.md. CI-on-GitHub confirmation pending first push."
   },
   "completedSteps": [
-    "1.1-inventory-summary",
-    "1.6-typecheck-lint-test-build",
-    "1.4-hex-grep",
-    "1.5-i18n-spot-check",
-    "parity-matrix-draft"
+    "F0: ADRs 005-009, BACKLOG-V2 contract",
+    "F0: toolchains (rustup, Android SDK/NDK, JDK17) installed and env vars persisted",
+    "F0: elite-core Rust workspace (core/jni/wasm/napi) — test/clippy/fmt/wasm32 all clean",
+    "F0: android/ Gradle project — :app :wear :core-capture :design, wrapper 9.5.0, AGP9 built-in Kotlin, full build green",
+    "F0: token pipeline — tokens:kotlin generate + check (CI drift gate), EliteSurfaceTokens.kt compiles",
+    "F0: packages/elite-core-wasm wrapper (tests pass without artifact)",
+    "F0: apps/mobile frozen (README banner, out of CI graph)",
+    "F0: CI workflows elite-core-rust.yml + android.yml",
+    "F0: internal skills elite-surface / sports-metrics / elite-core-rust",
+    "F1: streams module (time-series model, validation invariants, README, 6 tests)",
+    "F1: metrics slice 1 — NP/IF/TSS per sports-metrics.md §1.1-1.3 (README, 8 tests)"
   ],
   "pendingSteps": [
-    "1.2-knip-ts-prune-depcheck",
-    "1.3-jscpd",
-    "1.7-gitleaks-audit-full",
-    "2.1-route-crawler",
-    "2.2-persona-journeys",
-    "2.5-axe-all-routes",
-    "2.7-lighthouse-gate",
-    "3.1-android-maestro",
-    "fix-loop-cycle-1"
+    "F1: fit module — FIT parser (records → ActivityStreams), serde-based, fuzz boundary",
+    "F1: metrics — power curve (§1.4), pace/GAP (§3), HR/hrTSS (§2), zones (§4)",
+    "F1: physiology — CTL/ATL/TSB, ACWR, rMSSD baseline (§5)",
+    "F1: laps (§6) + GPS filtering (§7)",
+    "F1: golden files — need ≥15 real FIT files + Golden Cheetah exports (HUMAN-QUEUE if owner has none)",
+    "F1: real bindings — UniFFI Kotlin AAR, wasm-pack artifact into packages/elite-core-wasm, napi module",
+    "F1: cross-target parity test in CI (same FIT → identical JSON on JNI/WASM/napi)",
+    "verify CI green on GitHub after push (F0 conditional item)"
   ],
-  "estimatedCyclesToZero": "4-6",
   "needsHuman": [
-    "iOS testing strategy approval (Plan B)",
-    "ImageKit account for media migration",
-    "Copy approval for i18n hero telemetry strings"
+    "D3 — hardware (phone, watch, 3 HR straps, power meter, reference watch) — before F4",
+    "D4 — legal review status for archive import (F8b)",
+    "MCP tooling for visual verification (Playwright + Android emulator/Maestro) — before F3",
+    "Real FIT files from owner's devices for the F1 golden set (public samples used otherwise)",
+    "Veto window on applicationId com.fitconnect.android (closes at first Play upload, F15)"
   ]
 }

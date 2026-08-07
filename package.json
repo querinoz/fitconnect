@@ -46,6 +46,8 @@
     "env:check": "node scripts/validate-env.mjs",
     "brand:logo": "node scripts/recolor-logo.mjs",
     "codemod:tokens": "node scripts/codemod-tokens.mjs",
+    "tokens:kotlin": "node scripts/generate-kotlin-tokens.mjs",
+    "tokens:kotlin:check": "node scripts/generate-kotlin-tokens.mjs --check",
     "lighthouse:mobile": "node scripts/lighthouse-mobile.mjs",
     "lighthouse:gate": "CI=true node scripts/lighthouse-mobile.mjs",
     "stripe:login": "stripe login",

@@ -29,10 +29,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
-      - run: pnpm typecheck
+      # apps/mobile is frozen (ADR-005) — excluded so the legacy Expo app cannot break CI
+      - run: pnpm exec turbo typecheck --filter=!@fitconnect/mobile
+      - run: pnpm tokens:kotlin:check
 
   test-unit:
-    name: Unit tests (web + mobile)
+    name: Unit tests (web)
     runs-on: ubuntu-latest
     needs: lint-typecheck
     timeout-minutes: 8
@@ -47,7 +49,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @fitconnect/web test
-      - run: pnpm --filter @fitconnect/mobile test
+      # apps/mobile is frozen (ADR-005) — its tests no longer gate CI
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-lcov

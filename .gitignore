@@ -22,3 +22,18 @@ test-results/
 # Generated PWA service worker (production build only — breaks dev if cached)
 apps/web/public/sw.js
 apps/web/public/workbox-*.js
+
+# Rust (elite-core, ADR-006) — Cargo.lock IS committed (reproducible builds
+# across JNI/wasm/napi targets), only build output is ignored.
+elite-core/target/
+**/*.rs.bk
+
+# Android (ADR-005) — standard Gradle/Android ignores, added ahead of the
+# android/ scaffold so it's never accidentally committed once it lands.
+android/.gradle/
+android/build/
+android/*/build/
+android/local.properties
+android/.cxx/
+*.keystore
+!debug.keystore
