@@ -13,6 +13,20 @@ Protocol: FitConnect v1 — Elite Core / native Android rewrite (`docs/adr/ADR-0
 
 ---
 
+## 🔴 BLOCKED — Emulator cannot run: virtualization disabled in BIOS/UEFI
+
+**Item (2026-08-07):** Owner asked to open the app in the Android emulator. The AVD was created (`fitconnect_phone`, Pixel 7, API 37 image) and the debug APK builds, but the emulator refuses to start: `x86_64 emulation currently requires hardware acceleration` — and `systeminfo` shows **"Virtualization Enabled In Firmware: No"** (CPU supports it: "VM Monitor Mode Extensions: Yes"). No hypervisor (WHPX or Google AEHD) can be installed on top of disabled firmware virtualization; there is no software workaround, and the shell is non-admin anyway.
+**Action needed (once, ~3 minutes):**
+1. Reboot → enter BIOS/UEFI (usually Del/F2 during boot).
+2. Enable **SVM Mode** (AMD) — typically under Advanced → CPU Configuration.
+3. Boot Windows, then either: enable Windows Hypervisor Platform (`OptionalFeatures.exe` → "Plataforma do Hipervisor do Windows") **or** install Google's AEHD driver (Android Studio → SDK Tools → "Android Emulator hypervisor driver").
+4. Say the word — the AVD is ready, everything else is in place (`adb`, image, APK).
+
+**Alternative that works today:** plug a physical Android phone with USB debugging on — `adb` is installed and I can install + drive the app on it immediately (this also overlaps with D3, which F4/F5 need anyway).
+**Impact:** blocks emulator-based verification only. The APK itself builds and its unit tests/lint pass.
+
+---
+
 ## 🔴 BLOCKED — D3: Hardware (physical gate F4/F5)
 
 **Item:** Not specified by owner (placeholders left blank in the F0 response).
