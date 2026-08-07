@@ -1,4 +1,8 @@
-# HANDOFF — 2026-08-07 (F0 closed, F1 open)
+# HANDOFF — 2026-08-07 (Phase 00 complete — AWAITING APPROVAL)
+
+## STOP condition
+
+**Phase 00 architecture reset is documented under `docs/phase-00/`.** No product code was changed for it. **Do not start Phase 01 until Eduardo approves** (or requests amendments). Elite Core F1 code already in progress from earlier instructions may continue only if explicitly re-confirmed; default under the Phase 00 prompt is STOP.
 
 ## Where things stand
 
