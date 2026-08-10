@@ -1,0 +1,25 @@
+# 14 — Offline banner conditional (same as 08, numbered for suite)
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_primary"
+- runFlow: _complete_onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: "athlete_home"
+    timeout: 12000
+- assertVisible:
+    id: "athlete_os"
+- runFlow:
+    when:
+      visible:
+        id: "athlete_offline_banner"
+    commands:
+      - assertVisible: "OFFLINE"

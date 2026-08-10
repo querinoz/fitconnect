@@ -1,0 +1,8 @@
+# Example — merge into android/local.properties (gitignored). NEVER commit real values.
+
+# supabase.url=https://YOUR_PROJECT.supabase.co
+# supabase.anonKey=YOUR_ANON_KEY_ONLY
+
+# Or set CI env (preferred for pipelines):
+# FITCONNECT_SUPABASE_URL
+# FITCONNECT_SUPABASE_ANON_KEY

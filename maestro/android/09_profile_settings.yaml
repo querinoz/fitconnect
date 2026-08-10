@@ -1,0 +1,27 @@
+# 09 — Profile + settings + sign out
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_primary"
+- runFlow: _complete_onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: "athlete_os"
+    timeout: 12000
+- tapOn: "You"
+- assertVisible:
+    id: "athlete_profile"
+- assertVisible: "Open Telemetry Center"
+- tapOn:
+    id: "athlete_sign_out"
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000

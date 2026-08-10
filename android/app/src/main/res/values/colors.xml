@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mirrors EliteSurfaceColors.FLOOR — keep in sync via design tokens pipeline. -->
+    <color name="eos_floor">#070B14</color>
+    <color name="eos_voltline">#C8FF00</color>
+</resources>

@@ -122,19 +122,13 @@ fitconnect/
 
 ---
 
-## 6. Código Morto / Orphans para Remover
+## 6. Código Morto / Orphans
 
-```
-apps/web/components/hero.tsx            ← zero imports, substituído por hero-static.tsx
-apps/web/components/showcases.tsx       ← órfão, não montado
-apps/web/components/audience-split.tsx  ← órfão
-apps/web/components/photo-reel.tsx      ← órfão
-apps/web/components/why-fitconnect.tsx  ← órfão
-apps/web/components/ck/philosophy-block.tsx  ← órfão + i18n manual
-apps/web/components/ck/floating-pillars.tsx  ← órfão
-apps/web/components/ck/text-marquee.tsx ← órfão
+**Phase 01 W1 executed** (`docs/phase-01/Cleanup_Executed.md`): 31 REMOVE_CANDIDATE web orphans deleted + empty `packages/ui` removed. `lib/media/imagekit-loader.ts` kept (Next loader).
 
-```
+**Already gone earlier:** hero, showcases, audience-split, photo-reel, why-fitconnect, ck/*.
+
+**Deferred (not REMOVE_CANDIDATE):** `components/ui-glass/**` (~47 importers), `apps/mobile` (frozen Path A), Prisma/Supabase dual schema.
 
 ---
 

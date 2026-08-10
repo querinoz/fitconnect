@@ -1,0 +1,26 @@
+# 06 — Realtime: debug uses InProcessRealtimeClient (unit-verified dual-client).
+# Device flow: coach calendar/inbox surfaces remain reachable after login.
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_secondary"
+- runFlow: _complete_coach_onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: "coach_os"
+    timeout: 12000
+- tapOn:
+    id: "coach_tab_calendar"
+- assertVisible:
+    id: "coach_calendar"
+- tapOn:
+    id: "coach_tab_inbox"
+- assertVisible:
+    id: "coach_inbox"

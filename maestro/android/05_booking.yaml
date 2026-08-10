@@ -1,0 +1,26 @@
+# 05 — Booking surface (coach bookings from More)
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_secondary"
+- runFlow: _complete_coach_onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: "coach_overview"
+    timeout: 12000
+- tapOn:
+    id: "coach_tab_more"
+- assertVisible:
+    id: "coach_profile"
+- tapOn: "Bookings"
+- extendedWaitUntil:
+    visible:
+      id: "coach_bookings"
+    timeout: 8000

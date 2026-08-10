@@ -1,0 +1,39 @@
+# 03 — Athlete bottom navigation (product brief tabs)
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_primary"
+- runFlow: _complete_onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: "athlete_os"
+    timeout: 12000
+- tapOn:
+    id: "athlete_tab_discover"
+- assertVisible:
+    id: "athlete_discover"
+- tapOn:
+    id: "athlete_tab_training"
+- assertVisible:
+    id: "athlete_training"
+- tapOn:
+    id: "athlete_tab_programs"
+- assertVisible:
+    id: "athlete_programs"
+- tapOn:
+    id: "athlete_tab_community"
+- assertVisible:
+    id: "athlete_community"
+- tapOn:
+    id: "athlete_tab_home"
+- assertVisible:
+    id: "athlete_home"
+- assertVisible:
+    id: "elite_recovery_ring"

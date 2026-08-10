@@ -1,0 +1,23 @@
+# 13 — Telemetry center from profile
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_primary"
+- runFlow: _complete_onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: "athlete_os"
+    timeout: 12000
+- tapOn: "You"
+- tapOn: "Open Telemetry Center"
+- extendedWaitUntil:
+    visible:
+      id: "athlete_telemetry"
+    timeout: 8000

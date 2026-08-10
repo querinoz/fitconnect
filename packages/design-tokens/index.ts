@@ -5,6 +5,15 @@ export {
   MOTION_STORAGE_KEY,
   type MotionPreference
 } from "./src/motion-policy";
+export {
+  SPACING_TOKENS,
+  RADIUS_TOKENS,
+  ELEVATION_TOKENS,
+  OPACITY_TOKENS,
+  BORDER_TOKENS,
+} from "./layout";
+export { TYPE_TOKENS, type TypeToken } from "./typography";
+export { SEMANTIC_TOKENS, CHART_TOKENS, GRADIENT_TOKENS } from "./semantic";
 
 /**
  * COLOR_TOKENS — cross-platform single source of truth for FitConnect colours.

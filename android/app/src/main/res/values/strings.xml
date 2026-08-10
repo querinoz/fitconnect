@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FitConnect</string>
+    <string name="nav_guest_title">Welcome</string>
+    <string name="nav_guest_body">FitConnect Elite OS — connect, train, and perform. Continue to LOCAL_DEMO or sign in.</string>
+    <string name="nav_continue_auth">Continue</string>
+    <string name="nav_continue_anonymous">Continue anonymously</string>
+    <string name="nav_auth_title">Sign in</string>
+    <string name="nav_auth_body">LOCAL_DEMO personas — Inês (athlete), Marina (multi-sport), Tomás (coach). Password: password1</string>
+    <string name="nav_auth_live_body">Sign in with your FitConnect account.</string>
+    <string name="nav_auth_unconfigured_body">Production authentication is not configured. Set Supabase URL and anon key — sign-in is blocked until IdP is ready.</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_password_label">Password</string>
+    <string name="auth_submit">Sign in</string>
+    <string name="auth_signup_link">Sign up</string>
+    <string name="auth_signup_body">Create a LOCAL_DEMO account (not production).</string>
+    <string name="auth_signup_submit">Create account</string>
+    <string name="auth_forgot_link">Forgot password</string>
+    <string name="auth_forgot_body">We will queue a reset link. In LOCAL_DEMO this is simulated.</string>
+    <string name="auth_forgot_submit">Send reset link</string>
+    <string name="nav_enter_demo_session">Enter athlete demo</string>
+    <string name="nav_enter_coach_demo">Enter coach demo</string>
+    <string name="splash_tagline">Connect. Train. Perform.</string>
+    <string name="notification_channel_system">System</string>
+    <string name="notification_channel_session">Sessions</string>
+    <string name="notification_channel_training">Training</string>
+    <string name="notification_channel_social">Social</string>
+    <string name="notification_channel_marketing">Marketing</string>
+    <string name="nav_back">Back</string>
+    <string name="nav_home_title">Signed in</string>
+    <string name="nav_home_body">Choose Athlete or Coach from authentication to enter the operating system.</string>
+    <string name="nav_role_gate">View role</string>
+    <string name="nav_design_catalog">Design System</string>
+    <string name="nav_sign_out">Sign out</string>
+    <string name="nav_role_title">Role gate</string>
+    <string name="nav_role_body">Active role: %1$s</string>
+    <string name="nav_role_unknown">unknown</string>
+    <string name="nav_error_title">Error</string>
+    <string name="nav_error_body">Something went wrong. Retry or return and try another path.</string>
+</resources>

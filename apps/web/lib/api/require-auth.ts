@@ -69,7 +69,7 @@ export async function requireAuth(): Promise<AuthResult> {
   };
 }
 
-/** Resolve athlete id — demo permissive; prod requires auth + matching id when provided. */
+/** Resolve athlete id — demo permissive; prod binds to authenticated subject (anti-IDOR). */
 export async function requireAthleteId(
   request: Request,
   paramId?: string | null
@@ -83,16 +83,19 @@ export async function requireAthleteId(
     return { athleteId: fromParam ?? "a-ines" };
   }
 
-  const cookieAthlete = request.headers.get("x-athlete-id");
-  const resolved = fromParam ?? cookieAthlete ?? auth.user.id;
-  if (!resolved) {
+  // Admins may explicitly target another athlete; everyone else is bound to self.
+  if (auth.user.role === "admin" && fromParam) {
+    return { athleteId: fromParam };
+  }
+
+  if (fromParam && fromParam !== auth.user.id) {
     return {
       ok: false,
-      response: NextResponse.json({ error: "athleteId required" }, { status: 400 })
+      response: NextResponse.json({ error: "forbidden" }, { status: 403 })
     };
   }
 
-  return { athleteId: resolved };
+  return { athleteId: auth.user.id };
 }
 
 /** Resolve coach id — demo permissive; prod requires auth. */

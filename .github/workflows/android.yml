@@ -39,10 +39,31 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Build (lint + unit tests + assemble, all modules)
+      - name: Build (lint + unit tests + debug assemble)
         working-directory: android
-        run: ./gradlew build
+        # SIGN-02: assembleRelease is fail-closed (requires keystore + Supabase + FCM).
+        # CI without secrets must not claim a production release artifact.
+        run: ./gradlew build -x :app:assembleRelease -x :app:bundleRelease -x :app:assembleReleaseUnitTest
 
-      # connectedAndroidTest (instrumented) deliberately not wired yet:
-      # needs an emulator runner (reactivecircus/android-emulator-runner)
-      # and there are no instrumented tests until F3. Tracked in the F3 plan.
+      - name: Signed release (only when secrets present)
+        if: ${{ secrets.FITCONNECT_ANDROID_KEYSTORE_BASE64 != '' && secrets.FITCONNECT_SUPABASE_URL != '' && secrets.FITCONNECT_GOOGLE_SERVICES_JSON_BASE64 != '' }}
+        working-directory: android
+        env:
+          FITCONNECT_SUPABASE_URL: ${{ secrets.FITCONNECT_SUPABASE_URL }}
+          FITCONNECT_SUPABASE_ANON_KEY: ${{ secrets.FITCONNECT_SUPABASE_ANON_KEY }}
+        run: |
+          echo "::error::Signed release CI path is scaffolded but not fully wired (keystore decode + google-services.json injection). Keep fail-closed until human configures secrets + script."
+          exit 1
+
+      - name: Assert release remains fail-closed without secrets
+        if: ${{ secrets.FITCONNECT_ANDROID_KEYSTORE_BASE64 == '' }}
+        working-directory: android
+        run: |
+          set +e
+          ./gradlew :app:assembleRelease
+          code=$?
+          if [ "$code" -eq 0 ]; then
+            echo "::error::assembleRelease succeeded without keystore — SIGN-02 violated"
+            exit 1
+          fi
+          echo "SIGN-02 fail-closed verified (assembleRelease exited $code)"

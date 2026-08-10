@@ -1,0 +1,16 @@
+# 17 — Error recovery: anonymous cannot enter Athlete OS
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000
+- tapOn:
+    id: "screen_guest_secondary"
+- extendedWaitUntil:
+    visible:
+      id: "screen_auth"
+    timeout: 8000
+- assertNotVisible:
+    id: "athlete_os"

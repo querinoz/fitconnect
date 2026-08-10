@@ -1,0 +1,30 @@
+// Maps, Discovery & Booking Engine — geospatial + scheduling backbone.
+// No Compose UI. Athlete/Coach consume services only.
+plugins {
+    alias(libs.plugins.android.library)
+}
+
+android {
+    namespace = "com.fitconnect.android.geo"
+    compileSdk = 35
+
+    defaultConfig {
+        minSdk = 26
+        consumerProguardFiles("consumer-rules.pro")
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation(project(":foundation"))
+    implementation(project(":sports"))
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.kotlinx.coroutines.android)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+}

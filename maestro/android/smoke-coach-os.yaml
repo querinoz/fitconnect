@@ -1,0 +1,19 @@
+# Maestro smoke — Coach OS after coach demo sign-in. Device required.
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 8000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_secondary"
+- runFlow: _complete_coach_onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: "coach_os"
+    timeout: 10000
+- assertVisible:
+    id: "coach_overview"

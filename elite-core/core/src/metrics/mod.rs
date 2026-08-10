@@ -1,9 +1,14 @@
 //! Power metrics — implements `docs/sports-metrics.md` §1 exactly.
 //!
-//! F1 slice 1: Normalized Power (§1.1), Intensity Factor (§1.2), and
-//! Training Stress Score (§1.3). Power curves, pace/GAP, HR metrics and
-//! physiology land in later slices of F1. See this module's `README.md`
-//! for the reasoning behind the implementation choices.
+//! F1 slice 1: Normalized Power (§1.1), Intensity Factor (§1.2), Training
+//! Stress Score (§1.3), and the per-activity power curve (§1.4) — all
+//! delivered together below. hrTSS (§2.1) lives in [`heart_rate`] (slice
+//! 2). Pace/GAP + rTSS (§3) live in [`pace`] (slice 3). Physiology (§5) is
+//! its own top-level module, `crate::physiology`. See this module's
+//! `README.md` for the reasoning behind the implementation choices.
+
+pub mod heart_rate;
+pub mod pace;
 
 use crate::streams::ActivityStreams;
 

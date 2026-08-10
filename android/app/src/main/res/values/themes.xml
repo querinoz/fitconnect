@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.FitConnect" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/eos_floor</item>
+        <item name="android:colorBackground">@color/eos_floor</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <style name="Theme.FitConnect.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/eos_floor</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_fitconnect_logo</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/eos_floor</item>
+        <item name="postSplashScreenTheme">@style/Theme.FitConnect</item>
+    </style>
+</resources>

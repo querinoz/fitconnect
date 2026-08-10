@@ -8,7 +8,7 @@ import { saveConnection, syncRecentActivities } from "@/lib/integrations/strava/
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
 
-  if (searchParams.get("format") === "json" && process.env.NEXT_PUBLIC_DEMO_MODE !== "false") {
+  if (searchParams.get("format") === "json" && process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
     const expiresAt = Math.floor(Date.now() / 1000) + 3600;
     return NextResponse.json({
       accessToken: "demo-access-token",

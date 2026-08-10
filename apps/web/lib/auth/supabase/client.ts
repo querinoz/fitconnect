@@ -14,6 +14,7 @@ export function isSupabaseConfigured(): boolean {
   );
 }
 
+/** Fail-closed: demo only when explicitly enabled. */
 export function isDemoMode(): boolean {
-  return process.env.NEXT_PUBLIC_DEMO_MODE !== "false";
+  return process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 }

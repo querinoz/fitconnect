@@ -5,7 +5,7 @@
   "status": "IN_PROGRESS",
   "pauseReason": null,
   "startedAt": "2026-08-07T00:00:00Z",
-  "lastUpdated": "2026-08-07T14:05:00Z",
+  "lastUpdated": "2026-08-07T17:00:00Z",
   "decisionsApplied": {
     "D1": "ADR-005 accepted. Engineering writes Kotlin/Rust, owner reviews. Kill switch documented in ADR-005, checked at F2 gate.",
     "D2": "ADR-009 written. Supabase Postgres for v1, TimescaleDB/Neon deferred with explicit migration triggers.",
@@ -28,12 +28,15 @@
     "F0: CI workflows elite-core-rust.yml + android.yml",
     "F0: internal skills elite-surface / sports-metrics / elite-core-rust",
     "F1: streams module (time-series model, validation invariants, README, 6 tests)",
-    "F1: metrics slice 1 — NP/IF/TSS per sports-metrics.md §1.1-1.3 (README, 8 tests)"
+    "F1: metrics slice 1 — NP/IF/TSS + power curve per sports-metrics.md §1.1-1.4 (README, 15 tests) — note: power curve was already implemented as part of this slice, not a separate later step; STATE.json previously mis-listed it as pending",
+    "F1: zones module — power 7-zone (§4) + HR 5-zone (§2.2) ladder, time-in-zone distribution (README, 9 tests)",
+    "F1: metrics slice 2 — hrTSS per sports-metrics.md §2.1, TRIMP-based, Sex-coefficient enum, LTHR-calibrated (README, 8 tests)",
+    "F1: physiology module — CTL/ATL/TSB (§5.1), ACWR (§5.2 + advisory band), rMSSD baseline + readiness flag (§5.3) (README, 14 tests)",
+    "F1: metrics slice 3 — pace/GAP (§3.1, Minetti cost-of-running polynomial) + NGP + IF_pace + rTSS (§3.2) (README, 17 tests)"
   ],
   "pendingSteps": [
     "F1: fit module — FIT parser (records → ActivityStreams), serde-based, fuzz boundary",
-    "F1: metrics — power curve (§1.4), pace/GAP (§3), HR/hrTSS (§2), zones (§4)",
-    "F1: physiology — CTL/ATL/TSB, ACWR, rMSSD baseline (§5)",
+    "F1: FTP estimation (§1.5) + LTHR/threshold-pace estimation (§2.2/§3.2) — best-effort-from-power/HR/pace-curve heuristics, app-layer callers of the primitives already in core",
     "F1: laps (§6) + GPS filtering (§7)",
     "F1: golden files — need ≥15 real FIT files + Golden Cheetah exports (HUMAN-QUEUE if owner has none)",
     "F1: real bindings — UniFFI Kotlin AAR, wasm-pack artifact into packages/elite-core-wasm, napi module",

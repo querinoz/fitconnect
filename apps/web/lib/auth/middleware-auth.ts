@@ -19,8 +19,9 @@ export function hasValidDemoSessionCookie(
   }
 }
 
+/** Fail-closed: demo only when explicitly set to "true". */
 export function isDemoModeEnv(value: string | undefined): boolean {
-  return value !== "false";
+  return value === "true";
 }
 
 export function isSupabaseConfiguredEnv(

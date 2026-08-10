@@ -1,10 +1,13 @@
-# `metrics` — power metrics (spec §1)
+# `metrics` — power, heart-rate, and pace training stress (spec §1, §2.1, §3)
 
-Implements `docs/sports-metrics.md` §1.1–1.4: Normalized Power, Intensity
-Factor, Training Stress Score, and the per-activity power curve. The spec is normative — if the implementation
-ever needs to diverge, the spec changes first (ADR-006 rule). Later F1
-slices add power curves (§1.4), pace/GAP (§3), HR metrics (§2) and
-physiology (§5) alongside this file.
+Implements `docs/sports-metrics.md` §1.1–1.4 (Normalized Power, Intensity
+Factor, Training Stress Score, per-activity power curve) directly in this
+file, §2.1 (hrTSS) in [`heart_rate.rs`](./heart_rate.rs), and §3 (GAP +
+rTSS) in [`pace.rs`](./pace.rs). The spec is normative — if the
+implementation ever needs to diverge, the spec changes first (ADR-006
+rule). Physiology (§5) is its own top-level module, `crate::physiology`.
+HR/power *zones* (§2.2, §4) are a separate concern and already live in
+`crate::zones`, not here.
 
 ## Why it looks the way it does
 
@@ -50,6 +53,64 @@ one place (`streams`), not re-checked at every array access.
 - The `1e-9` tolerances in tests — constant-input identities (NP of
   constant 200W = 200) are exact in IEEE 754 up to rounding of the 4th
   root; the epsilon just avoids over-pinning the last bit.
+
+## `heart_rate.rs` — why it looks the way it does
+
+**`Sex` is an enum the caller must supply, not a bool with a default.** The
+spec says the male coefficient is the fallback "with a visible estimated
+flag" when unset — that flag has to live at the app/profile layer, where
+the athlete record is. Baking a silent default into this crate would make
+the "visible" part of the spec impossible to honour from here.
+
+**Calibration reuses the same rate function as the per-sample sum.**
+`trimp_rate_per_minute` is "TRIMP contribution for one minute at this
+HRR%" — the per-activity `trimp()` sums it sample-by-sample, and the
+threshold-hour calibration in `hr_tss()` evaluates it once at the
+athlete's LTHR and multiplies by 60. Two call sites, one formula, so the
+calibration can never drift out of sync with the per-sample math.
+
+**HRR% is intentionally unclamped.** A reading above `hr_max_bpm` or below
+`hr_rest_bpm` means the profile's HR bounds are stale, not that the sample
+is invalid — clamping here would hide that signal instead of surfacing it
+downstream (future work: flag profile HR bounds as due for review, not an
+F1-slice-2 concern).
+
+**Gap-crediting matches `zones::time_in_zones`.** Both integrate a
+per-sample quantity over wall-clock time and both credit the gap to the
+*next* sample (last sample gets 1s) — same convention, same reasoning:
+smart/irregular recording must not be penalised relative to dense 1 Hz
+recording.
+
+## `pace.rs` — why it looks the way it does
+
+**Speed, not pace, is the internal unit.** The spec writes the GAP formula
+both ways — `GAP_pace = actual_pace × (C(0)/C(g))` in §3.1's prose, and
+"applied to GAP-adjusted speed" in §3.2. Both are the same relationship
+(pace and speed are reciprocals: `GAP_speed = actual_speed × (C(g)/C(0))`
+is algebraically the inverse of the pace formula — worked through in the
+`grade_adjusted_speed_mps` doc comment). Elite Core stores `speed_mps` as
+the stream channel, so speed is the unit that avoids a conversion at every
+call site; pace-for-display (e.g. min/km) is a UI-edge concern per the
+spec's own "SI units internally... conversion at the UI edge only" rule.
+
+**Grade comes from distance + altitude deltas, not a dedicated channel.**
+No device streams "instantaneous grade" directly — it's derived the same
+way any analysis tool would, from consecutive points' rise over run. The
+`< 0.5m` run-distance guard in `grade_series` exists because GPS/barometer
+noise on a near-stationary step would otherwise produce grade values in
+the hundreds-of-percent range, which the ±20% clamp alone doesn't protect
+against (the clamp only helps once the *run* itself is trustworthy;
+garbage in a divisor needs its own guard, not just a clamp on the
+quotient).
+
+**The 1 Hz resample is duplicated from the parent module, not shared.**
+`resample_1hz_sample_and_hold` (power, `u16`) and
+`resample_1hz_sample_and_hold_f64` (pace, `f64`) do the same thing on
+different element types. Rust doesn't make a one-line generic version of
+this free (the multiply-and-hold logic is trivial but the type conversion
+boilerplate isn't), and with exactly two call sites duplication is more
+reviewable than an abstraction built for a "maybe" third caller — noted
+explicitly in the doc comment so this isn't mistaken for an oversight.
 
 ## Golden-file status
 

@@ -1,4 +1,13 @@
-# Add project specific ProGuard rules here.
-# F0: nothing yet — minifyEnabled is off for the skeleton build. Real rules
-# land alongside the elite-core JNI binding (F1+) once there's a native
-# library and reflection-based serialization to protect.
+# FitConnect release R8 / ProGuard — keep Compose, OkHttp, security, and DI entry points.
+-keepattributes Signature,InnerClasses,EnclosingMethod,*Annotation*
+-keep class com.fitconnect.android.FitConnectApplication { *; }
+-keep class com.fitconnect.android.** { *; }
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+-dontwarn com.google.errorprone.annotations.**
+-dontwarn com.google.crypto.tink.**
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+-keep class androidx.security.** { *; }
+-keepclassmembers class * extends androidx.compose.runtime.internal.ComposableFunction { *; }

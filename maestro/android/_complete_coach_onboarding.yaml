@@ -1,0 +1,15 @@
+# Shared: complete coach onboarding if first-run gate is shown
+appId: com.fitconnect.android.debug
+---
+- runFlow:
+    when:
+      visible:
+        id: "screen_coach_onboarding"
+    commands:
+      - tapOn: "Continue"
+      - tapOn: "Continue"
+      - tapOn: "Continue"
+      - tapOn: "Continue"
+      - tapOn: "Continue"
+      - tapOn:
+          id: "coach_onboarding_finish"

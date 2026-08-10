@@ -1,0 +1,27 @@
+# Maestro smoke — Athlete Telemetry Center (uses :telemetry DeviceCenter + facades).
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 8000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_primary"
+- runFlow: _complete_onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: "athlete_os"
+    timeout: 10000
+- tapOn: "You"
+- extendedWaitUntil:
+    visible:
+      id: "athlete_profile"
+    timeout: 8000
+- tapOn: "Open Telemetry Center"
+- extendedWaitUntil:
+    visible:
+      id: "athlete_telemetry"
+    timeout: 8000

@@ -7,8 +7,13 @@ import {
 } from "./middleware-auth";
 
 describe("middleware auth policy", () => {
-  it("treats unset DEMO_MODE as demo on", () => {
-    expect(isDemoModeEnv(undefined)).toBe(true);
+  it("treats unset DEMO_MODE as demo off (fail-closed)", () => {
+    expect(isDemoModeEnv(undefined)).toBe(false);
+  });
+
+  it("enables demo only when explicitly true", () => {
+    expect(isDemoModeEnv("true")).toBe(true);
+    expect(isDemoModeEnv("false")).toBe(false);
   });
 
   it("allows demo mode through without Supabase enforcement", () => {

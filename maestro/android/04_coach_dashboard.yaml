@@ -1,0 +1,23 @@
+# 04 — Coach dashboard after coach demo login
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_secondary"
+- runFlow: _complete_coach_onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: "coach_os"
+    timeout: 12000
+- assertVisible:
+    id: "coach_overview"
+- tapOn:
+    id: "coach_tab_athletes"
+- assertVisible:
+    id: "coach_athletes"

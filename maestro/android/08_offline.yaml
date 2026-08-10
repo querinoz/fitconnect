@@ -1,0 +1,29 @@
+# 08 — Offline: banner appears when connectivity reports offline (airplane may be required).
+# Without network toggle, asserts offline banner tag is present in tree when offline,
+# otherwise verifies athlete shell + home still load (cached fixtures).
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_primary"
+- runFlow: _complete_onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: "athlete_home"
+    timeout: 12000
+- assertVisible:
+    id: "athlete_os"
+- assertVisible: "Daily score"
+- runFlow:
+    when:
+      visible:
+        id: "athlete_offline_banner"
+    commands:
+      - assertVisible: "OFFLINE"
+      - assertVisible: "Working offline"

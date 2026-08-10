@@ -1,0 +1,18 @@
+# Maestro smoke — Core Platform shell (auth + guards). Device required.
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 8000
+- tapOn:
+    id: "screen_guest_primary"
+- assertVisible:
+    id: "screen_auth"
+- tapOn:
+    id: "screen_auth_primary"
+- extendedWaitUntil:
+    visible:
+      id: "screen_home"
+    timeout: 8000

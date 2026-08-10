@@ -1,0 +1,54 @@
+# 10 — Full athlete journey (debug fixtures, no production credentials)
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_primary"
+- runFlow: _complete_onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: "athlete_home"
+    timeout: 12000
+- assertVisible:
+    id: "elite_recovery_ring"
+- assertVisible:
+    id: "athlete_home_readiness_chart"
+- tapOn:
+    id: "athlete_tab_discover"
+- assertVisible:
+    id: "athlete_map_panel"
+- tapOn:
+    id: "athlete_tab_training"
+- assertVisible:
+    id: "athlete_training"
+- tapOn:
+    id: "athlete_tab_programs"
+- assertVisible:
+    id: "athlete_programs"
+- tapOn:
+    id: "athlete_tab_community"
+- assertVisible:
+    id: "athlete_community"
+- tapOn:
+    id: "athlete_tab_home"
+- tapOn: "You"
+- assertVisible:
+    id: "athlete_profile"
+- tapOn: "Open Telemetry Center"
+- extendedWaitUntil:
+    visible:
+      id: "athlete_telemetry"
+    timeout: 8000
+- back
+- tapOn:
+    id: "athlete_sign_out"
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000

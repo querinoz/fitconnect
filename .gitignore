@@ -35,5 +35,12 @@ android/build/
 android/*/build/
 android/local.properties
 android/.cxx/
+android/keystore.properties
 *.keystore
 !debug.keystore
+*.jks
+android/*.jks
+android/app/*.jks
+android/app/google-services.json
+android/local.properties
+

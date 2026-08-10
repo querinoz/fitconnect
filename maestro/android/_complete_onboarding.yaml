@@ -1,0 +1,15 @@
+# Shared: complete athlete onboarding if first-run gate is shown (6 steps)
+appId: com.fitconnect.android.debug
+---
+- runFlow:
+    when:
+      visible:
+        id: "screen_onboarding"
+    commands:
+      - tapOn: "Continue"
+      - tapOn: "Continue"
+      - tapOn: "Continue"
+      - tapOn: "Continue"
+      - tapOn: "Continue"
+      - tapOn:
+          id: "onboarding_finish"

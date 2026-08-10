@@ -19,7 +19,7 @@ function configured(env: NodeJS.ProcessEnv, key: string): boolean {
 export function buildHealthReport(env: NodeJS.ProcessEnv = process.env): HealthReport {
   const deps: HealthDependency[] = [];
 
-  const demoMode = env.NEXT_PUBLIC_DEMO_MODE !== "false";
+  const demoMode = env.NEXT_PUBLIC_DEMO_MODE === "true";
   const supabaseReady =
     configured(env, "NEXT_PUBLIC_SUPABASE_URL") && configured(env, "NEXT_PUBLIC_SUPABASE_ANON_KEY");
 

@@ -1,0 +1,55 @@
+# 11 — Full coach journey (debug fixtures, no production credentials)
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_secondary"
+- runFlow: _complete_coach_onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: "coach_overview"
+    timeout: 12000
+- tapOn:
+    id: "coach_tab_athletes"
+- assertVisible:
+    id: "coach_athletes"
+- tapOn:
+    id: "coach_tab_calendar"
+- assertVisible:
+    id: "coach_calendar"
+- tapOn:
+    id: "coach_tab_inbox"
+- assertVisible:
+    id: "coach_inbox"
+- tapOn:
+    id: "coach_tab_more"
+- assertVisible:
+    id: "coach_profile"
+- tapOn: "Sessions"
+- extendedWaitUntil:
+    visible:
+      id: "coach_sessions"
+    timeout: 8000
+- back
+- tapOn:
+    id: "coach_tab_more"
+- tapOn: "Revenue"
+- extendedWaitUntil:
+    visible:
+      id: "coach_revenue"
+    timeout: 8000
+- back
+- tapOn:
+    id: "coach_tab_more"
+- tapOn:
+    id: "coach_sign_out"
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000

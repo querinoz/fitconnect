@@ -1,0 +1,21 @@
+# 02 — Athlete home: readiness + chart after demo login
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_primary"
+- runFlow: _complete_onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: "athlete_home"
+    timeout: 12000
+- assertVisible:
+    id: "athlete_home_readiness_chart"
+- assertVisible: "Daily score"
+- assertVisible: "HRV"

@@ -39,7 +39,7 @@ export function AuthGate({ children, roles }: AuthGateProps) {
   const [demoParam, setDemoParam] = useState<string | null>(null);
 
   const rolesKey = roles?.join(",") ?? "";
-  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE !== "false";
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
   useEffect(() => {
     if (typeof window === "undefined") return;

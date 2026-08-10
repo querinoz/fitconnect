@@ -1,0 +1,30 @@
+# 03b — Athlete onboarding journey (first run, 6 steps)
+appId: com.fitconnect.android.debug
+---
+- clearState
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_primary"
+- extendedWaitUntil:
+    visible:
+      id: "screen_onboarding"
+    timeout: 12000
+- tapOn: "Continue"
+- tapOn: "Continue"
+- assertVisible:
+    id: "onboarding_goal"
+- tapOn: "Continue"
+- tapOn: "Continue"
+- tapOn: "Continue"
+- tapOn:
+    id: "onboarding_finish"
+- extendedWaitUntil:
+    visible:
+      id: "athlete_home"
+    timeout: 12000

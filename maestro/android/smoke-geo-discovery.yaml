@@ -1,0 +1,22 @@
+# Maestro smoke — Athlete Discover after sign-in (uses :geo DiscoveryEngine).
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 8000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_primary"
+- runFlow: _complete_onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: "athlete_os"
+    timeout: 10000
+- tapOn: "Discover"
+- extendedWaitUntil:
+    visible:
+      id: "athlete_discover"
+    timeout: 8000

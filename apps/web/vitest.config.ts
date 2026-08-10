@@ -42,9 +42,7 @@ export default defineConfig({
         "lib/auth/supabase-browser-auth.ts",
         "lib/auth/demo-tab-storage.ts",
         "lib/api/hooks/**",
-        "lib/api/fetch-json.ts",
         "lib/stripe/server.ts",
-        "lib/strava/sync-worker.ts",
       ],
       thresholds: {
         statements: 47,

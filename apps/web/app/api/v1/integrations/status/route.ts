@@ -41,7 +41,7 @@ export async function GET(request: Request) {
   let connections = listConnections(athleteId);
   const useDb = isStravaDbEnabled();
 
-  if (connections.length === 0 && process.env.NEXT_PUBLIC_DEMO_MODE !== "false") {
+  if (connections.length === 0 && process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
     seedDemoStrava(athleteId);
     connections = listConnections(athleteId);
   }

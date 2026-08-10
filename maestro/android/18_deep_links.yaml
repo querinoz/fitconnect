@@ -1,0 +1,10 @@
+# 18 — Deep link to auth (cold path via scheme when supported)
+appId: com.fitconnect.android.debug
+---
+- openLink: fitconnect://app/auth
+- extendedWaitUntil:
+    visible:
+      id: "screen_auth"
+    timeout: 10000
+- assertVisible:
+    id: "screen_auth"

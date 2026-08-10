@@ -1,0 +1,16 @@
+# Maestro RC smoke — release applicationId (no .debug suffix).
+# Requires a device/emulator with the RELEASE APK installed.
+# Expectation with ALLOW_LOCAL_AUTH=false: guest shell works; credential auth fails closed.
+appId: com.fitconnect.android
+---
+- launchApp
+- assertVisible:
+    id: "screen_splash"
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 8000
+- tapOn:
+    id: "screen_guest_primary"
+- assertVisible:
+    id: "screen_auth"

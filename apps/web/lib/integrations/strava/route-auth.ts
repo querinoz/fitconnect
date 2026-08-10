@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 
 export function isDemoMode(): boolean {
-  return process.env.NEXT_PUBLIC_DEMO_MODE !== "false";
+  return process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 }
 
 /** Resolve athlete id for integration routes — demo mode is permissive; prod binds to cookie/header. */
@@ -28,17 +28,18 @@ export async function resolveIntegrationAthlete(
 
   const cookieStore = await cookies();
   const cookieAthlete = cookieStore.get("fc-athlete-id")?.value;
-  const resolved = fromParam ?? headerId ?? cookieAthlete;
-
-  if (!resolved) {
+  if (!cookieAthlete) {
     return { error: "unauthorized", status: 401 };
   }
-
-  if (cookieAthlete && resolved !== cookieAthlete) {
+  // Never trust a client-supplied athleteId that disagrees with the session cookie.
+  if (fromParam && fromParam !== cookieAthlete) {
+    return { error: "athlete_mismatch", status: 403 };
+  }
+  if (headerId && headerId !== cookieAthlete) {
     return { error: "athlete_mismatch", status: 403 };
   }
 
-  return { athleteId: resolved };
+  return { athleteId: cookieAthlete };
 }
 
 export async function resolveIntegrationCoach(
