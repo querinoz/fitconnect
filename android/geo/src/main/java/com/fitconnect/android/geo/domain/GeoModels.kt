@@ -38,7 +38,7 @@ enum class LocationAccuracy { HIGH, BALANCED, LOW, PASSIVE }
 
 enum class EnvironmentContext { INDOOR, OUTDOOR, UNKNOWN }
 
-enum class MapProviderKind { MAPLIBRE, GOOGLE }
+enum class MapProviderKind { LOCAL_DEMO, MAPLIBRE, GOOGLE }
 
 enum class MapStyleKind { DARK, LIGHT, SATELLITE, TERRAIN }
 

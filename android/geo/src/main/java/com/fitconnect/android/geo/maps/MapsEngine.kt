@@ -69,6 +69,8 @@ data class MapScene(
  */
 interface MapProvider {
     val kind: MapProviderKind
+    /** True when the controller is in-process and must be labeled LOCAL_DEMO. */
+    val localDemo: Boolean
     fun supportedStyles(): Set<MapStyleKind>
     fun createController(): MapController
 }
@@ -89,15 +91,37 @@ interface MapsEngine {
     fun boundsFor(points: List<GeoPoint>): GeoBounds?
 }
 
+/**
+ * Deterministic in-memory map. Preferred until a production SDK is bound.
+ * UI must show LOCAL_DEMO — this is not live GPS tiles.
+ */
+class LocalDemoMapProvider : MapProvider {
+    override val kind: MapProviderKind = MapProviderKind.LOCAL_DEMO
+    override val localDemo: Boolean = true
+    override fun supportedStyles(): Set<MapStyleKind> =
+        setOf(MapStyleKind.DARK, MapStyleKind.LIGHT)
+    override fun createController(): MapController = InMemoryMapController(MapStyleKind.DARK)
+}
+
+/**
+ * MapLibre adapter slot. Controller is still in-memory until the SDK is wired.
+ * Do not treat [kind] as a live tile server.
+ */
 class MapLibreProvider : MapProvider {
     override val kind: MapProviderKind = MapProviderKind.MAPLIBRE
+    override val localDemo: Boolean = true
     override fun supportedStyles(): Set<MapStyleKind> =
         setOf(MapStyleKind.DARK, MapStyleKind.LIGHT, MapStyleKind.SATELLITE, MapStyleKind.TERRAIN)
     override fun createController(): MapController = InMemoryMapController(MapStyleKind.DARK)
 }
 
+/**
+ * Google Maps adapter slot. Same in-memory controller until Play Services maps
+ * are bound. Not a production map.
+ */
 class GoogleMapsProvider : MapProvider {
     override val kind: MapProviderKind = MapProviderKind.GOOGLE
+    override val localDemo: Boolean = true
     override fun supportedStyles(): Set<MapStyleKind> =
         setOf(MapStyleKind.DARK, MapStyleKind.LIGHT, MapStyleKind.SATELLITE, MapStyleKind.TERRAIN)
     override fun createController(): MapController = InMemoryMapController(MapStyleKind.LIGHT)
@@ -143,15 +167,17 @@ class InMemoryMapController(
 }
 
 class DefaultMapsEngine(
+    private val localDemo: MapProvider = LocalDemoMapProvider(),
     private val mapLibre: MapProvider = MapLibreProvider(),
     private val google: MapProvider = GoogleMapsProvider(),
 ) : MapsEngine {
     private val providers = mapOf(
+        MapProviderKind.LOCAL_DEMO to localDemo,
         MapProviderKind.MAPLIBRE to mapLibre,
         MapProviderKind.GOOGLE to google,
     )
 
-    override fun preferredProvider(): MapProvider = mapLibre
+    override fun preferredProvider(): MapProvider = localDemo
 
     override fun provider(kind: MapProviderKind): MapProvider =
         providers.getValue(kind)

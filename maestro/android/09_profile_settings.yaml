@@ -15,10 +15,20 @@ appId: com.fitconnect.android.debug
     visible:
       id: "athlete_os"
     timeout: 12000
-- tapOn: "You"
+- tapOn:
+    id: "athlete_tab_profile"
 - assertVisible:
     id: "athlete_profile"
-- assertVisible: "Open Telemetry Center"
+- tapOn:
+    id: "athlete_open_settings"
+- assertVisible:
+    id: "athlete_settings"
+- assertVisible:
+    id: "language_picker"
+- tapOn:
+    id: "athlete_tab_profile"
+- assertVisible:
+    id: "athlete_profile"
 - tapOn:
     id: "athlete_sign_out"
 - extendedWaitUntil:

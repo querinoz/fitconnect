@@ -24,13 +24,13 @@ appId: com.fitconnect.android.debug
 - assertVisible:
     id: "athlete_map_panel"
 - tapOn:
-    id: "athlete_tab_training"
+    id: "athlete_tab_activity"
 - assertVisible:
-    id: "athlete_training"
+    id: "athlete_activity"
 - tapOn:
-    id: "athlete_tab_programs"
+    id: "activity_start"
 - assertVisible:
-    id: "athlete_programs"
+    id: "activity_timer"
 - tapOn:
     id: "athlete_tab_community"
 - assertVisible:

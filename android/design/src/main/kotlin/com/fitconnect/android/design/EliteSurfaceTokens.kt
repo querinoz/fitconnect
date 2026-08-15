@@ -16,6 +16,11 @@ object EliteSurfaceColors {
     const val IRIS: Long = 0xFF6C63FFL
     const val IRIS_GLOW: Long = 0x596C63FFL
     const val IRIS_SOFT: Long = 0xFFC4C0FFL
+    const val LIGHT_FLOOR: Long = 0xFFE4E1EEL
+    const val LIGHT_ON_SURFACE: Long = 0xFF070B14L
+    const val LIGHT_ON_SURFACE_MUTED: Long = 0xFF111827L
+    const val LIGHT_SURFACE: Long = 0xFFF3F1F8L
+    const val LIGHT_SURFACE_CONTAINER: Long = 0xFFD8D4E6L
     const val ON_SURFACE: Long = 0xFFE4E1EEL
     const val ON_SURFACE_MUTED: Long = 0xFFC7C4D8L
     const val ON_SURFACE_SUBTLE: Long = 0x85E4E1EEL

@@ -14,6 +14,7 @@ TUNNEL_PID = apps/web/.next/tunnel.pid
 export PORT
 
 .PHONY: help setup dev start prod stop clean clean-deep status tunnel test build typecheck \
+        doctor android android-test android-emulator android-qa web-qa wear qa screenshots \
         _deps _kill_port _build _start_prod _wait_ready _smoke _tunnel _open
 
 # ── OS detection ───────────────────────────────────────────────────────────────
@@ -51,7 +52,15 @@ help:
 	@echo "  make prod        Production build + server + tunnel + smoke (slower)"
 	@echo "  make stop        Stop dev/prod server and free port"
 	@echo "  make status      Server, port, and route health checks"
-	@echo "  make test        Run Vitest unit tests"
+	@echo "  make doctor      Toolchain probe (PASS/WARN/FAIL/PENDING_HUMAN)"
+	@echo "  make android     assembleDebug + related unit tests"
+	@echo "  make android-test  Android unit tests (gradle test subset)"
+	@echo "  make android-emulator  Probe AVD (FAIL if hypervisor missing)"
+	@echo "  make android-qa  Alias of make android"
+	@echo "  make web-qa      Web mobile cockpit Vitest"
+	@echo "  make wear        Wear assemble + WearSessionLinkTest"
+	@echo "  make qa          web-qa + android"
+	@echo "  make screenshots Device screenshots — not invented if no device"
 	@echo "  make build       Production build only"
 	@echo "  make typecheck   TypeScript check"
 	@echo "  make clean       Stop + remove .next and dev state"
@@ -191,3 +200,52 @@ endif
 
 status:
 	@$(STATUS_CMD)
+
+doctor:
+ifdef IS_WINDOWS
+	@powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-doctor.ps1
+else
+	@echo "doctor: use PowerShell scripts/make-doctor.ps1 (Unix port not in this phase)"
+endif
+
+android android-qa:
+ifdef IS_WINDOWS
+	@powershell -NoProfile -ExecutionPolicy Bypass -File qa/android/run.ps1
+else
+	@cd android && ./gradlew :app:assembleDebug :geo:testDebugUnitTest :telemetry:testDebugUnitTest :foundation:testDebugUnitTest
+endif
+
+android-test:
+ifdef IS_WINDOWS
+	@powershell -NoProfile -ExecutionPolicy Bypass -Command "Set-Location android; .\gradlew.bat test"
+else
+	@cd android && ./gradlew test
+endif
+
+android-emulator:
+ifdef IS_WINDOWS
+	@powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-android-emulator.ps1
+else
+	@echo "android-emulator: Windows script only in this phase"
+	@exit 1
+endif
+
+web-qa:
+ifdef IS_WINDOWS
+	@powershell -NoProfile -ExecutionPolicy Bypass -File qa/web/run.ps1
+else
+	@pnpm --filter @fitconnect/web exec vitest run components/mobile/elite-mobile-cockpit.test.tsx
+endif
+
+wear:
+ifdef IS_WINDOWS
+	@powershell -NoProfile -ExecutionPolicy Bypass -File qa/wear/run.ps1
+else
+	@cd android && ./gradlew :wear:assembleDebug
+endif
+
+qa: web-qa android
+
+screenshots:
+	@echo "SCREENSHOTS = BLOCKED (no emulator/device evidence — none fabricated)"
+	@exit 1

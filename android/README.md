@@ -23,6 +23,21 @@ cd android
 .\gradlew.bat build
 ```
 
+### Local QR install (no USB / adb)
+
+**Human device workflow (preferred):**
+
+```powershell
+# From repo root — same Wi-Fi as your phone
+pnpm android:qr
+```
+
+Then: scan QR → install APK → open FitConnect → LOCAL DEMO.
+
+Engineering self-test (no phone): `pnpm android:qr:test`
+
+Docs: `docs/android/PHASE_15_LOCAL_DEVICE_RELEASE.md` · `docs/android/ANDROID_LOCAL_QR_DISTRIBUTION.md`
+
 Maestro (device required):
 
 ```powershell

@@ -384,6 +384,32 @@ export type Dict = {
       dataExport: string;
       demoNote: string;
     };
+    cockpit: {
+      demo: string;
+      home: string;
+      discover: string;
+      activity: string;
+      community: string;
+      profile: string;
+      prime: string;
+      means: string;
+      meansBody: string;
+      todo: string;
+      todoBody: string;
+      start: string;
+      pause: string;
+      resume: string;
+      end: string;
+      gps: string;
+      frameAria: string;
+      androidFrame: string;
+      iphoneFrame: string;
+      coachName: string;
+      book: string;
+      emptyFeed: string;
+      role: string;
+      sport: string;
+    };
     voltline: string;
   };
   trustStrip: {

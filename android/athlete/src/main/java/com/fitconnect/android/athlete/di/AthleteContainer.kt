@@ -5,6 +5,7 @@ import com.fitconnect.android.athlete.data.AthleteRepository
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
 import com.fitconnect.android.community.di.CommunityContainer
 import com.fitconnect.android.community.di.DefaultCommunityContainer
+import com.fitconnect.android.capture.LiveActivityEngine
 import com.fitconnect.android.foundation.di.AppContainer
 import com.fitconnect.android.geo.di.GeoContainer
 import com.fitconnect.android.sports.di.SportsContainer
@@ -20,6 +21,7 @@ interface AthleteContainer {
     val community: CommunityContainer
     val sportsEngine: SportsEngine
     val athleteRepository: AthleteRepository
+    val liveActivity: LiveActivityEngine
 }
 
 class DefaultAthleteContainer(
@@ -38,4 +40,5 @@ class DefaultAthleteContainer(
         geo = geo,
         telemetry = telemetry.athleteFacade,
     )
+    override val liveActivity: LiveActivityEngine = LiveActivityEngine()
 }

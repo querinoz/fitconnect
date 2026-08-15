@@ -1,39 +1,56 @@
 package com.fitconnect.android.athlete.ui.profile
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import com.fitconnect.android.athlete.data.LocalAthleteRepository
 import com.fitconnect.android.athlete.domain.Achievement
 import com.fitconnect.android.athlete.domain.AthleteGoal
 import com.fitconnect.android.athlete.domain.AthleteProfile
 import com.fitconnect.android.athlete.domain.BodyMetrics
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.LocalAthleteSignOut
-import com.fitconnect.android.athlete.data.LocalAthleteRepository
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
+import com.fitconnect.android.designui.components.EliteAppearancePicker
+import com.fitconnect.android.designui.components.EliteAvatar
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteMetricCard
 import com.fitconnect.android.designui.components.EliteProgress
+import com.fitconnect.android.designui.components.EliteStack
+import com.fitconnect.android.designui.components.EliteSysLabel
+import com.fitconnect.android.designui.theme.EliteSpace
+import com.fitconnect.android.foundation.common.AppResult
+import com.fitconnect.android.foundation.theme.ThemeMode
 import com.fitconnect.android.telemetry.devices.DeviceEntry
 import com.fitconnect.android.telemetry.provider.ProviderConnectionState
 import kotlinx.coroutines.launch
 
 @Composable
-fun ProfileScreen(onOpenTelemetry: () -> Unit = {}, onOpenAi: () -> Unit = {}) {
+fun ProfileScreen(
+    onOpenTelemetry: () -> Unit = {},
+    onOpenAi: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
+) {
     val container = LocalAthleteContainer.current
     val onSignedOut = LocalAthleteSignOut.current
     val scope = rememberCoroutineScope()
+    val themeMode by container.platform.themeSettings.observe().collectAsState(initial = ThemeMode.SYSTEM)
     var profile by remember { mutableStateOf<AthleteProfile?>(null) }
     var goals by remember { mutableStateOf<List<AthleteGoal>>(emptyList()) }
     var achievements by remember { mutableStateOf<List<Achievement>>(emptyList()) }
@@ -42,89 +59,130 @@ fun ProfileScreen(onOpenTelemetry: () -> Unit = {}, onOpenAi: () -> Unit = {}) {
 
     LaunchedEffect(Unit) {
         container.platform.analytics.screen("athlete_profile")
-        profile = (container.athleteRepository.profile() as? com.fitconnect.android.foundation.common.AppResult.Ok)?.value
-        goals = (container.athleteRepository.goals() as? com.fitconnect.android.foundation.common.AppResult.Ok)?.value.orEmpty()
-        achievements = (container.athleteRepository.achievements() as? com.fitconnect.android.foundation.common.AppResult.Ok)?.value.orEmpty()
-        body = (container.athleteRepository.bodyMetrics() as? com.fitconnect.android.foundation.common.AppResult.Ok)?.value
+        profile = (container.athleteRepository.profile() as? AppResult.Ok)?.value
+        goals = (container.athleteRepository.goals() as? AppResult.Ok)?.value.orEmpty()
+        achievements = (container.athleteRepository.achievements() as? AppResult.Ok)?.value.orEmpty()
+        body = (container.athleteRepository.bodyMetrics() as? AppResult.Ok)?.value
         devices = container.telemetry.deviceCenter.devices(LocalAthleteRepository.ATHLETE_ID)
     }
 
     AthleteScreenScaffold(
         title = profile?.displayName ?: "Profile",
-        subtitle = "Medical · goals · devices · privacy · subscription",
+        subtitle = "Identity · appearance · goals · devices",
         testTag = "athlete_profile",
     ) {
         profile?.let { p ->
             item {
                 EliteCard {
-                    Text("Subscription: ${p.subscriptionTier}", style = MaterialTheme.typography.titleMedium)
-                    Text("Medical: ${p.medicalNotes}", style = MaterialTheme.typography.bodyMedium)
-                    Text("Emergency: ${p.emergencyContact}", style = MaterialTheme.typography.bodyMedium)
-                    Text("Privacy: data stays on-device until sync", style = MaterialTheme.typography.bodyMedium)
+                    EliteStack(spacing = EliteSpace.Md) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(EliteSpace.Md),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            EliteAvatar(initials = initialsOf(p.displayName))
+                            EliteStack(spacing = EliteSpace.Xxs) {
+                                EliteSysLabel("ATHLETE · ${p.subscriptionTier.uppercase()}")
+                                Text(p.displayName, style = MaterialTheme.typography.titleLarge)
+                                Text(
+                                    p.sports.joinToString { it.value },
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                        ProfileField(label = "Medical", value = p.medicalNotes ?: "None on file")
+                        ProfileField(label = "Emergency", value = p.emergencyContact ?: "Not set")
+                        ProfileField(label = "Privacy", value = "On-device until sync")
+                    }
                 }
+            }
+        }
+        item {
+            EliteCard {
+                EliteAppearancePicker(
+                    mode = themeMode,
+                    onModeChange = { next ->
+                        scope.launch { container.platform.themeSettings.setMode(next) }
+                    },
+                )
             }
         }
         body?.let { metrics ->
             item {
-                EliteMetricCard(label = "Weight", value = "${metrics.weightKg} kg")
-                EliteMetricCard(label = "Hydration", value = "${metrics.hydrationLiters} L")
-                EliteMetricCard(label = "Nutrition", value = "${metrics.nutritionKcal} kcal")
+                EliteStack {
+                    EliteSysLabel("BODY METRICS")
+                    EliteMetricCard(label = "Weight", value = "${metrics.weightKg} kg")
+                    EliteMetricCard(label = "Hydration", value = "${metrics.hydrationLiters} L")
+                    EliteMetricCard(label = "Nutrition", value = "${metrics.nutritionKcal} kcal")
+                }
             }
         }
         item { Text("Goals", style = MaterialTheme.typography.titleMedium) }
         items(goals, key = { it.id }) { goal ->
             EliteCard {
-                Text(goal.title, style = MaterialTheme.typography.titleMedium)
-                EliteProgress(progress = goal.progressPercent / 100f)
+                EliteStack(spacing = EliteSpace.Sm) {
+                    Text(goal.title, style = MaterialTheme.typography.titleMedium)
+                    EliteProgress(progress = goal.progressPercent / 100f)
+                }
             }
         }
         item { Text("Achievements", style = MaterialTheme.typography.titleMedium) }
         items(achievements, key = { it.id }) { a ->
             EliteCard {
                 Text(
-                    if (a.unlocked) "✓ ${a.title}" else "○ ${a.title}",
+                    if (a.unlocked) a.title else "${a.title} · locked",
                     style = MaterialTheme.typography.bodyLarge,
                 )
             }
         }
         item { Text("Connected devices / apps", style = MaterialTheme.typography.titleMedium) }
         item {
-            EliteButton(
-                label = "Open Telemetry Center",
-                variant = EliteButtonVariant.Secondary,
-                onClick = onOpenTelemetry,
-            )
-        }
-        item {
-            EliteButton(
-                label = "Open Performance AI",
-                variant = EliteButtonVariant.Secondary,
-                onClick = onOpenAi,
-            )
+            EliteStack {
+                EliteButton(
+                    label = "Settings · language",
+                    variant = EliteButtonVariant.Secondary,
+                    onClick = onOpenSettings,
+                    modifier = Modifier.testTag("athlete_open_settings"),
+                )
+                EliteButton(
+                    label = "Open Telemetry Center",
+                    variant = EliteButtonVariant.Secondary,
+                    onClick = onOpenTelemetry,
+                )
+                EliteButton(
+                    label = "Open Performance AI",
+                    variant = EliteButtonVariant.Secondary,
+                    onClick = onOpenAi,
+                )
+            }
         }
         items(devices, key = { it.provider.name }) { device ->
             EliteCard {
-                Text(device.displayName, style = MaterialTheme.typography.titleMedium)
-                Text(
-                    "State: ${device.state} · ${device.readableMetricCount} metrics",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                val connected = device.state == ProviderConnectionState.CONNECTED
-                EliteButton(
-                    label = if (connected) "Sync now" else "Connect",
-                    variant = EliteButtonVariant.Secondary,
-                    onClick = {
-                        scope.launch {
-                            val athleteId = LocalAthleteRepository.ATHLETE_ID
-                            if (connected) {
-                                container.telemetry.deviceCenter.syncNow(athleteId, device.provider)
-                            } else {
-                                container.telemetry.deviceCenter.connect(athleteId, device.provider)
+                EliteStack(spacing = EliteSpace.Sm) {
+                    Text(device.displayName, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "State: ${device.state} · ${device.readableMetricCount} metrics",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    val connected = device.state == ProviderConnectionState.CONNECTED
+                    EliteButton(
+                        label = if (connected) "Sync now" else "Connect",
+                        variant = EliteButtonVariant.Secondary,
+                        onClick = {
+                            scope.launch {
+                                val athleteId = LocalAthleteRepository.ATHLETE_ID
+                                if (connected) {
+                                    container.telemetry.deviceCenter.syncNow(athleteId, device.provider)
+                                } else {
+                                    container.telemetry.deviceCenter.connect(athleteId, device.provider)
+                                }
+                                devices = container.telemetry.deviceCenter.devices(athleteId)
                             }
-                            devices = container.telemetry.deviceCenter.devices(athleteId)
-                        }
-                    },
-                )
+                        },
+                    )
+                }
             }
         }
         item {
@@ -143,3 +201,22 @@ fun ProfileScreen(onOpenTelemetry: () -> Unit = {}, onOpenAi: () -> Unit = {}) {
         }
     }
 }
+
+@Composable
+private fun ProfileField(label: String, value: String) {
+    EliteStack(spacing = EliteSpace.Xxs) {
+        Text(
+            label.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(value, style = MaterialTheme.typography.bodyLarge)
+    }
+}
+
+private fun initialsOf(name: String): String =
+    name.split(" ")
+        .filter { it.isNotBlank() }
+        .take(2)
+        .joinToString("") { it.first().uppercase() }
+        .ifBlank { "FC" }

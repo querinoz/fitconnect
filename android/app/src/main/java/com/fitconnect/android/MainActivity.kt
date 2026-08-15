@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -23,9 +22,8 @@ class MainActivity : ComponentActivity() {
             FitConnectTheme(container = app.container) {
                 ErrorBoundary(logger = app.container.logger) {
                     Surface(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .safeDrawingPadding(),
+                        modifier = Modifier.fillMaxSize(),
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.background,
                     ) {
                         FitConnectNavHost()
                     }

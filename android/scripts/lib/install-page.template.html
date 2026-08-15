@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FitConnect · Android DEBUG</title>
+  <style>
+    :root {
+      --floor: #070B14;
+      --volt: #C8FF00;
+      --connect: #00DDB4;
+      --ink: #F4F7F2;
+      --muted: #9AA3AD;
+      --line: rgba(244,247,242,0.12);
+      --panel: rgba(244,247,242,0.04);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(200,255,0,0.08), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(0,221,180,0.06), transparent 50%),
+        var(--floor);
+      color: var(--ink);
+      font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+      padding: 28px 20px 48px;
+    }
+    .wrap { max-width: 420px; margin: 0 auto; }
+    .brand {
+      font-family: Syne, "Segoe UI", system-ui, sans-serif;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      font-size: 1.65rem;
+      color: var(--volt);
+      margin: 0 0 4px;
+    }
+    .tag {
+      font-family: "JetBrains Mono", Consolas, monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--connect);
+      margin: 0 0 28px;
+    }
+    h1 {
+      font-family: Syne, "Segoe UI", system-ui, sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .warn {
+      border: 1px solid rgba(200,255,0,0.35);
+      background: var(--panel);
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      line-height: 1.45;
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+    .warn strong { color: var(--volt); font-weight: 600; }
+    .qr {
+      display: block;
+      width: min(260px, 70vw);
+      height: auto;
+      margin: 8px auto 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #F4F7F2;
+      padding: 10px;
+    }
+    .scan {
+      text-align: center;
+      font-family: "JetBrains Mono", Consolas, monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+    .meta {
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+      display: grid;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+    .row { display: grid; grid-template-columns: 88px 1fr; gap: 8px; font-size: 0.82rem; }
+    .k {
+      font-family: "JetBrains Mono", Consolas, monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding-top: 2px;
+    }
+    .v { word-break: break-all; color: var(--ink); }
+    .mono { font-family: "JetBrains Mono", Consolas, monospace; font-size: 0.75rem; }
+    .btn {
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      background: var(--volt);
+      color: #070B14;
+      font-weight: 700;
+      font-family: Syne, "Segoe UI", system-ui, sans-serif;
+      letter-spacing: 0.04em;
+      padding: 14px 18px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    .btn-ghost {
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      color: var(--connect);
+      border: 1px solid rgba(0,221,180,0.45);
+      padding: 12px 18px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      margin-bottom: 18px;
+    }
+    .status {
+      font-family: "JetBrains Mono", Consolas, monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-align: center;
+      color: var(--muted);
+    }
+    .status span { color: var(--volt); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="brand">FITCONNECT</p>
+    <p class="tag">Elite OS · Human Performance</p>
+    <h1>ANDROID LOCAL BUILD</h1>
+    <div class="warn">
+      <strong>LOCAL DEMO — NOT PRODUCTION.</strong>
+      This is a local DEBUG build for development and functional testing.
+      QR scanning does not bypass Android install security.
+      Android may ask permission to install apps from this browser or file source.
+    </div>
+    <img class="qr" src="qr.svg" alt="QR code for this install page" width="260" height="260" />
+    <p class="scan">SCAN WITH YOUR ANDROID PHONE</p>
+    <div class="meta">
+      <div class="row"><div class="k">Version</div><div class="v mono">{{VERSION_NAME}}</div></div>
+      <div class="row"><div class="k">Build</div><div class="v mono">DEBUG · code {{VERSION_CODE}}</div></div>
+      <div class="row"><div class="k">Package</div><div class="v mono">{{APPLICATION_ID}}</div></div>
+      <div class="row"><div class="k">Artifact</div><div class="v mono">{{FILE_NAME}}</div></div>
+      <div class="row"><div class="k">Size</div><div class="v mono">{{SIZE_LABEL}}</div></div>
+      <div class="row"><div class="k">SHA-256</div><div class="v mono" title="{{SHA256}}">{{SHA256_SHORT}}</div></div>
+      <div class="row"><div class="k">Built</div><div class="v mono">{{BUILT_AT}}</div></div>
+      <div class="row"><div class="k">Env</div><div class="v mono">LOCAL DEMO</div></div>
+    </div>
+    <a class="btn" href="app.apk" download="{{FILE_NAME}}">INSTALL APK</a>
+    <a class="btn-ghost" href="fitconnect://app/auth">OPEN FITCONNECT (after install)</a>
+    <div class="warn" style="margin-top:8px">
+      <strong>NETWORK</strong><br />
+      Phone and PC must be on the same Wi-Fi. Do not use localhost on the phone.
+      If download fails, check Windows Firewall for the printed port (do not disable the firewall).
+      <br /><br />
+      <strong>TROUBLESHOOTING</strong><br />
+      1. Same Wi-Fi as the PC running the distribution script.<br />
+      2. Allow install from this source when Android asks.<br />
+      3. Package id is com.fitconnect.android.debug (does not overwrite production).<br />
+      4. After install, use LOCAL DEMO personas (Inês / Marina / Tomás).
+    </div>
+    <p class="status"><span>LOCAL DEMO</span> · NOT PRODUCTION · PLAY LOCKED</p>
+  </div>
+</body>
+</html>

@@ -9,11 +9,15 @@ import java.util.Locale
 
 enum class AppLocale(
     val bcp47: String,
+    val displayName: String,
     val rtl: Boolean = false,
 ) {
-    EN("en"),
-    PT("pt"),
-    ES("es"),
+    EN("en", "English"),
+    PT("pt", "Português"),
+    PT_PT("pt-PT", "Português (Portugal)"),
+    ES("es", "Español"),
+    FR("fr", "Français"),
+    DE("de", "Deutsch"),
 }
 
 interface LocaleManager {

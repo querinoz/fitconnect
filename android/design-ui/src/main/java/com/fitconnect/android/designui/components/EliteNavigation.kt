@@ -24,14 +24,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.fitconnect.android.design.EliteSurfaceColors
 import com.fitconnect.android.designui.theme.EliteBorder
 import com.fitconnect.android.designui.theme.EliteMonoTextStyle
 import com.fitconnect.android.designui.theme.EliteOpacity
 import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
-import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.android.foundation.a11y.Accessibility
 
 data class EliteNavItem(
@@ -60,7 +59,7 @@ fun EliteFloatingNavBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(EliteRadius.Xl))
-                .background(EliteSurfaceColors.ELEVATED.toColor().copy(alpha = 0.94f))
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.96f))
                 .border(
                     width = EliteBorder.Hairline,
                     color = MaterialTheme.colorScheme.outline.copy(alpha = EliteOpacity.Border),
@@ -79,7 +78,7 @@ fun EliteFloatingNavBar(
 
 @Composable
 private fun RowScope.EliteNavTab(item: EliteNavItem) {
-    val selectedColor = EliteSurfaceColors.VOLTLINE.toColor()
+    val selectedColor = MaterialTheme.colorScheme.primary
     val idleColor = MaterialTheme.colorScheme.onSurfaceVariant
     Column(
         modifier = Modifier
@@ -92,7 +91,7 @@ private fun RowScope.EliteNavTab(item: EliteNavItem) {
             )
             .then(
                 if (item.selected) {
-                    Modifier.background(EliteSurfaceColors.VOLTLINE_DIM.toColor())
+                    Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f))
                 } else {
                     Modifier
                 },
@@ -113,6 +112,8 @@ private fun RowScope.EliteNavTab(item: EliteNavItem) {
             style = MaterialTheme.typography.labelSmall,
             color = if (item.selected) selectedColor else idleColor,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
         )
     }
 }
@@ -163,9 +164,9 @@ fun EliteOnboardingProgress(
                         .clip(RoundedCornerShape(EliteRadius.Full))
                         .background(
                             if (index <= clamped) {
-                                EliteSurfaceColors.VOLTLINE.toColor()
+                                MaterialTheme.colorScheme.primary
                             } else {
-                                EliteSurfaceColors.SURFACE_CONTAINER_HIGH.toColor()
+                                MaterialTheme.colorScheme.surfaceVariant
                             },
                         ),
                 )

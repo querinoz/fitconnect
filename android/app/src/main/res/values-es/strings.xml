@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FitConnect</string>
+    <string name="nav_guest_title">Bienvenido</string>
+    <string name="nav_guest_body">FitConnect Elite OS — conectar, entrenar y rendir. Continúa en LOCAL_DEMO o inicia sesión.</string>
+    <string name="nav_continue_auth">Continuar</string>
+    <string name="nav_continue_anonymous">Continuar de forma anónima</string>
+    <string name="nav_auth_title">Iniciar sesión</string>
+    <string name="nav_auth_body">Personas LOCAL_DEMO — Inês (atleta), Marina (multideporte), Tomás (entrenador). Contraseña: password1</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_password_label">Contraseña</string>
+    <string name="auth_submit">Entrar</string>
+    <string name="splash_tagline">Elite OS · Connect. Train. Perform.</string>
+    <string name="nav_sign_out">Cerrar sesión</string>
+    <string name="nav_error_title">Error</string>
+    <string name="nav_error_body">Algo salió mal. Inténtalo de nuevo.</string>
+</resources>

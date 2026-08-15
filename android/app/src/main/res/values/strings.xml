@@ -20,7 +20,7 @@
     <string name="auth_forgot_submit">Send reset link</string>
     <string name="nav_enter_demo_session">Enter athlete demo</string>
     <string name="nav_enter_coach_demo">Enter coach demo</string>
-    <string name="splash_tagline">Connect. Train. Perform.</string>
+    <string name="splash_tagline">Elite OS · Connect. Train. Perform.</string>
     <string name="notification_channel_system">System</string>
     <string name="notification_channel_session">Sessions</string>
     <string name="notification_channel_training">Training</string>

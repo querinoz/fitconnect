@@ -22,6 +22,7 @@ import com.fitconnect.android.coach.ui.programs.ProgramsScreen
 import com.fitconnect.android.coach.ui.revenue.RevenueScreen
 import com.fitconnect.android.coach.ui.sessions.SessionDetailScreen
 import com.fitconnect.android.coach.ui.sessions.SessionsScreen
+import com.fitconnect.android.coach.ui.settings.CoachSettingsScreen
 
 enum class CoachDest(
     val route: String,
@@ -43,7 +44,8 @@ enum class CoachDest(
     ANALYTICS("coach/analytics", "Analytics", "N"),
     REVENUE("coach/revenue", "Revenue", "R"),
     AI("coach/ai", "AI", "A"),
-    NOTIFICATIONS("coach/notifications", "Alerts", "!");
+    NOTIFICATIONS("coach/notifications", "Alerts", "!"),
+    SETTINGS("coach/settings", "Settings", "G");
 
     companion object {
         val bottomTabs = entries.filter { it.bottom }
@@ -127,8 +129,10 @@ fun CoachNavHost(navController: NavHostController) {
                 onOpenSessions = { navController.navigate(CoachDest.SESSIONS.route) },
                 onOpenNotifications = { navController.navigate(CoachDest.NOTIFICATIONS.route) },
                 onOpenAi = { navController.navigate(CoachDest.AI.route) },
+                onOpenSettings = { navController.navigate(CoachDest.SETTINGS.route) },
             )
         }
+        composable(CoachDest.SETTINGS.route) { CoachSettingsScreen() }
         composable(CoachDest.NOTIFICATIONS.route) { NotificationsScreen() }
     }
 }

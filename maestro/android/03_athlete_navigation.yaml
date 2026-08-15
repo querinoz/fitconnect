@@ -1,4 +1,4 @@
-# 03 — Athlete bottom navigation (product brief tabs)
+# 03 — Athlete bottom navigation (Home · Discover · Activity · Community · Profile)
 appId: com.fitconnect.android.debug
 ---
 - launchApp
@@ -20,17 +20,17 @@ appId: com.fitconnect.android.debug
 - assertVisible:
     id: "athlete_discover"
 - tapOn:
-    id: "athlete_tab_training"
+    id: "athlete_tab_activity"
 - assertVisible:
-    id: "athlete_training"
-- tapOn:
-    id: "athlete_tab_programs"
-- assertVisible:
-    id: "athlete_programs"
+    id: "athlete_activity"
 - tapOn:
     id: "athlete_tab_community"
 - assertVisible:
     id: "athlete_community"
+- tapOn:
+    id: "athlete_tab_profile"
+- assertVisible:
+    id: "athlete_profile"
 - tapOn:
     id: "athlete_tab_home"
 - assertVisible:

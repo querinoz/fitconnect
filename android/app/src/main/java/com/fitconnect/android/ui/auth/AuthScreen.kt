@@ -8,12 +8,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,9 +28,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import com.fitconnect.android.R
+import com.fitconnect.android.designui.components.EliteAppearancePicker
 import com.fitconnect.android.designui.components.EliteBadge
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
+import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteTextField
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.analytics.Analytics
@@ -40,6 +44,8 @@ import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.foundation.config.AppConfig
 import com.fitconnect.android.foundation.error.ErrorDomain
 import com.fitconnect.android.foundation.error.ErrorPipeline
+import com.fitconnect.android.foundation.theme.ThemeMode
+import com.fitconnect.android.ui.theme.LocalAppContainer
 import kotlinx.coroutines.launch
 
 @Composable
@@ -52,6 +58,8 @@ fun AuthScreen(
     onError: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val appContainer = LocalAppContainer.current
+    val themeMode by appContainer.themeSettings.observe().collectAsState(initial = ThemeMode.SYSTEM)
     val usesLiveAuth = config.usesLiveAuth
     val isDebuggable = config.isDebuggable
     var mode by remember { mutableStateOf(AuthMode.SignIn) }
@@ -74,6 +82,7 @@ fun AuthScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .statusBarsPadding()
             .padding(EliteSpace.Xl)
             .testTag("screen_auth"),
         verticalArrangement = Arrangement.Center,
@@ -90,6 +99,15 @@ fun AuthScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.height(EliteSpace.Sm))
+        EliteCard {
+            EliteAppearancePicker(
+                mode = themeMode,
+                onModeChange = { next ->
+                    scope.launch { appContainer.themeSettings.setMode(next) }
+                },
+            )
+        }
+        Spacer(modifier = Modifier.height(EliteSpace.Lg))
 
         when {
             usesLiveAuth -> {

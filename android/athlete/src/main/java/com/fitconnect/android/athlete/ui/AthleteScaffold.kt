@@ -2,14 +2,18 @@ package com.fitconnect.android.athlete.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -20,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -59,7 +62,10 @@ fun AthleteOsApp(
     ) {
         Scaffold(
             modifier = Modifier.testTag("athlete_os"),
-            containerColor = EliteSurfaceColors.FLOOR.toColor(),
+            containerColor = MaterialTheme.colorScheme.background,
+            contentWindowInsets = WindowInsets.safeDrawing.only(
+                WindowInsetsSides.Horizontal + WindowInsetsSides.Top,
+            ),
             topBar = {
                 if (!online) {
                     OfflineBanner()
@@ -74,12 +80,13 @@ fun AthleteOsApp(
                             icon = when (dest) {
                                 AthleteDest.HOME -> Icons.Filled.Home
                                 AthleteDest.DISCOVER -> Icons.Filled.Search
-                                AthleteDest.TRAINING -> Icons.Filled.DateRange
-                                AthleteDest.PROGRAMS -> Icons.Filled.Star
+                                AthleteDest.ACTIVITY -> Icons.Filled.PlayArrow
                                 AthleteDest.COMMUNITY -> Icons.Filled.Favorite
+                                AthleteDest.PROFILE -> Icons.Filled.Person
                                 else -> Icons.Filled.Home
                             },
-                            selected = current?.startsWith(dest.route) == true,
+                            selected = current?.startsWith(dest.route) == true ||
+                                (dest == AthleteDest.PROFILE && current == AthleteDest.SETTINGS.route),
                             onClick = {
                                 navController.navigate(dest.route) {
                                     popUpTo(navController.graph.findStartDestination().id) {
@@ -115,11 +122,11 @@ private fun OfflineBanner() {
         content = {
             EliteBadge(
                 text = "OFFLINE",
-                containerColor = EliteSurfaceColors.RECOVERY.toColor(),
-                contentColor = EliteSurfaceColors.FLOOR.toColor(),
+            containerColor = EliteSurfaceColors.RECOVERY.toColor(),
+            contentColor = MaterialTheme.colorScheme.onPrimary,
             )
             Text(
-                text = "  Cached · will sync on reconnect",
+                text = "  Working offline · cached · will sync on reconnect",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

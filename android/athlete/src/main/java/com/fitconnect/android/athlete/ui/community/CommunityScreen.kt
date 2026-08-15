@@ -29,6 +29,7 @@ import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteChip
+import com.fitconnect.android.designui.components.EliteFlowRow
 import com.fitconnect.android.designui.components.EliteTextField
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.auth.DemoPersona
@@ -87,7 +88,7 @@ fun CommunityScreen() {
         testTag = "athlete_community",
     ) {
         item {
-            Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
+            EliteFlowRow {
                 EliteChip(label = "Following", onClick = { kind = FeedKind.FOLLOWING })
                 EliteChip(label = "Official", onClick = { kind = FeedKind.OFFICIAL })
                 EliteChip(label = "Sport", onClick = { kind = FeedKind.SPORT })

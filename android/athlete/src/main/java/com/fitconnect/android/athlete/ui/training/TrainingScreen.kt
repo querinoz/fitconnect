@@ -31,7 +31,6 @@ import com.fitconnect.android.athlete.domain.TrainingSession
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteLoad
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
-import com.fitconnect.android.design.EliteSurfaceColors
 import com.fitconnect.android.designui.components.EliteBadge
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
@@ -39,7 +38,6 @@ import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteTag
 import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
-import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.android.foundation.auth.DemoPersona
 import com.fitconnect.android.foundation.common.AppResult
 import kotlinx.coroutines.delay
@@ -179,7 +177,7 @@ private fun LiveSessionPreview(
     onError: () -> Unit,
     onReset: () -> Unit,
 ) {
-    val floor = EliteSurfaceColors.FLOOR.toColor()
+    val panel = MaterialTheme.colorScheme.surfaceVariant
     EliteCard(modifier = Modifier.testTag("live_session_preview")) {
         EliteBadge(text = DemoPersona.MODE_LABEL)
         Text("Live session preview", style = MaterialTheme.typography.titleLarge)
@@ -192,7 +190,7 @@ private fun LiveSessionPreview(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(160.dp)
-                .background(floor, RoundedCornerShape(EliteRadius.Md))
+                .background(panel, RoundedCornerShape(EliteRadius.Md))
                 .padding(EliteSpace.Md),
             contentAlignment = Alignment.Center,
         ) {
@@ -208,7 +206,7 @@ private fun LiveSessionPreview(
                 Text("Participants: You · Coach Tomás (demo)", style = MaterialTheme.typography.bodySmall)
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
+        com.fitconnect.android.designui.components.EliteFlowRow {
             when (state.phase) {
                 LiveSessionPhase.IDLE, LiveSessionPhase.ENDED, LiveSessionPhase.ERROR -> {
                     EliteButton(label = "Join (demo)", onClick = onJoin)

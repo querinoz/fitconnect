@@ -30,7 +30,6 @@ import com.fitconnect.android.athlete.domain.CoachCard
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteLoad
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
-import com.fitconnect.android.design.EliteSurfaceColors
 import com.fitconnect.android.designui.components.EliteAvatar
 import com.fitconnect.android.designui.components.EliteBadge
 import com.fitconnect.android.designui.components.EliteButton
@@ -44,7 +43,6 @@ import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.components.EliteTextField
 import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
-import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.android.foundation.auth.DemoPersona
 import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.geo.booking.BookingRequest
@@ -382,7 +380,7 @@ private fun BookingSheet(
             "Day +${draft.dayOffset} · ${"%02d:00".format(draft.hour)} · ${draft.durationMin} min",
             style = MaterialTheme.typography.bodyMedium,
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
+        com.fitconnect.android.designui.components.EliteFlowRow {
             EliteButton(label = "Confirm booking", onClick = onConfirm)
             EliteButton(label = "Cancel", variant = EliteButtonVariant.Ghost, onClick = onDismiss)
         }
@@ -395,11 +393,11 @@ private fun LocalMapPreview(
     distanceKm: Double,
     durationMin: Int,
 ) {
-    val floor = EliteSurfaceColors.FLOOR.toColor()
-    val elevated = EliteSurfaceColors.ELEVATED.toColor()
-    val volt = EliteSurfaceColors.VOLTLINE.toColor()
-    val teal = EliteSurfaceColors.CONNECT.toColor()
-    val alert = EliteSurfaceColors.ALERT.toColor()
+    val floor = MaterialTheme.colorScheme.background
+    val elevated = MaterialTheme.colorScheme.surface
+    val volt = MaterialTheme.colorScheme.primary
+    val teal = MaterialTheme.colorScheme.secondary
+    val alert = MaterialTheme.colorScheme.error
     Box(
         modifier = Modifier
             .fillMaxWidth()

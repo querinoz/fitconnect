@@ -44,7 +44,7 @@ fun EliteRecoveryRing(
         animationSpec = if (reduceMotion) tween(0) else tween(900),
         label = "recovery_ring",
     )
-    val track = EliteSurfaceColors.ELEVATED.toColor().copy(alpha = 0.55f)
+    val track = com.fitconnect.android.designui.theme.eliteTrackColor()
     val arc = when {
         clamped >= 75 -> EliteSurfaceColors.PERFORMANCE.toColor()
         clamped >= 50 -> EliteSurfaceColors.VOLTLINE.toColor()

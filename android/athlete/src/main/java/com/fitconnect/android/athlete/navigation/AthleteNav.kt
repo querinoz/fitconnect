@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import com.fitconnect.android.athlete.ui.activity.ActivityScreen
 import com.fitconnect.android.athlete.ui.ai.AthleteAiScreen
 import com.fitconnect.android.athlete.ui.community.CommunityScreen
 import com.fitconnect.android.athlete.ui.discover.DiscoverScreen
@@ -15,6 +16,7 @@ import com.fitconnect.android.athlete.ui.notifications.NotificationsScreen
 import com.fitconnect.android.athlete.ui.profile.ProfileScreen
 import com.fitconnect.android.athlete.ui.programs.ProgramsScreen
 import com.fitconnect.android.athlete.ui.recovery.RecoveryScreen
+import com.fitconnect.android.athlete.ui.settings.SettingsScreen
 import com.fitconnect.android.athlete.ui.sports.SportsScreen
 import com.fitconnect.android.athlete.ui.telemetry.TelemetryScreen
 import com.fitconnect.android.athlete.ui.training.SessionDetailScreen
@@ -28,15 +30,17 @@ enum class AthleteDest(
 ) {
     HOME("athlete/home", "Home", "H", bottom = true),
     DISCOVER("athlete/discover", "Discover", "D", bottom = true),
-    TRAINING("athlete/training", "Sessions", "S", bottom = true),
-    PROGRAMS("athlete/programs", "Programs", "P", bottom = true),
+    ACTIVITY("athlete/activity", "Activity", "A", bottom = true),
     COMMUNITY("athlete/community", "Community", "C", bottom = true),
+    PROFILE("athlete/profile", "Profile", "Y", bottom = true),
+    TRAINING("athlete/training", "Sessions", "S"),
+    PROGRAMS("athlete/programs", "Programs", "P"),
     RECOVERY("athlete/recovery", "Recover", "R"),
-    PROFILE("athlete/profile", "You", "Y"),
     SPORTS("athlete/sports", "Sports", "S"),
     TELEMETRY("athlete/telemetry", "Telemetry", "T"),
     AI("athlete/ai", "AI", "A"),
     NOTIFICATIONS("athlete/notifications", "Alerts", "N"),
+    SETTINGS("athlete/settings", "Settings", "G"),
     SESSION("athlete/training/{sessionId}", "Session", "T");
 
     companion object {
@@ -67,8 +71,13 @@ fun AthleteNavHost(
                 onOpenCommunity = { navController.navigate(AthleteDest.COMMUNITY.route) },
                 onOpenProfile = { navController.navigate(AthleteDest.PROFILE.route) },
                 onOpenDiscover = { navController.navigate(AthleteDest.DISCOVER.route) },
+                onOpenActivity = { navController.navigate(AthleteDest.ACTIVITY.route) },
             )
         }
+        composable(
+            AthleteDest.ACTIVITY.route,
+            deepLinks = listOf(navDeepLink { uriPattern = "fitconnect://app/athlete/activity" }),
+        ) { ActivityScreen() }
         composable(
             AthleteDest.RECOVERY.route,
             deepLinks = listOf(navDeepLink { uriPattern = "fitconnect://app/athlete/recovery" }),
@@ -99,6 +108,14 @@ fun AthleteNavHost(
             ProfileScreen(
                 onOpenTelemetry = { navController.navigate(AthleteDest.TELEMETRY.route) },
                 onOpenAi = { navController.navigate(AthleteDest.AI.route) },
+                onOpenSettings = { navController.navigate(AthleteDest.SETTINGS.route) },
+            )
+        }
+        composable(AthleteDest.SETTINGS.route) {
+            SettingsScreen(
+                onOpenProfile = { navController.navigate(AthleteDest.PROFILE.route) },
+                onOpenNotifications = { navController.navigate(AthleteDest.NOTIFICATIONS.route) },
+                onOpenTelemetry = { navController.navigate(AthleteDest.TELEMETRY.route) },
             )
         }
         composable(AthleteDest.NOTIFICATIONS.route) { NotificationsScreen() }

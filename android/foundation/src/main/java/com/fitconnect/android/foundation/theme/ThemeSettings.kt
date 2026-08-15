@@ -10,6 +10,13 @@ enum class ThemeMode {
     DARK,
     LIGHT,
     HIGH_CONTRAST,
+    ;
+
+    fun resolveDark(systemDark: Boolean): Boolean = when (this) {
+        SYSTEM -> systemDark
+        DARK, HIGH_CONTRAST -> true
+        LIGHT -> false
+    }
 }
 
 /**

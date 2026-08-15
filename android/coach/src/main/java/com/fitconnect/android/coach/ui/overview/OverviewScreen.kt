@@ -23,8 +23,10 @@ import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteCardVariant
 import com.fitconnect.android.designui.components.EliteChip
+import com.fitconnect.android.designui.components.EliteFlowRow
 import com.fitconnect.android.designui.components.EliteMetricCard
 import com.fitconnect.android.designui.theme.EliteSpace
+import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.foundation.common.AppResult
 import kotlinx.coroutines.launch
 
@@ -67,21 +69,18 @@ fun OverviewScreen(
                 }
             }
             item {
-                com.fitconnect.android.designui.components.EliteSectionHeader(
-                    title = "Squad signals",
-                    overline = "KPI",
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    content = {
-                        EliteMetricCard(label = "Unread", value = "${home.unreadMessages}")
-                        EliteMetricCard(label = "Bookings", value = "${home.pendingBookings}")
-                        EliteMetricCard(label = "Revenue", value = "€${home.revenueSummaryCents / 100}")
-                    },
-                )
+                EliteStack {
+                    com.fitconnect.android.designui.components.EliteSectionHeader(
+                        title = "Squad signals",
+                        overline = "KPI",
+                    )
+                    EliteMetricCard(label = "Unread", value = "${home.unreadMessages}")
+                    EliteMetricCard(label = "Bookings", value = "${home.pendingBookings}")
+                    EliteMetricCard(label = "Revenue", value = "€${home.revenueSummaryCents / 100}")
+                }
             }
             item {
+                EliteStack {
                 com.fitconnect.android.designui.components.EliteSectionHeader(
                     title = "Readiness heatmap",
                     overline = "ROSTER",
@@ -109,17 +108,17 @@ fun OverviewScreen(
                         Text("Squad stable — no attention flags", style = MaterialTheme.typography.bodyMedium)
                     }
                 }
+                }
             }
             item {
-                com.fitconnect.android.designui.components.EliteSectionHeader(title = "Weekly metrics", overline = "TREND")
-            }
-            item {
-                home.weeklyMetrics.forEach { (k, v) ->
-                    Text(
-                        "$k · ${v.toInt()}",
-                        style = com.fitconnect.android.designui.theme.EliteMonoTextStyle,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                EliteStack {
+                    home.weeklyMetrics.forEach { (k, v) ->
+                        Text(
+                            "$k · ${v.toInt()}",
+                            style = com.fitconnect.android.designui.theme.EliteMonoTextStyle,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
             item {
@@ -169,22 +168,19 @@ fun OverviewScreen(
                 com.fitconnect.android.designui.components.EliteSectionHeader(title = "Quick actions", overline = "NAV")
             }
             item {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
-                    content = {
-                        home.quickActions.take(3).forEach { action ->
-                            EliteChip(label = action, onClick = {
-                                when {
-                                    action.contains("program", true) -> onOpenPrograms()
-                                    action.contains("booking", true) -> onOpenBookings()
-                                    action.contains("calendar", true) -> onOpenCalendar()
-                                    action.contains("message", true) -> onOpenInbox()
-                                    else -> onOpenNotifications()
-                                }
-                            })
-                        }
-                    },
-                )
+                EliteFlowRow {
+                    home.quickActions.take(3).forEach { action ->
+                        EliteChip(label = action, onClick = {
+                            when {
+                                action.contains("program", true) -> onOpenPrograms()
+                                action.contains("booking", true) -> onOpenBookings()
+                                action.contains("calendar", true) -> onOpenCalendar()
+                                action.contains("message", true) -> onOpenInbox()
+                                else -> onOpenNotifications()
+                            }
+                        })
+                    }
+                }
             }
             item {
                 com.fitconnect.android.designui.components.EliteSectionHeader(title = "Live activity", overline = "FEED")
@@ -193,14 +189,11 @@ fun OverviewScreen(
                 Text(feed.text, style = MaterialTheme.typography.bodyMedium)
             }
             item {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
-                    content = {
-                        EliteButton("Athletes", onClick = onOpenAthletes, variant = EliteButtonVariant.Secondary)
-                        EliteButton("Analytics", onClick = onOpenAnalytics, variant = EliteButtonVariant.Ghost)
-                        EliteButton("Revenue", onClick = onOpenRevenue, variant = EliteButtonVariant.Ghost)
-                    },
-                )
+                EliteFlowRow {
+                    EliteButton("Athletes", onClick = onOpenAthletes, variant = EliteButtonVariant.Secondary)
+                    EliteButton("Analytics", onClick = onOpenAnalytics, variant = EliteButtonVariant.Ghost)
+                    EliteButton("Revenue", onClick = onOpenRevenue, variant = EliteButtonVariant.Ghost)
+                }
             }
         }
     }

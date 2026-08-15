@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FitConnect</string>
+    <string name="nav_guest_title">Bem-vindo</string>
+    <string name="nav_guest_body">FitConnect Elite OS — ligar, treinar e performar. Continua em LOCAL_DEMO ou inicia sessão.</string>
+    <string name="nav_continue_auth">Continuar</string>
+    <string name="nav_continue_anonymous">Continuar anonimamente</string>
+    <string name="nav_auth_title">Entrar</string>
+    <string name="nav_auth_body">Personas LOCAL_DEMO — Inês (atleta), Marina (multi-desporto), Tomás (treinador). Palavra-passe: password1</string>
+    <string name="nav_auth_live_body">Entra com a tua conta FitConnect.</string>
+    <string name="nav_auth_unconfigured_body">A autenticação de produção não está configurada. Define o URL e a chave anónima do Supabase — o login fica bloqueado até o IdP estar pronto.</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_password_label">Palavra-passe</string>
+    <string name="auth_submit">Entrar</string>
+    <string name="auth_signup_link">Criar conta</string>
+    <string name="auth_signup_body">Cria uma conta LOCAL_DEMO (não é produção).</string>
+    <string name="auth_signup_submit">Criar conta</string>
+    <string name="auth_forgot_link">Esqueceste a palavra-passe?</string>
+    <string name="auth_forgot_body">Vamos enfileirar um link de reposição. Em LOCAL_DEMO isto é simulado.</string>
+    <string name="auth_forgot_submit">Enviar link</string>
+    <string name="nav_enter_demo_session">Entrar no demo de atleta</string>
+    <string name="nav_enter_coach_demo">Entrar no demo de treinador</string>
+    <string name="splash_tagline">Elite OS · Connect. Train. Perform.</string>
+    <string name="notification_channel_system">Sistema</string>
+    <string name="notification_channel_session">Sessões</string>
+    <string name="notification_channel_training">Treino</string>
+    <string name="notification_channel_social">Social</string>
+    <string name="notification_channel_marketing">Marketing</string>
+    <string name="nav_back">Voltar</string>
+    <string name="nav_home_title">Sessão iniciada</string>
+    <string name="nav_home_body">Escolhe Atleta ou Treinador na autenticação para entrar no sistema operativo.</string>
+    <string name="nav_role_gate">Ver papel</string>
+    <string name="nav_design_catalog">Sistema de design</string>
+    <string name="nav_sign_out">Sair</string>
+    <string name="nav_role_title">Controlo de papel</string>
+    <string name="nav_role_body">Papel ativo: %1$s</string>
+    <string name="nav_role_unknown">desconhecido</string>
+    <string name="nav_error_title">Erro</string>
+    <string name="nav_error_body">Algo correu mal. Tenta outra vez ou volta e escolhe outro caminho.</string>
+</resources>

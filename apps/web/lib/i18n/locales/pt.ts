@@ -376,6 +376,32 @@ export const pt = {
       demoNote:
         "Controlos só de demo — ligar às definições reais de conta em produção."
     },
+    cockpit: {
+      demo: "LOCAL_DEMO",
+      home: "Início",
+      discover: "Descobrir",
+      activity: "Atividade",
+      community: "Comunidade",
+      profile: "Perfil",
+      prime: "Prime Recovery",
+      means: "O que significa",
+      meansBody: "Sistema nervoso preparado. Mantém intensidade, protege o sono.",
+      todo: "O que fazer",
+      todoBody: "Executa o bloco de limiar de hoje. Inicia o monitor quando saíres.",
+      start: "Iniciar monitorização",
+      pause: "Pausa",
+      resume: "Retomar",
+      end: "Terminar",
+      gps: "GPS: percurso simulado (não é hardware)",
+      frameAria: "Pré-visualização do cockpit móvel FitConnect",
+      androidFrame: "Android 412",
+      iphoneFrame: "iPhone 390",
+      coachName: "Coach Ana · Lisboa",
+      book: "Marcar intro",
+      emptyFeed: "Sem posts em cache. Atualiza quando estiveres online.",
+      role: "Atleta",
+      sport: "Corrida · Trail"
+    },
     voltline: "Voltline"
   },
   trustStrip: {

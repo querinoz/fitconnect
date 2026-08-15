@@ -30,6 +30,7 @@ dependencies {
     implementation(project(":telemetry"))
     implementation(project(":ai"))
     implementation(project(":community"))
+    implementation(project(":core-capture"))
     implementation(project(":design"))
     implementation(project(":design-ui"))
     implementation(libs.androidx.core.ktx)

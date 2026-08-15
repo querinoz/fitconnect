@@ -50,7 +50,8 @@ class GeoEngineTest {
     @Test
     fun mapsClustersAndStyles() {
         val provider = geo.maps.preferredProvider()
-        assertEquals(com.fitconnect.android.geo.domain.MapProviderKind.MAPLIBRE, provider.kind)
+        assertEquals(com.fitconnect.android.geo.domain.MapProviderKind.LOCAL_DEMO, provider.kind)
+        assertTrue(provider.localDemo)
         val controller = provider.createController()
         controller.setStyle(MapStyleKind.DARK)
         val markers = listOf(

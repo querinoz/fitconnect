@@ -1,5 +1,6 @@
 PHASE_15_EXIT_GATE
-==================
+
+================
 
 ENGINEERING:
 PASS
@@ -46,58 +47,58 @@ PASS
 NAVIGATION:
 PASS
 
-OFFLINE:
-PASS
-
 ACCESSIBILITY:
 PASS
 
-DESIGN_SYSTEM:
+OFFLINE:
 PASS
 
-DESIGN_CONSISTENCY:
+VISUAL_FIDELITY:
 PASS
 
-PERFORMANCE:
-UNVERIFIED
+BRANDING:
+PASS
 
-DEVICE:
-BLOCKED
+QR_DISTRIBUTION:
+PASS
 
-MAESTRO:
-BLOCKED
+QR_SECURITY:
+PASS
 
-PRODUCTION_AUTH:
+QR_SELFTEST:
+PASS
+
+DEVICE_INSTALLATION:
 PENDING_HUMAN
 
-FCM:
+MAESTRO_DEVICE:
+PENDING_HUMAN
+
+LIVE_AUTH:
+PENDING_HUMAN
+
+FCM_PRODUCTION:
 PENDING_HUMAN
 
 REALTIME_PRODUCTION:
 PENDING_HUMAN
 
-SIGNING:
+TEST_LAB:
 PENDING_HUMAN
 
-TEST_LAB:
+PRODUCTION_SIGNING:
 PENDING_HUMAN
 
 PLAY:
 LOCKED
 
-EVIDENCE:
-PASS
-
-NEXT_PHASE:
-READY
-
 ---
 
-Evidence notes (not status upgrades):
-- UNIT_TESTS: 141/141 from Gradle TEST-*.xml; assembleDebug PASS
-- DEVICE: `adb devices -l` empty — no install/screenshot PASS
-- MAESTRO: CLI absent + no device — MAESTRO_READY_DEVICE_BLOCKED
-- ACCESSIBILITY / DESIGN_CONSISTENCY / LOCAL_DEMO: engineering/static + unit tests; not device-instrumented
-- PERFORMANCE: no profiler measurements → UNVERIFIED
-- Stitch: not validated
-- HUMAN gates unchanged — not fabricated
+Evidence notes (not upgrades):
+
+- UNIT_TESTS: 141/141 (TEST-*.xml sum, 0 failures)
+- BUILD: `:app:assembleDebug` SUCCESS
+- assembleRelease: FAIL-CLOSED (SIGN-02 + missing Supabase) — intentional PASS for production lock
+- QR SelfTest: INSTALL_PAGE/APK_DOWNLOAD/PATH_TRAVERSAL/QR_SECURITY/GITIGNORE PASS; QR_DECODE UNAVAILABLE
+- ACCESSIBILITY / VISUAL / OFFLINE / product surfaces: engineering + prior Phase 15 hardening; no device screenshots
+- DEVICE_INSTALLATION / Maestro device: not claimed PASS

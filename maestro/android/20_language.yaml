@@ -1,0 +1,29 @@
+# 20 — Language picker (EN/PT) from Settings
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_primary"
+- runFlow: _complete_onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: "athlete_os"
+    timeout: 12000
+- tapOn:
+    id: "athlete_tab_profile"
+- tapOn:
+    id: "athlete_open_settings"
+- assertVisible:
+    id: "athlete_settings"
+- assertVisible:
+    id: "language_picker"
+- tapOn:
+    id: "language_pt"
+- assertVisible:
+    id: "language_en"

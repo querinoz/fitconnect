@@ -1,19 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  FitConnect brand mark (simplified for vector splash / legacy).
+  Official raster adaptive icons use apps/web/public/brand/fitconnect-logo-*.png.
+
+  SPLASH SAFE ZONE (P1-SPLASH-01, docs/android/ANDROID_LANDING_PARITY_AUDIT.md):
+  windowSplashScreenAnimatedIcon is masked to a circle; only the inner 2/3 of the
+  canvas is guaranteed visible (safe radius = 108/3 = 36).
+  Unscaled, the outer Voltline ring reaches r = 40 + strokeWidth/2 = 43.5 > 36 and
+  was being cropped. Artwork is therefore grouped and scaled by 36/43.5 ~= 0.82
+  about the centre. The floor rect stays full-bleed on purpose: it is masked to the
+  circle and matches windowSplashScreenIconBackgroundColor (@color/eos_floor).
+  If ring radius or strokeWidth changes, recompute the scale factor.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- Floor -->
     <path
         android:fillColor="#070B14"
         android:pathData="M0,0h108v108h-108z" />
-    <path
-        android:fillColor="#151B2D"
-        android:pathData="M18,18h72v72h-72z" />
-    <path
-        android:fillColor="#C8FF00"
-        android:pathData="M54,24 L72,72 L54,60 L36,72 Z" />
-    <path
-        android:fillColor="#00DDB4"
-        android:pathData="M30,78h48v6h-48z" />
+    <!-- Mark artwork, scaled into the splash safe zone. See header note. -->
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="0.82"
+        android:scaleY="0.82">
+        <!-- Outer volt ring -->
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M54,14c22.1,0 40,17.9 40,40s-17.9,40 -40,40 -40,-17.9 -40,-40 17.9,-40 40,-40z"
+            android:strokeWidth="7"
+            android:strokeColor="#C8FF00" />
+        <!-- Soft inner ring (brand mark ring palette, DESIGN.md:250) -->
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M54,24c16.6,0 30,13.4 30,30s-13.4,30 -30,30 -30,-13.4 -30,-30 13.4,-30 30,-30z"
+            android:strokeWidth="2"
+            android:strokeColor="#39FF14"
+            android:strokeAlpha="0.35" />
+        <!-- F stem -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M40,36h10v36h-10z" />
+        <!-- F top bar -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M40,36h28v9h-28z" />
+        <!-- F mid bar (volt accent) -->
+        <path
+            android:fillColor="#C8FF00"
+            android:pathData="M40,52h20v7h-20z" />
+    </group>
 </vector>

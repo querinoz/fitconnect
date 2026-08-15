@@ -63,6 +63,14 @@ export const COLOR_TOKENS = {
   onSurface: "#e4e1ee",
   onSurfaceMuted: "#c7c4d8",
   onSurfaceSubtle: "rgba(228, 225, 238, 0.52)",
+
+  // ── Light surfaces (same obsidian-lavender family, lifted for daylight) ───
+  // lightFloor = onSurface paper. lightOnSurface = floor. lightOnSurfaceMuted = carbon.
+  lightFloor: "#e4e1ee",
+  lightSurface: "#f3f1f8",
+  lightSurfaceContainer: "#d8d4e6",
+  lightOnSurface: "#070b14",
+  lightOnSurfaceMuted: "#111827",
 } as const;
 
 export type ColorTokens = typeof COLOR_TOKENS;

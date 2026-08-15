@@ -2,8 +2,12 @@ package com.fitconnect.android.coach.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Email
@@ -58,7 +62,10 @@ fun CoachOsApp(
     ) {
         Scaffold(
             modifier = Modifier.testTag("coach_os"),
-            containerColor = EliteSurfaceColors.FLOOR.toColor(),
+            containerColor = MaterialTheme.colorScheme.background,
+            contentWindowInsets = WindowInsets.safeDrawing.only(
+                WindowInsetsSides.Horizontal + WindowInsetsSides.Top,
+            ),
             topBar = {
                 if (!online) {
                     OfflineBanner()
@@ -69,7 +76,8 @@ fun CoachOsApp(
                     modifier = Modifier.testTag("coach_bottom_nav"),
                     items = CoachDest.bottomTabs.map { dest ->
                         val selected = current?.startsWith(dest.route.substringBefore("/{")) == true ||
-                            current?.startsWith(dest.route) == true
+                            current?.startsWith(dest.route) == true ||
+                            (dest == CoachDest.MORE && current == CoachDest.SETTINGS.route)
                         EliteNavItem(
                             label = dest.label,
                             icon = when (dest) {
@@ -116,8 +124,8 @@ private fun OfflineBanner() {
         content = {
             EliteBadge(
                 text = "OFFLINE",
-                containerColor = EliteSurfaceColors.RECOVERY.toColor(),
-                contentColor = EliteSurfaceColors.FLOOR.toColor(),
+            containerColor = EliteSurfaceColors.RECOVERY.toColor(),
+            contentColor = MaterialTheme.colorScheme.onPrimary,
             )
             Text(
                 text = "  Cached · actions queue for sync",

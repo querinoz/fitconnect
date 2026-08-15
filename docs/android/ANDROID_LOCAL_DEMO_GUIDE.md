@@ -4,6 +4,17 @@ Install the **debug** APK and explore FitConnect without Supabase, Firebase, or 
 
 ## Install
 
+### Preferred — QR / same Wi-Fi (no USB)
+
+```powershell
+cd D:\fitconnect
+.\android\scripts\run-local-distribution.ps1
+```
+
+Or `pnpm android:qr`. Scan the QR on your phone (same Wi-Fi). See `docs/android/ANDROID_LOCAL_QR_DISTRIBUTION.md`.
+
+### Alternative — adb (optional)
+
 ```powershell
 cd D:\fitconnect\android
 .\gradlew.bat :app:assembleDebug

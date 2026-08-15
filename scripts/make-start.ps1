@@ -6,6 +6,18 @@ param(
   [switch]$SkipSetup
 )
 
+Write-Host ""
+Write-Host "╔══════════════════════════════════╗" -ForegroundColor Green
+Write-Host "║       FITCONNECT ELITE OS        ║" -ForegroundColor Green
+Write-Host "╚══════════════════════════════════╝" -ForegroundColor Green
+Write-Host "[1/6] Environment"
+Write-Host "[2/6] Android        (not started here — make android)"
+Write-Host "[3/6] Emulator       (not started here — hypervisor often PENDING_HUMAN)"
+Write-Host "[4/6] Web"
+Write-Host "[5/6] QA             (run make qa separately)"
+Write-Host "[6/6] Ready          (after this script finishes)"
+Write-Host ""
+
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 $WebDir = Join-Path $Root "apps\web"

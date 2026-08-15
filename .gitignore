@@ -44,3 +44,6 @@ android/app/*.jks
 android/app/google-services.json
 android/local.properties
 
+# Local DEBUG APK QR distribution artifacts (never commit)
+.fitconnect-local-distribution/
+

@@ -48,6 +48,8 @@
     "codemod:tokens": "node scripts/codemod-tokens.mjs",
     "tokens:kotlin": "node scripts/generate-kotlin-tokens.mjs",
     "tokens:kotlin:check": "node scripts/generate-kotlin-tokens.mjs --check",
+    "android:qr": "powershell -NoProfile -ExecutionPolicy Bypass -File android/scripts/run-local-distribution.ps1",
+    "android:qr:test": "powershell -NoProfile -ExecutionPolicy Bypass -File android/scripts/run-local-distribution.ps1 -SelfTest -SkipBuild",
     "lighthouse:mobile": "node scripts/lighthouse-mobile.mjs",
     "lighthouse:gate": "CI=true node scripts/lighthouse-mobile.mjs",
     "stripe:login": "stripe login",

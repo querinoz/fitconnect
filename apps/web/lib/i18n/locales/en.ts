@@ -377,6 +377,32 @@ export const en: Dict = {
       dataExport: "Data export & privacy controls",
       demoNote: "Demo-only controls — wire to real account settings in production."
     },
+    cockpit: {
+      demo: "LOCAL_DEMO",
+      home: "Home",
+      discover: "Discover",
+      activity: "Activity",
+      community: "Community",
+      profile: "Profile",
+      prime: "Prime Recovery",
+      means: "What it means",
+      meansBody: "Nervous system is primed. Keep intensity, protect sleep.",
+      todo: "What to do",
+      todoBody: "Execute today's threshold block. Start monitoring when you step out.",
+      start: "Start monitoring",
+      pause: "Pause",
+      resume: "Resume",
+      end: "End",
+      gps: "GPS: simulated path (not hardware)",
+      frameAria: "FitConnect mobile cockpit preview",
+      androidFrame: "Android 412",
+      iphoneFrame: "iPhone 390",
+      coachName: "Coach Ana · Lisbon",
+      book: "Book intro",
+      emptyFeed: "No posts in cache. Pull to refresh when online.",
+      role: "Athlete",
+      sport: "Run · Trail"
+    },
     voltline: "Voltline"
   },
   trustStrip: {

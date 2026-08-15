@@ -13,14 +13,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.fitconnect.android.design.EliteSurfaceColors
 import com.fitconnect.android.designui.theme.EliteBorder
 import com.fitconnect.android.designui.theme.EliteElevation
 import com.fitconnect.android.designui.theme.EliteMetricTextStyle
 import com.fitconnect.android.designui.theme.EliteOpacity
 import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
-import com.fitconnect.android.designui.theme.toColor
 
 enum class EliteCardVariant { Solid, Glass, Metric, Person }
 
@@ -28,16 +26,18 @@ enum class EliteCardVariant { Solid, Glass, Metric, Person }
 fun EliteCard(
     modifier: Modifier = Modifier,
     variant: EliteCardVariant = EliteCardVariant.Solid,
+    fillMaxWidth: Boolean = true,
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val shape = RoundedCornerShape(EliteRadius.Lg)
     val container = when (variant) {
-        EliteCardVariant.Glass -> MaterialTheme.colorScheme.surface.copy(alpha = EliteOpacity.Glass)
-        EliteCardVariant.Metric -> EliteSurfaceColors.SURFACE_CONTAINER.toColor()
+        EliteCardVariant.Glass -> MaterialTheme.colorScheme.surface.copy(alpha = 0.96f)
+        EliteCardVariant.Metric -> MaterialTheme.colorScheme.surfaceVariant
         EliteCardVariant.Person -> MaterialTheme.colorScheme.surfaceVariant
         EliteCardVariant.Solid -> MaterialTheme.colorScheme.surface
     }
+    val cardModifier = if (fillMaxWidth) modifier.fillMaxWidth() else modifier
     val border = when (variant) {
         EliteCardVariant.Glass -> BorderStroke(
             EliteBorder.Hairline,
@@ -53,7 +53,7 @@ fun EliteCard(
     if (onClick != null) {
         Card(
             onClick = onClick,
-            modifier = modifier.fillMaxWidth(),
+            modifier = cardModifier,
             shape = shape,
             colors = colors,
             elevation = elevation,
@@ -65,7 +65,7 @@ fun EliteCard(
         }
     } else {
         Card(
-            modifier = modifier.fillMaxWidth(),
+            modifier = cardModifier,
             shape = shape,
             colors = colors,
             elevation = elevation,
@@ -83,9 +83,10 @@ fun EliteMetricCard(
     label: String,
     value: String,
     modifier: Modifier = Modifier,
+    fillMaxWidth: Boolean = true,
     accent: Color = MaterialTheme.colorScheme.primary,
 ) {
-    EliteCard(modifier = modifier, variant = EliteCardVariant.Metric) {
+    EliteCard(modifier = modifier, variant = EliteCardVariant.Metric, fillMaxWidth = fillMaxWidth) {
         Text(
             text = label.uppercase(),
             style = MaterialTheme.typography.labelSmall,

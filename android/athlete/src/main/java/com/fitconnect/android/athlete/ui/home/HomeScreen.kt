@@ -34,9 +34,11 @@ import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteCardVariant
 import com.fitconnect.android.designui.components.EliteChip
+import com.fitconnect.android.designui.components.EliteFlowRow
 import com.fitconnect.android.designui.components.EliteMetricCard
 import com.fitconnect.android.designui.components.EliteRecoveryRing
 import com.fitconnect.android.designui.components.EliteSectionHeader
+import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.toColor
@@ -56,6 +58,7 @@ fun HomeScreen(
     onOpenCommunity: () -> Unit = {},
     onOpenProfile: () -> Unit = {},
     onOpenDiscover: () -> Unit = {},
+    onOpenActivity: () -> Unit = {},
 ) {
     val container = LocalAthleteContainer.current
     val scope = rememberCoroutineScope()
@@ -88,18 +91,14 @@ fun HomeScreen(
             }
             item {
                 EliteCard(variant = EliteCardVariant.Glass, modifier = Modifier.testTag("prime_recovery_block")) {
-                    EliteSysLabel("INSTRUMENT · PRIME RECOVERY")
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
+                    EliteStack(spacing = EliteSpace.Md) {
+                        EliteSysLabel("INSTRUMENT · PRIME RECOVERY")
                         EliteRecoveryRing(
                             score = home.readiness.recoveryScore,
                             label = "Prime Recovery",
-                            size = 168.dp,
+                            size = 148.dp,
                         )
-                        Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                        EliteStack(spacing = EliteSpace.Sm) {
                             ScoreBlock(label = "Readiness", value = "${home.readiness.score}%")
                             ScoreBlock(label = "HRV", value = "${home.readiness.hrvMs} ms")
                             ScoreBlock(label = "Sleep", value = "${home.readiness.sleepQuality}%")
@@ -162,12 +161,14 @@ fun HomeScreen(
                 }
             }
             item {
-                EliteMetricCard(
-                    label = "Conditions",
-                    value = "${home.weather.tempC}°",
-                    accent = EliteSurfaceColors.TELEMETRY.toColor(),
-                )
-                Text(home.weather.summary, style = MaterialTheme.typography.bodyMedium)
+                EliteStack {
+                    EliteMetricCard(
+                        label = "Conditions",
+                        value = "${home.weather.tempC}°",
+                        accent = EliteSurfaceColors.TELEMETRY.toColor(),
+                    )
+                    Text(home.weather.summary, style = MaterialTheme.typography.bodyMedium)
+                }
             }
             home.coachMessage?.let { msg ->
                 item {
@@ -193,16 +194,18 @@ fun HomeScreen(
                 }
             }
             item {
-                EliteSectionHeader(title = "Quick actions", overline = "NAV")
-                Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
-                    home.quickActions.take(3).forEach { action ->
-                        EliteChip(label = action, onClick = {
-                            when {
-                                action.contains("session", true) -> onOpenTraining()
-                                action.contains("readiness", true) -> onOpenRecovery()
-                                else -> onOpenNotifications()
-                            }
-                        })
+                EliteStack {
+                    EliteSectionHeader(title = "Quick actions", overline = "NAV")
+                    EliteFlowRow {
+                        home.quickActions.take(3).forEach { action ->
+                            EliteChip(label = action, onClick = {
+                                when {
+                                    action.contains("session", true) -> onOpenTraining()
+                                    action.contains("readiness", true) -> onOpenRecovery()
+                                    else -> onOpenNotifications()
+                                }
+                            })
+                        }
                     }
                 }
             }
@@ -211,7 +214,12 @@ fun HomeScreen(
                 Text(line, style = MaterialTheme.typography.bodyMedium)
             }
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                EliteFlowRow {
+                    EliteButton(
+                        "Start monitoring",
+                        onClick = onOpenActivity,
+                        modifier = Modifier.testTag("home_start_monitoring"),
+                    )
                     EliteButton("Recovery", onClick = onOpenRecovery, variant = EliteButtonVariant.Secondary)
                     EliteButton("Discover", onClick = onOpenDiscover, variant = EliteButtonVariant.Ghost)
                     EliteButton("Sports", onClick = onOpenSports, variant = EliteButtonVariant.Ghost)

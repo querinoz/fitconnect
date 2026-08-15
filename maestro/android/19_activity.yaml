@@ -1,0 +1,30 @@
+# 19 — Activity monitor LOCAL_DEMO (not hardware GPS)
+appId: com.fitconnect.android.debug
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 10000
+- tapOn:
+    id: "screen_guest_primary"
+- tapOn:
+    id: "screen_auth_primary"
+- runFlow: _complete_onboarding.yaml
+- extendedWaitUntil:
+    visible:
+      id: "athlete_os"
+    timeout: 12000
+- tapOn:
+    id: "athlete_tab_activity"
+- assertVisible:
+    id: "athlete_activity"
+- assertVisible: "LOCAL_DEMO"
+- tapOn:
+    id: "activity_start"
+- assertVisible:
+    id: "activity_pause"
+- tapOn:
+    id: "activity_pause"
+- assertVisible:
+    id: "activity_resume"

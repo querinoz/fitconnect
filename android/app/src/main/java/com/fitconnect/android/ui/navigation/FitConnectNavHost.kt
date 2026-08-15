@@ -1,5 +1,9 @@
 package com.fitconnect.android.ui.navigation
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -20,10 +25,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -37,6 +47,7 @@ import com.fitconnect.android.FitConnectApplication
 import com.fitconnect.android.athlete.ui.AthleteOsApp
 import com.fitconnect.android.coach.ui.CoachOsApp
 import com.fitconnect.android.designui.catalog.DesignSystemCatalog
+import com.fitconnect.android.designui.theme.reduceMotionEnabled
 import com.fitconnect.android.foundation.authz.UserRole
 import com.fitconnect.android.foundation.navigation.CoreRoute
 import com.fitconnect.android.ui.auth.AuthScreen
@@ -47,7 +58,6 @@ import com.fitconnect.android.ui.onboarding.CoachOnboardingScreen
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
 @Composable
 fun FitConnectNavHost(
     navController: NavHostController = rememberNavController(),
@@ -248,34 +258,79 @@ private fun SplashRoute(
     restore: suspend () -> AppResult<*>,
     onFinished: (loggedIn: Boolean) -> Unit,
 ) {
+    val reduceMotion = reduceMotionEnabled()
+    val markAlpha = remember { Animatable(if (reduceMotion) 1f else 0f) }
+    val glowAlpha = remember { Animatable(if (reduceMotion) 0.35f else 0f) }
+    // Theme already maps FLOOR / VOLTLINE from EliteSurfaceTokens (landing parity).
+    val floor = MaterialTheme.colorScheme.background
+    val volt = MaterialTheme.colorScheme.primary
+
     LaunchedEffect(Unit) {
+        if (!reduceMotion) {
+            markAlpha.animateTo(1f, tween(420))
+            glowAlpha.animateTo(0.45f, tween(520))
+        }
         val restored = restore()
-        delay(300)
-        onFinished(restored is AppResult.Ok)
+        // Cap brand beat; never invent long fake loaders.
+        delay(if (reduceMotion) 0 else 180)
+        onFinished(restored is AppResult.Ok<*>)
     }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .testTag("screen_splash"),
+            .background(floor)
+            .testTag("screen_splash")
+            .semantics { contentDescription = "FitConnect Elite OS" },
         contentAlignment = Alignment.Center,
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .alpha(glowAlpha.value)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(volt.copy(alpha = 0.18f), Color.Transparent),
+                    ),
+                ),
+        )
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Image(
+                painter = painterResource(R.drawable.ic_fitconnect_brand),
+                contentDescription = stringResource(R.string.app_name),
+                modifier = Modifier
+                    .size(96.dp)
+                    .alpha(markAlpha.value),
+            )
+            Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.alpha(markAlpha.value),
             )
             Text(
                 text = stringResource(R.string.splash_tagline),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.alpha(markAlpha.value),
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "SYS.MARK → INIT → TELEMETRY",
+                style = MaterialTheme.typography.labelLarge,
+                color = volt,
+                modifier = Modifier
+                    .alpha(markAlpha.value)
+                    .testTag("splash_sys_init"),
             )
             if (com.fitconnect.android.BuildConfig.DEBUG) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = "LOCAL_DEMO",
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = volt,
+                    modifier = Modifier.alpha(markAlpha.value),
                 )
             }
         }

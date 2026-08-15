@@ -30,7 +30,9 @@ import com.fitconnect.android.telemetry.sync.DeduplicationEngine
 import com.fitconnect.android.telemetry.sync.TelemetrySyncEngine
 import com.fitconnect.android.telemetry.time.SystemTelemetryClock
 import com.fitconnect.android.telemetry.time.TelemetryClock
+import com.fitconnect.android.telemetry.wear.InMemoryWearSessionLink
 import com.fitconnect.android.telemetry.wear.NoWearCompanion
+import com.fitconnect.android.telemetry.wear.WearSessionLink
 import com.fitconnect.android.telemetry.wear.WearableCompanionPort
 
 interface TelemetryContainer {
@@ -47,6 +49,7 @@ interface TelemetryContainer {
     val sportsBridge: SportsTelemetryBridge
     val backgroundPolicy: BackgroundSyncPolicy
     val wearCompanion: WearableCompanionPort
+    val wearSessionLink: WearSessionLink
 }
 
 class DefaultTelemetryContainer(
@@ -100,4 +103,5 @@ class DefaultTelemetryContainer(
     override val backgroundPolicy: BackgroundSyncPolicy = BackgroundSyncPolicy()
 
     override val wearCompanion: WearableCompanionPort = NoWearCompanion()
+    override val wearSessionLink: WearSessionLink = InMemoryWearSessionLink()
 }
