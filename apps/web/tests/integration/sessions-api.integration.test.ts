@@ -16,7 +16,11 @@ vi.mock("@/lib/api/require-auth", async (importOriginal) => {
       user: { id: "demo-user", role: "athlete", email: "demo@fitconnect.app" },
       supabaseUserId: "demo-user",
       demo: true
-    })
+    }),
+    requireAthleteId: vi.fn().mockResolvedValue({ athleteId: "a-ines" }),
+    requireCoachId: vi.fn().mockImplementation(async (_req: Request, coachId: string) => ({
+      coachId
+    }))
   };
 });
 

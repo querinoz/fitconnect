@@ -109,7 +109,7 @@ async function exportSizes(inputPath, outDir) {
 }
 
 const input =
-  process.argv[2] ?? path.resolve("LogoBase.png");
+  process.argv[2] ?? path.resolve("brand-sources/LogoBase.png");
 const outDir = process.argv[3] ?? path.resolve("apps/web/public/brand");
 
 await exportSizes(input, outDir);

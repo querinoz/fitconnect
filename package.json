@@ -56,7 +56,9 @@
     "stripe:whsec": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stripe-print-whsec.ps1",
     "stripe:whsec:save": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stripe-print-whsec.ps1 -Save",
     "stripe:listen": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stripe-webhook-dev.ps1",
-    "stripe:trigger": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stripe-trigger-events.ps1"
+    "stripe:trigger": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stripe-trigger-events.ps1",
+    "report:whatsapp": "node scripts/reporting/send-whatsapp.mjs",
+    "report:whatsapp:test": "node --test scripts/reporting/report-generator.test.mjs"
   },
   "devDependencies": {
     "@prisma/client": "^7.8.0",

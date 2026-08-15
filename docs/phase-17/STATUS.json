@@ -1,0 +1,24 @@
+{
+  "phase": "PHASE 17",
+  "overall": "BLOCKED",
+  "engineeringComplete": "PASS",
+  "repository": "PASS",
+  "android": "PASS",
+  "webApp": "PASS",
+  "landing": "PASS",
+  "watchos": "PENDING_ENVIRONMENT",
+  "tests": "Android 154/154 · Web 239/239 · reporting 2/2",
+  "build": "PASS",
+  "emulator": "BLOCKED",
+  "whatsapp": "PENDING_HUMAN",
+  "obsoleteFilesRemoved": 25,
+  "duplicateComponentsMerged": 0,
+  "securityFindings": 3,
+  "reportRepoPath": "docs/phase-17/PHASE_17_FINAL_REPORT.md",
+  "pendingHuman": [
+    "WhatsApp Business / Meta Cloud or Twilio credentials",
+    "Android emulator hypervisor (AEHD) for device smoke",
+    "Xcode + Apple Developer for watchOS",
+    "Decision on frozen Expo apps/mobile (REVIEW_REQUIRED — not deleted)"
+  ]
+}

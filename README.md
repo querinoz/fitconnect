@@ -8,13 +8,14 @@ Marketplace of verified sport specialists with science-grade athlete/coach tooli
 
 ## Architecture
 
-pnpm monorepo (Turborepo). Web app is the deploy target; mobile shares types/utils.
+pnpm monorepo (Turborepo). Web app is the deploy target. **Production mobile is native Android (`android/`, ADR-005).** `apps/mobile` (Expo) is frozen Path A.
 
 ```
 fitconnect/
+├── android/          # Kotlin + Jetpack Compose — athlete/coach (production mobile)
 ├── apps/
-│   ├── web/          # Next.js 14 — marketing + athlete/coach/admin dashboards
-│   └── mobile/       # Expo 52 — athlete/coach tabs (preview)
+│   ├── web/          # Next.js 14 — landing + athlete/coach/admin dashboards
+│   └── mobile/       # Expo 52 — frozen Path A (not the production Android binary)
 ├── packages/
 │   ├── types/        # Shared domain types
 │   ├── utils/        # Pure helpers
@@ -34,7 +35,7 @@ fitconnect/
 | Layer | Stack |
 |-------|--------|
 | Web | Next.js 14 App Router, TypeScript, Tailwind, Framer Motion, Zustand, tRPC |
-| Mobile | Expo 52, Expo Router, Reanimated, MMKV |
+| Mobile | **Android Kotlin + Compose** (`android/`) · Expo 52 frozen (`apps/mobile`) |
 | Data | Prisma, Supabase Auth (demo mode default) |
 | Realtime | **Hybrid:** Convex (nudges/live/plan sync) + Supabase Realtime (presence/chat) · BroadcastChannel for `?demo=1` |
 | Payments | Stripe demo routes |

@@ -1,0 +1,7 @@
+{
+  "status": "PENDING_HUMAN",
+  "reason": "WHATSAPP_PROVIDER unset",
+  "provider": null,
+  "recipientConfigured": true,
+  "sentAt": null
+}

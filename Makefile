@@ -14,7 +14,8 @@ TUNNEL_PID = apps/web/.next/tunnel.pid
 export PORT
 
 .PHONY: help setup dev start prod stop clean clean-deep status tunnel test build typecheck \
-        doctor android android-test android-emulator android-qa web-qa wear qa screenshots \
+        doctor android android-test android-emulator android-qa web web-test landing watch \
+        web-qa wear qa screenshots report-whatsapp \
         _deps _kill_port _build _start_prod _wait_ready _smoke _tunnel _open
 
 # ── OS detection ───────────────────────────────────────────────────────────────
@@ -57,9 +58,14 @@ help:
 	@echo "  make android-test  Android unit tests (gradle test subset)"
 	@echo "  make android-emulator  Probe AVD (FAIL if hypervisor missing)"
 	@echo "  make android-qa  Alias of make android"
+	@echo "  make web         Web typecheck (@fitconnect/web)"
+	@echo "  make web-test    Web Vitest (@fitconnect/web)"
+	@echo "  make landing     Landing/marketing route audit"
+	@echo "  make watch       watchOS probe (PENDING_ENVIRONMENT on Windows)"
 	@echo "  make web-qa      Web mobile cockpit Vitest"
 	@echo "  make wear        Wear assemble + WearSessionLinkTest"
 	@echo "  make qa          web-qa + android"
+	@echo "  make report-whatsapp  Official WhatsApp summary (PENDING_HUMAN if no creds)"
 	@echo "  make screenshots Device screenshots — not invented if no device"
 	@echo "  make build       Production build only"
 	@echo "  make typecheck   TypeScript check"
@@ -229,6 +235,22 @@ else
 	@echo "android-emulator: Windows script only in this phase"
 	@exit 1
 endif
+
+web:
+	@pnpm --filter @fitconnect/web typecheck
+
+web-test:
+	@pnpm --filter @fitconnect/web test
+
+landing:
+	@pnpm --filter @fitconnect/web exec vitest run lib/design-system/marketing-route-audit.test.ts
+
+watch:
+	@echo "WATCHOS_RUNTIME_TEST = PENDING_ENVIRONMENT (no Xcode/macOS in this workspace)"
+	@echo "Wear OS: make wear"
+
+report-whatsapp:
+	@node scripts/reporting/send-whatsapp.mjs
 
 web-qa:
 ifdef IS_WINDOWS

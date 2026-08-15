@@ -55,7 +55,7 @@ export function buildProductionEnv(
     NEXT_PUBLIC_SUPABASE_URL: "https://project.supabase.co",
     NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
     DATABASE_URL: "postgresql://user:pass@localhost:5432/fitconnect",
-    STRIPE_SECRET_KEY: "sk_live_test",
+    STRIPE_SECRET_KEY: "sk_test_fixture",
     STRAVA_CLIENT_ID: "12345",
     STRAVA_CLIENT_SECRET: "secret",
     UPSTASH_REDIS_REST_URL: "https://redis.upstash.io",

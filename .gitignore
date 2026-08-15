@@ -47,3 +47,19 @@ android/local.properties
 # Local DEBUG APK QR distribution artifacts (never commit)
 .fitconnect-local-distribution/
 
+# Python caches (QR / brand scripts)
+**/__pycache__/
+**/*.pyc
+
+# Expo local cache (apps/mobile is frozen Path A)
+apps/mobile/.expo/
+
+# QA machine logs — keep markdown audits, never commit Gradle/dev tails
+qa/reports/*.log
+qa/reports/*.pid
+qa/reports/*-selftest.json
+
+# Binary packages accidentally dropped at repo root
+/*.apk
+/*.aab
+
