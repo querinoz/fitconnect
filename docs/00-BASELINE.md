@@ -295,3 +295,60 @@ Regra 9 do prompt: se a instrução colidir com boas práticas / ADRs, **não ex
 - Não criar AVDs extra.  
 - Não commitar.  
 - Não aplicar honeycomb, nutrição, nova nav, ou confetti.
+
+---
+
+## 12. FASE 0 v5 addendum (2026-08-18) — MEGA PROMPT questions
+
+Read-only re-audit. No Gradle this session. Snapshot already at `a913959`. Branch `feat/elite-os-v2` @ `fc8bdc7`.
+
+### Existe já alguma superfície web? Que forma tem?
+
+**Sim.** `apps/web` is Next.js 14 (App Router), production Vercel `https://fitconnect-phi.vercel.app`.
+
+| Kind | Routes (examples) |
+|---|---|
+| Marketing / landing | `/` (`LandingPageContent`, editorial Voltline) |
+| Athlete app | `/dashboard`, `/sessions`, `/profile`, `/map`, `/inbox`, `/settings/*` |
+| Coach app | `/coach/dashboard`, roster, earnings, inbox |
+| Admin | `/admin/*` |
+| PWA shell | `/app/mobile`, install prompt — **not** IndexedDB-backed |
+
+This is option 2 in MEGA PROMPT §3.1, already shipping. See `docs/ADR-001-multiplatform.md`.
+
+### O backend suporta subscrições em tempo real, ou é REST com polling?
+
+**Hybrid, mostly incomplete.**
+
+- Web: `resolveTransport` — `presence:`/`chat:` → Supabase Realtime; else Convex **or** Broadcast (docs default = broadcast / same-tab demo).
+- Android: `SupabaseRealtimeClient` WebSocket if keys; else InProcess debug / fail-closed.
+- REST v1 still exists (`/api/v1/*`), demo bypass known P0.
+- Watch does **not** use the internet for live telemetry; Data Layer only.
+
+See `docs/ADR-002-realtime-sync.md`.
+
+### Há módulo Wear? Há `play-services-wearable`?
+
+**Yes / yes.** `:wear` module, `WearInstrument` + Health Services **probe**. Catalog: `play-services-wearable` **19.0.0**. `implementation` on `:app`, `:wear`, `:telemetry`. Capability `fitconnect_telemetry`. Complications, tiles, ambient B/W **not** implemented.
+
+### Onde vive a lógica de domínio?
+
+| Layer | Shareable? | Location |
+|---|---|---|
+| Session SM, outbox, envelope, realtime types | Yes (kotlin-jvm, no Android) | `android/shared` |
+| Tokens | Yes (TS → CSS + Kotlin) | `packages/design-tokens` |
+| Physiology | Planned Rust | Elite Core — often unbuilt |
+| Athlete UI + LOCAL_DEMO engine | Coupled | `:athlete`, `:core-capture` |
+| Web dashboard stores / readiness | Coupled to TS | `apps/web/lib/*` |
+
+Extraction of `:shared` is the prerequisite that already started. UI is not KMP.
+
+### Companion design docs
+
+| File | Present? |
+|---|---|
+| `docs/design/ELITE_OS_HANDOFF.md` | Yes — locked deviations |
+| `ELITE_OS_VISUAL_SPEC.md` | **Missing** |
+| `ELITE_OS_MOTION_BACKGROUND_WIDGET.md` | **Missing** |
+
+Proceed on HANDOFF + tokens. If the missing files arrive and conflict, stop.

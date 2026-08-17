@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FitConnect · Dashboards (maquete LOCAL_DEMO)</title>
+    <meta
+      name="description"
+      content="Maquete dos painéis web densos: carga, progressão, distribuição, sono, histórico CSV, comparação. Não é produção."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./mockup.css" />
+  </head>
+  <body data-view="home" data-state="default">
+    <div class="honeycomb" aria-hidden="true"></div>
+    <a class="skip" href="#main">Saltar para o painel</a>
+
+    <div class="overlay" id="help" role="dialog" aria-labelledby="help-title">
+      <div class="overlay-card">
+        <p class="sys">ATALHOS</p>
+        <h2 id="help-title" style="font-family: var(--font-display); margin: 8px 0 16px">Navegação</h2>
+        <p><span class="kbd">g</span> depois <span class="kbd">h</span> Home</p>
+        <p><span class="kbd">g</span> depois <span class="kbd">a</span> Activity</p>
+        <p><span class="kbd">g</span> depois <span class="kbd">d</span> Discover</p>
+        <p><span class="kbd">g</span> depois <span class="kbd">c</span> Community</p>
+        <p><span class="kbd">g</span> depois <span class="kbd">p</span> Profile</p>
+        <p><span class="kbd">g</span> depois <span class="kbd">s</span> Definições</p>
+        <p><span class="kbd">/</span> procurar · <span class="kbd">?</span> esta ajuda · <span class="kbd">Esc</span> fechar</p>
+        <p class="sys" style="margin-top: 16px">Atalhos de teclado sem animação (emil-design-eng).</p>
+        <button class="btn btn-volt" type="button" id="help-close" style="margin-top: 16px">Fechar</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="search" role="dialog" aria-labelledby="search-title">
+      <div class="overlay-card">
+        <label for="search-input" id="search-title" class="sys">PROCURAR</label>
+        <input id="search-input" class="toolbar" style="width: 100%; margin-top: 12px" placeholder="Exercício, sessão, atleta" />
+        <p class="sys" style="margin-top: 12px">Maquete: filtra a tabela de histórico se estiver visível.</p>
+      </div>
+    </div>
+
+    <div class="app wrap">
+      <aside class="rail" aria-label="Secções da app">
+        <a class="wordmark" href="./index.html" style="padding: 8px 12px 16px">FitConnect</a>
+        <button type="button" class="nav-item is-active" data-view="home">Home</button>
+        <button type="button" class="nav-item" data-view="discover">Discover</button>
+        <button type="button" class="nav-item" data-view="activity">Activity</button>
+        <button type="button" class="nav-item" data-view="community">Community</button>
+        <button type="button" class="nav-item" data-view="profile">Profile</button>
+        <button type="button" class="nav-item" data-view="settings" style="margin-top: auto">Definições</button>
+      </aside>
+
+      <div>
+        <div class="banner" id="session-banner">
+          <span class="chip">WATCH</span>
+          <strong>Sessão a decorrer no relógio</strong>
+          <span class="sys">Easy run · 00:18:42 · dono SM-R860</span>
+          <button class="btn btn-volt" type="button" id="transfer-btn">Transferir para este browser</button>
+          <span class="sys" id="owner-note">Não inicia uma segunda sessão (ADR-002).</span>
+        </div>
+
+        <main class="main" id="main">
+          <p class="sys">MAQUETE WEB · LOCAL_DEMO · IndexedDB ainda não existe · produção ≠ estes gráficos</p>
+
+          <section data-panel="home">
+            <h1 class="sys">CARGA E RECUPERAÇÃO · 12 SEMANAS</h1>
+            <div class="state-loading"><div class="skeleton" aria-hidden="true"></div><p>A carregar cache…</p></div>
+            <div class="state-empty">
+              <p>Sem histórico suficiente para CTL/ATL. Precisas de 42 dias de sessões com TSS. Nada é mostrado como zero.</p>
+            </div>
+            <div class="state-error">
+              <p>Falha a ler a série (5xx). <button class="btn btn-ghost" type="button" data-state="default">Tentar de novo</button></p>
+            </div>
+            <div class="state-offline">
+              <p>Offline. Última cache: timestamp desconhecido (sem IndexedDB). A UI não espera pela rede.</p>
+            </div>
+            <div class="grid-12 state-data">
+              <article class="card">
+                <h2>Aguda vs crónica</h2>
+                <p id="load-summary">
+                  Nas 12 semanas LOCAL_DEMO, a carga crónica sobe de 42 para 56. A aguda oscila 38–61. Semana 10 é o
+                  pico agudo (61) com recuperação 54: ACWR alto, não um recorde a celebrar.
+                </p>
+                <svg class="chart" viewBox="0 0 640 220" role="img" aria-labelledby="load-summary">
+                  <title>CTL e ATL em 12 semanas (LOCAL_DEMO)</title>
+                  <line x1="32" y1="200" x2="620" y2="200" stroke="#2a2933" />
+                  <polyline
+                    fill="none"
+                    stroke="#c8ff00"
+                    stroke-width="2"
+                    points="40,140 90,132 140,136 190,124 240,116 290,120 340,104 390,96 440,100 490,88 540,92 590,84"
+                  />
+                  <polyline
+                    fill="none"
+                    stroke="#3cd7ff"
+                    stroke-width="2"
+                    points="40,156 90,100 140,144 190,72 240,128 290,152 340,80 390,116 440,140 490,68 540,108 590,132"
+                  />
+                </svg>
+                <div class="legend">
+                  <span><i class="swatch" style="background: var(--eos-voltline)"></i>CTL crónica</span>
+                  <span><i class="swatch" style="background: var(--eos-telemetry)"></i>ATL aguda</span>
+                  <span class="chip chip-demo">LOCAL_DEMO</span>
+                </div>
+              </article>
+              <article class="card">
+                <h3>Recuperação · sono</h3>
+                <p class="metric">64</p>
+                <p class="sys">SCORE · PHONE HRV NÃO LIDO</p>
+                <p>Sobreposição: noites &lt; 6.2h coincidem com ATL &gt; 55 nas semanas 4, 7 e 10.</p>
+              </article>
+            </div>
+          </section>
+
+          <section data-panel="activity" hidden>
+            <h1 class="sys">PROGRESSÃO E DISTRIBUIÇÃO</h1>
+            <div class="state-data grid-12">
+              <article class="card">
+                <h2>1RM estimado · Back squat</h2>
+                <label class="sys" for="ex">EXERCÍCIO</label>
+                <select id="ex">
+                  <option>Back squat</option>
+                  <option>Bench press</option>
+                  <option>Deadlift</option>
+                </select>
+                <p id="prog-summary">Back squat LOCAL_DEMO: 1RM estimado 112 → 124 kg em 16 semanas. Volume semanal 8.4 t no pico. Frequência 2.1 sessões/semana.</p>
+                <svg class="chart" viewBox="0 0 640 220" role="img" aria-labelledby="prog-summary">
+                  <polyline
+                    fill="none"
+                    stroke="#c8ff00"
+                    stroke-width="2"
+                    points="40,160 120,150 200,148 280,132 360,128 440,118 520,110 600,96"
+                  />
+                </svg>
+                <div class="legend">
+                  <span><i class="swatch" style="background: var(--eos-voltline)"></i>1RM estimado</span>
+                  <span class="chip">PHONE</span>
+                </div>
+              </article>
+              <article class="card">
+                <h3>Distribuição (4 semanas)</h3>
+                <p id="dist-summary">Força 46%, cardio 38%, mobilidade 16%. Empurrar vs puxar 1.4:1 (desequilíbrio marcado).</p>
+                <div class="bars" aria-labelledby="dist-summary">
+                  <div class="bar-row"><span>Força</span><div class="bar-track"><div class="bar-fill" style="width: 46%"></div></div><span>46%</span></div>
+                  <div class="bar-row"><span>Cardio</span><div class="bar-track"><div class="bar-fill" style="width: 38%; background: var(--eos-telemetry)"></div></div><span>38%</span></div>
+                  <div class="bar-row"><span>Mobilidade</span><div class="bar-track"><div class="bar-fill" style="width: 16%; background: var(--eos-connect)"></div></div><span>16%</span></div>
+                </div>
+              </article>
+            </div>
+            <div class="state-empty"><p>Sem séries neste exercício. Adiciona uma sessão de força no telemóvel.</p></div>
+            <div class="state-loading"><div class="skeleton"></div></div>
+            <div class="state-error"><p>Não foi possível calcular 1RM (dados &lt; 3 sessões válidas).</p></div>
+            <div class="state-offline"><p>Offline. Progressão usa a última série em cache quando IndexedDB existir.</p></div>
+          </section>
+
+          <section data-panel="discover" hidden>
+            <h1 class="sys">SONO E HRV · 90 DIAS</h1>
+            <article class="card state-data">
+              <h2>Tendência</h2>
+              <p id="sleep-summary">
+                HRV matinal LOCAL_DEMO: mediana 48 ms. Blocos de sono &lt; 6h nos dias 12–14 antecedem duas sessões com
+                RPE 8. Correlação ilustrativa, não um p-value publicado.
+              </p>
+              <svg class="chart" viewBox="0 0 640 220" role="img" aria-labelledby="sleep-summary">
+                <polyline
+                  fill="none"
+                  stroke="#00ddb4"
+                  stroke-width="2"
+                  points="20,120 80,132 140,90 200,140 260,110 320,150 380,100 440,128 500,88 560,118 620,96"
+                />
+              </svg>
+              <div class="legend">
+                <span><i class="swatch" style="background: var(--eos-connect)"></i>HRV ms</span>
+                <span class="chip">IMPORT</span>
+                <span class="chip chip-demo">LOCAL_DEMO</span>
+              </div>
+            </article>
+            <div class="state-empty"><p>Wearable de sono não ligado. Health Connect não lê histórico nesta build.</p></div>
+            <div class="state-loading"><div class="skeleton"></div></div>
+            <div class="state-error"><p>Permissão de saúde recusada. Nada é inventado como 0 bpm.</p></div>
+            <div class="state-offline"><p>Offline. Série de 90 dias indisponível sem cache local.</p></div>
+          </section>
+
+          <section data-panel="community" hidden>
+            <h1 class="sys">HISTÓRICO COMPLETO</h1>
+            <div class="toolbar">
+              <label class="sys" for="sport-filter">DESPORTO</label>
+              <select id="sport-filter">
+                <option value="">Todos</option>
+                <option>Run</option>
+                <option>Ride</option>
+                <option>Strength</option>
+              </select>
+              <button class="btn btn-ghost" type="button" id="sort-date">Ordenar por data</button>
+              <button class="btn btn-volt" type="button" id="csv">Exportar CSV</button>
+            </div>
+            <div class="state-data">
+              <table class="data" id="history">
+                <caption class="sys" style="text-align: left; padding: 8px 0">
+                  Sessões LOCAL_DEMO. Teclado: tab nas linhas. CSV gera um ficheiro real neste browser.
+                </caption>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Desporto</th>
+                    <th>Duração</th>
+                    <th>Origem</th>
+                    <th>TSS</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="state-empty"><p>Zero sessões. O CSV exporta só o cabeçalho.</p></div>
+            <div class="state-loading"><div class="skeleton"></div></div>
+            <div class="state-error"><p>Lista indisponível (timeout). Tenta de novo sem duplicar a sessão activa.</p></div>
+            <div class="state-offline"><p>A mostrar cache. Timestamp: desconhecido.</p></div>
+          </section>
+
+          <section data-panel="profile" hidden>
+            <h1 class="sys">COMPARAÇÃO DE PERÍODOS</h1>
+            <div class="compare state-data">
+              <article class="card">
+                <h2>A · 14 Jul – 10 Ago</h2>
+                <p class="metric">6</p>
+                <p class="sys">SESSÕES</p>
+                <p>Volume 4.2 h · TSS médio 61 · sono 6.8 h</p>
+              </article>
+              <article class="card">
+                <h2>B · 11 Ago – 7 Set</h2>
+                <p class="metric">8</p>
+                <p class="sys">SESSÕES</p>
+                <p>Volume 5.1 h · TSS médio 54 · sono 7.1 h (mais fácil, mais frequente)</p>
+              </article>
+            </div>
+            <p class="sys state-data">Lado a lado para o ecrã grande. O telemóvel não tem esta vista.</p>
+            <div class="state-empty"><p>Escolhe dois intervalos com pelo menos uma sessão cada.</p></div>
+            <div class="state-loading"><div class="skeleton"></div></div>
+            <div class="state-error"><p>Não foi possível cruzar os intervalos.</p></div>
+            <div class="state-offline"><p>Comparação precisa de cache local (pendente).</p></div>
+          </section>
+
+          <section data-panel="settings" hidden>
+            <h1 class="sys">DEFINIÇÕES · WEB</h1>
+            <article class="card">
+              <p>Aparência: dark por omissão. Respeita <code>prefers-color-scheme</code> e <code>prefers-reduced-motion</code> (esta maquete já o faz no CSS).</p>
+              <p>Honeycomb: estático a 3%. Em reduced-motion, desligado.</p>
+              <p>Fonte de verdade: IndexedDB (target ADR-002). Hoje: nenhum. Não uses localStorage como SoT.</p>
+              <p>Logout nesta superfície <strong>não</strong> termina a sessão de treino no telemóvel.</p>
+            </article>
+          </section>
+        </main>
+
+        <div class="qa-bar" role="group" aria-label="Estados de QA da maquete">
+          <span class="sys">QA ESTADOS</span>
+          <button class="btn btn-ghost" type="button" data-state="default">Default</button>
+          <button class="btn btn-ghost" type="button" data-state="loading">Loading</button>
+          <button class="btn btn-ghost" type="button" data-state="empty">Vazio</button>
+          <button class="btn btn-ghost" type="button" data-state="error">Erro</button>
+          <button class="btn btn-ghost" type="button" data-state="offline">Offline</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const ROWS = [
+        ["2026-08-16", "Run", "00:42:11", "WATCH", "58"],
+        ["2026-08-14", "Strength", "00:51:02", "PHONE", "41"],
+        ["2026-08-12", "Ride", "01:18:44", "PHONE", "72"],
+        ["2026-08-10", "Run", "00:36:08", "WATCH", "49"],
+        ["2026-08-07", "Strength", "00:47:20", "PHONE", "38"],
+        ["2026-08-05", "Run", "00:55:03", "CLOUD", "66"],
+        ["2026-08-02", "Ride", "02:04:19", "PHONE", "91"],
+        ["2026-07-30", "Run", "00:28:40", "WATCH", "33"],
+      ];
+
+      const tbody = document.querySelector("#history tbody");
+      let sortAsc = false;
+
+      function renderRows(filter) {
+        if (!tbody) return;
+        tbody.replaceChildren();
+        ROWS.filter((r) => !filter || r[1] === filter || r.join(" ").toLowerCase().includes(filter.toLowerCase())).forEach((r) => {
+          const tr = document.createElement("tr");
+          r.forEach((c) => {
+            const td = document.createElement("td");
+            td.textContent = c;
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+      }
+      renderRows("");
+
+      document.getElementById("sport-filter")?.addEventListener("change", (e) => renderRows(e.target.value));
+      document.getElementById("search-input")?.addEventListener("input", (e) => {
+        show("community");
+        renderRows(e.target.value);
+      });
+      document.getElementById("sort-date")?.addEventListener("click", () => {
+        sortAsc = !sortAsc;
+        ROWS.sort((a, b) => (sortAsc ? a[0].localeCompare(b[0]) : b[0].localeCompare(a[0])));
+        renderRows(document.getElementById("sport-filter").value);
+      });
+      document.getElementById("csv")?.addEventListener("click", () => {
+        const lines = ["date,sport,duration,origin,tss", ...ROWS.map((r) => r.join(","))];
+        const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "fitconnect-history-LOCAL_DEMO.csv";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+
+      function show(view) {
+        document.body.dataset.view = view;
+        document.querySelectorAll("[data-panel]").forEach((el) => {
+          el.hidden = el.getAttribute("data-panel") !== view;
+        });
+        document.querySelectorAll(".nav-item").forEach((el) => {
+          el.classList.toggle("is-active", el.getAttribute("data-view") === view);
+        });
+      }
+
+      document.querySelectorAll(".nav-item").forEach((btn) => {
+        btn.addEventListener("click", () => show(btn.getAttribute("data-view")));
+      });
+
+      document.querySelectorAll(".qa-bar [data-state], .state-error [data-state]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.body.dataset.state = btn.getAttribute("data-state");
+        });
+      });
+
+      let pendingG = false;
+      const help = document.getElementById("help");
+      const search = document.getElementById("search");
+      document.getElementById("help-close")?.addEventListener("click", () => help.classList.remove("is-open"));
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          help.classList.remove("is-open");
+          search.classList.remove("is-open");
+          pendingG = false;
+          return;
+        }
+        if (e.key === "?" && !e.ctrlKey && !e.metaKey) {
+          e.preventDefault();
+          help.classList.add("is-open");
+          return;
+        }
+        if (e.key === "/" && document.activeElement.tagName !== "INPUT") {
+          e.preventDefault();
+          search.classList.add("is-open");
+          document.getElementById("search-input").focus();
+          return;
+        }
+        if (pendingG) {
+          pendingG = false;
+          const map = { h: "home", a: "activity", d: "discover", c: "community", p: "profile", s: "settings" };
+          if (map[e.key]) {
+            e.preventDefault();
+            show(map[e.key]);
+          }
+          return;
+        }
+        if (e.key === "g" && document.activeElement.tagName !== "INPUT") {
+          pendingG = true;
+        }
+      });
+
+      document.getElementById("transfer-btn")?.addEventListener("click", () => {
+        const note = document.getElementById("owner-note");
+        document.getElementById("session-banner").querySelector("strong").textContent =
+          "És o dono desta sessão neste browser";
+        document.querySelector("#session-banner .chip").textContent = "WEB";
+        document.getElementById("transfer-btn").hidden = true;
+        note.textContent = "Relógio passa a espectador após ACK (simulado). Sem segunda sessão.";
+      });
+    </script>
+  </body>
+</html>

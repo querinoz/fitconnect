@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FitConnect — o OS de treino no telemóvel, no relógio e na web</title>
+    <meta
+      name="description"
+      content="Maquete honesta da landing Elite OS. Só funcionalidades que existem no repositório. Capturas reais do emulador Android."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./mockup.css" />
+  </head>
+  <body>
+    <div class="honeycomb" aria-hidden="true"></div>
+    <a class="skip" href="#conteudo">Saltar para o conteúdo</a>
+    <div class="wrap">
+      <header class="nav-landing">
+        <a class="wordmark" href="./index.html">FitConnect</a>
+        <nav aria-label="Secções">
+          <a href="#prova">Prova</a>
+          ·
+          <a href="#superficie">Superfícies</a>
+          ·
+          <a href="#faq">FAQ</a>
+          ·
+          <a href="./dashboards.html">Maquete web</a>
+        </nav>
+      </header>
+
+      <main id="conteudo">
+        <p class="sys" style="max-width: 1280px; margin: 0 auto; padding: 0 24px">
+          MAQUETE · LOCAL_DEMO · não é a landing de produção · capturas emulator-5554 · 2026-08-17
+        </p>
+        <section class="hero">
+          <div>
+            <p class="sys">ELITE OS · ATHLETE</p>
+            <h1>O treino tem um dono. Só um.</h1>
+            <p class="lede">
+              FitConnect liga o telemóvel Android, o relógio Wear OS e a web à mesma sessão. Começas no pulso; o ecrã
+              grande não inventa um segundo treino.
+            </p>
+            <div class="cta-row">
+              <a class="btn btn-volt" href="https://fitconnect-phi.vercel.app">Abrir a web app em produção</a>
+              <a class="btn btn-ghost" href="./dashboards.html">Ver dashboards (maquete)</a>
+            </div>
+            <p class="sys" style="margin-top: 16px">
+              APK debug: não publicado nesta sessão (emulador ⏭️). QR e assembleRelease: FASE 7.
+            </p>
+          </div>
+          <div class="device-stack" aria-label="Capturas reais do emulador Android">
+            <img
+              class="shot-a"
+              src="../qa/elite-os-v2-home.png"
+              width="280"
+              height="608"
+              alt="Ecrã Home no emulador: header Elite OS, streak 18, patente INICIADO."
+            />
+            <img
+              class="shot-b"
+              src="../qa/elite-os-v2-profile.png"
+              width="280"
+              height="608"
+              alt="Ecrã Perfil no emulador: Hexatar, chip INICIADO I, sessões e streak."
+            />
+            <img
+              class="shot-c"
+              src="../qa/elite-os-v2-activity.png"
+              width="280"
+              height="608"
+              alt="Ecrã Activity no emulador: captura de sessão e mapa de quatro estados."
+            />
+          </div>
+        </section>
+
+        <section class="section" id="prova">
+          <p class="sys">O QUE EXISTE HOJE</p>
+          <h2>Cinco tabs. Patente honesta. Sem números inventados.</h2>
+          <article class="feature-row">
+            <p class="sys">01</p>
+            <h3>Cockpit Home</h3>
+            <p>
+              Readiness, streak e feed no telemóvel Compose. Captura real: Home com patente INICIADO, não ELITE. Dados
+              de telemetria ainda podem ser LOCAL_DEMO; o rótulo não é escondido na app.
+            </p>
+          </article>
+          <article class="feature-row">
+            <p class="sys">02</p>
+            <h3>Sessão e mapa</h3>
+            <p>
+              Activity com máquina de estados e mapa Canvas (não Google Maps neste ciclo). O ramo de loading infinito no
+              detalhe de corrida continua um risco conhecido; a correcção pedida é Loading com timeout 8s → Error /
+              Success / Empty.
+            </p>
+          </article>
+          <article class="feature-row">
+            <p class="sys">03</p>
+            <h3>Identidade</h3>
+            <p>
+              Hexatar 104dp, patente INICIADO I, progressão “8 sessions to grade II”, achievements ASCEND reais (5
+              desbloqueadas + 3 Locked na captura). Definições ainda aparecem no perfil: a FASE 2B (abas + ecrã
+              Settings) não está fechada.
+            </p>
+          </article>
+          <article class="feature-row">
+            <p class="sys">04</p>
+            <h3>Relógio companion</h3>
+            <p>
+              Módulo <code>android/wear</code> e Data Layer compilam. Não há captura de emulador Wear nesta máquina
+              (hypervisor). Complicações, tile e modo ambiente a preto e branco ainda não existem. Por isso o relógio
+              não entra como “screenshot de produto”.
+            </p>
+          </article>
+          <article class="feature-row">
+            <p class="sys">05</p>
+            <h3>Web densa</h3>
+            <p>
+              Next.js já serve landing e <code>/dashboard</code>. Os painéis de 12 semanas / 1RM / CSV desta maquete
+              ainda não são a app de produção. Abrir
+              <a href="./dashboards.html">dashboards.html</a>.
+            </p>
+          </article>
+        </section>
+
+        <section class="section" id="superficie">
+          <p class="sys">TRÊS SUPERFÍCIES</p>
+          <h2>O mesmo contrato. Canais diferentes.</h2>
+          <div class="devices">
+            <div class="panel">
+              <p class="sys">PHONE · REFERÊNCIA</p>
+              <h3>Android Compose</h3>
+              <p>HOME · DISCOVER · ACTIVITY · COMMUNITY · PROFILE. Tokens gerados de <code>packages/design-tokens</code>.</p>
+              <img
+                src="../qa/elite-os-v2-settings.png"
+                width="360"
+                alt="Definições no emulador: honeycomb Off ou Subtle."
+                style="margin-top: 16px; border-radius: 16px"
+              />
+            </div>
+            <div class="panel">
+              <p class="sys">WATCH · COMPANION</p>
+              <h3>Wear OS</h3>
+              <p>Data Layer, não internet. Um dado por ecrã. Captura: ⏭️.</p>
+              <div class="watch-wire" aria-hidden="true">
+                <span class="sys">SEM SHOT</span>
+              </div>
+              <p class="sys">código existe · AVD wear não corrido nesta sessão</p>
+            </div>
+            <div class="panel">
+              <p class="sys">WEB · DENSIDADE</p>
+              <h3>Next.js + PWA</h3>
+              <p>Produção: fitconnect-phi.vercel.app. Sidebar, atalhos, CSV: ver maquete, não o dashboard actual.</p>
+              <p style="margin-top: 24px"><a class="btn btn-volt" href="./dashboards.html">Abrir maquete</a></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section faq" id="faq">
+          <p class="sys">FAQ</p>
+          <h2>Perguntas que a landing de produção ainda mistura.</h2>
+          <details>
+            <summary>Isto já sincroniza os três dispositivos?</summary>
+            <p>
+              Não como produto. Tipos e outbox existem em <code>:shared</code>. O bloqueio de sessão exclusiva está no
+              ADR-002, não no código. Testes 1–10 da FASE 5B: ⏭️.
+            </p>
+          </details>
+          <details>
+            <summary>Posso instalar a app pela loja?</summary>
+            <p>Não. Play Console continua bloqueado. APK debug local só com Gradle + emulador/dispositivo.</p>
+          </details>
+          <details>
+            <summary>Os números da Home são os meus?</summary>
+            <p>
+              Só se o backend e os sensores estiverem ligados. Em debug a app marca LOCAL_DEMO. Esta maquete não finge
+              milhares de atletas.
+            </p>
+          </details>
+          <details>
+            <summary>Há testemunhos ou avaliações?</summary>
+            <p>Não. A secção não existe até haver provas reais (MEGA PROMPT §8 e §16.8).</p>
+          </details>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <span>FitConnect · Elite OS</span>
+        <a href="https://fitconnect-phi.vercel.app">Produção</a>
+        <span>Legal / privacidade: rotas da web app existentes; não duplicadas aqui.</span>
+        <span>Sem analytics de terceiros nesta maquete.</span>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,5 +1,7 @@
 # Relatório Elite OS v2
 
+**Addendum 2026-08-18 (v5):** audit + `docs/ADR-001-multiplatform.md` + `docs/ADR-002-realtime-sync.md` + HTML maquettes in `docs/mockups/`. Gradle / emulators / APK / QR = **⏭️**. Full v5 narrative: `docs/RELATORIO-ELITE-OS-V5.md`. Prior Android chrome work below is unchanged.
+
 **Data:** 2026-08-17  
 **Branch:** `feat/elite-os-v2`  
 **HEAD de partida:** `a913959` (`chore: snapshot before ELITE OS v2`)  
