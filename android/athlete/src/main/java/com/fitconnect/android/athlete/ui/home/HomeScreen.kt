@@ -2,48 +2,61 @@ package com.fitconnect.android.athlete.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
+import com.fitconnect.android.athlete.data.LocalAthleteRepository
 import com.fitconnect.android.athlete.domain.HomeSnapshot
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteLoad
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
-import com.fitconnect.android.athlete.ui.components.ScoreBlock
 import com.fitconnect.android.design.EliteSurfaceColors
 import com.fitconnect.android.designui.charts.EliteChart
 import com.fitconnect.android.designui.charts.EliteChartKind
 import com.fitconnect.android.designui.charts.EliteChartModel
 import com.fitconnect.android.designui.charts.EliteChartPoint
+import com.fitconnect.android.designui.components.AscendMissionCard
+import com.fitconnect.android.designui.components.AscendStreakCard
+import com.fitconnect.android.designui.components.AscendXPBar
+import com.fitconnect.android.designui.components.EliteAiDirective
+import com.fitconnect.android.designui.components.EliteAiFab
 import com.fitconnect.android.designui.components.EliteBadge
+import com.fitconnect.android.designui.components.EliteBentoCard
+import com.fitconnect.android.designui.components.EliteBentoMetric
+import com.fitconnect.android.designui.components.EliteBentoRow
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteCardVariant
 import com.fitconnect.android.designui.components.EliteChip
+import com.fitconnect.android.designui.components.EliteFeedPost
 import com.fitconnect.android.designui.components.EliteFlowRow
+import com.fitconnect.android.designui.components.EliteLiveDot
 import com.fitconnect.android.designui.components.EliteMetricCard
-import com.fitconnect.android.designui.components.EliteRecoveryRing
+import com.fitconnect.android.designui.components.ElitePrimeInstrument
 import com.fitconnect.android.designui.components.EliteSectionHeader
 import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.designui.components.EliteSysLabel
+import com.fitconnect.android.designui.components.EliteWordmarkHeader
+import com.fitconnect.android.designui.components.eliteDayStrain
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.android.foundation.auth.DemoPersona
 import com.fitconnect.android.foundation.common.AppResult
+import com.fitconnect.android.foundation.i18n.AppLocale
+import com.fitconnect.ascend.copy.AscendCopy
+import com.fitconnect.ascend.domain.MissionKind
+import com.fitconnect.ascend.domain.StreakKind
 import kotlinx.coroutines.launch
 
 @Composable
@@ -59,10 +72,17 @@ fun HomeScreen(
     onOpenProfile: () -> Unit = {},
     onOpenDiscover: () -> Unit = {},
     onOpenActivity: () -> Unit = {},
+    onOpenSleep: () -> Unit = {},
+    onOpenDaily: () -> Unit = {},
+    onOpenVault: () -> Unit = {},
 ) {
     val container = LocalAthleteContainer.current
     val scope = rememberCoroutineScope()
     var result by remember { mutableStateOf<AppResult<HomeSnapshot>?>(null) }
+
+    var worldPulse by remember { mutableStateOf<List<com.fitconnect.android.community.domain.CommunityPost>>(emptyList()) }
+    var worldNames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var worldAvatars by remember { mutableStateOf<Map<String, String?>>(emptyMap()) }
 
     fun reload() {
         scope.launch { result = container.athleteRepository.home() }
@@ -71,65 +91,221 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         container.platform.analytics.screen("athlete_home")
         reload()
+        container.community.seedIfNeeded()
+        val page = container.community.feed.feed(
+            com.fitconnect.android.community.feed.FeedRequest(
+                viewerId = LocalAthleteRepository.ATHLETE_ID,
+                kind = com.fitconnect.android.community.feed.FeedKind.FOLLOWING,
+                limit = 3,
+            ),
+        )
+        worldPulse = page.items
+        val ids = page.items.map { it.authorId }.distinct()
+        worldNames = ids.associateWith { id -> container.community.profiles.get(id)?.displayName ?: id }
+        worldAvatars = ids.associateWith { id -> container.community.profiles.get(id)?.avatarUri }
     }
 
     AthleteLoad(result = result, onRetry = ::reload) { home ->
+        val locale by container.platform.localeManager.observe().collectAsState(initial = AppLocale.EN)
+        val lang = locale.bcp47
+        val ascend = container.ascend.snapshot(LocalAthleteRepository.ATHLETE_ID)
+        val t = { key: String -> AscendCopy.t(lang, key) }
+        val daily = ascend.missions.firstOrNull { it.kind == MissionKind.DAILY }
+        val streak = ascend.streaks.firstOrNull { it.kind == StreakKind.PERFORMANCE }
         val nervous = when {
             home.readiness.recoveryScore >= 75 -> "OPTIMAL"
             home.readiness.recoveryScore >= 50 -> "BALANCED"
             home.readiness.recoveryScore >= 30 -> "CAUTION"
             else -> "STRAIN"
         }
+        val strain = eliteDayStrain(home.readiness.score)
+        val initials = home.greeting
+            .substringAfterLast(",")
+            .trim()
+            .split(" ")
+            .mapNotNull { it.firstOrNull()?.uppercaseChar()?.toString() }
+            .take(2)
+            .joinToString("")
+            .ifBlank { "FC" }
         AthleteScreenScaffold(
             title = home.greeting,
             subtitle = "Performance cockpit · ${DemoPersona.MODE_LABEL}",
             overline = "ATHLETE OS · TODAY",
             testTag = "athlete_home",
+            showTitle = false,
+            floating = { EliteAiFab(onClick = onOpenAi) },
         ) {
             item {
-                EliteBadge(text = DemoPersona.MODE_LABEL)
+                EliteWordmarkHeader(
+                    initials = initials,
+                    showWordmark = false,
+                    onAvatarClick = onOpenProfile,
+                    onSensorsClick = onOpenDaily,
+                )
             }
             item {
-                EliteCard(variant = EliteCardVariant.Glass, modifier = Modifier.testTag("prime_recovery_block")) {
-                    EliteStack(spacing = EliteSpace.Md) {
-                        EliteSysLabel("INSTRUMENT · PRIME RECOVERY")
-                        EliteRecoveryRing(
-                            score = home.readiness.recoveryScore,
-                            label = "Prime Recovery",
-                            size = 148.dp,
+                Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
+                    EliteSysLabel("ATHLETE OS · TODAY")
+                    Text(home.greeting, style = MaterialTheme.typography.titleLarge)
+                    EliteBadge(text = DemoPersona.MODE_LABEL)
+                }
+            }
+            item {
+                ElitePrimeInstrument(
+                    score = home.readiness.recoveryScore,
+                )
+            }
+            item {
+                EliteBentoRow {
+                    EliteBentoMetric(
+                        label = "HRV",
+                        value = "${home.readiness.hrvMs}",
+                        unit = "ms",
+                        delta = "READINESS ${home.readiness.score}%",
+                        modifier = Modifier.weight(1f),
+                        onClick = onOpenRecovery,
+                    )
+                    EliteBentoMetric(
+                        label = "DAY STRAIN",
+                        value = "%.1f".format(strain),
+                        unit = "/ 21",
+                        delta = "LOAD ${"%.1f".format(home.readiness.trainingLoad)}",
+                        accentVolt = false,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+            item {
+                EliteBentoMetric(
+                    label = "SLEEP",
+                    value = "${home.readiness.sleepQuality}",
+                    unit = "% quality",
+                    delta = nervous,
+                    onClick = onOpenSleep,
+                )
+            }
+            item {
+                EliteAiDirective(
+                    body = home.readiness.recommendation,
+                    action = "Start session",
+                    onAction = onOpenActivity,
+                )
+            }
+            item {
+                EliteBentoCard(onClick = onOpenCommunity) {
+                    val squad = remember {
+                        container.ascend.joinChallenge(LocalAthleteRepository.ATHLETE_ID, "squad-fc-week")
+                        container.ascend.squadChallenge(
+                            "squad-fc-week",
+                            listOf(
+                                LocalAthleteRepository.ATHLETE_ID,
+                                com.fitconnect.ascend.demo.AscendDemo.INES,
+                                com.fitconnect.ascend.demo.AscendDemo.MARINA,
+                            ),
                         )
-                        EliteStack(spacing = EliteSpace.Sm) {
-                            ScoreBlock(label = "Readiness", value = "${home.readiness.score}%")
-                            ScoreBlock(label = "HRV", value = "${home.readiness.hrvMs} ms")
-                            ScoreBlock(label = "Sleep", value = "${home.readiness.sleepQuality}%")
-                            ScoreBlock(label = "Nervous system", value = nervous)
+                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                        EliteLiveDot(live = false, label = "SQUAD · LOCAL_DEMO")
+                        Text("FC Performance", style = MaterialTheme.typography.titleLarge)
+                        if (squad == null) {
+                            Text(
+                                "Squad protocol not seeded.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        } else {
+                            Text(
+                                "${"%.1f".format(squad.progress / 1000.0)} / ${"%.0f".format(squad.target / 1000.0)} km",
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                            squad.contributions.entries.take(3).forEach { (athlete, meters) ->
+                                Text(
+                                    "${athlete.substringBefore("@")} · ${"%.1f".format(meters / 1000.0)} km",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
                     }
                 }
             }
-            item {
-                EliteCard(variant = EliteCardVariant.Glass) {
-                    EliteSectionHeader(title = "AI Coach Directive", overline = "SYS.AI")
-                    Text(home.readiness.aiSummary, style = MaterialTheme.typography.bodyLarge)
+            if (worldPulse.isNotEmpty()) {
+                item { EliteSectionHeader(title = "World signal", overline = "LOCAL_DEMO") }
+                items(worldPulse, key = { it.id }) { post ->
+                    val media = post.media.firstOrNull()
+                    EliteFeedPost(
+                        authorName = worldNames[post.authorId] ?: post.authorId,
+                        authorInitials = (worldNames[post.authorId] ?: post.authorId)
+                            .split(" ")
+                            .mapNotNull { it.firstOrNull()?.uppercaseChar()?.toString() }
+                            .take(2)
+                            .joinToString("")
+                            .ifBlank { "FC" },
+                        avatarName = worldAvatars[post.authorId],
+                        kindLabel = post.kind.name,
+                        timeLabel = "LIVE WORLD",
+                        body = post.text,
+                        imageName = media?.thumbnailUrl ?: media?.localUri,
+                        videoRawName = media?.takeIf {
+                            it.kind == com.fitconnect.android.community.domain.MediaKind.VIDEO
+                        }?.localUri,
+                        facts = post.workoutFacts?.takeIf { post.shareTelemetryFacts }?.let { facts ->
+                            listOfNotNull(
+                                facts.distanceMeters?.let { "KM" to "%.1f".format(it / 1000.0) },
+                                "MIN" to facts.durationMinutes.toString(),
+                            )
+                        }.orEmpty(),
+                        compact = true,
+                        onReact = {},
+                        onClick = onOpenCommunity,
+                    )
+                }
+                item {
                     EliteButton(
-                        label = "Open Performance AI",
+                        label = "Open community",
                         variant = EliteButtonVariant.Secondary,
-                        onClick = onOpenAi,
+                        onClick = onOpenCommunity,
+                    )
+                }
+            }
+            daily?.let { mission ->
+                item {
+                    AscendMissionCard(
+                        overline = "TODAY'S PERFORMANCE TARGET",
+                        title = t(mission.objectiveKey),
+                        progressLabel = "${mission.progress.toInt()} / ${mission.target.toInt()}",
+                        why = t(mission.whyKey),
+                        progress = (mission.progress / mission.target).toFloat(),
                     )
                 }
             }
             item {
-                EliteSectionHeader(title = "Training state", overline = "LOAD")
-                EliteCard(variant = EliteCardVariant.Metric) {
-                    Text(home.readiness.recommendation, style = MaterialTheme.typography.bodyLarge)
-                    Text(
-                        "Load ${"%.1f".format(home.readiness.trainingLoad)} · RHR ${home.readiness.restingHrBpm} bpm",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                AscendXPBar(
+                    rankLabel = t(ascend.level.rank.nameKey),
+                    level = ascend.level.level,
+                    xpLabel = "${ascend.totalXp} / ${ascend.totalXp + ascend.level.xpToNext} XP",
+                    remainingLabel = "+${ascend.level.xpToNext} XP TO NEXT LEVEL",
+                    progress = ascend.level.progressPercent / 100f,
+                    nextUnlock = ascend.level.nextUnlock?.let { t(it.nameKey) },
+                )
+            }
+            streak?.let { active ->
+                item {
+                    AscendStreakCard(
+                        title = t("ui.streak"),
+                        daysLabel = "${active.days}",
+                        statusLabel = active.status.name,
+                        body = "Recovery days can protect this streak. Rest is part of performance.",
                     )
-                    Text("Recovery plan", style = MaterialTheme.typography.titleMedium)
-                    Text(home.readiness.recoveryRecommendation, style = MaterialTheme.typography.bodyMedium)
                 }
+            }
+            item {
+                EliteButton(
+                    label = t("ui.vault"),
+                    variant = EliteButtonVariant.Secondary,
+                    onClick = onOpenVault,
+                    modifier = Modifier.testTag("home_open_vault"),
+                )
             }
             item {
                 EliteChart(
@@ -202,6 +378,7 @@ fun HomeScreen(
                                 when {
                                     action.contains("session", true) -> onOpenTraining()
                                     action.contains("readiness", true) -> onOpenRecovery()
+                                    action.contains("program", true) -> onOpenPrograms()
                                     else -> onOpenNotifications()
                                 }
                             })
@@ -211,19 +388,18 @@ fun HomeScreen(
             }
             item { EliteSectionHeader(title = "Recent activity", overline = "TELEMETRY") }
             items(home.recentActivity) { line ->
-                Text(line, style = MaterialTheme.typography.bodyMedium)
+                EliteCard(variant = EliteCardVariant.Glass) {
+                    Text(line, style = MaterialTheme.typography.bodyLarge)
+                }
             }
             item {
-                EliteFlowRow {
+                EliteStack {
                     EliteButton(
                         "Start monitoring",
                         onClick = onOpenActivity,
                         modifier = Modifier.testTag("home_start_monitoring"),
                     )
-                    EliteButton("Recovery", onClick = onOpenRecovery, variant = EliteButtonVariant.Secondary)
-                    EliteButton("Discover", onClick = onOpenDiscover, variant = EliteButtonVariant.Ghost)
-                    EliteButton("Sports", onClick = onOpenSports, variant = EliteButtonVariant.Ghost)
-                    EliteButton("You", onClick = onOpenProfile, variant = EliteButtonVariant.Ghost)
+                    EliteChip(label = "Recovery", onClick = onOpenRecovery)
                 }
             }
             if (home.readiness.warnings.isNotEmpty()) {

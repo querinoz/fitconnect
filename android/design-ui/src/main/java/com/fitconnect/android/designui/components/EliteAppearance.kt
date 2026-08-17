@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.fitconnect.android.designui.theme.EliteSpace
+import com.fitconnect.android.foundation.theme.AccentPreset
 import com.fitconnect.android.foundation.theme.ThemeMode
 
 @Composable
@@ -17,6 +18,8 @@ fun EliteAppearancePicker(
     mode: ThemeMode,
     onModeChange: (ThemeMode) -> Unit,
     modifier: Modifier = Modifier,
+    accent: AccentPreset? = null,
+    onAccentChange: ((AccentPreset) -> Unit)? = null,
 ) {
     Column(
         modifier = modifier
@@ -50,6 +53,32 @@ fun EliteAppearancePicker(
                     onClick = { onModeChange(value) },
                     modifier = Modifier.testTag("appearance_${value.name.lowercase()}"),
                 )
+            }
+        }
+        if (accent != null && onAccentChange != null) {
+            EliteSysLabel("ACCENT · VOLT SPECTRUM")
+            Text(
+                "Personalize Voltline. Floor, type, and semantic colors stay FitConnect.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            EliteFlowRow(
+                modifier = Modifier.selectableGroup(),
+                spacing = EliteSpace.Xs,
+            ) {
+                listOf(
+                    AccentPreset.VOLTLINE to "Voltline",
+                    AccentPreset.VOLT_400 to "Neon",
+                    AccentPreset.VOLT_300 to "Spring",
+                    AccentPreset.VOLT_600 to "Gold-green",
+                ).forEach { (value, label) ->
+                    EliteChip(
+                        label = label,
+                        selected = accent == value,
+                        onClick = { onAccentChange(value) },
+                        modifier = Modifier.testTag("accent_${value.name.lowercase()}"),
+                    )
+                }
             }
         }
     }

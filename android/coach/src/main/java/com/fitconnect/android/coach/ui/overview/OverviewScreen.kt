@@ -14,10 +14,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.runtime.collectAsState
 import com.fitconnect.android.coach.domain.CoachOverview
 import com.fitconnect.android.coach.ui.LocalCoachContainer
 import com.fitconnect.android.coach.ui.components.CoachLoad
 import com.fitconnect.android.coach.ui.components.CoachScreenScaffold
+import com.fitconnect.android.designui.components.EliteBadge
+import com.fitconnect.android.designui.components.EliteBentoMetric
+import com.fitconnect.android.designui.components.EliteBentoRow
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
@@ -60,6 +65,34 @@ fun OverviewScreen(
             testTag = "coach_overview",
         ) {
             item {
+                EliteBentoRow {
+                    EliteBentoMetric(
+                        label = "ATTENTION",
+                        value = "${home.athletesNeedingAttention.size}",
+                        delta = "AT RISK",
+                        accentVolt = false,
+                        modifier = Modifier.weight(1f),
+                    )
+                    EliteBentoMetric(
+                        label = "BOOKINGS",
+                        value = "${home.pendingBookings}",
+                        modifier = Modifier.weight(1f),
+                    )
+                    EliteBentoMetric(
+                        label = "INBOX",
+                        value = "${home.unreadMessages}",
+                        accentVolt = false,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+            item {
+                LiveSquadCard()
+            }
+            item {
+                SquadAscendCard()
+            }
+            item {
                 EliteCard(variant = EliteCardVariant.Glass) {
                     com.fitconnect.android.designui.components.EliteSectionHeader(
                         title = "AI command brief",
@@ -87,22 +120,11 @@ fun OverviewScreen(
                 )
                 EliteCard(variant = EliteCardVariant.Metric) {
                     home.athletesNeedingAttention.take(6).forEach { athlete ->
-                        val tone = when {
-                            athlete.recovery >= 75 -> MaterialTheme.colorScheme.secondary
-                            athlete.recovery >= 50 -> MaterialTheme.colorScheme.primary
-                            else -> MaterialTheme.colorScheme.error
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            Text(athlete.displayName, style = MaterialTheme.typography.bodyLarge)
-                            Text(
-                                "${athlete.recovery}",
-                                style = com.fitconnect.android.designui.theme.EliteMonoTextStyle,
-                                color = tone,
-                            )
-                        }
+                        com.fitconnect.android.designui.components.EliteCommandPip(
+                            name = athlete.displayName,
+                            recovery = athlete.recovery,
+                            onClick = { onOpenAthlete(athlete.id) },
+                        )
                     }
                     if (home.athletesNeedingAttention.isEmpty()) {
                         Text("Squad stable — no attention flags", style = MaterialTheme.typography.bodyMedium)
@@ -186,7 +208,9 @@ fun OverviewScreen(
                 com.fitconnect.android.designui.components.EliteSectionHeader(title = "Live activity", overline = "FEED")
             }
             items(home.liveFeed, key = { it.id }) { feed ->
-                Text(feed.text, style = MaterialTheme.typography.bodyMedium)
+                EliteCard(variant = EliteCardVariant.Glass) {
+                    Text(feed.text, style = MaterialTheme.typography.bodyLarge)
+                }
             }
             item {
                 EliteFlowRow {
@@ -194,6 +218,96 @@ fun OverviewScreen(
                     EliteButton("Analytics", onClick = onOpenAnalytics, variant = EliteButtonVariant.Ghost)
                     EliteButton("Revenue", onClick = onOpenRevenue, variant = EliteButtonVariant.Ghost)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SquadAscendCard() {
+    val container = LocalCoachContainer.current
+    val squad = remember {
+        container.ascend.joinChallenge("ath-1", "squad-fc-week")
+        container.ascend.squadChallenge(
+            "squad-fc-week",
+            listOf("ath-1", com.fitconnect.ascend.demo.AscendDemo.INES, com.fitconnect.ascend.demo.AscendDemo.MARINA),
+        )
+    }
+    EliteCard(variant = EliteCardVariant.Glass, modifier = Modifier.testTag("coach_squad_challenge")) {
+        EliteStack(spacing = EliteSpace.Md) {
+            com.fitconnect.android.designui.components.EliteSectionHeader(
+                title = "FC PERFORMANCE WEEK",
+                overline = "SQUAD CHALLENGE",
+            )
+            if (squad == null) {
+                Text("No squad protocol active.", style = MaterialTheme.typography.bodyMedium)
+            } else {
+                Text(
+                    "TARGET  ${(squad.target / 1000.0)} KM",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    "TEAM PROGRESS  ${"%.1f".format(squad.progress / 1000.0)} / ${"%.0f".format(squad.target / 1000.0)} KM",
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                squad.contributions.forEach { (athlete, meters) ->
+                    Text(
+                        "$athlete · ${"%.1f".format(meters / 1000.0)} km contribution",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+                Text(
+                    "Recovery distribution is protected. This is participation, not a humiliation ranking. LOCAL_DEMO.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LiveSquadCard() {
+    val container = LocalCoachContainer.current
+    val envelope by container.telemetry.wearInbox.lastEnvelope.collectAsState()
+    var companion by remember { mutableStateOf(com.fitconnect.android.telemetry.wear.WearCompanionState.NOT_PAIRED) }
+    var locationAllowed by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        companion = container.telemetry.wearCompanion.state()
+        locationAllowed = container.telemetry.privacy.coachMayRead(
+            coachId = "coach-1",
+            athleteId = "ath-1",
+            metric = com.fitconnect.android.telemetry.domain.MetricType.LOCATION,
+        )
+    }
+    EliteCard(variant = EliteCardVariant.Glass, modifier = Modifier) {
+        EliteStack(spacing = EliteSpace.Md) {
+            com.fitconnect.android.designui.components.EliteSectionHeader(
+                title = "LIVE SQUAD",
+                overline = "WATCH",
+            )
+            EliteBadge(text = companion.name)
+            Text(
+                "Connection is never faked. CONNECTED requires a reachable FitConnect Wear node.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            if (envelope == null) {
+                Text("ATHLETE · OFFLINE · no live session packet", style = MaterialTheme.typography.bodyMedium)
+            } else {
+                Text("ATHLETE · ${envelope?.userId} · session ${envelope?.sessionId}")
+                envelope?.samples?.firstOrNull { it.metric == "HEART_RATE" }?.let { hr ->
+                    Text("HR ${hr.value?.toInt() ?: hr.availability.name}")
+                }
+            }
+            if (!locationAllowed) {
+                Text(
+                    "Location sharing off. Coach map stays empty until the athlete grants COACH_SHARING.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            } else {
+                val lat = envelope?.samples?.firstOrNull { it.metric == "LATITUDE" }?.value
+                val lon = envelope?.samples?.firstOrNull { it.metric == "LONGITUDE" }?.value
+                Text("Live map ${lat ?: "—"}, ${lon ?: "—"}")
             }
         }
     }

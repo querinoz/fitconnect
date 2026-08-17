@@ -24,6 +24,10 @@ data class PostDraft(
     val challengeId: String? = null,
     val workoutFacts: com.fitconnect.android.community.domain.WorkoutFacts? = null,
     val mediaIds: List<String> = emptyList(),
+    val media: List<com.fitconnect.android.community.domain.MediaAttachment> = emptyList(),
+    /** Seed / replay only — never set from the live composer. */
+    val skipRateLimit: Boolean = false,
+    val createdAtEpochMs: Long? = null,
 )
 
 sealed interface PostResult {
@@ -72,7 +76,7 @@ class InMemoryPostEngine(
     private var sequence = 0L
 
     override suspend fun create(draft: PostDraft): PostResult = mutex.withLock {
-        if (draft.text.isBlank() && draft.workoutFacts == null && draft.mediaIds.isEmpty()) {
+        if (draft.text.isBlank() && draft.workoutFacts == null && draft.mediaIds.isEmpty() && draft.media.isEmpty()) {
             return@withLock PostResult.Invalid
         }
         // Idempotency: same key → same post, no duplicate.
@@ -86,10 +90,11 @@ class InMemoryPostEngine(
                 now - it.audit.createdAtEpochMs < DUPLICATE_WINDOW_MS && it.kind == draft.kind
         }?.let { return@withLock PostResult.Duplicate(it) }
 
-        if (!rateLimiter.tryAcquire(draft.authorId, CommunityAction.CREATE_POST)) {
+        if (!draft.skipRateLimit && !rateLimiter.tryAcquire(draft.authorId, CommunityAction.CREATE_POST)) {
             return@withLock PostResult.RateLimited
         }
 
+        val createdAt = draft.createdAtEpochMs ?: now
         val post = CommunityPost(
             id = "post-${++sequence}",
             authorId = draft.authorId,
@@ -97,6 +102,7 @@ class InMemoryPostEngine(
             text = draft.text.trim(),
             sportKey = draft.sportKey,
             workoutFacts = draft.workoutFacts,
+            media = draft.media,
             hashtags = extractTags(draft.text, '#'),
             mentions = extractTags(draft.text, '@'),
             groupId = draft.groupId,
@@ -104,7 +110,7 @@ class InMemoryPostEngine(
             challengeId = draft.challengeId,
             visibility = draft.visibility,
             shareTelemetryFacts = draft.shareTelemetryFacts,
-            audit = Audit(now, now),
+            audit = Audit(createdAt, createdAt),
         )
         posts[post.id] = post
         byIdempotencyKey["${draft.authorId}:${draft.idempotencyKey}"] = post.id

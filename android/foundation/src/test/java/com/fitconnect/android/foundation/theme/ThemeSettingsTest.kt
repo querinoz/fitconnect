@@ -4,6 +4,8 @@ import androidx.datastore.preferences.core.Preferences
 import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.foundation.storage.KeyValueStore
 import com.fitconnect.android.foundation.storage.PreferenceKeys
+import com.fitconnect.android.foundation.theme.AccentPreset
+import com.fitconnect.android.foundation.theme.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
@@ -32,9 +34,9 @@ class ThemeSettingsTest {
     }
 
     @Test
-    fun defaultsToSystem() = runBlocking {
+    fun defaultsToDark() = runBlocking {
         val settings = DefaultThemeSettings(store)
-        assertEquals(ThemeMode.SYSTEM, settings.mode())
+        assertEquals(ThemeMode.DARK, settings.mode())
     }
 
     @Test
@@ -54,5 +56,14 @@ class ThemeSettingsTest {
         assertTrue(ThemeMode.SYSTEM.resolveDark(systemDark = true))
         assertFalse(ThemeMode.SYSTEM.resolveDark(systemDark = false))
         assertTrue(ThemeMode.HIGH_CONTRAST.resolveDark(systemDark = false))
+    }
+
+    @Test
+    fun accentDefaultsToVoltlineAndPersists() = runBlocking {
+        val settings = DefaultThemeSettings(store)
+        assertEquals(AccentPreset.VOLTLINE, settings.accent())
+        settings.setAccent(AccentPreset.VOLT_400)
+        assertEquals(AccentPreset.VOLT_400, settings.accent())
+        assertEquals(AccentPreset.VOLT_400.name, store.get(PreferenceKeys.ACCENT))
     }
 }

@@ -13,6 +13,7 @@ fun loadSecretProps(): Properties {
     System.getenv("FITCONNECT_SUPABASE_ANON_KEY")?.let { props["supabase.anonKey"] = it }
     System.getenv("SUPABASE_URL")?.let { props["supabase.url"] = it }
     System.getenv("SUPABASE_ANON_KEY")?.let { props["supabase.anonKey"] = it }
+    System.getenv("FITCONNECT_GOOGLE_WEB_CLIENT_ID")?.let { props["firebase.webClientId"] = it }
     return props
 }
 
@@ -24,9 +25,11 @@ fun Properties.escaped(key: String): String {
 val secretProps = loadSecretProps()
 val supabaseUrl = secretProps.escaped("supabase.url")
 val supabaseAnon = secretProps.escaped("supabase.anonKey")
+val googleWebClientId = secretProps.escaped("firebase.webClientId")
 val keystorePropsFile = rootProject.file("keystore.properties")
 val googleServicesFile = file("google-services.json")
 val fcmConfigured = googleServicesFile.exists()
+val firebaseConfigured = fcmConfigured
 val enforceProd = (project.findProperty("fitconnect.enforceProdConfig") as String?) == "true"
 
 // SIGN-02: release signing is mandatory — never silently unsigned.
@@ -60,6 +63,8 @@ android {
         buildConfigField("boolean", "ALLOW_LOCAL_AUTH", "false")
         buildConfigField("boolean", "ENFORCE_PROD_CONFIG", "false")
         buildConfigField("boolean", "FCM_CONFIGURED", if (fcmConfigured) "true" else "false")
+        buildConfigField("boolean", "FIREBASE_CONFIGURED", if (firebaseConfigured) "true" else "false")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
     }
 
     signingConfigs {
@@ -82,9 +87,11 @@ android {
             buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
             buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseAnon\"")
             buildConfigField("String", "RELEASE_CHANNEL", "\"debug\"")
-            buildConfigField("boolean", "ALLOW_LOCAL_AUTH", if (supabaseUrl.isBlank()) "true" else "false")
+            buildConfigField("boolean", "ALLOW_LOCAL_AUTH", "true")
             buildConfigField("boolean", "ENFORCE_PROD_CONFIG", "false")
             buildConfigField("boolean", "FCM_CONFIGURED", if (fcmConfigured) "true" else "false")
+            buildConfigField("boolean", "FIREBASE_CONFIGURED", if (firebaseConfigured) "true" else "false")
+            buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
         }
         release {
             isMinifyEnabled = true
@@ -97,6 +104,8 @@ android {
             buildConfigField("boolean", "ALLOW_LOCAL_AUTH", "false")
             buildConfigField("boolean", "ENFORCE_PROD_CONFIG", "true")
             buildConfigField("boolean", "FCM_CONFIGURED", if (fcmConfigured) "true" else "false")
+            buildConfigField("boolean", "FIREBASE_CONFIGURED", if (firebaseConfigured) "true" else "false")
+            buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
             if (!releaseSigningReady) {
                 // Hard fail at configuration if someone invokes release tasks without keystore.
                 // Actual throw deferred to verifyReleaseSigning task (config-cache safe).
@@ -180,6 +189,9 @@ dependencies {
     implementation(project(":athlete"))
     implementation(project(":coach"))
     implementation(project(":core-capture"))
+    implementation(project(":shared"))
+    implementation(project(":ascend"))
+    implementation(libs.play.services.wearable)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -193,11 +205,17 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.coroutines.play.services)
 
     debugImplementation(libs.androidx.ui.tooling)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
 
 // Apply Google Services only when Firebase config is present (never commit the JSON).

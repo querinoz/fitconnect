@@ -65,17 +65,51 @@ class SupabaseAuthRepository(
                 )
                 AppResult.Ok(AuthUser(id = "guest", email = null, role = UserRole.GUEST))
             }
-            AuthProviderKind.GOOGLE, AuthProviderKind.APPLE, AuthProviderKind.MAGIC_LINK,
+            AuthProviderKind.GOOGLE, AuthProviderKind.APPLE ->
+                AuthErrorMapper.err(AppError.AuthKind.PROVIDER_UNAVAILABLE)
+            AuthProviderKind.MAGIC_LINK,
             AuthProviderKind.ANONYMOUS, AuthProviderKind.BIOMETRIC_UNLOCK,
-            -> AppResult.Err(AppError.Auth(AppError.AuthKind.UNAUTHENTICATED))
+            -> AuthErrorMapper.err(AppError.AuthKind.UNAUTHENTICATED)
         }
     }
 
-    override suspend fun signUp(email: String, password: String): AppResult<AuthUser> =
-        passwordGrant(email, password, signUp = true)
+    override suspend fun signUp(
+        email: String,
+        password: String,
+        confirmPassword: String?,
+    ): AppResult<AuthUser> {
+        AuthValidators.passwordsMatch(password, confirmPassword)?.let {
+            return AuthErrorMapper.err(it)
+        }
+        return passwordGrant(email, password, signUp = true)
+    }
 
-    override suspend fun sendMagicLink(email: String): AppResult<Unit> =
-        AppResult.Err(AppError.Auth(AppError.AuthKind.UNAUTHENTICATED))
+    override suspend fun sendMagicLink(email: String): AppResult<Unit> = sendPasswordReset(email)
+
+    override suspend fun sendPasswordReset(email: String): AppResult<Unit> = withContext(Dispatchers.IO) {
+        AuthValidators.email(email)?.let { return@withContext AuthErrorMapper.err(it) }
+        val root = base()
+            ?: return@withContext AuthErrorMapper.err(AppError.AuthKind.UNAUTHENTICATED)
+        val payload = JSONObject().put("email", email.trim()).toString()
+        val req = Request.Builder()
+            .url("$root/auth/v1/recover")
+            .addHeader("apikey", config.supabaseAnonKey!!)
+            .addHeader("Content-Type", "application/json")
+            .post(payload.toRequestBody(jsonMedia))
+            .build()
+        runCatching {
+            http.newCall(req).execute().use { resp ->
+                if (!resp.isSuccessful) {
+                    logger.w("SupabaseAuth", "recover failed status=${resp.code}")
+                    return@withContext AuthErrorMapper.err(AppError.AuthKind.UNKNOWN_AUTH_ERROR)
+                }
+                AppResult.Ok(Unit)
+            }
+        }.getOrElse {
+            logger.w("SupabaseAuth", "recover error")
+            AuthErrorMapper.err(AppError.AuthKind.NETWORK_ERROR)
+        }
+    }
 
     override suspend fun signInAnonymously(): AppResult<AuthUser> =
         AppResult.Err(AppError.Auth(AppError.AuthKind.UNAUTHENTICATED))
@@ -155,9 +189,8 @@ class SupabaseAuthRepository(
     ): AppResult<AuthUser> = withContext(Dispatchers.IO) {
         val root = base()
             ?: return@withContext AppResult.Err(AppError.Auth(AppError.AuthKind.UNAUTHENTICATED))
-        if (email.isBlank() || password.length < 8) {
-            return@withContext AppResult.Err(AppError.Auth(AppError.AuthKind.UNAUTHENTICATED))
-        }
+        AuthValidators.email(email)?.let { return@withContext AuthErrorMapper.err(it) }
+        AuthValidators.password(password)?.let { return@withContext AuthErrorMapper.err(it) }
         val path = if (signUp) "signup" else "token?grant_type=password"
         val payload = JSONObject()
             .put("email", email.trim())
@@ -174,7 +207,13 @@ class SupabaseAuthRepository(
                 val text = resp.body?.string().orEmpty()
                 if (!resp.isSuccessful) {
                     logger.w("SupabaseAuth", "auth failed status=${resp.code}")
-                    return@withContext AppResult.Err(AppError.Auth(AppError.AuthKind.UNAUTHENTICATED))
+                    val kind = when (resp.code) {
+                        400, 401 -> AppError.AuthKind.INVALID_CREDENTIALS
+                        422 -> AppError.AuthKind.EMAIL_ALREADY_EXISTS
+                        429 -> AppError.AuthKind.TOO_MANY_REQUESTS
+                        else -> AppError.AuthKind.UNKNOWN_AUTH_ERROR
+                    }
+                    return@withContext AuthErrorMapper.err(kind)
                 }
                 when (val tokens = persistTokenResponse(text)) {
                     is AppResult.Ok -> {

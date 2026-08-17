@@ -1,16 +1,21 @@
 package com.fitconnect.android.athlete.ui.telemetry
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.di.AthleteContainer
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.designui.charts.EliteChart
@@ -26,13 +31,15 @@ import com.fitconnect.android.foundation.auth.DemoPersona
 import com.fitconnect.android.telemetry.aggregate.AggregateSeries
 import com.fitconnect.android.telemetry.devices.DeviceEntry
 import com.fitconnect.android.telemetry.domain.MetricType
+import com.fitconnect.android.telemetry.healthconnect.HealthConnectAvailability
 import com.fitconnect.android.telemetry.integration.TelemetryOverview
 import com.fitconnect.android.telemetry.provider.ProviderConnectionState
+import com.fitconnect.android.telemetry.wear.WearCompanionState
+import com.fitconnect.android.telemetry.wear.WearablePlatformStatus
 import kotlinx.coroutines.launch
 
 /**
- * Telemetry Center — devices, sync state, coverage and normalized vitals.
- * Consumes only [TelemetryOverview] / [AggregateSeries]; no provider logic.
+ * Telemetry Center + Device Center — devices, Wear companion, coverage, vitals.
  */
 @Composable
 fun TelemetryScreen() {
@@ -63,8 +70,8 @@ fun TelemetryScreen() {
     }
 
     AthleteScreenScaffold(
-        title = "Telemetry Center",
-        subtitle = "Devices · sync · coverage · vitals · ${DemoPersona.MODE_LABEL}",
+        title = "Device Center",
+        subtitle = "Watch · Health Connect · providers · ${DemoPersona.MODE_LABEL}",
         testTag = "athlete_telemetry",
     ) {
         item {
@@ -129,7 +136,10 @@ fun TelemetryScreen() {
                 }
             }
         }
-        item { Text("Providers", style = MaterialTheme.typography.titleMedium) }
+        item {
+            WatchLinkCard(container)
+        }
+        item { Text("Providers · LOCAL_DEMO fixtures — Garmin / WHOOP / Oura production APIs are PENDING_HUMAN", style = MaterialTheme.typography.titleMedium) }
         items(devices, key = { it.provider.name }) { device ->
             EliteCard {
                 Text(device.displayName, style = MaterialTheme.typography.titleMedium)
@@ -165,6 +175,75 @@ fun TelemetryScreen() {
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun WatchLinkCard(container: AthleteContainer) {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val envelope by container.telemetry.wearInbox.lastEnvelope.collectAsState()
+    var companion by remember { mutableStateOf(WearCompanionState.NOT_PAIRED) }
+    var transport by remember { mutableStateOf(container.telemetry.wearSessionLink.transport) }
+    var pending by remember { mutableStateOf(0) }
+    val hc = remember { HealthConnectAvailability.status(context) }
+    val xiaomi = container.telemetry.xiaomiPlatform
+    LaunchedEffect(Unit) {
+        companion = container.telemetry.wearCompanion.state()
+        transport = container.telemetry.wearSessionLink.transport
+        pending = container.telemetry.wearSessionLink.pendingCount()
+    }
+    EliteCard {
+        Text("FITCONNECT WATCH", style = MaterialTheme.typography.titleMedium)
+        Text("${companion.name} · $transport", style = MaterialTheme.typography.bodyMedium)
+        Text("Battery UNAVAILABLE · HR sensor UNAVAILABLE · GPS UNAVAILABLE", style = MaterialTheme.typography.bodySmall)
+        Text("Health Connect SDK ${hc.name}", style = MaterialTheme.typography.bodySmall)
+        Text(
+            "Xiaomi HyperOS ${xiaomi.status.name} — not Wear OS.",
+            style = MaterialTheme.typography.bodySmall,
+        )
+        val last = envelope?.let { "Last packet seq ${it.sequenceNumber} · ${it.source.name}" } ?: "Last sync: none"
+        Text("$last · pending $pending", style = MaterialTheme.typography.bodySmall)
+        Text(
+            "Paired means a reachable FitConnect Wear capability, not a Bluetooth-only watch.",
+            style = MaterialTheme.typography.bodySmall,
+        )
+        EliteButton(
+            label = "PAIR WATCH",
+            onClick = {
+                context.startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
+            },
+        )
+        EliteButton(
+            label = "SYNC NOW",
+            variant = EliteButtonVariant.Secondary,
+            onClick = {
+                scope.launch {
+                    container.telemetry.wearCompanion.requestSync()
+                    companion = container.telemetry.wearCompanion.state()
+                    pending = container.telemetry.wearSessionLink.pendingCount()
+                }
+            },
+        )
+        EliteButton(
+            label = "UNPAIR IN SYSTEM SETTINGS",
+            variant = EliteButtonVariant.Ghost,
+            onClick = {
+                context.startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
+            },
+        )
+        EliteButton(
+            label = "DEVICE SETTINGS",
+            variant = EliteButtonVariant.Ghost,
+            onClick = {
+                context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = android.net.Uri.fromParts("package", context.packageName, null)
+                })
+            },
+        )
+        if (xiaomi.status == WearablePlatformStatus.BLOCKED_EXTERNAL_DEPENDENCY) {
+            EliteBadge(text = "XIAOMI BLOCKED")
         }
     }
 }

@@ -112,6 +112,8 @@ class DefaultCommunityContainer(
             posts = posts,
             programs = programs,
             challenges = challenges,
+            reactions = reactions,
+            comments = comments,
             nowEpochMs = nowProvider(),
         )
     }

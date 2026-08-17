@@ -15,6 +15,8 @@ import com.fitconnect.android.sports.di.SportsContainer
 import com.fitconnect.android.sports.integration.CoachSportsFacade
 import com.fitconnect.android.telemetry.di.TelemetryContainer
 import com.fitconnect.android.telemetry.integration.CoachTelemetryFacade
+import com.fitconnect.ascend.demo.AscendDemo
+import com.fitconnect.ascend.engine.AscendEngine
 
 interface CoachContainer {
     val platform: AppContainer
@@ -28,6 +30,7 @@ interface CoachContainer {
     val payments: CoachPaymentsGateway
     val files: CoachFileStore
     val ai: CoachAiPort
+    val ascend: AscendEngine
 }
 
 class DefaultCoachContainer(
@@ -36,6 +39,9 @@ class DefaultCoachContainer(
     override val geo: GeoContainer,
     override val telemetry: TelemetryContainer,
     override val aiEngine: AiContainer,
+    override val ascend: AscendEngine = AscendEngine(
+        demoLabeledUsers = setOf(AscendDemo.INES, AscendDemo.MARINA, AscendDemo.TOMAS, "ath-1"),
+    ),
 ) : CoachContainer {
     override val coachSports: CoachSportsFacade = sports.coachFacade
     override val coachTelemetry: CoachTelemetryFacade = telemetry.coachFacade
@@ -48,4 +54,13 @@ class DefaultCoachContainer(
     override val payments: CoachPaymentsGateway = ArchitectureCoachPaymentsGateway()
     override val files: CoachFileStore = LocalCoachFileStore()
     override val ai: CoachAiPort = EngineCoachAiPort(aiEngine.engine)
+
+    init {
+        AscendDemo.seed(ascend, "ath-1")
+        AscendDemo.seed(ascend, AscendDemo.INES)
+        AscendDemo.seed(ascend, AscendDemo.MARINA)
+        AscendDemo.seed(ascend, AscendDemo.TOMAS)
+        ascend.joinChallenge("ath-1", "squad-fc-week")
+        ascend.joinChallenge(AscendDemo.INES, "squad-fc-week")
+    }
 }

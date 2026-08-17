@@ -9,11 +9,16 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.PlayCircle
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -55,6 +60,10 @@ fun AthleteOsApp(
     val backStack by navController.currentBackStackEntryAsState()
     val current = backStack?.destination?.route
     val online by container.platform.connectivity.online.collectAsState()
+    val wearEnvelope by container.telemetry.wearInbox.lastEnvelope.collectAsState()
+    androidx.compose.runtime.LaunchedEffect(wearEnvelope) {
+        wearEnvelope?.let { container.liveCoordinator.onRemoteEnvelope(it) }
+    }
 
     CompositionLocalProvider(
         LocalAthleteContainer provides container,
@@ -78,12 +87,31 @@ fun AthleteOsApp(
                         EliteNavItem(
                             label = dest.label,
                             icon = when (dest) {
-                                AthleteDest.HOME -> Icons.Filled.Home
-                                AthleteDest.DISCOVER -> Icons.Filled.Search
-                                AthleteDest.ACTIVITY -> Icons.Filled.PlayArrow
-                                AthleteDest.COMMUNITY -> Icons.Filled.Favorite
-                                AthleteDest.PROFILE -> Icons.Filled.Person
-                                else -> Icons.Filled.Home
+                                AthleteDest.HOME ->
+                                    if (current?.startsWith(dest.route) == true) Icons.Filled.Home else Icons.Outlined.Home
+                                AthleteDest.DISCOVER ->
+                                    if (current?.startsWith(dest.route) == true) Icons.Filled.Search else Icons.Outlined.Search
+                                AthleteDest.ACTIVITY ->
+                                    if (current?.startsWith(dest.route) == true) {
+                                        Icons.Filled.PlayCircle
+                                    } else {
+                                        Icons.Outlined.PlayCircle
+                                    }
+                                AthleteDest.COMMUNITY ->
+                                    if (current?.startsWith(dest.route) == true) {
+                                        Icons.Filled.Groups
+                                    } else {
+                                        Icons.Outlined.Groups
+                                    }
+                                AthleteDest.PROFILE ->
+                                    if (current?.startsWith(dest.route) == true ||
+                                        current == AthleteDest.SETTINGS.route
+                                    ) {
+                                        Icons.Filled.Person
+                                    } else {
+                                        Icons.Outlined.Person
+                                    }
+                                else -> Icons.Outlined.Home
                             },
                             selected = current?.startsWith(dest.route) == true ||
                                 (dest == AthleteDest.PROFILE && current == AthleteDest.SETTINGS.route),

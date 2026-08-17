@@ -47,8 +47,10 @@ object EliteSurfaceSpacing {
     const val SM: Int = 8
     const val MD: Int = 12
     const val LG: Int = 16
+    const val INSET: Int = 20
     const val XL: Int = 24
     const val XXL: Int = 32
+    const val SECTION: Int = 40
     const val XXXL: Int = 48
     const val HUGE: Int = 64
 }
@@ -84,6 +86,18 @@ object EliteSurfaceBorder {
     const val HAIRLINE: Float = 1f
     const val THIN: Float = 1.5f
     const val THICK: Float = 2f
+}
+
+object EliteSurfaceGlass {
+    const val L_1: Float = 0.88f
+    const val L_2: Float = 0.72f
+    const val L_3: Float = 0.64f
+    const val L_4: Float = 0.52f
+    const val L_5: Float = 0.42f
+    const val HIGHLIGHT: Float = 0.18f
+    const val BLUR_L_3: Int = 8
+    const val BLUR_L_4: Int = 12
+    const val BLUR_L_5: Int = 20
 }
 
 object EliteSurfaceMotion {

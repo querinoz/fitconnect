@@ -6,8 +6,10 @@ export const SPACING_TOKENS = {
   sm: 8,
   md: 12,
   lg: 16,
+  inset: 20,
   xl: 24,
   xxl: 32,
+  section: 40,
   xxxl: 48,
   huge: 64,
 } as const;
@@ -44,4 +46,20 @@ export const BORDER_TOKENS = {
   hairline: 1,
   thin: 1.5,
   thick: 2,
+} as const;
+
+/**
+ * Glass ladder — opacity + optional localized blur (dp).
+ * L2 matches OPACITY_TOKENS.glass. Never fullscreen blur.
+ */
+export const GLASS_TOKENS = {
+  l1: 0.88,
+  l2: 0.72,
+  l3: 0.64,
+  l4: 0.52,
+  l5: 0.42,
+  highlight: 0.18,
+  blurL3: 8,
+  blurL4: 12,
+  blurL5: 20,
 } as const;

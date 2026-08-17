@@ -6,12 +6,22 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
 /**
- * Wear OS companion ports. The `:wear` module hosts a LOCAL_DEMO operational
- * shell (start/pause/resume/end). Phone ↔ watch DataLayer pairing is not
- * executed in this build — [NoWearCompanion] stays NOT_PAIRED until a
- * physical watch is bound (PENDING_HUMAN).
+ * Wear OS companion ports.
+ * [GmsWearCompanion] queries Play Services capability `fitconnect_telemetry`.
+ * Empty reachable set is [WearCompanionState.NOT_PAIRED] — never a fake connection.
+ * [NoWearCompanion] is for unit tests without Context.
  */
-enum class WearCompanionState { NOT_PAIRED, PAIRED, CONNECTED, SYNCING }
+enum class WearCompanionState {
+    NOT_PAIRED,
+    PAIRED,
+    CONNECTING,
+    CONNECTED,
+    SYNCING,
+    OFFLINE,
+    DISCONNECTED,
+    RECONNECTING,
+    ERROR,
+}
 
 interface WearableCompanionPort {
     suspend fun state(): WearCompanionState
@@ -29,14 +39,19 @@ interface WearWorkoutControlPort {
 /** No-op adapter used until a Wear OS companion is paired. */
 class NoWearCompanion : WearableCompanionPort {
     override suspend fun state(): WearCompanionState = WearCompanionState.NOT_PAIRED
-    override suspend fun requestSync(): AppResult<Unit> = AppResult.Ok(Unit)
+    override suspend fun requestSync(): AppResult<Unit> =
+        AppResult.Err(com.fitconnect.android.foundation.common.AppError.Unexpected("NOT_PAIRED"))
     override fun liveHeartRate(): Flow<TelemetrySample> = emptyFlow()
 }
 
-/** No-op workout control until DataLayer messaging is bound on a real watch. */
+/** No-op workout control until a reachable FitConnect Wear node exists. */
 class NoWearWorkoutControl : WearWorkoutControlPort {
-    override suspend fun startWorkout(sportKey: String): AppResult<Unit> = AppResult.Ok(Unit)
-    override suspend fun pauseWorkout(): AppResult<Unit> = AppResult.Ok(Unit)
-    override suspend fun resumeWorkout(): AppResult<Unit> = AppResult.Ok(Unit)
-    override suspend fun endWorkout(): AppResult<Unit> = AppResult.Ok(Unit)
+    override suspend fun startWorkout(sportKey: String): AppResult<Unit> =
+        AppResult.Err(com.fitconnect.android.foundation.common.AppError.Unexpected("NOT_PAIRED"))
+    override suspend fun pauseWorkout(): AppResult<Unit> =
+        AppResult.Err(com.fitconnect.android.foundation.common.AppError.Unexpected("NOT_PAIRED"))
+    override suspend fun resumeWorkout(): AppResult<Unit> =
+        AppResult.Err(com.fitconnect.android.foundation.common.AppError.Unexpected("NOT_PAIRED"))
+    override suspend fun endWorkout(): AppResult<Unit> =
+        AppResult.Err(com.fitconnect.android.foundation.common.AppError.Unexpected("NOT_PAIRED"))
 }

@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fitconnect.android.design.EliteSurfaceBorder
 import com.fitconnect.android.design.EliteSurfaceElevation
+import com.fitconnect.android.design.EliteSurfaceGlass
 import com.fitconnect.android.design.EliteSurfaceOpacity
 import com.fitconnect.android.design.EliteSurfaceRadius
 import com.fitconnect.android.design.EliteSurfaceSpacing
@@ -26,8 +27,10 @@ object EliteSpace {
     val Sm: Dp get() = EliteSurfaceSpacing.SM.dp
     val Md: Dp get() = EliteSurfaceSpacing.MD.dp
     val Lg: Dp get() = EliteSurfaceSpacing.LG.dp
+    val Inset: Dp get() = EliteSurfaceSpacing.INSET.dp
     val Xl: Dp get() = EliteSurfaceSpacing.XL.dp
     val Xxl: Dp get() = EliteSurfaceSpacing.XXL.dp
+    val Section: Dp get() = EliteSurfaceSpacing.SECTION.dp
     val Xxxl: Dp get() = EliteSurfaceSpacing.XXXL.dp
     val Huge: Dp get() = EliteSurfaceSpacing.HUGE.dp
 }
@@ -57,6 +60,18 @@ object EliteOpacity {
     val Glass get() = EliteSurfaceOpacity.GLASS
     val Scrim get() = EliteSurfaceOpacity.SCRIM
     val Border get() = EliteSurfaceOpacity.BORDER
+}
+
+object EliteGlass {
+    val L1 get() = EliteSurfaceGlass.L_1
+    val L2 get() = EliteSurfaceGlass.L_2
+    val L3 get() = EliteSurfaceGlass.L_3
+    val L4 get() = EliteSurfaceGlass.L_4
+    val L5 get() = EliteSurfaceGlass.L_5
+    val Highlight get() = EliteSurfaceGlass.HIGHLIGHT
+    val BlurL3: Dp get() = EliteSurfaceGlass.BLUR_L_3.dp
+    val BlurL4: Dp get() = EliteSurfaceGlass.BLUR_L_4.dp
+    val BlurL5: Dp get() = EliteSurfaceGlass.BLUR_L_5.dp
 }
 
 object EliteBorder {

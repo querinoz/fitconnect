@@ -8,6 +8,19 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+import java.util.Properties
+
+val keystorePropsFile = rootProject.file("keystore.properties")
+val wearReleaseSigningReady = keystorePropsFile.exists().also { exists ->
+    if (exists) {
+        val props = Properties().apply { keystorePropsFile.inputStream().use { load(it) } }
+        val store = rootProject.file(props.getProperty("storeFile") ?: "")
+        require(store.exists()) {
+            "keystore.properties storeFile does not exist: ${store.path}. Fix path or remove keystore.properties."
+        }
+    }
+}
+
 android {
     namespace = "com.fitconnect.android.wear"
     compileSdk = 35
@@ -21,10 +34,26 @@ android {
         versionName = "0.1.0"
     }
 
+    signingConfigs {
+        create("release") {
+            if (wearReleaseSigningReady) {
+                val props = Properties().apply { keystorePropsFile.inputStream().use { load(it) } }
+                storeFile = rootProject.file(props.getProperty("storeFile"))
+                storePassword = props.getProperty("storePassword")
+                keyAlias = props.getProperty("keyAlias")
+                keyPassword = props.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            if (wearReleaseSigningReady) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 
@@ -40,6 +69,9 @@ android {
 
 dependencies {
     implementation(project(":core-capture"))
+    implementation(project(":shared"))
+    implementation(project(":ascend"))
+    implementation(project(":design"))
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -48,4 +80,29 @@ dependencies {
     implementation(libs.androidx.wear.compose.material)
     implementation(libs.androidx.wear.compose.foundation)
     implementation(libs.play.services.wearable)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.androidx.health.services.client)
+}
+
+val wearKeystoreReadyCaptured = wearReleaseSigningReady
+val wearKeystorePropsPath = keystorePropsFile.absolutePath
+
+tasks.register("verifyWearReleaseSigning") {
+    group = "verification"
+    description = "Wear release must have a real keystore — never unsigned"
+    val ready = wearKeystoreReadyCaptured
+    val ksPath = wearKeystorePropsPath
+    doLast {
+        if (!ready) {
+            throw GradleException(
+                "WEAR SIGN-02 FAIL-CLOSED: android/keystore.properties missing or storeFile invalid ($ksPath). " +
+                    "Copy keystore.properties.example, point to a real .jks/.keystore (gitignored). " +
+                    "Use :wear:assembleDebug for engineering builds without signing.",
+            )
+        }
+    }
+}
+
+tasks.matching { it.name == "assembleRelease" || it.name == "bundleRelease" || it.name == "packageRelease" }.configureEach {
+    dependsOn("verifyWearReleaseSigning")
 }

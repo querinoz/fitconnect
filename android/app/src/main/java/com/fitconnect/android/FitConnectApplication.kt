@@ -29,6 +29,11 @@ import com.fitconnect.android.telemetry.di.DefaultTelemetryContainer
 import com.fitconnect.android.telemetry.di.TelemetryContainer
 import com.fitconnect.android.telemetry.domain.MetricType
 import com.fitconnect.android.telemetry.domain.ProviderId
+import com.fitconnect.android.telemetry.observability.WatchDiagEvent
+import com.fitconnect.ascend.demo.AscendDemo
+import com.fitconnect.ascend.engine.AscendEngine
+import com.fitconnect.shared.wear.WearPaths
+import com.google.android.gms.wearable.Wearable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -53,6 +58,7 @@ class FitConnectApplication : Application() {
     private val aiLock = Any()
     private val athleteLock = Any()
     private val coachLock = Any()
+    private val ascendLock = Any()
 
     @Volatile private var sportsContainerRef: SportsContainer? = null
     @Volatile private var geoContainerRef: GeoContainer? = null
@@ -60,6 +66,7 @@ class FitConnectApplication : Application() {
     @Volatile private var aiContainerRef: AiContainer? = null
     @Volatile private var athleteContainerRef: AthleteContainer? = null
     @Volatile private var coachContainerRef: CoachContainer? = null
+    @Volatile private var ascendEngineRef: AscendEngine? = null
 
     val sportsContainer: SportsContainer
         get() = sportsContainerRef ?: synchronized(sportsLock) {
@@ -79,7 +86,10 @@ class FitConnectApplication : Application() {
 
     val telemetryContainer: TelemetryContainer
         get() = telemetryContainerRef ?: synchronized(telemetryLock) {
-            telemetryContainerRef ?: DefaultTelemetryContainer(container.connectivity).also {
+            telemetryContainerRef ?: DefaultTelemetryContainer(
+                container.connectivity,
+                appContext = this@FitConnectApplication,
+            ).also {
                 telemetryContainerRef = it
                 startupTracer.mark("telemetry_ready")
             }
@@ -100,10 +110,26 @@ class FitConnectApplication : Application() {
             }
         }
 
+    val ascendEngine: AscendEngine
+        get() = ascendEngineRef ?: synchronized(ascendLock) {
+            ascendEngineRef ?: AscendEngine(
+                demoLabeledUsers = setOf(
+                    "ath-1",
+                    AscendDemo.INES,
+                    AscendDemo.MARINA,
+                    AscendDemo.TOMAS,
+                ),
+            ).also { engine ->
+                ascendEngineRef = engine
+                startupTracer.mark("ascend_ready")
+            }
+        }
+
     val athleteContainer: AthleteContainer
         get() = athleteContainerRef ?: synchronized(athleteLock) {
             athleteContainerRef ?: DefaultAthleteContainer(
                 container, sportsContainer, geoContainer, telemetryContainer, aiContainer,
+                ascend = ascendEngine,
             ).also {
                 athleteContainerRef = it
                 startupTracer.mark("athlete_ready")
@@ -114,6 +140,7 @@ class FitConnectApplication : Application() {
         get() = coachContainerRef ?: synchronized(coachLock) {
             coachContainerRef ?: DefaultCoachContainer(
                 container, sportsContainer, geoContainer, telemetryContainer, aiContainer,
+                ascend = ascendEngine,
             ).also {
                 coachContainerRef = it
                 startupTracer.mark("coach_ready")
@@ -129,11 +156,16 @@ class FitConnectApplication : Application() {
             supabaseAnonKey = BuildConfig.SUPABASE_ANON_KEY.takeIf { it.isNotBlank() },
             isDebuggable = BuildConfig.DEBUG,
             allowLocalAuth = BuildConfig.ALLOW_LOCAL_AUTH,
+            firebaseAuthConfigured = BuildConfig.FIREBASE_CONFIGURED,
+            googleWebClientId = BuildConfig.GOOGLE_WEB_CLIENT_ID.takeIf { it.isNotBlank() },
             fcmConfigured = BuildConfig.FCM_CONFIGURED,
             releaseChannel = BuildConfig.RELEASE_CHANNEL,
             versionName = BuildConfig.VERSION_NAME,
             versionCode = BuildConfig.VERSION_CODE,
         )
+        if (BuildConfig.FIREBASE_CONFIGURED) {
+            runCatching { com.google.firebase.FirebaseApp.initializeApp(this) }
+        }
         container = DefaultAppContainer(
             this,
             config,
@@ -148,6 +180,20 @@ class FitConnectApplication : Application() {
                     null
                 }
             },
+            identityAuthOverride = { platform ->
+                if (!BuildConfig.FIREBASE_CONFIGURED) {
+                    null
+                } else {
+                    com.fitconnect.android.foundation.auth.FirebaseAuthRepository(
+                        gateway = com.fitconnect.android.auth.AndroidFirebaseAuthGateway(),
+                        sessionStore = platform.sessionStore,
+                        logger = platform.logger,
+                        isolation = platform.accountIsolation,
+                        keyValueStore = platform.keyValueStore,
+                        connectivity = platform.connectivity,
+                    )
+                }
+            },
         )
         startupTracer.mark("foundation_ready")
         registerOfflineHandlers()
@@ -155,6 +201,9 @@ class FitConnectApplication : Application() {
         container.connectivity.start()
         container.lifecycle.start()
         startupTracer.mark("shell_ready")
+        runCatching {
+            Wearable.getCapabilityClient(this).addLocalCapability(WearPaths.CAPABILITY)
+        }
         // Demo telemetry is opt-in via debug flag — never auto-sync on every cold start.
         if (BuildConfig.DEBUG && shouldBootstrapDemoTelemetry()) {
             appScope.launch { bootstrapDemoTelemetry() }
@@ -163,6 +212,17 @@ class FitConnectApplication : Application() {
             "FitConnectApplication",
             "shell ready marks=${startupTracer.snapshot().joinToString { "${it.name}:${it.elapsedMs}ms" }}",
         )
+    }
+
+    fun ingestWearMessage(path: String, data: ByteArray) {
+        if (path != WearPaths.TELEMETRY_LIVE && path != WearPaths.TELEMETRY_BATCH) return
+        val result = telemetryContainer.wearInbox.ingest(data.toString(Charsets.UTF_8))
+        when (result) {
+            com.fitconnect.android.telemetry.wear.WearIngestResult.ACCEPTED ->
+                telemetryContainer.wearDiagnostics.record(WatchDiagEvent.TELEMETRY_SAMPLE)
+            com.fitconnect.android.telemetry.wear.WearIngestResult.DUPLICATE,
+            com.fitconnect.android.telemetry.wear.WearIngestResult.REJECTED -> Unit
+        }
     }
 
     private fun shouldBootstrapDemoTelemetry(): Boolean = false

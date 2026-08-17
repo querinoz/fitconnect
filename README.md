@@ -36,7 +36,7 @@ fitconnect/
 |-------|--------|
 | Web | Next.js 14 App Router, TypeScript, Tailwind, Framer Motion, Zustand, tRPC |
 | Mobile | **Android Kotlin + Compose** (`android/`) · Expo 52 frozen (`apps/mobile`) |
-| Data | Prisma, Supabase Auth (demo mode default) |
+| Data | Prisma + Supabase (production: `NEXT_PUBLIC_DEMO_MODE=false`; demo only when explicitly `"true"`) |
 | Realtime | **Hybrid:** Convex (nudges/live/plan sync) + Supabase Realtime (presence/chat) · BroadcastChannel for `?demo=1` |
 | Payments | Stripe demo routes |
 | CI/CD | GitHub Actions, Vercel, EAS (manual) |

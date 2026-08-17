@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.map
 object PreferenceKeys {
     val LOCALE = stringPreferencesKey("locale")
     val THEME = stringPreferencesKey("theme")
+    val ACCENT = stringPreferencesKey("accent")
     val ONBOARDING_DONE = stringPreferencesKey("onboarding_done")
     val ONBOARDING_ATHLETE_STEP = stringPreferencesKey("onboarding_athlete_step")
     val ONBOARDING_ATHLETE_SPORT = stringPreferencesKey("onboarding_athlete_sport")
@@ -25,6 +26,8 @@ object PreferenceKeys {
     val ONBOARDING_COACH_STEP = stringPreferencesKey("onboarding_coach_step")
 
     fun flagKey(flag: String) = stringPreferencesKey("flag.$flag")
+    fun identityRoleSelected(uid: String) = stringPreferencesKey("identity.role_selected.$uid")
+    fun identityProviders(uid: String) = stringPreferencesKey("identity.providers.$uid")
 }
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "fitconnect_prefs")

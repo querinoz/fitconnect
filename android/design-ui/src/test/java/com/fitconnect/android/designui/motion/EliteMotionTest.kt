@@ -17,4 +17,13 @@ class EliteMotionTest {
             EliteMotion.durationMs(EliteMotionPreset.MICRO, reduceMotion = false),
         )
     }
+
+    @Test
+    fun springUsesMicroToken() {
+        assertEquals(
+            EliteSurfaceMotion.MICRO_MS,
+            EliteMotion.durationMs(EliteMotionPreset.SPRING, reduceMotion = false),
+        )
+        assertEquals(0, EliteMotion.durationMs(EliteMotionPreset.SPRING, reduceMotion = true))
+    }
 }

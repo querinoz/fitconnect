@@ -36,7 +36,7 @@ import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteChip
-import com.fitconnect.android.designui.components.ElitePersonCard
+import com.fitconnect.android.designui.components.EliteMarketplaceCard
 import com.fitconnect.android.designui.components.EliteSectionHeader
 import com.fitconnect.android.designui.components.EliteSwitch
 import com.fitconnect.android.designui.components.EliteSysLabel
@@ -241,21 +241,16 @@ fun DiscoverScreen() {
             } else {
                 items(filtered, key = { it.id }) { coach ->
                     Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
-                        ElitePersonCard(
-                            title = coach.name,
-                            subtitle = buildString {
-                                append(coach.specialties.joinToString())
-                                append(" · ")
-                                append(coach.city)
-                                append(" · ")
-                                append("%.1f km".format(coach.distanceKm))
-                                append(" · ★ ")
-                                append(coach.rating)
-                                append(" · € tier ")
-                                append(coach.priceTier)
-                                if (coach.verified) append(" · Verified")
-                                if (!coach.available) append(" · Busy")
-                            },
+                        EliteMarketplaceCard(
+                            name = coach.name,
+                            sport = coach.specialties.firstOrNull().orEmpty(),
+                            specialty = coach.specialties.drop(1).joinToString().ifBlank { "Performance" },
+                            city = "${coach.city} · ${"%.1f".format(coach.distanceKm)} km",
+                            rating = "%.1f".format(coach.rating),
+                            price = "TIER 0${coach.priceTier}",
+                            verified = coach.verified,
+                            available = coach.available,
+                            coverImageName = coachCover(coach.id),
                             onClick = { selectedCoach = coach },
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
@@ -318,6 +313,19 @@ private fun nextOpenSlot(
         t += 3_600_000L
     }
     return base
+}
+
+private fun coachCover(coachId: String): String {
+    val covers = listOf(
+        "demo_coach_track",
+        "demo_run_waterfront",
+        "demo_ride_ridge",
+        "demo_gym_iron",
+        "demo_swim_lanes",
+        "demo_squad_track",
+    )
+    val index = (coachId.hashCode().toLong() and Long.MAX_VALUE) % covers.size
+    return covers[index.toInt()]
 }
 
 @Composable

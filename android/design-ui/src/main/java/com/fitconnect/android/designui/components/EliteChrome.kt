@@ -1,8 +1,11 @@
 package com.fitconnect.android.designui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,11 +23,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.fitconnect.android.design.EliteSurfaceSpacing
 import com.fitconnect.android.designui.theme.EliteOpacity
 import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
+import com.fitconnect.android.designui.theme.reduceMotionEnabled
 import com.fitconnect.android.foundation.a11y.Accessibility
 
 @Composable
@@ -93,19 +98,29 @@ fun EliteAvatar(
     initials: String,
     modifier: Modifier = Modifier,
     size: Int = Accessibility.PREFERRED_TOUCH_TARGET_DP,
+    imageName: String? = null,
 ) {
     Box(
         modifier = modifier
             .size(size.dp)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.secondary),
+            .background(MaterialTheme.colorScheme.primary),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = initials.take(2).uppercase(),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSecondary,
-        )
+        if (!imageName.isNullOrBlank() && EliteLocalImageExists(imageName)) {
+            EliteLocalImage(
+                name = imageName,
+                contentDescription = initials,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
+        } else {
+            Text(
+                text = initials.take(2).uppercase(),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onPrimary,
+            )
+        }
     }
 }
 
@@ -125,9 +140,19 @@ fun EliteProgress(
 }
 
 @Composable
-fun EliteLoading(modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+fun EliteLoading(
+    modifier: Modifier = Modifier,
+    label: String = "SYS.SYNC",
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(EliteSpace.Md),
+    ) {
+        EliteSysLabel(label)
+        if (!reduceMotionEnabled()) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
     }
 }
 

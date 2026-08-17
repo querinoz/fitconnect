@@ -16,6 +16,8 @@ data class SessionSnapshot(
     val tokens: AuthTokens?,
     val isAnonymous: Boolean,
     val biometricUnlockEnabled: Boolean,
+    /** True only for debug LOCAL_DEMO sessions — never a production identity. */
+    val isLocalDemo: Boolean = false,
 )
 
 /**
@@ -44,6 +46,7 @@ class SecureSessionStore(
             ?: if (access == null) UserRole.GUEST else UserRole.ATHLETE
         val anonymous = read(ANON_KEY) == "1"
         val biometric = read(BIOMETRIC_KEY) == "1"
+        val localDemo = read(LOCAL_DEMO_KEY) == "1"
         val expires = read(EXPIRES_KEY)?.toLongOrNull()
         val tokens = access?.let {
             AuthTokens(accessToken = it, refreshToken = refresh, expiresAtEpochMs = expires)
@@ -54,6 +57,7 @@ class SecureSessionStore(
             tokens = tokens,
             isAnonymous = anonymous,
             biometricUnlockEnabled = biometric,
+            isLocalDemo = localDemo,
         )
     }
 
@@ -89,6 +93,7 @@ class SecureSessionStore(
         write(ROLE_KEY, snapshot.role.name)?.let { return it }
         write(ANON_KEY, if (snapshot.isAnonymous) "1" else "0")?.let { return it }
         write(BIOMETRIC_KEY, if (snapshot.biometricUnlockEnabled) "1" else "0")?.let { return it }
+        write(LOCAL_DEMO_KEY, if (snapshot.isLocalDemo) "1" else "0")?.let { return it }
         return AppResult.Ok(Unit)
     }
 
@@ -104,8 +109,9 @@ class SecureSessionStore(
     }
 
     override suspend fun clear(): AppResult<Unit> {
-        listOf(ACCESS_KEY, REFRESH_KEY, USER_KEY, ROLE_KEY, ANON_KEY, BIOMETRIC_KEY, EXPIRES_KEY)
-            .forEach { secureStore.remove(it) }
+        listOf(
+            ACCESS_KEY, REFRESH_KEY, USER_KEY, ROLE_KEY, ANON_KEY, BIOMETRIC_KEY, EXPIRES_KEY, LOCAL_DEMO_KEY,
+        ).forEach { secureStore.remove(it) }
         return AppResult.Ok(Unit)
     }
 
@@ -130,5 +136,6 @@ class SecureSessionStore(
         const val ANON_KEY = "session.anonymous"
         const val BIOMETRIC_KEY = "session.biometric"
         const val EXPIRES_KEY = "session.expires"
+        const val LOCAL_DEMO_KEY = "session.local_demo"
     }
 }

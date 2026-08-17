@@ -6,6 +6,7 @@ import com.fitconnect.android.foundation.analytics.CompositeAnalytics
 import com.fitconnect.android.foundation.analytics.NoOpAnalytics
 import com.fitconnect.android.foundation.auth.AuthRepository
 import com.fitconnect.android.foundation.auth.BiometricGate
+import com.fitconnect.android.foundation.auth.CompositeAuthRepository
 import com.fitconnect.android.foundation.auth.LocalAuthRepository
 import com.fitconnect.android.foundation.auth.SessionBiometricGate
 import com.fitconnect.android.foundation.auth.SupabaseAuthRepository
@@ -106,6 +107,11 @@ class DefaultAppContainer(
      * (DevNotificationGateway debug / FailClosedNotificationGateway release).
      */
     private val notificationOverride: ((Logger) -> NotificationGateway?)? = null,
+    /**
+     * App module may supply Firebase identity. Return null to fall back to
+     * Supabase Auth REST when configured, else local/fail-closed.
+     */
+    private val identityAuthOverride: ((AppContainer) -> AuthRepository?)? = null,
 ) : AppContainer {
     private val appContext = context.applicationContext
 
@@ -161,6 +167,7 @@ class DefaultAppContainer(
             isolation = accountIsolation,
             allowLocalCoachElevation = config.isDebuggable && config.allowLocalAuth,
             allowLocalAuth = config.allowLocalAuth,
+            keyValueStore = keyValueStore,
         )
     }
 
@@ -173,12 +180,20 @@ class DefaultAppContainer(
         )
     }
 
-    /** Live IdP when configured; otherwise local (debug) or locked local (release). */
+    /** Firebase identity when provided; else Supabase Auth; else local/fail-closed. */
     override val authRepository: AuthRepository by lazy {
-        if (config.usesLiveAuth) supabaseAuth else localAuth
+        val live = identityAuthOverride?.invoke(this)
+            ?: supabaseAuth.takeIf { config.usesSupabaseData }
+        CompositeAuthRepository(
+            local = localAuth,
+            live = live,
+            allowLocalAuth = config.allowLocalAuth,
+            connectivity = connectivity,
+            logger = logger,
+        )
     }
     override val tokenRefresher: TokenRefresher by lazy {
-        if (config.usesLiveAuth) supabaseAuth else localAuth
+        authRepository as TokenRefresher
     }
     override val biometricGate: BiometricGate by lazy { SessionBiometricGate(sessionStore, featureFlags) }
     override val authorizer: Authorizer by lazy { SessionAuthorizer(sessionStore) }

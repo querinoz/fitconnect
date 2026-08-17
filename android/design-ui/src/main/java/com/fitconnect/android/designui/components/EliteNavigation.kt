@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +32,7 @@ import com.fitconnect.android.designui.theme.EliteMonoTextStyle
 import com.fitconnect.android.designui.theme.EliteOpacity
 import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
+import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.android.foundation.a11y.Accessibility
 
 data class EliteNavItem(
@@ -59,7 +61,7 @@ fun EliteFloatingNavBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(EliteRadius.Xl))
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.96f))
+                .background(com.fitconnect.android.design.EliteSurfaceColors.CARBON.toColor().copy(alpha = 0.94f))
                 .border(
                     width = EliteBorder.Hairline,
                     color = MaterialTheme.colorScheme.outline.copy(alpha = EliteOpacity.Border),
@@ -89,24 +91,28 @@ private fun RowScope.EliteNavTab(item: EliteNavItem) {
                 onClick = item.onClick,
                 role = Role.Tab,
             )
-            .then(
-                if (item.selected) {
-                    Modifier.background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f))
-                } else {
-                    Modifier
-                },
-            )
             .padding(vertical = EliteSpace.Sm)
             .testTag(item.testTag),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(EliteSpace.Xxs),
     ) {
-        Icon(
-            imageVector = item.icon,
-            contentDescription = item.label,
-            tint = if (item.selected) selectedColor else idleColor,
-            modifier = Modifier.size(Accessibility.MIN_TOUCH_TARGET_DP.dp / 2),
-        )
+        Box(contentAlignment = Alignment.Center) {
+            if (item.selected) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(selectedColor.copy(alpha = 0.16f))
+                        .border(EliteBorder.Hairline, selectedColor.copy(alpha = 0.45f), CircleShape),
+                )
+            }
+            Icon(
+                imageVector = item.icon,
+                contentDescription = item.label,
+                tint = if (item.selected) selectedColor else idleColor,
+                modifier = Modifier.size(Accessibility.MIN_TOUCH_TARGET_DP.dp / 2),
+            )
+        }
         Text(
             text = item.label,
             style = MaterialTheme.typography.labelSmall,

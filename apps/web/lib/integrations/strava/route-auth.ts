@@ -1,10 +1,25 @@
-import { cookies } from "next/headers";
+import {
+  isAuthFailure,
+  requireAthleteId,
+  requireCoachId,
+  type AuthFailure
+} from "@/lib/api/require-auth";
 
 export function isDemoMode(): boolean {
   return process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 }
 
-/** Resolve athlete id for integration routes — demo mode is permissive; prod binds to cookie/header. */
+function fromAuthFailure(
+  failure: AuthFailure,
+  mismatch: "athlete_mismatch" | "coach_mismatch"
+): { error: string; status: number } {
+  const status = failure.response.status;
+  if (status === 403) return { error: mismatch, status };
+  if (status === 503) return { error: "auth_not_configured", status };
+  return { error: "unauthorized", status };
+}
+
+/** Resolve athlete id for integration routes — demo permissive; prod binds to Supabase session. */
 export async function resolveIntegrationAthlete(
   request: Request,
   paramId?: string | null
@@ -20,26 +35,17 @@ export async function resolveIntegrationAthlete(
   const authSecret = process.env.INTEGRATION_AUTH_SECRET;
   const authHeader = request.headers.get("authorization");
   const bearerOk =
-    authSecret && authHeader === `Bearer ${authSecret}` && Boolean(headerId);
+    Boolean(authSecret) && authHeader === `Bearer ${authSecret}` && Boolean(headerId);
 
   if (bearerOk && headerId) {
     return { athleteId: headerId };
   }
 
-  const cookieStore = await cookies();
-  const cookieAthlete = cookieStore.get("fc-athlete-id")?.value;
-  if (!cookieAthlete) {
-    return { error: "unauthorized", status: 401 };
+  const result = await requireAthleteId(request, paramId);
+  if (isAuthFailure(result)) {
+    return fromAuthFailure(result, "athlete_mismatch");
   }
-  // Never trust a client-supplied athleteId that disagrees with the session cookie.
-  if (fromParam && fromParam !== cookieAthlete) {
-    return { error: "athlete_mismatch", status: 403 };
-  }
-  if (headerId && headerId !== cookieAthlete) {
-    return { error: "athlete_mismatch", status: 403 };
-  }
-
-  return { athleteId: cookieAthlete };
+  return { athleteId: result.athleteId };
 }
 
 export async function resolveIntegrationCoach(
@@ -53,15 +59,11 @@ export async function resolveIntegrationCoach(
     return { coachId: fromParam ?? "t-002" };
   }
 
-  const cookieStore = await cookies();
-  const cookieCoach = cookieStore.get("fc-coach-id")?.value;
-  const resolved = fromParam ?? cookieCoach;
-
-  if (!resolved) {
-    return { error: "unauthorized", status: 401 };
+  const result = await requireCoachId(request, paramId);
+  if (isAuthFailure(result)) {
+    return fromAuthFailure(result, "coach_mismatch");
   }
-
-  return { coachId: resolved };
+  return { coachId: result.coachId };
 }
 
 export function verifyQStashJob(request: Request): boolean {

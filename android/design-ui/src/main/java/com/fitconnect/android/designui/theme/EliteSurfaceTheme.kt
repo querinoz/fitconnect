@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowInsetsControllerCompat
 import com.fitconnect.android.design.EliteSurfaceColors
+import com.fitconnect.android.foundation.theme.AccentPreset
 import com.fitconnect.android.foundation.theme.ThemeMode
 
 val LocalDarkTheme = staticCompositionLocalOf { true }
@@ -23,8 +24,7 @@ val LocalDarkTheme = staticCompositionLocalOf { true }
 object EliteColorRoles {
     fun backgroundArgb(dark: Boolean, highContrast: Boolean): Long = when {
         !dark -> EliteSurfaceColors.LIGHT_FLOOR
-        highContrast -> EliteSurfaceColors.FLOOR
-        else -> EliteSurfaceColors.CARBON
+        else -> EliteSurfaceColors.FLOOR
     }
 
     fun surfaceArgb(dark: Boolean, highContrast: Boolean): Long = when {
@@ -45,17 +45,27 @@ object EliteColorRoles {
         else -> EliteSurfaceColors.ON_SURFACE_MUTED
     }
 
-    fun scheme(dark: Boolean, highContrast: Boolean): ColorScheme {
+    fun primaryArgb(dark: Boolean, accent: AccentPreset): Long {
+        if (!dark) return EliteSurfaceColors.VOLT_600
+        return when (accent) {
+            AccentPreset.VOLTLINE -> EliteSurfaceColors.VOLTLINE
+            AccentPreset.VOLT_300 -> EliteSurfaceColors.VOLT_300
+            AccentPreset.VOLT_400 -> EliteSurfaceColors.VOLT_400
+            AccentPreset.VOLT_600 -> EliteSurfaceColors.VOLT_600
+        }
+    }
+
+    fun scheme(
+        dark: Boolean,
+        highContrast: Boolean,
+        accent: AccentPreset = AccentPreset.VOLTLINE,
+    ): ColorScheme {
         val on = onSurfaceArgb(dark).toColor()
         val muted = onSurfaceMutedArgb(dark, highContrast).toColor()
         val bg = backgroundArgb(dark, highContrast).toColor()
         val surface = surfaceArgb(dark, highContrast).toColor()
         val variant = surfaceVariantArgb(dark).toColor()
-        val primary = if (dark) {
-            EliteSurfaceColors.VOLTLINE.toColor()
-        } else {
-            EliteSurfaceColors.VOLT_600.toColor()
-        }
+        val primary = primaryArgb(dark, accent).toColor()
         val onPrimary = EliteSurfaceColors.FLOOR.toColor()
         return if (dark) {
             darkColorScheme(
@@ -96,6 +106,7 @@ object EliteColorRoles {
 @Composable
 fun EliteSurfaceTheme(
     mode: ThemeMode = ThemeMode.SYSTEM,
+    accent: AccentPreset = AccentPreset.VOLTLINE,
     content: @Composable () -> Unit,
 ) {
     val systemDark = isSystemInDarkTheme()
@@ -125,7 +136,7 @@ fun EliteSurfaceTheme(
         LocalDarkTheme provides darkTheme,
     ) {
         MaterialTheme(
-            colorScheme = EliteColorRoles.scheme(darkTheme, highContrast),
+            colorScheme = EliteColorRoles.scheme(darkTheme, highContrast, accent),
             typography = EliteTypographyStyles,
             content = content,
         )

@@ -10,4 +10,8 @@
 -keep class okhttp3.** { *; }
 -keep interface okhttp3.** { *; }
 -keep class androidx.security.** { *; }
+-keep class com.google.firebase.** { *; }
+-dontwarn com.google.firebase.**
+-keep class androidx.credentials.** { *; }
+-dontwarn androidx.credentials.**
 -keepclassmembers class * extends androidx.compose.runtime.internal.ComposableFunction { *; }

@@ -99,5 +99,6 @@ class NotificationHelper(
             NotificationCategory.TRAINING -> appContext.getString(R.string.notification_channel_training)
             NotificationCategory.SOCIAL -> appContext.getString(R.string.notification_channel_social)
             NotificationCategory.MARKETING -> appContext.getString(R.string.notification_channel_marketing)
+            NotificationCategory.PROGRESSION -> appContext.getString(R.string.notification_channel_progression)
         }
 }

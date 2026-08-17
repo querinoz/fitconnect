@@ -18,6 +18,8 @@ rootProject.name = "fitconnect-android"
 
 include(":app")
 include(":wear")
+include(":shared")
+include(":ascend")
 include(":core-capture")
 include(":design")
 include(":design-ui")

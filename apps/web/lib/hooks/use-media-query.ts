@@ -26,8 +26,10 @@ export function useStitchMobile() {
   const [inShell, setInShell] = useState(false);
 
   useEffect(() => {
-    const read = () =>
-      setInShell(document.documentElement.classList.contains("eos-app-shell-active"));
+    const read = () => {
+      const next = document.documentElement.classList.contains("eos-app-shell-active");
+      setInShell((prev) => (prev === next ? prev : next));
+    };
     read();
     const observer = new MutationObserver(read);
     observer.observe(document.documentElement, {

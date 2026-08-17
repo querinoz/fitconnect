@@ -71,6 +71,7 @@ fun DesignSystemCatalog(
                 EliteButton("Primary", onClick = {})
                 EliteButton("Secondary", onClick = {}, variant = EliteButtonVariant.Secondary)
                 EliteButton("Ghost", onClick = {}, variant = EliteButtonVariant.Ghost)
+                EliteButton("Destructive", onClick = {}, variant = EliteButtonVariant.Destructive)
             }
         }
         item {
@@ -83,6 +84,14 @@ fun DesignSystemCatalog(
                     onSelected = { segment = it },
                 )
                 EliteSlider(value = slider, onValueChange = { slider = it })
+            }
+        }
+        item {
+            Section("Cockpit") {
+                com.fitconnect.android.designui.components.ElitePrimeInstrument(score = 88, subtitle = "Peak Readiness")
+                com.fitconnect.android.designui.components.EliteWordmarkHeader(initials = "FC")
+                EliteButton("Primary loading", onClick = {}, loading = true)
+                EliteButton("Primary success", onClick = {}, status = com.fitconnect.android.designui.components.EliteButtonStatus.Success)
             }
         }
         item {

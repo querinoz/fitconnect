@@ -19,8 +19,20 @@ object ProductionConfigGate {
         if (config.allowLocalAuth) {
             findings += Finding("LOCAL_AUTH", "Production must set allowLocalAuth=false")
         }
-        if (!config.usesLiveAuth) {
+        if (!config.usesSupabaseData) {
             findings += Finding("SUPABASE_MISSING", "Production requires SUPABASE_URL and SUPABASE_ANON_KEY")
+        }
+        if (!config.usesFirebaseIdentity) {
+            findings += Finding(
+                "FIREBASE_MISSING",
+                "Production requires android/app/google-services.json (gitignored) from Firebase Console",
+            )
+        }
+        if (!config.fcmConfigured) {
+            findings += Finding(
+                "FCM_MISSING",
+                "Production requires FCM: android/app/google-services.json (gitignored) from Firebase Console",
+            )
         }
         return findings
     }

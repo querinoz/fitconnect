@@ -24,6 +24,8 @@ data class UserProfile(
     val verifiedCoach: Boolean = false,
     val sportKeys: List<String> = emptyList(),
     val bio: String? = null,
+    /** Drawable / asset name for LOCAL_DEMO portraits. Never a live CDN URL. */
+    val avatarUri: String? = null,
 )
 
 enum class Visibility { PUBLIC, FOLLOWERS, CONNECTIONS, GROUP, COACH_ONLY, PRIVATE }

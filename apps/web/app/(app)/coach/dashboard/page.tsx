@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useRef, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { AuthGate } from "@/components/auth-gate";
 import { useAuthStore } from "@/lib/auth-store";
 import {
@@ -21,6 +22,14 @@ import { useStitchMobile } from "@/lib/hooks/use-media-query";
 import { useRouter } from "next/navigation";
 
 export default function CoachDashboardPage() {
+  return (
+    <AuthGate roles={["coach", "admin"]}>
+      <CoachDashboardBody />
+    </AuthGate>
+  );
+}
+
+function CoachDashboardBody() {
   const user = useAuthStore((s) => s.user);
   const coachId = user?.coachId ?? DEMO_COACH_TOMAS_ID;
   const router = useRouter();
@@ -34,7 +43,9 @@ export default function CoachDashboardPage() {
   }, []);
 
   const metrics = useDashboardStore((s) => selectCoachMetrics(s, coachId));
-  const athletes = useDashboardStore((s) => selectAthletesForCoach(s, coachId));
+  const athletes = useDashboardStore(
+    useShallow((s) => selectAthletesForCoach(s, coachId))
+  );
   const coach = getTrainerById(coachId);
   const stitchMobile = useStitchMobile();
   const amberCount = athletes.filter((a) => a.recoveryStatus === "amber").length;
@@ -88,38 +99,38 @@ export default function CoachDashboardPage() {
       </BentoCard>
     ) : null;
 
-  return (
-    <AuthGate roles={["coach", "admin"]}>
-      {stitchMobile ? (
-        <div className="space-y-4">
-          {demoSection}
-          <StitchCoachScreen
-            isCoach
-            coachName={coach?.name ?? "Coach"}
-            roster={athletes.slice(0, 5).map((a) => ({
-              name: a.name,
-              readinessLabel:
-                a.recoveryStatus === "green"
-                  ? "Optimal"
-                  : a.recoveryStatus === "amber"
-                    ? "Building"
-                    : "Recovery",
-              hrvMs: a.hrv
-            }))}
-            onSendCheckIn={() => router.push("/coach/inbox")}
-          />
-        </div>
-      ) : (
-        <CoachOsDashboard
-          coachId={coachId}
+  if (stitchMobile) {
+    return (
+      <div className="space-y-4">
+        {demoSection}
+        <StitchCoachScreen
+          isCoach
           coachName={coach?.name ?? "Coach"}
-          coachTitle={coach?.headline ?? "Verified specialist"}
-          coachAvatar={coach?.avatar}
-          netPayout={metrics.revenueMtd}
-          attentionCount={amberCount || 1}
-          demoSection={demoSection}
+          roster={athletes.slice(0, 5).map((a) => ({
+            name: a.name,
+            readinessLabel:
+              a.recoveryStatus === "green"
+                ? "Optimal"
+                : a.recoveryStatus === "amber"
+                  ? "Building"
+                  : "Recovery",
+            hrvMs: a.hrv
+          }))}
+          onSendCheckIn={() => router.push("/coach/inbox")}
         />
-      )}
-    </AuthGate>
+      </div>
+    );
+  }
+
+  return (
+    <CoachOsDashboard
+      coachId={coachId}
+      coachName={coach?.name ?? "Coach"}
+      coachTitle={coach?.headline ?? "Verified specialist"}
+      coachAvatar={coach?.avatar}
+      netPayout={metrics.revenueMtd}
+      attentionCount={amberCount || 1}
+      demoSection={demoSection}
+    />
   );
 }

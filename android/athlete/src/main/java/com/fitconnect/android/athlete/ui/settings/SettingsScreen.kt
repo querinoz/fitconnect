@@ -5,10 +5,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import com.fitconnect.android.athlete.data.LocalAthleteRepository
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.designui.components.EliteAppearancePicker
@@ -16,10 +20,12 @@ import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteLanguagePicker
+import com.fitconnect.android.designui.components.EliteSwitch
 import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.foundation.i18n.AppLocale
 import com.fitconnect.android.foundation.i18n.LocaleApplier
 import com.fitconnect.android.foundation.theme.ThemeMode
+import com.fitconnect.ascend.domain.AscendPrefs
 import kotlinx.coroutines.launch
 
 @Composable
@@ -33,6 +39,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val themeMode by container.platform.themeSettings.observe().collectAsState(initial = ThemeMode.SYSTEM)
     val locale by container.platform.localeManager.observe().collectAsState(initial = AppLocale.EN)
+    var prefs by remember { mutableStateOf(container.ascend.snapshot(LocalAthleteRepository.ATHLETE_ID).prefs) }
 
     AthleteScreenScaffold(
         title = "Settings",
@@ -64,6 +71,11 @@ fun SettingsScreen(
             }
         }
         item {
+            com.fitconnect.android.designui.components.IdentityConnectedAccounts(
+                authRepository = container.platform.authRepository,
+            )
+        }
+        item {
             EliteCard {
                 EliteStack {
                     Text("Notifications", style = MaterialTheme.typography.titleMedium)
@@ -76,6 +88,24 @@ fun SettingsScreen(
                         label = "Open alerts",
                         variant = EliteButtonVariant.Secondary,
                         onClick = onOpenNotifications,
+                    )
+                    Text("ASCEND haptics", style = MaterialTheme.typography.titleSmall)
+                    EliteSwitch(
+                        checked = prefs.hapticsEnabled,
+                        onCheckedChange = { enabled ->
+                            val next = AscendPrefs(hapticsEnabled = enabled, progressionNotificationsEnabled = prefs.progressionNotificationsEnabled)
+                            container.ascend.setPrefs(LocalAthleteRepository.ATHLETE_ID, next)
+                            prefs = next
+                        },
+                    )
+                    Text("ASCEND progression notifications", style = MaterialTheme.typography.titleSmall)
+                    EliteSwitch(
+                        checked = prefs.progressionNotificationsEnabled,
+                        onCheckedChange = { enabled ->
+                            val next = AscendPrefs(hapticsEnabled = prefs.hapticsEnabled, progressionNotificationsEnabled = enabled)
+                            container.ascend.setPrefs(LocalAthleteRepository.ATHLETE_ID, next)
+                            prefs = next
+                        },
                     )
                 }
             }

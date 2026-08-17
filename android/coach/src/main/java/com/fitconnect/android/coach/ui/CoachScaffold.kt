@@ -14,6 +14,11 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -81,12 +86,12 @@ fun CoachOsApp(
                         EliteNavItem(
                             label = dest.label,
                             icon = when (dest) {
-                                CoachDest.OVERVIEW -> Icons.Filled.Home
-                                CoachDest.ATHLETES -> Icons.Filled.Person
-                                CoachDest.CALENDAR -> Icons.Filled.DateRange
-                                CoachDest.INBOX -> Icons.Filled.Email
-                                CoachDest.MORE -> Icons.Filled.Settings
-                                else -> Icons.Filled.Home
+                                CoachDest.OVERVIEW -> if (selected) Icons.Filled.Home else Icons.Outlined.Home
+                                CoachDest.ATHLETES -> if (selected) Icons.Filled.Person else Icons.Outlined.Person
+                                CoachDest.CALENDAR -> if (selected) Icons.Filled.DateRange else Icons.Outlined.DateRange
+                                CoachDest.INBOX -> if (selected) Icons.Filled.Email else Icons.Outlined.Email
+                                CoachDest.MORE -> if (selected) Icons.Filled.Settings else Icons.Outlined.Settings
+                                else -> Icons.Outlined.Home
                             },
                             selected = selected,
                             onClick = {

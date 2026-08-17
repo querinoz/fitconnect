@@ -1,8 +1,9 @@
 package com.fitconnect.android.athlete.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.fitconnect.android.designui.components.EliteErrorView
@@ -29,32 +31,52 @@ fun AthleteScreenScaffold(
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     overline: String? = "ATHLETE OS",
+    showTitle: Boolean = true,
+    floating: (@Composable BoxScope.() -> Unit)? = null,
     content: LazyListScope.() -> Unit,
 ) {
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .testTag(testTag),
-        contentPadding = PaddingValues(EliteSpace.Lg),
-        verticalArrangement = Arrangement.spacedBy(EliteSpace.Md),
-    ) {
-        item {
-            EliteEnter {
-                Column {
-                    overline?.let { EliteSysLabel(it) }
-                    Text(title, style = MaterialTheme.typography.headlineMedium)
-                    if (subtitle != null) {
-                        Text(
-                            subtitle,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = EliteSpace.Xs),
-                        )
+    Box(modifier = modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag(testTag),
+            contentPadding = PaddingValues(
+                start = EliteSpace.Lg,
+                end = EliteSpace.Lg,
+                top = EliteSpace.Lg,
+                bottom = if (floating != null) EliteSpace.Huge + EliteSpace.Section else EliteSpace.Xl,
+            ),
+            verticalArrangement = Arrangement.spacedBy(EliteSpace.Md),
+        ) {
+            if (showTitle) {
+                item {
+                    EliteEnter {
+                        Column {
+                            overline?.let { EliteSysLabel(it) }
+                            Text(title, style = MaterialTheme.typography.headlineMedium)
+                            if (subtitle != null) {
+                                Text(
+                                    subtitle,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(top = EliteSpace.Xs),
+                                )
+                            }
+                        }
                     }
                 }
             }
+            content()
         }
-        content()
+        if (floating != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(EliteSpace.Lg),
+                contentAlignment = Alignment.BottomEnd,
+                content = { floating() },
+            )
+        }
     }
 }
 

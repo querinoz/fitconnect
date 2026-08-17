@@ -10,6 +10,7 @@ import androidx.navigation.navDeepLink
 import com.fitconnect.android.athlete.ui.activity.ActivityScreen
 import com.fitconnect.android.athlete.ui.ai.AthleteAiScreen
 import com.fitconnect.android.athlete.ui.community.CommunityScreen
+import com.fitconnect.android.athlete.ui.daily.DailyActivityScreen
 import com.fitconnect.android.athlete.ui.discover.DiscoverScreen
 import com.fitconnect.android.athlete.ui.home.HomeScreen
 import com.fitconnect.android.athlete.ui.notifications.NotificationsScreen
@@ -17,10 +18,12 @@ import com.fitconnect.android.athlete.ui.profile.ProfileScreen
 import com.fitconnect.android.athlete.ui.programs.ProgramsScreen
 import com.fitconnect.android.athlete.ui.recovery.RecoveryScreen
 import com.fitconnect.android.athlete.ui.settings.SettingsScreen
+import com.fitconnect.android.athlete.ui.sleep.SleepScreen
 import com.fitconnect.android.athlete.ui.sports.SportsScreen
 import com.fitconnect.android.athlete.ui.telemetry.TelemetryScreen
 import com.fitconnect.android.athlete.ui.training.SessionDetailScreen
 import com.fitconnect.android.athlete.ui.training.TrainingScreen
+import com.fitconnect.android.athlete.ui.vault.PerformanceVaultScreen
 
 enum class AthleteDest(
     val route: String,
@@ -40,7 +43,10 @@ enum class AthleteDest(
     TELEMETRY("athlete/telemetry", "Telemetry", "T"),
     AI("athlete/ai", "AI", "A"),
     NOTIFICATIONS("athlete/notifications", "Alerts", "N"),
+    SLEEP("athlete/sleep", "Sleep", "Z"),
+    DAILY("athlete/daily", "Daily", "Y"),
     SETTINGS("athlete/settings", "Settings", "G"),
+    VAULT("athlete/vault", "Vault", "V"),
     SESSION("athlete/training/{sessionId}", "Session", "T");
 
     companion object {
@@ -72,16 +78,22 @@ fun AthleteNavHost(
                 onOpenProfile = { navController.navigate(AthleteDest.PROFILE.route) },
                 onOpenDiscover = { navController.navigate(AthleteDest.DISCOVER.route) },
                 onOpenActivity = { navController.navigate(AthleteDest.ACTIVITY.route) },
+                onOpenSleep = { navController.navigate(AthleteDest.SLEEP.route) },
+                onOpenDaily = { navController.navigate(AthleteDest.DAILY.route) },
+                onOpenVault = { navController.navigate(AthleteDest.VAULT.route) },
             )
         }
         composable(
             AthleteDest.ACTIVITY.route,
             deepLinks = listOf(navDeepLink { uriPattern = "fitconnect://app/athlete/activity" }),
         ) { ActivityScreen() }
-        composable(
-            AthleteDest.RECOVERY.route,
-            deepLinks = listOf(navDeepLink { uriPattern = "fitconnect://app/athlete/recovery" }),
-        ) { RecoveryScreen() }
+        composable(AthleteDest.RECOVERY.route, deepLinks = listOf(navDeepLink { uriPattern = "fitconnect://app/athlete/recovery" })) {
+            RecoveryScreen()
+        }
+        composable(AthleteDest.SLEEP.route, deepLinks = listOf(navDeepLink { uriPattern = "fitconnect://app/athlete/sleep" })) {
+            SleepScreen()
+        }
+        composable(AthleteDest.DAILY.route) { DailyActivityScreen() }
         composable(AthleteDest.TRAINING.route) {
             TrainingScreen(onOpenSession = { id -> navController.navigate("athlete/training/$id") })
         }
@@ -109,8 +121,10 @@ fun AthleteNavHost(
                 onOpenTelemetry = { navController.navigate(AthleteDest.TELEMETRY.route) },
                 onOpenAi = { navController.navigate(AthleteDest.AI.route) },
                 onOpenSettings = { navController.navigate(AthleteDest.SETTINGS.route) },
+                onOpenVault = { navController.navigate(AthleteDest.VAULT.route) },
             )
         }
+        composable(AthleteDest.VAULT.route) { PerformanceVaultScreen() }
         composable(AthleteDest.SETTINGS.route) {
             SettingsScreen(
                 onOpenProfile = { navController.navigate(AthleteDest.PROFILE.route) },

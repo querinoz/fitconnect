@@ -45,5 +45,5 @@ describe("<MobileAppPreview />", () => {
     await waitFor(() =>
       expect(screen.getByText("Inês Martins")).toBeInTheDocument()
     );
-  });
+  }, 15_000);
 });

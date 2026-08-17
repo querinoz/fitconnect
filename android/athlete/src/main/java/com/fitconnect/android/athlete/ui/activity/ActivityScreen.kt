@@ -1,117 +1,230 @@
 package com.fitconnect.android.athlete.ui.activity
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
+import com.fitconnect.android.athlete.ascend.ActivityAscendBridge
+import com.fitconnect.android.athlete.data.LocalAthleteRepository
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.capture.GpsFeedStatus
 import com.fitconnect.android.capture.LiveActivityEngine
 import com.fitconnect.android.capture.LiveActivityPhase
+import com.fitconnect.android.designui.components.AscendEnergyCard
 import com.fitconnect.android.designui.components.EliteBadge
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteCardVariant
+import com.fitconnect.android.designui.components.EliteChip
 import com.fitconnect.android.designui.components.EliteFlowRow
+import com.fitconnect.android.designui.components.EliteLiveDot
 import com.fitconnect.android.designui.components.EliteMetricCard
+import com.fitconnect.android.designui.components.PerformanceCompleteOverlay
+import com.fitconnect.android.designui.components.EliteShareCard
 import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.designui.components.EliteSysLabel
+import com.fitconnect.android.designui.components.EliteTelemetryGrid
+import com.fitconnect.android.designui.maps.EliteMapMode
+import com.fitconnect.android.designui.maps.EliteRouteMap
+import com.fitconnect.android.designui.maps.EliteRouteVertex
 import com.fitconnect.android.designui.theme.EliteMetricTextStyle
 import com.fitconnect.android.designui.theme.EliteSpace
+import com.fitconnect.android.foundation.i18n.AppLocale
+import com.fitconnect.ascend.copy.AscendCopy
+import com.fitconnect.ascend.domain.ProcessResult
+import com.fitconnect.shared.telemetry.MetricAvailability
+import com.fitconnect.shared.telemetry.TelemetryEnvelope
+import com.fitconnect.shared.workout.WorkoutSport
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun ActivityScreen() {
     val container = LocalAthleteContainer.current
     val engine = container.liveActivity
     val snap by engine.state.collectAsState()
+    val wearEnvelope by container.telemetry.wearInbox.lastEnvelope.collectAsState()
     val haptics = LocalHapticFeedback.current
+    val scope = rememberCoroutineScope()
+    var sport by remember { mutableStateOf(WorkoutSport.RUN) }
+    var mapMode by remember { mutableStateOf(EliteMapMode.LIVE) }
+    var complete by remember { mutableStateOf<ProcessResult?>(null) }
+    var completeDismissed by remember { mutableStateOf(false) }
+    var processedSession by remember { mutableStateOf<String?>(null) }
+    val locale by container.platform.localeManager.observe().collectAsState(initial = AppLocale.EN)
+
+    LaunchedEffect(wearEnvelope) {
+        wearEnvelope?.let { container.liveCoordinator.onRemoteEnvelope(it) }
+    }
 
     LaunchedEffect(snap.phase) {
-        if (snap.phase != LiveActivityPhase.RUNNING) return@LaunchedEffect
-        while (true) {
-            delay(1_000)
-            if (engine.state.value.phase != LiveActivityPhase.RUNNING) break
-            engine.tick()
+        when (snap.phase) {
+            LiveActivityPhase.COUNTDOWN -> {
+                while (engine.state.value.phase == LiveActivityPhase.COUNTDOWN) {
+                    delay(1_000)
+                    engine.tickCountdown()
+                }
+            }
+            LiveActivityPhase.RUNNING -> {
+                while (engine.state.value.phase == LiveActivityPhase.RUNNING) {
+                    delay(1_000)
+                    engine.tick()
+                }
+            }
+            else -> Unit
         }
+    }
+
+    LaunchedEffect(snap.phase, snap.sessionId) {
+        if (snap.phase == LiveActivityPhase.ENDED &&
+            snap.sessionId.isNotBlank() &&
+            processedSession != snap.sessionId
+        ) {
+            processedSession = snap.sessionId
+            completeDismissed = false
+            val result = container.ascend.process(ActivityAscendBridge.workoutEvent(snap))
+            complete = result
+            if (result.snapshot.prefs.hapticsEnabled && result.awardedXp > 0) {
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+            }
+        }
+    }
+
+    val vertices = snap.route.map {
+        EliteRouteVertex(it.latitude, it.longitude, snap.paceSecPerKm, it.heartRateBpm, it.altitudeM)
+    }
+    val demoRoute = remember {
+        container.geo.routes.get("rt_coastal")?.points.orEmpty().map {
+            EliteRouteVertex(it.latitude, it.longitude)
+        }
+    }
+    val mapPoints = vertices.ifEmpty { demoRoute }
+    val cursor = snap.replayCursor?.let { cursor ->
+        snap.route.indexOfFirst {
+            it.latitude == cursor.latitude && it.longitude == cursor.longitude
+        }.takeIf { it >= 0 }
     }
 
     AthleteScreenScaffold(
         title = "Activity",
-        subtitle = "Start monitoring · ${snap.sourceLabel}",
+        subtitle = "Live cockpit · ${snap.sourceLabel}",
         overline = "ATHLETE OS · CAPTURE",
         testTag = "athlete_activity",
     ) {
         item {
+            EliteStack {
+                EliteSysLabel(
+                    if (vertices.isEmpty()) "GPS DEMO · LOCAL TELEMETRY" else "ROUTE · ${mapMode.name}",
+                )
+                EliteFlowRow {
+                    EliteMapMode.entries.forEach { mode ->
+                        EliteChip(label = mode.name, selected = mapMode == mode, onClick = { mapMode = mode })
+                    }
+                }
+                EliteRouteMap(
+                    points = mapPoints,
+                    mode = mapMode,
+                    cursorIndex = cursor,
+                    contentDescription = if (vertices.isEmpty()) {
+                        "LOCAL_DEMO coastal route — not live GPS"
+                    } else {
+                        "Activity route"
+                    },
+                )
+            }
+        }
+        item {
             EliteCard(variant = EliteCardVariant.Glass, modifier = Modifier.testTag("activity_monitor")) {
                 EliteStack(spacing = EliteSpace.Md) {
+                    EliteLiveDot(
+                        live = snap.phase == LiveActivityPhase.RUNNING ||
+                            snap.phase == LiveActivityPhase.RESUMING,
+                        label = when (snap.phase) {
+                            LiveActivityPhase.RUNNING, LiveActivityPhase.RESUMING -> "LIVE TELEMETRY"
+                            LiveActivityPhase.COUNTDOWN -> "SYS.COUNTDOWN"
+                            LiveActivityPhase.PAUSED -> "PAUSED"
+                            LiveActivityPhase.FINISHING -> "SYS.FINISH"
+                            LiveActivityPhase.ENDED -> "COMPLETE"
+                            else -> "IDLE"
+                        },
+                    )
                     EliteSysLabel("LIVE MONITOR · ${snap.sport.uppercase()}")
                     EliteBadge(text = snap.sourceLabel)
+                    EliteBadge(text = snap.sessionState.name)
+                    if (snap.sessionId.isNotBlank()) {
+                        Text("session ${snap.sessionId}", style = MaterialTheme.typography.labelSmall)
+                    }
                     Text(
-                        LiveActivityEngine.formatElapsed(snap.elapsedMs),
+                        if (snap.phase == LiveActivityPhase.COUNTDOWN) {
+                            "${snap.countdownRemainingSec}"
+                        } else {
+                            LiveActivityEngine.formatElapsed(snap.elapsedMs)
+                        },
                         style = EliteMetricTextStyle,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.testTag("activity_timer"),
                     )
+                    Text(phaseCopy(snap.phase, snap.sessionState.name), style = MaterialTheme.typography.bodyMedium)
+                    Text(gpsCopy(snap.gps), style = MaterialTheme.typography.bodySmall)
                     Text(
-                        when (snap.phase) {
-                            LiveActivityPhase.IDLE -> "Idle — sensors not bound"
-                            LiveActivityPhase.RUNNING -> "Recording (simulated GPS / HR)"
-                            LiveActivityPhase.PAUSED -> "Paused"
-                            LiveActivityPhase.ENDED -> "Ended — review then discard"
-                        },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        gpsCopy(snap.gps),
+                        "HR ${snap.hrBpm ?: "—"} is ${snap.sourceKind.name} — not a medical reading.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
         }
-        item {
-            EliteStack {
-                EliteMetricCard(
-                    label = "Distance",
-                    value = "%.2f km".format(snap.distanceM / 1000.0),
-                )
-                EliteMetricCard(
-                    label = "Pace",
-                    value = LiveActivityEngine.formatPace(snap.paceSecPerKm),
-                )
-                EliteMetricCard(
-                    label = "Heart rate",
-                    value = snap.hrBpm?.let { "$it bpm" } ?: "Sensor unavailable",
-                )
-                EliteMetricCard(
-                    label = "Zone",
-                    value = snap.zone?.let { "Z$it" } ?: "—",
-                )
-                EliteMetricCard(
-                    label = "Calories",
-                    value = "${snap.caloriesKcal} kcal",
-                )
+        if (snap.phase == LiveActivityPhase.IDLE || snap.phase == LiveActivityPhase.ENDED) {
+            item {
+                EliteFlowRow {
+                    WorkoutSport.entries.forEach { option ->
+                        EliteChip(
+                            label = option.wireKey,
+                            selected = sport == option,
+                            onClick = { sport = option },
+                        )
+                    }
+                }
             }
+        }
+        item {
+            EliteTelemetryGrid(
+                cells = listOf(
+                    "DISTANCE" to "%.2f km".format(snap.distanceM / 1000.0),
+                    "PACE" to LiveActivityEngine.formatPace(snap.paceSecPerKm),
+                    "HR" to (snap.hrBpm?.let { "$it" } ?: "—"),
+                    "ZONE" to (snap.zone?.let { "Z$it" } ?: "—"),
+                    "ENERGY" to "${snap.caloriesKcal} kcal",
+                    "ELEV +" to "+${snap.elevationGainM.toInt()} m",
+                    "BEST" to LiveActivityEngine.formatPace(snap.bestPaceSecPerKm),
+                    "LOAD" to snap.sessionState.name,
+                    "GPS" to if (snap.gps == GpsFeedStatus.LIVE) "LIVE" else "DEMO",
+                ),
+            )
         }
         item {
             EliteFlowRow {
                 when (snap.phase) {
                     LiveActivityPhase.IDLE, LiveActivityPhase.ENDED -> {
                         EliteButton(
-                            label = "Start monitoring",
+                            label = "Start",
                             onClick = {
                                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                engine.start("Run")
+                                engine.arm(sport.wireKey)
+                                engine.beginCountdown()
+                                scope.launch { container.telemetry.wearWorkout.startWorkout(sport.wireKey) }
                             },
                             modifier = Modifier.testTag("activity_start"),
                         )
@@ -124,18 +237,33 @@ fun ActivityScreen() {
                             )
                         }
                     }
-                    LiveActivityPhase.RUNNING -> {
+                    LiveActivityPhase.READY, LiveActivityPhase.COUNTDOWN -> {
+                        EliteButton(
+                            label = "Skip countdown",
+                            onClick = { engine.start(sport.wireKey) },
+                        )
+                    }
+                    LiveActivityPhase.RUNNING, LiveActivityPhase.RESUMING -> {
                         EliteButton(
                             label = "Pause",
                             variant = EliteButtonVariant.Secondary,
-                            onClick = engine::pause,
+                            onClick = {
+                                engine.pause()
+                                scope.launch { container.telemetry.wearWorkout.pauseWorkout() }
+                            },
                             modifier = Modifier.testTag("activity_pause"),
                         )
                         EliteButton(
-                            label = "End",
+                            label = "Lap",
+                            variant = EliteButtonVariant.Ghost,
+                            onClick = engine::addLap,
+                        )
+                        EliteButton(
+                            label = "Finish",
                             onClick = {
                                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                 engine.end()
+                                scope.launch { container.telemetry.wearWorkout.endWorkout() }
                             },
                             modifier = Modifier.testTag("activity_end"),
                         )
@@ -143,31 +271,128 @@ fun ActivityScreen() {
                     LiveActivityPhase.PAUSED -> {
                         EliteButton(
                             label = "Resume",
-                            onClick = engine::resume,
+                            onClick = {
+                                engine.resume()
+                                scope.launch { container.telemetry.wearWorkout.resumeWorkout() }
+                            },
                             modifier = Modifier.testTag("activity_resume"),
                         )
                         EliteButton(
-                            label = "End",
+                            label = "Finish",
                             variant = EliteButtonVariant.Secondary,
-                            onClick = engine::end,
+                            onClick = {
+                                engine.end()
+                                scope.launch { container.telemetry.wearWorkout.endWorkout() }
+                            },
                             modifier = Modifier.testTag("activity_end"),
                         )
-                        EliteButton(
-                            label = "Discard",
-                            variant = EliteButtonVariant.Ghost,
-                            onClick = engine::discard,
-                            modifier = Modifier.testTag("activity_discard"),
+                    }
+                    LiveActivityPhase.FINISHING -> {
+                        Text("Finishing…", style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+        }
+        if (snap.phase == LiveActivityPhase.ENDED) {
+            val result = complete
+            if (result != null && !completeDismissed) {
+                item {
+                    val lang = locale.bcp47
+                    val why = result.explanations.firstOrNull()?.let { AscendCopy.t(lang, it.reasonKey) }
+                        ?: "Your performance profile evolved."
+                    val achievement = result.newAchievementIds.firstOrNull()?.let { id ->
+                        result.snapshot.achievements.firstOrNull { it.definition.id == id }
+                            ?.let { AscendCopy.t(lang, it.definition.nameKey) }
+                    }
+                    PerformanceCompleteOverlay(
+                        distanceLabel = "%.2f KM".format(snap.distanceM / 1000.0),
+                        xpLabel = "+${result.awardedXp} XP",
+                        why = "WHY: $why",
+                        result = "RESULT: level ${result.snapshot.level.level} · ${AscendCopy.t(lang, result.snapshot.level.rank.nameKey)}",
+                        next = result.snapshot.level.nextUnlock?.let { "NEXT: ${AscendCopy.t(lang, it.nameKey)}" }
+                            ?: "There is another level of your performance waiting.",
+                        energyLabel = result.snapshot.energy?.let {
+                            "${it.kcal} kcal · ${AscendCopy.t(lang, it.equivalentKey, mapOf("n" to it.equivalentAmount.toString()))}"
+                        },
+                        achievement = achievement,
+                        record = result.newRecordKinds.firstOrNull()?.name,
+                        levelFrom = if (result.leveledUp) result.previousLevel.toString() else null,
+                        levelTo = if (result.leveledUp) result.snapshot.level.level.toString() else null,
+                        unlock = result.snapshot.level.nextUnlock?.let { AscendCopy.t(lang, it.nameKey) },
+                        onContinue = { completeDismissed = true },
+                    )
+                }
+            }
+            item {
+                EliteStack {
+                    EliteSysLabel("PERFORMANCE TRACE")
+                    Slider(
+                        value = snap.replayFraction,
+                        onValueChange = engine::setReplayFraction,
+                        modifier = Modifier.testTag("activity_replay_scrub"),
+                    )
+                    val cursorPt = snap.replayCursor
+                    Text(
+                        "t=${"%.0f".format(snap.replayFraction * 100)}% · " +
+                            "alt ${cursorPt?.altitudeM?.toInt() ?: "—"} m · " +
+                            "HR ${cursorPt?.heartRateBpm ?: snap.hrBpm ?: "—"}",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    EliteShareCard(
+                        sport = snap.sport,
+                        distanceKm = "%.2f km".format(snap.distanceM / 1000.0),
+                        elapsed = LiveActivityEngine.formatElapsed(snap.elapsedMs),
+                        pace = LiveActivityEngine.formatPace(snap.paceSecPerKm),
+                        hr = snap.avgHrBpm?.let { "$it bpm" } ?: "UNAVAILABLE",
+                        score = snap.performanceScore?.toString() ?: "—",
+                        points = vertices,
+                    )
+                    Text(
+                        "Z1 ${snap.timeInZoneSec.getOrElse(0) { 0 }}s · " +
+                            "Z2 ${snap.timeInZoneSec.getOrElse(1) { 0 }}s · " +
+                            "Z3 ${snap.timeInZoneSec.getOrElse(2) { 0 }}s · " +
+                            "Z4 ${snap.timeInZoneSec.getOrElse(3) { 0 }}s · " +
+                            "Z5 ${snap.timeInZoneSec.getOrElse(4) { 0 }}s",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        "AI INSIGHT · RECOMMENDED: review pace vs zone 3. Not medical advice.",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    complete?.snapshot?.energy?.let { energy ->
+                        AscendEnergyCard(
+                            kcalLabel = "${energy.kcal} kcal",
+                            equivalent = AscendCopy.t(
+                                locale.bcp47,
+                                energy.equivalentKey,
+                                mapOf("n" to energy.equivalentAmount.toString()),
+                            ),
+                            disclaimer = AscendCopy.t(locale.bcp47, energy.disclaimerKey),
+                        )
+                    }
+                    complete?.snapshot?.conversions?.forEach { conv ->
+                        Text(
+                            "${AscendCopy.t(locale.bcp47, conv.headlineKey)} · ${if (conv.demoLabeled) "LOCAL_DEMO" else ""}",
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                    complete?.snapshot?.segments?.forEach { seg ->
+                        Text(
+                            "${AscendCopy.t(locale.bcp47, seg.nameKey)} · ${seg.distanceKm} km · LOCAL_DEMO",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.testTag("ascend_segment_demo"),
                         )
                     }
                 }
             }
         }
+        item { WatchFeedCard(wearEnvelope) }
         item {
             EliteCard {
                 EliteSysLabel("PRODUCTION")
                 Text(
-                    "FusedLocation, Health Connect, and BLE are not bound in this build. " +
-                        "This monitor is LOCAL_DEMO only — never shown as live GPS.",
+                    "FusedLocation LIVE GPS is not claimed in LOCAL_DEMO. " +
+                        "Emulator geo inject is GPS.EMULATOR. Health Services HR is UNAVAILABLE on this host unless probed AVAILABLE.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -176,8 +401,49 @@ fun ActivityScreen() {
     }
 }
 
+@Composable
+private fun WatchFeedCard(envelope: TelemetryEnvelope?) {
+    EliteCard(variant = EliteCardVariant.Glass, modifier = Modifier.testTag("watch_feed")) {
+        EliteStack(spacing = EliteSpace.Md) {
+            EliteSysLabel("WATCH FEED")
+            if (envelope == null) {
+                Text(
+                    "No Data Layer packets. Pairing requires a reachable FitConnect Wear node.",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            } else {
+                EliteBadge(text = envelope.source.name)
+                Text("seq ${envelope.sequenceNumber} · ${envelope.schemaVersion} · ${envelope.sessionId}")
+                envelope.samples.forEach { sample ->
+                    EliteMetricCard(
+                        label = sample.metric,
+                        value = if (sample.availability == MetricAvailability.AVAILABLE && sample.value != null) {
+                            "${sample.value} ${sample.unit}"
+                        } else {
+                            sample.availability.name
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
 private fun gpsCopy(status: GpsFeedStatus): String = when (status) {
-    GpsFeedStatus.SIMULATED -> "GPS: simulated path (not hardware)"
+    GpsFeedStatus.SIMULATED -> "GPS: simulated QA route (not hardware)"
+    GpsFeedStatus.EMULATOR_INJECTED -> "GPS: emulator inject (TEST_FIXTURE)"
+    GpsFeedStatus.LIVE -> "GPS: live device"
     GpsFeedStatus.UNAVAILABLE -> "GPS unavailable"
     GpsFeedStatus.PERMISSION_DENIED -> "GPS permission denied"
+}
+
+private fun phaseCopy(phase: LiveActivityPhase, session: String): String = when (phase) {
+    LiveActivityPhase.IDLE -> "Idle — sensors not bound · $session"
+    LiveActivityPhase.READY -> "Ready · $session"
+    LiveActivityPhase.COUNTDOWN -> "Countdown · $session"
+    LiveActivityPhase.RUNNING -> "Recording · $session"
+    LiveActivityPhase.PAUSED -> "Paused · $session"
+    LiveActivityPhase.RESUMING -> "Resuming · $session"
+    LiveActivityPhase.FINISHING -> "Finishing · $session"
+    LiveActivityPhase.ENDED -> "Performance complete · $session"
 }

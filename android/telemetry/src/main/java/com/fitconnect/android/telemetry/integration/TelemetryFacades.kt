@@ -28,6 +28,9 @@ data class TelemetryOverview(
     val latestSleep: TelemetrySample?,
     val latestRecovery: TelemetrySample?,
     val latestWeight: TelemetrySample?,
+    val latestSteps: TelemetrySample?,
+    val latestCalories: TelemetrySample?,
+    val latestDistance: TelemetrySample?,
     val recentWorkouts: List<WorkoutSession>,
 )
 
@@ -58,6 +61,9 @@ class AthleteTelemetryFacade(
             latestSleep = store.latestSample(athleteId, MetricType.SLEEP),
             latestRecovery = store.latestSample(athleteId, MetricType.RECOVERY),
             latestWeight = store.latestSample(athleteId, MetricType.WEIGHT),
+            latestSteps = store.latestSample(athleteId, MetricType.STEPS),
+            latestCalories = store.latestSample(athleteId, MetricType.CALORIES),
+            latestDistance = store.latestSample(athleteId, MetricType.DISTANCE),
             recentWorkouts = store.workouts(athleteId, recent, limit = 10).items,
         )
     }

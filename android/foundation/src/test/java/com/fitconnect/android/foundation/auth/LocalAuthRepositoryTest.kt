@@ -192,4 +192,17 @@ class LocalAuthRepositoryTest {
         assertTrue(user is AppResult.Err)
         assertFalse(session.isLoggedIn())
     }
+
+    @Test
+    fun googleAndAppleAreNotFakedLocally() = runBlocking {
+        val session = SecureSessionStore(InMemorySecureStore())
+        val auth = LocalAuthRepository(session, logger)
+        val google = auth.signIn(AuthProviderKind.GOOGLE, AuthCredentials(idToken = "token"))
+        assertTrue(google is AppResult.Err)
+        assertEquals(
+            com.fitconnect.android.foundation.common.AppError.AuthKind.PROVIDER_UNAVAILABLE,
+            ((google as AppResult.Err).error as com.fitconnect.android.foundation.common.AppError.Auth).kind,
+        )
+        assertFalse(session.isLoggedIn())
+    }
 }

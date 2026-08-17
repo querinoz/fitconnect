@@ -57,7 +57,13 @@ fun RecoveryScreen() {
                 )
             }
             item {
-                EliteMetricCard(label = "HRV", value = "${recovery.hrvMs} ms")
+                EliteCard {
+                    Text(
+                        "CALCULATED from LOCAL_DEMO vitals — not a medical diagnosis. " +
+                            "Body state uses Performance Intelligence (RESTORE / READY / STRAINED).",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
             }
             item {
                 EliteChart(

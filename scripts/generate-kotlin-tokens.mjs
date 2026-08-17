@@ -171,6 +171,7 @@ function generateKotlin() {
   const elevation = parseSimpleObject(layoutTs, "ELEVATION_TOKENS");
   const opacity = parseSimpleObject(layoutTs, "OPACITY_TOKENS");
   const border = parseSimpleObject(layoutTs, "BORDER_TOKENS");
+  const glass = parseSimpleObject(layoutTs, "GLASS_TOKENS");
   const type = parseTypeTokens(typeTs);
   const semantic = parseSimpleObject(semanticTs, "SEMANTIC_TOKENS");
   const charts = parseSimpleObject(semanticTs, "CHART_TOKENS");
@@ -212,6 +213,14 @@ function generateKotlin() {
     "",
     "object EliteSurfaceBorder {",
     ...border.map(([k, v]) => `    const val ${toConstName(k)}: Float = ${v}f`),
+    "}",
+    "",
+    "object EliteSurfaceGlass {",
+    ...glass.map(([k, v]) =>
+      Number.isInteger(v)
+        ? `    const val ${toConstName(k)}: Int = ${Math.round(v)}`
+        : `    const val ${toConstName(k)}: Float = ${v}f`,
+    ),
     "}",
     "",
     "object EliteSurfaceMotion {",

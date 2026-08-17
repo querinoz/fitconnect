@@ -31,6 +31,8 @@ elite-core/target/
 # Android (ADR-005) — standard Gradle/Android ignores, added ahead of the
 # android/ scaffold so it's never accidentally committed once it lands.
 android/.gradle/
+android/.kotlin/
+android/.idea/
 android/build/
 android/*/build/
 android/local.properties
@@ -43,6 +45,7 @@ android/*.jks
 android/app/*.jks
 android/app/google-services.json
 android/local.properties
+android/.auth-qa/
 
 # Local DEBUG APK QR distribution artifacts (never commit)
 .fitconnect-local-distribution/

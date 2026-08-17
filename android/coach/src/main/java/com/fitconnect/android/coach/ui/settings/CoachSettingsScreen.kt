@@ -55,6 +55,11 @@ fun CoachSettingsScreen() {
             }
         }
         item {
+            com.fitconnect.android.designui.components.IdentityConnectedAccounts(
+                authRepository = container.platform.authRepository,
+            )
+        }
+        item {
             EliteCard {
                 Text(
                     "FCM production remains PENDING_HUMAN. This surface stores preferences on-device.",

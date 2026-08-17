@@ -1,6 +1,8 @@
 package com.fitconnect.android.designui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,15 +14,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import com.fitconnect.android.designui.theme.EliteBorder
 import com.fitconnect.android.designui.theme.EliteElevation
+import com.fitconnect.android.designui.theme.EliteGlass
 import com.fitconnect.android.designui.theme.EliteMetricTextStyle
 import com.fitconnect.android.designui.theme.EliteOpacity
 import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
+import com.fitconnect.android.designui.theme.toColor
 
-enum class EliteCardVariant { Solid, Glass, Metric, Person }
+enum class EliteCardVariant { Solid, Glass, Metric, Person, Bento }
 
 @Composable
 fun EliteCard(
@@ -30,18 +36,25 @@ fun EliteCard(
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val shape = RoundedCornerShape(EliteRadius.Lg)
+    val shape = RoundedCornerShape(
+        if (variant == EliteCardVariant.Bento || variant == EliteCardVariant.Glass) {
+            EliteRadius.Xl
+        } else {
+            EliteRadius.Lg
+        },
+    )
     val container = when (variant) {
-        EliteCardVariant.Glass -> MaterialTheme.colorScheme.surface.copy(alpha = 0.96f)
+        EliteCardVariant.Glass -> MaterialTheme.colorScheme.surface.copy(alpha = EliteGlass.L2)
         EliteCardVariant.Metric -> MaterialTheme.colorScheme.surfaceVariant
         EliteCardVariant.Person -> MaterialTheme.colorScheme.surfaceVariant
+        EliteCardVariant.Bento -> com.fitconnect.android.design.EliteSurfaceColors.CARBON.toColor()
         EliteCardVariant.Solid -> MaterialTheme.colorScheme.surface
     }
     val cardModifier = if (fillMaxWidth) modifier.fillMaxWidth() else modifier
     val border = when (variant) {
-        EliteCardVariant.Glass -> BorderStroke(
+        EliteCardVariant.Glass, EliteCardVariant.Bento -> BorderStroke(
             EliteBorder.Hairline,
-            MaterialTheme.colorScheme.outline.copy(alpha = EliteOpacity.Border),
+            MaterialTheme.colorScheme.onBackground.copy(alpha = EliteOpacity.Border),
         )
         else -> null
     }
@@ -49,6 +62,26 @@ fun EliteCard(
     val elevation = CardDefaults.cardElevation(
         defaultElevation = if (variant == EliteCardVariant.Solid) EliteElevation.Low else EliteElevation.None,
     )
+    val body: @Composable () -> Unit = {
+        Box {
+            if (variant == EliteCardVariant.Glass) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(shape)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = EliteGlass.Highlight),
+                                    Color.Transparent,
+                                ),
+                            ),
+                        ),
+                )
+            }
+            Column(modifier = Modifier.padding(EliteSpace.Lg), content = content)
+        }
+    }
 
     if (onClick != null) {
         Card(
@@ -58,11 +91,7 @@ fun EliteCard(
             colors = colors,
             elevation = elevation,
             border = border,
-        ) {
-            Column(modifier = Modifier.padding(EliteSpace.Lg)) {
-                content()
-            }
-        }
+        ) { body() }
     } else {
         Card(
             modifier = cardModifier,
@@ -70,11 +99,7 @@ fun EliteCard(
             colors = colors,
             elevation = elevation,
             border = border,
-        ) {
-            Column(modifier = Modifier.padding(EliteSpace.Lg)) {
-                content()
-            }
-        }
+        ) { body() }
     }
 }
 

@@ -9,6 +9,7 @@ enum class NotificationCategory {
     TRAINING,
     SOCIAL,
     MARKETING,
+    PROGRESSION,
 }
 
 data class LocalNotificationRequest(

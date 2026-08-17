@@ -119,15 +119,18 @@ export async function requireCoachId(
     };
   }
 
-  const resolved = fromParam ?? auth.user.id;
-  if (!resolved) {
+  if (auth.user.role === "admin" && fromParam) {
+    return { coachId: fromParam };
+  }
+
+  if (fromParam && fromParam !== auth.user.id) {
     return {
       ok: false,
-      response: NextResponse.json({ error: "coachId required" }, { status: 400 })
+      response: NextResponse.json({ error: "forbidden" }, { status: 403 })
     };
   }
 
-  return { coachId: resolved };
+  return { coachId: auth.user.id };
 }
 
 export function isAuthFailure(

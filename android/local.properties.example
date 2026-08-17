@@ -3,6 +3,10 @@
 # supabase.url=https://YOUR_PROJECT.supabase.co
 # supabase.anonKey=YOUR_ANON_KEY_ONLY
 
+# Web OAuth client ID for Google Credential Manager (not the Android client ID).
+# firebase.webClientId=YOUR_WEB_CLIENT_ID.apps.googleusercontent.com
+
 # Or set CI env (preferred for pipelines):
 # FITCONNECT_SUPABASE_URL
 # FITCONNECT_SUPABASE_ANON_KEY
+# FITCONNECT_GOOGLE_WEB_CLIENT_ID

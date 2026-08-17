@@ -44,6 +44,20 @@ sealed class AppError {
         FORBIDDEN,
         SESSION_EXPIRED,
         REFRESH_FAILED,
+        INVALID_CREDENTIALS,
+        INVALID_EMAIL,
+        EMAIL_ALREADY_EXISTS,
+        WEAK_PASSWORD,
+        PASSWORD_MISMATCH,
+        NETWORK_ERROR,
+        CONNECTION_REQUIRED,
+        ACCOUNT_DISABLED,
+        TOO_MANY_REQUESTS,
+        EMAIL_NOT_VERIFIED,
+        CANCELLED,
+        PROVIDER_UNAVAILABLE,
+        ACCOUNT_EXISTS_DIFFERENT_CREDENTIAL,
+        UNKNOWN_AUTH_ERROR,
     }
 }
 
@@ -60,5 +74,10 @@ sealed class AppResult<out T> {
     inline fun getOrElse(default: (AppError) -> @UnsafeVariance T): T = when (this) {
         is Ok -> value
         is Err -> default(error)
+    }
+
+    fun getOrNull(): T? = when (this) {
+        is Ok -> value
+        is Err -> null
     }
 }

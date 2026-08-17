@@ -43,7 +43,7 @@ jobs:
         working-directory: android
         # SIGN-02: assembleRelease is fail-closed (requires keystore + Supabase + FCM).
         # CI without secrets must not claim a production release artifact.
-        run: ./gradlew build -x :app:assembleRelease -x :app:bundleRelease -x :app:assembleReleaseUnitTest
+        run: ./gradlew build -x :app:assembleRelease -x :app:bundleRelease -x :app:assembleReleaseUnitTest -x :wear:assembleRelease -x :wear:bundleRelease
 
       - name: Signed release (only when secrets present)
         if: ${{ secrets.FITCONNECT_ANDROID_KEYSTORE_BASE64 != '' && secrets.FITCONNECT_SUPABASE_URL != '' && secrets.FITCONNECT_GOOGLE_SERVICES_JSON_BASE64 != '' }}

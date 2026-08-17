@@ -14,7 +14,7 @@ TUNNEL_PID = apps/web/.next/tunnel.pid
 export PORT
 
 .PHONY: help setup dev start prod stop clean clean-deep status tunnel test build typecheck \
-        doctor android android-test android-emulator android-qa web web-test landing watch \
+        doctor android android-test android-emulator android-qa android-wear-test android-ascend-test web web-test landing watch \
         web-qa wear qa screenshots report-whatsapp \
         _deps _kill_port _build _start_prod _wait_ready _smoke _tunnel _open
 
@@ -63,7 +63,7 @@ help:
 	@echo "  make landing     Landing/marketing route audit"
 	@echo "  make watch       watchOS probe (PENDING_ENVIRONMENT on Windows)"
 	@echo "  make web-qa      Web mobile cockpit Vitest"
-	@echo "  make wear        Wear assemble + WearSessionLinkTest"
+	@echo "  make android-wear-test  Phone+Wear env probe, unit tests, APKs, optional emu GPS"
 	@echo "  make qa          web-qa + android"
 	@echo "  make report-whatsapp  Official WhatsApp summary (PENDING_HUMAN if no creds)"
 	@echo "  make screenshots Device screenshots — not invented if no device"
@@ -264,6 +264,20 @@ ifdef IS_WINDOWS
 	@powershell -NoProfile -ExecutionPolicy Bypass -File qa/wear/run.ps1
 else
 	@cd android && ./gradlew :wear:assembleDebug
+endif
+
+android-wear-test:
+ifdef IS_WINDOWS
+	@powershell -NoProfile -ExecutionPolicy Bypass -File scripts/android-wear-test.ps1
+else
+	@cd android && ./gradlew :shared:test :core-capture:testDebugUnitTest :wear:assembleDebug
+endif
+
+android-ascend-test:
+ifdef IS_WINDOWS
+	@powershell -NoProfile -ExecutionPolicy Bypass -Command "Set-Location android; .\gradlew.bat :ascend:test :athlete:testDebugUnitTest :coach:testDebugUnitTest"
+else
+	@cd android && ./gradlew :ascend:test :athlete:testDebugUnitTest :coach:testDebugUnitTest
 endif
 
 qa: web-qa android

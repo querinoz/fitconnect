@@ -54,6 +54,7 @@ import com.fitconnect.android.ui.auth.AuthScreen
 import com.fitconnect.android.ui.theme.LocalAppContainer
 import com.fitconnect.android.foundation.storage.isCoachOnboardingDone
 import com.fitconnect.android.foundation.storage.isOnboardingDone
+import com.fitconnect.android.foundation.storage.needsIdentityRoleSelection
 import com.fitconnect.android.ui.onboarding.CoachOnboardingScreen
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.delay
@@ -108,7 +109,7 @@ fun FitConnectNavHost(
                 secondaryLabel = stringResource(R.string.nav_continue_anonymous),
                 onSecondary = {
                     scope.launch {
-                        // Anonymous explores guest surfaces only Ã¢â‚¬â€ never Athlete/Coach OS.
+                        // Anonymous explores guest surfaces only — never Athlete/Coach OS.
                         container.authRepository.signInAnonymously()
                         navigateGuarded(CoreRoute.AUTH)
                     }
@@ -125,11 +126,7 @@ fun FitConnectNavHost(
         ) {
             AuthScreen(
                 config = container.config,
-                authRepository = container.authRepository,
-                analytics = container.analytics,
-                errorPipeline = container.errorPipeline,
                 onSignedIn = { navigateGuarded(CoreRoute.HOME) },
-                onError = { navController.navigate(AppDestination.Error.route) },
             )
         }
         composable(
@@ -160,69 +157,94 @@ fun FitConnectNavHost(
                         content = {},
                     )
                 }
-                role == UserRole.COACH -> {
-                    var coachOnboardingDone by remember { mutableStateOf<Boolean?>(null) }
-                    LaunchedEffect(Unit) {
-                        coachOnboardingDone = container.keyValueStore.isCoachOnboardingDone()
-                    }
-                    when (coachOnboardingDone) {
-                        null -> Spacer(modifier = Modifier.fillMaxSize())
-                        false -> CoachOnboardingScreen(
-                            keyValueStore = container.keyValueStore,
-                            onFinished = { coachOnboardingDone = true },
-                        )
-                        true -> CoachOsApp(
-                            container = app.coachContainer,
-                            onSignedOut = {
-                                scope.launch {
-                                    container.authRepository.logout()
-                                    container.analytics.reset()
-                                    navigateGuarded(CoreRoute.GUEST)
-                                }
-                            },
-                        )
-                    }
-                }
-                role == UserRole.ATHLETE -> {
-                    var onboardingDone by remember { mutableStateOf<Boolean?>(null) }
-                    LaunchedEffect(Unit) {
-                        onboardingDone = container.keyValueStore.isOnboardingDone()
-                    }
-                    when (onboardingDone) {
-                        null -> Spacer(modifier = Modifier.fillMaxSize())
-                        false -> com.fitconnect.android.ui.onboarding.OnboardingScreen(
-                            keyValueStore = container.keyValueStore,
-                            onFinished = { onboardingDone = true },
-                        )
-                        true -> AthleteOsApp(
-                            container = app.athleteContainer,
-                            onSignedOut = {
-                                scope.launch {
-                                    container.authRepository.logout()
-                                    container.analytics.reset()
-                                    navigateGuarded(CoreRoute.GUEST)
-                                }
-                            },
-                        )
-                    }
-                }
                 else -> {
-                    // Anonymous / guest / unexpected roles never enter Athlete OS.
-                    FoundationScreen(
-                        title = stringResource(R.string.nav_home_title),
-                        body = stringResource(R.string.nav_home_body),
-                        primaryLabel = stringResource(R.string.nav_continue_auth),
-                        onPrimary = { navigateGuarded(CoreRoute.AUTH) },
-                        secondaryLabel = stringResource(R.string.nav_sign_out),
-                        onSecondary = {
-                            scope.launch {
-                                container.authRepository.logout()
-                                container.analytics.reset()
-                                navigateGuarded(CoreRoute.GUEST)
+                    var needsRole by remember { mutableStateOf<Boolean?>(null) }
+                    var sessionRole by remember { mutableStateOf(role) }
+                    LaunchedEffect(role, needsRole) {
+                        val snap = container.sessionStore.snapshot()
+                        sessionRole = snap.role
+                        needsRole = container.keyValueStore.needsIdentityRoleSelection(
+                            snap.userId.orEmpty(),
+                            snap.isLocalDemo,
+                        )
+                    }
+                    when (needsRole) {
+                        null -> Spacer(modifier = Modifier.fillMaxSize())
+                        true -> com.fitconnect.android.ui.auth.RoleSelectScreen(
+                            authRepository = container.authRepository,
+                            onSelected = {
+                                scope.launch {
+                                    sessionRole = container.sessionStore.role()
+                                    needsRole = false
+                                }
+                            },
+                        )
+                        false -> when (sessionRole) {
+                            UserRole.COACH -> {
+                                var coachOnboardingDone by remember { mutableStateOf<Boolean?>(null) }
+                                LaunchedEffect(Unit) {
+                                    coachOnboardingDone = container.keyValueStore.isCoachOnboardingDone()
+                                }
+                                when (coachOnboardingDone) {
+                                    null -> Spacer(modifier = Modifier.fillMaxSize())
+                                    false -> CoachOnboardingScreen(
+                                        keyValueStore = container.keyValueStore,
+                                        onFinished = { coachOnboardingDone = true },
+                                    )
+                                    true -> CoachOsApp(
+                                        container = app.coachContainer,
+                                        onSignedOut = {
+                                            scope.launch {
+                                                container.authRepository.logout()
+                                                container.analytics.reset()
+                                                navigateGuarded(CoreRoute.GUEST)
+                                            }
+                                        },
+                                    )
+                                }
                             }
-                        },
-                        testTag = "screen_home",
-                    )
+                            UserRole.ATHLETE -> {
+                                var onboardingDone by remember { mutableStateOf<Boolean?>(null) }
+                                LaunchedEffect(Unit) {
+                                    onboardingDone = container.keyValueStore.isOnboardingDone()
+                                }
+                                when (onboardingDone) {
+                                    null -> Spacer(modifier = Modifier.fillMaxSize())
+                                    false -> com.fitconnect.android.ui.onboarding.OnboardingScreen(
+                                        keyValueStore = container.keyValueStore,
+                                        onFinished = { onboardingDone = true },
+                                    )
+                                    true -> AthleteOsApp(
+                                        container = app.athleteContainer,
+                                        onSignedOut = {
+                                            scope.launch {
+                                                container.authRepository.logout()
+                                                container.analytics.reset()
+                                                navigateGuarded(CoreRoute.GUEST)
+                                            }
+                                        },
+                                    )
+                                }
+                            }
+                            else -> {
+                                FoundationScreen(
+                                    title = stringResource(R.string.nav_home_title),
+                                    body = stringResource(R.string.nav_home_body),
+                                    primaryLabel = stringResource(R.string.nav_continue_auth),
+                                    onPrimary = { navigateGuarded(CoreRoute.AUTH) },
+                                    secondaryLabel = stringResource(R.string.nav_sign_out),
+                                    onSecondary = {
+                                        scope.launch {
+                                            container.authRepository.logout()
+                                            container.analytics.reset()
+                                            navigateGuarded(CoreRoute.GUEST)
+                                        }
+                                    },
+                                    testTag = "screen_home",
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -315,9 +337,15 @@ private fun SplashRoute(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.alpha(markAlpha.value),
             )
+            Text(
+                text = "ELITE OS",
+                style = MaterialTheme.typography.labelLarge,
+                color = volt,
+                modifier = Modifier.alpha(markAlpha.value),
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "SYS.MARK → INIT → TELEMETRY",
+                text = "BIOMETRIC · TELEMETRY · AI · CONNECT",
                 style = MaterialTheme.typography.labelLarge,
                 color = volt,
                 modifier = Modifier
@@ -343,7 +371,7 @@ private fun RoleGateRoute(
     authorize: suspend () -> com.fitconnect.android.foundation.navigation.NavDecision,
     onDenied: () -> Unit,
 ) {
-    var roleName by remember { mutableStateOf("Ã¢â‚¬Â¦") }
+    var roleName by remember { mutableStateOf("…") }
     LaunchedEffect(Unit) {
         val decision = authorize()
         if (!decision.allowed) {
@@ -374,6 +402,7 @@ private fun FoundationScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(24.dp)
             .testTag(testTag),
         verticalArrangement = Arrangement.Center,

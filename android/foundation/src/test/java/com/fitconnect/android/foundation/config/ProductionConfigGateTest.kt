@@ -11,6 +11,8 @@ class ProductionConfigGateTest {
         supabaseUrl: String? = "https://xyz.supabase.co",
         anon: String? = "anon",
         debug: Boolean = false,
+        firebase: Boolean = true,
+        fcm: Boolean = true,
     ) = AppConfig(
         environment = if (debug) AppEnvironment.DEBUG else AppEnvironment.PRODUCTION,
         apiBaseUrl = api,
@@ -18,6 +20,8 @@ class ProductionConfigGateTest {
         supabaseAnonKey = anon,
         isDebuggable = debug,
         allowLocalAuth = allowLocal,
+        fcmConfigured = fcm,
+        firebaseAuthConfigured = firebase,
     )
 
     @Test
@@ -36,6 +40,24 @@ class ProductionConfigGateTest {
             enforce = true,
         )
         assertTrue(findings.any { it.code == "API_DEV_HOST" })
+    }
+
+    @Test
+    fun enforceFailsWithoutFirebase() {
+        val findings = ProductionConfigGate.validate(
+            base(firebase = false),
+            enforce = true,
+        )
+        assertTrue(findings.any { it.code == "FIREBASE_MISSING" })
+    }
+
+    @Test
+    fun enforceFailsWithoutFcm() {
+        val findings = ProductionConfigGate.validate(
+            base(fcm = false),
+            enforce = true,
+        )
+        assertTrue(findings.any { it.code == "FCM_MISSING" })
     }
 
     @Test

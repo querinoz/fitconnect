@@ -39,7 +39,8 @@ class DefaultErrorPipeline(
 ) : ErrorPipeline {
     override fun report(domain: ErrorDomain, error: AppError, recoverable: Boolean): PipelineError {
         val mapped = map(error).copy(domain = domain, recoverable = recoverable)
-        logger.e("ErrorPipeline", "${mapped.domain}: ${mapped.userMessageKey}", causeOf(error))
+        val cause = if (error is AppError.Auth) null else causeOf(error)
+        logger.e("ErrorPipeline", "${mapped.domain}: ${mapped.userMessageKey}", cause)
         analytics.track(
             AnalyticsEvent(
                 name = "error_pipeline",

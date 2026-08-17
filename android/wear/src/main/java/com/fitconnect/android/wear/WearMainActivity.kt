@@ -3,86 +3,59 @@ package com.fitconnect.android.wear
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.wear.compose.material.Button
+import androidx.compose.ui.graphics.Color
+import androidx.wear.compose.material.Colors
 import androidx.wear.compose.material.MaterialTheme
-import androidx.wear.compose.material.Text
 import com.fitconnect.android.capture.LiveActivityEngine
-import com.fitconnect.android.capture.LiveActivityPhase
-import kotlinx.coroutines.delay
+import com.fitconnect.android.design.EliteSurfaceColors
+import com.fitconnect.shared.wear.WearPaths
+import com.google.android.gms.wearable.Wearable
 
-/**
- * Operational Wear shell — LOCAL_DEMO activity controls.
- * Phone ↔ watch DataLayer sync is not executed here (PENDING_HUMAN device).
- */
 class WearMainActivity : ComponentActivity() {
+    private val engine = LiveActivityEngine()
+    private lateinit var sender: WearTelemetrySender
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sender = WearTelemetrySender(this)
+        WearRuntime.engine = engine
+        WearRuntime.sessionId = "wear-${System.currentTimeMillis()}"
+        runCatching {
+            Wearable.getCapabilityClient(this).addLocalCapability(WearPaths.CAPABILITY)
+        }
+        val hrCapability = WearHealthServicesProbe.heartRate(this)
         setContent {
-            MaterialTheme {
-                WearHome()
+            MaterialTheme(colors = eliteWearColors()) {
+                WearInstrument(
+                    engine = engine,
+                    sender = sender,
+                    hrCapability = hrCapability,
+                    deviceId = android.os.Build.MODEL,
+                    companionLabel = "LINK UNVERIFIED",
+                )
             }
         }
+    }
+
+    override fun onDestroy() {
+        WearRuntime.engine = null
+        runCatching {
+            Wearable.getCapabilityClient(this).removeLocalCapability(WearPaths.CAPABILITY)
+        }
+        super.onDestroy()
     }
 }
 
-@Composable
-private fun WearHome() {
-    val engine = remember { LiveActivityEngine() }
-    val snap by engine.state.collectAsState()
-    LaunchedEffect(snap.phase) {
-        if (snap.phase != LiveActivityPhase.RUNNING) return@LaunchedEffect
-        while (true) {
-            delay(1_000)
-            if (engine.state.value.phase != LiveActivityPhase.RUNNING) break
-            engine.tick()
-        }
-    }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text("FitConnect")
-        Text("Readiness 78 · ${snap.sourceLabel}")
-        Text(LiveActivityEngine.formatElapsed(snap.elapsedMs))
-        Text(snap.hrBpm?.let { "HR $it · Z${snap.zone}" } ?: "HR —")
-        when (snap.phase) {
-            LiveActivityPhase.IDLE, LiveActivityPhase.ENDED -> {
-                Button(onClick = { engine.start("Run") }, modifier = Modifier.fillMaxWidth()) {
-                    Text("START")
-                }
-            }
-            LiveActivityPhase.RUNNING -> {
-                Button(onClick = engine::pause, modifier = Modifier.fillMaxWidth()) {
-                    Text("PAUSE")
-                }
-                Button(onClick = engine::end, modifier = Modifier.fillMaxWidth()) {
-                    Text("END")
-                }
-            }
-            LiveActivityPhase.PAUSED -> {
-                Button(onClick = engine::resume, modifier = Modifier.fillMaxWidth()) {
-                    Text("RESUME")
-                }
-                Button(onClick = engine::end, modifier = Modifier.fillMaxWidth()) {
-                    Text("END")
-                }
-            }
-        }
-    }
-}
+private fun eliteWearColors() = Colors(
+    primary = Color(EliteSurfaceColors.VOLTLINE),
+    primaryVariant = Color(EliteSurfaceColors.VOLT_600),
+    secondary = Color(EliteSurfaceColors.TELEMETRY),
+    background = Color(EliteSurfaceColors.FLOOR),
+    surface = Color(EliteSurfaceColors.CARBON),
+    error = Color(EliteSurfaceColors.ALERT),
+    onPrimary = Color(EliteSurfaceColors.FLOOR),
+    onSecondary = Color(EliteSurfaceColors.FLOOR),
+    onBackground = Color(EliteSurfaceColors.ON_SURFACE),
+    onSurface = Color(EliteSurfaceColors.ON_SURFACE),
+    onError = Color(EliteSurfaceColors.ON_SURFACE),
+)

@@ -10,12 +10,12 @@ Write-Host ""
 Write-Host "╔══════════════════════════════════╗" -ForegroundColor Green
 Write-Host "║       FITCONNECT ELITE OS        ║" -ForegroundColor Green
 Write-Host "╚══════════════════════════════════╝" -ForegroundColor Green
-Write-Host "[1/6] Environment"
-Write-Host "[2/6] Android        (not started here — make android)"
-Write-Host "[3/6] Emulator       (not started here — hypervisor often PENDING_HUMAN)"
-Write-Host "[4/6] Web"
-Write-Host "[5/6] QA             (run make qa separately)"
-Write-Host "[6/6] Ready          (after this script finishes)"
+Write-Host "[BOOT] FitConnect Elite OS local start"
+Write-Host "[PHONE] not started here — make android-wear-test / make android-emulator"
+Write-Host "[WATCH] not started here — Wear AVD may be UNAVAILABLE"
+Write-Host "[SYNC] UNVERIFIED until a reachable FitConnect Wear node exists"
+Write-Host "[BACKEND] Next.js on :$Port"
+Write-Host "[READY] after this script finishes (web only)"
 Write-Host ""
 
 $ErrorActionPreference = "Stop"
