@@ -7,6 +7,9 @@ describe("<ReadinessRing />", () => {
     render(<ReadinessRing percent={82} label="Readiness" />);
     expect(screen.getByText("82")).toBeInTheDocument();
     expect(screen.getByText("Readiness")).toBeInTheDocument();
+    const cluster = screen.getByText("82").parentElement;
+    expect(cluster?.className).toMatch(/flex-col/);
+    expect(cluster?.className).toMatch(/items-center/);
   });
 
   it("clamps percent into 0..100", () => {

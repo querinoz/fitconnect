@@ -111,6 +111,14 @@ export const de = {
       togetherCta: "community erkunden",
       footerHint: "bereit wenn du es bist",
       footerCta: "kostenlos starten"
+    },
+    map: {
+      eyebrow: "Live-Karte",
+      title: "Deine Welt.",
+      titleAccent: "In Bewegung.",
+      body: "OpenFreeMap-Kacheln laden live. Spuren und der bewegte Athlet sind LOCAL_DEMO — kein Hardware-GPS, bis Strava verbunden ist.",
+      locate: "Mich finden",
+      you: "Du"
     }
   },
   landingEditorial: {

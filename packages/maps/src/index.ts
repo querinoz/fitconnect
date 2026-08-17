@@ -12,6 +12,8 @@ export const DEMO_HOTSPOTS: ActivityHotspot[] = [
   { id: "ericeira-surf", name: "Ericeira surf break", lat: 38.962, lng: -9.415, intensity: 0.78, sport: "Surf" },
   { id: "sintra-trails", name: "Sintra trails", lat: 38.799, lng: -9.388, intensity: 0.85, sport: "Running" },
   { id: "cascais-coast", name: "Cascais coastal ride", lat: 38.697, lng: -9.421, intensity: 0.71, sport: "Cycling" },
+  { id: "lx-factory-yoga", name: "Lx Factory yoga", lat: 38.703, lng: -9.178, intensity: 0.64, sport: "Yoga" },
+  { id: "belem-pool", name: "Belém open water", lat: 38.693, lng: -9.216, intensity: 0.69, sport: "Swim" },
   { id: "innsbruck-alps", name: "Innsbruck alpine", lat: 47.269, lng: 11.404, intensity: 0.88, sport: "Climbing" }
 ];
 

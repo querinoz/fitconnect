@@ -12,7 +12,10 @@ export const eliteButtonVariants = cva(
         ghost:
           "bg-transparent font-mono text-xs uppercase tracking-widest text-eos-on-surface-muted hover:text-eos-on-surface",
         telemetry:
-          "border border-eos-telemetry/30 bg-eos-telemetry-dim text-eos-telemetry hover:border-eos-telemetry/50"
+          "border border-eos-telemetry/30 bg-eos-telemetry-dim text-eos-telemetry hover:border-eos-telemetry/50",
+        danger:
+          "border border-eos-alert/40 bg-eos-alert/10 text-eos-alert hover:bg-eos-alert/20 active:scale-[0.98]",
+        link: "bg-transparent text-eos-connect underline-offset-4 hover:underline"
       },
       size: {
         sm: "h-9 px-4 text-xs rounded-[var(--eos-radius-nested)]",

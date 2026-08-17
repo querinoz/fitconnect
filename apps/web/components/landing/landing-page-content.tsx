@@ -15,6 +15,8 @@ import { FeatureManifesto } from "@/components/landing/feature-manifesto";
 import { CinematicBreak } from "@/components/landing/cinematic-break";
 import { CoachReel } from "@/components/landing/coach-reel";
 import { PullQuote } from "@/components/landing/pull-quote";
+import { LandingProblemAct } from "@/components/landing/landing-problem-act";
+import { LandingEcosystemAct } from "@/components/landing/landing-ecosystem-act";
 import { FinalCta } from "@/components/landing/final-cta";
 
 const AppDemoSection = dynamic(
@@ -61,8 +63,9 @@ export function LandingPageContent() {
       {/* Act I–II: Boot gate + Hero */}
       <HeroEliteOs />
 
-      {/* Act III: Trust marquee */}
       <TrustStripMarquee />
+
+      <LandingProblemAct />
 
       {/* Act IV: Section break — CONNECT / PERFORM */}
       <CinematicBreak lineOne={sb.connect} lineTwo={sb.perform} />
@@ -114,6 +117,8 @@ export function LandingPageContent() {
       </Defer>
 
       {/* Act IX: Final CTA aurora */}
+      <LandingEcosystemAct />
+
       <FinalCta />
 
       <Defer minHeight={400}>

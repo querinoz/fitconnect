@@ -25,6 +25,7 @@ describe("<EliteMobileCockpit />", () => {
     expect(screen.getAllByText("LOCAL_DEMO").length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole("button", { name: /start monitoring/i }));
     expect(screen.getByRole("button", { name: /^pause$/i })).toBeInTheDocument();
+    expect(screen.getByText(/bpm/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /community/i }));
     expect(screen.getByText(/no posts in cache/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /iphone 390/i }));

@@ -3,6 +3,7 @@
 import { DEMO_STRAVA_ACTIVITIES } from "@/lib/integrations/store";
 import { formatMsg, useLocale } from "@/lib/i18n-provider";
 import { RealtimeBadge } from "@/components/ui-glass/premium-system";
+import { useLiveDemoTelemetry } from "@/lib/demo/live-telemetry";
 import { cn } from "@/lib/utils";
 
 const SPORT_EMOJI: Record<string, string> = {
@@ -42,6 +43,7 @@ type ActivityFeedLiveProps = {
 export function ActivityFeedLive({ className }: ActivityFeedLiveProps) {
   const { dashboard } = useLocale();
   const copy = dashboard.activity_feed;
+  const live = useLiveDemoTelemetry();
   const items = DEMO_STRAVA_ACTIVITIES.slice(0, 4);
 
   return (
@@ -79,7 +81,13 @@ export function ActivityFeedLive({ className }: ActivityFeedLiveProps) {
                 </div>
                 <p className="mt-0.5 text-xs text-ink-500">
                   {formatDistance(activity.distanceM)} · {formatDuration(activity.movingTimeSec)} ·{" "}
-                  {formatRelativeTime(activity.startDate, copy)}
+                  {index === 0 ? (
+                    <span className="tabular-nums text-eos-telemetry">
+                      {live.hrBpm} bpm · {copy.live}
+                    </span>
+                  ) : (
+                    formatRelativeTime(activity.startDate, copy)
+                  )}
                 </p>
               </div>
             </li>

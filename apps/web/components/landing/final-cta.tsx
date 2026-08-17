@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRef } from "react";
 import { useLocale } from "@/lib/i18n-provider";
 import { useGsapReveal } from "@/hooks/use-gsap-reveal";
+import { EliteButton } from "@/components/elite-os";
 import { cn } from "@/lib/utils";
 
 export function FinalCta() {
@@ -41,18 +42,12 @@ export function FinalCta() {
         {copy.subheadline}
       </p>
       <div data-reveal className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center">
-        <Link
-          href="/discover"
-          className="inline-flex min-h-12 items-center justify-center rounded-full bg-eos-voltline px-8 py-3.5 text-sm font-semibold text-eos-floor transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eos-voltline active:translate-y-px"
-        >
-          {copy.primary}
-        </Link>
-        <Link
-          href="/dashboard?demo=athlete"
-          className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/10 bg-white/5 px-8 py-3.5 text-sm font-semibold text-eos-on-surface backdrop-blur transition hover:border-eos-voltline/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60"
-        >
-          {copy.secondary}
-        </Link>
+        <EliteButton asChild size="lg" className="rounded-full">
+          <Link href="/signup">{copy.primary}</Link>
+        </EliteButton>
+        <EliteButton asChild variant="secondary" size="lg" className="rounded-full">
+          <Link href="/dashboard?demo=athlete">{copy.secondary}</Link>
+        </EliteButton>
       </div>
       <p
         data-reveal

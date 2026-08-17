@@ -539,3 +539,214 @@ html.eos-app-shell-active .fc-dashboard-inner {
   height: 40vw;
   background: rgba(108, 99, 255, 0.05);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   LANDING — cinematic aurora + 3D phone stage
+   ═══════════════════════════════════════════════════════════════ */
+
+.eos-aurora-blob {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(90px);
+  will-change: transform;
+}
+
+html:not([data-motion="reduced"]) .eos-aurora-blob {
+  animation: eos-aurora-drift 14s ease-in-out infinite;
+}
+
+@keyframes eos-aurora-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(6%, -8%, 0) scale(1.08);
+  }
+}
+
+.eos-phone-stage {
+  width: min(280px, 100%);
+  max-width: 100%;
+  margin-inline: auto;
+  perspective: 1400px;
+  perspective-origin: 50% 38%;
+}
+
+.eos-phone-rig {
+  transform: rotateY(-18deg) rotateX(8deg);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+@media (max-width: 767px) {
+  .eos-phone-rig {
+    transform: rotateY(-8deg) rotateX(4deg);
+  }
+}
+
+html:not([data-motion="reduced"]) .eos-phone-chassis {
+  animation: eos-phone-float 7.2s ease-in-out infinite;
+}
+
+@keyframes eos-phone-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+.eos-phone-chassis {
+  position: relative;
+  width: min(280px, 100%);
+  border-radius: 2.35rem;
+  padding: 10px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--eos-on-surface) 16%, var(--eos-floor)),
+    var(--eos-floor)
+  );
+  box-shadow:
+    0 42px 90px -32px color-mix(in srgb, var(--eos-floor) 92%, transparent),
+    0 0 48px -18px color-mix(in srgb, var(--eos-voltline) 22%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--eos-on-surface) 14%, transparent);
+}
+
+.eos-phone-chassis::before,
+.eos-phone-chassis::after {
+  content: "";
+  position: absolute;
+  width: 3px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--eos-on-surface) 22%, var(--eos-floor));
+}
+
+.eos-phone-chassis::before {
+  left: -3px;
+  top: 88px;
+  height: 52px;
+}
+
+.eos-phone-chassis::after {
+  right: -3px;
+  top: 120px;
+  height: 72px;
+}
+
+.eos-phone-screen {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  height: min(58dvh, 540px);
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 1.85rem;
+  background: var(--eos-floor);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--eos-on-surface) 8%, transparent);
+}
+
+.eos-phone-glare {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--eos-on-surface) 10%, transparent),
+    transparent 42%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eos-aurora-blob,
+  .eos-phone-chassis {
+    animation: none;
+  }
+}
+
+/* ── Sports hub — catalog tiles ── */
+.sports-hub-card {
+  animation: sports-hub-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+.sports-hub-card:hover {
+  border-color: color-mix(in srgb, var(--eos-voltline) 45%, var(--eos-outline));
+  box-shadow: 0 0 32px -12px color-mix(in srgb, var(--eos-voltline) 40%, transparent);
+  transform: translateY(-2px);
+}
+
+.sports-hub-card:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.sports-hub-load {
+  height: 2px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--eos-on-surface) 8%, transparent);
+}
+
+.sports-hub-load > span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--eos-telemetry), var(--eos-voltline));
+}
+
+.sports-hub-live {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--eos-telemetry);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--eos-telemetry) 70%, transparent);
+  animation: sports-hub-live 1.8s ease-in-out infinite;
+}
+
+@keyframes sports-hub-rise {
+  from {
+    transform: translateY(14px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes sports-hub-live {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.72);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sports-hub-card,
+  .sports-hub-live {
+    animation: none;
+  }
+
+  .sports-hub-card:hover,
+  .sports-hub-card:active {
+    transform: none;
+  }
+}
+
+html[data-motion="reduced"] .sports-hub-card,
+html[data-motion="reduced"] .sports-hub-live {
+  animation: none;
+}
+
+html[data-motion="reduced"] .sports-hub-card:hover,
+html[data-motion="reduced"] .sports-hub-card:active {
+  transform: none;
+}

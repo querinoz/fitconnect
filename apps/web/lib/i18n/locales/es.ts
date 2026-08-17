@@ -110,6 +110,14 @@ export const es = {
       togetherCta: "explorar community",
       footerHint: "listo cuando tú lo estés",
       footerCta: "empezar gratis"
+    },
+    map: {
+      eyebrow: "Mapa en vivo",
+      title: "Tu mundo.",
+      titleAccent: "En movimiento.",
+      body: "Los tiles OpenFreeMap cargan en tiempo real. Las rutas y el atleta en movimiento son LOCAL_DEMO — no GPS de hardware hasta que conectes Strava.",
+      locate: "Mi posición",
+      you: "Tú"
     }
   },
   landingEditorial: {

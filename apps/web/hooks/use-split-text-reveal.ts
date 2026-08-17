@@ -20,7 +20,8 @@ type SplitRevealOptions = {
 /**
  * Scroll-triggered SplitText word reveal.
  * Elements matching `selector` inside `scopeRef` have their words staggered
- * from y:40/opacity:0 on scroll entry. Respects prefers-reduced-motion.
+ * with a short rise on scroll entry. Copy stays visible if motion is skipped.
+ * Respects prefers-reduced-motion.
  */
 export function useSplitTextReveal(
   scopeRef: React.RefObject<HTMLElement | null>,
@@ -61,8 +62,7 @@ export function useSplitTextReveal(
       const splits = headlines.map((el) => {
         const split = new SplitText(el, { type: "words", wordsClass: "gsap-word" });
         gsap.from(split.words, {
-          y: 40,
-          opacity: 0,
+          y: 24,
           duration: 0.75,
           stagger,
           ease: "power3.out",

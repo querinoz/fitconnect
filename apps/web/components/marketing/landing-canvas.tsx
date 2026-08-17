@@ -9,12 +9,12 @@ export function LandingCanvas({ subdued = false }: { subdued?: boolean }) {
     <div
       aria-hidden
       className={cn(
-        "pointer-events-none fixed inset-0 -z-30 overflow-hidden bg-ink-950",
+        "pointer-events-none fixed inset-0 -z-30 overflow-hidden bg-eos-floor",
         subdued && "opacity-50"
       )}
     >
       <OrbsLayer />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-20%,#1a1814_0%,#0c0a08_45%,#090402_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-20%,color-mix(in_srgb,var(--eos-carbon)_80%,transparent)_0%,var(--eos-floor)_55%,var(--eos-floor)_100%)]" />
 
       <div className="fc-landing-mesh absolute inset-0">
         <div className="fc-landing-blob fc-landing-blob-a" />
@@ -25,7 +25,7 @@ export function LandingCanvas({ subdued = false }: { subdued?: boolean }) {
       <div className={cn("fc-landing-aurora absolute inset-0", subdued ? "opacity-40" : "opacity-70")} />
 
       <div className="absolute left-1/2 top-[-10%] h-[min(720px,90vh)] w-[min(960px,130vw)] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(191,238,22,0.06)_0%,transparent_62%)] blur-[100px]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#090402_88%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,var(--eos-floor)_88%)]" />
       <div className="absolute inset-0 bg-noise opacity-[0.12] mix-blend-soft-light" />
     </div>
   );

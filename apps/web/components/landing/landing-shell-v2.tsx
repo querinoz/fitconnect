@@ -2,6 +2,7 @@
 
 import { type ReactNode, useState, useCallback } from "react";
 import { CrosshairBg } from "@/components/elite-os";
+import { LandingOsNav } from "@/components/landing/landing-os-nav";
 import { HeroGate } from "@/components/landing/hero-gate";
 import { LandingGateContext } from "@/components/landing/landing-gate-context";
 import { ScrollTrigger } from "@/lib/motion/gsap-register";
@@ -31,8 +32,9 @@ export function LandingShellV2({ children, withBootGate = false }: LandingShellV
   return (
     <LandingGateContext.Provider value={{ gateDone }}>
       {withBootGate && !gateDone && <HeroGate onComplete={handleGateComplete} />}
-      <CrosshairBg className="eos-floor relative min-h-dvh text-eos-on-surface">
-        <main id="main" className="relative flex w-full flex-col">
+      <LandingOsNav />
+      <CrosshairBg className="eos-floor relative min-h-dvh max-w-[100vw] overflow-x-clip text-eos-on-surface">
+        <main id="main" className="relative flex w-full min-w-0 flex-col overflow-x-clip">
           {children}
         </main>
       </CrosshairBg>

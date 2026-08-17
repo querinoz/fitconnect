@@ -1,9 +1,10 @@
 "use client";
 
 import { useReducedMotion } from "motion/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/lib/i18n-provider";
+import { useLiveDemoTelemetry } from "@/lib/demo/live-telemetry";
 
 type Tab = "home" | "discover" | "activity" | "community" | "profile";
 type Frame = "android" | "iphone";
@@ -14,7 +15,7 @@ const FRAMES: Record<Frame, { w: number; h: number }> = {
   iphone: { w: 390, h: 844 }
 };
 
-export function EliteMobileCockpit() {
+export function EliteMobileCockpit({ embedded = false }: { embedded?: boolean }) {
   const reduce = useReducedMotion();
   const copy = useLocale().mobileApp.cockpit;
   const [frame, setFrame] = useState<Frame>("android");
@@ -35,7 +36,14 @@ export function EliteMobileCockpit() {
   );
 
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center bg-eos-floor px-4 py-8 text-eos-on-surface">
+    <div
+      className={cn(
+        "flex flex-col items-center bg-eos-floor text-eos-on-surface",
+        embedded ? "w-full min-w-0 px-0 py-0" : "min-h-[100dvh] px-4 py-8"
+      )}
+    >
+      {embedded ? null : (
+        <>
       <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-eos-voltline">
         Elite OS · {copy.demo}
       </p>
@@ -65,13 +73,22 @@ export function EliteMobileCockpit() {
           {copy.iphoneFrame}
         </button>
       </div>
+        </>
+      )}
       <div
         role="img"
         aria-label={copy.frameAria}
         data-testid="elite-mobile-frame"
         data-frame={frame}
-        className="mt-6 overflow-hidden rounded-[2rem] border border-eos-voltline/25 bg-[#0b101c] shadow-[0_0_80px_rgba(200,255,0,0.08)]"
-        style={{ width: size.w, maxWidth: "100%", height: "min(86dvh, " + size.h + "px)" }}
+        className={cn(
+          "mt-6 overflow-hidden rounded-[2rem] border border-eos-voltline/25 bg-[#0b101c] shadow-[0_0_80px_rgba(200,255,0,0.08)]",
+          embedded ? "mt-0 w-full max-w-[min(100%,340px)]" : "max-w-full"
+        )}
+        style={
+          embedded
+            ? { width: "100%", height: "min(78dvh, 720px)" }
+            : { width: size.w, maxWidth: "100%", height: "min(86dvh, " + size.h + "px)" }
+        }
       >
         <div className="flex h-full flex-col">
           <header className="flex items-center justify-between px-5 pt-5">
@@ -133,12 +150,15 @@ function HomePane({
   copy: ReturnType<typeof useLocale>["mobileApp"]["cockpit"];
   onStart: () => void;
 }) {
+  const live = useLiveDemoTelemetry();
   return (
     <div className="space-y-4">
       <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-eos-telemetry">
         {copy.prime}
       </p>
-      <p className="font-display text-6xl font-extrabold leading-none text-eos-voltline">88</p>
+      <p className="font-display text-6xl font-extrabold leading-none tabular-nums text-eos-voltline">
+        {live.readiness}
+      </p>
       <section>
         <h2 className="font-mono text-[10px] uppercase tracking-wider text-eos-on-surface-muted">
           {copy.means}
@@ -195,11 +215,32 @@ function ActivityPane({
   phase: ActivityPhase;
   setPhase: (p: ActivityPhase) => void;
 }) {
+  const live = useLiveDemoTelemetry();
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    if (phase === "idle" || phase === "ended") setSeconds(0);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== "running") return;
+    const id = window.setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [phase]);
+
+  const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const ss = String(seconds % 60).padStart(2, "0");
+
   return (
     <div className="space-y-4">
-      <p className="font-mono text-3xl text-eos-telemetry">
-        {phase === "idle" ? "00:00" : "05:42"}
+      <p className="font-mono text-3xl tabular-nums text-eos-telemetry">
+        {phase === "idle" ? "00:00" : `${mm}:${ss}`}
       </p>
+      {phase === "running" || phase === "paused" ? (
+        <p className="font-mono text-sm tabular-nums text-eos-voltline">
+          {live.hrBpm} bpm · HRV {live.hrvMs} ms
+        </p>
+      ) : null}
       <p className="text-sm text-eos-on-surface-muted">{copy.gps}</p>
       <div className="flex flex-wrap gap-2">
         {phase === "idle" || phase === "ended" ? (

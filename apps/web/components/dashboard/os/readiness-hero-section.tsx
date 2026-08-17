@@ -89,17 +89,17 @@ export function ReadinessHeroSection({
             })}
           </p>
 
-          <div className="relative mt-6 flex justify-center lg:justify-start">
+          <div className="relative mx-auto mt-6 grid size-[168px] place-items-center lg:mx-0">
             <div
               aria-hidden
-              className="absolute inset-0 m-auto h-[min(40vw,200px)] w-[min(40vw,200px)] max-h-[200px] max-w-[200px] rounded-full bg-[conic-gradient(from_0deg,var(--volt-500),var(--lime-500),var(--volt-500))] opacity-25 motion-safe:animate-spin [animation-duration:12s]"
+              className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,var(--eos-voltline),var(--eos-performance),var(--eos-voltline))] opacity-25 motion-safe:animate-spin [animation-duration:12s]"
             />
             <ReadinessRing
               percent={readiness}
               label={copy.title}
               size={168}
               hero
-              className="relative motion-safe:animate-[pulse_4s_ease-in-out_infinite] shadow-[0_0_60px_rgba(200,255,0,0.15)]"
+              className="relative motion-safe:animate-[pulse_4s_ease-in-out_infinite] shadow-[0_0_60px_color-mix(in_srgb,var(--eos-voltline)_18%,transparent)]"
               data-testid="readiness-hero-ring"
             />
           </div>

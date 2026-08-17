@@ -18,6 +18,19 @@ describe("Elite OS design system", () => {
     expect(screen.getByRole("button", { name: "Start session" })).toBeInTheDocument();
   });
 
+  it("supports danger and loading states", () => {
+    const { rerender } = render(
+      <EliteButton variant="danger">Discard</EliteButton>
+    );
+    expect(screen.getByRole("button", { name: "Discard" })).toBeInTheDocument();
+    rerender(
+      <EliteButton loading aria-label="Saving">
+        Save
+      </EliteButton>
+    );
+    expect(screen.getByRole("button", { name: "Saving" })).toBeDisabled();
+  });
+
   it("renders status chip tones", () => {
     render(<EliteChip tone="telemetry" as="span">Live HRV</EliteChip>);
     expect(screen.getByText("Live HRV")).toBeInTheDocument();

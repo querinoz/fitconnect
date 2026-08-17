@@ -5,9 +5,9 @@ import { LandingPageContent } from "@/components/landing/landing-page-content";
 function HeroPlaceholder() {
   return (
     <header aria-labelledby="fc-hero-title" className="sr-only">
-      <h1 id="fc-hero-title">Find my specialist</h1>
+      <h1 id="fc-hero-title">Elite human performance OS</h1>
       <div id="fc-kinetic" />
-      <div className="fc-headline-line">Find my specialist</div>
+      <div className="fc-headline-line">Elite human performance OS</div>
     </header>
   );
 }
@@ -32,7 +32,7 @@ export default function Home() {
     "@type": "SoftwareApplication",
     name: "FitConnect",
     applicationCategory: "HealthApplication",
-    operatingSystem: "Web, iOS, Android",
+    operatingSystem: "Web, Android",
     offers: { "@type": "Offer", price: "12", priceCurrency: "EUR" }
   };
 

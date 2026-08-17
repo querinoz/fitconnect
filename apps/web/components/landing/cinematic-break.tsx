@@ -68,8 +68,7 @@ export function CinematicBreak({ lineOne, lineTwo, className }: CinematicBreakPr
       const splits = lines.map((el, i) => {
         const split = new SplitText(el, { type: "words", wordsClass: "gsap-word" });
         gsap.from(split.words, {
-          y: 36,
-          opacity: 0,
+          y: 24,
           duration: 0.7,
           stagger: 0.06,
           ease: "power3.out",
@@ -95,7 +94,7 @@ export function CinematicBreak({ lineOne, lineTwo, className }: CinematicBreakPr
       ref={ref}
       aria-hidden
       className={cn(
-        "relative overflow-hidden px-4 py-20 sm:px-6 sm:py-28 md:py-32",
+        "relative overflow-x-clip px-4 py-20 sm:px-6 sm:py-28 md:py-32",
         className
       )}
     >
@@ -116,10 +115,10 @@ export function CinematicBreak({ lineOne, lineTwo, className }: CinematicBreakPr
         />
       </svg>
 
-      <p className="cb-line font-display text-[clamp(2.5rem,10vw,7.5rem)] font-extrabold uppercase leading-[0.92] tracking-[-0.05em] text-eos-on-surface">
+      <p className="cb-line max-w-full break-words font-display text-[clamp(1.75rem,8vw,5.5rem)] font-extrabold uppercase leading-[0.92] tracking-[-0.05em] text-eos-on-surface">
         {lineOne}
       </p>
-      <p className="cb-line mt-2 text-right font-display text-[clamp(2.5rem,10vw,7.5rem)] font-extrabold uppercase leading-[0.92] tracking-[-0.05em] text-eos-voltline">
+      <p className="cb-line mt-2 max-w-full break-words text-right font-display text-[clamp(1.75rem,8vw,5.5rem)] font-extrabold uppercase leading-[0.92] tracking-[-0.05em] text-eos-voltline">
         {lineTwo}
       </p>
     </section>

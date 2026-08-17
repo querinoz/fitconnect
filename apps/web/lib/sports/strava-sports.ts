@@ -143,3 +143,54 @@ export const SPORT_CATEGORIES: {
     sports: ["Golf", "Soccer", "RockClimbing", "Skateboard", "Wheelchair", "InlineSkate"]
   }
 ];
+
+const SPORT_LABELS: Partial<Record<StravaSportType, string>> = {
+  EBikeRide: "E-Bike",
+  EMountainBikeRide: "E-MTB",
+  MountainBikeRide: "MTB",
+  HighIntensityIntervalTraining: "HIIT",
+  StandUpPaddling: "SUP",
+  VirtualRide: "Virtual Ride",
+  VirtualRun: "Virtual Run",
+  VirtualRow: "Virtual Row",
+  WeightTraining: "Weights",
+  TrailRun: "Trail Run",
+  AlpineSki: "Alpine Ski",
+  BackcountrySki: "Backcountry",
+  NordicSki: "Nordic Ski",
+  TableTennis: "Table Tennis",
+  RockClimbing: "Climbing",
+  InlineSkate: "Inline Skate",
+  IceSkate: "Ice Skate",
+  GravelRide: "Gravel",
+  StairStepper: "Stepper",
+  RollerSki: "Roller Ski"
+};
+
+/** Human label for a Strava camelCase sport id — never overflow a tile with the raw id. */
+export function formatStravaSportLabel(sport: string): string {
+  const mapped = SPORT_LABELS[sport as StravaSportType];
+  if (mapped) return mapped;
+  return sport
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2");
+}
+
+/** Short SYS.* code for telemetry labels (MTB, HIIT, RIDE). */
+export function sportSysCode(sport: string): string {
+  const mapped = SPORT_LABELS[sport as StravaSportType];
+  if (mapped) {
+    const compact = mapped.replace(/[\s-]/g, "").toUpperCase();
+    if (compact.length <= 8) return compact;
+  }
+  const caps = sport.replace(/[a-z]+/g, "");
+  if (caps.length >= 2) return caps.slice(0, 6);
+  return sport.slice(0, 6).toUpperCase();
+}
+
+/** Deterministic LOCAL_DEMO volume — same on server and client. */
+export function demoSportVolume(sport: string): number {
+  let h = 0;
+  for (let i = 0; i < sport.length; i++) h = (h + sport.charCodeAt(i) * 17) % 997;
+  return 100 + (h % 900);
+}

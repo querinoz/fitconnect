@@ -110,10 +110,75 @@ export const pt = {
       togetherCta: "explorar community",
       footerHint: "pronto quando tu estiveres",
       footerCta: "começar grátis"
+    },
+    map: {
+      eyebrow: "Mapa ao vivo",
+      title: "O teu mundo.",
+      titleAccent: "Em movimento.",
+      body: "Os tiles OpenFreeMap carregam em tempo real. Rotas e o atleta em movimento são LOCAL_DEMO — não GPS de hardware até ligares o Strava.",
+      locate: "A minha posição",
+      you: "Tu"
+    },
+    sportsHub: {
+      eyebrow: "Sports hub",
+      title: "Cada desporto.",
+      titleAccent: "Uma plataforma.",
+      body: "{count}+ tipos de atividade Strava — filtra stats, coaches e rotas pelo que realmente treinas.",
+      logged: "atividades",
+      today: "hoje",
+      demo: "LOCAL_DEMO",
+      types: "tipos",
+      families: "famílias",
+      live: "sinal demo",
+      all: "Tudo",
+      cycling: "Ciclismo",
+      running: "Corrida",
+      swimming: "Natação",
+      winter: "Inverno",
+      water: "Água",
+      strength: "Força",
+      mind: "Mente",
+      racket: "Raquete",
+      other: "Outros"
     }
   },
   landingEditorial: {
-    gate: { initializing: "A INICIALIZAR FITCONNECT" },
+    gate: {
+      initializing: "A INICIALIZAR O SISTEMA DE PERFORMANCE",
+      brand: "FITCONNECT",
+      osLabel: "ELITE OS",
+      systemReady: "SISTEMA PRONTO"
+    },
+    problem: {
+      eyebrow: "SYS.NOISE",
+      title: "Fitness fragmentado não é um sistema operativo.",
+      body: "HRV numa app. Rotas noutra. Notas do coach no chat. Prontidão adivinhada. A FitConnect junta atleta, coach e telemetria num único Elite OS.",
+      resolve: "Um sistema. Um sinal."
+    },
+    ecosystem: {
+      eyebrow: "MATRIZ DE DISPOSITIVOS",
+      title: "Um OS em várias superfícies.",
+      subtitle: "As afirmações correspondem ao que este repositório realmente envia. Sem emparelhamento inventado.",
+      android: "Android",
+      androidStatus: "READY · LOCAL_DEMO",
+      web: "Web app",
+      webStatus: "READY",
+      wear: "Wear OS",
+      wearStatus: "PREVIEW · LOCAL_DEMO",
+      watchos: "watchOS",
+      watchosStatus: "COMING SOON",
+      xiaomi: "Xiaomi HyperOS",
+      xiaomiStatus: "UNSUPPORTED"
+    },
+    productStage: {
+      titleLine1: "O mesmo OS.",
+      titleLine2: "Preview real.",
+      subtitle:
+        "Os tabs do atleta espelham o Android: Home, Discover, Activity, Community, Profile. A telemetria é LOCAL_DEMO, não GPS ao vivo.",
+      athlete: "Athlete OS",
+      coach: "Coach OS",
+      roster: "Prontidão do plantel · LOCAL_DEMO"
+    },
     hero: {
       badge: "INTRO GRÁTIS 15 MIN · €12/MÊS",
       scroll: "↓ SCROLL",
@@ -128,22 +193,27 @@ export const pt = {
       navOverview: "VISÃO DO OS",
       navTelemetry: "TELEMETRIA",
       navManifesto: "MANIFESTO",
-      navInitialize: "INICIAR",
-      headlineLine1: "Treina com",
-      headlineLine2: "dados ao vivo.",
+      navInitialize: "ENTRAR NO ELITE OS",
+      navEcosystem: "ECOSSISTEMA",
+      navMenu: "Menu",
+      navClose: "Fechar",
+      osLabel: "ELITE OS",
+      demoBadge: "LOCAL DEMO",
+      headlineLine1: "OS de",
+      headlineLine2: "performance elite.",
       subtitle:
-        "A FitConnect liga coaches especialistas verificados a prontidão em tempo real, telemetria wearable e feedback de sessão — cada decisão de treino tem um sinal por trás.",
-      ctaPrimary: "Encontrar coach",
-      ctaSecondary: "Ver o OS",
+        "A FitConnect é o sistema operativo para atletas e coaches: prontidão, carga, booking e inteligência de sessão numa Elite Surface.",
+      ctaPrimary: "Entrar no Elite OS",
+      ctaSecondary: "Explorar sistema",
       statCoaches: "12.418",
       statCoachesLabel: "coaches verificados",
       statRating: "4,94",
       statRatingLabel: "avaliação de atletas",
       statRejected: "62%",
       statRejectedLabel: "candidatos rejeitados",
-      liveSession: "Sessão ao vivo",
+      liveSession: "Pré-visualização de sessão",
       liveSessionTitle: "Recalibração de limiar",
-      liveBadge: "Ao vivo",
+      liveBadge: "LOCAL DEMO",
       telemetryHrv: "HRV",
       telemetryLoad: "Carga",
       telemetrySleep: "Sono",
@@ -193,7 +263,7 @@ export const pt = {
       block3: {
         label: "INTEGRAÇÃO COMPLETA",
         title: "O teu histórico já está aqui.",
-        body: "Sync automático com Strava, Garmin, Apple Health e Whoop. Todos os dados numa vista unificada para ti e o teu coach."
+        body: "O connect Strava está implementado. Garmin, Apple Health e Whoop ficam PREVIEW até esses providers estarem configurados — não são afirmados como live aqui."
       }
     },
     trust: {
@@ -213,12 +283,12 @@ export const pt = {
       dragHint: "Arrasta para explorar coaches"
     },
     finalCta: {
-      eyebrow: "COMEÇA HOJE",
-      headline: "Encontra o teu coach.",
-      subheadline: "Intro grátis. Sem compromisso.",
-      primary: "Encontrar Coach →",
-      secondary: "Ver Demo Live",
-      footer: "4.94★ · 27k avaliações · Cancela quando quiseres"
+      eyebrow: "ELITE OS",
+      headline: "Arranca o teu sistema de performance.",
+      subheadline: "Atleta e coach na mesma superfície. Dados demo até configurares produção.",
+      primary: "Entrar no Elite OS",
+      secondary: "Abrir demo de atleta",
+      footer: "Android · Web · Wear OS preview · watchOS em breve"
     },
     navPill: {
       demo: "Demo",
@@ -722,7 +792,8 @@ export const pt = {
     readiness_ring: {
       title: "Prontidão",
       subtitle: "HRV · sono · carga",
-      viewDetails: "Ver detalhes"
+      viewDetails: "Ver detalhes",
+      howItWorks: "Como funciona"
     },
     map: {
       title: "Mapa de atividade",
@@ -1491,13 +1562,13 @@ export const pt = {
     }
   ],
   meta: {
-    title: "FitConnect — Treina com especialistas de elite",
+    title: "FitConnect — Elite OS",
     description:
-      "Marketplace de coaches verificados com IA Readiness, sync Strava e sessões live. Yoga, surf, escalada, MMA e mais — presencial ou online.",
-    ogTitle: "FitConnect — Treina com especialistas de elite",
+      "Sistema operativo de performance para atletas e coaches. Prontidão, carga, booking e inteligência de sessão. Android e web. LOCAL_DEMO até haver credenciais de produção.",
+    ogTitle: "FitConnect — Elite OS",
     ogDescription:
-      "Descobre, reserva e treina com os melhores coaches desportivos do mundo.",
+      "Um sistema operativo para atletas e coaches: prontidão, preview de telemetria e coaching na Elite Surface.",
     twitterDescription:
-      "Coaches de elite para cada desporto. IA Readiness, sync Strava e intro grátis de 15 min."
+      "Elite OS para atletas e coaches. Prontidão, carga e coaching numa superfície. LOCAL_DEMO até a produção estar configurada."
   }
 };

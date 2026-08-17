@@ -39,9 +39,9 @@ export function useGsapReveal(
       const targets = root.querySelectorAll(selector);
       if (!targets.length) return;
 
+      // Transform only — never park copy at opacity 0 if ScrollTrigger misses.
       gsap.from(targets, {
         y,
-        opacity: 0,
         duration: 0.85,
         stagger,
         delay,

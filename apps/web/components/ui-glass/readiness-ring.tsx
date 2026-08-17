@@ -47,19 +47,23 @@ export function ReadinessRing({
     >
       <div
         className={cn(
-          "absolute rounded-full bg-ink-900 grid place-items-center overflow-hidden",
+          "absolute flex items-center justify-center overflow-hidden rounded-full bg-ink-900",
           inset
         )}
       >
-        <span className={cn(percentClass, "font-extrabold text-ink-100 leading-none")}>{p}</span>
-        <span
-          className={cn(
-            labelClass,
-            "uppercase tracking-[0.18em] text-ink-400 mt-1 text-center px-1"
-          )}
-        >
-          {label}
-        </span>
+        <div className="flex max-w-full flex-col items-center justify-center px-2">
+          <span className={cn(percentClass, "font-extrabold leading-none text-ink-100 tabular-nums")}>
+            {p}
+          </span>
+          <span
+            className={cn(
+              labelClass,
+              "mt-1 max-w-full truncate text-center uppercase tracking-[0.18em] text-ink-400"
+            )}
+          >
+            {label}
+          </span>
+        </div>
       </div>
     </div>
   );

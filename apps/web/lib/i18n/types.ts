@@ -144,9 +144,68 @@ export type Dict = {
       footerHint: string;
       footerCta: string;
     };
+    map: {
+      eyebrow: string;
+      title: string;
+      titleAccent: string;
+      body: string;
+      locate: string;
+      you: string;
+    };
+    sportsHub: {
+      eyebrow: string;
+      title: string;
+      titleAccent: string;
+      body: string;
+      logged: string;
+      today: string;
+      demo: string;
+      types: string;
+      families: string;
+      live: string;
+      all: string;
+      cycling: string;
+      running: string;
+      swimming: string;
+      winter: string;
+      water: string;
+      strength: string;
+      mind: string;
+      racket: string;
+      other: string;
+    };
   };
   landingEditorial: {
-    gate: { initializing: string };
+    gate: { initializing: string; brand: string; osLabel: string; systemReady: string };
+    problem: {
+      eyebrow: string;
+      title: string;
+      body: string;
+      resolve: string;
+    };
+    ecosystem: {
+      eyebrow: string;
+      title: string;
+      subtitle: string;
+      android: string;
+      androidStatus: string;
+      web: string;
+      webStatus: string;
+      wear: string;
+      wearStatus: string;
+      watchos: string;
+      watchosStatus: string;
+      xiaomi: string;
+      xiaomiStatus: string;
+    };
+    productStage: {
+      titleLine1: string;
+      titleLine2: string;
+      subtitle: string;
+      athlete: string;
+      coach: string;
+      roster: string;
+    };
     hero: {
       badge: string;
       scroll: string;
@@ -162,6 +221,11 @@ export type Dict = {
       navTelemetry: string;
       navManifesto: string;
       navInitialize: string;
+      navEcosystem: string;
+      navMenu: string;
+      navClose: string;
+      osLabel: string;
+      demoBadge: string;
       headlineLine1: string;
       headlineLine2: string;
       subtitle: string;
@@ -593,6 +657,7 @@ export type Dict = {
       title: string;
       subtitle: string;
       viewDetails: string;
+      howItWorks: string;
     };
     map: {
       title: string;
