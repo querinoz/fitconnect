@@ -63,3 +63,46 @@ export const GLASS_TOKENS = {
   blurL4: 12,
   blurL5: 20,
 } as const;
+
+/**
+ * Atmosphere — theme chrome, not a product feature.
+ * Honeycomb intensities: off | subtle only. No full. No confetti.
+ */
+export const ATMOSPHERE_TOKENS = {
+  honeycombSubtle: 0.06,
+  honeycombEmpty: 0.16,
+  honeycombParallax: 0.04,
+  honeycombPulse: 0.12,
+  honeycombCellRadius: 28,
+  honeycombDriftMs: 32000,
+  honeycombMaxCells: 120,
+  honeycombPulseCells: 3,
+  honeycombCoverage: 0.58,
+  honeycombBudgetMs: 1.5,
+  honeycombSessionScale: 0.3,
+} as const;
+
+/**
+ * Instrument ring — fractions of diameter D, plus hero sizes (dp).
+ * Thicknesses must stay relative so 224dp and 160dp rings share weight.
+ */
+export const INSTRUMENT_TOKENS = {
+  bezel: 0.085,
+  groove: 0.045,
+  halo: 0.065,
+  stroke: 0.031,
+  specular: 0.027,
+  trackRadius: 0.405,
+  haloAlpha: 0.18,
+  specularAlpha: 0.05,
+  heroDp: 224,
+  profileDp: 160,
+  inlineDp: 88,
+  loadTimeoutMs: 8000,
+  headerDp: 52,
+  hexatarHeaderDp: 32,
+  hexatarProfileDp: 104,
+  hexatarFeedDp: 26,
+  hexatarBadgeDp: 14,
+  logoMarkDp: 24,
+} as const;

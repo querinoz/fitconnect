@@ -12,7 +12,8 @@ export const TYPE_TOKENS = {
   body: { size: 15, lineHeight: 22, weight: 400, tracking: 0, family: "body" },
   caption: { size: 12, lineHeight: 16, weight: 500, tracking: 0.2, family: "body" },
   overline: { size: 11, lineHeight: 14, weight: 600, tracking: 1.2, family: "body" },
-  metric: { size: 28, lineHeight: 32, weight: 600, tracking: -0.4, family: "mono" },
+  metric: { size: 28, lineHeight: 32, weight: 300, tracking: -0.4, family: "mono" },
+  metricHero: { size: 52, lineHeight: 52, weight: 300, tracking: -1.2, family: "body" },
   monospace: { size: 13, lineHeight: 18, weight: 500, tracking: 0, family: "mono" },
 } as const;
 

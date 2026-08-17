@@ -204,6 +204,7 @@ fun CommunityScreen() {
             val media = post.media.firstOrNull()
             Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
                 EliteFeedPost(
+                authorId = post.authorId,
                 authorName = author?.displayName ?: post.authorId,
                 authorInitials = initialsOf(author?.displayName ?: post.authorId),
                 avatarName = author?.avatarUri,

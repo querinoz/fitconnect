@@ -67,6 +67,7 @@ fun EliteFeedPost(
     body: String,
     onReact: (String) -> Unit,
     modifier: Modifier = Modifier,
+    authorId: String? = null,
     avatarName: String? = null,
     imageName: String? = null,
     videoRawName: String? = null,
@@ -83,7 +84,15 @@ fun EliteFeedPost(
             horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            EliteAvatar(initials = authorInitials, imageName = avatarName, size = 40)
+            if (authorId != null) {
+                EliteHexatar(
+                    userId = authorId,
+                    contentDescription = authorName,
+                    diameter = EliteHexatarFeed,
+                )
+            } else {
+                EliteAvatar(initials = authorInitials, imageName = avatarName, size = 40)
+            }
             Column(modifier = Modifier.weight(1f)) {
                 Text(authorName, style = MaterialTheme.typography.titleMedium)
                 Text(

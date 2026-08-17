@@ -12,6 +12,8 @@ export {
   OPACITY_TOKENS,
   BORDER_TOKENS,
   GLASS_TOKENS,
+  ATMOSPHERE_TOKENS,
+  INSTRUMENT_TOKENS,
 } from "./layout";
 export { TYPE_TOKENS, type TypeToken } from "./typography";
 export { SEMANTIC_TOKENS, CHART_TOKENS, GRADIENT_TOKENS } from "./semantic";
@@ -32,6 +34,23 @@ export const COLOR_TOKENS = {
   surfaceContainer: "#1f1f28",
   surfaceContainerHigh: "#2a2933",
   surfaceContainerHighest: "#35343e",
+  instrumentFace: "#0a0e15",
+  instrumentBezel: "#161a22",
+  instrumentGroove: "#05070b",
+  instrumentTrack: "#1a2028",
+  onVolt: "#0f1400",
+  instrumentMuted: "#8a93a0",
+
+  // Progression only — never on HRV / strain / ring. ATIVO = telemetry, ELITE = voltline, FORTE = recovery.
+  patentSteel: "#7a8899",
+  onPatentSteel: "#14191f",
+  patentMint: "#2fe3a0",
+  onPatentMint: "#04241a",
+  onPatentAmber: "#241700",
+  patentLegend: "#b44bff",
+  onPatentLegend: "#1b0729",
+  onPatentCyan: "#04222b",
+  patentEmber: "#ff8a3d",
 
   // ── Brand: Volt (primary CTA / athlete identity) ──────────────────────────
   voltline: "#c8ff00",

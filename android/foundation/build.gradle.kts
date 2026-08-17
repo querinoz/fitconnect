@@ -24,7 +24,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.process)
-    implementation(libs.androidx.datastore.preferences)
+    api(libs.androidx.datastore.preferences)
     implementation(libs.androidx.security.crypto)
     implementation(libs.okhttp)
     implementation(libs.kotlinx.coroutines.android)

@@ -13,6 +13,7 @@ import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.designui.components.EliteBadge
 import com.fitconnect.android.designui.components.EliteCard
+import com.fitconnect.android.designui.components.EliteEmptyState
 import com.fitconnect.android.designui.components.EliteMetricCard
 import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.designui.components.EliteSysLabel
@@ -58,13 +59,22 @@ fun SleepScreen() {
         testTag = "athlete_sleep",
     ) {
         item { EliteBadge(text = score.kind.name) }
+        if (!score.available) {
+            item {
+                EliteEmptyState(
+                    title = "Your first night fills this chart.",
+                    body = "Sleep stages are not fabricated. Connect Health Connect or a FitConnect Watch.",
+                    actionLabel = null,
+                    onAction = null,
+                )
+            }
+        }
         item {
             EliteCard {
                 EliteStack {
                     EliteSysLabel("SLEEP SCORE")
                     if (!score.available) {
-                        Text("DATA SOURCE REQUIRED", style = MaterialTheme.typography.titleLarge)
-                        Text("Connect Health Connect or a FitConnect Watch to populate stages.")
+                        Text(sourceNote, style = MaterialTheme.typography.bodySmall)
                     } else {
                         Text("${score.score}", style = MaterialTheme.typography.displaySmall)
                         EliteMetricCard(label = "Duration", value = "${score.durationMin} min")

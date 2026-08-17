@@ -13,6 +13,11 @@ object EliteSurfaceColors {
     const val CYAN: Long = 0xFF00BFFFL
     const val ELEVATED: Long = 0xFF151B2DL
     const val FLOOR: Long = 0xFF070B14L
+    const val INSTRUMENT_BEZEL: Long = 0xFF161A22L
+    const val INSTRUMENT_FACE: Long = 0xFF0A0E15L
+    const val INSTRUMENT_GROOVE: Long = 0xFF05070BL
+    const val INSTRUMENT_MUTED: Long = 0xFF8A93A0L
+    const val INSTRUMENT_TRACK: Long = 0xFF1A2028L
     const val IRIS: Long = 0xFF6C63FFL
     const val IRIS_GLOW: Long = 0x596C63FFL
     const val IRIS_SOFT: Long = 0xFFC4C0FFL
@@ -21,9 +26,19 @@ object EliteSurfaceColors {
     const val LIGHT_ON_SURFACE_MUTED: Long = 0xFF111827L
     const val LIGHT_SURFACE: Long = 0xFFF3F1F8L
     const val LIGHT_SURFACE_CONTAINER: Long = 0xFFD8D4E6L
+    const val ON_PATENT_AMBER: Long = 0xFF241700L
+    const val ON_PATENT_CYAN: Long = 0xFF04222BL
+    const val ON_PATENT_LEGEND: Long = 0xFF1B0729L
+    const val ON_PATENT_MINT: Long = 0xFF04241AL
+    const val ON_PATENT_STEEL: Long = 0xFF14191FL
     const val ON_SURFACE: Long = 0xFFE4E1EEL
     const val ON_SURFACE_MUTED: Long = 0xFFC7C4D8L
     const val ON_SURFACE_SUBTLE: Long = 0x85E4E1EEL
+    const val ON_VOLT: Long = 0xFF0F1400L
+    const val PATENT_EMBER: Long = 0xFFFF8A3DL
+    const val PATENT_LEGEND: Long = 0xFFB44BFFL
+    const val PATENT_MINT: Long = 0xFF2FE3A0L
+    const val PATENT_STEEL: Long = 0xFF7A8899L
     const val PERFORMANCE: Long = 0xFF00E090L
     const val RECOVERY: Long = 0xFFFFB020L
     const val SURFACE: Long = 0xFF13121BL
@@ -100,6 +115,41 @@ object EliteSurfaceGlass {
     const val BLUR_L_5: Int = 20
 }
 
+object EliteSurfaceAtmosphere {
+    const val HONEYCOMB_SUBTLE: Float = 0.06f
+    const val HONEYCOMB_EMPTY: Float = 0.16f
+    const val HONEYCOMB_PARALLAX: Float = 0.04f
+    const val HONEYCOMB_PULSE: Float = 0.12f
+    const val HONEYCOMB_CELL_RADIUS: Int = 28
+    const val HONEYCOMB_DRIFT_MS: Int = 32000
+    const val HONEYCOMB_MAX_CELLS: Int = 120
+    const val HONEYCOMB_PULSE_CELLS: Int = 3
+    const val HONEYCOMB_COVERAGE: Float = 0.58f
+    const val HONEYCOMB_BUDGET_MS: Float = 1.5f
+    const val HONEYCOMB_SESSION_SCALE: Float = 0.3f
+}
+
+object EliteSurfaceInstrument {
+    const val BEZEL: Float = 0.085f
+    const val GROOVE: Float = 0.045f
+    const val HALO: Float = 0.065f
+    const val STROKE: Float = 0.031f
+    const val SPECULAR: Float = 0.027f
+    const val TRACK_RADIUS: Float = 0.405f
+    const val HALO_ALPHA: Float = 0.18f
+    const val SPECULAR_ALPHA: Float = 0.05f
+    const val HERO_DP: Int = 224
+    const val PROFILE_DP: Int = 160
+    const val INLINE_DP: Int = 88
+    const val LOAD_TIMEOUT_MS: Int = 8000
+    const val HEADER_DP: Int = 52
+    const val HEXATAR_HEADER_DP: Int = 32
+    const val HEXATAR_PROFILE_DP: Int = 104
+    const val HEXATAR_FEED_DP: Int = 26
+    const val HEXATAR_BADGE_DP: Int = 14
+    const val LOGO_MARK_DP: Int = 24
+}
+
 object EliteSurfaceMotion {
     const val MICRO_MS: Int = 150
     const val UI_MS: Int = 220
@@ -150,9 +200,14 @@ object EliteSurfaceType {
     const val OVERLINE_FAMILY: String = "body"
     const val METRIC_SIZE_SP: Float = 28f
     const val METRIC_LINE_HEIGHT_SP: Float = 32f
-    const val METRIC_WEIGHT: Int = 600
+    const val METRIC_WEIGHT: Int = 300
     const val METRIC_TRACKING: Float = -0.4f
     const val METRIC_FAMILY: String = "mono"
+    const val METRIC_HERO_SIZE_SP: Float = 52f
+    const val METRIC_HERO_LINE_HEIGHT_SP: Float = 52f
+    const val METRIC_HERO_WEIGHT: Int = 300
+    const val METRIC_HERO_TRACKING: Float = -1.2f
+    const val METRIC_HERO_FAMILY: String = "body"
     const val MONOSPACE_SIZE_SP: Float = 13f
     const val MONOSPACE_LINE_HEIGHT_SP: Float = 18f
     const val MONOSPACE_WEIGHT: Int = 500

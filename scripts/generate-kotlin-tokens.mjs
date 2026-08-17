@@ -172,6 +172,8 @@ function generateKotlin() {
   const opacity = parseSimpleObject(layoutTs, "OPACITY_TOKENS");
   const border = parseSimpleObject(layoutTs, "BORDER_TOKENS");
   const glass = parseSimpleObject(layoutTs, "GLASS_TOKENS");
+  const atmosphere = parseSimpleObject(layoutTs, "ATMOSPHERE_TOKENS");
+  const instrument = parseSimpleObject(layoutTs, "INSTRUMENT_TOKENS");
   const type = parseTypeTokens(typeTs);
   const semantic = parseSimpleObject(semanticTs, "SEMANTIC_TOKENS");
   const charts = parseSimpleObject(semanticTs, "CHART_TOKENS");
@@ -217,6 +219,22 @@ function generateKotlin() {
     "",
     "object EliteSurfaceGlass {",
     ...glass.map(([k, v]) =>
+      Number.isInteger(v)
+        ? `    const val ${toConstName(k)}: Int = ${Math.round(v)}`
+        : `    const val ${toConstName(k)}: Float = ${v}f`,
+    ),
+    "}",
+    "",
+    "object EliteSurfaceAtmosphere {",
+    ...atmosphere.map(([k, v]) =>
+      Number.isInteger(v)
+        ? `    const val ${toConstName(k)}: Int = ${Math.round(v)}`
+        : `    const val ${toConstName(k)}: Float = ${v}f`,
+    ),
+    "}",
+    "",
+    "object EliteSurfaceInstrument {",
+    ...instrument.map(([k, v]) =>
       Number.isInteger(v)
         ? `    const val ${toConstName(k)}: Int = ${Math.round(v)}`
         : `    const val ${toConstName(k)}: Float = ${v}f`,

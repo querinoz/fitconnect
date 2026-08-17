@@ -5,6 +5,7 @@ import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.foundation.storage.KeyValueStore
 import com.fitconnect.android.foundation.storage.PreferenceKeys
 import com.fitconnect.android.foundation.theme.AccentPreset
+import com.fitconnect.android.foundation.theme.HoneycombIntensity
 import com.fitconnect.android.foundation.theme.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,5 +66,17 @@ class ThemeSettingsTest {
         settings.setAccent(AccentPreset.VOLT_400)
         assertEquals(AccentPreset.VOLT_400, settings.accent())
         assertEquals(AccentPreset.VOLT_400.name, store.get(PreferenceKeys.ACCENT))
+    }
+
+    @Test
+    fun honeycombDefaultsToSubtleWithoutFull() = runBlocking {
+        val settings = DefaultThemeSettings(store)
+        assertEquals(HoneycombIntensity.SUBTLE, settings.honeycomb())
+        assertEquals(2, HoneycombIntensity.entries.size)
+        settings.setHoneycomb(HoneycombIntensity.OFF)
+        assertEquals(HoneycombIntensity.OFF, settings.honeycomb())
+        assertEquals(HoneycombIntensity.OFF.name, store.get(PreferenceKeys.HONEYCOMB))
+        store.set(PreferenceKeys.HONEYCOMB, "FULL")
+        assertEquals(HoneycombIntensity.SUBTLE, settings.honeycomb())
     }
 }

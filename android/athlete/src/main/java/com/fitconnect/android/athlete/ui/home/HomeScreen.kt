@@ -47,7 +47,6 @@ import com.fitconnect.android.designui.components.ElitePrimeInstrument
 import com.fitconnect.android.designui.components.EliteSectionHeader
 import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.designui.components.EliteSysLabel
-import com.fitconnect.android.designui.components.EliteWordmarkHeader
 import com.fitconnect.android.designui.components.eliteDayStrain
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.toColor
@@ -119,14 +118,6 @@ fun HomeScreen(
             else -> "STRAIN"
         }
         val strain = eliteDayStrain(home.readiness.score)
-        val initials = home.greeting
-            .substringAfterLast(",")
-            .trim()
-            .split(" ")
-            .mapNotNull { it.firstOrNull()?.uppercaseChar()?.toString() }
-            .take(2)
-            .joinToString("")
-            .ifBlank { "FC" }
         AthleteScreenScaffold(
             title = home.greeting,
             subtitle = "Performance cockpit · ${DemoPersona.MODE_LABEL}",
@@ -136,23 +127,16 @@ fun HomeScreen(
             floating = { EliteAiFab(onClick = onOpenAi) },
         ) {
             item {
-                EliteWordmarkHeader(
-                    initials = initials,
-                    showWordmark = false,
-                    onAvatarClick = onOpenProfile,
-                    onSensorsClick = onOpenDaily,
-                )
-            }
-            item {
                 Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
                     EliteSysLabel("ATHLETE OS · TODAY")
-                    Text(home.greeting, style = MaterialTheme.typography.titleLarge)
+                    Text(home.greeting, style = MaterialTheme.typography.headlineMedium)
                     EliteBadge(text = DemoPersona.MODE_LABEL)
                 }
             }
             item {
                 ElitePrimeInstrument(
                     score = home.readiness.recoveryScore,
+                    showCaption = false,
                 )
             }
             item {
@@ -230,10 +214,18 @@ fun HomeScreen(
                 }
             }
             if (worldPulse.isNotEmpty()) {
-                item { EliteSectionHeader(title = "World signal", overline = "LOCAL_DEMO") }
+                item {
+                    EliteSectionHeader(
+                        title = "World signal",
+                        overline = "LOCAL_DEMO",
+                        actionLabel = "SEE ALL",
+                        onAction = onOpenCommunity,
+                    )
+                }
                 items(worldPulse, key = { it.id }) { post ->
                     val media = post.media.firstOrNull()
                     EliteFeedPost(
+                        authorId = post.authorId,
                         authorName = worldNames[post.authorId] ?: post.authorId,
                         authorInitials = (worldNames[post.authorId] ?: post.authorId)
                             .split(" ")
@@ -257,13 +249,6 @@ fun HomeScreen(
                         }.orEmpty(),
                         compact = true,
                         onReact = {},
-                        onClick = onOpenCommunity,
-                    )
-                }
-                item {
-                    EliteButton(
-                        label = "Open community",
-                        variant = EliteButtonVariant.Secondary,
                         onClick = onOpenCommunity,
                     )
                 }

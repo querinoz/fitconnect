@@ -3,11 +3,9 @@ package com.fitconnect.android.designui.components
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,8 +21,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,11 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -54,7 +48,6 @@ import com.fitconnect.android.designui.theme.EliteMonoTextStyle
 import com.fitconnect.android.designui.theme.EliteOpacity
 import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
-import com.fitconnect.android.designui.theme.eliteTrackColor
 import com.fitconnect.android.designui.theme.reduceMotionEnabled
 import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.android.foundation.a11y.Accessibility
@@ -130,9 +123,9 @@ fun EliteWordmarkHeader(
         }
         EliteIconButton(onClick = onSensorsClick, contentDescription = "Wearable sync") {
             Icon(
-                imageVector = Icons.Filled.Settings,
+                imageVector = Icons.Filled.MonitorHeart,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = MaterialTheme.colorScheme.primary,
             )
         }
     }
@@ -148,125 +141,62 @@ fun ElitePrimeInstrument(
     status: String = elitePrimeStatus(score),
     title: String = elitePeakTitle(score),
     subtitle: String? = null,
-    size: Dp = 220.dp,
+    size: Dp = EliteRingHero,
+    overline: String = "PRIME RECOVERY",
+    showCaption: Boolean = true,
 ) {
     val clamped = score.coerceIn(0, 100)
-    val reduceMotion = reduceMotionEnabled()
-    val progress by animateFloatAsState(
-        targetValue = clamped / 100f,
-        animationSpec = if (reduceMotion) tween(0) else tween(900),
-        label = "prime_instrument",
-    )
     val volt = MaterialTheme.colorScheme.primary
-    val track = eliteTrackColor()
-    val carbon = EliteSurfaceColors.CARBON.toColor()
-    val elevated = EliteSurfaceColors.ELEVATED.toColor()
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .testTag("prime_recovery_block")
-            .semantics { contentDescription = "Prime Recovery $clamped percent $status" },
+            .testTag("prime_recovery_block"),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(
-            modifier = Modifier.size(size),
-            contentAlignment = Alignment.Center,
+        EliteInstrumentRing(
+            progress = clamped / 100f,
+            diameter = size,
+            contentDescription = "Recovery $clamped percent, status $status",
         ) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(volt.copy(alpha = 0.12f), carbon.copy(alpha = 0f)),
-                        ),
-                    ),
-            )
-            Box(
-                modifier = Modifier
-                    .size(size)
-                    .clip(CircleShape)
-                    .background(elevated.copy(alpha = 0.42f))
-                    .border(
-                        EliteBorder.Hairline,
-                        MaterialTheme.colorScheme.outline.copy(alpha = EliteOpacity.Border),
-                        CircleShape,
-                    ),
-            )
-            Canvas(modifier = Modifier.size(size)) {
-                val strokePx = 14.dp.toPx()
-                val diameter = this.size.minDimension - strokePx
-                val topLeft = Offset(strokePx / 2f, strokePx / 2f)
-                val arcSize = Size(diameter, diameter)
-                drawArc(
-                    color = track,
-                    startAngle = -90f,
-                    sweepAngle = 360f,
-                    useCenter = false,
-                    topLeft = topLeft,
-                    size = arcSize,
-                    style = Stroke(width = strokePx * 0.7f, cap = StrokeCap.Round),
-                )
-                drawArc(
-                    color = volt.copy(alpha = 0.28f),
-                    startAngle = -90f,
-                    sweepAngle = 360f * progress,
-                    useCenter = false,
-                    topLeft = topLeft,
-                    size = arcSize,
-                    style = Stroke(width = strokePx + 8.dp.toPx(), cap = StrokeCap.Round),
-                )
-                drawArc(
-                    color = volt,
-                    startAngle = -90f,
-                    sweepAngle = 360f * progress,
-                    useCenter = false,
-                    topLeft = topLeft,
-                    size = arcSize,
-                    style = Stroke(width = strokePx, cap = StrokeCap.Round),
-                )
-            }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Row(verticalAlignment = Alignment.Bottom) {
-                    Text(
-                        text = "$clamped",
-                        style = EliteMetricTextStyle.copy(
-                            fontSize = 52.sp,
-                            lineHeight = 52.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = (-1.2).sp,
-                        ),
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                    Text(
-                        text = "%",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = EliteSpace.Xs),
-                    )
-                }
+                Text(
+                    text = overline,
+                    style = EliteMonoTextStyle.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.6.sp,
+                    ),
+                    color = volt,
+                )
+                Text(
+                    text = "$clamped",
+                    style = com.fitconnect.android.designui.theme.EliteMetricHeroTextStyle,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
                 Text(
                     text = status,
                     style = EliteMonoTextStyle.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 2.sp,
                     ),
-                    color = volt,
+                    color = volt.copy(alpha = EliteOpacity.Subtle),
                 )
             }
         }
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(top = EliteSpace.Md),
-        )
-        if (subtitle != null) {
+        if (showCaption) {
             Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = EliteSpace.Xs),
+                text = title,
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(top = EliteSpace.Md),
             )
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = EliteSpace.Xs),
+                )
+            }
         }
     }
 }
@@ -368,7 +298,8 @@ fun EliteAiDirective(
     action: String,
     onAction: () -> Unit,
     modifier: Modifier = Modifier,
-    title: String = "AI Coach Directive",
+    title: String = "AI DIRECTIVE",
+    actionVariant: EliteButtonVariant = EliteButtonVariant.Secondary,
 ) {
     val volt = MaterialTheme.colorScheme.primary
     EliteBentoCard(modifier = modifier.testTag("elite_ai_directive")) {
@@ -380,7 +311,7 @@ fun EliteAiDirective(
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,
                     contentDescription = null,
-                    tint = volt,
+                    tint = EliteSurfaceColors.TELEMETRY.toColor(),
                     modifier = Modifier.size(16.dp),
                 )
                 EliteSysLabel(title)
@@ -391,8 +322,9 @@ fun EliteAiDirective(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             EliteButton(
-                label = action.uppercase(),
+                label = action,
                 onClick = onAction,
+                variant = actionVariant,
                 modifier = Modifier.fillMaxWidth(),
             )
         }

@@ -12,6 +12,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
@@ -24,6 +26,7 @@ import com.fitconnect.android.designui.components.EliteSwitch
 import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.foundation.i18n.AppLocale
 import com.fitconnect.android.foundation.i18n.LocaleApplier
+import com.fitconnect.android.foundation.theme.HoneycombIntensity
 import com.fitconnect.android.foundation.theme.ThemeMode
 import com.fitconnect.ascend.domain.AscendPrefs
 import kotlinx.coroutines.launch
@@ -38,6 +41,8 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val themeMode by container.platform.themeSettings.observe().collectAsState(initial = ThemeMode.SYSTEM)
+    val honeycomb by container.platform.themeSettings.observeHoneycomb()
+        .collectAsState(initial = HoneycombIntensity.SUBTLE)
     val locale by container.platform.localeManager.observe().collectAsState(initial = AppLocale.EN)
     var prefs by remember { mutableStateOf(container.ascend.snapshot(LocalAthleteRepository.ATHLETE_ID).prefs) }
 
@@ -49,12 +54,33 @@ fun SettingsScreen(
     ) {
         item {
             EliteCard {
-                EliteAppearancePicker(
-                    mode = themeMode,
-                    onModeChange = { next ->
-                        scope.launch { container.platform.themeSettings.setMode(next) }
-                    },
-                )
+                EliteStack {
+                    EliteAppearancePicker(
+                        mode = themeMode,
+                        onModeChange = { next ->
+                            scope.launch { container.platform.themeSettings.setMode(next) }
+                        },
+                    )
+                    Text("Honeycomb atmosphere", style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        "Subtle mesh at 6% Volt on the Athlete OS floor. Off is a flat floor. No full intensity — anti-casino.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    EliteSwitch(
+                        checked = honeycomb == HoneycombIntensity.SUBTLE,
+                        onCheckedChange = { enabled ->
+                            scope.launch {
+                                container.platform.themeSettings.setHoneycomb(
+                                    if (enabled) HoneycombIntensity.SUBTLE else HoneycombIntensity.OFF,
+                                )
+                            }
+                        },
+                        modifier = Modifier
+                            .testTag("athlete_honeycomb_toggle")
+                            .semantics { contentDescription = "Honeycomb atmosphere" },
+                    )
+                }
             }
         }
         item {

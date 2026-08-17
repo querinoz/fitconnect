@@ -35,7 +35,11 @@ import com.fitconnect.android.designui.components.EliteBadge
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
+import com.fitconnect.android.designui.components.EliteInstrumentRing
+import com.fitconnect.android.designui.components.EliteRingHero
+import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.components.EliteTag
+import com.fitconnect.android.designui.theme.EliteMetricHeroTextStyle
 import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.auth.DemoPersona
@@ -119,6 +123,35 @@ fun SessionDetailScreen(sessionId: String) {
             subtitle = "${session.sport.value} · ${session.durationMin} min",
             testTag = "athlete_session_detail",
         ) {
+            item {
+                val liveProgress = when (live.phase) {
+                    LiveSessionPhase.ENDED -> 1f
+                    LiveSessionPhase.IDLE, LiveSessionPhase.ERROR -> 0f
+                    else -> 0.72f
+                }
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    EliteInstrumentRing(
+                        progress = liveProgress,
+                        diameter = EliteRingHero,
+                        contentDescription = "Session ${live.phase.name}",
+                        modifier = Modifier.testTag("session_instrument_ring"),
+                    ) {
+                        Text(
+                            if (live.phase == LiveSessionPhase.ENDED) "DONE" else live.phase.name.replace('_', ' '),
+                            style = if (live.phase == LiveSessionPhase.ENDED) {
+                                EliteMetricHeroTextStyle
+                            } else {
+                                MaterialTheme.typography.titleMedium
+                            },
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                    }
+                    EliteSysLabel("LIVEKIT · ${DemoPersona.MODE_LABEL}")
+                }
+            }
             item {
                 LiveSessionPreview(
                     state = live,

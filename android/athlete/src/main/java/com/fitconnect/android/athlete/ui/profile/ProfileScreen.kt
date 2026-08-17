@@ -1,6 +1,16 @@
 package com.fitconnect.android.athlete.ui.profile
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Flag
+import androidx.compose.material.icons.outlined.MonitorHeart
+import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -11,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
@@ -18,21 +29,33 @@ import com.fitconnect.android.athlete.domain.AthleteGoal
 import com.fitconnect.android.athlete.domain.AthleteProfile
 import com.fitconnect.android.athlete.domain.BodyMetrics
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
+import com.fitconnect.android.athlete.ui.LocalAthletePatentStatus
 import com.fitconnect.android.athlete.ui.LocalAthleteSignOut
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
-import com.fitconnect.android.designui.components.EliteAppearancePicker
+import com.fitconnect.android.design.EliteSurfaceColors
+import com.fitconnect.android.designui.components.EliteAchievementTile
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
+import com.fitconnect.android.designui.components.EliteHexatar
+import com.fitconnect.android.designui.components.EliteHexatarProfile
 import com.fitconnect.android.designui.components.EliteMetricCard
-import com.fitconnect.android.designui.components.ElitePlayerCard
+import com.fitconnect.android.designui.components.EliteMetricTile
 import com.fitconnect.android.designui.components.EliteProgress
+import com.fitconnect.android.designui.components.EliteSettingsRow
 import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.designui.components.EliteSysLabel
+import com.fitconnect.android.designui.components.EliteTierBadge
+import com.fitconnect.android.designui.components.EliteTierChip
+import com.fitconnect.android.designui.components.EliteTierProgress
+import com.fitconnect.android.designui.components.fillColor
+import com.fitconnect.android.designui.identity.Patent
 import com.fitconnect.android.designui.theme.EliteSpace
+import com.fitconnect.android.designui.theme.toColor
+import com.fitconnect.ascend.domain.AchievementCategory
+import com.fitconnect.android.foundation.auth.DemoPersona
 import com.fitconnect.android.foundation.common.AppResult
-import com.fitconnect.android.foundation.theme.AccentPreset
-import com.fitconnect.android.foundation.theme.ThemeMode
+import com.fitconnect.android.foundation.theme.HoneycombIntensity
 import com.fitconnect.android.telemetry.devices.DeviceEntry
 import com.fitconnect.android.telemetry.provider.ProviderConnectionState
 import kotlinx.coroutines.launch
@@ -47,12 +70,13 @@ fun ProfileScreen(
     val container = LocalAthleteContainer.current
     val onSignedOut = LocalAthleteSignOut.current
     val scope = rememberCoroutineScope()
-    val themeMode by container.platform.themeSettings.observe().collectAsState(initial = ThemeMode.SYSTEM)
-    val accent by container.platform.themeSettings.observeAccent().collectAsState(initial = AccentPreset.VOLTLINE)
+    val honeycomb by container.platform.themeSettings.observeHoneycomb()
+        .collectAsState(initial = HoneycombIntensity.SUBTLE)
     var profile by remember { mutableStateOf<AthleteProfile?>(null) }
     var goals by remember { mutableStateOf<List<AthleteGoal>>(emptyList()) }
     var body by remember { mutableStateOf<BodyMetrics?>(null) }
     var devices by remember { mutableStateOf<List<DeviceEntry>>(emptyList()) }
+    var sessionCount by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(Unit) {
         container.platform.analytics.screen("athlete_profile")
@@ -60,6 +84,8 @@ fun ProfileScreen(
         goals = (container.athleteRepository.goals() as? AppResult.Ok)?.value.orEmpty()
         body = (container.athleteRepository.bodyMetrics() as? AppResult.Ok)?.value
         devices = container.telemetry.deviceCenter.devices(LocalAthleteRepository.ATHLETE_ID)
+        val sessions = (container.athleteRepository.sessions() as? AppResult.Ok)?.value
+        sessionCount = sessions?.size?.takeIf { it > 0 }
     }
 
     AthleteScreenScaffold(
@@ -75,21 +101,86 @@ fun ProfileScreen(
                 )
                 val t = { key: String -> com.fitconnect.ascend.copy.AscendCopy.t(locale.bcp47, key) }
                 val titles = com.fitconnect.ascend.titles.TitleRegistry.unlocked(ascend)
-                val equipped = com.fitconnect.ascend.titles.TitleRegistry.equipped(titles)
                 val streak = ascend.streaks.firstOrNull {
                     it.kind == com.fitconnect.ascend.domain.StreakKind.PERFORMANCE
                 }
+                val patent = LocalAthletePatentStatus.current
                 EliteStack(spacing = EliteSpace.Md) {
-                    ElitePlayerCard(
-                        initials = initialsOf(p.displayName),
-                        displayName = p.displayName,
-                        overline = "ATHLETE · ${p.subscriptionTier.uppercase()} · IDENTITY",
-                        title = equipped?.let { t(it.nameKey) },
-                        sportLine = p.sports.joinToString { it.value },
-                        levelLabel = "LV ${ascend.level.level} · ${t(ascend.level.rank.nameKey)}",
-                        xpLabel = "${ascend.totalXp} XP",
-                        streakLabel = streak?.let { "${it.days} DAY STREAK" },
-                        squadLabel = "SQUAD · LOCAL_DEMO",
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Box {
+                            EliteHexatar(
+                                userId = LocalAthleteRepository.ATHLETE_ID,
+                                contentDescription = p.displayName,
+                                diameter = EliteHexatarProfile,
+                                modifier = Modifier.testTag("profile_hexatar"),
+                            )
+                            EliteTierBadge(
+                                rank = patent.rank,
+                                modifier = Modifier.align(Alignment.BottomEnd),
+                            )
+                        }
+                        Text(
+                            p.displayName,
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.testTag("elite_player_card"),
+                        )
+                        patent.rank?.let { EliteTierChip(it) }
+                        EliteSysLabel(
+                            streak?.let { "${it.days} DAY STREAK · ${DemoPersona.MODE_LABEL}" }
+                                ?: "NO CONSISTENCY DATA YET",
+                        )
+                    }
+                    EliteTierProgress(
+                        title = patent.nextPatent?.name ?: Patent.INICIADO.name,
+                        progress = patent.progressToNext,
+                        remaining = patent.remainingLabel,
+                        fill = (patent.rank?.patent ?: Patent.INICIADO).fillColor(),
+                    )
+                    val tiles = buildList {
+                        sessionCount?.let { add("SESSIONS" to it.toString() to false) }
+                        streak?.days?.let { add("STREAK" to it.toString() to true) }
+                    }
+                    if (tiles.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
+                        ) {
+                            tiles.forEach { (labelValue, volt) ->
+                                val (label, value) = labelValue
+                                EliteMetricTile(
+                                    label = label,
+                                    value = value,
+                                    accentVolt = volt,
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                        }
+                    }
+                    EliteSettingsRow(
+                        title = "Devices and sensors",
+                        icon = Icons.Outlined.MonitorHeart,
+                        onClick = onOpenTelemetry,
+                    )
+                    EliteSettingsRow(
+                        title = "Goals",
+                        icon = Icons.Outlined.Flag,
+                        trailing = goals.size.takeIf { it > 0 }?.toString(),
+                        onClick = { },
+                    )
+                    EliteSettingsRow(
+                        title = "Appearance",
+                        icon = Icons.Outlined.Palette,
+                        trailing = "HONEYCOMB · ${honeycomb.name}",
+                        onClick = onOpenSettings,
+                    )
+                    EliteSettingsRow(
+                        title = "Privacy and data",
+                        icon = Icons.Outlined.Shield,
+                        trailing = "ON-DEVICE",
+                        onClick = onOpenSettings,
                     )
                     if (titles.isNotEmpty()) {
                         EliteCard(variant = com.fitconnect.android.designui.components.EliteCardVariant.Glass) {
@@ -97,6 +188,28 @@ fun ProfileScreen(
                                 EliteSysLabel("FEATURED TITLES · UNLOCKED")
                                 titles.take(4).forEach { title ->
                                     Text(t(title.nameKey), style = MaterialTheme.typography.titleMedium)
+                                }
+                            }
+                        }
+                    }
+                    val achievementTiles = PROFILE_ACHIEVEMENT_IDS.mapNotNull { id ->
+                        ascend.achievements.firstOrNull { it.definition.id == id }
+                    }
+                    if (achievementTiles.isNotEmpty()) {
+                        EliteSysLabel("ACHIEVEMENTS")
+                        achievementTiles.chunked(4).forEach { row ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
+                            ) {
+                                row.forEach { item ->
+                                    EliteAchievementTile(
+                                        emoji = achievementGlyph(item.definition.category),
+                                        label = t(item.definition.nameKey),
+                                        domain = achievementDomain(item.definition.category),
+                                        unlocked = item.unlocked,
+                                        modifier = Modifier.weight(1f),
+                                    )
                                 }
                             }
                         }
@@ -111,20 +224,6 @@ fun ProfileScreen(
                         ProfileField(label = "Privacy", value = "On-device until sync")
                     }
                 }
-            }
-        }
-        item {
-            EliteCard {
-                EliteAppearancePicker(
-                    mode = themeMode,
-                    onModeChange = { next ->
-                        scope.launch { container.platform.themeSettings.setMode(next) }
-                    },
-                    accent = accent,
-                    onAccentChange = { next ->
-                        scope.launch { container.platform.themeSettings.setAccent(next) }
-                    },
-                )
             }
         }
         body?.let { metrics ->
@@ -232,9 +331,54 @@ private fun ProfileField(label: String, value: String) {
     }
 }
 
-private fun initialsOf(name: String): String =
-    name.split(" ")
-        .filter { it.isNotBlank() }
-        .take(2)
-        .joinToString("") { it.first().uppercase() }
-        .ifBlank { "FC" }
+private val PROFILE_ACHIEVEMENT_IDS = listOf(
+    "first_session",
+    "first_km",
+    "daily_runner",
+    "cardio_initiate",
+    "first_pr",
+    "recovery_discipline",
+    "sleep_architect",
+    "multi_sport",
+)
+
+private fun achievementGlyph(category: AchievementCategory): String = when (category) {
+    AchievementCategory.DISTANCE -> "🏃"
+    AchievementCategory.CONSISTENCY -> "🔥"
+    AchievementCategory.CARDIO -> "❤️"
+    AchievementCategory.SPEED -> "⚡"
+    AchievementCategory.ENDURANCE -> "🛣️"
+    AchievementCategory.RECOVERY -> "💚"
+    AchievementCategory.SLEEP -> "🌙"
+    AchievementCategory.PERSONAL_RECORD -> "🏆"
+    AchievementCategory.SPORT -> "🏅"
+    AchievementCategory.MILESTONE -> "📍"
+    AchievementCategory.EXPLORATION -> "🗺️"
+    AchievementCategory.PERFORMANCE -> "📈"
+    AchievementCategory.LEGACY -> "👑"
+    AchievementCategory.COMMUNITY -> "🤝"
+    AchievementCategory.COACHING -> "🎯"
+}
+
+private fun achievementDomain(category: AchievementCategory) = when (category) {
+    AchievementCategory.DISTANCE,
+    AchievementCategory.CARDIO,
+    AchievementCategory.ENDURANCE,
+    -> EliteSurfaceColors.TELEMETRY.toColor()
+    AchievementCategory.CONSISTENCY,
+    AchievementCategory.RECOVERY,
+    -> EliteSurfaceColors.RECOVERY.toColor()
+    AchievementCategory.PERSONAL_RECORD,
+    AchievementCategory.SPEED,
+    AchievementCategory.PERFORMANCE,
+    AchievementCategory.MILESTONE,
+    -> EliteSurfaceColors.VOLTLINE.toColor()
+    AchievementCategory.SLEEP -> EliteSurfaceColors.IRIS.toColor()
+    AchievementCategory.SPORT,
+    AchievementCategory.EXPLORATION,
+    -> EliteSurfaceColors.PATENT_MINT.toColor()
+    AchievementCategory.LEGACY -> EliteSurfaceColors.PATENT_LEGEND.toColor()
+    AchievementCategory.COMMUNITY,
+    AchievementCategory.COACHING,
+    -> EliteSurfaceColors.PATENT_STEEL.toColor()
+}

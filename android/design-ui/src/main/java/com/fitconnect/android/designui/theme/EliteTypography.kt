@@ -28,6 +28,7 @@ private fun style(
     lineHeight = lineHeight.sp,
     fontWeight = FontWeight(weight),
     letterSpacing = tracking.sp,
+    fontFeatureSettings = "tnum",
     fontFamily = when (family) {
         "display" -> Syne
         "mono" -> JetBrainsMono
@@ -53,6 +54,14 @@ val EliteMetricTextStyle: TextStyle = style(
     T.METRIC_WEIGHT,
     T.METRIC_TRACKING,
     T.METRIC_FAMILY,
+)
+
+val EliteMetricHeroTextStyle: TextStyle = style(
+    T.METRIC_HERO_SIZE_SP,
+    T.METRIC_HERO_LINE_HEIGHT_SP,
+    T.METRIC_HERO_WEIGHT,
+    T.METRIC_HERO_TRACKING,
+    T.METRIC_HERO_FAMILY,
 )
 
 val EliteMonoTextStyle: TextStyle = style(

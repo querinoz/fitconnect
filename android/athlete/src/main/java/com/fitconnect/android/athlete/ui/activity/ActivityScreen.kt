@@ -1,5 +1,11 @@
 package com.fitconnect.android.athlete.ui.activity
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -7,14 +13,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import com.fitconnect.android.athlete.ascend.ActivityAscendBridge
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
@@ -22,6 +31,7 @@ import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.capture.GpsFeedStatus
 import com.fitconnect.android.capture.LiveActivityEngine
 import com.fitconnect.android.capture.LiveActivityPhase
+import com.fitconnect.android.design.EliteSurfaceInstrument
 import com.fitconnect.android.designui.components.AscendEnergyCard
 import com.fitconnect.android.designui.components.EliteBadge
 import com.fitconnect.android.designui.components.EliteButton
@@ -30,16 +40,22 @@ import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteCardVariant
 import com.fitconnect.android.designui.components.EliteChip
 import com.fitconnect.android.designui.components.EliteFlowRow
+import com.fitconnect.android.designui.components.EliteInstrumentRing
 import com.fitconnect.android.designui.components.EliteLiveDot
 import com.fitconnect.android.designui.components.EliteMetricCard
-import com.fitconnect.android.designui.components.PerformanceCompleteOverlay
+import com.fitconnect.android.designui.components.EliteMetricTile
+import com.fitconnect.android.designui.components.EliteRingHero
 import com.fitconnect.android.designui.components.EliteShareCard
 import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.components.EliteTelemetryGrid
+import com.fitconnect.android.designui.components.PerformanceCompleteOverlay
 import com.fitconnect.android.designui.maps.EliteMapMode
+import com.fitconnect.android.designui.maps.EliteMapPhase
+import com.fitconnect.android.designui.maps.EliteMapPhaseLogic
 import com.fitconnect.android.designui.maps.EliteRouteMap
 import com.fitconnect.android.designui.maps.EliteRouteVertex
+import com.fitconnect.android.designui.theme.EliteMetricHeroTextStyle
 import com.fitconnect.android.designui.theme.EliteMetricTextStyle
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.i18n.AppLocale
@@ -106,17 +122,32 @@ fun ActivityScreen() {
     val vertices = snap.route.map {
         EliteRouteVertex(it.latitude, it.longitude, snap.paceSecPerKm, it.heartRateBpm, it.altitudeM)
     }
-    val demoRoute = remember {
-        container.geo.routes.get("rt_coastal")?.points.orEmpty().map {
-            EliteRouteVertex(it.latitude, it.longitude)
+    val sessionWaiting = snap.phase != LiveActivityPhase.IDLE &&
+        snap.phase != LiveActivityPhase.ENDED &&
+        vertices.size < 2
+    var waitMs by remember { mutableLongStateOf(0L) }
+    LaunchedEffect(sessionWaiting, snap.sessionId) {
+        waitMs = 0L
+        if (!sessionWaiting) return@LaunchedEffect
+        while (waitMs < EliteSurfaceInstrument.LOAD_TIMEOUT_MS &&
+            engine.state.value.route.size < 2
+        ) {
+            delay(250)
+            waitMs += 250
         }
     }
-    val mapPoints = vertices.ifEmpty { demoRoute }
+    val mapPhase = EliteMapPhaseLogic.resolve(
+        pointCount = vertices.size,
+        sessionWaitingForTrace = sessionWaiting,
+        permissionDenied = snap.gps == GpsFeedStatus.PERMISSION_DENIED,
+        elapsedMs = waitMs,
+    )
     val cursor = snap.replayCursor?.let { cursor ->
         snap.route.indexOfFirst {
             it.latitude == cursor.latitude && it.longitude == cursor.longitude
         }.takeIf { it >= 0 }
     }
+    val liveSession = snap.phase != LiveActivityPhase.IDLE
 
     AthleteScreenScaffold(
         title = "Activity",
@@ -127,21 +158,78 @@ fun ActivityScreen() {
         item {
             EliteStack {
                 EliteSysLabel(
-                    if (vertices.isEmpty()) "GPS DEMO · LOCAL TELEMETRY" else "ROUTE · ${mapMode.name}",
+                    when (mapPhase) {
+                        EliteMapPhase.Success -> "ROUTE · ${mapMode.name}"
+                        EliteMapPhase.Loading -> "ROUTE · WAITING"
+                        EliteMapPhase.Error -> "ROUTE · ERROR"
+                        EliteMapPhase.Empty -> "ROUTE · NO TRACE"
+                    },
                 )
-                EliteFlowRow {
-                    EliteMapMode.entries.forEach { mode ->
-                        EliteChip(label = mode.name, selected = mapMode == mode, onClick = { mapMode = mode })
+                if (liveSession) {
+                    EliteInstrumentRing(
+                        progress = when (snap.phase) {
+                            LiveActivityPhase.ENDED -> 1f
+                            else -> (snap.elapsedMs / 3_600_000f).coerceIn(0.04f, 1f)
+                        },
+                        diameter = EliteRingHero,
+                        contentDescription = when (snap.phase) {
+                            LiveActivityPhase.ENDED -> "Session complete"
+                            else -> "Elapsed ${LiveActivityEngine.formatElapsed(snap.elapsedMs)}"
+                        },
+                        modifier = Modifier.testTag("activity_instrument_ring"),
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            if (snap.phase == LiveActivityPhase.ENDED) {
+                                Icon(
+                                    imageVector = Icons.Filled.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier,
+                                )
+                                EliteSysLabel("COMPLETE")
+                            } else {
+                                EliteSysLabel(snap.sport.uppercase())
+                                Text(
+                                    if (snap.phase == LiveActivityPhase.COUNTDOWN) {
+                                        "${snap.countdownRemainingSec}"
+                                    } else {
+                                        LiveActivityEngine.formatElapsed(snap.elapsedMs)
+                                    },
+                                    style = EliteMetricHeroTextStyle,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    modifier = Modifier.testTag("activity_timer"),
+                                )
+                            }
+                        }
+                    }
+                }
+                if (mapPhase != EliteMapPhase.Empty) {
+                    EliteFlowRow {
+                        EliteMapMode.entries.forEach { mode ->
+                            EliteChip(label = mode.name, selected = mapMode == mode, onClick = { mapMode = mode })
+                        }
                     }
                 }
                 EliteRouteMap(
-                    points = mapPoints,
+                    points = vertices,
                     mode = mapMode,
                     cursorIndex = cursor,
-                    contentDescription = if (vertices.isEmpty()) {
-                        "LOCAL_DEMO coastal route — not live GPS"
+                    phase = mapPhase,
+                    onRetry = if (mapPhase == EliteMapPhase.Empty) {
+                        {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            engine.arm(sport.wireKey)
+                            engine.beginCountdown()
+                            scope.launch { container.telemetry.wearWorkout.startWorkout(sport.wireKey) }
+                        }
                     } else {
-                        "Activity route"
+                        { waitMs = 0L }
+                    },
+                    contentDescription = when (mapPhase) {
+                        EliteMapPhase.Success -> "Activity route"
+                        EliteMapPhase.Empty -> "No GPS trace yet"
+                        EliteMapPhase.Loading -> "Waiting for GPS trace"
+                        EliteMapPhase.Error -> "Map failed to load"
                     },
                 )
             }
@@ -167,16 +255,14 @@ fun ActivityScreen() {
                     if (snap.sessionId.isNotBlank()) {
                         Text("session ${snap.sessionId}", style = MaterialTheme.typography.labelSmall)
                     }
-                    Text(
-                        if (snap.phase == LiveActivityPhase.COUNTDOWN) {
-                            "${snap.countdownRemainingSec}"
-                        } else {
-                            LiveActivityEngine.formatElapsed(snap.elapsedMs)
-                        },
-                        style = EliteMetricTextStyle,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.testTag("activity_timer"),
-                    )
+                    if (!liveSession) {
+                        Text(
+                            "—",
+                            style = EliteMetricTextStyle,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.testTag("activity_timer"),
+                        )
+                    }
                     Text(phaseCopy(snap.phase, snap.sessionState.name), style = MaterialTheme.typography.bodyMedium)
                     Text(gpsCopy(snap.gps), style = MaterialTheme.typography.bodySmall)
                     Text(
@@ -199,8 +285,9 @@ fun ActivityScreen() {
                 }
             }
         }
-        item {
-            EliteTelemetryGrid(
+        if (liveSession) {
+            item {
+                EliteTelemetryGrid(
                 cells = listOf(
                     "DISTANCE" to "%.2f km".format(snap.distanceM / 1000.0),
                     "PACE" to LiveActivityEngine.formatPace(snap.paceSecPerKm),
@@ -213,6 +300,7 @@ fun ActivityScreen() {
                     "GPS" to if (snap.gps == GpsFeedStatus.LIVE) "LIVE" else "DEMO",
                 ),
             )
+            }
         }
         item {
             EliteFlowRow {

@@ -31,6 +31,15 @@ enum class AccentPreset {
 }
 
 /**
+ * Honeycomb atmosphere intensity. Theme chrome, not a feature flag.
+ * Off | Subtle only — no Full, no confetti.
+ */
+enum class HoneycombIntensity {
+    OFF,
+    SUBTLE,
+}
+
+/**
  * Theme preference port. Compose mapping to Elite Surface / Voltline tokens
  * lives in `:app` — this store is the single source for the user's choice.
  */
@@ -41,6 +50,9 @@ interface ThemeSettings {
     suspend fun accent(): AccentPreset
     fun observeAccent(): Flow<AccentPreset>
     suspend fun setAccent(accent: AccentPreset)
+    suspend fun honeycomb(): HoneycombIntensity
+    fun observeHoneycomb(): Flow<HoneycombIntensity>
+    suspend fun setHoneycomb(intensity: HoneycombIntensity)
 }
 
 class DefaultThemeSettings(
@@ -73,4 +85,25 @@ class DefaultThemeSettings(
     override suspend fun setAccent(accent: AccentPreset) {
         keyValueStore.set(PreferenceKeys.ACCENT, accent.name)
     }
+
+    override suspend fun honeycomb(): HoneycombIntensity {
+        val raw = keyValueStore.get(PreferenceKeys.HONEYCOMB) ?: return HoneycombIntensity.SUBTLE
+        return parseHoneycomb(raw)
+    }
+
+    override fun observeHoneycomb(): Flow<HoneycombIntensity> =
+        keyValueStore.observe(PreferenceKeys.HONEYCOMB).map { raw ->
+            raw?.let(::parseHoneycomb) ?: HoneycombIntensity.SUBTLE
+        }
+
+    override suspend fun setHoneycomb(intensity: HoneycombIntensity) {
+        keyValueStore.set(PreferenceKeys.HONEYCOMB, intensity.name)
+    }
+
+    private fun parseHoneycomb(raw: String): HoneycombIntensity =
+        when (raw) {
+            HoneycombIntensity.OFF.name -> HoneycombIntensity.OFF
+            HoneycombIntensity.SUBTLE.name -> HoneycombIntensity.SUBTLE
+            else -> HoneycombIntensity.SUBTLE
+        }
 }

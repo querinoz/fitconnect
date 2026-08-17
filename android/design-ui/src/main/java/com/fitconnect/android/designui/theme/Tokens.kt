@@ -8,17 +8,27 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fitconnect.android.design.EliteSurfaceAtmosphere
 import com.fitconnect.android.design.EliteSurfaceBorder
 import com.fitconnect.android.design.EliteSurfaceElevation
 import com.fitconnect.android.design.EliteSurfaceGlass
 import com.fitconnect.android.design.EliteSurfaceOpacity
 import com.fitconnect.android.design.EliteSurfaceRadius
 import com.fitconnect.android.design.EliteSurfaceSpacing
+import com.fitconnect.android.foundation.theme.HoneycombIntensity
 
 fun Long.toColor(): Color = Color(this)
 
 val LocalReduceMotion = staticCompositionLocalOf { false }
 val LocalHighContrast = staticCompositionLocalOf { false }
+val LocalHoneycombIntensity = staticCompositionLocalOf { HoneycombIntensity.SUBTLE }
+
+object EliteAtmosphere {
+    val HoneycombSubtle get() = EliteSurfaceAtmosphere.HONEYCOMB_SUBTLE
+    val HoneycombParallax get() = EliteSurfaceAtmosphere.HONEYCOMB_PARALLAX
+    val HoneycombPulse get() = EliteSurfaceAtmosphere.HONEYCOMB_PULSE
+    val HoneycombCellRadius: Dp get() = EliteSurfaceAtmosphere.HONEYCOMB_CELL_RADIUS.dp
+}
 
 object EliteSpace {
     val None: Dp get() = EliteSurfaceSpacing.NONE.dp

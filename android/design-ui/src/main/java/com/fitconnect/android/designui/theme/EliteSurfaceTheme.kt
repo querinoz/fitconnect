@@ -66,7 +66,7 @@ object EliteColorRoles {
         val surface = surfaceArgb(dark, highContrast).toColor()
         val variant = surfaceVariantArgb(dark).toColor()
         val primary = primaryArgb(dark, accent).toColor()
-        val onPrimary = EliteSurfaceColors.FLOOR.toColor()
+        val onPrimary = EliteSurfaceColors.ON_VOLT.toColor()
         return if (dark) {
             darkColorScheme(
                 primary = primary,

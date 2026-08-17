@@ -1,5 +1,6 @@
 package com.fitconnect.android.designui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -9,11 +10,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,9 +23,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.fitconnect.android.designui.theme.EliteBorder
@@ -82,35 +87,34 @@ fun EliteFloatingNavBar(
 private fun RowScope.EliteNavTab(item: EliteNavItem) {
     val selectedColor = MaterialTheme.colorScheme.primary
     val idleColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val onSelected = MaterialTheme.colorScheme.onPrimary
     Column(
         modifier = Modifier
             .weight(1f)
+            .heightIn(min = Accessibility.MIN_TOUCH_TARGET_DP.dp)
             .clip(RoundedCornerShape(EliteRadius.Lg))
             .selectable(
                 selected = item.selected,
                 onClick = item.onClick,
                 role = Role.Tab,
             )
-            .padding(vertical = EliteSpace.Sm)
+            .padding(vertical = EliteSpace.Xs)
             .testTag(item.testTag),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(EliteSpace.Xxs),
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            if (item.selected) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(selectedColor.copy(alpha = 0.16f))
-                        .border(EliteBorder.Hairline, selectedColor.copy(alpha = 0.45f), CircleShape),
-                )
-            }
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(width = 48.dp, height = 32.dp)
+                .clip(RoundedCornerShape(EliteRadius.Full))
+                .background(if (item.selected) selectedColor else Color.Transparent),
+        ) {
             Icon(
                 imageVector = item.icon,
                 contentDescription = item.label,
-                tint = if (item.selected) selectedColor else idleColor,
-                modifier = Modifier.size(Accessibility.MIN_TOUCH_TARGET_DP.dp / 2),
+                tint = if (item.selected) onSelected else idleColor,
+                modifier = Modifier.size(22.dp),
             )
         }
         Text(
@@ -132,7 +136,7 @@ fun EliteSysLabel(
     Text(
         text = text.uppercase(),
         style = EliteMonoTextStyle,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = com.fitconnect.android.design.EliteSurfaceColors.INSTRUMENT_MUTED.toColor(),
         modifier = modifier,
     )
 }
@@ -142,10 +146,36 @@ fun EliteSectionHeader(
     title: String,
     modifier: Modifier = Modifier,
     overline: String? = null,
+    actionLabel: String? = null,
+    onAction: (() -> Unit)? = null,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(EliteSpace.Xxs)) {
         overline?.let { EliteSysLabel(it) }
-        Text(title, style = MaterialTheme.typography.titleLarge)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                title,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier
+                    .weight(1f)
+                    .semantics { heading() },
+            )
+            if (actionLabel != null && onAction != null) {
+                Text(
+                    text = actionLabel.uppercase(),
+                    style = EliteMonoTextStyle,
+                    color = com.fitconnect.android.design.EliteSurfaceColors.INSTRUMENT_MUTED.toColor(),
+                    modifier = Modifier
+                        .heightIn(min = Accessibility.MIN_TOUCH_TARGET_DP.dp)
+                        .clickable(onClick = onAction)
+                        .padding(horizontal = EliteSpace.Sm)
+                        .semantics { contentDescription = actionLabel },
+                )
+            }
+        }
     }
 }
 

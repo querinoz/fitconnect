@@ -30,7 +30,11 @@ describe("COLOR_TOKENS ↔ elite-os.css sync", () => {
     ["performance", "performance"],
     ["recovery", "recovery"],
     ["alert", "alert"],
-    ["onSurface", "on-surface"]
+    ["onSurface", "on-surface"],
+    ["patentSteel", "patent-steel"],
+    ["patentMint", "patent-mint"],
+    ["patentLegend", "patent-legend"],
+    ["patentEmber", "patent-ember"],
   ];
 
   it.each(pairs)("COLOR_TOKENS.%s matches --eos-%s in CSS", (tokenKey, cssKey) => {
