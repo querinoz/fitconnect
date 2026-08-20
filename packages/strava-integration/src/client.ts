@@ -7,7 +7,9 @@ import type {
   StravaWebhookEvent
 } from "@fitconnect/types";
 import { STRAVA_API_BASE, STRAVA_TOKEN_URL } from "./oauth";
+import { assertStravaPathAllowed } from "./endpoints";
 import {
+  isRateLimited,
   parseRateLimitHeaders,
   StravaRateLimitError,
   withRetry
@@ -69,6 +71,14 @@ export class StravaClient {
     init?: RequestInit & { retry?: boolean }
   ): Promise<T> {
     const exec = async () => {
+      if (this.lastRateLimit && isRateLimited(this.lastRateLimit)) {
+        throw new StravaRateLimitError(
+          "Strava rate limit at 85%",
+          15_000,
+          this.lastRateLimit
+        );
+      }
+      assertStravaPathAllowed(path);
       const token = await this.config.getAccessToken();
       if (!token) throw new Error("Strava not connected");
 
@@ -488,6 +498,7 @@ export class StravaClient {
     path: string,
     init?: { body?: BodyInit; contentType?: string; textResponse?: boolean }
   ): Promise<{ status: number; data: unknown }> {
+    assertStravaPathAllowed(path);
     const token = await this.config.getAccessToken();
     if (!token) throw new Error("Strava not connected");
 
@@ -616,6 +627,15 @@ export class StravaClient {
 export function parseWebhookEvent(body: unknown): StravaWebhookEvent | null {
   const parsed = stravaWebhookEventSchema.safeParse(body);
   return parsed.success ? (parsed.data as StravaWebhookEvent) : null;
+}
+
+export function isStravaAthleteRevocation(
+  event: Pick<StravaWebhookEvent, "object_type" | "aspect_type" | "updates">
+): boolean {
+  if (event.object_type !== "athlete") return false;
+  if (event.aspect_type === "delete") return true;
+  const authorized = event.updates?.authorized;
+  return authorized === "false" || authorized === false;
 }
 
 /** Verify Strava webhook subscription challenge. */

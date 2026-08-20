@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { COACH_TAKE_HOME_RATE, PLATFORM_SUBSCRIPTION_EUR } from "./constants";
 import type { CheckoutKind } from "./demo";
+import { isProductionSecurityMode } from "@/lib/security/runtime";
 
 let stripeInstance: Stripe | null = null;
 
@@ -131,8 +132,10 @@ export async function createLiveSubscription(request: Request, email: string) {
 
 export async function verifyStripeWebhook(request: Request) {
   const stripe = getStripe();
-  const webhookSecret =
-    process.env.STRIPE_WEBHOOK_SECRET ?? process.env.STRIPE_DEMO_WEBHOOK_SECRET;
+  const webhookSecret = isProductionSecurityMode()
+    ? process.env.STRIPE_WEBHOOK_SECRET?.trim()
+    : process.env.STRIPE_WEBHOOK_SECRET?.trim() ||
+      process.env.STRIPE_DEMO_WEBHOOK_SECRET?.trim();
 
   if (!webhookSecret) {
     throw new Error("STRIPE_WEBHOOK_SECRET is not configured");

@@ -14,8 +14,12 @@ import {
 } from "@/lib/integrations/store";
 import { resolveIntegrationAthlete } from "@/lib/integrations/strava/route-auth";
 import { getStravaRateLimit } from "@/lib/integrations/strava/rate-limit-cache";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 export async function POST(request: Request) {
+  const limited = await enforceRateLimit(request, "strava");
+  if (limited) return limited;
+
   const body = (await request.json().catch(() => ({}))) as { athleteId?: string };
   const auth = await resolveIntegrationAthlete(request, body.athleteId);
   if ("error" in auth) {

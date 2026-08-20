@@ -4,6 +4,7 @@ import com.fitconnect.android.foundation.authz.UserRole
 import com.fitconnect.android.foundation.common.AppError
 import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.foundation.common.Logger
+import com.fitconnect.android.foundation.identity.IdentityRemote
 import com.fitconnect.android.foundation.network.ConnectivityMonitor
 import com.fitconnect.android.foundation.security.AccountIsolationController
 import com.fitconnect.android.foundation.session.AuthTokens
@@ -25,6 +26,8 @@ class FirebaseAuthRepository(
     private val isolation: AccountIsolationController? = null,
     private val keyValueStore: KeyValueStore? = null,
     private val connectivity: ConnectivityMonitor? = null,
+    private val identityRemote: IdentityRemote? = null,
+    private val credentialClearer: (suspend () -> Unit)? = null,
 ) : AuthRepository, TokenRefresher {
 
     private val authState = MutableStateFlow<AuthUser?>(null)
@@ -158,11 +161,21 @@ class FirebaseAuthRepository(
     override suspend fun logout(): AppResult<Unit> {
         isolation?.wipeForLogout()?.let { if (it is AppResult.Err) return it }
         gateway.signOut()
+        runCatching { credentialClearer?.invoke() }
         authState.value = null
         return sessionStore.clear()
     }
 
     override suspend fun deleteSession(): AppResult<Unit> = logout()
+
+    override suspend fun deleteAccount(): AppResult<Unit> {
+        val remote = identityRemote
+            ?: return AuthErrorMapper.err(AppError.AuthKind.FORBIDDEN)
+        return when (val result = remote.deleteAccount()) {
+            is AppResult.Err -> result
+            is AppResult.Ok -> logout()
+        }
+    }
 
     override suspend fun enableBiometricUnlock(enabled: Boolean): AppResult<Unit> {
         val snap = sessionStore.snapshot()
@@ -240,6 +253,11 @@ class FirebaseAuthRepository(
         }
         val snap = sessionStore.snapshot()
         val uid = snap.userId ?: return AuthErrorMapper.err(AppError.AuthKind.UNAUTHENTICATED)
+        when (val remote = identityRemote?.setRole(role)) {
+            is AppResult.Err -> logger.w("FirebaseAuth", "role persist failed")
+            is AppResult.Ok -> Unit
+            null -> Unit
+        }
         sessionStore.save(snap.copy(role = role))
         keyValueStore?.set(PreferenceKeys.identityRoleSelected(uid), "1")
         return currentUser()
@@ -255,11 +273,11 @@ class FirebaseAuthRepository(
             isolation?.wipeForAccountSwitch(identity.uid)
             val existingRole = sessionStore.snapshot().takeIf { it.userId == identity.uid }?.role
             val selected = keyValueStore?.get(PreferenceKeys.identityRoleSelected(identity.uid))
-            val needsRole = selected != "1"
+            var needsRole = selected != "1"
             if (needsRole && selected == null) {
                 keyValueStore?.set(PreferenceKeys.identityRoleSelected(identity.uid), "0")
             }
-            val role = existingRole?.takeIf { it == UserRole.ATHLETE || it == UserRole.COACH }
+            var role = existingRole?.takeIf { it == UserRole.ATHLETE || it == UserRole.COACH }
                 ?: UserRole.ATHLETE
             val tokens = AuthTokens(
                 accessToken = identity.idToken,
@@ -281,6 +299,20 @@ class FirebaseAuthRepository(
                 PreferenceKeys.identityProviders(identity.uid),
                 identity.providers.joinToString(",") { it.name },
             )
+            when (val remote = identityRemote?.bootstrap(identity.displayName, identity.email, identity.photoUrl)) {
+                is AppResult.Ok -> {
+                    remote.value.role?.takeIf { it == UserRole.ATHLETE || it == UserRole.COACH }?.let {
+                        role = it
+                        needsRole = false
+                        keyValueStore?.set(PreferenceKeys.identityRoleSelected(identity.uid), "1")
+                    }
+                    sessionStore.save(
+                        sessionStore.snapshot().copy(role = role),
+                    )
+                }
+                is AppResult.Err -> logger.w("FirebaseAuth", "profile bootstrap failed")
+                null -> Unit
+            }
             val user = AuthUser(
                 id = identity.uid,
                 email = identity.email,

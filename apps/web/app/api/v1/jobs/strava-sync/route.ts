@@ -25,7 +25,10 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json().catch(() => ({}))) as JobBody;
-  const athleteExternalId = body.athleteExternalId ?? "a-ines";
+  const athleteExternalId = body.athleteExternalId;
+  if (!athleteExternalId) {
+    return NextResponse.json({ ok: false, error: "athlete_required" }, { status: 400 });
+  }
   const aspectType = body.aspectType ?? "create";
 
   try {

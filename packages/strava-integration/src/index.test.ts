@@ -36,8 +36,19 @@ describe("parseWebhookEvent", () => {
     expect(event?.object_id).toBe(456);
   });
 
-  it("rejects invalid payloads", () => {
-    expect(parseWebhookEvent({ foo: "bar" })).toBeNull();
+  it("detects athlete.update authorized=false as revocation", async () => {
+    const { isStravaAthleteRevocation, parseWebhookEvent } = await import("./client");
+    const event = parseWebhookEvent({
+      aspect_type: "update",
+      event_time: 1,
+      object_id: 9,
+      object_type: "athlete",
+      owner_id: 9,
+      subscription_id: 1,
+      updates: { authorized: "false" }
+    });
+    expect(event).not.toBeNull();
+    expect(isStravaAthleteRevocation(event!)).toBe(true);
   });
 });
 
@@ -89,8 +100,14 @@ describe("matchStravaEndpoint", () => {
     expect(matchStravaEndpoint("/admin/users", "GET")).toBeNull();
   });
 
-  it("allows segment explore", async () => {
-    const { matchStravaEndpoint } = await import("./endpoints");
-    expect(matchStravaEndpoint("/segments/explore", "GET")).not.toBeNull();
+  it("bans segment explore, club social lists, kudos and comments", async () => {
+    const { matchStravaEndpoint, isBannedStravaPath } = await import("./endpoints");
+    expect(isBannedStravaPath("/segments/explore")).toBe(true);
+    expect(matchStravaEndpoint("/segments/explore", "GET")).toBeNull();
+    expect(matchStravaEndpoint("/clubs/1/activities", "GET")).toBeNull();
+    expect(matchStravaEndpoint("/clubs/1/admins", "GET")).toBeNull();
+    expect(matchStravaEndpoint("/clubs/1/members", "GET")).toBeNull();
+    expect(matchStravaEndpoint("/activities/9/kudos", "GET")).toBeNull();
+    expect(matchStravaEndpoint("/activities/9/comments", "GET")).toBeNull();
   });
 });

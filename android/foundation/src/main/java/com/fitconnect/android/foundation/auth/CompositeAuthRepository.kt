@@ -106,6 +106,11 @@ class CompositeAuthRepository(
 
     override suspend fun deleteSession(): AppResult<Unit> = logout()
 
+    override suspend fun deleteAccount(): AppResult<Unit> {
+        val liveRepo = live ?: return AuthErrorMapper.err(AppError.AuthKind.FORBIDDEN)
+        return liveRepo.deleteAccount()
+    }
+
     override suspend fun enableBiometricUnlock(enabled: Boolean): AppResult<Unit> =
         active().enableBiometricUnlock(enabled)
 

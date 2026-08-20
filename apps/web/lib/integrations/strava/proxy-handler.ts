@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import { matchStravaEndpoint, StravaRateLimitError } from "@fitconnect/strava-integration";
+import { matchStravaEndpoint, StravaRateLimitError, isBannedStravaPath } from "@fitconnect/strava-integration";
 import {
   createStravaClientForAthlete,
   getConnectionByAthlete
 } from "@/lib/integrations/strava/service";
 import { resolveIntegrationAthlete } from "@/lib/integrations/strava/route-auth";
 import { getStravaRateLimit } from "@/lib/integrations/strava/rate-limit-cache";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 function buildStravaPath(segments: string[], search: string): string {
   const path = `/${segments.join("/")}`;
@@ -17,6 +18,9 @@ export async function handleStravaV3Proxy(
   pathSegments: string[]
 ): Promise<NextResponse> {
   const url = new URL(request.url);
+  const limited = await enforceRateLimit(request, "strava");
+  if (limited) return limited;
+
   const auth = await resolveIntegrationAthlete(request, url.searchParams.get("athleteId"));
   if ("error" in auth) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
@@ -28,6 +32,12 @@ export async function handleStravaV3Proxy(
   }
 
   const stravaPathOnly = `/${pathSegments.join("/")}`;
+  if (isBannedStravaPath(stravaPathOnly)) {
+    return NextResponse.json(
+      { error: "endpoint_forbidden", path: stravaPathOnly },
+      { status: 403 }
+    );
+  }
   const rule = matchStravaEndpoint(stravaPathOnly, request.method);
   if (!rule) {
     return NextResponse.json(

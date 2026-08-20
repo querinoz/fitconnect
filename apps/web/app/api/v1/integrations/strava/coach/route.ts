@@ -1,22 +1,16 @@
 import { NextResponse } from "next/server";
-import { listActivitiesForCoach, toIntegrationActivity } from "@/lib/integrations/strava/service";
-import { resolveIntegrationCoach } from "@/lib/integrations/strava/route-auth";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
+/**
+ * Strava activities must never be shown to a coach (or any third party).
+ * Fail-closed: this route exists only as a tombstone for old clients.
+ */
 export async function GET(request: Request) {
-  const auth = await resolveIntegrationCoach(request);
-  if ("error" in auth) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
-  }
+  const limited = await enforceRateLimit(request, "strava");
+  if (limited) return limited;
 
-  const { searchParams } = new URL(request.url);
-  const limit = Number(searchParams.get("limit") ?? 12);
-
-  const rows = await listActivitiesForCoach(auth.coachId, limit);
-  const activities = rows.map((r) => ({
-    ...toIntegrationActivity(r),
-    sportType: r.sportType,
-    athleteName: r.athleteName
-  }));
-
-  return NextResponse.json({ coachId: auth.coachId, activities });
+  return NextResponse.json(
+    { error: "strava_not_shareable", activities: [] },
+    { status: 403 }
+  );
 }

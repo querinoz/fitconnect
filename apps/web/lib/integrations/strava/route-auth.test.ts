@@ -1,30 +1,30 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { createSupabaseServerClient } from "@/lib/auth/supabase/server";
-import { resolveIntegrationAthlete, resolveIntegrationCoach } from "./route-auth";
+import { resolveIntegrationAthlete, resolveIntegrationCoach, verifyQStashJob } from "./route-auth";
+import { encodeUnsignedTestJwt } from "@/lib/auth/firebase-id-token";
+import { lookupIdentityRole } from "@/lib/identity/repository";
 
 vi.mock("@/lib/auth/supabase/client", () => ({
   isDemoMode: () => false
 }));
 
-vi.mock("@/lib/auth/supabase/server", () => ({
-  createSupabaseServerClient: vi.fn()
+vi.mock("@/lib/firebase/config", () => ({
+  isFirebaseWebConfigured: () => true
 }));
 
-function mockSession(id: string, role: "athlete" | "coach" | "admin") {
-  vi.mocked(createSupabaseServerClient).mockResolvedValue({
-    auth: {
-      getUser: vi.fn().mockResolvedValue({
-        data: {
-          user: {
-            id,
-            email: `${id}@fitconnect.app`,
-            user_metadata: { role }
-          }
-        },
-        error: null
-      })
-    }
-  } as never);
+vi.mock("@/lib/identity/repository", () => ({
+  lookupIdentityRole: vi.fn()
+}));
+
+vi.mock("next/headers", () => ({
+  cookies: async () => ({ get: () => undefined }),
+  headers: async () => new Headers()
+}));
+
+function authedRequest(uid: string, path: string) {
+  const token = encodeUnsignedTestJwt({ sub: uid, email: `${uid}@fitconnect.app` });
+  return new Request(`http://localhost${path}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
 }
 
 describe("strava route-auth production IDOR", () => {
@@ -43,38 +43,33 @@ describe("strava route-auth production IDOR", () => {
   });
 
   it("rejects athleteId that disagrees with the authenticated session", async () => {
-    mockSession("ath-self", "athlete");
+    vi.mocked(lookupIdentityRole).mockResolvedValue("athlete");
     const result = await resolveIntegrationAthlete(
-      new Request("http://localhost/api/v1/integrations/strava?athleteId=ath-other"),
+      authedRequest("ath-self", "/api/v1/integrations/strava?athleteId=ath-other"),
       "ath-other"
     );
     expect(result).toEqual({ error: "athlete_mismatch", status: 403 });
   });
 
   it("binds athlete to the authenticated session when param matches", async () => {
-    mockSession("ath-self", "athlete");
+    vi.mocked(lookupIdentityRole).mockResolvedValue("athlete");
     const result = await resolveIntegrationAthlete(
-      new Request("http://localhost/api/v1/integrations/strava?athleteId=ath-self"),
+      authedRequest("ath-self", "/api/v1/integrations/strava?athleteId=ath-self"),
       "ath-self"
     );
     expect(result).toEqual({ athleteId: "ath-self" });
   });
 
   it("rejects coachId that disagrees with the authenticated session", async () => {
-    mockSession("coach-self", "coach");
+    vi.mocked(lookupIdentityRole).mockResolvedValue("coach");
     const result = await resolveIntegrationCoach(
-      new Request("http://localhost/api/v1/integrations?coachId=coach-other"),
+      authedRequest("coach-self", "/api/v1/integrations?coachId=coach-other"),
       "coach-other"
     );
     expect(result).toEqual({ error: "coach_mismatch", status: 403 });
   });
 
   it("does not allow a missing session to fall back to a client param", async () => {
-    vi.mocked(createSupabaseServerClient).mockResolvedValue({
-      auth: {
-        getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null })
-      }
-    } as never);
     const result = await resolveIntegrationCoach(
       new Request("http://localhost/api/v1/integrations?coachId=attacker"),
       "attacker"
@@ -93,5 +88,43 @@ describe("strava route-auth production IDOR", () => {
       })
     );
     expect(result).toEqual({ athleteId: "job-athlete" });
+  });
+});
+
+describe("verifyQStashJob", () => {
+  const prevSecret = process.env.INTEGRATION_AUTH_SECRET;
+  const prevQstash = process.env.QSTASH_TOKEN;
+
+  afterEach(() => {
+    process.env.INTEGRATION_AUTH_SECRET = prevSecret;
+    process.env.QSTASH_TOKEN = prevQstash;
+  });
+
+  it("denies unsigned jobs", () => {
+    delete process.env.INTEGRATION_AUTH_SECRET;
+    expect(verifyQStashJob(new Request("http://localhost/api/v1/jobs/strava-sync"))).toBe(false);
+  });
+
+  it("does not trust an upstash-signature header without the job secret", () => {
+    process.env.QSTASH_TOKEN = "qstash-token";
+    delete process.env.INTEGRATION_AUTH_SECRET;
+    expect(
+      verifyQStashJob(
+        new Request("http://localhost/api/v1/jobs/strava-sync", {
+          headers: { "upstash-signature": "forged" }
+        })
+      )
+    ).toBe(false);
+  });
+
+  it("accepts the forwarded job secret", () => {
+    process.env.INTEGRATION_AUTH_SECRET = "job-secret";
+    expect(
+      verifyQStashJob(
+        new Request("http://localhost/api/v1/jobs/strava-sync", {
+          headers: { authorization: "Bearer job-secret" }
+        })
+      )
+    ).toBe(true);
   });
 });

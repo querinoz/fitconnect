@@ -10,14 +10,13 @@ import {
 import { formatSyncAgo } from "@fitconnect/strava-integration";
 import { getStravaRateLimit } from "@/lib/integrations/strava/rate-limit-cache";
 import {
-  DEMO_STRAVA_ACTIVITIES,
-  getActivities,
   getConnection,
-  getLogs,
   listConnections,
   seedDemoStrava
 } from "@/lib/integrations/store";
 import type { WearableProvider } from "@fitconnect/types";
+import { isAuthFailure, requireAthleteId } from "@/lib/api/require-auth";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 const PROVIDER_CATALOG: {
   id: WearableProvider;
@@ -35,8 +34,12 @@ const PROVIDER_CATALOG: {
 ];
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const athleteId = searchParams.get("athleteId") ?? "a-ines";
+  const limited = await enforceRateLimit(request, "strava");
+  if (limited) return limited;
+
+  const bound = await requireAthleteId(request);
+  if (isAuthFailure(bound)) return bound.response;
+  const athleteId = bound.athleteId;
 
   let connections = listConnections(athleteId);
   const useDb = isStravaDbEnabled();
@@ -47,7 +50,7 @@ export async function GET(request: Request) {
   }
 
   const stravaConn = getConnection(athleteId, "strava");
-  let activities = getActivities(athleteId, 10);
+  let activityCount = 0;
   let lastSyncAt = stravaConn?.lastSyncAt ?? null;
   let connected = stravaConn?.status === "connected";
 
@@ -58,14 +61,20 @@ export async function GET(request: Request) {
       connected = true;
       lastSyncAt = prismaConn.lastSyncAt;
       const dbActivities = await listStravaActivities(athleteId, 10);
-      if (dbActivities.length) activities = dbActivities;
+      activityCount = dbActivities.length;
     }
+  } else {
+    activityCount = (await import("@/lib/integrations/store")).getActivities(athleteId, 50).length;
   }
 
   const providers = PROVIDER_CATALOG.map((p) => {
     const conn = connections.find((c) => c.provider === p.id);
     return {
-      ...p,
+      id: p.id,
+      label: p.label,
+      category: p.category,
+      metrics: p.metrics,
+      oauth: p.oauth,
       status: conn?.status ?? (p.id === "strava" && connected ? "connected" : "disconnected"),
       connectedAt: conn?.connectedAt ?? null,
       lastSyncAt: p.id === "strava" ? lastSyncAt : conn?.lastSyncAt ?? null,
@@ -94,11 +103,8 @@ export async function GET(request: Request) {
       connected,
       lastSyncAt,
       syncLabel: formatSyncAgo(lastSyncAt ? new Date(lastSyncAt) : null),
-      activityCount: activities.length,
-      activities,
+      activityCount,
       rateLimit
-    },
-    syncLogs: getLogs(6),
-    demoActivitiesAvailable: DEMO_STRAVA_ACTIVITIES.length
+    }
   });
 }

@@ -169,6 +169,9 @@ class LocalAuthRepository(
 
     override suspend fun deleteSession(): AppResult<Unit> = logout()
 
+    override suspend fun deleteAccount(): AppResult<Unit> =
+        AuthErrorMapper.err(AppError.AuthKind.FORBIDDEN)
+
     override suspend fun enableBiometricUnlock(enabled: Boolean): AppResult<Unit> {
         val snap = sessionStore.snapshot()
         return sessionStore.save(snap.copy(biometricUnlockEnabled = enabled))

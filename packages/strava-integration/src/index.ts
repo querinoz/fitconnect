@@ -1,6 +1,7 @@
 export {
   StravaClient,
   parseWebhookEvent,
+  isStravaAthleteRevocation,
   verifyWebhookChallenge,
   createPushSubscription,
   listPushSubscriptions,
@@ -10,8 +11,13 @@ export {
 
 export {
   STRAVA_API_ENDPOINTS,
+  STRAVA_BANNED_PATHS,
   STRAVA_ENDPOINT_CATALOG,
-  matchStravaEndpoint
+  StravaPathDeniedError,
+  assertStravaPathAllowed,
+  isBannedStravaPath,
+  matchStravaEndpoint,
+  normalizeStravaApiPath
 } from "./endpoints";
 export type { StravaEndpointRule } from "./endpoints";
 export type { StravaClientConfig, ListActivitiesParams, ActivityStreamsParams } from "./client";

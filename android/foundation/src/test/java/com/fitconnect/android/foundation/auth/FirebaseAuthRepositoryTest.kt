@@ -7,6 +7,9 @@ import com.fitconnect.android.foundation.common.Logger
 import com.fitconnect.android.foundation.session.SecureSessionStore
 import com.fitconnect.android.foundation.support.InMemorySecureStore
 import kotlinx.coroutines.runBlocking
+import com.fitconnect.android.foundation.identity.IdentityOnboarding
+import com.fitconnect.android.foundation.identity.IdentityProfile
+import com.fitconnect.android.foundation.identity.IdentityRemote
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -171,6 +174,101 @@ class FirebaseAuthRepositoryTest {
             AppError.AuthKind.PROVIDER_UNAVAILABLE,
             ((result as AppResult.Err).error as AppError.Auth).kind,
         )
+    }
+
+    @Test
+    fun bootstrapAppliesServerRoleAndLogoutClearsCredentials() = runBlocking {
+        var cleared = false
+        val remote = FakeIdentityRemote(role = UserRole.COACH)
+        val repo = FirebaseAuthRepository(
+            FakeFirebaseAuthGateway(),
+            SecureSessionStore(InMemorySecureStore()),
+            logger,
+            identityRemote = remote,
+            credentialClearer = { cleared = true },
+        )
+        val created = repo.signUp("a@b.com", "password1", "password1") as AppResult.Ok
+        assertTrue(remote.bootstrapped)
+        assertEquals(UserRole.COACH, created.value.role)
+        assertTrue(!created.value.needsRoleSelection)
+        repo.logout()
+        assertTrue(cleared)
+    }
+
+    @Test
+    fun deleteAccountCallsRemoteThenClearsSession() = runBlocking {
+        val remote = FakeIdentityRemote(role = UserRole.ATHLETE)
+        val session = SecureSessionStore(InMemorySecureStore())
+        val repo = FirebaseAuthRepository(
+            FakeFirebaseAuthGateway(),
+            session,
+            logger,
+            identityRemote = remote,
+        )
+        repo.signUp("a@b.com", "password1", "password1")
+        val deleted = repo.deleteAccount()
+        assertTrue(deleted is AppResult.Ok)
+        assertTrue(remote.deleted)
+        assertTrue(!session.isLoggedIn())
+    }
+
+    @Test
+    fun deleteAccountWithoutRemoteIsDenied() = runBlocking {
+        val session = SecureSessionStore(InMemorySecureStore())
+        val repo = FirebaseAuthRepository(FakeFirebaseAuthGateway(), session, logger)
+        repo.signUp("a@b.com", "password1", "password1")
+        val deleted = repo.deleteAccount()
+        assertEquals(
+            AppError.AuthKind.FORBIDDEN,
+            ((deleted as AppResult.Err).error as AppError.Auth).kind,
+        )
+        assertTrue(session.isLoggedIn())
+    }
+}
+
+private class FakeIdentityRemote(
+    private val role: UserRole? = UserRole.ATHLETE,
+) : IdentityRemote {
+    var bootstrapped = false
+    var deleted = false
+
+    override suspend fun bootstrap(
+        displayName: String?,
+        email: String?,
+        photoUrl: String?,
+    ): AppResult<IdentityProfile> {
+        bootstrapped = true
+        return AppResult.Ok(
+            IdentityProfile(
+                uid = "uid-1",
+                email = email,
+                displayName = displayName,
+                avatarUrl = photoUrl,
+                locale = null,
+                timezone = null,
+                accent = null,
+                role = role,
+                onboardingCompleted = false,
+                onboardingStep = 0,
+            ),
+        )
+    }
+
+    override suspend fun getProfile(): AppResult<IdentityProfile> =
+        bootstrap(null, null, null)
+
+    override suspend fun setRole(role: UserRole): AppResult<IdentityProfile> =
+        bootstrap(null, null, null)
+
+    override suspend fun getOnboarding(): AppResult<IdentityOnboarding> =
+        AppResult.Ok(IdentityOnboarding("uid-1", role, 0, false, "{}"))
+
+    override suspend fun putOnboarding(state: IdentityOnboarding): AppResult<IdentityOnboarding> =
+        AppResult.Ok(state)
+
+    override suspend fun deleteAccount(): AppResult<Unit> {
+        deleted = true
+        return AppResult.Ok(Unit)
     }
 }
 

@@ -29,10 +29,10 @@ export function Footer() {
   ];
 
   const legal = [
-    { label: t("footer", "privacy"), href: "#" },
-    { label: t("footer", "terms"), href: "#" },
-    { label: t("footer", "trustSafety"), href: "#" },
-    { label: t("footer", "contact"), href: "#" }
+    { label: t("footer", "privacy"), href: "/privacy" },
+    { label: t("footer", "terms"), href: "/terms" },
+    { label: t("footer", "trustSafety"), href: "/privacy#trust" },
+    { label: t("footer", "contact"), href: "mailto:security@fitconnect.app" }
   ];
 
   const social = [

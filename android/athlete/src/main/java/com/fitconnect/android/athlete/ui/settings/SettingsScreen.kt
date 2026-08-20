@@ -16,6 +16,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
+import com.fitconnect.android.athlete.ui.LocalAthleteSignOut
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.designui.components.EliteAppearancePicker
 import com.fitconnect.android.designui.components.EliteButton
@@ -26,6 +27,7 @@ import com.fitconnect.android.designui.components.EliteSwitch
 import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.foundation.i18n.AppLocale
 import com.fitconnect.android.foundation.i18n.LocaleApplier
+import com.fitconnect.android.foundation.theme.AccentPreset
 import com.fitconnect.android.foundation.theme.HoneycombIntensity
 import com.fitconnect.android.foundation.theme.ThemeMode
 import com.fitconnect.ascend.domain.AscendPrefs
@@ -38,13 +40,18 @@ fun SettingsScreen(
     onOpenTelemetry: () -> Unit,
 ) {
     val container = LocalAthleteContainer.current
+    val onSignedOut = LocalAthleteSignOut.current
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val themeMode by container.platform.themeSettings.observe().collectAsState(initial = ThemeMode.SYSTEM)
+    val accent by container.platform.themeSettings.observeAccent()
+        .collectAsState(initial = AccentPreset.VOLTLINE)
     val honeycomb by container.platform.themeSettings.observeHoneycomb()
         .collectAsState(initial = HoneycombIntensity.SUBTLE)
     val locale by container.platform.localeManager.observe().collectAsState(initial = AppLocale.EN)
     var prefs by remember { mutableStateOf(container.ascend.snapshot(LocalAthleteRepository.ATHLETE_ID).prefs) }
+    var confirmDelete by remember { mutableStateOf(false) }
+    var deleteMessage by remember { mutableStateOf<String?>(null) }
 
     AthleteScreenScaffold(
         title = "Settings",
@@ -59,6 +66,10 @@ fun SettingsScreen(
                         mode = themeMode,
                         onModeChange = { next ->
                             scope.launch { container.platform.themeSettings.setMode(next) }
+                        },
+                        accent = accent,
+                        onAccentChange = { next ->
+                            scope.launch { container.platform.themeSettings.setAccent(next) }
                         },
                     )
                     Text("Honeycomb atmosphere", style = MaterialTheme.typography.titleSmall)
@@ -106,7 +117,7 @@ fun SettingsScreen(
                 EliteStack {
                     Text("Notifications", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "Push delivery is LOCAL_DEMO until FCM production credentials exist (PENDING_HUMAN).",
+                        "Push uses FCM when google-services.json is present. Device delivery remains PENDING_HUMAN until Firebase Console + Play credentials exist.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -135,6 +146,47 @@ fun SettingsScreen(
                     )
                 }
             }
+        }
+        item {
+            EliteCard {
+                EliteStack {
+                    Text("Account deletion", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Removes FitConnect app identity and Strava tokens for this user. Firebase Auth user deletion remains PENDING_HUMAN. LOCAL_DEMO accounts are refused.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (deleteMessage != null) {
+                        Text(deleteMessage!!, style = MaterialTheme.typography.bodySmall)
+                    }
+                    EliteButton(
+                        label = if (confirmDelete) "Confirm DELETE" else "Request account deletion",
+                        variant = EliteButtonVariant.Destructive,
+                        modifier = Modifier.testTag("athlete_delete_account"),
+                        onClick = {
+                            scope.launch {
+                                if (!confirmDelete) {
+                                    confirmDelete = true
+                                    return@launch
+                                }
+                                when (container.platform.authRepository.deleteAccount()) {
+                                    is com.fitconnect.android.foundation.common.AppResult.Ok -> {
+                                        container.platform.analytics.reset()
+                                        onSignedOut()
+                                    }
+                                    is com.fitconnect.android.foundation.common.AppResult.Err -> {
+                                        deleteMessage = "Deletion denied"
+                                        confirmDelete = false
+                                    }
+                                }
+                            }
+                        },
+                    )
+                }
+            }
+        }
+        item {
+            LocalDebugSettingsSlot.current?.invoke()
         }
         item {
             EliteStack {

@@ -101,6 +101,10 @@ interface AuthRepository {
 
     suspend fun assignRole(role: UserRole): AppResult<AuthUser> =
         AppResult.Err(AppError.Auth(AppError.AuthKind.FORBIDDEN))
+
+    /** App-data deletion. LOCAL_DEMO adapters must refuse. Firebase Auth user delete is PENDING_HUMAN. */
+    suspend fun deleteAccount(): AppResult<Unit> =
+        AppResult.Err(AppError.Auth(AppError.AuthKind.FORBIDDEN))
 }
 
 fun interface TokenRefresher {

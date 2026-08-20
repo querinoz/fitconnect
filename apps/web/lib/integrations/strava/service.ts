@@ -73,10 +73,27 @@ export async function saveConnection(input: {
 export async function markDeauthorized(stravaAthleteId: number) {
   const prisma = getPrisma();
   if (!prisma) return;
-  await prisma.stravaConnection.updateMany({
-    where: { stravaAthleteId },
-    data: { deauthorizedAt: new Date() }
+  const conn = await prisma.stravaConnection.findFirst({
+    where: { stravaAthleteId }
   });
+  if (conn) {
+    await prisma.stravaActivity.deleteMany({
+      where: { athleteExternalId: conn.athleteExternalId }
+    });
+  }
+  await prisma.stravaConnection.deleteMany({
+    where: { stravaAthleteId }
+  });
+}
+
+export function stravaRevocationPurgePlan(athleteExternalId: string) {
+  return {
+    athleteExternalId,
+    deleteActivities: true,
+    deleteLaps: true,
+    deleteSegmentEfforts: true,
+    deleteConnectionAndTokens: true
+  } as const;
 }
 
 export function createStravaClientForAthlete(athleteExternalId: string): StravaClient | null {
@@ -346,25 +363,19 @@ export async function listActivitiesForAthlete(athleteExternalId: string, limit 
   });
 }
 
-export async function listActivitiesForCoach(coachExternalId: string, limit = 20) {
+export async function listActivitiesForCoach(
+  _coachExternalId?: string,
+  limit = 20
+): Promise<never> {
+  void limit;
+  throw new Error("strava_not_shareable");
+}
+
+export async function purgeStravaForAthlete(athleteExternalId: string): Promise<void> {
   const prisma = getPrisma();
-  if (!prisma) return [];
-
-  const athletes = await prisma.athleteProfile.findMany({
-    where: { coachExternalId },
-    select: { externalId: true, name: true }
-  });
-  const ids = athletes.map((a) => a.externalId);
-  if (!ids.length) return [];
-
-  const activities = await prisma.stravaActivity.findMany({
-    where: { athleteExternalId: { in: ids }, deletedAt: null },
-    orderBy: { startDate: "desc" },
-    take: limit
-  });
-
-  const nameById = Object.fromEntries(athletes.map((a) => [a.externalId, a.name]));
-  return activities.map((a) => ({ ...a, athleteName: nameById[a.athleteExternalId] ?? a.athleteExternalId }));
+  if (!prisma) return;
+  await prisma.stravaActivity.deleteMany({ where: { athleteExternalId } });
+  await prisma.stravaConnection.deleteMany({ where: { athleteExternalId } });
 }
 
 export function isStravaDbEnabled(): boolean {

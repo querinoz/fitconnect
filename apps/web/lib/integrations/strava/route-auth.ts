@@ -19,7 +19,7 @@ function fromAuthFailure(
   return { error: "unauthorized", status };
 }
 
-/** Resolve athlete id for integration routes — demo permissive; prod binds to Supabase session. */
+/** Resolve athlete id for integration routes — demo permissive; prod binds to Firebase UID. */
 export async function resolveIntegrationAthlete(
   request: Request,
   paramId?: string | null
@@ -66,11 +66,13 @@ export async function resolveIntegrationCoach(
   return { coachId: result.coachId };
 }
 
+/**
+ * Job auth is a shared machine secret only. Presence of `upstash-signature`
+ * is not verification — QStash deliveries must forward Authorization via
+ * `Upstash-Forward-Authorization`.
+ */
 export function verifyQStashJob(request: Request): boolean {
-  if (process.env.NODE_ENV !== "production") return true;
-  const token = process.env.QSTASH_TOKEN;
-  if (!token) return false;
-  const auth = request.headers.get("authorization");
-  if (auth === `Bearer ${token}`) return true;
-  return Boolean(request.headers.get("upstash-signature"));
+  const jobSecret = process.env.INTEGRATION_AUTH_SECRET?.trim();
+  if (!jobSecret || /fitconnect-dev/i.test(jobSecret)) return false;
+  return request.headers.get("authorization") === `Bearer ${jobSecret}`;
 }

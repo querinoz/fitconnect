@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { computeReadinessForApi } from "@/lib/readiness/compute";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
+import { requireAuth } from "@/lib/api/require-auth";
 
 const computeBodySchema = z.object({
   hrvMs: z.number(),
@@ -12,6 +14,12 @@ const computeBodySchema = z.object({
 });
 
 export async function POST(req: Request) {
+  const limited = await enforceRateLimit(req, "highcost");
+  if (limited) return limited;
+
+  const auth = await requireAuth(req);
+  if (!auth.ok) return auth.response;
+
   let body: unknown;
   try {
     body = await req.json();

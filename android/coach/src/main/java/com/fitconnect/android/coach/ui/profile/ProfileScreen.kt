@@ -31,6 +31,7 @@ import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.common.AppResult
+import com.fitconnect.android.foundation.theme.AccentPreset
 import com.fitconnect.android.foundation.theme.ThemeMode
 import kotlinx.coroutines.launch
 
@@ -49,8 +50,11 @@ fun ProfileScreen(
     val onSignedOut = LocalCoachSignOut.current
     val scope = rememberCoroutineScope()
     val themeMode by container.platform.themeSettings.observe().collectAsState(initial = ThemeMode.SYSTEM)
+    val accent by container.platform.themeSettings.observeAccent()
+        .collectAsState(initial = AccentPreset.VOLTLINE)
     var profile by remember { mutableStateOf<CoachProfile?>(null) }
     var docs by remember { mutableStateOf<List<CoachFileRef>>(emptyList()) }
+    var confirmDelete by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         container.platform.analytics.screen("coach_profile")
@@ -100,6 +104,10 @@ fun ProfileScreen(
                     onModeChange = { next ->
                         scope.launch { container.platform.themeSettings.setMode(next) }
                     },
+                    accent = accent,
+                    onAccentChange = { next ->
+                        scope.launch { container.platform.themeSettings.setAccent(next) }
+                    },
                 )
             }
         }
@@ -148,6 +156,28 @@ fun ProfileScreen(
                     )
                 }
             }
+        }
+        item {
+            EliteButton(
+                label = if (confirmDelete) "Confirm DELETE" else "Request account deletion",
+                variant = EliteButtonVariant.Destructive,
+                modifier = Modifier.testTag("coach_delete_account"),
+                onClick = {
+                    scope.launch {
+                        if (!confirmDelete) {
+                            confirmDelete = true
+                            return@launch
+                        }
+                        when (container.platform.authRepository.deleteAccount()) {
+                            is AppResult.Ok -> {
+                                container.platform.analytics.reset()
+                                onSignedOut()
+                            }
+                            is AppResult.Err -> confirmDelete = false
+                        }
+                    }
+                },
+            )
         }
         item {
             EliteButton(

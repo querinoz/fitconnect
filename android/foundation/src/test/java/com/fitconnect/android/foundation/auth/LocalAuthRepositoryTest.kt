@@ -205,4 +205,20 @@ class LocalAuthRepositoryTest {
         )
         assertFalse(session.isLoggedIn())
     }
+
+    @Test
+    fun localDemoRefusesAccountDeletion() = runBlocking {
+        val session = SecureSessionStore(InMemorySecureStore())
+        val auth = LocalAuthRepository(session, logger)
+        auth.signIn(
+            AuthProviderKind.EMAIL_PASSWORD,
+            AuthCredentials(email = "a@b.com", password = "password1"),
+        )
+        val deleted = auth.deleteAccount()
+        assertEquals(
+            com.fitconnect.android.foundation.common.AppError.AuthKind.FORBIDDEN,
+            ((deleted as AppResult.Err).error as com.fitconnect.android.foundation.common.AppError.Auth).kind,
+        )
+        assertTrue(session.isLoggedIn())
+    }
 }

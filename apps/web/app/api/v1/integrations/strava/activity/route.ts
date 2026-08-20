@@ -2,8 +2,13 @@ import { NextResponse } from "next/server";
 import { listActivitiesForAthlete, syncActivityById } from "@/lib/integrations/strava/service";
 import { resolveIntegrationAthlete } from "@/lib/integrations/strava/route-auth";
 import { getPrisma } from "@/lib/db/client";
+import { canAccessStravaOwnedRecord } from "@/lib/fitness/workout-session-policy";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 export async function GET(request: Request) {
+  const limited = await enforceRateLimit(request, "strava");
+  if (limited) return limited;
+
   const { searchParams } = new URL(request.url);
   const auth = await resolveIntegrationAthlete(request, searchParams.get("athleteId"));
   if ("error" in auth) {
@@ -23,6 +28,9 @@ export async function GET(request: Request) {
       row = await prisma.stravaActivity.findUnique({ where: { stravaId } });
     }
     if (row) {
+      if (!canAccessStravaOwnedRecord({ actorId: auth.athleteId, ownerId: row.athleteExternalId })) {
+        return NextResponse.json({ error: "forbidden" }, { status: 403 });
+      }
       return NextResponse.json({
         activity: {
           id: String(row.stravaId),

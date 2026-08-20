@@ -22,11 +22,17 @@ export function parseRateLimitHeaders(headers: Headers): StravaRateLimit {
   };
 }
 
-export function isRateLimited(limits: StravaRateLimit): boolean {
-  return (
-    limits.fifteenMinUsage >= limits.fifteenMinLimit ||
-    limits.dailyUsage >= limits.dailyLimit
-  );
+export function isRateLimited(
+  limits: StravaRateLimit,
+  threshold = 0.85
+): boolean {
+  const fifteen =
+    limits.fifteenMinLimit <= 0
+      ? 0
+      : limits.fifteenMinUsage / limits.fifteenMinLimit;
+  const daily =
+    limits.dailyLimit <= 0 ? 0 : limits.dailyUsage / limits.dailyLimit;
+  return fifteen >= threshold || daily >= threshold;
 }
 
 export async function sleep(ms: number): Promise<void> {

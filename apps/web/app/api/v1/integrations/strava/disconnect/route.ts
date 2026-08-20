@@ -8,8 +8,11 @@ import {
 import { resolveIntegrationAthlete } from "@/lib/integrations/strava/route-auth";
 import { decryptToken } from "@/lib/integrations/strava/token-crypto";
 import { getConnection, upsertConnection } from "@/lib/integrations/store";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 export async function POST(request: Request) {
+  const limited = await enforceRateLimit(request, "strava");
+  if (limited) return limited;
   const body = (await request.json().catch(() => ({}))) as { athleteId?: string };
   const auth = await resolveIntegrationAthlete(request, body.athleteId);
   if ("error" in auth) {
