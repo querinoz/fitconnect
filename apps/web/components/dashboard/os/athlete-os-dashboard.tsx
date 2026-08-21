@@ -90,7 +90,7 @@ export function AthleteOsDashboard({
   streakWeeks = 5,
   onBookSession
 }: AthleteOsDashboardProps) {
-  const { dashboard, hub } = useLocale();
+  const { dashboard, hub, insights } = useLocale();
   const os = dashboard.os;
   const inAppShell = useInEliteShell();
   const compactCockpit = inAppShell;
@@ -188,6 +188,9 @@ export function AthleteOsDashboard({
                     >
                       <Bell className="h-3.5 w-3.5" />
                     </Button>
+                    <EliteButton asChild variant="ghost" size="sm">
+                      <Link href="/insights">{insights.openCta}</Link>
+                    </EliteButton>
                     <EliteButton asChild size="sm">
                       <Link href="/discover">{os.findCoach}</Link>
                     </EliteButton>

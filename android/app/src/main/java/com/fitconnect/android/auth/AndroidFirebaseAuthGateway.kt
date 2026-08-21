@@ -115,20 +115,22 @@ class AndroidFirebaseAuthGateway(
             ?: return AuthErrorMapper.err(AppError.AuthKind.SESSION_EXPIRED)
         return AppResult.Ok(
             IdentitySnapshot(
-                uid = user.uid,
-                email = user.email,
-                emailVerified = user.isEmailVerified,
-                providers = user.providerData.mapNotNull { info ->
-                    when (info.providerId) {
-                        EmailAuthProvider.PROVIDER_ID -> AuthProviderKind.EMAIL_PASSWORD
-                        GoogleAuthProvider.PROVIDER_ID -> AuthProviderKind.GOOGLE
-                        "apple.com" -> AuthProviderKind.APPLE
-                        else -> null
-                    }
-                }.toSet(),
-                idToken = token,
-                refreshToken = null,
-            ),
+                    uid = user.uid,
+                    email = user.email,
+                    emailVerified = user.isEmailVerified,
+                    providers = user.providerData.mapNotNull { info ->
+                        when (info.providerId) {
+                            EmailAuthProvider.PROVIDER_ID -> AuthProviderKind.EMAIL_PASSWORD
+                            GoogleAuthProvider.PROVIDER_ID -> AuthProviderKind.GOOGLE
+                            "apple.com" -> AuthProviderKind.APPLE
+                            else -> null
+                        }
+                    }.toSet(),
+                    idToken = token,
+                    refreshToken = null,
+                    displayName = user.displayName,
+                    photoUrl = user.photoUrl?.toString(),
+                ),
         )
     }
 

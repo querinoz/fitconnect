@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="pt-PT" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FitConnect · Elite OS — Dashboards Web</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   TOKENS — copiados de apps/web/app/elite-os.css (canónicos, não alterar)
+   ═══════════════════════════════════════════════════════════════════ */
+:root{
+  --eos-floor:#070b14;
+  --eos-carbon:#111827;
+  --eos-elevated:#151b2d;
+  --eos-instrument-face:#0a0e15;
+  --eos-instrument-bezel:#161a22;
+  --eos-instrument-track:#1a2028;
+  --eos-surface-container-lowest:#0e0d16;
+  --eos-surface-container-low:#1b1b24;
+  --eos-surface-container:#1f1f28;
+  --eos-surface-container-high:#2a2933;
+
+  --eos-voltline:#c8ff00;
+  --eos-voltline-dim:rgba(200,255,0,.12);
+  --eos-voltline-glow:rgba(200,255,0,.40);
+  --eos-on-volt:#0f1400;
+  --eos-telemetry:#3cd7ff;
+  --eos-telemetry-dim:rgba(60,215,255,.12);
+  --eos-iris:#6c63ff;
+  --eos-connect:#00ddb4;
+  --eos-performance:#00e090;
+  --eos-recovery:#ffb020;
+  --eos-alert:#ff3a5c;
+  --eos-patent-steel:#7a8899;
+
+  --eos-on-surface:#e4e1ee;
+  --eos-on-surface-muted:#c7c4d8;
+  --eos-on-surface-subtle:rgba(228,225,238,.52);
+  --eos-on-surface-faint:rgba(228,225,238,.28);   /* decorativo apenas — 2.16:1, NAO usar em texto */
+  --eos-chart-ink:rgba(228,225,238,.56);          /* texto de grafico — medido ≥4.5:1 em todas as superficies (AA) */
+  --eos-outline:rgba(255,255,255,.08);
+  --eos-outline-strong:rgba(255,255,255,.14);
+
+  --eos-radius-nested:12px;
+  --eos-radius-control:18px;
+  --eos-radius-card:24px;
+  --eos-radius-pill:9999px;
+
+  --eos-unit:4px;
+  --eos-stack-sm:8px;
+  --eos-stack-md:16px;
+  --eos-stack-lg:24px;
+  --eos-gutter:24px;
+  --eos-bento-gap:20px;
+  --eos-container-margin:32px;
+
+  --eos-ease-out:cubic-bezier(.16,1,.3,1);
+  --eos-duration-micro:150ms;
+  --eos-duration-ui:220ms;
+  --eos-duration-screen:400ms;
+  --eos-duration-data:1200ms;
+
+  /* ── ESCALA DE GRÁFICO (nova) ─────────────────────────────────────
+     As hues canónicas a brilho pleno caem fora da banda de lightness
+     OKLCH do modo escuro (L 0.48–0.67) quando usadas como séries.
+     Estes passos mantêm a MESMA hue, dessaturada para a banda.
+     Validado: node scripts/validate_palette.js
+       "#00A2C4,#7EA200,#7F80FF,#C38400" --mode dark --surface "#0A0E15"
+       → 5/5 PASS · pior par adjacente ΔE 20.3 protan / 8.1 tritan
+     Volt pleno (#C8FF00) fica reservado ao herói e ao CTA. ────────── */
+  --eos-chart-1:#00a2c4;  /* telemetry-700 */
+  --eos-chart-2:#7ea200;  /* voltline-700  */
+  --eos-chart-3:#7f80ff;  /* iris-500      */
+  --eos-chart-4:#c38400;  /* recovery-700  */
+
+  /* sequencial — uma só hue, claro→escuro (telemetry) */
+  --eos-seq-1:#003947; --eos-seq-2:#00566a; --eos-seq-3:#00758e;
+  --eos-seq-4:#0095b5; --eos-seq-5:#00b7dd; --eos-seq-6:#41d8ff;
+
+  /* divergente — dois polos + cinzento neutro ao meio */
+  --eos-div-warm-3:#db9400; --eos-div-warm-2:#b37900; --eos-div-warm-1:#8d5e00;
+  --eos-div-mid:#3c3b46;
+  --eos-div-cool-1:#00758e; --eos-div-cool-2:#0095b5; --eos-div-cool-3:#00b7dd;
+
+  --grid:rgba(255,255,255,.06);
+  --axis:rgba(228,225,238,.34);
+  --sidebar-w:248px;
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--eos-floor);color:var(--eos-on-surface);
+  font-family:"Plus Jakarta Sans",system-ui,sans-serif;
+  font-size:14px;line-height:1.5;min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:Syne,system-ui,sans-serif;font-weight:700;letter-spacing:-.01em}
+.mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--eos-voltline);outline-offset:2px;border-radius:4px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip{position:absolute;left:8px;top:-48px;z-index:99;background:var(--eos-voltline);color:var(--eos-on-volt);padding:10px 16px;border-radius:var(--eos-radius-pill);font-weight:700;transition:top var(--eos-duration-ui) var(--eos-ease-out)}
+.skip:focus{top:8px}
+
+/* ── SHELL ───────────────────────────────────────────────────────── */
+.shell{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh}
+aside{
+  background:var(--eos-instrument-face);border-right:1px solid var(--eos-outline);
+  padding:var(--eos-stack-lg) var(--eos-stack-md);position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;gap:var(--eos-stack-lg);overflow-y:auto;
+}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px}
+.brand-mark{width:28px;height:28px;flex:none}
+.brand-name{font-family:Syne;font-weight:800;font-size:16px;letter-spacing:.02em}
+.brand-sub{font-size:9px;letter-spacing:.18em;color:var(--eos-chart-ink);font-family:"JetBrains Mono",monospace}
+nav ul{list-style:none;display:flex;flex-direction:column;gap:2px}
+.navlink{
+  display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--eos-radius-nested);
+  color:var(--eos-on-surface-subtle);text-decoration:none;font-weight:600;font-size:13px;
+  letter-spacing:.06em;transition:background var(--eos-duration-micro) var(--eos-ease-out),color var(--eos-duration-micro) var(--eos-ease-out);
+  border:none;background:none;width:100%;cursor:pointer;text-align:left;font-family:inherit;
+}
+.navlink:hover{background:var(--eos-surface-container-low);color:var(--eos-on-surface)}
+.navlink[aria-current="page"]{background:var(--eos-voltline-dim);color:var(--eos-voltline)}
+.navlink .ico{width:18px;height:18px;flex:none;opacity:.9}
+.navlink kbd{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--eos-chart-ink);border:1px solid var(--eos-outline);padding:1px 5px;border-radius:4px}
+.nav-sep{height:1px;background:var(--eos-outline);margin:10px 4px}
+.aside-foot{margin-top:auto;font-size:11px;color:var(--eos-chart-ink);padding:0 8px}
+
+main{padding:var(--eos-container-margin);max-width:1680px;width:100%}
+
+/* ── TOPO ────────────────────────────────────────────────────────── */
+.topbar{display:flex;align-items:flex-start;gap:var(--eos-stack-md);flex-wrap:wrap;margin-bottom:var(--eos-stack-lg)}
+.topbar h1{font-size:clamp(22px,2.4vw,30px)}
+.topbar .sub{color:var(--eos-on-surface-subtle);font-size:13px;margin-top:2px}
+.topbar-right{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+.live{
+  display:flex;align-items:center;gap:10px;padding:8px 14px 8px 12px;
+  border-radius:var(--eos-radius-pill);border:1px solid rgba(60,215,255,.32);
+  background:var(--eos-telemetry-dim);font-size:12px;font-weight:600;
+}
+.live .dot{width:8px;height:8px;border-radius:50%;background:var(--eos-telemetry);animation:pulse 2s var(--eos-ease-out) infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.82)}}
+.live .origin{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.1em;color:var(--eos-telemetry)}
+.live button{
+  background:var(--eos-telemetry);color:#04222b;border:none;border-radius:var(--eos-radius-pill);
+  padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.04em;
+}
+
+.demo-flag{
+  display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:var(--eos-radius-pill);
+  border:1px dashed rgba(255,176,32,.45);background:rgba(255,176,32,.08);
+  color:var(--eos-recovery);font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.1em;
+}
+
+/* ── CONTROLOS ───────────────────────────────────────────────────── */
+.filters{
+  display:flex;gap:var(--eos-stack-sm);align-items:center;flex-wrap:wrap;
+  padding:var(--eos-stack-sm) 0 var(--eos-stack-lg);
+}
+.seg{display:inline-flex;background:var(--eos-surface-container-lowest);border:1px solid var(--eos-outline);border-radius:var(--eos-radius-pill);padding:3px}
+.seg button{
+  background:none;border:none;color:var(--eos-on-surface-subtle);font-family:"JetBrains Mono",monospace;
+  font-size:11px;letter-spacing:.08em;padding:7px 14px;border-radius:var(--eos-radius-pill);cursor:pointer;
+  transition:all var(--eos-duration-micro) var(--eos-ease-out);min-height:32px;
+}
+.seg button[aria-pressed="true"]{background:var(--eos-voltline);color:var(--eos-on-volt);font-weight:700}
+.seg button:hover:not([aria-pressed="true"]){color:var(--eos-on-surface)}
+select,input[type="search"]{
+  background:var(--eos-surface-container-lowest);border:1px solid var(--eos-outline);
+  color:var(--eos-on-surface);border-radius:var(--eos-radius-control);padding:9px 13px;
+  font-family:inherit;font-size:13px;min-height:38px;
+}
+.btn{
+  display:inline-flex;align-items:center;gap:7px;background:none;border:1px solid var(--eos-outline-strong);
+  color:var(--eos-on-surface);border-radius:var(--eos-radius-control);padding:9px 15px;
+  font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;min-height:38px;
+  transition:all var(--eos-duration-micro) var(--eos-ease-out);
+}
+.btn:hover{background:var(--eos-surface-container-low);border-color:var(--eos-outline-strong)}
+.btn:active{transform:scale(.97)}
+.btn-volt{background:var(--eos-voltline);color:var(--eos-on-volt);border-color:var(--eos-voltline);font-weight:700}
+.btn-volt:hover{background:#d4ff4d;border-color:#d4ff4d}
+
+/* ── GRELHA BENTO ────────────────────────────────────────────────── */
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--eos-bento-gap);align-items:start}
+.span-2{grid-column:span 2}
+.span-3{grid-column:span 3}
+@media(max-width:1279px){
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .span-2,.span-3{grid-column:span 2}
+}
+@media(max-width:899px){
+  .shell{grid-template-columns:1fr}
+  aside{position:static;height:auto;flex-direction:row;align-items:center;overflow-x:auto;gap:var(--eos-stack-md);padding:12px var(--eos-stack-md)}
+  aside nav ul{flex-direction:row}
+  .navlink kbd,.nav-sep,.aside-foot,.brand-sub{display:none}
+  .grid{grid-template-columns:1fr}
+  .span-2,.span-3{grid-column:span 1}
+  main{padding:var(--eos-stack-md)}
+}
+
+.card{
+  background:linear-gradient(180deg,var(--eos-carbon) 0%,var(--eos-instrument-face) 100%);
+  border:1px solid var(--eos-outline);border-radius:var(--eos-radius-card);
+  padding:var(--eos-stack-lg);position:relative;overflow:hidden;
+}
+.card::before{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent)}
+.card-head{display:flex;align-items:flex-start;gap:var(--eos-stack-md);margin-bottom:var(--eos-stack-md)}
+.card-head h2{font-size:15px;letter-spacing:0}
+.card-head .desc{font-size:12px;color:var(--eos-on-surface-subtle);margin-top:3px;max-width:52ch}
+.card-head .tools{margin-left:auto;display:flex;gap:6px;align-items:center}
+.chip{
+  font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.11em;
+  padding:4px 9px;border-radius:var(--eos-radius-pill);border:1px solid var(--eos-outline);
+  color:var(--eos-on-surface-subtle);background:var(--eos-surface-container-lowest);white-space:nowrap;
+}
+.icon-btn{
+  background:none;border:1px solid var(--eos-outline);border-radius:8px;width:30px;height:30px;
+  display:grid;place-items:center;cursor:pointer;color:var(--eos-on-surface-subtle);
+  transition:all var(--eos-duration-micro) var(--eos-ease-out);
+}
+.icon-btn:hover{color:var(--eos-on-surface);background:var(--eos-surface-container-low)}
+.icon-btn[aria-pressed="true"]{background:var(--eos-voltline-dim);color:var(--eos-voltline);border-color:rgba(200,255,0,.3)}
+
+/* ── LEGENDA ─────────────────────────────────────────────────────── */
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:var(--eos-stack-md);padding-top:var(--eos-stack-md);border-top:1px solid var(--eos-outline)}
+.legend .item{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--eos-on-surface-muted)}
+.legend .sw{width:11px;height:11px;border-radius:3px;flex:none}
+.legend .sw.line{height:3px;border-radius:2px;width:16px}
+
+/* ── HERÓI / MOSAICOS ────────────────────────────────────────────── */
+.hero-num{font-family:Syne;font-weight:800;font-size:clamp(38px,4.6vw,60px);line-height:.94;color:var(--eos-voltline);letter-spacing:-.02em}
+.hero-unit{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--eos-on-surface-subtle);letter-spacing:.1em}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.tile{background:var(--eos-surface-container-lowest);border:1px solid var(--eos-outline);border-radius:var(--eos-radius-nested);padding:13px}
+.tile .lbl{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.13em;color:var(--eos-chart-ink);margin-bottom:6px}
+.tile .val{font-family:Syne;font-weight:700;font-size:22px;line-height:1}
+.tile .delta{font-size:11px;margin-top:5px;display:flex;align-items:center;gap:4px}
+.up{color:var(--eos-performance)}.down{color:var(--eos-alert)}.flat{color:var(--eos-patent-steel)}
+
+/* ── ESTADO / SVG ────────────────────────────────────────────────── */
+.empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  min-height:190px;text-align:center;color:var(--eos-on-surface-subtle);
+  border:1px dashed var(--eos-outline-strong);border-radius:var(--eos-radius-nested);padding:24px;
+}
+.empty .t{font-family:Syne;font-weight:700;font-size:14px;color:var(--eos-on-surface)}
+.empty .d{font-size:12px;max-width:38ch}
+svg.chart{display:block;width:100%;height:auto;overflow:visible}
+.tick{font-family:"JetBrains Mono",monospace;font-size:9.5px;fill:var(--eos-chart-ink)}
+.gridline{stroke:var(--grid);stroke-width:1}
+.baseline{stroke:var(--axis);stroke-width:1}
+.dlabel{font-family:"JetBrains Mono",monospace;font-size:10px;font-weight:700}
+
+/* ── TOOLTIP ─────────────────────────────────────────────────────── */
+.tt{
+  position:fixed;z-index:60;pointer-events:none;opacity:0;
+  background:var(--eos-surface-container);border:1px solid var(--eos-outline-strong);
+  border-radius:var(--eos-radius-nested);padding:10px 13px;font-size:12px;min-width:150px;
+  box-shadow:0 20px 50px -20px rgba(0,0,0,.9);transition:opacity var(--eos-duration-micro) var(--eos-ease-out);
+}
+.tt.on{opacity:1}
+.tt .h{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.11em;color:var(--eos-chart-ink);margin-bottom:7px}
+.tt .r{display:flex;align-items:center;gap:8px;margin-top:4px}
+.tt .r .sw{width:9px;height:9px;border-radius:2px;flex:none}
+.tt .r .n{margin-left:auto;font-family:"JetBrains Mono",monospace;font-weight:700}
+
+/* ── TABELA ──────────────────────────────────────────────────────── */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--eos-outline);border-radius:var(--eos-radius-nested)}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
+thead th{
+  text-align:left;padding:11px 14px;font-family:"JetBrains Mono",monospace;font-size:9.5px;
+  letter-spacing:.12em;color:var(--eos-chart-ink);background:var(--eos-surface-container-lowest);
+  border-bottom:1px solid var(--eos-outline);position:sticky;top:0;white-space:nowrap;
+}
+thead th button{background:none;border:none;color:inherit;font:inherit;letter-spacing:inherit;cursor:pointer;display:flex;align-items:center;gap:5px;padding:0;min-height:24px}
+thead th button:hover{color:var(--eos-on-surface)}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--eos-outline);color:var(--eos-on-surface-muted)}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+tbody tr:focus-within{background:var(--eos-voltline-dim)}
+td.num{font-family:"JetBrains Mono",monospace;text-align:right;color:var(--eos-on-surface)}
+.src{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.08em;padding:2px 7px;border-radius:var(--eos-radius-pill);border:1px solid var(--eos-outline)}
+.src-watch{color:var(--eos-telemetry);border-color:rgba(60,215,255,.3)}
+.src-phone{color:var(--eos-voltline);border-color:rgba(200,255,0,.28)}
+.src-cloud{color:var(--eos-patent-steel)}
+
+/* ── VISTA TABELA (a11y) ─────────────────────────────────────────── */
+.tableview{margin-top:var(--eos-stack-md);display:none}
+.tableview.on{display:block}
+.tableview table{min-width:0;font-size:12px}
+
+/* ── DIÁLOGO ATALHOS ─────────────────────────────────────────────── */
+dialog{
+  background:var(--eos-carbon);border:1px solid var(--eos-outline-strong);border-radius:var(--eos-radius-card);
+  color:var(--eos-on-surface);padding:var(--eos-stack-lg);max-width:440px;width:calc(100% - 32px);
+}
+dialog::backdrop{background:rgba(7,11,20,.82);backdrop-filter:blur(4px)}
+dialog h2{font-size:16px;margin-bottom:var(--eos-stack-md)}
+.kb{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--eos-outline);font-size:13px}
+.kb:last-of-type{border-bottom:none}
+.kb kbd{font-family:"JetBrains Mono",monospace;font-size:11px;background:var(--eos-surface-container);border:1px solid var(--eos-outline);border-radius:5px;padding:2px 7px}
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120%);
+  background:var(--eos-voltline);color:var(--eos-on-volt);padding:12px 22px;border-radius:var(--eos-radius-pill);
+  font-weight:700;font-size:13px;z-index:80;visibility:hidden;
+  transition:transform var(--eos-duration-ui) var(--eos-ease-out),visibility 0s linear var(--eos-duration-ui);
+}
+.toast.on{transform:translateX(-50%) translateY(0);visibility:visible;transition-delay:0s}
+</style>
+</head>
+<body data-palette="#00A2C4,#7EA200,#7F80FF,#C38400">
+<a class="skip" href="#main">Saltar para o conteúdo</a>
+
+<div class="shell">
+  <aside>
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M16 2 29 9.5v15L16 32 3 24.5v-15z" fill="none" stroke="#c8ff00" stroke-width="1.6"/>
+        <path d="M16 9 23 13v8l-7 4-7-4v-8z" fill="#c8ff00" opacity=".16"/>
+        <path d="M12 21v-8l4 3.6 4-3.6v8" fill="none" stroke="#c8ff00" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <div class="brand-name">FitConnect</div>
+        <div class="brand-sub">ELITE OS</div>
+      </div>
+    </div>
+
+    <nav aria-label="Navegação principal">
+      <ul>
+        <li><button class="navlink" data-goto="home"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-6H9v6H5a2 2 0 0 1-2-2z"/></svg>HOME<kbd>g h</kbd></button></li>
+        <li><button class="navlink" data-goto="discover"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>DISCOVER</button></li>
+        <li><button class="navlink" aria-current="page" data-goto="activity"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>ACTIVITY<kbd>g a</kbd></button></li>
+        <li><button class="navlink" data-goto="community"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9.5" r="2.6"/><path d="M17 15.5a5.5 5.5 0 0 1 4.5 4.5"/></svg>COMMUNITY</button></li>
+        <li><button class="navlink" data-goto="profile"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>PROFILE</button></li>
+      </ul>
+      <div class="nav-sep"></div>
+      <ul>
+        <li><button class="navlink" data-goto="settings"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>DEFINIÇÕES</button></li>
+        <li><button class="navlink" id="btn-help"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.2 2.4c-.7.3-1.2.9-1.2 1.7v.4"/><circle cx="12" cy="17" r=".9" fill="currentColor" stroke="none"/></svg>ATALHOS<kbd>?</kbd></button></li>
+      </ul>
+    </nav>
+
+    <div class="aside-foot">
+      Maquete de dashboards<br>
+      <span class="mono" style="font-size:10px">docs/design · v1</span>
+    </div>
+  </aside>
+
+  <main id="main">
+    <header class="topbar">
+      <div>
+        <h1>Activity · Análise</h1>
+        <p class="sub">A densidade que o telemóvel não comporta. Doze semanas de carga, progressão por exercício e histórico completo.</p>
+      </div>
+      <div class="topbar-right">
+        <div class="live" role="status">
+          <span class="dot" aria-hidden="true"></span>
+          <div>
+            <div style="font-size:12px">Sessão a decorrer</div>
+            <div class="origin">⌚ RELÓGIO · 00:42:18</div>
+          </div>
+          <button type="button" id="btn-transfer">TRANSFERIR</button>
+        </div>
+        <span class="demo-flag" title="Nenhum destes números vem de sensores reais">LOCAL_DEMO · DADOS SINTÉTICOS</span>
+      </div>
+    </header>
+
+    <div class="filters" role="group" aria-label="Filtros globais">
+      <div class="seg" role="group" aria-label="Intervalo de tempo">
+        <button type="button" data-range="4" aria-pressed="false">4 SEM</button>
+        <button type="button" data-range="12" aria-pressed="true">12 SEM</button>
+        <button type="button" data-range="26" aria-pressed="false">26 SEM</button>
+        <button type="button" data-range="52" aria-pressed="false">52 SEM</button>
+      </div>
+      <label class="sr-only" for="f-sport">Modalidade</label>
+      <select id="f-sport">
+        <option>Todas as modalidades</option>
+        <option>Força</option><option>Corrida</option><option>Ciclismo</option><option>Mobilidade</option>
+      </select>
+      <button class="btn" type="button" id="btn-empty" aria-pressed="false">Ver estados vazios</button>
+      <button class="btn btn-volt" type="button" id="btn-export-all">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 19h16"/></svg>
+        Exportar tudo (CSV)
+      </button>
+    </div>
+
+    <div class="grid" id="grid">
+
+      <!-- 1 ── CARGA E RECUPERAÇÃO ─────────────────────────────── -->
+      <section class="card span-2" aria-labelledby="h-load">
+        <div class="card-head">
+          <div>
+            <h2 id="h-load">Carga e recuperação</h2>
+            <p class="desc">Carga aguda (7 d) contra crónica (28 d), na mesma unidade e no mesmo eixo. A faixa a cheio é a zona de rácio saudável 0,8–1,3.</p>
+          </div>
+          <div class="tools">
+            <span class="chip">12 SEMANAS</span>
+            <button class="icon-btn" type="button" data-tableview="load" aria-pressed="false" aria-label="Alternar vista de tabela">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg>
+            </button>
+          </div>
+        </div>
+        <div data-panel="load"></div>
+        <div class="legend" data-legend="load"></div>
+        <div class="tableview" data-tv="load"></div>
+      </section>
+
+      <!-- 2 ── RÁCIO ACWR (herói) ──────────────────────────────── -->
+      <section class="card" aria-labelledby="h-acwr">
+        <div class="card-head">
+          <div>
+            <h2 id="h-acwr">Rácio agudo/crónico</h2>
+            <p class="desc">Um número, não um gráfico.</p>
+          </div>
+        </div>
+        <div data-panel="acwr"></div>
+      </section>
+
+      <!-- 3 ── PROGRESSÃO POR EXERCÍCIO ────────────────────────── -->
+      <section class="card span-2" aria-labelledby="h-prog">
+        <div class="card-head">
+          <div>
+            <h2 id="h-prog">Progressão por exercício</h2>
+            <p class="desc">1RM estimado (Epley) por sessão. Uma linha por exercício — a cor segue o exercício, não a posição na lista.</p>
+          </div>
+          <div class="tools">
+            <label class="sr-only" for="f-ex">Exercícios</label>
+            <select id="f-ex">
+              <option value="all">4 exercícios</option>
+              <option value="squat">Só Agachamento</option>
+              <option value="bench">Só Supino</option>
+            </select>
+            <button class="icon-btn" type="button" data-tableview="prog" aria-pressed="false" aria-label="Alternar vista de tabela">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg>
+            </button>
+          </div>
+        </div>
+        <div data-panel="prog"></div>
+        <div class="legend" data-legend="prog"></div>
+        <div class="tableview" data-tv="prog"></div>
+      </section>
+
+      <!-- 4 ── DISTRIBUIÇÃO ────────────────────────────────────── -->
+      <section class="card" aria-labelledby="h-dist">
+        <div class="card-head">
+          <div>
+            <h2 id="h-dist">Distribuição de treino</h2>
+            <p class="desc">Minutos por domínio, semana a semana.</p>
+          </div>
+        </div>
+        <div data-panel="dist"></div>
+        <div class="legend" data-legend="dist"></div>
+      </section>
+
+      <!-- 5 ── DESEQUILÍBRIOS (divergente) ─────────────────────── -->
+      <section class="card" aria-labelledby="h-bal">
+        <div class="card-head">
+          <div>
+            <h2 id="h-bal">Desequilíbrios musculares</h2>
+            <p class="desc">Desvio face ao volume-alvo. Cinzento ao meio é equilíbrio.</p>
+          </div>
+        </div>
+        <div data-panel="bal"></div>
+        <div class="legend" data-legend="bal"></div>
+      </section>
+
+      <!-- 6 ── SONO ────────────────────────────────────────────── -->
+      <section class="card" aria-labelledby="h-sleep">
+        <div class="card-head">
+          <div>
+            <h2 id="h-sleep">Sono · 90 dias</h2>
+            <p class="desc">Horas por noite. Média móvel de 7 dias a cheio.</p>
+          </div>
+          <div class="tools"><span class="chip">HORAS</span></div>
+        </div>
+        <div data-panel="sleep"></div>
+        <div class="legend" data-legend="sleep"></div>
+      </section>
+
+      <!-- 7 ── HRV ─────────────────────────────────────────────── -->
+      <section class="card" aria-labelledby="h-hrv">
+        <div class="card-head">
+          <div>
+            <h2 id="h-hrv">HRV · 90 dias</h2>
+            <p class="desc">Unidade diferente do sono — gráfico separado, nunca segundo eixo.</p>
+          </div>
+          <div class="tools"><span class="chip">MILISSEGUNDOS</span></div>
+        </div>
+        <div data-panel="hrv"></div>
+        <div class="legend" data-legend="hrv"></div>
+      </section>
+
+      <!-- 8 ── COMPARAÇÃO DE PERÍODOS ──────────────────────────── -->
+      <section class="card span-3" aria-labelledby="h-cmp">
+        <div class="card-head">
+          <div>
+            <h2 id="h-cmp">Comparação de períodos</h2>
+            <p class="desc">Dois intervalos lado a lado, indexados à mesma base para serem comparáveis.</p>
+          </div>
+          <div class="tools">
+            <span class="chip" style="color:var(--eos-chart-1);border-color:rgba(0,162,196,.4)">A · SEM 1–6</span>
+            <span class="chip" style="color:var(--eos-chart-2);border-color:rgba(126,162,0,.4)">B · SEM 7–12</span>
+          </div>
+        </div>
+        <div data-panel="cmp"></div>
+        <div class="legend" data-legend="cmp"></div>
+      </section>
+
+      <!-- 9 ── HISTÓRICO ───────────────────────────────────────── -->
+      <section class="card span-3" aria-labelledby="h-hist">
+        <div class="card-head">
+          <div>
+            <h2 id="h-hist">Histórico completo</h2>
+            <p class="desc">Ordenável por qualquer coluna, filtrável, navegável por teclado. A exportação escreve um CSV a sério.</p>
+          </div>
+          <div class="tools">
+            <label class="sr-only" for="f-hist">Procurar sessão</label>
+            <input type="search" id="f-hist" placeholder="Procurar…" style="width:180px">
+            <button class="btn" type="button" id="btn-export-hist">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 19h16"/></svg>
+              CSV
+            </button>
+          </div>
+        </div>
+        <div data-panel="hist"></div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<div class="tt" id="tt" role="tooltip" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<dialog id="dlg-help">
+  <h2>Atalhos de teclado</h2>
+  <div class="kb"><span>Ir para Home</span><span><kbd>g</kbd> <kbd>h</kbd></span></div>
+  <div class="kb"><span>Ir para Activity</span><span><kbd>g</kbd> <kbd>a</kbd></span></div>
+  <div class="kb"><span>Procurar</span><span><kbd>/</kbd></span></div>
+  <div class="kb"><span>Alternar estados vazios</span><span><kbd>e</kbd></span></div>
+  <div class="kb"><span>Exportar histórico</span><span><kbd>x</kbd></span></div>
+  <div class="kb"><span>Esta ajuda</span><span><kbd>?</kbd></span></div>
+  <button class="btn btn-volt" type="button" style="margin-top:18px;width:100%;justify-content:center" onclick="document.getElementById('dlg-help').close()">Fechar</button>
+</dialog>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   DADOS — sintéticos e determinísticos. LOCAL_DEMO.
+   Nenhum valor aqui vem de sensor, de Strava ou da base de dados.
+   ═══════════════════════════════════════════════════════════════════ */
+const C = getComputedStyle(document.documentElement);
+const T = n => C.getPropertyValue(n).trim();
+const PAL = [T('--eos-chart-1'), T('--eos-chart-2'), T('--eos-chart-3'), T('--eos-chart-4')];
+const SEQ = [1,2,3,4,5,6].map(i => T('--eos-seq-'+i));
+const VOLT = T('--eos-voltline'), TEXT = T('--eos-on-surface'), SUBTLE = T('--eos-on-surface-subtle');
+
+let seed = 20260817;
+const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+
+const WEEKS = Array.from({length:12}, (_,i) => {
+  const base = 380 + i*18 + Math.sin(i/1.7)*70;
+  return { w:'S'+(i+1), acute: Math.round(base + (rnd()-.5)*130), chronic: 0 };
+});
+WEEKS.forEach((d,i) => {
+  const win = WEEKS.slice(Math.max(0,i-3), i+1);
+  d.chronic = Math.round(win.reduce((s,x)=>s+x.acute,0)/win.length);
+  d.ratio = +(d.acute/d.chronic).toFixed(2);
+});
+
+const EXERCISES = [
+  {id:'squat', name:'Agachamento', color:PAL[0], base:112},
+  {id:'bench', name:'Supino',      color:PAL[1], base:82},
+  {id:'dead',  name:'Peso morto',  color:PAL[2], base:141},
+  {id:'ohp',   name:'Militar',     color:PAL[3], base:54},
+];
+EXERCISES.forEach(e => {
+  e.series = Array.from({length:12}, (_,i) => Math.round(e.base + i*(e.base*0.011) + (rnd()-.45)*(e.base*0.045)));
+});
+
+const DOMAINS = [
+  {name:'Força',      color:PAL[0]},
+  {name:'Cardio',     color:PAL[1]},
+  {name:'Mobilidade', color:PAL[2]},
+];
+const DIST = Array.from({length:12}, (_,i) => ({
+  w:'S'+(i+1),
+  v:[Math.round(120+rnd()*90), Math.round(70+rnd()*110), Math.round(25+rnd()*45)]
+}));
+
+const BAL = [
+  {name:'Peito',        v:+18}, {name:'Costas',       v:-24},
+  {name:'Quadríceps',   v:+31}, {name:'Isquiotibiais', v:-38},
+  {name:'Ombros',       v:+6},  {name:'Core',          v:-11},
+];
+
+const SLEEP = Array.from({length:90}, (_,i) => +(6.4 + Math.sin(i/9)*0.75 + rnd()*1.1).toFixed(1));
+const HRV   = Array.from({length:90}, (_,i) => Math.round(52 + Math.sin(i/11)*11 + rnd()*13));
+const mavg = (a,n) => a.map((_,i) => { const s = a.slice(Math.max(0,i-n+1), i+1); return s.reduce((x,y)=>x+y,0)/s.length; });
+
+const SPORTS = ['Força','Corrida','Ciclismo','Mobilidade','Natação'];
+const SRC = [['watch','⌚ RELÓGIO'],['phone','📱 TELEMÓVEL'],['cloud','☁ IMPORTADO']];
+const HIST = Array.from({length:26}, (_,i) => {
+  const d = new Date(2026, 7, 16 - i*3);
+  const s = SRC[Math.floor(rnd()*3)];
+  return {
+    date: d.toISOString().slice(0,10),
+    sport: SPORTS[Math.floor(rnd()*SPORTS.length)],
+    dur: Math.round(32 + rnd()*68),
+    load: Math.round(180 + rnd()*420),
+    hr: Math.round(118 + rnd()*44),
+    srcKey: s[0], src: s[1],
+  };
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   PRIMITIVAS SVG
+   ═══════════════════════════════════════════════════════════════════ */
+const NS = 'http://www.w3.org/2000/svg';
+const el = (t, a={}) => { const n = document.createElementNS(NS,t); for(const k in a) n.setAttribute(k, a[k]); return n; };
+const svgRoot = (w,h) => el('svg',{class:'chart', viewBox:`0 0 ${w} ${h}`, preserveAspectRatio:'xMidYMid meet', role:'img'});
+
+function yAxis(g, y, min, max, w, ticks=4, fmt=v=>Math.round(v)){
+  for(let i=0;i<=ticks;i++){
+    const v = min + (max-min)*i/ticks, py = y(v);
+    g.appendChild(el('line',{x1:44,y1:py,x2:w-8,y2:py,class:'gridline'}));
+    const t = el('text',{x:38,y:py+3.5,class:'tick','text-anchor':'end'});
+    t.textContent = fmt(v); g.appendChild(t);
+  }
+}
+function xLabels(g, labels, x, baseY, every=1){
+  labels.forEach((l,i) => {
+    if(i % every) return;
+    const t = el('text',{x:x(i), y:baseY+16, class:'tick','text-anchor':'middle'});
+    t.textContent = l; g.appendChild(t);
+  });
+}
+
+/* ── tooltip partilhado ────────────────────────────────────────── */
+const tt = document.getElementById('tt');
+function showTip(evt, title, rows){
+  tt.innerHTML = `<div class="h">${title}</div>` + rows.map(r =>
+    `<div class="r"><span class="sw" style="background:${r.c}"></span><span>${r.l}</span><span class="n">${r.v}</span></div>`).join('');
+  tt.classList.add('on'); tt.setAttribute('aria-hidden','false');
+  const pad = 14, w = tt.offsetWidth, h = tt.offsetHeight;
+  let x = evt.clientX + pad, y = evt.clientY - h - pad;
+  if(x + w > innerWidth - 8) x = evt.clientX - w - pad;
+  if(y < 8) y = evt.clientY + pad;
+  tt.style.left = x+'px'; tt.style.top = y+'px';
+}
+const hideTip = () => { tt.classList.remove('on'); tt.setAttribute('aria-hidden','true'); };
+addEventListener('scroll', hideTip, true);
+
+/* ── legendas ──────────────────────────────────────────────────── */
+function legend(key, items, kind='sw'){
+  const box = document.querySelector(`[data-legend="${key}"]`);
+  if(!box) return;
+  box.innerHTML = items.map(i =>
+    `<span class="item"><span class="sw ${kind==='line'?'line':''}" style="background:${i.c}"></span>${i.l}</span>`).join('');
+}
+
+/* ── vista de tabela (acessibilidade) ──────────────────────────── */
+function tableView(key, head, rows){
+  const box = document.querySelector(`[data-tv="${key}"]`);
+  if(!box) return;
+  box.innerHTML = `<div class="tbl-wrap"><table><caption class="sr-only">Vista tabular dos mesmos dados</caption><thead><tr>${
+    head.map(h=>`<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${
+    rows.map(r=>`<tr>${r.map((c,i)=>`<td class="${i?'num':''}">${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+
+const EMPTY = (t,d) => `<div class="empty"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="${SUBTLE}" stroke-width="1.4" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7 15l3.2-3.6 2.4 2.4L17 9"/></svg><div class="t">${t}</div><div class="d">${d}</div><button class="btn" type="button" style="margin-top:4px">Registar primeira sessão</button></div>`;
+
+let emptyMode = false;
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAINÉIS
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* 1 ── Carga aguda vs crónica (mesma unidade, um eixo) ────────── */
+function drawLoad(){
+  const host = document.querySelector('[data-panel="load"]');
+  if(emptyMode){ host.innerHTML = EMPTY('Sem carga registada','Precisamos de pelo menos 4 semanas de sessões para calcular carga crónica.'); legend('load',[]); return; }
+  const W=760, H=280, L=44, R=8, Tp=14, B=34;
+  const max = Math.max(...WEEKS.map(d=>Math.max(d.acute,d.chronic)))*1.12, min = 0;
+  const x = i => L + (W-L-R) * (i/(WEEKS.length-1));
+  const y = v => Tp + (H-Tp-B) * (1 - (v-min)/(max-min));
+  const s = svgRoot(W,H);
+  s.setAttribute('aria-label','Carga aguda de sete dias contra carga crónica de vinte e oito dias, ao longo de doze semanas. Ambas em unidades arbitrárias no mesmo eixo.');
+  const g = el('g'); s.appendChild(g);
+  yAxis(g, y, min, max, W);
+  g.appendChild(el('line',{x1:L,y1:y(0),x2:W-R,y2:y(0),class:'baseline'}));
+
+  // área da carga crónica (magnitude de fundo)
+  const area = `M${x(0)},${y(0)} ` + WEEKS.map((d,i)=>`L${x(i)},${y(d.chronic)}`).join(' ') + ` L${x(WEEKS.length-1)},${y(0)} Z`;
+  g.appendChild(el('path',{d:area, fill:PAL[0], 'fill-opacity':'.13'}));
+  g.appendChild(el('path',{d:'M'+WEEKS.map((d,i)=>`${x(i)},${y(d.chronic)}`).join(' L'), fill:'none', stroke:PAL[0], 'stroke-width':2, 'stroke-linejoin':'round'}));
+  // linha da carga aguda
+  g.appendChild(el('path',{d:'M'+WEEKS.map((d,i)=>`${x(i)},${y(d.acute)}`).join(' L'), fill:'none', stroke:PAL[1], 'stroke-width':2, 'stroke-linejoin':'round'}));
+
+  WEEKS.forEach((d,i)=>{
+    // anel de superfície de 2 px nas marcas sobrepostas
+    g.appendChild(el('circle',{cx:x(i),cy:y(d.acute),r:4.5,fill:PAL[1],stroke:T('--eos-instrument-face'),'stroke-width':2}));
+    const hit = el('rect',{x:x(i)-((W-L-R)/WEEKS.length)/2, y:Tp, width:(W-L-R)/WEEKS.length, height:H-Tp-B, fill:'transparent', tabindex:'0', role:'button',
+      'aria-label':`Semana ${i+1}: carga aguda ${d.acute}, crónica ${d.chronic}, rácio ${d.ratio}`});
+    const show = e => showTip(e, 'SEMANA '+(i+1), [
+      {c:PAL[1], l:'Aguda (7 d)',   v:d.acute+' UA'},
+      {c:PAL[0], l:'Crónica (28 d)',v:d.chronic+' UA'},
+      {c:d.ratio>1.3?T('--eos-alert'):VOLT, l:'Rácio', v:d.ratio.toFixed(2)},
+    ]);
+    hit.addEventListener('mousemove', show);
+    hit.addEventListener('focus', e => { const r = hit.getBoundingClientRect(); show({clientX:r.left+r.width/2, clientY:r.top+40}); });
+    hit.addEventListener('mouseleave', hideTip); hit.addEventListener('blur', hideTip);
+    g.appendChild(hit);
+  });
+  xLabels(g, WEEKS.map(d=>d.w), x, H-B);
+  // rótulo directo selectivo — só a última
+  const last = WEEKS[WEEKS.length-1];
+  const lb = el('text',{x:x(WEEKS.length-1), y:y(last.acute)-13, class:'dlabel', fill:PAL[1], 'text-anchor':'end'});
+  lb.textContent = last.acute+' UA'; g.appendChild(lb);
+
+  host.innerHTML=''; host.appendChild(s);
+  legend('load',[{c:PAL[1],l:'Carga aguda · 7 dias'},{c:PAL[0],l:'Carga crónica · 28 dias'}],'line');
+  tableView('load', ['Semana','Aguda (UA)','Crónica (UA)','Rácio'], WEEKS.map((d,i)=>['S'+(i+1), d.acute, d.chronic, d.ratio.toFixed(2)]));
+}
+
+/* 2 ── Rácio ACWR: número herói, não gráfico ──────────────────── */
+function drawAcwr(){
+  const host = document.querySelector('[data-panel="acwr"]');
+  if(emptyMode){ host.innerHTML = EMPTY('Sem rácio','São precisas 4 semanas para o denominador crónico.'); return; }
+  const d = WEEKS[WEEKS.length-1], r = d.ratio;
+  const ok = r>=0.8 && r<=1.3;
+  const state = r>1.3 ? ['Acima da zona', T('--eos-alert'), 'serious'] : r<0.8 ? ['Abaixo da zona', T('--eos-recovery'), 'warning'] : ['Dentro da zona', T('--eos-performance'), 'good'];
+  const pct = Math.max(0, Math.min(1, (r-0.4)/(2.0-0.4)));
+  host.innerHTML = `
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span class="hero-num">${r.toFixed(2)}</span>
+      <span class="hero-unit">AGUDA÷CRÓNICA</span>
+    </div>
+    <div style="margin-top:18px">
+      <div style="position:relative;height:10px;border-radius:9999px;background:var(--eos-instrument-track);overflow:hidden">
+        <div style="position:absolute;left:${(0.8-0.4)/1.6*100}%;width:${(1.3-0.8)/1.6*100}%;top:0;bottom:0;background:${T('--eos-performance')};opacity:.24"></div>
+        <div style="position:absolute;left:calc(${pct*100}% - 2px);top:-3px;width:4px;height:16px;border-radius:2px;background:${VOLT};box-shadow:0 0 12px ${T('--eos-voltline-glow')}"></div>
+      </div>
+      <div class="mono" style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--eos-chart-ink);margin-top:7px">
+        <span>0,4</span><span>ZONA 0,8–1,3</span><span>2,0</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:18px;font-size:13px;font-weight:600;color:${state[1]}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">${
+        ok ? '<path d="M20 6 9 17l-5-5"/>' : '<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/>'}</svg>
+      ${state[0]}
+    </div>
+    <p style="font-size:12px;color:var(--eos-on-surface-subtle);margin-top:8px">
+      A cor não anda sozinha: traz ícone e texto. Um leitor daltónico lê o estado sem ver a cor.
+    </p>`;
+}
+
+/* 3 ── Progressão por exercício ───────────────────────────────── */
+let exFilter = 'all';
+function drawProg(){
+  const host = document.querySelector('[data-panel="prog"]');
+  const list = exFilter==='all' ? EXERCISES : EXERCISES.filter(e=>e.id===exFilter);
+  if(emptyMode || !list.length){ host.innerHTML = EMPTY('Sem séries registadas','Regista pelo menos duas sessões do mesmo exercício para desenhar progressão.'); legend('prog',[]); return; }
+  const W=760, H=280, L=44, R=118, Tp=14, B=34;
+  const all = list.flatMap(e=>e.series);
+  const min = Math.min(...all)*0.9, max = Math.max(...all)*1.06;
+  const x = i => L + (W-L-R) * (i/11);
+  const y = v => Tp + (H-Tp-B) * (1 - (v-min)/(max-min));
+  const s = svgRoot(W,H);
+  s.setAttribute('aria-label','1RM estimado por exercício ao longo de doze sessões, em quilogramas.');
+  const g = el('g'); s.appendChild(g);
+  yAxis(g, y, min, max, W, 4, v=>Math.round(v)+' kg');
+  list.forEach(e=>{
+    g.appendChild(el('path',{d:'M'+e.series.map((v,i)=>`${x(i)},${y(v)}`).join(' L'), fill:'none', stroke:e.color, 'stroke-width':2, 'stroke-linejoin':'round','stroke-linecap':'round'}));
+    e.series.forEach((v,i)=>{
+      if(i%3) return;
+      g.appendChild(el('circle',{cx:x(i),cy:y(v),r:4,fill:e.color,stroke:T('--eos-instrument-face'),'stroke-width':2}));
+    });
+    // rótulo directo no fim (≤4 séries)
+    const t = el('text',{x:x(11)+9, y:y(e.series[11])+3.5, class:'dlabel', fill:e.color});
+    t.textContent = e.name; g.appendChild(t);
+  });
+  for(let i=0;i<12;i++){
+    const bw = (W-L-R)/12;
+    const hit = el('rect',{x:x(i)-bw/2, y:Tp, width:bw, height:H-Tp-B, fill:'transparent', tabindex:'0', role:'button',
+      'aria-label':`Sessão ${i+1}: ` + list.map(e=>`${e.name} ${e.series[i]} quilos`).join(', ')});
+    const show = e2 => showTip(e2, 'SESSÃO '+(i+1), list.map(e=>({c:e.color,l:e.name,v:e.series[i]+' kg'})));
+    hit.addEventListener('mousemove', show);
+    hit.addEventListener('focus', ()=>{ const r=hit.getBoundingClientRect(); show({clientX:r.left+r.width/2, clientY:r.top+40}); });
+    hit.addEventListener('mouseleave', hideTip); hit.addEventListener('blur', hideTip);
+    g.appendChild(hit);
+  }
+  xLabels(g, Array.from({length:12},(_,i)=>'#'+(i+1)), x, H-B);
+  host.innerHTML=''; host.appendChild(s);
+  legend('prog', list.map(e=>({c:e.color,l:e.name})), 'line');
+  tableView('prog', ['Sessão', ...list.map(e=>e.name+' (kg)')], Array.from({length:12},(_,i)=>['#'+(i+1), ...list.map(e=>e.series[i])]));
+}
+
+/* 4 ── Distribuição empilhada (gap de 2 px entre segmentos) ───── */
+function drawDist(){
+  const host = document.querySelector('[data-panel="dist"]');
+  if(emptyMode){ host.innerHTML = EMPTY('Sem distribuição','Ainda não há sessões classificadas por domínio.'); legend('dist',[]); return; }
+  const W=380, H=260, L=40, R=8, Tp=12, B=30;
+  const totals = DIST.map(d=>d.v.reduce((a,b)=>a+b,0));
+  const max = Math.max(...totals)*1.08;
+  const bw = (W-L-R)/DIST.length;
+  const y = v => Tp + (H-Tp-B) * (1 - v/max);
+  const s = svgRoot(W,H);
+  s.setAttribute('aria-label','Minutos de treino por domínio e por semana, barras empilhadas.');
+  const g = el('g'); s.appendChild(g);
+  yAxis(g, y, 0, max, W, 3, v=>Math.round(v)+'m');
+  DIST.forEach((d,i)=>{
+    let acc = 0;
+    const bx = L + i*bw + bw*0.16, w = bw*0.68;
+    d.v.forEach((v,j)=>{
+      const y0 = y(acc), y1 = y(acc+v);
+      const h = Math.max(0, y0-y1-2); // 2 px de superfície entre segmentos
+      const r = el('rect',{x:bx, y:y1, width:w, height:h, fill:DOMAINS[j].color, rx: j===d.v.length-1 ? 4 : 0});
+      g.appendChild(r); acc += v;
+    });
+    const hit = el('rect',{x:L+i*bw, y:Tp, width:bw, height:H-Tp-B, fill:'transparent', tabindex:'0', role:'button',
+      'aria-label':`Semana ${i+1}: ` + d.v.map((v,j)=>`${DOMAINS[j].name} ${v} minutos`).join(', ')});
+    const show = e => showTip(e, d.w, DOMAINS.map((dm,j)=>({c:dm.color,l:dm.name,v:d.v[j]+' min'})));
+    hit.addEventListener('mousemove', show);
+    hit.addEventListener('focus', ()=>{ const r=hit.getBoundingClientRect(); show({clientX:r.left+r.width/2, clientY:r.top+40}); });
+    hit.addEventListener('mouseleave', hideTip); hit.addEventListener('blur', hideTip);
+    g.appendChild(hit);
+  });
+  xLabels(g, DIST.map(d=>d.w), i=>L+i*bw+bw/2, H-B, 2);
+  host.innerHTML=''; host.appendChild(s);
+  legend('dist', DOMAINS.map(d=>({c:d.color,l:d.name})));
+}
+
+/* 5 ── Desequilíbrios: divergente com neutro cinzento ─────────── */
+function drawBal(){
+  const host = document.querySelector('[data-panel="bal"]');
+  if(emptyMode){ host.innerHTML = EMPTY('Sem dados de volume','Precisamos de séries etiquetadas por grupo muscular.'); legend('bal',[]); return; }
+  const W=380, H=260, L=98, R=34, Tp=8, B=26;
+  const max = 45, mid = L + (W-L-R)/2, half = (W-L-R)/2;
+  const bh = (H-Tp-B)/BAL.length;
+  const s = svgRoot(W,H);
+  s.setAttribute('aria-label','Desvio percentual do volume por grupo muscular face ao alvo. Valores positivos acima do alvo, negativos abaixo.');
+  const g = el('g'); s.appendChild(g);
+  g.appendChild(el('line',{x1:mid,y1:Tp,x2:mid,y2:H-B,stroke:T('--eos-div-mid'),'stroke-width':1.5}));
+  BAL.forEach((d,i)=>{
+    const w = Math.abs(d.v)/max*half;
+    const y0 = Tp + i*bh + bh*0.22, h = bh*0.56;
+    const mag = Math.min(2, Math.floor(Math.abs(d.v)/14));
+    const col = d.v >= 0 ? T('--eos-div-warm-'+(mag+1)) : T('--eos-div-cool-'+(mag+1));
+    g.appendChild(el('rect',{x: d.v>=0 ? mid+1 : mid-w-1, y:y0, width:Math.max(2,w), height:h, fill:col, rx:4}));
+    const lb = el('text',{x:L-10, y:y0+h/2+3.5, class:'tick','text-anchor':'end'});
+    lb.textContent = d.name; g.appendChild(lb);
+    const vl = el('text',{x: d.v>=0 ? mid+w+7 : mid-w-7, y:y0+h/2+3.5, class:'dlabel', fill:col, 'text-anchor': d.v>=0?'start':'end'});
+    vl.textContent = (d.v>0?'+':'')+d.v+'%'; g.appendChild(vl);
+    const hit = el('rect',{x:L-96, y:y0-bh*0.22, width:W-L+96-4, height:bh, fill:'transparent', tabindex:'0', role:'button',
+      'aria-label':`${d.name}: ${d.v>0?'mais':'menos'} ${Math.abs(d.v)} por cento face ao alvo`});
+    const show = e => showTip(e, d.name.toUpperCase(), [{c:col, l:'Desvio do alvo', v:(d.v>0?'+':'')+d.v+'%'}]);
+    hit.addEventListener('mousemove', show);
+    hit.addEventListener('focus', ()=>{ const r=hit.getBoundingClientRect(); show({clientX:r.left+r.width/2, clientY:r.top+34}); });
+    hit.addEventListener('mouseleave', hideTip); hit.addEventListener('blur', hideTip);
+    g.appendChild(hit);
+  });
+  const t1 = el('text',{x:mid-6,y:H-8,class:'tick','text-anchor':'end'}); t1.textContent='ABAIXO DO ALVO';
+  const t2 = el('text',{x:mid+6,y:H-8,class:'tick','text-anchor':'start'}); t2.textContent='ACIMA';
+  g.appendChild(t1); g.appendChild(t2);
+  host.innerHTML=''; host.appendChild(s);
+  legend('bal',[{c:T('--eos-div-cool-3'),l:'Abaixo do alvo'},{c:T('--eos-div-mid'),l:'Equilibrado'},{c:T('--eos-div-warm-3'),l:'Acima do alvo'}]);
+}
+
+/* 6/7 ── Sono e HRV: dois gráficos, nunca dois eixos ──────────── */
+function drawTrend(key, data, unit, color, label){
+  const host = document.querySelector(`[data-panel="${key}"]`);
+  if(emptyMode){ host.innerHTML = EMPTY('Sem dados de '+label.toLowerCase(),'Liga um relógio ou o Health Connect para começar a recolher.'); legend(key,[]); return; }
+  const W=380, H=210, L=40, R=8, Tp=12, B=28;
+  const avg = mavg(data,7);
+  const min = Math.min(...data)*0.92, max = Math.max(...data)*1.06;
+  const x = i => L + (W-L-R)*(i/(data.length-1));
+  const y = v => Tp + (H-Tp-B)*(1-(v-min)/(max-min));
+  const s = svgRoot(W,H);
+  s.setAttribute('aria-label',`${label} ao longo de noventa dias, em ${unit}, com média móvel de sete dias.`);
+  const g = el('g'); s.appendChild(g);
+  yAxis(g, y, min, max, W, 3, v=>v.toFixed(unit==='h'?1:0));
+  data.forEach((v,i)=> g.appendChild(el('circle',{cx:x(i),cy:y(v),r:1.7,fill:color,opacity:.36})));
+  g.appendChild(el('path',{d:'M'+avg.map((v,i)=>`${x(i)},${y(v)}`).join(' L'), fill:'none', stroke:color, 'stroke-width':2,'stroke-linejoin':'round'}));
+  const lastT = el('text',{x:x(data.length-1), y:y(avg[avg.length-1])-11, class:'dlabel', fill:color, 'text-anchor':'end'});
+  lastT.textContent = avg[avg.length-1].toFixed(unit==='h'?1:0)+' '+unit; g.appendChild(lastT);
+  for(let i=0;i<data.length;i+=1){
+    const bw = (W-L-R)/data.length;
+    const hit = el('rect',{x:x(i)-bw/2, y:Tp, width:bw, height:H-Tp-B, fill:'transparent'});
+    hit.addEventListener('mousemove', e => showTip(e, 'DIA '+(i+1), [
+      {c:color, l:label, v:data[i]+' '+unit},
+      {c:T('--eos-patent-steel'), l:'Média 7 d', v:avg[i].toFixed(unit==='h'?1:0)+' '+unit},
+    ]));
+    hit.addEventListener('mouseleave', hideTip);
+    g.appendChild(hit);
+  }
+  xLabels(g, data.map((_,i)=> i%30===0 ? 'D'+(i+1) : ''), x, H-B, 30);
+  host.innerHTML=''; host.appendChild(s);
+  legend(key, [{c:color, l:label+' · diário'},{c:color, l:'Média móvel 7 dias'}], 'line');
+}
+
+/* 8 ── Comparação de períodos (indexada à mesma base) ─────────── */
+function drawCmp(){
+  const host = document.querySelector('[data-panel="cmp"]');
+  if(emptyMode){ host.innerHTML = EMPTY('Sem períodos para comparar','São precisos dois intervalos com pelo menos uma sessão cada.'); legend('cmp',[]); return; }
+  const perA = WEEKS.slice(0,6), perB = WEEKS.slice(6);
+  const metrics = [
+    ['Carga total',      perA.reduce((s,d)=>s+d.acute,0), perB.reduce((s,d)=>s+d.acute,0), 'UA'],
+    ['Sessões',          17, 21, ''],
+    ['Volume (min)',     DIST.slice(0,6).reduce((s,d)=>s+d.v.reduce((a,b)=>a+b,0),0), DIST.slice(6).reduce((s,d)=>s+d.v.reduce((a,b)=>a+b,0),0), 'min'],
+    ['1RM médio',        Math.round(EXERCISES.reduce((s,e)=>s+e.series.slice(0,6).reduce((a,b)=>a+b,0)/6,0)/4),
+                         Math.round(EXERCISES.reduce((s,e)=>s+e.series.slice(6).reduce((a,b)=>a+b,0)/6,0)/4), 'kg'],
+    ['Sono médio',       +(SLEEP.slice(0,45).reduce((a,b)=>a+b,0)/45).toFixed(1), +(SLEEP.slice(45).reduce((a,b)=>a+b,0)/45).toFixed(1), 'h'],
+  ];
+  const W=1080, H=210, L=130, R=70, Tp=14, B=26;
+  const rowH = (H-Tp-B)/metrics.length;
+  const s = svgRoot(W,H);
+  s.setAttribute('aria-label','Comparação entre o período A, semanas um a seis, e o período B, semanas sete a doze. Cada métrica está indexada ao seu próprio máximo.');
+  const g = el('g'); s.appendChild(g);
+  metrics.forEach((m,i)=>{
+    const [name,a,b,unit] = m;
+    const mx = Math.max(a,b), avail = W-L-R;
+    const y0 = Tp + i*rowH;
+    const lb = el('text',{x:L-12, y:y0+rowH/2+3.5, class:'tick','text-anchor':'end'});
+    lb.textContent = name; g.appendChild(lb);
+    [[a,PAL[0],0],[b,PAL[1],1]].forEach(([v,c,k])=>{
+      const w = Math.max(2, v/mx*avail);
+      const yy = y0 + rowH*0.18 + k*(rowH*0.30);
+      g.appendChild(el('rect',{x:L, y:yy, width:w, height:rowH*0.26, fill:c, rx:4}));
+      const t = el('text',{x:L+w+8, y:yy+rowH*0.13+3.5, class:'dlabel', fill:c});
+      t.textContent = v+(unit?' '+unit:''); g.appendChild(t);
+    });
+    const delta = a ? Math.round((b-a)/a*100) : 0;
+    const dt = el('text',{x:W-6, y:y0+rowH/2+3.5, class:'dlabel','text-anchor':'end', fill: delta>=0 ? T('--eos-performance') : T('--eos-alert')});
+    dt.textContent = (delta>=0?'▲ +':'▼ ')+delta+'%'; g.appendChild(dt);
+    const hit = el('rect',{x:0,y:y0,width:W,height:rowH,fill:'transparent',tabindex:'0',role:'button',
+      'aria-label':`${name}: período A ${a} ${unit}, período B ${b} ${unit}, variação ${delta} por cento`});
+    const show = e => showTip(e, name.toUpperCase(), [
+      {c:PAL[0], l:'A · sem 1–6', v:a+' '+unit},
+      {c:PAL[1], l:'B · sem 7–12', v:b+' '+unit},
+      {c:delta>=0?T('--eos-performance'):T('--eos-alert'), l:'Variação', v:(delta>=0?'+':'')+delta+'%'},
+    ]);
+    hit.addEventListener('mousemove', show);
+    hit.addEventListener('focus', ()=>{ const r=hit.getBoundingClientRect(); show({clientX:r.left+220, clientY:r.top+30}); });
+    hit.addEventListener('mouseleave', hideTip); hit.addEventListener('blur', hideTip);
+    g.appendChild(hit);
+  });
+  host.innerHTML=''; host.appendChild(s);
+  legend('cmp',[{c:PAL[0],l:'Período A · semanas 1–6'},{c:PAL[1],l:'Período B · semanas 7–12'}]);
+}
+
+/* 9 ── Histórico: ordenar, filtrar, exportar a sério ──────────── */
+let sortKey='date', sortDir=-1, histQuery='';
+function drawHist(){
+  const host = document.querySelector('[data-panel="hist"]');
+  let rows = HIST.filter(r => !histQuery || (r.sport+' '+r.date+' '+r.src).toLowerCase().includes(histQuery.toLowerCase()));
+  if(emptyMode || !rows.length){
+    host.innerHTML = emptyMode
+      ? EMPTY('Sem histórico','Quando concluíres a primeira sessão ela aparece aqui, com a origem indicada.')
+      : `<div class="empty"><div class="t">Nada encontrado para “${histQuery}”</div><div class="d">Tenta outro termo ou limpa a procura.</div><button class="btn" type="button" onclick="document.getElementById('f-hist').value='';document.getElementById('f-hist').dispatchEvent(new Event('input'))">Limpar procura</button></div>`;
+    return;
+  }
+  rows = rows.slice().sort((a,b)=> (a[sortKey]>b[sortKey]?1:a[sortKey]<b[sortKey]?-1:0)*sortDir);
+  const cols = [['date','DATA'],['sport','MODALIDADE'],['dur','DURAÇÃO'],['load','CARGA'],['hr','FC MÉDIA'],['src','ORIGEM']];
+  const arrow = k => sortKey===k ? (sortDir>0?'▲':'▼') : '';
+  host.innerHTML = `<div class="tbl-wrap"><table>
+    <caption class="sr-only">Histórico de sessões, ordenável</caption>
+    <thead><tr>${cols.map(([k,l])=>
+      `<th scope="col" aria-sort="${sortKey===k?(sortDir>0?'ascending':'descending'):'none'}"><button type="button" data-sort="${k}">${l} <span aria-hidden="true">${arrow(k)}</span></button></th>`).join('')}</tr></thead>
+    <tbody>${rows.map(r=>`<tr>
+      <td class="mono">${r.date}</td><td>${r.sport}</td>
+      <td class="num">${r.dur} min</td><td class="num">${r.load} UA</td><td class="num">${r.hr} bpm</td>
+      <td><span class="src src-${r.srcKey}">${r.src}</span></td></tr>`).join('')}</tbody></table></div>
+    <p style="font-size:11.5px;color:var(--eos-on-surface-subtle);margin-top:12px">${rows.length} sessões · a coluna ORIGEM diz de que dispositivo veio cada registo.</p>`;
+  host.querySelectorAll('[data-sort]').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.sort;
+    if(sortKey===k) sortDir*=-1; else { sortKey=k; sortDir=1; }
+    drawHist();
+  }));
+}
+
+/* ── CSV real ──────────────────────────────────────────────────── */
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'), 2600); }
+function downloadCSV(name, header, rows){
+  const esc = v => /[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : v;
+  const csv = [header, ...rows].map(r => r.map(esc).join(',')).join('\r\n');
+  const url = URL.createObjectURL(new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'}));
+  const a = Object.assign(document.createElement('a'), {href:url, download:name});
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  toast('Descarregado: '+name);
+}
+document.getElementById('btn-export-hist').addEventListener('click', () =>
+  downloadCSV('fitconnect-historico-LOCAL_DEMO.csv',
+    ['data','modalidade','duracao_min','carga_ua','fc_media_bpm','origem'],
+    HIST.map(r=>[r.date,r.sport,r.dur,r.load,r.hr,r.src])));
+document.getElementById('btn-export-all').addEventListener('click', () =>
+  downloadCSV('fitconnect-carga-LOCAL_DEMO.csv',
+    ['semana','carga_aguda_ua','carga_cronica_ua','racio'],
+    WEEKS.map((d,i)=>['S'+(i+1), d.acute, d.chronic, d.ratio])));
+
+/* ── Controlos ─────────────────────────────────────────────────── */
+document.querySelectorAll('.seg [data-range]').forEach(b => b.addEventListener('click', () => {
+  b.parentElement.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed','false'));
+  b.setAttribute('aria-pressed','true');
+  toast('Intervalo: '+b.textContent.trim()+' — a maquete mantém 12 semanas de dados');
+}));
+document.getElementById('f-ex').addEventListener('change', e => { exFilter = e.target.value; drawProg(); });
+document.getElementById('f-hist').addEventListener('input', e => { histQuery = e.target.value; drawHist(); });
+document.querySelectorAll('[data-tableview]').forEach(b => b.addEventListener('click', () => {
+  const k = b.dataset.tableview, on = b.getAttribute('aria-pressed')==='true';
+  b.setAttribute('aria-pressed', String(!on));
+  document.querySelector(`[data-tv="${k}"]`).classList.toggle('on', !on);
+}));
+const btnEmpty = document.getElementById('btn-empty');
+btnEmpty.addEventListener('click', () => {
+  emptyMode = !emptyMode;
+  btnEmpty.setAttribute('aria-pressed', String(emptyMode));
+  btnEmpty.textContent = emptyMode ? 'Ver dados de exemplo' : 'Ver estados vazios';
+  renderAll();
+});
+document.getElementById('btn-transfer').addEventListener('click', () =>
+  toast('Só um dispositivo é dono da sessão — o relógio largava-a aqui'));
+document.querySelectorAll('.navlink[data-goto]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.navlink').forEach(x => x.removeAttribute('aria-current'));
+  b.setAttribute('aria-current','page');
+}));
+const dlg = document.getElementById('dlg-help');
+document.getElementById('btn-help').addEventListener('click', () => dlg.showModal());
+
+/* ── Atalhos de teclado ────────────────────────────────────────── */
+let gPending = false;
+addEventListener('keydown', e => {
+  const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName);
+  if(e.key === '?' && !typing){ e.preventDefault(); dlg.showModal(); return; }
+  if(e.key === '/' && !typing){ e.preventDefault(); document.getElementById('f-hist').focus(); return; }
+  if(typing) return;
+  if(e.key === 'e'){ btnEmpty.click(); return; }
+  if(e.key === 'x'){ document.getElementById('btn-export-hist').click(); return; }
+  if(e.key === 'g'){ gPending = true; setTimeout(()=>gPending=false, 900); return; }
+  if(gPending && (e.key === 'h' || e.key === 'a')){
+    gPending = false;
+    const target = e.key === 'h' ? 'home' : 'activity';
+    document.querySelector(`.navlink[data-goto="${target}"]`).click();
+    toast('Ir para '+target.toUpperCase());
+  }
+});
+
+/* ── Render ────────────────────────────────────────────────────── */
+function renderAll(){
+  drawLoad(); drawAcwr(); drawProg(); drawDist(); drawBal();
+  drawTrend('sleep', SLEEP, 'h', PAL[2], 'Sono');
+  drawTrend('hrv', HRV, 'ms', PAL[0], 'HRV');
+  drawCmp(); drawHist();
+}
+renderAll();
+let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(renderAll, 180); });
+</script>
+</body>
+</html>

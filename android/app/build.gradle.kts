@@ -189,6 +189,7 @@ dependencies {
     implementation(project(":athlete"))
     implementation(project(":coach"))
     implementation(project(":core-capture"))
+    implementation(project(":core:fitness"))
     implementation(project(":shared"))
     implementation(project(":ascend"))
     implementation(libs.play.services.wearable)
@@ -206,6 +207,11 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.perf)
+    implementation(libs.firebase.appcheck)
+    implementation(libs.firebase.appcheck.playintegrity)
+    debugImplementation(libs.firebase.appcheck.debug)
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
@@ -218,7 +224,17 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
 }
 
-// Apply Google Services only when Firebase config is present (never commit the JSON).
+// Apply Google Services / Crashlytics / Perf only when Firebase config is present
+// (never commit google-services.json). LOCAL_DEMO debug builds stay JSON-free.
 if (fcmConfigured) {
     apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
+    apply(plugin = "com.google.firebase.firebase-perf")
+}
+
+// When JSON exists, do not strip FirebaseInitProvider / FCM from the debug overlay.
+android.sourceSets.named("debug") {
+    if (fcmConfigured) {
+        manifest.srcFile("src/debugFirebase/AndroidManifest.xml")
+    }
 }

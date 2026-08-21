@@ -4,13 +4,17 @@
     <uses-feature android:name="android.hardware.type.watch" />
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="false"
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"
-        android:icon="@android:drawable/sym_def_app_icon"
-        android:label="FitConnect Wear"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/wear_app_name"
+        android:enableOnBackInvokedCallback="true"
         android:theme="@android:style/Theme.DeviceDefault">
 
         <meta-data
@@ -21,6 +25,7 @@
             android:name=".WearMainActivity"
             android:exported="true"
             android:taskAffinity=""
+            android:enableOnBackInvokedCallback="true"
             android:theme="@android:style/Theme.DeviceDefault">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,6 +45,48 @@
                 <data android:scheme="wear" android:host="*" android:pathPrefix="/sync" />
             </intent-filter>
         </service>
+
+        <service
+            android:name=".WearTileService"
+            android:exported="true"
+            android:label="@string/tile_label"
+            android:description="@string/tile_description"
+            android:icon="@drawable/ic_wear_session"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+            </intent-filter>
+            <meta-data
+                android:name="androidx.wear.tiles.PREVIEW"
+                android:resource="@drawable/ic_wear_session" />
+        </service>
+
+        <!--
+          Wear surface #3: complication data source. Puts one FitConnect number directly on
+          the user's chosen watch face. SUPPORTED_TYPES must stay in sync with the `when`
+          branches in WearComplicationService.onComplicationRequest().
+          UPDATE_PERIOD_SECONDS is a hint, not a guarantee — the system throttles it, and
+          0 would mean "never auto-update".
+        -->
+        <service
+            android:name=".WearComplicationService"
+            android:exported="true"
+            android:label="@string/complication_label"
+            android:description="@string/complication_description"
+            android:icon="@drawable/ic_wear_session"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,RANGED_VALUE" />
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="300" />
+        </service>
+
     </application>
 
 </manifest>

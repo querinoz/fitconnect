@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import com.fitconnect.android.designui.atmosphere.HoneycombAtmosphere
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
@@ -63,6 +65,10 @@ import com.fitconnect.android.designui.maps.EliteMapMode
 import com.fitconnect.android.designui.maps.EliteMapPhase
 import com.fitconnect.android.designui.maps.EliteRouteMap
 import com.fitconnect.android.designui.theme.EliteSpace
+import com.fitconnect.android.designui.components.EliteGlassCard
+import com.fitconnect.android.designui.theme.LocalHapticGenerator
+import com.fitconnect.android.foundation.haptics.HapticPreset
+import com.fitconnect.android.designui.atmosphere.LocalEnergyPulseTrigger
 
 /**
  * Living catalog for Design System 2.0 — not a product feature screen.
@@ -76,6 +82,9 @@ fun DesignSystemCatalog(
     var checked by remember { mutableStateOf(true) }
     var segment by remember { mutableIntStateOf(0) }
     var slider by remember { mutableFloatStateOf(0.4f) }
+    var pulsing by remember { mutableStateOf(false) }
+    val haptics = LocalHapticGenerator.current
+    val pulseTrigger = LocalEnergyPulseTrigger.current
 
     LazyColumn(
         modifier = modifier
@@ -91,6 +100,39 @@ fun DesignSystemCatalog(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+        item {
+            Section("Premium") {
+                EliteGlassCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                        Text("Ultra Premium Glass", style = MaterialTheme.typography.titleMedium, color = Color.White)
+                        Text("Real-time backdrop blur (API 31+)", style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.7f))
+                        EliteButton(
+                            "Test Haptics (Success)", 
+                            onClick = { haptics.generate(HapticPreset.SUCCESS) }
+                        )
+                        EliteButton(
+                            "Trigger Energy Pulse", 
+                            onClick = { 
+                                pulseTrigger.value = System.currentTimeMillis()
+                                haptics.generate(HapticPreset.HEAVY_CLICK)
+                            },
+                            variant = EliteButtonVariant.Secondary
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                        ) {
+                            Text("Biometric Pulse (Ring)", color = Color.White.copy(alpha = 0.7f))
+                            EliteSwitch(
+                                checked = pulsing,
+                                onCheckedChange = { pulsing = it }
+                            )
+                        }
+                    }
+                }
+            }
         }
         item {
             Section("Atmosphere") {
@@ -126,12 +168,13 @@ fun DesignSystemCatalog(
         }
         item {
             Section("Cockpit") {
-                ElitePrimeInstrument(score = 88, subtitle = "Peak Readiness")
+                ElitePrimeInstrument(score = 88, subtitle = "Peak Readiness", pulsing = pulsing)
                 com.fitconnect.android.designui.components.EliteWordmarkHeader(initials = "FC")
                 EliteInstrumentRing(
                     progress = 0.78f,
                     diameter = EliteRingInline,
                     contentDescription = "Recovery 78 percent, status prime",
+                    pulsing = pulsing
                 ) {
                     androidx.compose.material3.Text("78", style = MaterialTheme.typography.headlineMedium)
                 }

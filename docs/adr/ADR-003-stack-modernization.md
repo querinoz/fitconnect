@@ -1,8 +1,12 @@
 # ADR-003 — Stack Modernization (Voltline OS v2)
 
-**Date:** 2026-08-06  
-**Status:** Proposed (phased)  
+**Date:** 2026-08-06
+
+**Status:** HISTORICAL / SUPERSEDED IN PART
+
 **Author:** FitConnect engineering
+
+Canonical stack: [docs/master-plan/18_TECHNOLOGY_DECISIONS.md](../master-plan/18_TECHNOLOGY_DECISIONS.md). Root `package.json` currently pins Next 15 / React 19 via pnpm overrides. Keep this ADR for decision history; do not treat the “Next 14 / React 18 production stack” table as current.
 
 ## Context
 
@@ -31,6 +35,6 @@ The Voltline OS v2 mega-prompt targets Next 15+, React 19, Tailwind v4, Motion p
 
 ## Consequences
 
-- Document target versions in `AGENT_PROGRESS.md` when each phase lands.
+- Document target versions in `docs/master-plan/` when each phase lands (historical pointer to `AGENT_PROGRESS.md` archived).
 - Use Context7 / official migration guides before any major bump.
 - New dependencies require KB budget note in PR description.

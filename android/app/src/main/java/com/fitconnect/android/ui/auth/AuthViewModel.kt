@@ -52,6 +52,7 @@ class AuthViewModel(
     private val auth: AuthRepository,
     private val analytics: Analytics,
     private val errorPipeline: ErrorPipeline,
+    private val notifications: com.fitconnect.android.foundation.notifications.NotificationGateway? = null,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AuthUiState())
@@ -150,6 +151,9 @@ class AuthViewModel(
 
     private fun complete(user: AuthUser, fromEmail: Boolean) {
         analytics.identify(user.id)
+        if (!user.isLocalDemo) {
+            viewModelScope.launch { notifications?.registerForPush() }
+        }
         if (fromEmail && !user.isLocalDemo && !user.emailVerified) {
             _state.value = _state.value.copy(
                 phase = AuthPhase.IDLE,
@@ -183,6 +187,7 @@ class AuthViewModel(
                         auth = container.authRepository,
                         analytics = container.analytics,
                         errorPipeline = container.errorPipeline,
+                        notifications = container.notifications,
                     ) as T
                 }
             }

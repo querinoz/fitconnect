@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
-import type { User } from "@supabase/supabase-js";
-import { createSupabaseServerClient } from "@/lib/auth/supabase/server";
-import { isDemoMode } from "@/lib/auth/supabase/client";
 import type { ContextUser } from "@fitconnect/api-client";
+import { isDemoMode } from "@/lib/auth/supabase/client";
+import { isFirebaseWebConfigured } from "@/lib/firebase/config";
+import { parseFirebaseIdToken } from "@/lib/auth/firebase-id-token";
+import { readAccessToken } from "@/lib/auth/read-access-token";
+import { lookupIdentityRole } from "@/lib/identity/repository";
 
 export type AuthSuccess = {
   ok: true;
   user: ContextUser;
   supabaseUserId: string;
+  accessToken: string | null;
   demo: boolean;
 };
 
@@ -18,53 +21,44 @@ export type AuthFailure = {
 
 export type AuthResult = AuthSuccess | AuthFailure;
 
-function mapSupabaseUser(user: User): ContextUser {
-  const meta = user.user_metadata ?? {};
-  const roleRaw = (meta.role as string | undefined)?.toLowerCase();
-  const role: ContextUser["role"] =
-    roleRaw === "coach" ? "coach" : roleRaw === "admin" ? "admin" : "athlete";
-  return {
-    id: user.id,
-    role,
-    email: user.email
-  };
-}
-
-/** Require Supabase session unless demo mode is active. */
-export async function requireAuth(): Promise<AuthResult> {
+/** Require a Firebase session unless demo mode is explicitly on. */
+export async function requireAuth(request?: Request): Promise<AuthResult> {
   if (isDemoMode()) {
     return {
       ok: true,
       user: { id: "demo-user", role: "athlete", email: "demo@fitconnect.app" },
       supabaseUserId: "demo-user",
+      accessToken: null,
       demo: true
     };
   }
 
-  const supabase = await createSupabaseServerClient();
-  if (!supabase) {
+  if (!isFirebaseWebConfigured()) {
     return {
       ok: false,
       response: NextResponse.json({ error: "auth_not_configured" }, { status: 503 })
     };
   }
 
-  const {
-    data: { user },
-    error
-  } = await supabase.auth.getUser();
-
-  if (error || !user) {
+  const accessToken = await readAccessToken(request);
+  const claims = parseFirebaseIdToken(accessToken);
+  if (!accessToken || !claims) {
     return {
       ok: false,
       response: NextResponse.json({ error: "unauthorized" }, { status: 401 })
     };
   }
 
+  const role = (await lookupIdentityRole(claims.sub, accessToken)) ?? "athlete";
   return {
     ok: true,
-    user: mapSupabaseUser(user),
-    supabaseUserId: user.id,
+    user: {
+      id: claims.sub,
+      role,
+      email: claims.email
+    },
+    supabaseUserId: claims.sub,
+    accessToken,
     demo: false
   };
 }
@@ -73,19 +67,18 @@ export async function requireAuth(): Promise<AuthResult> {
 export async function requireAthleteId(
   request: Request,
   paramId?: string | null
-): Promise<{ athleteId: string } | AuthFailure> {
+): Promise<{ athleteId: string; accessToken: string | null } | AuthFailure> {
   const url = new URL(request.url);
   const fromParam = paramId ?? url.searchParams.get("athleteId");
-  const auth = await requireAuth();
+  const auth = await requireAuth(request);
   if (!auth.ok) return auth;
 
   if (auth.demo) {
-    return { athleteId: fromParam ?? "a-ines" };
+    return { athleteId: fromParam ?? "a-ines", accessToken: null };
   }
 
-  // Admins may explicitly target another athlete; everyone else is bound to self.
   if (auth.user.role === "admin" && fromParam) {
-    return { athleteId: fromParam };
+    return { athleteId: fromParam, accessToken: auth.accessToken };
   }
 
   if (fromParam && fromParam !== auth.user.id) {
@@ -95,21 +88,21 @@ export async function requireAthleteId(
     };
   }
 
-  return { athleteId: auth.user.id };
+  return { athleteId: auth.user.id, accessToken: auth.accessToken };
 }
 
 /** Resolve coach id — demo permissive; prod requires auth. */
 export async function requireCoachId(
   request: Request,
   paramId?: string | null
-): Promise<{ coachId: string } | AuthFailure> {
+): Promise<{ coachId: string; accessToken: string | null } | AuthFailure> {
   const url = new URL(request.url);
   const fromParam = paramId ?? url.searchParams.get("coachId");
-  const auth = await requireAuth();
+  const auth = await requireAuth(request);
   if (!auth.ok) return auth;
 
   if (auth.demo) {
-    return { coachId: fromParam ?? "t-002" };
+    return { coachId: fromParam ?? "t-002", accessToken: null };
   }
 
   if (auth.user.role !== "coach" && auth.user.role !== "admin") {
@@ -120,7 +113,7 @@ export async function requireCoachId(
   }
 
   if (auth.user.role === "admin" && fromParam) {
-    return { coachId: fromParam };
+    return { coachId: fromParam, accessToken: auth.accessToken };
   }
 
   if (fromParam && fromParam !== auth.user.id) {
@@ -130,7 +123,7 @@ export async function requireCoachId(
     };
   }
 
-  return { coachId: auth.user.id };
+  return { coachId: auth.user.id, accessToken: auth.accessToken };
 }
 
 export function isAuthFailure(

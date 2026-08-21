@@ -33,7 +33,9 @@ import com.fitconnect.android.capture.LiveActivityEngine
 import com.fitconnect.android.capture.LiveActivityPhase
 import com.fitconnect.android.design.EliteSurfaceInstrument
 import com.fitconnect.android.designui.components.AscendEnergyCard
+import com.fitconnect.android.designui.components.EffortZoneStrip
 import com.fitconnect.android.designui.components.EliteBadge
+import com.fitconnect.android.designui.components.HoldToConfirmButton
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
@@ -217,10 +219,12 @@ fun ActivityScreen() {
                     phase = mapPhase,
                     onRetry = if (mapPhase == EliteMapPhase.Empty) {
                         {
-                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                            engine.arm(sport.wireKey)
-                            engine.beginCountdown()
-                            scope.launch { container.telemetry.wearWorkout.startWorkout(sport.wireKey) }
+                            if (container.liveCoordinator.claimLocalStart(sport.wireKey)) {
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                engine.arm(sport.wireKey)
+                                engine.beginCountdown()
+                                scope.launch { container.telemetry.wearWorkout.startWorkout(sport.wireKey) }
+                            }
                         }
                     } else {
                         { waitMs = 0L }
@@ -309,10 +313,12 @@ fun ActivityScreen() {
                         EliteButton(
                             label = "Start",
                             onClick = {
-                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                engine.arm(sport.wireKey)
-                                engine.beginCountdown()
-                                scope.launch { container.telemetry.wearWorkout.startWorkout(sport.wireKey) }
+                                if (container.liveCoordinator.claimLocalStart(sport.wireKey)) {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    engine.arm(sport.wireKey)
+                                    engine.beginCountdown()
+                                    scope.launch { container.telemetry.wearWorkout.startWorkout(sport.wireKey) }
+                                }
                             },
                             modifier = Modifier.testTag("activity_start"),
                         )
@@ -328,7 +334,11 @@ fun ActivityScreen() {
                     LiveActivityPhase.READY, LiveActivityPhase.COUNTDOWN -> {
                         EliteButton(
                             label = "Skip countdown",
-                            onClick = { engine.start(sport.wireKey) },
+                            onClick = {
+                                if (container.liveCoordinator.claimLocalStart(sport.wireKey)) {
+                                    engine.start(sport.wireKey)
+                                }
+                            },
                         )
                     }
                     LiveActivityPhase.RUNNING, LiveActivityPhase.RESUMING -> {
@@ -346,14 +356,13 @@ fun ActivityScreen() {
                             variant = EliteButtonVariant.Ghost,
                             onClick = engine::addLap,
                         )
-                        EliteButton(
+                        HoldToConfirmButton(
                             label = "Finish",
-                            onClick = {
+                            onConfirmed = {
                                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                 engine.end()
                                 scope.launch { container.telemetry.wearWorkout.endWorkout() }
                             },
-                            modifier = Modifier.testTag("activity_end"),
                         )
                     }
                     LiveActivityPhase.PAUSED -> {
@@ -365,14 +374,12 @@ fun ActivityScreen() {
                             },
                             modifier = Modifier.testTag("activity_resume"),
                         )
-                        EliteButton(
+                        HoldToConfirmButton(
                             label = "Finish",
-                            variant = EliteButtonVariant.Secondary,
-                            onClick = {
+                            onConfirmed = {
                                 engine.end()
                                 scope.launch { container.telemetry.wearWorkout.endWorkout() }
                             },
-                            modifier = Modifier.testTag("activity_end"),
                         )
                     }
                     LiveActivityPhase.FINISHING -> {
@@ -435,14 +442,7 @@ fun ActivityScreen() {
                         score = snap.performanceScore?.toString() ?: "—",
                         points = vertices,
                     )
-                    Text(
-                        "Z1 ${snap.timeInZoneSec.getOrElse(0) { 0 }}s · " +
-                            "Z2 ${snap.timeInZoneSec.getOrElse(1) { 0 }}s · " +
-                            "Z3 ${snap.timeInZoneSec.getOrElse(2) { 0 }}s · " +
-                            "Z4 ${snap.timeInZoneSec.getOrElse(3) { 0 }}s · " +
-                            "Z5 ${snap.timeInZoneSec.getOrElse(4) { 0 }}s",
-                        style = MaterialTheme.typography.bodySmall,
-                    )
+                    EffortZoneStrip(secondsInZone = snap.timeInZoneSec)
                     Text(
                         "AI INSIGHT · RECOMMENDED: review pace vs zone 3. Not medical advice.",
                         style = MaterialTheme.typography.bodySmall,

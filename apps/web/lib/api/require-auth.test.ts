@@ -6,8 +6,12 @@ vi.mock("@/lib/auth/supabase/client", () => ({
   isDemoMode: () => true
 }));
 
-vi.mock("@/lib/auth/supabase/server", () => ({
-  createSupabaseServerClient: vi.fn()
+vi.mock("@/lib/firebase/config", () => ({
+  isFirebaseWebConfigured: () => false
+}));
+
+vi.mock("@/lib/identity/repository", () => ({
+  lookupIdentityRole: vi.fn()
 }));
 
 describe("require-auth", () => {

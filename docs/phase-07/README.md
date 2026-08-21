@@ -1,30 +1,9 @@
-# Phase 07 — Maps, Discovery & Booking Engine
+# phase-07 (historical)
 
-Geospatial + scheduling backbone (`:geo`).
+> **HISTORICAL** — this path is a stub. The original files were archived for traceability.
 
-## Reports
+Moved to: [../archive/phase-07/](../archive/phase-07/)
 
-| Report |
-|--------|
-| [Maps_Audit_Report.md](./Maps_Audit_Report.md) |
-| [Maps_Architecture.md](./Maps_Architecture.md) |
-| [Discovery_Engine.md](./Discovery_Engine.md) |
-| [Booking_Engine.md](./Booking_Engine.md) |
-| [Availability_Engine.md](./Availability_Engine.md) |
-| [Route_Engine.md](./Route_Engine.md) |
-| [Offline_Maps_Report.md](./Offline_Maps_Report.md) |
-| [Performance_Report.md](./Performance_Report.md) |
-| [Accessibility_Report.md](./Accessibility_Report.md) |
-| [QA_Report.md](./QA_Report.md) |
-| [Technical_Debt.md](./Technical_Debt.md) |
+Canonical current status: [../master-plan/21_FINAL_ROADMAP.md](../master-plan/21_FINAL_ROADMAP.md)
 
-## Verify
-
-```powershell
-cd android
-.\gradlew.bat :geo:testDebugUnitTest :athlete:testDebugUnitTest :coach:testDebugUnitTest :app:assembleDebug
-```
-
-## Stop
-
-Do **not** start Telemetry / Wearables / AI without approval.
+Do not treat archived reports as the current product state.

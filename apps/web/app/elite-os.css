@@ -114,6 +114,41 @@
   --connect-dim: rgba(0, 221, 180, 0.1);
   --connect-glow: rgba(0, 221, 180, 0.06);
 
+  /* ── Chart series (ADR-011 / dataviz) ──────────────────────────────────
+     Espelham packages/design-tokens COLOR_TOKENS.chart*. Nao editar aqui sem
+     editar la -- apps/web/lib/design-system/tokens-sync.test.ts falha.
+
+     Porque nao usar as hues canonicas como serie: a brilho pleno reprovam a
+     banda de lightness OKLCH do modo escuro (voltline 0.928, telemetry 0.817,
+     connect 0.800 contra um teto de 0.67), e connect vs telemetry medem
+     DeltaE 11.7 para VISAO NORMAL -- indistinguiveis mesmo sem daltonismo.
+     Validado 5/5 em dark sobre #0A0E15. Volt pleno = heroi e CTA, um por ecra. */
+  --eos-chart-1: #00a2c4;
+  --eos-chart-2: #7ea200;
+  --eos-chart-3: #7f80ff;
+  --eos-chart-4: #c38400;
+
+  /* Sequencial -- uma so hue, claro->escuro. Magnitude. */
+  --eos-chart-seq-1: #003947;
+  --eos-chart-seq-2: #00566a;
+  --eos-chart-seq-3: #00758e;
+  --eos-chart-seq-4: #0095b5;
+  --eos-chart-seq-5: #00b7dd;
+  --eos-chart-seq-6: #41d8ff;
+
+  /* Divergente -- dois polos + neutro cinzento. Desvio face a um alvo. */
+  --eos-chart-div-warm-3: #db9400;
+  --eos-chart-div-warm-2: #b37900;
+  --eos-chart-div-warm-1: #8d5e00;
+  --eos-chart-div-mid: #3c3b46;
+  --eos-chart-div-cool-1: #00758e;
+  --eos-chart-div-cool-2: #0095b5;
+  --eos-chart-div-cool-3: #00b7dd;
+
+  /* Texto dentro de graficos. --eos-on-surface-faint (28%) mede 2.16:1 e
+     REPROVA WCAG AA como texto -- serve so para ornamento. Este mede >=4.5:1. */
+  --eos-chart-ink: rgba(228, 225, 238, 0.56);
+
   /* ── Extended palette ── */
   --cyan-500: #00bfff;
   --cyan-dim: rgba(0, 191, 255, 0.1);
@@ -202,6 +237,12 @@
    ═══════════════════════════════════════════════════════════════ */
 
   --eos-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* ATENCAO (ELITE_OS_MOTION_LANGUAGE.md §1): ~50% de overshoot.
+     PROIBIDO em qualquer elemento que represente um numero -- anel, contador,
+     gauge, barra. Um valor que ultrapassa e volta atras diz "nao tenho a certeza",
+     e a metrica e o produto. Unico uso autorizado: selo de confirmacao de recorde
+     pessoal. Para tudo o resto usar --eos-ease-out (assentamento sem overshoot).
+     Estado em 2026-08-18: sem uso em componentes -- candidato a remocao. */
   --eos-ease-spring: cubic-bezier(0.25, 1.5, 0.5, 1);
   --eos-duration-micro: 150ms;
   --eos-duration-ui: 220ms;

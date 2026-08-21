@@ -14,6 +14,7 @@ import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteLanguagePicker
 import com.fitconnect.android.foundation.i18n.AppLocale
 import com.fitconnect.android.foundation.i18n.LocaleApplier
+import com.fitconnect.android.foundation.theme.AccentPreset
 import com.fitconnect.android.foundation.theme.ThemeMode
 import kotlinx.coroutines.launch
 
@@ -23,6 +24,8 @@ fun CoachSettingsScreen() {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val themeMode by container.platform.themeSettings.observe().collectAsState(initial = ThemeMode.SYSTEM)
+    val accent by container.platform.themeSettings.observeAccent()
+        .collectAsState(initial = AccentPreset.VOLTLINE)
     val locale by container.platform.localeManager.observe().collectAsState(initial = AppLocale.EN)
 
     CoachScreenScaffold(
@@ -37,6 +40,10 @@ fun CoachSettingsScreen() {
                     mode = themeMode,
                     onModeChange = { next ->
                         scope.launch { container.platform.themeSettings.setMode(next) }
+                    },
+                    accent = accent,
+                    onAccentChange = { next ->
+                        scope.launch { container.platform.themeSettings.setAccent(next) }
                     },
                 )
             }

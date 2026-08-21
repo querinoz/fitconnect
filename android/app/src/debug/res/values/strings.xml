@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Debug-variant override. The debug build installs as com.fitconnect.android.debug and can
+  therefore sit on a device alongside the release build. Before this override both showed the
+  identical launcher label "FitConnect", which made them impossible to tell apart by eye.
+  Debug-only string: no localisation needed, hence the explicit lint suppression.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" tools:ignore="MissingTranslation">FitConnect DEBUG</string>
+</resources>

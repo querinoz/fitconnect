@@ -8,6 +8,7 @@ import { useAuthHydrated } from "@/lib/use-auth-hydrated";
 import type { UserRole } from "@/lib/auth";
 import { dashboardPathForRole, validateCredentials } from "@/lib/auth";
 import { persistClientAuthSession } from "@/lib/auth/complete-login";
+import { demoRoleForPath, isAthleteAppPath, isCoachAppPath } from "@/lib/auth/demo-path";
 import { LiquidLoader } from "@/components/ui-glass/liquid-loader";
 import { VoltButton } from "@/components/ui-glass/volt-button";
 
@@ -20,13 +21,14 @@ type AuthGateProps = {
   roles?: UserRole[];
 };
 
+function isAthleteDemoPath(pathname: string) {
+  return isAthleteAppPath(pathname);
+}
+
 function demoUserForPath(pathname: string, demoParam: string | null) {
-  if (demoParam === "coach" || pathname.startsWith("/coach")) {
-    return validateCredentials("Coach", "Coach");
-  }
-  if (demoParam === "athlete" || pathname.startsWith("/dashboard")) {
-    return validateCredentials("Athlete", "Athlete");
-  }
+  const role = demoRoleForPath(pathname, demoParam);
+  if (role === "coach") return validateCredentials("Coach", "Coach");
+  if (role === "athlete") return validateCredentials("Athlete", "Athlete");
   return null;
 }
 
@@ -59,7 +61,7 @@ export function AuthGate({ children, roles }: AuthGateProps) {
       demoParam === "1" || demoParam === "coach" || demoParam === "athlete";
     const pathDemo =
       isDemoMode &&
-      (pathname.startsWith("/coach") || pathname.startsWith("/dashboard"));
+      (pathname.startsWith("/coach") || isCoachAppPath(pathname) || isAthleteDemoPath(pathname));
 
     if (!explicitDemo && !pathDemo) return;
 
@@ -79,7 +81,11 @@ export function AuthGate({ children, roles }: AuthGateProps) {
     if (!user) {
       const next = encodeURIComponent(pathname);
       const demo =
-        pathname.startsWith("/coach") ? "&demo=coach" : pathname.startsWith("/dashboard") ? "&demo=athlete" : "";
+        isCoachAppPath(pathname)
+          ? "&demo=coach"
+          : isAthleteDemoPath(pathname)
+            ? "&demo=athlete"
+            : "";
       router.replace(`/signin?next=${next}${demo}`);
     }
   }, [hydrated, timedOut, user, router, pathname]);

@@ -17,7 +17,7 @@ export function AuthStoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void Promise.resolve(useAuthStore.persist.rehydrate()).then(() => {
       const user = useAuthStore.getState().user;
-      if (user && authBackend() === "supabase" && isAllowedDemoSessionId(user.id)) {
+      if (user && authBackend() === "demo" && isAllowedDemoSessionId(user.id)) {
         persistClientAuthSession(user);
       }
 

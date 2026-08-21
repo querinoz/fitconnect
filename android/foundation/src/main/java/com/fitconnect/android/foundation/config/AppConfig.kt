@@ -46,5 +46,5 @@ data class AppConfig(
      */
     val usesLiveAuth: Boolean = usesSupabaseData
 
-    val usesIdentityCore: Boolean = usesFirebaseIdentity || usesSupabaseData
+    val usesIdentityCore: Boolean = usesFirebaseIdentity || allowLocalAuth
 }

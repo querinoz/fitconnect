@@ -1,30 +1,9 @@
-# Phase 04 — Athlete OS
+# phase-04 (historical)
 
-Native Kotlin/Compose **Athlete Operating System** (`:athlete`) on Design System 2.0 + Core Platform.
+> **HISTORICAL** — this path is a stub. The original files were archived for traceability.
 
-## Reports
+Moved to: [../archive/phase-04/](../archive/phase-04/)
 
-| Report |
-|--------|
-| [Athlete_OS_Report.md](./Athlete_OS_Report.md) |
-| [Navigation_Report.md](./Navigation_Report.md) |
-| [Offline_Report.md](./Offline_Report.md) |
-| [Performance_Report.md](./Performance_Report.md) |
-| [Accessibility_Report.md](./Accessibility_Report.md) |
-| [UX_Report.md](./UX_Report.md) |
-| [QA_Report.md](./QA_Report.md) |
-| [Technical_Debt.md](./Technical_Debt.md) |
-| [DECISION-scope.md](./DECISION-scope.md) |
+Canonical current status: [../master-plan/21_FINAL_ROADMAP.md](../master-plan/21_FINAL_ROADMAP.md)
 
-## Verify
-
-```powershell
-cd android
-.\gradlew.bat :athlete:testDebugUnitTest :app:assembleDebug
-```
-
-Maestro (device required): `maestro/android/smoke-athlete-os.yaml`
-
-## Stop
-
-Do **not** start Coach OS / Maps / Telemetry / AI Engine without human approval.
+Do not treat archived reports as the current product state.

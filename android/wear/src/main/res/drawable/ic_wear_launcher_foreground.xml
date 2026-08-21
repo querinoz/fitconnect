@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  FitConnect Elite OS mark for the Wear launcher.
+  Adaptive-icon foreground: art is kept inside the safe zone (centre 66dp of the 108dp
+  viewport) so the system can mask it to any shape without clipping the mark.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- honeycomb cell outline -->
+    <path
+        android:strokeColor="#C8FF00"
+        android:strokeWidth="4"
+        android:fillColor="#00000000"
+        android:strokeLineJoin="round"
+        android:pathData="M54,26 L78,40 L78,68 L54,82 L30,68 L30,40 Z" />
+
+    <!-- voltline pulse through the cell -->
+    <path
+        android:strokeColor="#C8FF00"
+        android:strokeWidth="5"
+        android:fillColor="#00000000"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M36,54 L47,54 L52,44 L60,64 L65,54 L74,54" />
+</vector>

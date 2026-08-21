@@ -12,6 +12,9 @@
 
     <application>
         <service
+            android:name="com.fitconnect.android.push.FitConnectMessagingService"
+            tools:node="remove" />
+        <service
             android:name="com.fitconnect.android.push.FitConnectFirebaseMessagingService"
             tools:node="remove" />
 

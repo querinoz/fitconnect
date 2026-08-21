@@ -10,16 +10,22 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowInsetsControllerCompat
 import com.fitconnect.android.design.EliteSurfaceColors
+import com.fitconnect.android.foundation.haptics.AndroidHapticGenerator
+import com.fitconnect.android.foundation.haptics.HapticGenerator
 import com.fitconnect.android.foundation.theme.AccentPreset
 import com.fitconnect.android.foundation.theme.ThemeMode
 
 val LocalDarkTheme = staticCompositionLocalOf { true }
+val LocalHapticGenerator = staticCompositionLocalOf<HapticGenerator> {
+    error("No HapticGenerator provided")
+}
 
 object EliteColorRoles {
     fun backgroundArgb(dark: Boolean, highContrast: Boolean): Long = when {
@@ -119,6 +125,7 @@ fun EliteSurfaceTheme(
         1f,
     )
     val reduceMotion = animatorScale == 0f
+    val hapticGenerator = remember(context) { AndroidHapticGenerator(context) }
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -134,6 +141,7 @@ fun EliteSurfaceTheme(
         LocalReduceMotion provides reduceMotion,
         LocalHighContrast provides highContrast,
         LocalDarkTheme provides darkTheme,
+        LocalHapticGenerator provides hapticGenerator,
     ) {
         MaterialTheme(
             colorScheme = EliteColorRoles.scheme(darkTheme, highContrast, accent),

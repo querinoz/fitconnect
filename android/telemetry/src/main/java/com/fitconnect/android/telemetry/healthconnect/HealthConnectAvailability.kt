@@ -13,6 +13,8 @@ object HealthConnectAvailability {
         try {
             when (HealthConnectClient.getSdkStatus(context)) {
                 HealthConnectClient.SDK_AVAILABLE -> MetricAvailability.AVAILABLE
+                HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED ->
+                    MetricAvailability.NEEDS_UPDATE
                 else -> MetricAvailability.UNAVAILABLE
             }
         } catch (_: Throwable) {

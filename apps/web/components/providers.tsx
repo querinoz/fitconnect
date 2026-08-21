@@ -17,7 +17,12 @@ function DevServiceWorkerCleanup() {
     if (process.env.NODE_ENV === "production") return;
     if (!("serviceWorker" in navigator)) return;
     void navigator.serviceWorker.getRegistrations().then((regs) => {
-      regs.forEach((reg) => void reg.unregister());
+      regs.forEach((reg) => {
+        const script =
+          reg.active?.scriptURL ?? reg.waiting?.scriptURL ?? reg.installing?.scriptURL ?? "";
+        if (script.includes("firebase-messaging-sw")) return;
+        void reg.unregister();
+      });
     });
   }, []);
   return null;

@@ -3,12 +3,13 @@ import { TRAINERS } from "@/lib/data";
 import { TrainerProfilePreview } from "@/components/discover/trainer-profile-preview";
 import { RouteModal } from "@/components/shell/route-modal";
 
-export default function TrainerProfileModalPage({
+export default async function TrainerProfileModalPage({
   params
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const trainer = TRAINERS.find((t) => t.id === params.id);
+  const { id } = await params;
+  const trainer = TRAINERS.find((t) => t.id === id);
   if (!trainer) return notFound();
 
   return (

@@ -21,6 +21,7 @@ android {
 
 dependencies {
     implementation(project(":foundation"))
+    implementation(project(":shared"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
 

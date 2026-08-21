@@ -1,5 +1,7 @@
 # PHASE 17 — final report
 
+> **HISTORICAL** (2026-08-15). Canonical status: [../master-plan/23_GO_NO_GO.md](../master-plan/23_GO_NO_GO.md). **PRODUCTION = NO-GO**. Do not treat ENGINEERING_COMPLETE as a launch GO.
+
 **Date:** 2026-08-15  
 **Branch:** `chore/android-phase-13r-recovery`  
 **Base HEAD (pre-cleanup):** `20173c8`  

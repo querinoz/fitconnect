@@ -79,6 +79,48 @@ export const COLOR_TOKENS = {
   alert: "#ff3a5c",
   cyan: "#00bfff",
 
+  // ── Chart series (ADR-011 / dataviz) ──────────────────────────────────────
+  // As hues canonicas a brilho pleno REPROVAM a banda de lightness OKLCH do modo
+  // escuro (L 0.48-0.67) quando usadas como series de grafico: voltline mede 0.928,
+  // telemetry 0.817, connect 0.800. Pior ainda, connect vs telemetry medem DeltaE 11.7
+  // para VISAO NORMAL -- abaixo do piso de 15, ou seja, indistinguiveis mesmo sem
+  // daltonismo.
+  //
+  // Estes passos mantem a MESMA hue, dessaturada para dentro da banda. Validado 5/5:
+  //   validate_palette.js "#00A2C4,#7EA200,#7F80FF,#C38400" --mode dark --surface "#0A0E15"
+  //   pior par adjacente DeltaE 20.3 (protan) / 8.1 (tritan) / 21.3 (normal)
+  //
+  // Volt pleno fica reservado ao numero heroi e ao CTA -- um por ecra.
+  // telemetry-700
+  chartSeries1: "#00a2c4",
+  // voltline-700
+  chartSeries2: "#7ea200",
+  // iris-500
+  chartSeries3: "#7f80ff",
+  // recovery-700
+  chartSeries4: "#c38400",
+
+  // Sequencial -- uma so hue (telemetry), claro->escuro. Para magnitude.
+  chartSeq1: "#003947",
+  chartSeq2: "#00566a",
+  chartSeq3: "#00758e",
+  chartSeq4: "#0095b5",
+  chartSeq5: "#00b7dd",
+  chartSeq6: "#41d8ff",
+
+  // Divergente -- dois polos + cinzento neutro ao meio. Para desvio face a um alvo.
+  chartDivWarm3: "#db9400",
+  chartDivWarm2: "#b37900",
+  chartDivWarm1: "#8d5e00",
+  chartDivMid: "#3c3b46",
+  chartDivCool1: "#00758e",
+  chartDivCool2: "#0095b5",
+  chartDivCool3: "#00b7dd",
+
+  // Texto dentro de graficos. --eos-on-surface-faint (28%) mede 2.16:1 e REPROVA
+  // WCAG AA como texto; serve so para ornamento. Este mede >=4.5:1.
+  chartInk: "rgba(228, 225, 238, 0.56)",
+
   // ── Text ──────────────────────────────────────────────────────────────────
   onSurface: "#e4e1ee",
   onSurfaceMuted: "#c7c4d8",

@@ -1,55 +1,63 @@
 package com.fitconnect.android.wear
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.wear.compose.material.Button
-import androidx.wear.compose.material.ButtonDefaults
-import androidx.wear.compose.material.Text
+import androidx.wear.compose.foundation.lazy.TransformingLazyColumn
+import androidx.wear.compose.foundation.lazy.TransformingLazyColumnDefaults
+import androidx.wear.compose.foundation.lazy.TransformingLazyColumnScope
+import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
+import androidx.wear.compose.foundation.pager.PagerState
+import androidx.wear.compose.foundation.pager.VerticalPager
+import androidx.wear.compose.foundation.pager.rememberPagerState
+import androidx.wear.compose.foundation.rotary.RotaryScrollableDefaults
+import androidx.wear.compose.material3.AnimatedPage
+import androidx.wear.compose.material3.Button
+import androidx.wear.compose.material3.ButtonDefaults
+import androidx.wear.compose.material3.EdgeButton
+import androidx.wear.compose.material3.ListHeader
+import androidx.wear.compose.material3.MaterialTheme
+import androidx.wear.compose.material3.ScreenScaffold
+import androidx.wear.compose.material3.Text
+import androidx.wear.compose.material3.VerticalPagerScaffold
 import com.fitconnect.android.capture.LiveActivityEngine
 import com.fitconnect.android.capture.LiveActivityPhase
-import com.fitconnect.android.design.EliteSurfaceColors
 import com.fitconnect.ascend.domain.EventPayload
 import com.fitconnect.ascend.domain.EventSource
 import com.fitconnect.ascend.domain.PerformanceEvent
 import com.fitconnect.ascend.domain.PerformanceEventType
-import com.fitconnect.ascend.engine.EventIds
 import com.fitconnect.ascend.domain.StreakKind
+import com.fitconnect.ascend.engine.EventIds
+import com.fitconnect.shared.identity.LocalDemoIdentity
 import com.fitconnect.shared.intelligence.BodyState
 import com.fitconnect.shared.intelligence.PerformanceIntelligence
 import com.fitconnect.shared.telemetry.MetricAvailability
 import com.fitconnect.shared.workout.WorkoutSport
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-enum class WearPane {
+private enum class WearIdlePane {
     HOME,
     READINESS,
-    WORKOUT,
-    PAUSE,
-    SUMMARY,
     HEART_RATE,
+    ASCEND,
     SLEEP,
     RECOVERY,
     STEPS,
-    ASCEND,
     SETTINGS,
 }
 
@@ -62,7 +70,21 @@ fun WearInstrument(
     companionLabel: String,
 ) {
     val snap by engine.state.collectAsState()
-    var pane by remember { mutableStateOf(WearPane.HOME) }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val ambient = LocalWearAmbient.current
+    val pagerState = rememberPagerState(pageCount = { WearIdlePane.entries.size })
+    val sessionActive = snap.phase == LiveActivityPhase.COUNTDOWN ||
+        snap.phase == LiveActivityPhase.RUNNING ||
+        snap.phase == LiveActivityPhase.PAUSED ||
+        snap.phase == LiveActivityPhase.RESUMING ||
+        snap.phase == LiveActivityPhase.FINISHING
+    val showSummary = snap.phase == LiveActivityPhase.ENDED
+
+    LaunchedEffect(snap.phase, snap.elapsedMs, ambient) {
+        WearOngoingController.sync(context, snap.phase, snap.elapsedMs)
+    }
+
     LaunchedEffect(snap.phase) {
         when (snap.phase) {
             LiveActivityPhase.COUNTDOWN -> {
@@ -72,7 +94,6 @@ fun WearInstrument(
                 }
             }
             LiveActivityPhase.RUNNING -> {
-                pane = WearPane.WORKOUT
                 WearRuntime.sessionId = engine.state.value.sessionId.ifBlank { WearRuntime.sessionId }
                 while (engine.state.value.phase == LiveActivityPhase.RUNNING) {
                     delay(1_000)
@@ -83,21 +104,19 @@ fun WearInstrument(
                         heartRateCapability = hrCapability,
                         sessionId = current.sessionId.ifBlank { WearRuntime.sessionId },
                         deviceId = deviceId,
-                        userId = "local",
+                        userId = LocalDemoIdentity.ATHLETE_ID,
                         sequenceNumber = WearRuntime.nextSequence(),
                         timestampEpochMs = System.currentTimeMillis(),
                     )
                 }
             }
-            LiveActivityPhase.PAUSED -> pane = WearPane.PAUSE
             LiveActivityPhase.ENDED -> {
-                pane = WearPane.SUMMARY
                 val current = engine.state.value
                 if (current.sessionId.isNotBlank()) {
                     WearRuntime.ascend.process(
                         PerformanceEvent(
-                            eventId = EventIds.workoutCompleted("wear-local", current.sessionId),
-                            userId = "wear-local",
+                            eventId = EventIds.workoutCompleted(LocalDemoIdentity.ATHLETE_ID, current.sessionId),
+                            userId = LocalDemoIdentity.ATHLETE_ID,
                             type = PerformanceEventType.WORKOUT_COMPLETED,
                             timestampEpochMs = System.currentTimeMillis(),
                             source = EventSource.WATCH,
@@ -125,58 +144,117 @@ fun WearInstrument(
     } else {
         "HR UNAVAILABLE"
     }
-    val zoneText = if (hrCapability == MetricAvailability.AVAILABLE) {
-        "ZONE ${snap.zone ?: "—"}"
-    } else {
-        "ZONE UNAVAILABLE"
-    }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(EliteSurfaceColors.FLOOR))
-            .padding(10.dp)
-            .pointerInput(pane) {
-                detectHorizontalDragGestures { _, drag ->
-                    if (drag < -40) pane = pane.next()
-                    if (drag > 40) pane = pane.prev()
-                }
-            },
-        verticalArrangement = Arrangement.spacedBy(3.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text("FITCONNECT", color = Color(EliteSurfaceColors.VOLTLINE), fontSize = 11.sp, fontWeight = FontWeight.Bold)
-        Text(companionLabel, color = Color(EliteSurfaceColors.ON_SURFACE_MUTED), fontSize = 8.sp)
-        when (pane) {
-            WearPane.HOME -> WearHomePane(
-                hrText = hrText,
-                onStart = {
+    when {
+        sessionActive -> WearActivePane(
+            engine = engine,
+            snapElapsed = snap.elapsedMs,
+            snapHr = snap.hrBpm,
+            snapZone = snap.zone,
+            phase = snap.phase,
+            hrCapability = hrCapability,
+            countdown = snap.countdownRemainingSec,
+        )
+        showSummary -> WearSummaryPane(engine)
+        else -> WearIdlePager(
+            pagerState = pagerState,
+            hrText = hrText,
+            hrCapability = hrCapability,
+            snapHr = snap.hrBpm,
+            companionLabel = companionLabel,
+            pendingCount = sender.pendingCount,
+            blocked = WearRuntime.lastBlockCode,
+            onStart = {
+                if (WearRuntime.claimLocalStart(WorkoutSport.RUN.wireKey)) {
                     engine.arm(WorkoutSport.RUN.wireKey)
                     engine.beginCountdown()
-                },
-                onOpen = { pane = it },
-            )
-            WearPane.READINESS -> WearMetricPane("READINESS", "88", "CALCULATED · LOCAL_DEMO")
-            WearPane.WORKOUT -> WearWorkoutPane(engine, snap.elapsedMs, snap.distanceM, snap.paceSecPerKm, hrText, zoneText)
-            WearPane.PAUSE -> WearPausePane(engine)
-            WearPane.SUMMARY -> WearSummaryPane(engine)
-            WearPane.HEART_RATE -> WearMetricPane("HEART RATE", if (hrCapability == MetricAvailability.AVAILABLE) "${snap.hrBpm ?: "—"}" else "UNAVAILABLE", hrCapability.name)
-            WearPane.SLEEP -> WearMetricPane("SLEEP", "DATA SOURCE REQUIRED", "No Health Services sleep")
-            WearPane.RECOVERY -> {
-                val body = PerformanceIntelligence.bodyState(88, hrvAvailable = false, sleepAvailable = false)
-                WearMetricPane("RECOVERY", if (body == BodyState.DATA_SOURCE_REQUIRED) "NO SOURCE" else body.name, "Performance Intelligence")
+                }
+            },
+            onOpenSettings = {
+                scope.launch { pagerState.animateScrollToPage(WearIdlePane.SETTINGS.ordinal) }
+            },
+        )
+    }
+}
+
+@Composable
+private fun WearIdlePager(
+    pagerState: PagerState,
+    hrText: String,
+    hrCapability: MetricAvailability,
+    snapHr: Int?,
+    companionLabel: String,
+    pendingCount: Int,
+    blocked: String?,
+    onStart: () -> Unit,
+    onOpenSettings: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    BackHandler(enabled = pagerState.currentPage > 0) {
+        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
+    }
+    VerticalPagerScaffold(pagerState = pagerState) {
+        VerticalPager(
+            state = pagerState,
+            rotaryScrollableBehavior = RotaryScrollableDefaults.snapBehavior(pagerState),
+        ) { page ->
+            val pane = WearIdlePane.entries[page]
+            AnimatedPage(pageIndex = page, pagerState = pagerState) {
+                when (pane) {
+                    WearIdlePane.HOME -> WearHomePane(
+                        hrText = hrText,
+                        blocked = blocked,
+                        onStart = onStart,
+                        onOpenSettings = onOpenSettings,
+                    )
+                    WearIdlePane.READINESS -> WearMetricPane(
+                        title = "READINESS",
+                        value = "88",
+                        footnote = "CALCULATED · LOCAL_DEMO",
+                    )
+                    WearIdlePane.HEART_RATE -> WearMetricPane(
+                        title = "HEART RATE",
+                        value = if (hrCapability == MetricAvailability.AVAILABLE) {
+                            "${snapHr ?: "—"}"
+                        } else {
+                            "UNAVAILABLE"
+                        },
+                        footnote = hrCapability.name,
+                    )
+                    WearIdlePane.ASCEND -> {
+                        val ascend = WearRuntime.ascend.snapshot(LocalDemoIdentity.ATHLETE_ID)
+                        val streak = ascend.streaks.firstOrNull { it.kind == StreakKind.PERFORMANCE }?.days ?: 0
+                        WearMetricPane(
+                            title = "ASCEND",
+                            value = "${ascend.level.rank.code} · ${ascend.totalXp} XP",
+                            footnote = "streak $streak · LINK UNVERIFIED · LOCAL_DEMO",
+                        )
+                    }
+                    WearIdlePane.SLEEP -> WearMetricPane(
+                        title = "SLEEP",
+                        value = "DATA SOURCE REQUIRED",
+                        footnote = "No Health Services sleep",
+                    )
+                    WearIdlePane.RECOVERY -> {
+                        val body = PerformanceIntelligence.bodyState(88, hrvAvailable = false, sleepAvailable = false)
+                        WearMetricPane(
+                            title = "RECOVERY",
+                            value = if (body == BodyState.DATA_SOURCE_REQUIRED) "NO SOURCE" else body.name,
+                            footnote = "Performance Intelligence",
+                        )
+                    }
+                    WearIdlePane.STEPS -> WearMetricPane(
+                        title = "STEPS",
+                        value = "DATA SOURCE REQUIRED",
+                        footnote = "Not a fabricated count",
+                    )
+                    WearIdlePane.SETTINGS -> WearMetricPane(
+                        title = "SETTINGS",
+                        value = companionLabel,
+                        footnote = "queued $pendingCount",
+                    )
+                }
             }
-            WearPane.STEPS -> WearMetricPane("STEPS", "DATA SOURCE REQUIRED", "Not a fabricated count")
-            WearPane.ASCEND -> {
-                val snap = WearRuntime.ascend.snapshot("wear-local")
-                val streak = snap.streaks.firstOrNull { it.kind == StreakKind.PERFORMANCE }?.days ?: 0
-                WearMetricPane(
-                    "ASCEND",
-                    "${snap.level.rank.code} · ${snap.totalXp} XP",
-                    "streak $streak · LINK UNVERIFIED · LOCAL_DEMO",
-                )
-            }
-            WearPane.SETTINGS -> WearMetricPane("SETTINGS", companionLabel, "queued ${sender.pendingCount}")
         }
     }
 }
@@ -184,72 +262,250 @@ fun WearInstrument(
 @Composable
 private fun WearHomePane(
     hrText: String,
+    blocked: String?,
     onStart: () -> Unit,
-    onOpen: (WearPane) -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
-    Text("READINESS", color = Color(EliteSurfaceColors.CONNECT), fontSize = 9.sp)
-    Text("88", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color(EliteSurfaceColors.VOLTLINE))
-    Text("READY · LOCAL_DEMO", fontSize = 9.sp, color = Color(EliteSurfaceColors.ON_SURFACE_MUTED))
-    Text(hrText, color = Color(EliteSurfaceColors.TELEMETRY), fontSize = 12.sp)
-    Button(
-        onClick = onStart,
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.primaryButtonColors(),
-    ) { Text("START") }
-    Button(onClick = { onOpen(WearPane.SETTINGS) }, modifier = Modifier.fillMaxWidth()) { Text("MORE") }
+    WearColumn(
+        edgeButton = {
+            EdgeButton(onClick = onStart) {
+                Text("START")
+            }
+        },
+    ) {
+        item {
+            ListHeader {
+                Text(
+                    "READINESS",
+                    color = MaterialTheme.colorScheme.secondary,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.semantics { heading() },
+                )
+            }
+        }
+        item {
+            Text(
+                "88",
+                style = MaterialTheme.typography.displaySmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        item {
+            Text(
+                "READY · LOCAL_DEMO",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        item {
+            Text(
+                hrText,
+                color = MaterialTheme.colorScheme.tertiary,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        if (blocked != null) {
+            item {
+                Text(
+                    blocked,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.labelSmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
+        item {
+            Button(onClick = onOpenSettings, modifier = Modifier.fillMaxWidth()) {
+                Text("MORE")
+            }
+        }
+    }
 }
 
 @Composable
-private fun WearWorkoutPane(
+private fun WearActivePane(
     engine: LiveActivityEngine,
-    elapsedMs: Long,
-    distanceM: Double,
-    pace: Double?,
-    hrText: String,
-    zoneText: String,
+    snapElapsed: Long,
+    snapHr: Int?,
+    snapZone: Int?,
+    phase: LiveActivityPhase,
+    hrCapability: MetricAvailability,
+    countdown: Int,
 ) {
-    Text("LIVE TELEMETRY", color = Color(EliteSurfaceColors.CONNECT), fontSize = 8.sp)
-    Text(LiveActivityEngine.formatElapsed(elapsedMs), fontSize = 22.sp, fontWeight = FontWeight.Bold)
-    Text("%.2f KM".format(distanceM / 1000.0), fontSize = 14.sp, color = Color(EliteSurfaceColors.VOLTLINE))
-    Text(LiveActivityEngine.formatPace(pace), fontSize = 12.sp)
-    Text(hrText, fontSize = 12.sp, color = Color(EliteSurfaceColors.TELEMETRY))
-    Text(zoneText, fontSize = 11.sp)
-    Button(onClick = engine::pause, modifier = Modifier.fillMaxWidth()) { Text("PAUSE") }
-    Button(onClick = engine::end, modifier = Modifier.fillMaxWidth()) { Text("FINISH") }
-}
-
-@Composable
-private fun WearPausePane(engine: LiveActivityEngine) {
-    Text("PAUSED", color = Color(EliteSurfaceColors.RECOVERY), fontSize = 14.sp, fontWeight = FontWeight.Bold)
-    Button(onClick = engine::resume, modifier = Modifier.fillMaxWidth()) { Text("RESUME") }
-    Button(onClick = engine::end, modifier = Modifier.fillMaxWidth()) { Text("FINISH") }
+    val ambient = LocalWearAmbient.current
+    val hrAvailable = hrCapability == MetricAvailability.AVAILABLE && snapHr != null
+    val primaryValue = when {
+        phase == LiveActivityPhase.COUNTDOWN -> countdown.toString()
+        hrAvailable -> "${snapHr ?: "—"}"
+        else -> LiveActivityEngine.formatElapsed(snapElapsed)
+    }
+    val primaryLabel = when {
+        phase == LiveActivityPhase.COUNTDOWN -> "COUNTDOWN"
+        hrAvailable -> "HR"
+        else -> "ELAPSED"
+    }
+    WearColumn(
+        edgeButton = {
+            when (phase) {
+                LiveActivityPhase.PAUSED -> EdgeButton(onClick = engine::resume) { Text("RESUME") }
+                LiveActivityPhase.COUNTDOWN -> EdgeButton(onClick = engine::end) { Text("CANCEL") }
+                else -> EdgeButton(onClick = engine::pause) { Text("PAUSE") }
+            }
+        },
+    ) {
+        item {
+            ListHeader {
+                Text(
+                    if (phase == LiveActivityPhase.PAUSED) "PAUSED" else primaryLabel,
+                    color = if (phase == LiveActivityPhase.PAUSED) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.secondary
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.semantics { heading() },
+                )
+            }
+        }
+        item {
+            Text(
+                primaryValue,
+                style = MaterialTheme.typography.displaySmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        if (!ambient) {
+            item {
+                val zone = if (hrAvailable) "ZONE ${snapZone ?: "—"}" else "LOCAL_DEMO"
+                Text(
+                    zone,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            if (phase == LiveActivityPhase.PAUSED || phase == LiveActivityPhase.RUNNING) {
+                item {
+                    Button(
+                        onClick = engine::end,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                        ),
+                    ) {
+                        Text("FINISH")
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
 private fun WearSummaryPane(engine: LiveActivityEngine) {
     val snap by engine.state.collectAsState()
-    Text("PERFORMANCE COMPLETE", color = Color(EliteSurfaceColors.VOLTLINE), fontSize = 9.sp)
-    Text("%.2f KM".format(snap.distanceM / 1000.0), fontSize = 16.sp)
-    Text(LiveActivityEngine.formatElapsed(snap.elapsedMs), fontSize = 14.sp)
-    val ascend = WearRuntime.ascend.snapshot("wear-local")
-    Text("ASCEND ${ascend.level.rank.code} · ${ascend.totalXp} XP", fontSize = 11.sp, color = Color(EliteSurfaceColors.CONNECT))
-    Text("SCORE ${snap.performanceScore ?: "—"}", fontSize = 12.sp)
-    Button(onClick = engine::discard, modifier = Modifier.fillMaxWidth()) { Text("DONE") }
+    WearColumn(
+        edgeButton = {
+            EdgeButton(onClick = engine::discard) { Text("DONE") }
+        },
+    ) {
+        item {
+            ListHeader {
+                Text(
+                    "COMPLETE",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.semantics { heading() },
+                )
+            }
+        }
+        item {
+            Text(
+                LiveActivityEngine.formatElapsed(snap.elapsedMs),
+                style = MaterialTheme.typography.displaySmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        item {
+            val ascend = WearRuntime.ascend.snapshot(LocalDemoIdentity.ATHLETE_ID)
+            Text(
+                "ASCEND ${ascend.level.rank.code} · LOCAL_DEMO",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.secondary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
 }
 
 @Composable
 private fun WearMetricPane(title: String, value: String, footnote: String) {
-    Text(title, color = Color(EliteSurfaceColors.CONNECT), fontSize = 9.sp)
-    Text(value, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-    Text(footnote, fontSize = 8.sp, color = Color(EliteSurfaceColors.ON_SURFACE_MUTED))
+    WearColumn {
+        item {
+            Text(
+                title,
+                color = MaterialTheme.colorScheme.secondary,
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().semantics { heading() },
+            )
+        }
+        item {
+            Text(
+                value,
+                style = MaterialTheme.typography.displaySmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        item {
+            Text(
+                footnote,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
 }
 
-private fun WearPane.next(): WearPane {
-    val all = WearPane.entries
-    return all[(ordinal + 1) % all.size]
-}
-
-private fun WearPane.prev(): WearPane {
-    val all = WearPane.entries
-    return all[(ordinal - 1 + all.size) % all.size]
+@Composable
+private fun WearColumn(
+    edgeButton: (@Composable BoxScope.() -> Unit)? = null,
+    content: TransformingLazyColumnScope.() -> Unit,
+) {
+    val state = rememberTransformingLazyColumnState()
+    val body: @Composable BoxScope.(androidx.compose.foundation.layout.PaddingValues) -> Unit =
+        { contentPadding ->
+            TransformingLazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = state,
+                contentPadding = contentPadding,
+                flingBehavior = TransformingLazyColumnDefaults.snapFlingBehavior(state),
+                rotaryScrollableBehavior = RotaryScrollableDefaults.snapBehavior(state),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(
+                    com.fitconnect.android.design.EliteSurfaceSpacing.SM.dp,
+                ),
+                content = content,
+            )
+        }
+    if (edgeButton != null) {
+        ScreenScaffold(scrollState = state, edgeButton = edgeButton, content = body)
+    } else {
+        ScreenScaffold(scrollState = state, content = body)
+    }
 }

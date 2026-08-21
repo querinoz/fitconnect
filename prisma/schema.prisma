@@ -42,6 +42,9 @@ enum WearableProvider {
 }
 
 model User {
+  /// Privileged Prisma/server identity only. User-facing identity is
+  /// identity_profiles (Firebase UID text) via Supabase Data API + RLS.
+  /// Do not use this model to authorize mobile/web user operations.
   id        String   @id @default(cuid())
   email     String   @unique
   role      UserRole @default(ATHLETE)

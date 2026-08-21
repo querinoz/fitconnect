@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { initPostHog, trackEvent } from "@/lib/observability/posthog";
 import { initSentryClient } from "@/lib/observability/sentry.client";
+import { initFirebaseClient } from "@/lib/firebase";
 
 export function AnalyticsBootstrap() {
   const pathname = usePathname();
@@ -12,6 +13,7 @@ export function AnalyticsBootstrap() {
     const run = () => {
       initSentryClient();
       initPostHog();
+      void initFirebaseClient();
     };
     if (typeof window.requestIdleCallback === "function") {
       const id = window.requestIdleCallback(run, { timeout: 5000 });

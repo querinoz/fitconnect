@@ -21,6 +21,7 @@ describe("CommandPalette", () => {
     const user = userEvent.setup();
     wrap(<CommandPalette role="athlete" open onOpenChange={() => {}} />);
     expect(screen.getByText("Go to dashboard")).toBeInTheDocument();
+    expect(screen.getByText("Load dashboards")).toBeInTheDocument();
     await user.type(screen.getByPlaceholderText(/search commands/i), "session");
     expect(screen.getByText("Go to sessions")).toBeInTheDocument();
     expect(screen.queryByText("Go to dashboard")).not.toBeInTheDocument();

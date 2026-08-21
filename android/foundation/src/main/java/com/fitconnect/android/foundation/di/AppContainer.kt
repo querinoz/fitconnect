@@ -9,7 +9,6 @@ import com.fitconnect.android.foundation.auth.BiometricGate
 import com.fitconnect.android.foundation.auth.CompositeAuthRepository
 import com.fitconnect.android.foundation.auth.LocalAuthRepository
 import com.fitconnect.android.foundation.auth.SessionBiometricGate
-import com.fitconnect.android.foundation.auth.SupabaseAuthRepository
 import com.fitconnect.android.foundation.auth.TokenRefresher
 import com.fitconnect.android.foundation.authz.Authorizer
 import com.fitconnect.android.foundation.authz.SessionAuthorizer
@@ -26,6 +25,8 @@ import com.fitconnect.android.foundation.i18n.LocaleManager
 import com.fitconnect.android.foundation.lifecycle.AppLifecycle
 import com.fitconnect.android.foundation.lifecycle.DefaultAppLifecycle
 import com.fitconnect.android.foundation.navigation.NavGuard
+import com.fitconnect.android.foundation.identity.HttpIdentityRemote
+import com.fitconnect.android.foundation.identity.IdentityRemote
 import com.fitconnect.android.foundation.network.AndroidConnectivityMonitor
 import com.fitconnect.android.foundation.network.ApiClient
 import com.fitconnect.android.foundation.network.AuthTokenProvider
@@ -95,6 +96,7 @@ interface AppContainer {
     val errorPipeline: ErrorPipeline
     val imageLoader: ImageLoader
     val accountIsolation: AccountIsolationController
+    val identityRemote: IdentityRemote
 }
 
 class DefaultAppContainer(
@@ -108,8 +110,8 @@ class DefaultAppContainer(
      */
     private val notificationOverride: ((Logger) -> NotificationGateway?)? = null,
     /**
-     * App module may supply Firebase identity. Return null to fall back to
-     * Supabase Auth REST when configured, else local/fail-closed.
+     * App module may supply Firebase identity. Return null to use local/fail-closed.
+     * Supabase Auth is not a second IdP.
      */
     private val identityAuthOverride: ((AppContainer) -> AuthRepository?)? = null,
 ) : AppContainer {
@@ -171,19 +173,13 @@ class DefaultAppContainer(
         )
     }
 
-    private val supabaseAuth by lazy {
-        SupabaseAuthRepository(
-            config = config,
-            sessionStore = sessionStore,
-            logger = logger,
-            isolation = accountIsolation,
-        )
+    override val identityRemote: IdentityRemote by lazy {
+        HttpIdentityRemote(api = { apiClient }, logger = logger)
     }
 
-    /** Firebase identity when provided; else Supabase Auth; else local/fail-closed. */
+    /** Firebase identity when provided; otherwise local demo or fail-closed. */
     override val authRepository: AuthRepository by lazy {
         val live = identityAuthOverride?.invoke(this)
-            ?: supabaseAuth.takeIf { config.usesSupabaseData }
         CompositeAuthRepository(
             local = localAuth,
             live = live,

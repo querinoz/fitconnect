@@ -1,12 +1,17 @@
 package com.fitconnect.android.designui.components
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,11 +47,33 @@ fun EliteInstrumentRing(
     contentDescription: String,
     modifier: Modifier = Modifier,
     trackColor: Color = EliteSurfaceColors.VOLTLINE.toColor(),
+    pulsing: Boolean = false,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val reduceMotion = reduceMotionEnabled()
     val animated = remember { Animatable(0f) }
     val target = progress.coerceIn(0f, 1f)
+    
+    val infiniteTransition = rememberInfiniteTransition(label = "ring-pulse")
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse-scale"
+    )
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 0.8f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse-alpha"
+    )
+
     LaunchedEffect(target, reduceMotion) {
         if (reduceMotion) {
             animated.snapTo(target)
@@ -91,7 +118,23 @@ fun EliteInstrumentRing(
                     drawCircle(color = bezel, radius = d / 2f, center = center)
                     drawCircle(color = groove, radius = d / 2f - bezelW * 0.35f, center = center)
                     drawCircle(color = face, radius = d / 2f - bezelW - grooveW * 0.15f, center = center)
-                    drawCircle(brush = glowBrush, radius = d * 0.48f, center = center)
+                    
+                    val currentPulseAlpha = if (pulsing && !reduceMotion) pulseAlpha else EliteSurfaceInstrument.HALO_ALPHA
+                    val currentPulseRadius = if (pulsing && !reduceMotion) d * 0.48f * pulseScale else d * 0.48f
+                    
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                trackColor.copy(alpha = currentPulseAlpha),
+                                trackColor.copy(alpha = 0f),
+                            ),
+                            center = center,
+                            radius = currentPulseRadius * 1.1f,
+                        ),
+                        radius = currentPulseRadius,
+                        center = center
+                    )
+                    
                     drawArc(
                         color = track,
                         startAngle = -90f,

@@ -36,6 +36,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     api(libs.androidx.material.icons.core)
     api(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.kotlinx.coroutines.android)
 
     debugImplementation(libs.androidx.ui.tooling)

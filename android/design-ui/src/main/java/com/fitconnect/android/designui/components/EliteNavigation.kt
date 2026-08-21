@@ -8,11 +8,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -79,6 +82,84 @@ fun EliteFloatingNavBar(
             items.forEach { item ->
                 EliteNavTab(item)
             }
+        }
+    }
+}
+
+/**
+ * Medium/expanded rail — same five destinations as [EliteFloatingNavBar].
+ */
+@Composable
+fun EliteNavRail(
+    items: List<EliteNavItem>,
+    modifier: Modifier = Modifier,
+    expanded: Boolean = false,
+) {
+    Column(
+        modifier = modifier
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .widthIn(
+                min = if (expanded) {
+                    196.dp
+                } else {
+                    Accessibility.MIN_TOUCH_TARGET_DP.dp + EliteSpace.Lg * 2
+                },
+            )
+            .fillMaxHeight()
+            .padding(horizontal = EliteSpace.Sm, vertical = EliteSpace.Md),
+        verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
+        horizontalAlignment = if (expanded) Alignment.Start else Alignment.CenterHorizontally,
+    ) {
+        items.forEach { item ->
+            EliteNavRailTab(item, expanded)
+        }
+    }
+}
+
+@Composable
+private fun EliteNavRailTab(item: EliteNavItem, expanded: Boolean) {
+    val selectedColor = MaterialTheme.colorScheme.primary
+    val idleColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val onSelected = MaterialTheme.colorScheme.onPrimary
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = Accessibility.PREFERRED_TOUCH_TARGET_DP.dp)
+            .clip(RoundedCornerShape(EliteRadius.Lg))
+            .selectable(
+                selected = item.selected,
+                onClick = item.onClick,
+                role = Role.Tab,
+            )
+            .padding(vertical = EliteSpace.Xs)
+            .testTag(item.testTag),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(EliteSpace.Xxs),
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(width = 48.dp, height = 32.dp)
+                .clip(RoundedCornerShape(EliteRadius.Full))
+                .background(if (item.selected) selectedColor else Color.Transparent),
+        ) {
+            Icon(
+                imageVector = item.icon,
+                contentDescription = item.label,
+                tint = if (item.selected) onSelected else idleColor,
+                modifier = Modifier.size(22.dp),
+            )
+        }
+        if (expanded) {
+            Text(
+                text = item.label,
+                style = MaterialTheme.typography.labelSmall,
+                color = if (item.selected) selectedColor else idleColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
+            )
         }
     }
 }

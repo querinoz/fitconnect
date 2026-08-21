@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wear_app_name">FitConnect Wear</string>
+    <string name="tile_label">Readiness</string>
+    <string name="tile_description">Prime Readiness and live session state at a glance.</string>
+    <string name="complication_label">FitConnect Prime</string>
+    <string name="complication_description">Prime Readiness, or live session state while training.</string>
+</resources>

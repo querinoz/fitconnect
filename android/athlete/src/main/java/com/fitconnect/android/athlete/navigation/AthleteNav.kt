@@ -31,10 +31,10 @@ enum class AthleteDest(
     val iconLabel: String,
     val bottom: Boolean = false,
 ) {
-    HOME("athlete/home", "Home", "H", bottom = true),
-    DISCOVER("athlete/discover", "Discover", "D", bottom = true),
-    ACTIVITY("athlete/activity", "Activity", "A", bottom = true),
-    COMMUNITY("athlete/community", "Community", "C", bottom = true),
+    HOME("athlete/home", "Today", "H", bottom = true),
+    DISCOVER("athlete/discover", "Analysis", "D", bottom = true),
+    ACTIVITY("athlete/activity", "Train", "A", bottom = false),
+    COMMUNITY("athlete/community", "Community", "C", bottom = false),
     PROFILE("athlete/profile", "Profile", "Y", bottom = true),
     TRAINING("athlete/training", "Sessions", "S"),
     PROGRAMS("athlete/programs", "Programs", "P"),
@@ -46,11 +46,11 @@ enum class AthleteDest(
     SLEEP("athlete/sleep", "Sleep", "Z"),
     DAILY("athlete/daily", "Daily", "Y"),
     SETTINGS("athlete/settings", "Settings", "G"),
-    VAULT("athlete/vault", "Vault", "V"),
+    VAULT("athlete/vault", "Achievements", "V", bottom = true),
     SESSION("athlete/training/{sessionId}", "Session", "T");
 
     companion object {
-        val bottomTabs = entries.filter { it.bottom }
+        val bottomTabs = listOf(HOME, DISCOVER, VAULT, PROFILE)
     }
 }
 

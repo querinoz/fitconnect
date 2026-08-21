@@ -1,31 +1,9 @@
-# Phase 05 — Coach OS
+# phase-05 (historical)
 
-Native Kotlin/Compose **Coach Operating System** (`:coach`).
+> **HISTORICAL** — this path is a stub. The original files were archived for traceability.
 
-## Reports
+Moved to: [../archive/phase-05/](../archive/phase-05/)
 
-| Report |
-|--------|
-| [Coach_OS_Report.md](./Coach_OS_Report.md) |
-| [Coach_Architecture.md](./Coach_Architecture.md) |
-| [Program_Builder_Report.md](./Program_Builder_Report.md) |
-| [Analytics_Report.md](./Analytics_Report.md) |
-| [Offline_Report.md](./Offline_Report.md) |
-| [Accessibility_Report.md](./Accessibility_Report.md) |
-| [Performance_Report.md](./Performance_Report.md) |
-| [QA_Report.md](./QA_Report.md) |
-| [Technical_Debt.md](./Technical_Debt.md) |
-| [DECISION-scope.md](./DECISION-scope.md) |
+Canonical current status: [../master-plan/21_FINAL_ROADMAP.md](../master-plan/21_FINAL_ROADMAP.md)
 
-## Verify
-
-```powershell
-cd android
-.\gradlew.bat :coach:testDebugUnitTest :app:assembleDebug
-```
-
-Coach demo: Auth → **Enter coach demo** (`coach@fitconnect.app`).
-
-## Stop
-
-Do **not** start Sports Engine / Maps / Telemetry / AI without human approval.
+Do not treat archived reports as the current product state.

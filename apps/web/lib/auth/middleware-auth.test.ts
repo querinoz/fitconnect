@@ -3,7 +3,8 @@ import {
   isDemoModeEnv,
   isSupabaseConfiguredEnv,
   shouldEnforceSupabaseAuth,
-  hasValidDemoSessionCookie
+  hasValidDemoSessionCookie,
+  isProtectedPath,
 } from "./middleware-auth";
 
 describe("middleware auth policy", () => {
@@ -25,7 +26,7 @@ describe("middleware auth policy", () => {
     ).toBe(false);
   });
 
-  it("enforces Supabase only when demo is off and Supabase is configured", () => {
+  it("enforces Firebase only when demo is off and Firebase web config is present", () => {
     expect(
       shouldEnforceSupabaseAuth({ demoMode: false, supabaseConfigured: true })
     ).toBe(true);
@@ -44,5 +45,13 @@ describe("middleware auth policy", () => {
       hasValidDemoSessionCookie("athlete", (id) => id === "athlete")
     ).toBe(true);
     expect(hasValidDemoSessionCookie("%invalid", () => false)).toBe(false);
+  });
+
+  it("protects insights with the rest of the athlete workspace", () => {
+    expect(isProtectedPath("/achievements")).toBe(true);
+    expect(isProtectedPath("/insights")).toBe(true);
+    expect(isProtectedPath("/insights/export")).toBe(true);
+    expect(isProtectedPath("/dashboard")).toBe(true);
+    expect(isProtectedPath("/")).toBe(false);
   });
 });

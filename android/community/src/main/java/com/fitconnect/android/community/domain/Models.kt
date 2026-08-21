@@ -69,6 +69,7 @@ data class WorkoutFacts(
     val avgHeartRate: Double?,
     val trainingLoad: Double?,
     val personalRecord: Boolean = false,
+    val providerId: String = com.fitconnect.shared.fitness.ProviderId.HEALTH_CONNECT.name,
 )
 
 data class CommunityPost(

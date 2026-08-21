@@ -29,6 +29,9 @@ import com.fitconnect.android.designui.components.EliteOnboardingProgress
 import com.fitconnect.android.designui.components.EliteTextField
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.auth.DemoPersona
+import com.fitconnect.android.foundation.authz.UserRole
+import com.fitconnect.android.foundation.identity.IdentityOnboarding
+import com.fitconnect.android.foundation.identity.IdentityRemote
 import com.fitconnect.android.foundation.storage.KeyValueStore
 import com.fitconnect.android.foundation.storage.coachOnboardingStep
 import com.fitconnect.android.foundation.storage.markCoachOnboardingDone
@@ -48,6 +51,7 @@ private val COACH_STEPS = listOf(
 fun CoachOnboardingScreen(
     keyValueStore: KeyValueStore,
     onFinished: () -> Unit,
+    identityRemote: IdentityRemote? = null,
 ) {
     val scope = rememberCoroutineScope()
     var step by remember { mutableIntStateOf(0) }
@@ -65,7 +69,21 @@ fun CoachOnboardingScreen(
 
     fun persistStep(next: Int) {
         step = next
-        scope.launch { keyValueStore.setCoachOnboardingStep(next) }
+        scope.launch {
+            keyValueStore.setCoachOnboardingStep(next)
+            identityRemote?.putOnboarding(
+                IdentityOnboarding(
+                    uid = "",
+                    role = UserRole.COACH,
+                    step = next,
+                    completed = false,
+                    payload = org.json.JSONObject()
+                        .put("displayName", displayName)
+                        .put("specialty", specialty)
+                        .toString(),
+                ),
+            )
+        }
     }
 
     if (!hydrated) {
@@ -181,6 +199,18 @@ fun CoachOnboardingScreen(
                         onClick = {
                             scope.launch {
                                 keyValueStore.markCoachOnboardingDone()
+                                identityRemote?.putOnboarding(
+                                    IdentityOnboarding(
+                                        uid = "",
+                                        role = UserRole.COACH,
+                                        step = 5,
+                                        completed = true,
+                                        payload = org.json.JSONObject()
+                                            .put("displayName", displayName)
+                                            .put("specialty", specialty)
+                                            .toString(),
+                                    ),
+                                )
                                 onFinished()
                             }
                         },

@@ -85,10 +85,11 @@ class AndroidFederatedAuthHost(
         }
     }
 
-    suspend fun clearCredentialState() {
+    override suspend fun clearCredentialState(): AppResult<Unit> {
         runCatching {
             CredentialManager.create(activity).clearCredentialState(ClearCredentialStateRequest())
         }
+        return AppResult.Ok(Unit)
     }
 
     private suspend fun requestGoogle(

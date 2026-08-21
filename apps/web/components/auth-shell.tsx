@@ -19,21 +19,18 @@ import {
   safeInternalNextPath,
   validateCredentials
 } from "@/lib/auth";
-import { mapSupabaseUserToAuthUser } from "@/lib/auth/map-supabase-user";
-import {
-  setDemoSessionCookie
-} from "@/lib/auth/demo-session";
+import { setDemoSessionCookie } from "@/lib/auth/demo-session";
 import {
   navigateAfterLogin,
   persistClientAuthSession
 } from "@/lib/auth/complete-login";
 import {
   authBackend,
-  fetchSupabaseAuthUser,
   signInWithMagicLink,
   signInWithPassword,
   signUpWithPassword
 } from "@/lib/auth/supabase-browser-auth";
+import { applyIdentityToAuthUser, bootstrapProfile, persistIdentityRole, persistOnboarding } from "@/lib/identity/client";
 import { logoutAuthSession } from "@/lib/auth/use-supabase-auth-sync";
 import { useAuthStore } from "@/lib/auth-store";
 import { useAuthHydrated } from "@/lib/use-auth-hydrated";
@@ -144,28 +141,29 @@ export function AuthShell({
         return;
       }
 
-      const demoUser = validateCredentials(identifier, password, registered);
-      if (demoUser) {
-        await completeLogin(demoUser);
+      if (authBackend() === "demo") {
+        const demoUser = validateCredentials(identifier, password, registered);
+        if (demoUser) {
+          await completeLogin(demoUser);
+          return;
+        }
+        setError(t("auth", "invalidCredentials"));
+        setSubmitted(false);
         return;
       }
 
-      if (authBackend() === "supabase" && identifier.includes("@")) {
+      if (authBackend() === "firebase" && identifier.includes("@")) {
         const result = await signInWithPassword(identifier, password);
-        if (!result.ok) {
-          setError(result.message);
+        if (!result.ok || !result.user) {
+          setError(result.ok ? t("auth", "invalidCredentials") : result.message);
           setSubmitted(false);
           return;
         }
-
-        const supabaseUser = await fetchSupabaseAuthUser();
-        if (!supabaseUser) {
-          setError(t("auth", "invalidCredentials"));
-          setSubmitted(false);
-          return;
-        }
-
-        await completeLogin(mapSupabaseUserToAuthUser(supabaseUser), {
+        const profile = await bootstrapProfile({
+          email: result.user.email,
+          displayName: result.user.name
+        });
+        await completeLogin(applyIdentityToAuthUser(result.user, profile), {
           persistDemoCookie: false
         });
         return;
@@ -182,7 +180,7 @@ export function AuthShell({
       return;
     }
 
-    if (authBackend() === "supabase") {
+    if (authBackend() === "firebase") {
       const result = await signUpWithPassword({
         email,
         password,
@@ -190,12 +188,22 @@ export function AuthShell({
         role: signupRole
       });
       setSubmitted(false);
-      if (!result.ok) {
-        setError(result.message);
+      if (!result.ok || !result.user) {
+        setError(result.ok ? t("auth", "invalidCredentials") : result.message);
         return;
       }
+      await bootstrapProfile({ email, displayName: name });
+      await persistIdentityRole(signupRole);
+      await persistOnboarding({ role: signupRole, step: 0, completed: false });
       setOnboardingRole(signupRole);
+      persistClientAuthSession(result.user, { persistDemoCookie: false });
       router.push(onboardingPathForRole(signupRole));
+      return;
+    }
+
+    if (authBackend() !== "demo") {
+      setError("Authentication is not configured.");
+      setSubmitted(false);
       return;
     }
 

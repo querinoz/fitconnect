@@ -1,13 +1,18 @@
-import withPWAInit from "@ducanh2912/next-pwa";
-import { pwaInitOptions } from "./lib/pwa/config.mjs";
+import withSerwistInit from "@serwist/next";
+import { isPWADisabled, pwaInitOptions } from "./lib/pwa/config.mjs";
 
-const withPWA = withPWAInit(pwaInitOptions);
+const withSerwist = withSerwistInit({
+  swSrc: pwaInitOptions.swSrc,
+  swDest: pwaInitOptions.swDest,
+  disable: isPWADisabled()
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
     optimizeCss: true,
+    reactCompiler: true,
     optimizePackageImports: [
       "lucide-react",
       "motion",
@@ -24,8 +29,16 @@ const nextConfig = {
     "@fitconnect/maps",
   ],
   allowedDevOrigins: ["*.trycloudflare.com"],
-  async headers() {
+    async headers() {
     return [
+      {
+        source: "/firebase-messaging-sw.js",
+        headers: [
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+          { key: "Service-Worker-Allowed", value: "/" },
+          { key: "Cache-Control", value: "no-cache" }
+        ]
+      },
       {
         source: "/:path*",
         headers: [
@@ -43,7 +56,7 @@ const nextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https: wss:; worker-src 'self' blob:; child-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: blob:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https: wss:; worker-src 'self' blob:; child-src 'self' blob:; frame-src 'self' https://www.google.com https://www.gstatic.com https://www.recaptcha.net; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
           }
         ]
       }
@@ -67,4 +80,4 @@ const nextConfig = {
   },
 };
 
-export default withPWA(nextConfig);
+export default withSerwist(nextConfig);

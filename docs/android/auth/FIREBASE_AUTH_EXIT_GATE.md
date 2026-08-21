@@ -1,6 +1,9 @@
 # Firebase Auth — Exit Gate
 
-Date: 2026-08-17  
+Date: 2026-08-17
+
+**Status:** ENGINEERING EVIDENCE · PRODUCTION_AUTH PENDING_HUMAN · does not skip **P0-SEC**
+
 Evidence is local engineering. Production IdP credentials were **not** supplied.
 
 | Gate | Status | Evidence |

@@ -10,6 +10,7 @@ import com.fitconnect.android.foundation.common.AppResult
 interface FederatedAuthHost {
     suspend fun googleIdToken(): AppResult<String>
     suspend fun appleSignIn(): AppResult<IdentitySnapshot>
+    suspend fun clearCredentialState(): AppResult<Unit> = AppResult.Ok(Unit)
 }
 
 object UnavailableFederatedAuthHost : FederatedAuthHost {
@@ -31,6 +32,8 @@ data class IdentitySnapshot(
     val idToken: String,
     val refreshToken: String? = null,
     val expiresAtEpochMs: Long? = null,
+    val displayName: String? = null,
+    val photoUrl: String? = null,
 )
 
 /**

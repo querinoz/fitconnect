@@ -1,5 +1,6 @@
 package com.fitconnect.android
 
+import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import com.fitconnect.android.ui.ErrorBoundary
 import com.fitconnect.android.ui.navigation.FitConnectNavHost
 import com.fitconnect.android.ui.theme.FitConnectTheme
@@ -24,6 +26,10 @@ class MainActivity : ComponentActivity() {
             )
         }
         enableEdgeToEdge()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        if (Build.VERSION.SDK_INT >= 29) {
+            window.isNavigationBarContrastEnforced = false
+        }
         val app = application as FitConnectApplication
         setContent {
             FitConnectTheme(container = app.container) {

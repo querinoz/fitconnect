@@ -31,6 +31,7 @@ dependencies {
     implementation(project(":ai"))
     implementation(project(":community"))
     implementation(project(":core-capture"))
+    implementation(project(":core:fitness"))
     implementation(project(":shared"))
     implementation(project(":ascend"))
     implementation(project(":design"))
@@ -44,6 +45,9 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.adaptive)
+    implementation(libs.androidx.adaptive.layout)
+    implementation(libs.androidx.adaptive.navigation)
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)

@@ -30,6 +30,7 @@ import com.fitconnect.android.sports.domain.SportId
 import com.fitconnect.android.sports.performance.LoadSeries
 import com.fitconnect.android.sports.performance.ReadinessInputs
 import com.fitconnect.android.telemetry.integration.AthleteTelemetryFacade
+import com.fitconnect.shared.identity.LocalDemoIdentity
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.roundToInt
 
@@ -331,6 +332,6 @@ class LocalAthleteRepository(
     }
 
     companion object {
-        const val ATHLETE_ID = "ath-1"
+        const val ATHLETE_ID = LocalDemoIdentity.ATHLETE_ID
     }
 }

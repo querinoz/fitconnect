@@ -4,6 +4,7 @@ import com.fitconnect.android.telemetry.aggregate.AggregateSeries
 import com.fitconnect.android.telemetry.aggregate.AggregationEngine
 import com.fitconnect.android.telemetry.aggregate.Bucket
 import com.fitconnect.android.telemetry.domain.MetricType
+import com.fitconnect.android.telemetry.domain.ProviderId
 import com.fitconnect.android.telemetry.domain.TelemetrySample
 import com.fitconnect.android.telemetry.domain.WorkoutSession
 import com.fitconnect.android.telemetry.privacy.TelemetryPrivacyManager
@@ -49,6 +50,17 @@ class AthleteTelemetryFacade(
         restingHr = store.latestSample(athleteId, MetricType.RESTING_HEART_RATE)?.value,
         trainingLoad = store.latestSample(athleteId, MetricType.TRAINING_LOAD)?.value,
     )
+
+    /** ML / coach-adjacent summaries never include STRAVA rows (AGENTS.md §1). */
+    suspend fun readinessVitalsForModels(athleteId: String): ReadinessVitals {
+        val banned = setOf(ProviderId.STRAVA)
+        return ReadinessVitals(
+            hrvMs = store.latestSampleExcluding(athleteId, MetricType.HRV, banned)?.value,
+            sleepMinutes = store.latestSampleExcluding(athleteId, MetricType.SLEEP, banned)?.value,
+            restingHr = store.latestSampleExcluding(athleteId, MetricType.RESTING_HEART_RATE, banned)?.value,
+            trainingLoad = store.latestSampleExcluding(athleteId, MetricType.TRAINING_LOAD, banned)?.value,
+        )
+    }
 
     suspend fun overview(athleteId: String, recentDays: Int = 7): TelemetryOverview {
         val now = TelemetryInstant.now(clock)
@@ -107,7 +119,11 @@ class CoachTelemetryFacade(
         val now = TelemetryInstant.now(clock)
         for (metric in shared) {
             if (!privacy.coachMayRead(coachId, athleteId, metric)) continue
-            store.latestSample(athleteId, metric)?.let { vitals[metric] = it.value }
+            store.latestSampleExcluding(
+                athleteId,
+                metric,
+                setOf(com.fitconnect.android.telemetry.domain.ProviderId.STRAVA),
+            )?.let { vitals[metric] = it.value }
             val series = aggregation.aggregate(
                 athleteId, metric,
                 TimeRange(now.plusMs(-14 * DAY_MS), now), Bucket.DAILY,

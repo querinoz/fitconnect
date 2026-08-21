@@ -85,12 +85,12 @@ const samplePlan = [
   }
 ];
 
-export default function TrainerPage({
+export default async function TrainerPage({
   params
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = await params;
   const t = TRAINERS.find((x) => x.id === id);
   if (!t) return notFound();
   const reviews = REVIEWS.filter((r) => r.trainerId === t.id);

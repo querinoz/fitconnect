@@ -3,7 +3,7 @@ import { getPrisma } from "@/lib/db/client";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const body = (await request.json().catch(() => null)) as {
     athleteExternalId?: string;
@@ -16,11 +16,12 @@ export async function POST(
     return NextResponse.json({ error: "invalid rpe" }, { status: 400 });
   }
 
+  const { id } = await params;
   const prisma = getPrisma();
   if (prisma) {
     await prisma.sessionFeedback.create({
       data: {
-        sessionExternalId: params.id,
+        sessionExternalId: id,
         athleteExternalId: body?.athleteExternalId ?? "a-ines",
         rpe,
         notes: body?.notes ?? null

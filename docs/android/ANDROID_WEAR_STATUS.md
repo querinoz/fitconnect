@@ -2,6 +2,8 @@
 
 **Date:** 2026-08-15
 
+**Status:** HISTORICAL snapshot of the Wear module · P7-WATCH is still PLANNED · phone↔watch Data Layer **UNVERIFIED** · **PRODUCTION = NO-GO**
+
 ```
 WEAR_ENGINEERING_READY = YES
 WEAR_DEVICE_TEST       = PENDING_HUMAN

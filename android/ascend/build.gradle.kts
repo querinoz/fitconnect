@@ -9,5 +9,6 @@ java {
 }
 
 dependencies {
+    implementation(project(":shared"))
     testImplementation(libs.junit)
 }

@@ -52,7 +52,7 @@ Extend with alpha ramps and gradients — **never replace core hues**.
 
 1. **Zero hex in new components** — use `var(--eos-*)` or `COLOR_TOKENS`.
 2. **Dark-first** — light mode optional; glass on light needs `bg-white/80+`.
-3. **Motion** — see [motion-language.md](./motion-language.md); respect `data-motion="reduced"`.
+3. **Motion** — see [design/ELITE_OS_MOTION_LANGUAGE.md](./design/ELITE_OS_MOTION_LANGUAGE.md); respect `data-motion="reduced"`.
 4. **i18n** — new copy → `apps/web/lib/i18n/types.ts` + 6 locales.
 
 ## Migration
@@ -66,7 +66,7 @@ node scripts/codemod-tokens.mjs --dry-run
 
 ## Related docs
 
-- [motion-language.md](./motion-language.md)
-- [art-direction.md](./art-direction.md)
+- [design/ELITE_OS_MOTION_LANGUAGE.md](./design/ELITE_OS_MOTION_LANGUAGE.md)
+- [archive/docs-root/art-direction.md](./archive/docs-root/art-direction.md) (HISTORICAL)
 - [ADR-002 Token format](./adr/ADR-002-token-format.md)
 - [ADR-003 Stack modernization](./adr/ADR-003-stack-modernization.md)

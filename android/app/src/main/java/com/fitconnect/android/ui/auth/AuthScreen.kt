@@ -53,6 +53,7 @@ import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.reduceMotionEnabled
 import com.fitconnect.android.foundation.auth.DemoPersona
 import com.fitconnect.android.foundation.config.AppConfig
+import com.fitconnect.android.foundation.theme.AccentPreset
 import com.fitconnect.android.foundation.theme.ThemeMode
 import com.fitconnect.android.ui.theme.LocalAppContainer
 import kotlinx.coroutines.delay
@@ -75,6 +76,7 @@ fun AuthScreen(
     val viewModel: AuthViewModel = viewModel(factory = AuthViewModel.factory(container))
     val state by viewModel.state.collectAsState()
     val themeMode by container.themeSettings.observe().collectAsState(initial = ThemeMode.DARK)
+    val accent by container.themeSettings.observeAccent().collectAsState(initial = AccentPreset.VOLTLINE)
     val scope = rememberCoroutineScope()
     val reduceMotion = reduceMotionEnabled()
     var introStep by remember { mutableIntStateOf(if (reduceMotion) 3 else 0) }
@@ -199,6 +201,10 @@ fun AuthScreen(
                     mode = themeMode,
                     onModeChange = { next ->
                         scope.launch { container.themeSettings.setMode(next) }
+                    },
+                    accent = accent,
+                    onAccentChange = { next ->
+                        scope.launch { container.themeSettings.setAccent(next) }
                     },
                 )
             }

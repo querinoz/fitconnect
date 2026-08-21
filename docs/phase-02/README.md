@@ -1,23 +1,9 @@
-# Phase 02 — Core Platform
+# phase-02 (historical)
 
-Native Android Core Platform on top of Phase 01 foundation.
+> **HISTORICAL** — this path is a stub. The original files were archived for traceability.
 
-## Outputs
+Moved to: [../archive/phase-02/](../archive/phase-02/)
 
-| Report |
-|--------|
-| [Core_Platform_Report.md](./Core_Platform_Report.md) |
-| [Authentication_Report.md](./Authentication_Report.md) |
-| [Navigation_Report.md](./Navigation_Report.md) |
-| [Permissions_Report.md](./Permissions_Report.md) |
-| [Networking_Report.md](./Networking_Report.md) |
-| [Offline_Report.md](./Offline_Report.md) |
-| [Security_Report.md](./Security_Report.md) |
-| [Localization_Report.md](./Localization_Report.md) |
-| [Theme_Report.md](./Theme_Report.md) |
-| [Feature_Flags_Report.md](./Feature_Flags_Report.md) |
-| [DECISION-native-vs-expo.md](./DECISION-native-vs-expo.md) |
+Canonical current status: [../master-plan/21_FINAL_ROADMAP.md](../master-plan/21_FINAL_ROADMAP.md)
 
-## Stop
-
-Do not start Athlete OS / Coach OS / feature UI until explicitly approved.
+Do not treat archived reports as the current product state.

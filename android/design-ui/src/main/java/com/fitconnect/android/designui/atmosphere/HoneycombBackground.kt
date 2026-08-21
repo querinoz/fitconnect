@@ -5,12 +5,15 @@ import android.os.PowerManager
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -36,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.fitconnect.android.design.EliteSurfaceAtmosphere
@@ -46,10 +50,14 @@ import com.fitconnect.android.designui.theme.LocalHoneycombIntensity
 import com.fitconnect.android.designui.theme.reduceMotionEnabled
 import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.android.foundation.theme.HoneycombIntensity
+import kotlinx.coroutines.delay
 import kotlin.math.ceil
 
 val LocalHoneycombEmptyBoost = staticCompositionLocalOf<MutableState<Boolean>?> { null }
 val LocalAtmosphereMotionScale = staticCompositionLocalOf<MutableFloatState?> { null }
+val LocalEnergyPulseTrigger = staticCompositionLocalOf<MutableState<Long>> { 
+    mutableStateOf(0L)
+}
 
 @Composable
 fun HoneycombAtmosphere(
@@ -91,6 +99,20 @@ fun HoneycombAtmosphere(
     }
     val floor = EliteSurfaceColors.FLOOR.toColor()
     val (driftFactor, pulseAlpha) = honeycombMotion(animate)
+    val energyPulseTrigger = LocalEnergyPulseTrigger.current
+    val energyPulseAlpha by animateFloatAsState(
+        targetValue = if (energyPulseTrigger.value > 0L) 1f else 0f,
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = 100f),
+        label = "energy-pulse-alpha"
+    )
+    
+    LaunchedEffect(energyPulseTrigger.value) {
+        if (energyPulseTrigger.value > 0L) {
+            delay(1000)
+            energyPulseTrigger.value = 0L
+        }
+    }
+
     val driftAmp = radiusPx * EliteSurfaceAtmosphere.HONEYCOMB_PARALLAX * sessionScale
 
     CanvasLike(
@@ -118,9 +140,18 @@ fun HoneycombAtmosphere(
                     ).take(HoneycombMesh.pulseCells)
                     origins.forEach { origin ->
                         drawCircle(
-                            color = strokeColor.copy(alpha = pulseAlpha * sessionScale),
-                            radius = pulseR,
+                            color = strokeColor.copy(alpha = (pulseAlpha + energyPulseAlpha * 0.4f) * sessionScale),
+                            radius = pulseR * (1f + energyPulseAlpha * 0.5f),
                             center = origin,
+                        )
+                    }
+                    
+                    if (energyPulseAlpha > 0f) {
+                        drawCircle(
+                            color = strokeColor.copy(alpha = energyPulseAlpha * 0.2f),
+                            radius = size.minDimension * energyPulseAlpha,
+                            center = center,
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 4.dp.toPx())
                         )
                     }
                 }

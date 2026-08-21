@@ -1,30 +1,30 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { requireCoachId, requireAthleteId } from "./require-auth";
-import { createSupabaseServerClient } from "@/lib/auth/supabase/server";
+import { requireCoachId, requireAthleteId, requireAuth } from "./require-auth";
+import { encodeUnsignedTestJwt } from "@/lib/auth/firebase-id-token";
+import { lookupIdentityRole } from "@/lib/identity/repository";
 
 vi.mock("@/lib/auth/supabase/client", () => ({
   isDemoMode: () => false
 }));
 
-vi.mock("@/lib/auth/supabase/server", () => ({
-  createSupabaseServerClient: vi.fn()
+vi.mock("@/lib/firebase/config", () => ({
+  isFirebaseWebConfigured: () => true
 }));
 
-function mockSession(id: string, role: "athlete" | "coach" | "admin") {
-  vi.mocked(createSupabaseServerClient).mockResolvedValue({
-    auth: {
-      getUser: vi.fn().mockResolvedValue({
-        data: {
-          user: {
-            id,
-            email: `${id}@fitconnect.app`,
-            user_metadata: { role }
-          }
-        },
-        error: null
-      })
-    }
-  } as never);
+vi.mock("@/lib/identity/repository", () => ({
+  lookupIdentityRole: vi.fn()
+}));
+
+vi.mock("next/headers", () => ({
+  cookies: async () => ({ get: () => undefined }),
+  headers: async () => new Headers()
+}));
+
+function authedRequest(uid: string, path: string) {
+  const token = encodeUnsignedTestJwt({ sub: uid, email: `${uid}@fitconnect.app` });
+  return new Request(`http://localhost${path}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
 }
 
 describe("require-auth production IDOR", () => {
@@ -33,9 +33,9 @@ describe("require-auth production IDOR", () => {
   });
 
   it("binds coach id to the authenticated coach, not the query param", async () => {
-    mockSession("coach-self", "coach");
+    vi.mocked(lookupIdentityRole).mockResolvedValue("coach");
     const result = await requireCoachId(
-      new Request("http://localhost/api/v1/roster?coachId=coach-other"),
+      authedRequest("coach-self", "/api/v1/roster?coachId=coach-other"),
       "coach-other"
     );
     expect("ok" in result && result.ok === false).toBe(true);
@@ -45,8 +45,8 @@ describe("require-auth production IDOR", () => {
   });
 
   it("returns the authenticated coach when no param is supplied", async () => {
-    mockSession("coach-self", "coach");
-    const result = await requireCoachId(new Request("http://localhost/api/v1/roster"));
+    vi.mocked(lookupIdentityRole).mockResolvedValue("coach");
+    const result = await requireCoachId(authedRequest("coach-self", "/api/v1/roster"));
     expect("coachId" in result).toBe(true);
     if ("coachId" in result) {
       expect(result.coachId).toBe("coach-self");
@@ -54,9 +54,9 @@ describe("require-auth production IDOR", () => {
   });
 
   it("allows admin to target another coach", async () => {
-    mockSession("admin-1", "admin");
+    vi.mocked(lookupIdentityRole).mockResolvedValue("admin");
     const result = await requireCoachId(
-      new Request("http://localhost/api/v1/roster?coachId=coach-other"),
+      authedRequest("admin-1", "/api/v1/roster?coachId=coach-other"),
       "coach-other"
     );
     expect("coachId" in result).toBe(true);
@@ -66,14 +66,20 @@ describe("require-auth production IDOR", () => {
   });
 
   it("rejects athletes targeting another athlete", async () => {
-    mockSession("ath-self", "athlete");
+    vi.mocked(lookupIdentityRole).mockResolvedValue("athlete");
     const result = await requireAthleteId(
-      new Request("http://localhost/api/v1/sessions?athleteId=ath-other"),
+      authedRequest("ath-self", "/api/v1/sessions?athleteId=ath-other"),
       "ath-other"
     );
     expect("ok" in result && result.ok === false).toBe(true);
     if ("ok" in result && result.ok === false) {
       expect(result.response.status).toBe(403);
     }
+  });
+
+  it("rejects missing Firebase token", async () => {
+    const result = await requireAuth(new Request("http://localhost/api/v1/identity/profile"));
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.response.status).toBe(401);
   });
 });

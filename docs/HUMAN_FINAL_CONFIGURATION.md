@@ -1,5 +1,11 @@
 # Human-final configuration
 
+**Status:** PENDING_HUMAN
+
+**Canonical ordered list:** [master-plan/17_HUMAN_ACTION_PLAN.md](master-plan/17_HUMAN_ACTION_PLAN.md)
+
+**Production:** NO-GO
+
 Agent-complete items are omitted. Only actions that require a human account, admin, or hardware:
 
 1. **Install Android Emulator hypervisor driver (WHPX or AEHD)** so `fitconnect_phone` can boot. Agent run failed: “Android Emulator hypervisor driver is not installed”.

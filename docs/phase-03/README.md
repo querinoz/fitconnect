@@ -1,15 +1,9 @@
-# Phase 03 — Design System 2.0
+# phase-03 (historical)
 
-| Doc |
-|-----|
-| [Design_System_Report.md](./Design_System_Report.md) |
-| [Component_Catalog.md](./Component_Catalog.md) |
-| [Token_Documentation.md](./Token_Documentation.md) |
-| [Typography_Guide.md](./Typography_Guide.md) |
-| [Motion_Guide.md](./Motion_Guide.md) |
-| [Accessibility_Report.md](./Accessibility_Report.md) |
-| [Performance_Report.md](./Performance_Report.md) |
-| [Visual_QA_Report.md](./Visual_QA_Report.md) |
-| [DECISION-native-vs-expo.md](./DECISION-native-vs-expo.md) |
+> **HISTORICAL** — this path is a stub. The original files were archived for traceability.
 
-**STOP** — no Phase 04 / feature OS until approved.
+Moved to: [../archive/phase-03/](../archive/phase-03/)
+
+Canonical current status: [../master-plan/21_FINAL_ROADMAP.md](../master-plan/21_FINAL_ROADMAP.md)
+
+Do not treat archived reports as the current product state.

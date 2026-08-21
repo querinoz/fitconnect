@@ -4,6 +4,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  Activity,
   Calendar,
   Compass,
   LayoutDashboard,
@@ -61,7 +62,15 @@ export function CommandPalette({ role, open, onOpenChange }: CommandPaletteProps
         section: "navigation",
         icon: LayoutDashboard,
         href: dashboardHref,
-        keywords: ["home", "today", "g d"]
+        keywords: ["home", "today", "g d", "g h"]
+      },
+      {
+        id: "insights",
+        label: cp.goInsights,
+        section: "navigation",
+        icon: Activity,
+        href: "/insights",
+        keywords: ["load", "ctl", "history", "csv", "g a"]
       },
       {
         id: "sessions",
@@ -235,7 +244,7 @@ export function CommandPalette({ role, open, onOpenChange }: CommandPaletteProps
 
           <div className="border-t border-eos-outline px-4 py-2">
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-eos-on-surface-subtle">
-              {cp.hint} · g d · g s
+              {cp.hint} · g h · g a · / · ?
             </p>
           </div>
         </Dialog.Content>
@@ -244,8 +253,44 @@ export function CommandPalette({ role, open, onOpenChange }: CommandPaletteProps
   );
 }
 
-/** Global ⌘K / Ctrl+K + vim-style g→d / g→s shortcuts. */
-export function useCommandPaletteShortcut(onOpen: () => void) {
+function ShortcutsHelp({
+  open,
+  onOpenChange
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const cp = useLocale().commandPalette;
+  return (
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 z-[200] bg-eos-floor/75 backdrop-blur-md" />
+        <Dialog.Content className="fixed left-1/2 top-[18vh] z-[201] w-[min(calc(100%-2rem),28rem)] -translate-x-1/2 rounded-[var(--eos-radius-modal)] border border-eos-outline bg-eos-elevated p-5 focus:outline-none">
+          <Dialog.Title className="font-display text-xl text-eos-on-surface">
+            {cp.helpTitle}
+          </Dialog.Title>
+          <Dialog.Description className="mt-3 text-sm text-eos-on-surface-muted">
+            {cp.helpBody}
+          </Dialog.Description>
+          <Dialog.Close asChild>
+            <button
+              type="button"
+              className="mt-5 inline-flex min-h-11 items-center rounded-[var(--eos-radius-control)] bg-eos-voltline px-4 text-sm font-semibold text-eos-floor active:scale-[0.97]"
+            >
+              Esc
+            </button>
+          </Dialog.Close>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+
+/** Global ⌘K / Ctrl+K + vim-style g then h/a/d/s, / search, ? help. */
+export function useCommandPaletteShortcut(
+  onOpen: () => void,
+  onHelp: () => void
+) {
   const pendingRef = useRef<string | null>(null);
   const timerRef = useRef<number | null>(null);
 
@@ -258,12 +303,19 @@ export function useCommandPaletteShortcut(onOpen: () => void) {
       }
     };
 
+    const goHome = () => {
+      window.location.href = window.location.pathname.startsWith("/coach")
+        ? "/coach/dashboard"
+        : "/dashboard";
+    };
+
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       const typing =
         target?.tagName === "INPUT" ||
         target?.tagName === "TEXTAREA" ||
-        target?.isContentEditable;
+        target?.isContentEditable ||
+        target?.tagName === "SELECT";
 
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
@@ -274,6 +326,20 @@ export function useCommandPaletteShortcut(onOpen: () => void) {
 
       if (typing) return;
 
+      if (e.key === "/" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        onOpen();
+        clearPending();
+        return;
+      }
+
+      if (e.key === "?" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        onHelp();
+        clearPending();
+        return;
+      }
+
       if (e.key === "g" && !e.metaKey && !e.ctrlKey && !e.altKey) {
         pendingRef.current = "g";
         if (timerRef.current) window.clearTimeout(timerRef.current);
@@ -283,12 +349,12 @@ export function useCommandPaletteShortcut(onOpen: () => void) {
 
       if (pendingRef.current === "g") {
         clearPending();
-        if (e.key === "d") {
+        if (e.key === "d" || e.key === "h") {
           e.preventDefault();
-          window.location.href =
-            window.location.pathname.startsWith("/coach")
-              ? "/coach/dashboard"
-              : "/dashboard";
+          goHome();
+        } else if (e.key === "a") {
+          e.preventDefault();
+          window.location.href = "/insights";
         } else if (e.key === "s") {
           e.preventDefault();
           window.location.href = window.location.pathname.startsWith("/coach")
@@ -303,13 +369,20 @@ export function useCommandPaletteShortcut(onOpen: () => void) {
       window.removeEventListener("keydown", onKey);
       clearPending();
     };
-  }, [onOpen]);
+  }, [onOpen, onHelp]);
 }
 
 export function CommandPaletteHost({ role }: { role: UserRole }) {
   const [open, setOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const openPalette = useCallback(() => setOpen(true), []);
-  useCommandPaletteShortcut(openPalette);
+  const openHelp = useCallback(() => setHelpOpen(true), []);
+  useCommandPaletteShortcut(openPalette, openHelp);
 
-  return <CommandPalette role={role} open={open} onOpenChange={setOpen} />;
+  return (
+    <>
+      <CommandPalette role={role} open={open} onOpenChange={setOpen} />
+      <ShortcutsHelp open={helpOpen} onOpenChange={setHelpOpen} />
+    </>
+  );
 }

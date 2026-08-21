@@ -5,6 +5,7 @@ import com.fitconnect.android.community.domain.ReactionTargetKind
 import com.fitconnect.android.community.graph.SocialGraph
 import com.fitconnect.android.community.groups.GroupEngine
 import com.fitconnect.android.community.posts.PostEngine
+import com.fitconnect.android.community.privacy.RestrictedWorkout
 import com.fitconnect.android.community.privacy.VisibilityResolver
 import com.fitconnect.android.community.reactions.ReactionEngine
 
@@ -75,6 +76,7 @@ class FeedEngine(
         val visible = mutableListOf<CommunityPost>()
         for (post in candidates) {
             if (graph.isMuted(request.viewerId, post.authorId)) continue
+            if (request.viewerId != post.authorId && RestrictedWorkout.isHiddenFromOthers(post)) continue
             if (!visibility.canView(request.viewerId, post)) continue
             visible += visibility.redact(request.viewerId, post)
         }

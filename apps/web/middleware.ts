@@ -1,37 +1,22 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { STORAGE_KEY } from "@/lib/i18n/server";
 import { SUPPORTED_LANGS, type Lang } from "@/lib/i18n";
 import {
   isDemoModeEnv,
-  isSupabaseConfiguredEnv,
-  shouldEnforceSupabaseAuth,
-  hasValidDemoSessionCookie
+  shouldEnforceFirebaseAuth,
+  hasValidDemoSessionCookie,
+  hasFirebaseSessionCookie,
+  isProtectedPath,
 } from "@/lib/auth/middleware-auth";
+import { isFirebaseWebConfigured } from "@/lib/firebase/config";
+import { FIREBASE_ID_COOKIE } from "@/lib/auth/session-cookie";
 import {
   DEMO_SESSION_COOKIE,
   isAllowedDemoSessionId
 } from "@/lib/auth/demo-session";
 
-const PROTECTED_PREFIXES = [
-  "/dashboard",
-  "/coach",
-  "/sessions",
-  "/inbox",
-  "/my-coach",
-  "/profile",
-  "/settings",
-  "/admin"
-];
-
 function isLang(value: string | null): value is Lang {
-  return value !== null && (SUPPORTED_LANGS as string[]).includes(value);
-}
-
-function isProtectedPath(pathname: string) {
-  return PROTECTED_PREFIXES.some(
-    (p) => pathname === p || pathname.startsWith(`${p}/`)
-  );
+  return value !== null && (SUPPORTED_LANGS as readonly string[]).includes(value);
 }
 
 export async function middleware(request: NextRequest) {
@@ -53,55 +38,25 @@ export async function middleware(request: NextRequest) {
   if (!isProtectedPath(pathname)) return NextResponse.next();
 
   const demoMode = isDemoModeEnv(process.env.NEXT_PUBLIC_DEMO_MODE);
-  const supabaseConfigured = isSupabaseConfiguredEnv(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
+  const firebaseConfigured = isFirebaseWebConfigured();
 
-  // Demo / local auth: client Zustand + AuthGate — no server session cookie required.
-  if (!shouldEnforceSupabaseAuth({ demoMode, supabaseConfigured })) {
+  if (!shouldEnforceFirebaseAuth({ demoMode, firebaseConfigured })) {
     return NextResponse.next();
   }
 
-  let response = NextResponse.next({ request: { headers: request.headers } });
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-    cookies: {
-      get(name: string) {
-        return request.cookies.get(name)?.value;
-      },
-      set(name: string, value: string, options: CookieOptions) {
-        request.cookies.set({ name, value, ...options });
-        response = NextResponse.next({ request: { headers: request.headers } });
-        response.cookies.set({ name, value, ...options });
-      },
-      remove(name: string, options: CookieOptions) {
-        request.cookies.set({ name, value: "", ...options });
-        response = NextResponse.next({ request: { headers: request.headers } });
-        response.cookies.set({ name, value: "", ...options });
-      }
-    }
-  });
-
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    const demoCookie = request.cookies.get(DEMO_SESSION_COOKIE)?.value;
-    if (hasValidDemoSessionCookie(demoCookie, isAllowedDemoSessionId)) {
-      return response;
-    }
-
-    const signIn = new URL("/signin", request.url);
-    signIn.searchParams.set("next", pathname);
-    return NextResponse.redirect(signIn);
+  const firebaseCookie = request.cookies.get(FIREBASE_ID_COOKIE)?.value;
+  if (hasFirebaseSessionCookie(firebaseCookie)) {
+    return NextResponse.next();
   }
 
-  return response;
+  const demoCookie = request.cookies.get(DEMO_SESSION_COOKIE)?.value;
+  if (hasValidDemoSessionCookie(demoCookie, isAllowedDemoSessionId)) {
+    return NextResponse.next();
+  }
+
+  const signIn = new URL("/signin", request.url);
+  signIn.searchParams.set("next", pathname);
+  return NextResponse.redirect(signIn);
 }
 
 export const config = {

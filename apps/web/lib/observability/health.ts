@@ -75,6 +75,25 @@ export function buildHealthReport(env: NodeJS.ProcessEnv = process.env): HealthR
   });
 
   deps.push({
+    name: "firebase",
+    status: configured(env, "NEXT_PUBLIC_FIREBASE_API_KEY") &&
+      configured(env, "NEXT_PUBLIC_FIREBASE_PROJECT_ID") &&
+      configured(env, "NEXT_PUBLIC_FIREBASE_APP_ID")
+      ? "ok"
+      : "degraded",
+    detail:
+      configured(env, "NEXT_PUBLIC_FIREBASE_APP_ID")
+        ? [
+            "web sdk",
+            configured(env, "NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY") ? "app check" : null,
+            configured(env, "NEXT_PUBLIC_FIREBASE_VAPID_KEY") ? "fcm" : null
+          ]
+            .filter(Boolean)
+            .join(" + ")
+        : "not configured"
+  });
+
+  deps.push({
     name: "realtime",
     status: "ok",
     detail: resolveRealtimeDetail(env)

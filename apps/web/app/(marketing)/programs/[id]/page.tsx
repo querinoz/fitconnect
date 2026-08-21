@@ -18,9 +18,11 @@ import {
   SectionHeader
 } from "@/components/ui-glass/premium-system";
 import { ArrowLeft, Award, Check, ShieldCheck, Star } from "lucide-react";
+import { useParams } from "next/navigation";
 
-export default function ProgramDetailPage({ params }: { params: { id: string } }) {
-  const program = getProgramById(params.id);
+export default function ProgramDetailPage() {
+  const params = useParams<{ id: string }>();
+  const program = getProgramById(String(params.id));
   const coach = program ? getProgramCoach(program) : undefined;
   const [enrolled, setEnrolled] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState<"idle" | "processing" | "done">("idle");

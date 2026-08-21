@@ -9,10 +9,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
+import com.fitconnect.android.BuildConfig
+import com.fitconnect.android.athlete.ui.settings.LocalDebugSettingsSlot
 import com.fitconnect.android.auth.AndroidFederatedAuthHost
 import com.fitconnect.android.auth.GoogleWebClientIds
 import com.fitconnect.android.designui.identity.LocalFederatedAuthHost
 import com.fitconnect.android.designui.theme.EliteSurfaceTheme
+import com.fitconnect.android.firebase.DebugCrashlyticsCard
 import com.fitconnect.android.foundation.auth.UnavailableFederatedAuthHost
 import com.fitconnect.android.foundation.di.AppContainer
 import com.fitconnect.android.foundation.i18n.AppLocale
@@ -51,6 +54,11 @@ fun FitConnectTheme(
     CompositionLocalProvider(
         LocalAppContainer provides container,
         LocalFederatedAuthHost provides federatedHost,
+        LocalDebugSettingsSlot provides if (BuildConfig.DEBUG) {
+            { DebugCrashlyticsCard() }
+        } else {
+            null
+        },
     ) {
         EliteSurfaceTheme(mode = mode, accent = accent, content = content)
     }

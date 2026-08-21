@@ -71,7 +71,10 @@ const GROUPS = [
     title: "Analytics (optional but recommended)",
     vars: [
       { key: "NEXT_PUBLIC_POSTHOG_KEY", required: false, hint: "PostHog → Project → Project API Key (phc_…)" },
-      { key: "NEXT_PUBLIC_SENTRY_DSN", required: false, hint: "Sentry → Project Settings → Client DSN" }
+      { key: "NEXT_PUBLIC_SENTRY_DSN", required: false, hint: "Sentry → Project Settings → Client DSN" },
+      { key: "NEXT_PUBLIC_FIREBASE_API_KEY", required: false, hint: "Firebase Console → Project settings → Web app config" },
+      { key: "NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY", required: false, hint: "App Check → reCAPTCHA v3/Enterprise site key" },
+      { key: "NEXT_PUBLIC_FIREBASE_VAPID_KEY", required: false, hint: "Cloud Messaging → Web Push certificates (VAPID)" }
     ]
   },
   {

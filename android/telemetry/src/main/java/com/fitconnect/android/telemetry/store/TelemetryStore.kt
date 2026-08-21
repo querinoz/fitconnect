@@ -31,6 +31,11 @@ interface TelemetryStore {
     ): Page<TelemetrySample>
 
     suspend fun latestSample(athleteId: String, metric: MetricType): TelemetrySample?
+    suspend fun latestSampleExcluding(
+        athleteId: String,
+        metric: MetricType,
+        excluded: Set<ProviderId>,
+    ): TelemetrySample?
 
     suspend fun workouts(athleteId: String, range: TimeRange, offset: Int = 0, limit: Int = 100): Page<WorkoutSession>
 
@@ -117,6 +122,17 @@ class InMemoryTelemetryStore : TelemetryStore {
     override suspend fun latestSample(athleteId: String, metric: MetricType): TelemetrySample? = mutex.withLock {
         sampleIndex[athleteId]?.get(metric).orEmpty()
             .mapNotNull { sampleTable[it] }
+            .maxByOrNull { it.at.epochMs }
+    }
+
+    override suspend fun latestSampleExcluding(
+        athleteId: String,
+        metric: MetricType,
+        excluded: Set<ProviderId>,
+    ): TelemetrySample? = mutex.withLock {
+        sampleIndex[athleteId]?.get(metric).orEmpty()
+            .mapNotNull { sampleTable[it] }
+            .filter { it.provenance.provider !in excluded }
             .maxByOrNull { it.at.epochMs }
     }
 

@@ -22,6 +22,17 @@ describe("COLOR_TOKENS ↔ elite-os.css sync", () => {
   }
 
   const pairs: Array<[keyof typeof COLOR_TOKENS, string]> = [
+    // Chart series (ADR-011) -- garante que TS e CSS nao divergem.
+    ["chartSeries1", "chart-1"],
+    ["chartSeries2", "chart-2"],
+    ["chartSeries3", "chart-3"],
+    ["chartSeries4", "chart-4"],
+    ["chartSeq1", "chart-seq-1"],
+    ["chartSeq6", "chart-seq-6"],
+    ["chartDivWarm3", "chart-div-warm-3"],
+    ["chartDivMid", "chart-div-mid"],
+    ["chartDivCool3", "chart-div-cool-3"],
+    ["chartInk", "chart-ink"],
     ["floor", "floor"],
     ["voltline", "voltline"],
     ["connect", "connect"],

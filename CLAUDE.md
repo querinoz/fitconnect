@@ -1,6 +1,10 @@
 # CLAUDE.md — FitConnect · Memória Persistente do Projeto
 
-> Este ficheiro é a fonte de verdade do projeto FitConnect. Lê sempre isto primeiro antes de qualquer tarefa. Não peças contexto ao utilizador — já está aqui.
+> **CURRENT STATUS (2026-08-20):** Production = **NO-GO**. Active next phase = **P0-SEC**. Canonical execution plan = [`docs/master-plan/`](docs/master-plan/21_FINAL_ROADMAP.md). Entry point = [`README.md`](README.md).
+>
+> Architecture rules in [`AGENTS.md`](AGENTS.md) remain in force (Strava never social; Health Connect is the data core).
+>
+> Sections below are a **HISTORICAL** project-memory snapshot (May 2026 era). Where they conflict with the master plan (Expo as production mobile, “demo product scores”, old P0 lists), **the master plan wins**. Do not copy HISTORICAL PASS/ready language into new work.
 
 ---
 

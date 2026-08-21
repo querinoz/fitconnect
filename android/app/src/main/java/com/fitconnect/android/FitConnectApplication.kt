@@ -16,6 +16,8 @@ import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.foundation.config.AppConfig
 import com.fitconnect.android.foundation.config.AppEnvironment
 import com.fitconnect.android.foundation.crash.CrashHandler
+import com.fitconnect.android.firebase.FirebaseBootstrap
+import com.fitconnect.android.firebase.FirebaseCrashReporter
 import com.fitconnect.android.foundation.di.AppContainer
 import com.fitconnect.android.foundation.di.DefaultAppContainer
 import com.fitconnect.android.foundation.offline.OfflineWorkExecutor
@@ -164,7 +166,7 @@ class FitConnectApplication : Application() {
             versionCode = BuildConfig.VERSION_CODE,
         )
         if (BuildConfig.FIREBASE_CONFIGURED) {
-            runCatching { com.google.firebase.FirebaseApp.initializeApp(this) }
+            FirebaseBootstrap.start(this)
         }
         container = DefaultAppContainer(
             this,
@@ -191,13 +193,21 @@ class FitConnectApplication : Application() {
                         isolation = platform.accountIsolation,
                         keyValueStore = platform.keyValueStore,
                         connectivity = platform.connectivity,
+                        identityRemote = platform.identityRemote,
+                        credentialClearer = {
+                            androidx.credentials.CredentialManager.create(this@FitConnectApplication)
+                                .clearCredentialState(androidx.credentials.ClearCredentialStateRequest())
+                        },
                     )
                 }
             },
         )
         startupTracer.mark("foundation_ready")
         registerOfflineHandlers()
-        CrashHandler(container.logger).install()
+        CrashHandler(
+            container.logger,
+            reporter = if (BuildConfig.FIREBASE_CONFIGURED) FirebaseCrashReporter() else null,
+        ).install()
         container.connectivity.start()
         container.lifecycle.start()
         startupTracer.mark("shell_ready")

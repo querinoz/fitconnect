@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { pwaInitOptions, isPWADisabled } from "@/lib/pwa/config.mjs";
 import nextConfig from "@/next.config.mjs";
 
-describe("next-pwa config", () => {
+describe("serwist PWA config", () => {
   it("disables the SW outside production", () => {
     const expected = process.env.NODE_ENV !== "production";
     expect(isPWADisabled()).toBe(expected);

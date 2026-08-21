@@ -40,6 +40,15 @@ fun PerformanceVaultScreen() {
         testTag = "ascend_vault",
     ) {
         item {
+            val progress = com.fitconnect.ascend.badges.BadgeProgressEngine.evaluate(emptyList())
+            EliteCard {
+                EliteStack {
+                    EliteSysLabel("SHAREABLE BADGES")
+                    Text(progress.emptyCopy, style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+        }
+        item {
             AscendXPBar(
                 rankLabel = t(snap.level.rank.nameKey),
                 level = snap.level.level,

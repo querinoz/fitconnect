@@ -50,7 +50,7 @@ export async function scheduleDemoSessionReminder(coachName: string) {
     content: {
       title: "Session in 30 minutes",
       body: `Your session with ${coachName} starts soon.`,
-      data: { url: "fitconnect://sessions/s-101" }
+      data: { url: "fitconnect-expo://sessions/s-101" }
     },
     trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 5 }
   });

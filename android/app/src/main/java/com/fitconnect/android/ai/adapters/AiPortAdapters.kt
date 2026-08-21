@@ -21,7 +21,7 @@ class TelemetryAiAdapter(
 ) : AiTelemetryPort {
     override suspend fun summary(athleteId: String): TelemetryFactSheet {
         val now = System.currentTimeMillis()
-        val vitals = facade.readinessVitals(athleteId)
+        val vitals = facade.readinessVitalsForModels(athleteId)
         val hrvTrend = facade.trend(athleteId, MetricType.HRV, days = 14)
         val sleepTrend = facade.trend(athleteId, MetricType.SLEEP, days = 14)
         return TelemetryFactSheet(

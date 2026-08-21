@@ -77,11 +77,25 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
-    implementation(libs.androidx.wear.compose.material)
+    implementation(libs.androidx.wear.compose.material3)
     implementation(libs.androidx.wear.compose.foundation)
+    implementation(libs.androidx.wear.compose.navigation)
+    implementation(libs.androidx.wear.tiles)
+    implementation(libs.androidx.wear.protolayout)
+    implementation(libs.androidx.wear.protolayout.material)
+    implementation(libs.androidx.wear.ongoing)
+    implementation(libs.androidx.wear)
     implementation(libs.play.services.wearable)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.androidx.health.services.client)
+    // Complication data source: publishes Prime Readiness / live session to the watch face.
+    implementation(libs.androidx.watchface.complications.data.source.ktx)
+    // protolayout/tiles APIs are ListenableFuture-based, hence Guava.
+    implementation(libs.guava)
+    // Tile previews inside Android Studio (debug only, no release footprint).
+    implementation(libs.androidx.wear.tiles.tooling.preview)
+    implementation(libs.androidx.wear.tooling.preview)
+    debugImplementation(libs.androidx.wear.tiles.tooling)
 }
 
 val wearKeystoreReadyCaptured = wearReleaseSigningReady

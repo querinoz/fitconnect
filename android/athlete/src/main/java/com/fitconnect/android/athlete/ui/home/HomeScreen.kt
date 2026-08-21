@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
 import com.fitconnect.android.athlete.domain.HomeSnapshot
@@ -50,6 +51,8 @@ import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.components.eliteDayStrain
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.toColor
+import com.fitconnect.android.fitness.domain.HealthConnectSdkState
+import com.fitconnect.android.fitness.healthconnect.HealthConnectSdkMapper
 import com.fitconnect.android.foundation.auth.DemoPersona
 import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.foundation.i18n.AppLocale
@@ -118,6 +121,7 @@ fun HomeScreen(
             else -> "STRAIN"
         }
         val strain = eliteDayStrain(home.readiness.score)
+        val hcState = HealthConnectSdkMapper.probe(LocalContext.current)
         AthleteScreenScaffold(
             title = home.greeting,
             subtitle = "Performance cockpit · ${DemoPersona.MODE_LABEL}",
@@ -126,6 +130,14 @@ fun HomeScreen(
             showTitle = false,
             floating = { EliteAiFab(onClick = onOpenAi) },
         ) {
+            if (hcState != HealthConnectSdkState.AVAILABLE) {
+                item {
+                    HealthConnectStatusCard(
+                        state = hcState,
+                        onAction = onOpenActivity,
+                    )
+                }
+            }
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
                     EliteSysLabel("ATHLETE OS · TODAY")

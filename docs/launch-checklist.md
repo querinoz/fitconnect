@@ -1,5 +1,11 @@
 # FitConnect Launch Checklist
 
+**Status:** PLANNED
+
+**Production:** NO-GO
+
+Do not treat this checklist as a current GO. Canonical blockers: [master-plan/23_GO_NO_GO.md](master-plan/23_GO_NO_GO.md).
+
 ## Pre-deploy verification
 
 - [ ] `pnpm typecheck` — zero errors

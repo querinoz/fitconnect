@@ -1,10 +1,13 @@
 package com.fitconnect.android.designui.components
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -144,8 +147,14 @@ fun ElitePrimeInstrument(
     size: Dp = EliteRingHero,
     overline: String = "PRIME RECOVERY",
     showCaption: Boolean = true,
+    pulsing: Boolean = false,
 ) {
     val clamped = score.coerceIn(0, 100)
+    val animatedScore by animateIntAsState(
+        targetValue = clamped,
+        animationSpec = spring(dampingRatio = 0.8f, stiffness = 50f),
+        label = "liquid-score"
+    )
     val volt = MaterialTheme.colorScheme.primary
     Column(
         modifier = modifier
@@ -154,9 +163,10 @@ fun ElitePrimeInstrument(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         EliteInstrumentRing(
-            progress = clamped / 100f,
+            progress = animatedScore / 100f,
             diameter = size,
             contentDescription = "Recovery $clamped percent, status $status",
+            pulsing = pulsing,
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
@@ -168,7 +178,7 @@ fun ElitePrimeInstrument(
                     color = volt,
                 )
                 Text(
-                    text = "$clamped",
+                    text = "$animatedScore",
                     style = com.fitconnect.android.designui.theme.EliteMetricHeroTextStyle,
                     color = MaterialTheme.colorScheme.onBackground,
                 )

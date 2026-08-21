@@ -1,7 +1,9 @@
 import {
+  Activity,
   Bell,
   Calendar,
   Home,
+  Trophy,
   UserRound,
   UsersRound,
   type LucideIcon
@@ -25,13 +27,12 @@ export function getShellNavItems(
     ];
   }
 
-  return [
-    { href: "/dashboard", label: nav.today, icon: Home },
-    { href: "/sessions", label: nav.sessions, icon: Calendar },
-    { href: "/my-coach", label: nav.coach, icon: UserRound },
-    { href: "/inbox", label: nav.inbox, icon: Bell },
-    { href: "/profile", label: nav.profile, icon: UserRound }
-  ];
+    return [
+      { href: "/dashboard", label: nav.today, icon: Home },
+      { href: "/insights", label: nav.analysis, icon: Activity },
+      { href: "/achievements", label: nav.achievements, icon: Trophy },
+      { href: "/profile", label: nav.profile, icon: UserRound }
+    ];
 }
 
 export function resolveActiveNavItem(pathname: string, items: ShellNavItem[]) {

@@ -1,5 +1,6 @@
 package com.fitconnect.android.capture
 
+import com.fitconnect.shared.session.SessionOwnership
 import com.fitconnect.shared.source.DataSourceKind
 import com.fitconnect.shared.telemetry.MetricAvailability
 import com.fitconnect.shared.telemetry.TelemetryEnvelope
@@ -53,5 +54,30 @@ class LiveSessionCoordinatorTest {
         )
         assertEquals(LiveActivityPhase.ENDED, engine.state.value.phase)
         assertTrue(engine.isDuplicateSession(id))
+    }
+
+    @Test
+    fun watchEnvelopeLocksPhoneStart() {
+        val engine = LiveActivityEngine(clockMs = { 1_000L })
+        val coordinator = LiveSessionCoordinator(engine, deviceId = "phone")
+        coordinator.onRemoteEnvelope(
+            TelemetryEnvelope(
+                sessionId = "watch-1",
+                deviceId = "w1",
+                userId = "ath-1",
+                timestampEpochMs = 10L,
+                sequenceNumber = 1L,
+                source = DataSourceKind.TEST_FIXTURE,
+                samples = listOf(
+                    TelemetryEnvelopeSample("LATITUDE", 38.7223, "deg", MetricAvailability.AVAILABLE, 10L),
+                    TelemetryEnvelopeSample("LONGITUDE", -9.1393, "deg", MetricAvailability.AVAILABLE, 10L),
+                ),
+            ),
+        )
+        assertEquals("watch-1", engine.state.value.sessionId)
+        assertEquals("w1", coordinator.lease?.ownerDeviceId)
+        assertFalse(coordinator.claimLocalStart("Run", nowEpochMs = 20L, sessionId = "phone-2"))
+        assertEquals(SessionOwnership.SESSION_OWNED_BY, coordinator.lastBlockCode)
+        assertEquals("watch-1", engine.state.value.sessionId)
     }
 }

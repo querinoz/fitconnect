@@ -3,6 +3,7 @@ package com.fitconnect.android.athlete.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,18 +13,17 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.outlined.Analytics
+import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.PlayCircle
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.fitconnect.android.athlete.R
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
 import com.fitconnect.android.athlete.di.AthleteContainer
 import com.fitconnect.android.athlete.domain.resolvePatentStatus
@@ -59,10 +60,13 @@ import com.fitconnect.android.design.EliteSurfaceInstrument
 import com.fitconnect.android.designui.atmosphere.HoneycombAtmosphere
 import com.fitconnect.android.designui.atmosphere.LocalAtmosphereMotionScale
 import com.fitconnect.android.designui.atmosphere.LocalHoneycombEmptyBoost
+import com.fitconnect.android.designui.components.EliteCinematicBackground
 import com.fitconnect.android.designui.components.EliteFloatingNavBar
 import com.fitconnect.android.designui.components.EliteHeader
 import com.fitconnect.android.designui.components.EliteNavItem
+import com.fitconnect.android.designui.components.EliteNavRail
 import com.fitconnect.android.designui.components.EliteOfflineBanner
+import com.fitconnect.android.designui.components.EliteTrainFab
 import com.fitconnect.android.designui.identity.PatentSignals
 import com.fitconnect.android.designui.identity.PatentStatus
 import com.fitconnect.android.designui.theme.LocalHoneycombIntensity
@@ -172,6 +176,36 @@ fun AthleteOsApp(
         }
     }
 
+    val widthDp = LocalConfiguration.current.screenWidthDp
+    val compact = widthDp < 600
+    val expandedRail = widthDp >= 1240
+    val useRail = !compact
+    val navItems = AthleteDest.bottomTabs.map { dest ->
+        val selected = current?.startsWith(dest.route) == true ||
+            (dest == AthleteDest.PROFILE && current == AthleteDest.SETTINGS.route)
+        EliteNavItem(
+            label = dest.label,
+            icon = when (dest) {
+                AthleteDest.HOME -> if (selected) Icons.Filled.Home else Icons.Outlined.Home
+                AthleteDest.DISCOVER -> if (selected) Icons.Filled.Analytics else Icons.Outlined.Analytics
+                AthleteDest.VAULT -> if (selected) Icons.Filled.EmojiEvents else Icons.Outlined.EmojiEvents
+                AthleteDest.PROFILE -> if (selected) Icons.Filled.Person else Icons.Outlined.Person
+                else -> Icons.Outlined.Home
+            },
+            selected = selected,
+            onClick = {
+                navController.navigate(dest.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            testTag = "athlete_tab_${dest.name.lowercase()}",
+        )
+    }
+
     CompositionLocalProvider(
         LocalAthleteContainer provides container,
         LocalAthleteSignOut provides onSignedOut,
@@ -186,6 +220,9 @@ fun AthleteOsApp(
                 .fillMaxSize()
                 .background(EliteSurfaceColors.FLOOR.toColor()),
         ) {
+            if (current == AthleteDest.HOME.route) {
+                EliteCinematicBackground(videoResId = R.raw.demo_motion_clip, alpha = 0.28f)
+            }
             HoneycombAtmosphere(strokeColor = MaterialTheme.colorScheme.primary)
             Scaffold(
                 modifier = Modifier
@@ -249,69 +286,41 @@ fun AthleteOsApp(
                     }
                 },
                 bottomBar = {
-                    if (!hideNav) {
+                    if (!hideNav && !useRail) {
                         EliteFloatingNavBar(
                             modifier = Modifier.testTag("athlete_bottom_nav"),
-                            items = AthleteDest.bottomTabs.map { dest ->
-                                EliteNavItem(
-                                    label = dest.label,
-                                    icon = when (dest) {
-                                        AthleteDest.HOME ->
-                                            if (current?.startsWith(dest.route) == true) {
-                                                Icons.Filled.Home
-                                            } else {
-                                                Icons.Outlined.Home
-                                            }
-                                        AthleteDest.DISCOVER ->
-                                            if (current?.startsWith(dest.route) == true) {
-                                                Icons.Filled.Search
-                                            } else {
-                                                Icons.Outlined.Search
-                                            }
-                                        AthleteDest.ACTIVITY ->
-                                            if (current?.startsWith(dest.route) == true) {
-                                                Icons.Filled.PlayCircle
-                                            } else {
-                                                Icons.Outlined.PlayCircle
-                                            }
-                                        AthleteDest.COMMUNITY ->
-                                            if (current?.startsWith(dest.route) == true) {
-                                                Icons.Filled.Groups
-                                            } else {
-                                                Icons.Outlined.Groups
-                                            }
-                                        AthleteDest.PROFILE ->
-                                            if (current?.startsWith(dest.route) == true ||
-                                                current == AthleteDest.SETTINGS.route
-                                            ) {
-                                                Icons.Filled.Person
-                                            } else {
-                                                Icons.Outlined.Person
-                                            }
-                                        else -> Icons.Outlined.Home
-                                    },
-                                    selected = current?.startsWith(dest.route) == true ||
-                                        (dest == AthleteDest.PROFILE && current == AthleteDest.SETTINGS.route),
-                                    onClick = {
-                                        navController.navigate(dest.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
-                                    },
-                                    testTag = "athlete_tab_${dest.name.lowercase()}",
-                                )
+                            items = navItems,
+                        )
+                    }
+                },
+                floatingActionButton = {
+                    if (!hideNav) {
+                        EliteTrainFab(
+                            onClick = {
+                                navController.navigate(AthleteDest.ACTIVITY.route)
                             },
+                            expanded = expandedRail,
                         )
                     }
                 },
                 content = { padding ->
-                    Box(
-                        modifier = Modifier.padding(padding),
-                        content = { AthleteNavHost(navController = navController) },
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding),
+                    ) {
+                        if (!hideNav && useRail) {
+                            EliteNavRail(
+                                items = navItems,
+                                expanded = expandedRail,
+                                modifier = Modifier.testTag("athlete_nav_rail"),
+                            )
+                        }
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            content = { AthleteNavHost(navController = navController) },
+                        )
+                    }
                 },
             )
         }

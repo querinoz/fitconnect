@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { signInWithOAuth, authBackend } from "@/lib/auth/supabase-browser-auth";
+import { signInWithGoogle, authBackend } from "@/lib/auth/supabase-browser-auth";
+import { applyIdentityToAuthUser, bootstrapProfile } from "@/lib/identity/client";
+import { persistClientAuthSession } from "@/lib/auth/complete-login";
+import { useAuthStore } from "@/lib/auth-store";
 import { useT } from "@/lib/i18n-provider";
 import { EliteAuthDivider } from "@/components/auth/elite";
 import { LabelCaps } from "@/components/elite-os/typography";
@@ -104,9 +107,36 @@ export function OAuthRow({
     setPending(provider.id);
     setOauthError(null);
 
-    if (provider.supabase && authBackend() === "supabase") {
-      const result = await signInWithOAuth(provider.supabase);
-      if (!result.ok) setOauthError(result.message);
+    if (provider.id === "google" && authBackend() === "firebase") {
+      const result = await signInWithGoogle();
+      if (!result.ok) {
+        setOauthError(result.message);
+        setPending(null);
+        return;
+      }
+      if (result.user) {
+        const profile = await bootstrapProfile({
+          email: result.user.email,
+          displayName: result.user.name,
+          avatarUrl: undefined
+        });
+        persistClientAuthSession(applyIdentityToAuthUser(result.user, profile), {
+          persistDemoCookie: false
+        });
+        useAuthStore.getState().login(applyIdentityToAuthUser(result.user, profile));
+      }
+      setPending(null);
+      return;
+    }
+
+    if (authBackend() === "firebase") {
+      setOauthError("This sign-in method is not available yet.");
+      setPending(null);
+      return;
+    }
+
+    if (authBackend() !== "demo") {
+      setOauthError("Authentication is not configured.");
       setPending(null);
       return;
     }

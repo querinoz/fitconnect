@@ -3,17 +3,18 @@ import { SignInClient } from "./sign-in-client";
 
 export const dynamic = "force-dynamic";
 
-export default function SignInPage({
+export default async function SignInPage({
   searchParams
 }: {
-  searchParams: { demo?: string; next?: string };
+  searchParams: Promise<{ demo?: string; next?: string }>;
 }) {
-  const next = safeInternalNextPath(searchParams.next ?? null);
+  const query = await searchParams;
+  const next = safeInternalNextPath(query.next ?? null);
 
   return (
     <SignInClient
       redirectOverride={next}
-      coachDemoShortcut={searchParams.demo === "coach"}
+      coachDemoShortcut={query.demo === "coach"}
     />
   );
 }

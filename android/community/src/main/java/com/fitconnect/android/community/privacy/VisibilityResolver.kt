@@ -17,6 +17,7 @@ class VisibilityResolver(
     suspend fun canView(viewerId: String, post: CommunityPost): Boolean {
         if (post.audit.deleted) return false
         if (viewerId == post.authorId) return true
+        if (RestrictedWorkout.isHiddenFromOthers(post)) return false
         if (graph.isBlocked(viewerId, post.authorId)) return false
         return when (post.visibility) {
             Visibility.PUBLIC -> true

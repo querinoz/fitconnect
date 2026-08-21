@@ -46,10 +46,8 @@ export function MobileShell({
   const athleteItems: DockItem[] = useMemo(
     () => [
       { href: "/dashboard", label: nav.today, icon: Home },
-      { href: "/sessions", label: nav.sessions, icon: Calendar },
-      { href: "/map", label: nav.map, icon: MapPin },
-      { href: "/my-coach", label: nav.coach, icon: Users },
-      { href: "/inbox", label: nav.inbox, icon: Inbox },
+      { href: "/insights", label: nav.analysis, icon: MapPin },
+      { href: "/achievements", label: nav.achievements, icon: Calendar },
       { href: "/profile", label: nav.profile, icon: User }
     ],
     [nav]

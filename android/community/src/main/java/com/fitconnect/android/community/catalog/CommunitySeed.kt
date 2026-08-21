@@ -290,6 +290,25 @@ object CommunitySeed {
         )
         return listOf(
             PostDraft(
+                idempotencyKey = "seed-strava-hidden",
+                authorId = "a1",
+                kind = PostKind.WORKOUT,
+                text = "Private import. This must never reach another athlete's feed.",
+                sportKey = "running",
+                workoutFacts = WorkoutFacts(
+                    sportKey = "running",
+                    durationMinutes = 40,
+                    distanceMeters = 8_000.0,
+                    calories = 500.0,
+                    avgHeartRate = 150.0,
+                    trainingLoad = 60.0,
+                    providerId = com.fitconnect.shared.fitness.ProviderId.STRAVA.name,
+                ),
+                shareTelemetryFacts = true,
+                skipRateLimit = true,
+                createdAtEpochMs = ago(0.2),
+            ),
+            PostDraft(
                 idempotencyKey = "seed-1",
                 authorId = "a1",
                 kind = PostKind.WORKOUT,

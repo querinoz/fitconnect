@@ -106,15 +106,32 @@ export function SignupWizard({ embedded = false }: SignupWizardProps) {
       JSON.stringify({ role, goals, experience })
     );
 
-    if (authBackend() === "supabase") {
+    if (authBackend() === "firebase") {
       const result = await signUpWithPassword({ email, password, name, role });
       setSubmitting(false);
       if (!result.ok) {
         setError(result.message);
         return;
       }
+      const { bootstrapProfile, persistIdentityRole, persistOnboarding } = await import(
+        "@/lib/identity/client"
+      );
+      await bootstrapProfile({ email, displayName: name });
+      await persistIdentityRole(role);
+      await persistOnboarding({
+        role,
+        step: 0,
+        completed: false,
+        payload: { goals, experience }
+      });
       setOnboardingRole(role);
       router.push(onboardingPathForRole(role));
+      return;
+    }
+
+    if (authBackend() !== "demo") {
+      setSubmitting(false);
+      setError("Authentication is not configured.");
       return;
     }
 

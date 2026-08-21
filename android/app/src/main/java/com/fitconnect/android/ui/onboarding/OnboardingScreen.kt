@@ -34,6 +34,9 @@ import com.fitconnect.android.designui.components.EliteOnboardingProgress
 import com.fitconnect.android.designui.components.EliteTextField
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.auth.DemoPersona
+import com.fitconnect.android.foundation.identity.IdentityOnboarding
+import com.fitconnect.android.foundation.identity.IdentityRemote
+import com.fitconnect.android.foundation.authz.UserRole
 import com.fitconnect.android.foundation.storage.KeyValueStore
 import com.fitconnect.android.foundation.storage.athleteOnboardingGoal
 import com.fitconnect.android.foundation.storage.athleteOnboardingSport
@@ -60,6 +63,7 @@ private val ATHLETE_STEPS = listOf(
 fun OnboardingScreen(
     keyValueStore: KeyValueStore,
     onFinished: () -> Unit,
+    identityRemote: IdentityRemote? = null,
 ) {
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
@@ -79,7 +83,21 @@ fun OnboardingScreen(
 
     fun persistStep(next: Int) {
         step = next
-        scope.launch { keyValueStore.setAthleteOnboardingStep(next) }
+        scope.launch {
+            keyValueStore.setAthleteOnboardingStep(next)
+            identityRemote?.putOnboarding(
+                IdentityOnboarding(
+                    uid = "",
+                    role = UserRole.ATHLETE,
+                    step = next,
+                    completed = false,
+                    payload = org.json.JSONObject()
+                        .put("sport", sport)
+                        .put("goal", goal)
+                        .toString(),
+                ),
+            )
+        }
     }
 
     if (!hydrated) {
@@ -218,6 +236,18 @@ fun OnboardingScreen(
                         onClick = {
                             scope.launch {
                                 keyValueStore.markOnboardingDone()
+                                identityRemote?.putOnboarding(
+                                    IdentityOnboarding(
+                                        uid = "",
+                                        role = UserRole.ATHLETE,
+                                        step = 5,
+                                        completed = true,
+                                        payload = org.json.JSONObject()
+                                            .put("sport", sport)
+                                            .put("goal", goal)
+                                            .toString(),
+                                    ),
+                                )
                                 onFinished()
                             }
                         },

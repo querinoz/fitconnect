@@ -36,4 +36,6 @@ Naming: **Elite OS** = product shell. **Elite Surface** = design tokens. **Elite
 
 ## Navigation
 
-Mobile tabs stay **HOME · DISCOVER · ACTIVITY · COMMUNITY · PROFILE**. Web uses a persistent sidebar of the same five plus Settings. Wear is one datum per screen, rotary crown, ambient B/W during session.
+Athlete IA (2026-08-20, `AGENTS.md` §6): **Hoje · Análise · Conquistas · Perfil** plus **Treinar** as M3 Expressive FAB Menu — not a fifth tab. Compact = flexible/floating bar + FAB. ≥600dp collapsed rail; ≥1240dp expanded rail. Zero drawer. Community/squad are destinations inside Hoje/Análise, not peer tabs. Web sidebar mirrors the same four plus Settings. Wear stays one datum per screen, rotary crown, ambient B/W during session.
+
+The previous five-tab lock (HOME · DISCOVER · ACTIVITY · COMMUNITY · PROFILE) is **superseded**. Do not reintroduce Activity or Community as equal bottom destinations.
