@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireAuth, isAuthFailure } from "@/lib/api/require-auth";
+import { requireAuth } from "@/lib/api/require-auth";
 import { createBillingPortalSession, isStripeLive } from "@/lib/stripe/server";
 import { getCustomerIdPg } from "@/lib/stripe/persistence";
 
 export async function POST(request: Request) {
   const auth = await requireAuth(request);
-  if (isAuthFailure(auth)) return auth.response;
+  if (!auth.ok) return auth.response;
 
   if (!isStripeLive()) {
     return NextResponse.json({ error: "stripe_not_configured" }, { status: 503 });

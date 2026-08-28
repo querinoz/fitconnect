@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/require-auth";
-import { persistenceReady, useMemoryPersistence } from "@/lib/persistence/config";
+import { persistenceReady, isMemoryPersistence } from "@/lib/persistence/config";
 import {
   contributeToSquadChallenge,
   getSquadChallenge,
@@ -21,7 +21,7 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.json({ error: "persistence_not_configured" }, { status: 503 });
   }
 
-  if (useMemoryPersistence()) {
+  if (isMemoryPersistence()) {
     const challenge = getSquadChallenge(id);
     return NextResponse.json({ challenge, source: "memory" });
   }
@@ -50,7 +50,7 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "persistence_not_configured" }, { status: 503 });
   }
 
-  if (useMemoryPersistence()) {
+  if (isMemoryPersistence()) {
     if (body?.action === "contribute") {
       const challenge = contributeToSquadChallenge(id, userId, Number(body.distanceM ?? 0));
       return NextResponse.json({ challenge, source: "memory" });

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/require-auth";
-import { persistenceReady, useMemoryPersistence } from "@/lib/persistence/config";
+import { persistenceReady, isMemoryPersistence } from "@/lib/persistence/config";
 import {
   applyProgressionEvent,
   getProgression,
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "persistence_not_configured" }, { status: 503 });
   }
 
-  if (useMemoryPersistence()) {
+  if (isMemoryPersistence()) {
     return NextResponse.json({ progression: getProgression(userId), source: "memory" });
   }
 
@@ -48,7 +48,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "persistence_not_configured" }, { status: 503 });
   }
 
-  if (useMemoryPersistence()) {
+  if (isMemoryPersistence()) {
     const progression = patchProgression(userId, {
       totalXp: body?.totalXp,
       streakDays: body?.streakDays,
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "persistence_not_configured" }, { status: 503 });
   }
 
-  if (useMemoryPersistence()) {
+  if (isMemoryPersistence()) {
     const result = applyProgressionEvent(userId, body);
     return NextResponse.json({ ...result, source: "memory" });
   }

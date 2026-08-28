@@ -9,14 +9,14 @@ import {
   listCommunityPostsFromSupabase
 } from "@/lib/community/supabase-repository";
 import type { CommunityPost } from "@/lib/data";
-import { persistenceReady, useMemoryPersistence } from "@/lib/persistence/config";
+import { persistenceReady, isMemoryPersistence } from "@/lib/persistence/config";
 
 export async function GET() {
   if (!persistenceReady()) {
     return NextResponse.json({ error: "persistence_not_configured" }, { status: 503 });
   }
 
-  if (useMemoryPersistence()) {
+  if (isMemoryPersistence()) {
     const posts = listCommunityPosts();
     return NextResponse.json({ posts, source: "memory" });
   }
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
   const authorAvatar = body.author?.avatar ?? "https://i.pravatar.cc/200?img=8";
   const sport = body.author?.sport ?? "Running";
 
-  if (useMemoryPersistence()) {
+  if (isMemoryPersistence()) {
     const post = createCommunityPost({
       id: `c-user-${Date.now()}`,
       author: body.author ?? { name: authorName, avatar: authorAvatar, sport: sport as CommunityPost["author"]["sport"] },

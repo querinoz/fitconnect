@@ -5,7 +5,6 @@ import { Cta } from "@/components/cta";
 import { ComparisonTable } from "@/components/comparison-table";
 import { Faqs } from "@/components/faqs";
 import { PricingCta } from "@/components/marketing/pricing-cta";
-import { Button } from "@/components/ui/button";
 import { Atmosphere } from "@/components/marketing/atmosphere";
 import {
   Check,

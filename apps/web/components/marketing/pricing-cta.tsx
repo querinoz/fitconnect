@@ -36,6 +36,7 @@ export function PricingCta({ planName, period, variant = "outline", children }: 
   }
 
   async function handleClick() {
+    if (mapped === "free") return;
     setLoading(true);
     try {
       await startSubscription({ plan: mapped, period });

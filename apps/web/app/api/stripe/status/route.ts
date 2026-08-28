@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireAuth, isAuthFailure } from "@/lib/api/require-auth";
+import { requireAuth } from "@/lib/api/require-auth";
 import { getConnectAccountPg, getSubscriptionPg } from "@/lib/stripe/persistence";
 import { isStripeLive } from "@/lib/stripe/server";
 
 export async function GET(request: Request) {
   const auth = await requireAuth(request);
-  if (isAuthFailure(auth)) return auth.response;
+  if (!auth.ok) return auth.response;
 
   const subscription = await getSubscriptionPg(auth.user.id);
   const connect =

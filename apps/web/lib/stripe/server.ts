@@ -138,22 +138,24 @@ export async function createLiveSubscription(
   const priceId = resolveStripePriceId(plan, period);
   const amountCents = planAmountCents(plan, period);
 
-  const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = priceId
-    ? { price: priceId, quantity: 1 }
-    : {
-        price_data: {
-          currency: "eur",
-          unit_amount: amountCents,
-          recurring: { interval: period === "annual" ? "year" : "month" },
-          product_data: { name: planDisplayName(plan) }
-        },
-        quantity: 1
-      };
+  const lineItems = priceId
+    ? [{ price: priceId, quantity: 1 }]
+    : [
+        {
+          price_data: {
+            currency: "eur",
+            unit_amount: amountCents,
+            recurring: { interval: period === "annual" ? ("year" as const) : ("month" as const) },
+            product_data: { name: planDisplayName(plan) }
+          },
+          quantity: 1
+        }
+      ];
 
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer_email: input.email,
-    line_items: [lineItem],
+    line_items: lineItems,
     success_url: `${origin}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/pricing?subscription=cancel`,
     metadata: {

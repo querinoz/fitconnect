@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireAuth, isAuthFailure } from "@/lib/api/require-auth";
+import { requireAuth } from "@/lib/api/require-auth";
 import { createDemoConnectAccount } from "@/lib/stripe/demo";
 import { createLiveConnectAccount, isStripeLive } from "@/lib/stripe/server";
 
 export async function POST(request: Request) {
   const auth = await requireAuth(request);
-  if (isAuthFailure(auth)) return auth.response;
+  if (!auth.ok) return auth.response;
 
   const body = (await request.json()) as { coachId?: string };
   const coachId =
