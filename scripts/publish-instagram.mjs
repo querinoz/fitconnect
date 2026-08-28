@@ -20,6 +20,15 @@
 import fs from "node:fs";
 import path from "node:path";
 
+// Load .env.local if present (local publish without Cursor secrets)
+const envLocal = path.resolve("/workspace/.env.local");
+if (fs.existsSync(envLocal)) {
+  for (const line of fs.readFileSync(envLocal, "utf8").split("\n")) {
+    const m = line.match(/^([A-Z_][A-Z0-9_]*)=(.*)$/);
+    if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
+  }
+}
+
 const API_VERSION = "v21.0";
 const API_HOST = process.env.IG_API_HOST || "graph.facebook.com";
 const API_BASE = `https://${API_HOST}/${API_VERSION}`;
@@ -30,7 +39,7 @@ const PUBLIC_BASE =
   "https://raw.githubusercontent.com/querinoz/fitconnect/cursor/instagram-api-publish-3f4b/public/instagram-pack";
 
 const IG_USER_ID = process.env.IG_USER_ID;
-const IG_ACCESS_TOKEN = process.env.IG_ACCESS_TOKEN;
+const IG_ACCESS_TOKEN = process.env.IG_ACCESS_TOKEN || process.env.META_ACCESS_TOKEN;
 
 const DELAY_MS = Number(process.env.IG_PUBLISH_DELAY_MS || 90_000); // 90s entre posts
 const STORY_DELAY_MS = Number(process.env.IG_STORY_DELAY_MS || 30_000);

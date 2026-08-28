@@ -4,6 +4,8 @@ out/
 build/
 dist/
 .env*.local
+.env.local
+.env.instagram
 .vercel
 *.tsbuildinfo
 next-env.d.ts
