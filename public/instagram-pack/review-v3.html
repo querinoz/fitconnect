@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FitConnect — Revisão pack v3 · @fitconnectsports</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --ink:#07080A; --ink800:#1a1d24; --volt:#C7FB3A; --muted:#8b93a7; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:Inter,system-ui,sans-serif; background:var(--ink); color:#FAFBFC; line-height:1.5; }
+    .hero { padding:48px 32px 32px; border-bottom:1px solid var(--ink800);
+      background:radial-gradient(ellipse 60% 80% at 10% 0%, rgba(199,251,58,.12), transparent 50%), var(--ink); }
+    .hero h1 { font-family:'Space Grotesk',sans-serif; font-size:clamp(28px,4vw,42px); font-weight:700; }
+    .hero h1 span { color:var(--volt); }
+    .hero p { color:var(--muted); margin-top:8px; max-width:640px; }
+    .stats { display:flex; flex-wrap:wrap; gap:16px; margin-top:24px; }
+    .stat { background:var(--ink800); border:1px solid #2a2f3a; border-radius:12px; padding:12px 20px; }
+    .stat b { display:block; font-size:24px; color:var(--volt); font-family:'Space Grotesk',sans-serif; }
+    nav { position:sticky; top:0; z-index:50; display:flex; flex-wrap:wrap; gap:8px; padding:12px 32px;
+      background:rgba(7,8,10,.92); backdrop-filter:blur(12px); border-bottom:1px solid var(--ink800); }
+    nav a { color:var(--muted); text-decoration:none; font-size:13px; padding:6px 12px; border-radius:8px;
+      border:1px solid transparent; transition:.15s; }
+    nav a:hover { color:var(--volt); border-color:#2a2f3a; background:var(--ink800); }
+    main { max-width:1400px; margin:0 auto; padding:32px; }
+    .section { margin-bottom:56px; scroll-margin-top:72px; }
+    .section header { margin-bottom:24px; }
+    .section h2 { font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:700; }
+    .section header p { color:var(--muted); margin-top:4px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px; }
+    .reels-grid { grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); }
+    .card { background:var(--ink800); border:1px solid #2a2f3a; border-radius:16px; overflow:hidden; }
+    .thumb { background:#0b0d11; overflow:hidden; }
+    .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+    .reel-thumb { aspect-ratio:9/16; max-height:480px; margin:0 auto; }
+    .reel-thumb video { width:100%; height:100%; object-fit:cover; display:block; }
+    .meta { padding:14px 16px; }
+    .meta h3 { font-size:15px; font-weight:600; margin-bottom:6px; }
+    .meta p { font-size:13px; color:var(--muted); margin-bottom:8px; }
+    .meta code { font-size:11px; color:#6b7280; word-break:break-all; }
+    .meta a { display:inline-block; margin-top:8px; font-size:12px; color:var(--volt); }
+    .pill { display:inline-block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
+      background:rgba(199,251,58,.15); color:var(--volt); padding:3px 8px; border-radius:99px; margin-bottom:8px; }
+    .carousel-block { margin-bottom:32px; }
+    .carousel-block h3 { font-size:18px; margin-bottom:4px; }
+    .carousel-block .path { color:var(--muted); font-size:13px; margin-bottom:12px; }
+    .carousel-strip { display:flex; gap:12px; overflow-x:auto; padding-bottom:12px; scroll-snap-type:x mandatory; }
+    .carousel-strip figure { flex:0 0 200px; scroll-snap-align:start; }
+    .carousel-strip img { width:200px; height:200px; object-fit:cover; border-radius:12px; border:1px solid #2a2f3a; }
+    .carousel-strip figcaption { text-align:center; font-size:11px; color:var(--muted); margin-top:4px; }
+    .lightbox { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.92);
+      align-items:center; justify-content:center; padding:24px; cursor:zoom-out; }
+    .lightbox.open { display:flex; }
+    .lightbox img { max-width:95vw; max-height:90vh; border-radius:12px; }
+    footer { text-align:center; padding:32px; color:var(--muted); font-size:13px; border-top:1px solid var(--ink800); }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>Fit<span>Connect</span> — Revisão pack v3</h1>
+    <p>Analisa todo o conteúdo novo antes de publicar no @fitconnectsports. Clica numa imagem para ampliar.</p>
+    <div class="stats">
+      <div class="stat"><b>51</b> imagens</div>
+      <div class="stat"><b>6</b> reels MP4</div>
+      <div class="stat"><b>3</b> carousels</div>
+      <div class="stat"><b>6</b> mockups app</div>
+    </div>
+  </div>
+  <nav>
+    <a href="#mockups">Mockups</a>
+    <a href="#features">Features</a>
+    <a href="#educational">Educativos</a>
+    <a href="#abstract">Abstratos</a>
+    <a href="#posts-mockups">Posts</a>
+    <a href="#carousels">Carousels</a>
+    <a href="#reels">Reels</a>
+  </nav>
+  <main>
+    <section id="mockups" class="section">
+      <header><h2>Mockups de app</h2><p>Feed · Ranks · Perfil · Busca coach · Roster · Inbox</p></header>
+      <div class="grid">
+    <article class="card" data-label="Community Feed">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Mockups/mockup-09-community-feed.png" alt="Community Feed" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Community Feed</h3>
+        <p>PRs, check-ins e race day no feed da comunidade.</p>
+        <code>Mockups/mockup-09-community-feed.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="Ranks / Leaderboard">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Mockups/mockup-10-ranks-leaderboard.png" alt="Ranks / Leaderboard" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Ranks / Leaderboard</h3>
+        <p>Ranking por modalidade · Top 5% · pontos semanais.</p>
+        <code>Mockups/mockup-10-ranks-leaderboard.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="Perfil atleta">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Mockups/mockup-11-athlete-profile.png" alt="Perfil atleta" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Perfil atleta</h3>
+        <p>Readiness · HRV · streak · sports multi-modalidade.</p>
+        <code>Mockups/mockup-11-athlete-profile.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="Discover / busca coach">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Mockups/mockup-12-coach-search.png" alt="Discover / busca coach" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Discover / busca coach</h3>
+        <p>12.418 coaches · filtros · rating · €/h.</p>
+        <code>Mockups/mockup-12-coach-search.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="Coach roster">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Mockups/mockup-13-coach-roster.png" alt="Coach roster" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Coach roster</h3>
+        <p>Heatmap do plantel · readiness por atleta.</p>
+        <code>Mockups/mockup-13-coach-roster.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="Inbox + nudges">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Mockups/mockup-14-inbox-nudge.png" alt="Inbox + nudges" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Inbox + nudges</h3>
+        <p>Coach ↔ atleta · AI nudges · plano ajustado.</p>
+        <code>Mockups/mockup-14-inbox-nudge.png</code>
+      </div>
+    </article></div>
+    </section>
+    <section id="features" class="section">
+      <header><h2>Posts de features</h2><p>Descrição textual das funções (feed 1:1)</p></header>
+      <div class="grid">
+    <article class="card" data-label="Feature · Feed">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/25-feature-community-feed.png" alt="Feature · Feed" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Feature · Feed</h3>
+        
+        <code>Posts/25-feature-community-feed.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="Feature · Ranks">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/26-feature-ranks.png" alt="Feature · Ranks" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Feature · Ranks</h3>
+        
+        <code>Posts/26-feature-ranks.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="Feature · Perfil">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/27-feature-profile.png" alt="Feature · Perfil" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Feature · Perfil</h3>
+        
+        <code>Posts/27-feature-profile.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="Feature · Discover">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/28-feature-coach-search.png" alt="Feature · Discover" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Feature · Discover</h3>
+        
+        <code>Posts/28-feature-coach-search.png</code>
+      </div>
+    </article></div>
+    </section>
+    <section id="educational" class="section">
+      <header><h2>Educativos v2</h2><p>Saves · autoridade · explicação rápida</p></header>
+      <div class="grid">
+    <article class="card" data-label="5 zonas de treino">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Educational/edu-08-training-zones.png" alt="5 zonas de treino" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>5 zonas de treino</h3>
+        
+        <code>Educational/edu-08-training-zones.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="Periodização">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Educational/edu-09-periodization.png" alt="Periodização" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Periodização</h3>
+        
+        <code>Educational/edu-09-periodization.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="Como escolher coach">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Educational/edu-10-coach-match.png" alt="Como escolher coach" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Como escolher coach</h3>
+        
+        <code>Educational/edu-10-coach-match.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="Load management">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Educational/edu-11-load-management.png" alt="Load management" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Load management</h3>
+        
+        <code>Educational/edu-11-load-management.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="Morning handshake">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Educational/edu-12-morning-handshake.png" alt="Morning handshake" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Morning handshake</h3>
+        
+        <code>Educational/edu-12-morning-handshake.png</code>
+      </div>
+    </article></div>
+    </section>
+    <section id="abstract" class="section">
+      <header><h2>Abstratos / brand</h2><p>Identidade visual · frases de marca</p></header>
+      <div class="grid">
+    <article class="card" data-label="Connect. Train. Perform.">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Abstract/abstract-01-connect-train-perform.png" alt="Connect. Train. Perform." loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Connect. Train. Perform.</h3>
+        
+        <code>Abstract/abstract-01-connect-train-perform.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="Readiness is the new PR">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Abstract/abstract-02-readiness-ring.png" alt="Readiness is the new PR" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Readiness is the new PR</h3>
+        
+        <code>Abstract/abstract-02-readiness-ring.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="Signal over noise">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Abstract/abstract-03-signal-grid.png" alt="Signal over noise" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Signal over noise</h3>
+        
+        <code>Abstract/abstract-03-signal-grid.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="Load up. Then recover.">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Abstract/abstract-04-weekly-load.png" alt="Load up. Then recover." loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Load up. Then recover.</h3>
+        
+        <code>Abstract/abstract-04-weekly-load.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="Your pulse. Their plan.">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Abstract/abstract-05-volt-pulse.png" alt="Your pulse. Their plan." loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>Your pulse. Their plan.</h3>
+        
+        <code>Abstract/abstract-05-volt-pulse.png</code>
+      </div>
+    </article></div>
+    </section>
+    <section id="posts-mockups" class="section">
+      <header><h2>Posts (cópias dos mockups)</h2><p>Prontos para publicar no feed</p></header>
+      <div class="grid">
+    <article class="card" data-label="25-feature-community-feed">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/25-feature-community-feed.png" alt="25-feature-community-feed" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>25-feature-community-feed</h3>
+        
+        <code>Posts/25-feature-community-feed.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="26-feature-ranks">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/26-feature-ranks.png" alt="26-feature-ranks" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>26-feature-ranks</h3>
+        
+        <code>Posts/26-feature-ranks.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="27-feature-profile">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/27-feature-profile.png" alt="27-feature-profile" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>27-feature-profile</h3>
+        
+        <code>Posts/27-feature-profile.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="28-feature-coach-search">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/28-feature-coach-search.png" alt="28-feature-coach-search" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>28-feature-coach-search</h3>
+        
+        <code>Posts/28-feature-coach-search.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="29-mockup-09-community-feed">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/29-mockup-09-community-feed.png" alt="29-mockup-09-community-feed" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>29-mockup-09-community-feed</h3>
+        
+        <code>Posts/29-mockup-09-community-feed.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="30-mockup-10-ranks-leaderboard">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/30-mockup-10-ranks-leaderboard.png" alt="30-mockup-10-ranks-leaderboard" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>30-mockup-10-ranks-leaderboard</h3>
+        
+        <code>Posts/30-mockup-10-ranks-leaderboard.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="31-mockup-11-athlete-profile">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/31-mockup-11-athlete-profile.png" alt="31-mockup-11-athlete-profile" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>31-mockup-11-athlete-profile</h3>
+        
+        <code>Posts/31-mockup-11-athlete-profile.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="32-mockup-12-coach-search">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/32-mockup-12-coach-search.png" alt="32-mockup-12-coach-search" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>32-mockup-12-coach-search</h3>
+        
+        <code>Posts/32-mockup-12-coach-search.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="33-mockup-13-coach-roster">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/33-mockup-13-coach-roster.png" alt="33-mockup-13-coach-roster" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>33-mockup-13-coach-roster</h3>
+        
+        <code>Posts/33-mockup-13-coach-roster.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="34-mockup-14-inbox-nudge">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/34-mockup-14-inbox-nudge.png" alt="34-mockup-14-inbox-nudge" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>34-mockup-14-inbox-nudge</h3>
+        
+        <code>Posts/34-mockup-14-inbox-nudge.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="abstract-01-connect-train-perform">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/abstract-01-connect-train-perform.png" alt="abstract-01-connect-train-perform" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>abstract-01-connect-train-perform</h3>
+        
+        <code>Posts/abstract-01-connect-train-perform.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="abstract-02-readiness-ring">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/abstract-02-readiness-ring.png" alt="abstract-02-readiness-ring" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>abstract-02-readiness-ring</h3>
+        
+        <code>Posts/abstract-02-readiness-ring.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="abstract-03-signal-grid">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/abstract-03-signal-grid.png" alt="abstract-03-signal-grid" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>abstract-03-signal-grid</h3>
+        
+        <code>Posts/abstract-03-signal-grid.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="abstract-04-weekly-load">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/abstract-04-weekly-load.png" alt="abstract-04-weekly-load" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>abstract-04-weekly-load</h3>
+        
+        <code>Posts/abstract-04-weekly-load.png</code>
+      </div>
+    </article>
+    <article class="card" data-label="abstract-05-volt-pulse">
+      <div class="thumb" style="aspect-ratio:1/1">
+        <img src="Posts/abstract-05-volt-pulse.png" alt="abstract-05-volt-pulse" loading="lazy" />
+      </div>
+      <div class="meta">
+        <h3>abstract-05-volt-pulse</h3>
+        
+        <code>Posts/abstract-05-volt-pulse.png</code>
+      </div>
+    </article></div>
+    </section>
+      <section id="carousels" class="section">
+        <header><h2>Carousels novos</h2><p>3 sets prontos para swipe</p></header>
+        
+    <div class="carousel-block">
+      <h3>App features (6 slides)</h3>
+      <p class="path"><code>Carousels/09-app-features/</code> · 6 slides</p>
+      <div class="carousel-strip">
+        
+          <figure>
+            <img src="Carousels/09-app-features/01-mockup-09-community-feed.png" alt="slide 1" loading="lazy" />
+            <figcaption>1/6</figcaption>
+          </figure>
+          <figure>
+            <img src="Carousels/09-app-features/02-mockup-10-ranks-leaderboard.png" alt="slide 2" loading="lazy" />
+            <figcaption>2/6</figcaption>
+          </figure>
+          <figure>
+            <img src="Carousels/09-app-features/03-mockup-11-athlete-profile.png" alt="slide 3" loading="lazy" />
+            <figcaption>3/6</figcaption>
+          </figure>
+          <figure>
+            <img src="Carousels/09-app-features/04-mockup-12-coach-search.png" alt="slide 4" loading="lazy" />
+            <figcaption>4/6</figcaption>
+          </figure>
+          <figure>
+            <img src="Carousels/09-app-features/05-mockup-13-coach-roster.png" alt="slide 5" loading="lazy" />
+            <figcaption>5/6</figcaption>
+          </figure>
+          <figure>
+            <img src="Carousels/09-app-features/06-mockup-14-inbox-nudge.png" alt="slide 6" loading="lazy" />
+            <figcaption>6/6</figcaption>
+          </figure>
+      </div>
+    </div>
+    <div class="carousel-block">
+      <h3>Educação v2 (5 slides)</h3>
+      <p class="path"><code>Carousels/10-educational-v2/</code> · 5 slides</p>
+      <div class="carousel-strip">
+        
+          <figure>
+            <img src="Carousels/10-educational-v2/01-edu-08-training-zones.png" alt="slide 1" loading="lazy" />
+            <figcaption>1/5</figcaption>
+          </figure>
+          <figure>
+            <img src="Carousels/10-educational-v2/02-edu-09-periodization.png" alt="slide 2" loading="lazy" />
+            <figcaption>2/5</figcaption>
+          </figure>
+          <figure>
+            <img src="Carousels/10-educational-v2/03-edu-10-coach-match.png" alt="slide 3" loading="lazy" />
+            <figcaption>3/5</figcaption>
+          </figure>
+          <figure>
+            <img src="Carousels/10-educational-v2/04-edu-11-load-management.png" alt="slide 4" loading="lazy" />
+            <figcaption>4/5</figcaption>
+          </figure>
+          <figure>
+            <img src="Carousels/10-educational-v2/05-edu-12-morning-handshake.png" alt="slide 5" loading="lazy" />
+            <figcaption>5/5</figcaption>
+          </figure>
+      </div>
+    </div>
+    <div class="carousel-block">
+      <h3>Brand abstract (5 slides)</h3>
+      <p class="path"><code>Carousels/11-abstract-brand/</code> · 5 slides</p>
+      <div class="carousel-strip">
+        
+          <figure>
+            <img src="Carousels/11-abstract-brand/01-abstract-01-connect-train-perform.png" alt="slide 1" loading="lazy" />
+            <figcaption>1/5</figcaption>
+          </figure>
+          <figure>
+            <img src="Carousels/11-abstract-brand/02-abstract-02-readiness-ring.png" alt="slide 2" loading="lazy" />
+            <figcaption>2/5</figcaption>
+          </figure>
+          <figure>
+            <img src="Carousels/11-abstract-brand/03-abstract-03-signal-grid.png" alt="slide 3" loading="lazy" />
+            <figcaption>3/5</figcaption>
+          </figure>
+          <figure>
+            <img src="Carousels/11-abstract-brand/04-abstract-04-weekly-load.png" alt="slide 4" loading="lazy" />
+            <figcaption>4/5</figcaption>
+          </figure>
+          <figure>
+            <img src="Carousels/11-abstract-brand/05-abstract-05-volt-pulse.png" alt="slide 5" loading="lazy" />
+            <figcaption>5/5</figcaption>
+          </figure>
+      </div>
+    </div>
+      </section>
+      <section id="reels" class="section">
+        <header><h2>Reels animados</h2><p>MP4 9:16 · ~6.5s · hero sports + frases motivacionais</p></header>
+        <div class="grid reels-grid">
+    <article class="card reel-card">
+      <div class="thumb reel-thumb">
+        <video src="Reels/Animated/reel-hero-01-runner.mp4" poster="Reels/reel-hero-01-runner-cover.png" controls playsinline loop muted></video>
+      </div>
+      <div class="meta">
+        <span class="pill">Running</span>
+        <h3>Bad night? Lighter session.</h3>
+        <code>Reels/Animated/reel-hero-01-runner.mp4</code>
+        <a href="Reels/reel-hero-01-runner-cover.png" target="_blank">Cover PNG →</a>
+      </div>
+    </article>
+    <article class="card reel-card">
+      <div class="thumb reel-thumb">
+        <video src="Reels/Animated/reel-hero-02-strength.mp4" poster="Reels/reel-hero-02-strength-cover.png" controls playsinline loop muted></video>
+      </div>
+      <div class="meta">
+        <span class="pill">Strength</span>
+        <h3>O plano muda. O atleta sente.</h3>
+        <code>Reels/Animated/reel-hero-02-strength.mp4</code>
+        <a href="Reels/reel-hero-02-strength-cover.png" target="_blank">Cover PNG →</a>
+      </div>
+    </article>
+    <article class="card reel-card">
+      <div class="thumb reel-thumb">
+        <video src="Reels/Animated/reel-hero-03-swim.mp4" poster="Reels/reel-hero-03-swim-cover.png" controls playsinline loop muted></video>
+      </div>
+      <div class="meta">
+        <span class="pill">Swimming</span>
+        <h3>Measure. Then move.</h3>
+        <code>Reels/Animated/reel-hero-03-swim.mp4</code>
+        <a href="Reels/reel-hero-03-swim-cover.png" target="_blank">Cover PNG →</a>
+      </div>
+    </article>
+    <article class="card reel-card">
+      <div class="thumb reel-thumb">
+        <video src="Reels/Animated/reel-hero-04-cycle.mp4" poster="Reels/reel-hero-04-cycle-cover.png" controls playsinline loop muted></video>
+      </div>
+      <div class="meta">
+        <span class="pill">Cycling</span>
+        <h3>Consistency beats intensity.</h3>
+        <code>Reels/Animated/reel-hero-04-cycle.mp4</code>
+        <a href="Reels/reel-hero-04-cycle-cover.png" target="_blank">Cover PNG →</a>
+      </div>
+    </article>
+    <article class="card reel-card">
+      <div class="thumb reel-thumb">
+        <video src="Reels/Animated/reel-hero-05-stack.mp4" poster="Reels/reel-hero-05-stack-cover.png" controls playsinline loop muted></video>
+      </div>
+      <div class="meta">
+        <span class="pill">Multi-sport</span>
+        <h3>Connect. Train. Perform.</h3>
+        <code>Reels/Animated/reel-hero-05-stack.mp4</code>
+        <a href="Reels/reel-hero-05-stack-cover.png" target="_blank">Cover PNG →</a>
+      </div>
+    </article>
+    <article class="card reel-card">
+      <div class="thumb reel-thumb">
+        <video src="Reels/Animated/reel-hero-06-recovery.mp4" poster="Reels/reel-hero-06-recovery-cover.png" controls playsinline loop muted></video>
+      </div>
+      <div class="meta">
+        <span class="pill">Recovery</span>
+        <h3>Rest is part of the work.</h3>
+        <code>Reels/Animated/reel-hero-06-recovery.mp4</code>
+        <a href="Reels/reel-hero-06-recovery-cover.png" target="_blank">Cover PNG →</a>
+      </div>
+    </article></div>
+      </section></main>
+  <footer>
+    Gerado em 2026-08-28 · <code>public/instagram-pack/review-v3.html</code>
+    · Ver também <code>CONTENT-V3.md</code>
+  </footer>
+  <div class="lightbox" id="lightbox"><img alt="" /></div>
+  <script>
+    const lb = document.getElementById('lightbox');
+    const lbImg = lb.querySelector('img');
+    document.querySelectorAll('.card img, .carousel-strip img').forEach(img => {
+      img.style.cursor = 'zoom-in';
+      img.addEventListener('click', () => {
+        lbImg.src = img.src;
+        lbImg.alt = img.alt;
+        lb.classList.add('open');
+      });
+    });
+    lb.addEventListener('click', () => lb.classList.remove('open'));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('open'); });
+  </script>
+</body>
+</html>
