@@ -2,11 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { CommunityPost, Sport } from "@/lib/data";
-import { COMMUNITY_POSTS } from "@/lib/data";
-import {
-  communityPostEventName,
-  loadLocalPosts
-} from "@/lib/community/local-posts";
 import { useChannel } from "@/lib/realtime/use-channel";
 import { Button } from "@/components/ui/button";
 import { PremiumCard } from "@/components/ui-glass/premium-system";
@@ -15,13 +10,15 @@ import { Heart, MessageCircle, Share2 } from "lucide-react";
 
 type FeedPost = CommunityPost & { reactions: Record<string, number> };
 
-function seedPosts(): FeedPost[] {
-  const local = typeof window !== "undefined" ? loadLocalPosts() : [];
-  const merged = [...local, ...COMMUNITY_POSTS];
-  return merged.map((p) => ({
-    ...p,
-    reactions: { "🔥": Math.max(1, p.likes % 7), "💪": p.likes % 5, "👏": p.comments }
-  }));
+function withReactions(post: CommunityPost): FeedPost {
+  return {
+    ...post,
+    reactions: {
+      "🔥": Math.max(1, post.likes % 7),
+      "💪": post.likes % 5,
+      "👏": post.comments
+    }
+  };
 }
 
 export function CommunityFeed({
@@ -29,28 +26,35 @@ export function CommunityFeed({
 }: {
   filteredIds: Set<string> | null;
 }) {
-  const [posts, setPosts] = useState<FeedPost[]>(seedPosts);
+  const [posts, setPosts] = useState<FeedPost[]>([]);
+  const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState("");
   const [kind, setKind] = useState<CommunityPost["kind"]>("Check-in");
   const { messages, send } = useChannel("community:feed");
 
   useEffect(() => {
-    function onExternalPost(e: Event) {
-      const post = (e as CustomEvent<CommunityPost>).detail;
-      if (!post) return;
-      setPosts((prev) => {
-        if (prev.some((p) => p.id === post.id)) return prev;
-        return [
-          {
-            ...post,
-            reactions: { "🔥": 1 }
-          },
-          ...prev
-        ];
-      });
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch("/api/v1/community/posts");
+        if (!res.ok) throw new Error("feed unavailable");
+        const body = (await res.json()) as { posts: CommunityPost[] };
+        if (!cancelled) setPosts(body.posts.map(withReactions));
+      } catch {
+        if (!cancelled) setPosts([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
-    window.addEventListener(communityPostEventName(), onExternalPost);
-    return () => window.removeEventListener(communityPostEventName(), onExternalPost);
+    void load();
+    function onRefresh() {
+      void load();
+    }
+    window.addEventListener("fitconnect:community-refresh", onRefresh);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("fitconnect:community-refresh", onRefresh);
+    };
   }, []);
 
   useEffect(() => {
@@ -80,42 +84,46 @@ export function CommunityFeed({
 
   const visible = filteredIds
     ? posts.filter(
-        (p) => filteredIds.has(p.id) || p.id.startsWith("c-local-")
+        (p) => filteredIds.has(p.id) || p.id.startsWith("c-user-")
       )
     : posts;
 
-  const publish = useCallback(() => {
+  const publish = useCallback(async () => {
     if (!draft.trim()) return;
-    const post = {
-      kind: "community-post" as const,
+    const postKind = kind;
+    const text = draft.trim();
+    const res = await fetch("/api/v1/community/posts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, kind: postKind })
+    });
+    const body = res.ok ? ((await res.json()) as { post: CommunityPost }) : null;
+    const post = body?.post ?? {
       id: `c-local-${Date.now()}`,
       author: {
         name: "You",
         avatar: "https://i.pravatar.cc/200?img=8",
-        sport: "Running"
+        sport: "Running" as Sport
       },
-      postKind: kind,
-      text: draft.trim(),
-      at: new Date().toISOString()
+      kind: postKind,
+      text,
+      likes: 0,
+      comments: 0,
+      ago: "just now"
     };
-    send(post);
-    setPosts((prev) => [
-      {
-        id: post.id,
-        author: {
-          name: post.author.name,
-          avatar: post.author.avatar,
-          sport: post.author.sport as Sport
-        },
-        kind: post.postKind,
-        text: post.text,
-        likes: 0,
-        comments: 0,
-        ago: "just now",
-        reactions: { "🔥": 1 }
+    send({
+      kind: "community-post",
+      id: post.id,
+      author: {
+        name: post.author.name,
+        avatar: post.author.avatar,
+        sport: post.author.sport
       },
-      ...prev
-    ]);
+      postKind: post.kind,
+      text: post.text,
+      at: new Date().toISOString()
+    });
+    setPosts((prev) => [withReactions(post), ...prev]);
     setDraft("");
   }, [draft, kind, send]);
 
@@ -167,9 +175,13 @@ export function CommunityFeed({
           Post to feed
         </Button>
         <p className="text-[10px] text-ink-500">
-          Live sync via BroadcastChannel (demo realtime).
+          Posts persist in Supabase and sync live via BroadcastChannel.
         </p>
       </PremiumCard>
+
+      {loading ? (
+        <p className="text-sm text-ink-500">Loading community feed…</p>
+      ) : null}
 
       {visible.map((post) => (
         <PremiumCard key={post.id} className="p-5 space-y-3">

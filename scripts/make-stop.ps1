@@ -74,3 +74,4 @@ if ($still) {
 }
 
 if (-not $Quiet) { Write-Host "Stopped." -ForegroundColor Green }
+exit 0

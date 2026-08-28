@@ -18,10 +18,14 @@ function decodeSegment(segment: string): unknown {
 }
 
 /**
- * Decode a Firebase ID token payload.
- * Signature verification is performed by Supabase PostgREST when the token is
- * used as a Data API access token. This helper only rejects malformed/expired
- * tokens so API routes can bind `sub` before RLS runs.
+ * UNSAFE: decode a Firebase ID token payload WITHOUT verifying its signature.
+ *
+ * Do NOT use this to authenticate a request. It cannot tell a Google-signed
+ * token from one an attacker minted with `{"alg":"none"}` and an arbitrary
+ * `sub`. Use `verifyFirebaseIdToken` from "@/lib/auth/firebase-verify" for any
+ * decision that grants access.
+ *
+ * Kept only for non-security display/inspection paths and for tests.
  */
 export function parseFirebaseIdToken(
   token: string | null | undefined,
@@ -50,7 +54,11 @@ export function parseFirebaseIdToken(
   }
 }
 
+/** Test-only. Produces an UNSIGNED token; refuses to run outside the test env. */
 export function encodeUnsignedTestJwt(claims: Omit<FirebaseIdClaims, "exp"> & { exp?: number }): string {
+  if (process.env.NODE_ENV !== "test") {
+    throw new Error("encodeUnsignedTestJwt is test-only");
+  }
   const header = Buffer.from(JSON.stringify({ alg: "none", typ: "JWT" })).toString("base64url");
   const payload = Buffer.from(
     JSON.stringify({

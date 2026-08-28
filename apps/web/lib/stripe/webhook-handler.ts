@@ -1,8 +1,21 @@
 import type Stripe from "stripe";
 import { getPrisma } from "@/lib/db/client";
+import { isProductionSecurityMode } from "@/lib/security/runtime";
 
 export function isWebhookProcessingEnabled(): boolean {
   return process.env.STRIPE_WEBHOOK_PROCESSING !== "false";
+}
+
+/**
+ * Whether we can persist processed-event ids and subscription state.
+ *
+ * SECURITY: `claimStripeEvent` returns true when there is no database, because
+ * demo and local runs must still exercise the dispatch path. That means replay
+ * protection is absent and every subscription write is dropped -- acceptable in
+ * demo, never in production. `processStripeWebhookEvent` fails closed instead.
+ */
+export function isStripePersistenceAvailable(): boolean {
+  return getPrisma() !== null;
 }
 
 export async function claimStripeEvent(event: Stripe.Event): Promise<boolean> {
@@ -137,6 +150,20 @@ export async function dispatchStripeEvent(event: Stripe.Event): Promise<void> {
 export async function processStripeWebhookEvent(event: Stripe.Event) {
   if (!isWebhookProcessingEnabled()) {
     return { received: true, processed: false, demo: false, eventType: event.type, eventId: event.id };
+  }
+
+  // Without persistence there is no replay protection and no subscription
+  // state: Stripe would retry an event forever and we would reprocess it every
+  // time. Refuse in production so Stripe backs off and retries later.
+  if (isProductionSecurityMode() && !isStripePersistenceAvailable()) {
+    return {
+      received: true,
+      processed: false,
+      degraded: true,
+      reason: "persistence_unavailable" as const,
+      eventType: event.type,
+      eventId: event.id
+    };
   }
 
   const claimed = await claimStripeEvent(event);

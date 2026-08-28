@@ -1,4 +1,4 @@
-# FitConnect — start dev environment (Windows)
+# FitConnect - start dev environment (Windows)
 param(
   [int]$Port = 3001,
   [switch]$NoBrowser,
@@ -7,12 +7,12 @@ param(
 )
 
 Write-Host ""
-Write-Host "╔══════════════════════════════════╗" -ForegroundColor Green
-Write-Host "║       FITCONNECT ELITE OS        ║" -ForegroundColor Green
-Write-Host "╚══════════════════════════════════╝" -ForegroundColor Green
+Write-Host "====================================" -ForegroundColor Green
+Write-Host "       FITCONNECT ELITE OS          " -ForegroundColor Green
+Write-Host "====================================" -ForegroundColor Green
 Write-Host "[BOOT] FitConnect Elite OS local start"
-Write-Host "[PHONE] not started here — make android-wear-test / make android-emulator"
-Write-Host "[WATCH] not started here — Wear AVD may be UNAVAILABLE"
+Write-Host "[PHONE] not started here - make android-wear-test / make android-emulator"
+Write-Host "[WATCH] not started here - Wear AVD may be UNAVAILABLE"
 Write-Host "[SYNC] UNVERIFIED until a reachable FitConnect Wear node exists"
 Write-Host "[BACKEND] Next.js on :$Port"
 Write-Host "[READY] after this script finishes (web only)"
@@ -33,15 +33,15 @@ function Write-Step($msg) { Write-Host "==> $msg" -ForegroundColor Cyan }
 
 if (-not $SkipSetup) {
   & "$PSScriptRoot\make-setup.ps1"
-  if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+  if ($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
 New-Item -ItemType Directory -Force -Path $StateDir | Out-Null
 
 Write-Step "Stopping any existing dev server on port $Port"
 & "$PSScriptRoot\make-stop.ps1" -Port $Port -Quiet -Strict
-if ($LASTEXITCODE -ne 0) {
-  Write-Host "Port $Port is still in use. Run 'npm run env:stop' or use -Port 3002" -ForegroundColor Red
+if ($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
+  Write-Host "Port $Port is still in use. Run npm run env:stop or use -Port 3002" -ForegroundColor Red
   exit 1
 }
 
@@ -90,7 +90,7 @@ if (-not $NoSmoke) {
   Write-Step "Running smoke tests"
   node scripts/smoke-test.mjs $BaseUrl
   node scripts/mobile-pwa-check.mjs $BaseUrl
-  if ($LASTEXITCODE -ne 0) {
+  if ($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
     Write-Host "Smoke tests failed - server is up but some checks did not pass." -ForegroundColor Yellow
   }
 }
@@ -108,4 +108,4 @@ if (-not $NoBrowser) {
 
 Write-Host ""
 Write-Host "Demo sign-in: Athlete/Athlete | Coach/Coach | Admin/Admin" -ForegroundColor DarkGray
-Write-Host "Stop with: make stop  or  npm run env:stop" -ForegroundColor DarkGray
+Write-Host "Stop with: make stop or npm run env:stop" -ForegroundColor DarkGray

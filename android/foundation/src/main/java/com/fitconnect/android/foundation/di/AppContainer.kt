@@ -25,7 +25,7 @@ import com.fitconnect.android.foundation.i18n.LocaleManager
 import com.fitconnect.android.foundation.lifecycle.AppLifecycle
 import com.fitconnect.android.foundation.lifecycle.DefaultAppLifecycle
 import com.fitconnect.android.foundation.navigation.NavGuard
-import com.fitconnect.android.foundation.identity.HttpIdentityRemote
+import com.fitconnect.android.foundation.ascend.HttpAscendRemote
 import com.fitconnect.android.foundation.identity.IdentityRemote
 import com.fitconnect.android.foundation.network.AndroidConnectivityMonitor
 import com.fitconnect.android.foundation.network.ApiClient
@@ -97,6 +97,7 @@ interface AppContainer {
     val imageLoader: ImageLoader
     val accountIsolation: AccountIsolationController
     val identityRemote: IdentityRemote
+    val ascendRemote: HttpAscendRemote
 }
 
 class DefaultAppContainer(
@@ -175,6 +176,10 @@ class DefaultAppContainer(
 
     override val identityRemote: IdentityRemote by lazy {
         HttpIdentityRemote(api = { apiClient }, logger = logger)
+    }
+
+    override val ascendRemote: HttpAscendRemote by lazy {
+        HttpAscendRemote(api = { apiClient }, logger = logger)
     }
 
     /** Firebase identity when provided; otherwise local demo or fail-closed. */

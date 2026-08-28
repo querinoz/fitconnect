@@ -48,6 +48,7 @@ help:
 	@echo "  FitConnect — Makefile"
 	@echo ""
 	@echo "  make start       Setup + dev server on :$(PORT) (recommended)"
+	@echo "  make fitconnect  Alias for make start (bootstrap local dev)"
 	@echo "  make dev         Alias for make start"
 	@echo "  make setup       Install deps, .env.local, Prisma generate, optional DB seed"
 	@echo "  make prod        Production build + server + tunnel + smoke (slower)"
@@ -81,8 +82,11 @@ help:
 setup:
 	@$(SETUP_CMD)
 
-dev start: setup
+dev start fitconnect: setup
 	@$(START_CMD)
+
+# `make start fitconnect` runs both targets; fitconnect is an alias of start.
+fitconnect: start
 
 # ── Production demo flow (build + tunnel) ─────────────────────────────────────
 prod: _deps setup _kill_port _build _start_prod _wait_ready _smoke _tunnel _open

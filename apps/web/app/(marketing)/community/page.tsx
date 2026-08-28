@@ -9,10 +9,6 @@ import { CommunityFeed } from "@/components/community/community-feed";
 import { CreatePostModal } from "@/components/community/create-post-modal";
 import { CommunityActivityMap } from "@/components/community/community-activity-map";
 import { COMMUNITY_POSTS, SPORTS, type Sport } from "@/lib/data";
-import {
-  dispatchCommunityPost,
-  saveLocalPost
-} from "@/lib/community/local-posts";
 import { Calendar, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/lib/i18n-provider";
@@ -91,9 +87,13 @@ export default function CommunityPage() {
       <CreatePostModal
         open={createOpen}
         onOpenChange={setCreateOpen}
-        onPublish={(post) => {
-          saveLocalPost(post);
-          dispatchCommunityPost(post);
+        onPublish={async (post) => {
+          await fetch("/api/v1/community/posts", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: post.text, kind: post.kind, author: post.author })
+          });
+          window.dispatchEvent(new CustomEvent("fitconnect:community-refresh"));
         }}
       />
 

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { LanguageProvider } from "@/lib/i18n-provider";
 import { AuthStoreProvider } from "@/components/auth-store-provider";
+import { FirebaseProvider } from "@/components/firebase/firebase-provider";
 import { AnalyticsBootstrap } from "@/components/observability/analytics-bootstrap";
 import { ToastHost } from "@/components/ui/toast-host";
 import { ConvexClientProvider } from "@/components/convex-client-provider";
@@ -42,11 +43,13 @@ export function Providers({
           <LanguageProvider initialLang={initialLang}>
             <LenisProvider>
               <AuthStoreProvider>
+                <FirebaseProvider>
                 <DevServiceWorkerCleanup />
                 <AnalyticsBootstrap />
                 <ToastHost />
                 <AppIntroSplash />
                 {children}
+                </FirebaseProvider>
               </AuthStoreProvider>
             </LenisProvider>
           </LanguageProvider>

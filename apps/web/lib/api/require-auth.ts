@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { ContextUser } from "@fitconnect/api-client";
 import { isDemoMode } from "@/lib/auth/supabase/client";
 import { isFirebaseWebConfigured } from "@/lib/firebase/config";
-import { parseFirebaseIdToken } from "@/lib/auth/firebase-id-token";
+import { verifyFirebaseIdToken } from "@/lib/auth/firebase-verify";
 import { readAccessToken } from "@/lib/auth/read-access-token";
 import { lookupIdentityRole } from "@/lib/identity/repository";
 
@@ -41,7 +41,7 @@ export async function requireAuth(request?: Request): Promise<AuthResult> {
   }
 
   const accessToken = await readAccessToken(request);
-  const claims = parseFirebaseIdToken(accessToken);
+  const claims = await verifyFirebaseIdToken(accessToken);
   if (!accessToken || !claims) {
     return {
       ok: false,

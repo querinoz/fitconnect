@@ -24,7 +24,7 @@ const heroMarkers = [
   "fc-hero-title",
   "fc-kinetic",
   "fc-headline-line",
-  "Find my specialist"
+  "Elite human performance OS"
 ];
 
 const previewMarkers = ["dashboard-preview", "fc-dashboard-preview-title"];

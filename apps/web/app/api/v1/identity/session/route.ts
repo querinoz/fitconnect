@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { parseFirebaseIdToken } from "@/lib/auth/firebase-id-token";
+import { verifyFirebaseIdToken } from "@/lib/auth/firebase-verify";
 import { FIREBASE_ID_COOKIE } from "@/lib/auth/session-cookie";
 import { isDemoMode } from "@/lib/auth/supabase/client";
 import { isFirebaseWebConfigured } from "@/lib/firebase/config";
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as { idToken?: string } | null;
   const header = request.headers.get("authorization");
   const token = body?.idToken ?? (header?.startsWith("Bearer ") ? header.slice(7) : null);
-  const claims = parseFirebaseIdToken(token);
+  const claims = await verifyFirebaseIdToken(token);
   if (!token || !claims) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }

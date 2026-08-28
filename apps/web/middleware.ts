@@ -4,16 +4,11 @@ import { SUPPORTED_LANGS, type Lang } from "@/lib/i18n";
 import {
   isDemoModeEnv,
   shouldEnforceFirebaseAuth,
-  hasValidDemoSessionCookie,
   hasFirebaseSessionCookie,
   isProtectedPath,
 } from "@/lib/auth/middleware-auth";
 import { isFirebaseWebConfigured } from "@/lib/firebase/config";
 import { FIREBASE_ID_COOKIE } from "@/lib/auth/session-cookie";
-import {
-  DEMO_SESSION_COOKIE,
-  isAllowedDemoSessionId
-} from "@/lib/auth/demo-session";
 
 function isLang(value: string | null): value is Lang {
   return value !== null && (SUPPORTED_LANGS as readonly string[]).includes(value);
@@ -49,11 +44,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const demoCookie = request.cookies.get(DEMO_SESSION_COOKIE)?.value;
-  if (hasValidDemoSessionCookie(demoCookie, isAllowedDemoSessionId)) {
-    return NextResponse.next();
-  }
-
+  // SECURITY: the demo-session cookie is NOT an authentication factor. We only
+  // reach this point when shouldEnforceFirebaseAuth() is true, i.e. demo mode
+  // is OFF and Firebase is configured -- so honouring it here let anyone set
+  // `fc-demo-session=user-x` in the browser and walk into every protected page.
+  // Demo deployments skip this whole block at the shouldEnforceFirebaseAuth
+  // check above.
   const signIn = new URL("/signin", request.url);
   signIn.searchParams.set("next", pathname);
   return NextResponse.redirect(signIn);

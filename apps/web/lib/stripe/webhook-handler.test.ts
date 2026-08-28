@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import {
   claimStripeEvent,
   dispatchStripeEvent,
+  isStripePersistenceAvailable,
   isWebhookProcessingEnabled,
   processStripeWebhookEvent
 } from "./webhook-handler";
@@ -64,5 +65,43 @@ describe("stripe webhook handler", () => {
       type: "checkout.session.completed"
     } as never);
     expect(claimed).toBe(false);
+  });
+  it("should_report_persistence_unavailable_without_a_database", () => {
+    expect(isStripePersistenceAvailable()).toBe(false);
+  });
+
+  it("should_fail_closed_in_production_when_persistence_is_unavailable", async () => {
+    // Regression: previously claimStripeEvent returned true with no database,
+    // so replay protection silently vanished and every subscription write was
+    // dropped while the route still answered 200.
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_DEMO_MODE", "false");
+    try {
+      const result = await processStripeWebhookEvent({
+        id: "evt_prod_nodb",
+        type: "checkout.session.completed",
+        data: { object: {} }
+      } as never);
+      expect(result.processed).toBe(false);
+      expect("degraded" in result && result.degraded).toBe(true);
+      expect("reason" in result && result.reason).toBe("persistence_unavailable");
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("should_still_process_in_demo_without_a_database", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_DEMO_MODE", "true");
+    try {
+      const result = await processStripeWebhookEvent({
+        id: "evt_demo_nodb",
+        type: "checkout.session.completed",
+        data: { object: {} }
+      } as never);
+      expect(result.processed).toBe(true);
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });

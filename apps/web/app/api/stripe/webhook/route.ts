@@ -19,6 +19,10 @@ export async function POST(request: Request) {
     try {
       const event = await verifyStripeWebhook(request);
       const result = await processStripeWebhookEvent(event);
+      // 503 tells Stripe to retry rather than marking the event delivered.
+      if ("degraded" in result && result.degraded) {
+        return NextResponse.json(result, { status: 503 });
+      }
       return NextResponse.json(result);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Webhook verification failed";

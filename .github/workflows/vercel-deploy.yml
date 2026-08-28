@@ -34,6 +34,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Test before production deploy
+        run: pnpm --filter @fitconnect/web test
+
+      - name: Typecheck before production deploy
+        run: pnpm --filter @fitconnect/web typecheck
+
+      - name: Apply Supabase migrations
+        continue-on-error: true
+        run: pnpm db:supabase:migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+
       - name: Check Vercel auth
         run: |
           if [ -z "$VERCEL_TOKEN" ]; then

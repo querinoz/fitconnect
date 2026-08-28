@@ -38,7 +38,7 @@ export function LandingOsNav() {
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-[90] px-4 pt-4 sm:px-6">
       <nav
-        className="pointer-events-auto mx-auto flex min-w-0 max-w-[1440px] items-center justify-between gap-3 overflow-hidden rounded-full border border-white/10 bg-[var(--eos-floor)]/72 px-4 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-2xl"
+        className="pointer-events-auto mx-auto flex min-w-0 max-w-[1440px] items-center justify-between gap-3 rounded-full border border-white/10 bg-[var(--eos-floor)]/72 px-4 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-2xl"
         aria-label={localeNav.homeAria}
       >
         <BrandLockup href="/" layout="inline" logoSize={28} textSize={13} className="min-w-0 shrink" />

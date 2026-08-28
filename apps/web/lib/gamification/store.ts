@@ -85,6 +85,18 @@ function makeGamificationStore(getDaily: () => MissionDef[], storageName: string
             badges
           });
 
+          if (typeof fetch !== "undefined") {
+            void fetch("/api/v1/ascend/progression", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                eventId: `mission-${missionId}-${today}`,
+                type: "MISSION_COMPLETED",
+                xpAward: bonusXp
+              })
+            }).catch(() => undefined);
+          }
+
           return {
             leveledUp: newLevel > prevLevel,
             newLevel: newLevel > prevLevel ? newLevel : undefined

@@ -2,8 +2,10 @@
 # Usage: .\make.ps1 start | stop | clean | status
 param(
   [Parameter(Position = 0)]
-  [ValidateSet("start", "stop", "clean", "clean-deep", "status", "help")]
+  [ValidateSet("start", "fitconnect", "stop", "clean", "clean-deep", "status", "help")]
   [string]$Command = "help",
+  [Parameter(Position = 1)]
+  [string]$SubCommand = "",
   [int]$Port = 3001
 )
 
@@ -11,9 +13,13 @@ $Root = $PSScriptRoot
 $scripts = Join-Path $Root "scripts"
 
 switch ($Command) {
-  "start" {
+  { $_ -in @("start", "fitconnect") } {
+    if ($SubCommand -and $SubCommand -ne "fitconnect" -and $Command -eq "start") {
+      Write-Error "Unknown target: $SubCommand (did you mean: .\make.ps1 fitconnect ?)"
+      exit 1
+    }
     & "$scripts\make-start.ps1" -Port $Port
-    exit $LASTEXITCODE
+    exit $(if ($null -ne $LASTEXITCODE) { $LASTEXITCODE } else { 0 })
   }
   "stop" {
     & "$scripts\make-stop.ps1" -Port $Port

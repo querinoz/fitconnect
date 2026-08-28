@@ -12,7 +12,7 @@ function Write-Gate($name, $status) {
 }
 
 Write-Host ""
-Write-Host "FITCONNECT ELITE OS — android-wear-test"
+Write-Host "FITCONNECT ELITE OS - android-wear-test"
 Write-Host ""
 
 $sdk = $env:ANDROID_HOME
@@ -41,7 +41,7 @@ if (Test-Path $adbBin) {
   foreach ($line in $devices) {
     if ($line -match "^(emulator-\d+)\s+device") {
       if (-not $phoneSerial) { $phoneSerial = $Matches[1]; $phoneEmu = "PASS" }
-      elseif (-not $wearSerial) { $wearSerial = $Matches[1] }
+      elseif (-not $wearSerial) { $wearSerial = $Matches[1]; $wearEmu = "PASS" }
     }
   }
 }
@@ -74,15 +74,24 @@ Write-Host "==> unit tests"
 & .\gradlew.bat --offline :shared:test :core-capture:testDebugUnitTest :telemetry:testDebugUnitTest :wear:assembleDebug :app:assembleDebug :athlete:testDebugUnitTest :coach:testDebugUnitTest
 $gradleExit = $LASTEXITCODE
 if ($gradleExit -ne 0) {
-  Write-Host "Offline gradle failed — retry with network"
+  Write-Host "Offline gradle failed - retry with network"
   & .\gradlew.bat :shared:test :core-capture:testDebugUnitTest :telemetry:testDebugUnitTest :wear:assembleDebug :app:assembleDebug
   $gradleExit = $LASTEXITCODE
+}
+
+if ($phoneSerial -and $wearSerial -and (Test-Path $adbBin)) {
+  $nodes = & $adbBin -s $phoneSerial shell "cmd wearable nodes" 2>$null
+  if ($nodes -match $wearSerial -or $nodes -match "connected") {
+    $sync = "PASS"
+  } else {
+    $sync = "PARTIAL (wear node not listed on phone)"
+  }
 }
 
 if ($phoneSerial -and (Test-Path (Join-Path $Android "app\build\outputs\apk\debug\app-debug.apk"))) {
   Write-Host "==> install phone APK on $phoneSerial"
   & $adbBin -s $phoneSerial install -r "app\build\outputs\apk\debug\app-debug.apk"
-  Write-Host "==> GPS fixture inject (TEST_FIXTURE, not LIVE)"
+  Write-Host '==> GPS fixture inject (TEST_FIXTURE not LIVE)'
   & $adbBin -s $phoneSerial emu geo fix -9.139300 38.722300
   $gps = "EMULATOR_INJECTED"
   $shot = Join-Path $QaDir "phone.png"
