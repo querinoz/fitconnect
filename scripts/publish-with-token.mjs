@@ -71,9 +71,9 @@ console.log(`✓ Guardado em .env.local (gitignored)\n`);
 
 // Publicar
 const publishArgs = process.argv.includes("--all")
-  ? "--all"
+  ? "--all --resume"
   : process.argv.includes("--strategic")
-    ? "--strategic --resume"
+    ? "--strategic --resume --sync-profile"
     : "--priority";
 console.log(`📤 A publicar (${publishArgs})...\n`);
 execSync(`node scripts/publish-instagram.mjs ${publishArgs}`, {

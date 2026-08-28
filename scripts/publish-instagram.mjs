@@ -262,6 +262,10 @@ const PRIORITY_QUEUE = [
   { type: "carousel", id: "03-devices-mobile-tablet-wearos", caption: CAPTIONS.devices },
 ];
 
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 function captionFingerprint(caption) {
   return (caption || "")
     .toLowerCase()
