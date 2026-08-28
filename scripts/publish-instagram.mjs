@@ -21,7 +21,8 @@ import fs from "node:fs";
 import path from "node:path";
 
 const API_VERSION = "v21.0";
-const API_BASE = `https://graph.facebook.com/${API_VERSION}`;
+const API_HOST = process.env.IG_API_HOST || "graph.facebook.com";
+const API_BASE = `https://${API_HOST}/${API_VERSION}`;
 
 const PACK = path.resolve("/workspace/public/instagram-pack");
 const PUBLIC_BASE =
