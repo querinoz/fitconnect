@@ -1,0 +1,169 @@
+{
+  "profile": "@fitconnectsports",
+  "bioLink": "https://fitconnect-phi.vercel.app",
+  "schedule": { "days": ["tuesday", "friday"], "timezone": "Europe/Lisbon" },
+  "posts": [
+    {
+      "id": "post01",
+      "type": "reel",
+      "media": ["assets/post01_capa_reel.png"],
+      "video": "generated/reel01_hexatar.mp4",
+      "captionFile": "captions/post01.txt",
+      "cover": "assets/post01_capa_reel.png"
+    },
+    {
+      "id": "post02",
+      "type": "carousel",
+      "media": [
+        "assets/post02_p1.png",
+        "assets/post02_p2.png",
+        "assets/post02_p3.png",
+        "assets/post02_p4.png",
+        "assets/post02_p5.png",
+        "assets/post02_p6.png"
+      ],
+      "captionFile": "captions/post02.txt"
+    },
+    {
+      "id": "post03",
+      "type": "image",
+      "media": ["assets/post03_quatro_apps.png"],
+      "captionFile": "captions/post03.txt"
+    },
+    {
+      "id": "post04",
+      "type": "reel",
+      "media": ["assets/post04_capa_reel.png"],
+      "video": "generated/reel04_hexatar_design.mp4",
+      "captionFile": "captions/post04.txt",
+      "cover": "assets/post04_capa_reel.png"
+    },
+    {
+      "id": "post05",
+      "type": "carousel",
+      "media": [
+        "assets/post05_p1.png",
+        "assets/post05_p2.png",
+        "assets/post05_p3.png",
+        "assets/post05_p4.png",
+        "assets/post05_p5.png"
+      ],
+      "captionFile": "captions/post05.txt"
+    },
+    {
+      "id": "post06",
+      "type": "reel",
+      "media": ["assets/post06_capa_reel.png"],
+      "video": "generated/reel06_desafio7.mp4",
+      "captionFile": "captions/post06.txt",
+      "cover": "assets/post06_capa_reel.png"
+    },
+    {
+      "id": "post07",
+      "type": "carousel",
+      "media": [
+        "assets/post07_p1.png",
+        "assets/post07_p2.png",
+        "assets/post07_p3.png",
+        "assets/post07_p4.png",
+        "assets/post07_p5.png"
+      ],
+      "captionFile": "captions/post07.txt"
+    },
+    {
+      "id": "post08",
+      "type": "image",
+      "media": ["assets/post08_treinador_adivinha.png"],
+      "captionFile": "captions/post08.txt"
+    },
+    {
+      "id": "post09",
+      "type": "carousel",
+      "media": [
+        "assets/post09_p1.png",
+        "assets/post09_p2.png",
+        "assets/post09_p3.png",
+        "assets/post09_p4.png",
+        "assets/post09_p5.png"
+      ],
+      "captionFile": "captions/post09.txt"
+    },
+    {
+      "id": "post10",
+      "type": "reel",
+      "media": ["assets/post10_capa_reel.png"],
+      "video": "generated/reel10_prontidao.mp4",
+      "captionFile": "captions/post10.txt",
+      "cover": "assets/post10_capa_reel.png"
+    },
+    {
+      "id": "post11",
+      "type": "image",
+      "media": ["assets/post11_consistencia.png"],
+      "captionFile": "captions/post11.txt"
+    },
+    {
+      "id": "post12",
+      "type": "carousel",
+      "media": [
+        "assets/post12_p1.png",
+        "assets/post12_p2.png",
+        "assets/post12_p3.png",
+        "assets/post12_p4.png",
+        "assets/post12_p5.png"
+      ],
+      "captionFile": "captions/post12.txt"
+    },
+    {
+      "id": "post13",
+      "type": "reel",
+      "media": ["assets/post13_capa_reel.png"],
+      "video": "generated/reel13_wearos.mp4",
+      "captionFile": "captions/post13.txt",
+      "cover": "assets/post13_capa_reel.png"
+    },
+    {
+      "id": "post14",
+      "type": "image",
+      "media": ["assets/post14_marketplace.png"],
+      "captionFile": "captions/post14.txt"
+    },
+    {
+      "id": "post15",
+      "type": "carousel",
+      "media": [
+        "assets/post15_p1.png",
+        "assets/post15_p2.png",
+        "assets/post15_p3.png",
+        "assets/post15_p4.png"
+      ],
+      "captionFile": "captions/post15.txt"
+    },
+    {
+      "id": "post16",
+      "type": "reel",
+      "media": ["assets/post16_capa_reel.png"],
+      "video": "generated/reel16_public.mp4",
+      "captionFile": "captions/post16.txt",
+      "cover": "assets/post16_capa_reel.png"
+    },
+    {
+      "id": "post17",
+      "type": "image",
+      "media": ["assets/post17_manifesto.png"],
+      "captionFile": "captions/post17.txt"
+    },
+    {
+      "id": "post18",
+      "type": "carousel",
+      "media": [
+        "assets/post18_p1.png",
+        "assets/post18_p2.png",
+        "assets/post18_p3.png",
+        "assets/post18_p4.png",
+        "assets/post18_p5.png"
+      ],
+      "captionFile": "captions/post18.txt"
+    }
+  ]
+}

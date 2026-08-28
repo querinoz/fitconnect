@@ -1,0 +1,5 @@
+Um avatar de fitness tem um problema difícil: se for demasiado realista, quem não está em forma sente-se julgado. Se for demasiado caricato, ninguém o leva a sério.
+O Hexatar acabou em geometria por isso mesmo. Um hexágono não tem corpo, não tem género e não te compara com ninguém — só mostra a tua consistência. As arestas enchem com a regularidade, a densidade cresce com o volume, a aura marca a série ativa.
+Foram 38 versões até lá. Estou a construir isto em público, com Figma e agentes de IA a fazerem grande parte do trabalho pesado, e mostro tudo por aqui — incluindo o que corre mal.
+Segue se quiseres ver uma app a ser construída do zero. A próxima decisão de design vai a votos nos stories.
+#buildinpublic #designdeproduto #figma #uidesign #androiddev #wearos #fitconnect #productdesign

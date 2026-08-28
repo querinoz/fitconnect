@@ -61,7 +61,14 @@
     "stripe:listen": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stripe-webhook-dev.ps1",
     "stripe:trigger": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stripe-trigger-events.ps1",
     "report:whatsapp": "node scripts/reporting/send-whatsapp.mjs",
-    "report:whatsapp:test": "node --test scripts/reporting/report-generator.test.mjs"
+    "report:whatsapp:test": "node --test scripts/reporting/report-generator.test.mjs",
+    "instagram:sync": "node scripts/instagram/sync-assets.mjs",
+    "instagram:captions": "node scripts/instagram/extract-captions.mjs",
+    "instagram:reels": "node scripts/instagram/generate-reels.mjs",
+    "instagram:prepare": "pnpm instagram:sync && pnpm instagram:captions && pnpm instagram:reels",
+    "instagram:status": "node scripts/instagram/status.mjs",
+    "instagram:discover": "node scripts/instagram/discover.mjs",
+    "instagram:publish": "node scripts/instagram/publish.mjs"
   },
   "devDependencies": {
     "@prisma/client": "^7.8.0",
@@ -71,6 +78,7 @@
     "pg": "^8.13.1",
     "prisma": "^7.8.0",
     "sharp": "^0.34.5",
+    "ffmpeg-static": "^5.2.0",
     "tsx": "^4.22.2",
     "turbo": "^2.5.4",
     "typescript": "^5.6.3"

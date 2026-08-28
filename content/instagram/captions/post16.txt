@@ -1,0 +1,5 @@
+`✗ PRODUCTION = NO-GO`
+É isto que a consola me devolve hoje, e vou mostrá-lo em vez de o esconder. Há segurança por fechar, infraestrutura por configurar, testes que ainda correm em modo demo.
+A app existe, corre e faz coisas. Mas não está pronta, e dizer o contrário seria a primeira mentira desta conta.
+Construo isto em público — decisões, erros, e o que ainda não passa. Segue se quiseres ver o processo inteiro, e não só o anúncio no fim.
+#buildinpublic #indiedev #androiddev #startup #fitconnect #kotlin #nextjs
