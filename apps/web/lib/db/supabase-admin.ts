@@ -6,7 +6,7 @@ export function createSupabaseAdminClient(
 ): SupabaseClient | null {
   const url = env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const key = env.SUPABASE_SERVICE_ROLE_KEY?.trim();
-  if (!url || !key) return null;
+  if (!url || !key || key.includes("PASTE")) return null;
 
   return createClient(url, key, {
     auth: {
@@ -20,9 +20,14 @@ export function createSupabaseAdminClient(
 export function isSupabasePersistenceConfigured(
   env: Record<string, string | undefined> = process.env
 ): boolean {
-  return Boolean(
-    env.NEXT_PUBLIC_SUPABASE_URL?.trim() &&
-      env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() &&
-      env.SUPABASE_SERVICE_ROLE_KEY?.trim()
-  );
+  const hasUrl = Boolean(env.NEXT_PUBLIC_SUPABASE_URL?.trim());
+  const anon = env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ?? "";
+  const service = env.SUPABASE_SERVICE_ROLE_KEY?.trim() ?? "";
+  const hasKeys =
+    anon.length > 20 &&
+    !anon.includes("PASTE") &&
+    service.length > 20 &&
+    !service.includes("PASTE");
+  const hasDb = Boolean(env.DATABASE_URL?.trim());
+  return hasUrl && (hasKeys || hasDb);
 }

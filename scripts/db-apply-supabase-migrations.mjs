@@ -11,36 +11,43 @@ import pg from "pg";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const migrationsDir = path.join(root, "supabase", "migrations");
 
-function loadEnv() {
-  const envPath = path.join(root, ".env.local");
-  if (!fs.existsSync(envPath)) return;
-  for (const line of fs.readFileSync(envPath, "utf8").split(/\r?\n/)) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-    const eq = trimmed.indexOf("=");
-    if (eq === -1) continue;
-    const key = trimmed.slice(0, eq).trim();
-    let val = trimmed.slice(eq + 1).trim();
-    if (
-      (val.startsWith('"') && val.endsWith('"')) ||
-      (val.startsWith("'") && val.endsWith("'"))
-    ) {
-      val = val.slice(1, -1);
+function loadEnvFiles() {
+  for (const rel of [".env.local", "apps/web/.env.local"]) {
+    const envPath = path.join(root, rel);
+    if (!fs.existsSync(envPath)) continue;
+    for (const line of fs.readFileSync(envPath, "utf8").split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eq = trimmed.indexOf("=");
+      if (eq === -1) continue;
+      const key = trimmed.slice(0, eq).trim();
+      let val = trimmed.slice(eq + 1).trim();
+      if (
+        (val.startsWith('"') && val.endsWith('"')) ||
+        (val.startsWith("'") && val.endsWith("'"))
+      ) {
+        val = val.slice(1, -1);
+      }
+      if (!process.env[key]) process.env[key] = val;
     }
-    if (!process.env[key]) process.env[key] = val;
   }
 }
 
 function statementsFromFile(filePath) {
   const raw = fs.readFileSync(filePath, "utf8");
   return raw
-    .split("--;;")
+    .split(/\r?\n--;;\r?\n/)
     .map((s) => s.trim())
-    .filter(Boolean);
+    .filter((s) => {
+      if (!s) return false;
+      // Drop header comment blocks (no executable SQL).
+      const lines = s.split(/\r?\n/).filter((line) => line.trim() && !line.trim().startsWith("--"));
+      return lines.length > 0;
+    });
 }
 
 async function main() {
-  loadEnv();
+  loadEnvFiles();
   const url = process.env.DIRECT_URL || process.env.DATABASE_URL;
   if (!url) {
     console.error("DIRECT_URL or DATABASE_URL required");
@@ -75,8 +82,14 @@ async function main() {
     const filePath = path.join(migrationsDir, file);
     const stmts = statementsFromFile(filePath);
     console.log("apply", file, `(${stmts.length} statements)`);
-    for (const sql of stmts) {
-      await client.query(sql);
+    for (const [i, sql] of stmts.entries()) {
+      try {
+        await client.query(sql);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(`failed ${file} statement ${i + 1}/${stmts.length}: ${message}`);
+        throw err;
+      }
     }
     await client.query("insert into public.schema_migrations (filename) values ($1)", [file]);
   }

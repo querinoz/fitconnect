@@ -3,7 +3,7 @@
 -- Firebase UID is text (not uuid). Do NOT use auth.uid() for these tables.
 -- Legacy public.profiles (uuid → auth.users) remains unused by this identity path.
 --
--- Statements are separated by --;; so tests can apply them on vanilla Postgres.
+-- Statement batches use line-only `--;;` markers (see migration runner).
 
 --;;
 create or replace function public.firebase_uid()

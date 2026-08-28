@@ -22,6 +22,8 @@
     "test:pact": "pnpm --filter @fitconnect/api-client test:pact",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:supabase:migrate": "node scripts/db-apply-supabase-migrations.mjs",
+    "db:supabase:status": "node scripts/db-status.mjs",
+    "db:supabase:verify": "node scripts/db-verify-social.mjs",
     "test:perf": "k6 run scripts/perf/k6-smoke.js",
     "deploy:vercel": "pnpm dlx vercel@latest",
     "deploy:vercel:prod": "pnpm dlx vercel@latest --prod",

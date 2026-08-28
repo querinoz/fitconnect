@@ -1,5 +1,6 @@
 import type { CommunityPost, Sport } from "@/lib/data";
 import { createSupabaseAdminClient } from "@/lib/db/supabase-admin";
+import { pgQuery } from "@/lib/db/pg-pool";
 import { createSupabaseRlsClient } from "@/lib/identity/supabase-rls-client";
 
 type PostRow = {
@@ -48,16 +49,19 @@ function mapRow(row: PostRow, likes = 0, comments = 0): CommunityPost {
 
 export async function listCommunityPostsFromSupabase(): Promise<CommunityPost[]> {
   const admin = createSupabaseAdminClient();
-  if (!admin) return [];
+  if (admin) {
+    const { data, error } = await admin
+      .from("community_posts")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (!error && data) return (data as PostRow[]).map((row) => mapRow(row));
+  }
 
-  const { data, error } = await admin
-    .from("community_posts")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(100);
-
-  if (error || !data) return [];
-  return (data as PostRow[]).map((row) => mapRow(row));
+  const rows = await pgQuery<PostRow>(
+    `select * from public.community_posts order by created_at desc limit 100`
+  );
+  return rows.map((row) => mapRow(row));
 }
 
 export async function createCommunityPostInSupabase(
@@ -72,21 +76,35 @@ export async function createCommunityPostInSupabase(
   accessToken: string
 ): Promise<CommunityPost | null> {
   const client = createSupabaseRlsClient(accessToken);
-  if (!client) return null;
+  if (client) {
+    const { data, error } = await client
+      .from("community_posts")
+      .insert({
+        author_id: userId,
+        post_kind: input.kind,
+        content: input.text,
+        sport: input.sport ?? "Running",
+        author_name: input.authorName,
+        author_avatar: input.authorAvatar
+      })
+      .select("*")
+      .single();
+    if (!error && data) return mapRow(data as PostRow);
+  }
 
-  const { data, error } = await client
-    .from("community_posts")
-    .insert({
-      author_id: userId,
-      post_kind: input.kind,
-      content: input.text,
-      sport: input.sport ?? "Running",
-      author_name: input.authorName,
-      author_avatar: input.authorAvatar
-    })
-    .select("*")
-    .single();
-
-  if (error || !data) return null;
-  return mapRow(data as PostRow);
+  const rows = await pgQuery<PostRow>(
+    `insert into public.community_posts
+      (author_id, post_kind, content, sport, author_name, author_avatar)
+     values ($1, $2, $3, $4, $5, $6)
+     returning *`,
+    [
+      userId,
+      input.kind,
+      input.text,
+      input.sport ?? "Running",
+      input.authorName,
+      input.authorAvatar
+    ]
+  );
+  return rows[0] ? mapRow(rows[0]) : null;
 }
