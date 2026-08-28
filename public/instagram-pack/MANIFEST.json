@@ -1,0 +1,42 @@
+{
+  "version": "2.0",
+  "account": "@fitconnectsports",
+  "generatedAt": "2026-08-28",
+  "totals": {
+    "Stories": 18,
+    "Posts": 24,
+    "Reels": 20,
+    "CarouselSets": 8,
+    "CarouselSlides": 75,
+    "Mockups": 8,
+    "Educational": 7,
+    "GrandTotal": 152
+  },
+  "folders": {
+    "Stories": "9:16 vertical — lifestyle + polls + swipe-up",
+    "Posts": "1:1 single feed — curated lifestyle + mockups",
+    "Reels": "9:16 covers — pair with 15-60s video",
+    "Carousels": "Up to 10 slides — educational + lifestyle + mockups",
+    "Mockups": "Product shots — phone/tablet/WearOS",
+    "Educational": "Carousel slides — HRV, features, CTA"
+  },
+  "priorityPublishOrder": [
+    "Carousels/07-educational-fitconnect",
+    "Stories/story-edu-poll-hrv.png",
+    "Posts/22-mockup-athlete-dashboard.png",
+    "Carousels/08-mockups-product",
+    "Carousels/02-diversity-sports",
+    "Reels/01-reel-01-black-runner-wearos.png",
+    "Stories/story-edu-swipe-up-demo.png"
+  ],
+  "carousels": {
+    "01-coach-athlete-lifestyle": { "slides": 10, "theme": "Coach × atleta" },
+    "02-diversity-sports": { "slides": 10, "theme": "Diversidade desportiva" },
+    "03-devices-mobile-tablet-wearos": { "slides": 10, "theme": "Mobile + tablet + WearOS" },
+    "04-multi-sport-training": { "slides": 10, "theme": "Multi-sport" },
+    "05-athlete-recovery-performance": { "slides": 10, "theme": "Recovery & performance" },
+    "06-coach-tools-deep-dive": { "slides": 10, "theme": "Ferramentas coach" },
+    "07-educational-fitconnect": { "slides": 7, "theme": "Educação app ★ saves" },
+    "08-mockups-product": { "slides": 8, "theme": "Mockups produto ★ conversão" }
+  }
+}

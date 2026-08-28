@@ -1,3 +1,9 @@
+import withPWAInit from "@ducanh2912/next-pwa";
+import { pwaInitOptions } from "./lib/pwa/config.mjs";
+
+const withPWA = withPWAInit(pwaInitOptions);
+
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   images: {
@@ -17,4 +23,9 @@ const nextConfig = {
       },
     ];
   },
+  pwa: {
+    disable: process.env.NODE_ENV !== "production",
+  },
 };
+
+export default withPWA(nextConfig);
