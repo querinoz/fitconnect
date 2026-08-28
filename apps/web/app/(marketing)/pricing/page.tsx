@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Cta } from "@/components/cta";
 import { ComparisonTable } from "@/components/comparison-table";
 import { Faqs } from "@/components/faqs";
+import { PricingCta } from "@/components/marketing/pricing-cta";
 import { Button } from "@/components/ui/button";
 import { Atmosphere } from "@/components/marketing/atmosphere";
 import {
-  ArrowRight,
   Check,
   HeartPulse,
   Sparkles,
@@ -222,15 +221,11 @@ export default function PricingPage() {
                       </li>
                     ))}
                   </ul>
-                  <Button
-                    asChild
-                    className="mt-6 w-full"
-                    variant={p.highlight ? "default" : "outline"}
-                  >
-                    <Link href="/discover">
-                      {p.cta} <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
+                  <div className="mt-6">
+                    <PricingCta planName={p.name} period={period} variant={p.highlight ? "default" : "outline"}>
+                      {p.cta}
+                    </PricingCta>
+                  </div>
               </BentoCard>
             );
           })}

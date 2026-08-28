@@ -52,7 +52,7 @@ export default function AthleteOnboardingPage() {
     patchAthlete({ completed: true });
 
     if (athlete.subscription === "pro" && pendingSignup?.email) {
-      await startSubscription(pendingSignup.email);
+      await startSubscription({ email: pendingSignup.email, plan: "athlete" });
     }
 
     if (user) {

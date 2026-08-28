@@ -1,7 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { processStripeWebhookEvent, claimStripeEvent } from "@/lib/stripe/webhook-handler";
 
-vi.mock("@/lib/db/client", () => ({ getPrisma: vi.fn() }));
+vi.mock("@/lib/db/client", () => ({
+  getPrisma: vi.fn(),
+  isDatabaseConfigured: vi.fn(() => false)
+}));
 import { getPrisma } from "@/lib/db/client";
 
 const events = [

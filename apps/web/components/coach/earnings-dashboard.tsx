@@ -27,6 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CreditCard, Download, TrendingUp, Wallet } from "lucide-react";
 import { useState } from "react";
+import { startConnectOnboarding } from "@/lib/stripe/client";
 
 const tooltipStyle = {
   background: rechartsTheme.tooltipBg,
@@ -39,6 +40,19 @@ export function CoachEarningsDashboard({ coachId }: { coachId: string }) {
   const series = getCoachEarningsSeries(coachId);
   const payouts = getCoachPayouts(coachId);
   const [stripeConnected, setStripeConnected] = useState(coachId === "t-002");
+  const [connectLoading, setConnectLoading] = useState(false);
+
+  async function handleConnectStripe() {
+    setConnectLoading(true);
+    try {
+      await startConnectOnboarding(coachId);
+      setStripeConnected(true);
+    } catch {
+      // onboarding redirect or auth required
+    } finally {
+      setConnectLoading(false);
+    }
+  }
 
   const chartData = series.map((row) => ({
     month: row.month,
@@ -108,8 +122,8 @@ export function CoachEarningsDashboard({ coachId }: { coachId: string }) {
             </p>
           </div>
           {!stripeConnected && (
-            <Button type="button" onClick={() => setStripeConnected(true)}>
-              Connect Stripe
+            <Button type="button" disabled={connectLoading} onClick={() => void handleConnectStripe()}>
+              {connectLoading ? "Opening Stripe…" : "Connect Stripe"}
             </Button>
           )}
         </div>

@@ -1,3 +1,5 @@
+import type { BillingPeriod, SubscriptionPlan } from "./plans";
+
 export type CheckoutKind = "session" | "program" | "subscription";
 
 export type CheckoutResult = {
@@ -9,9 +11,25 @@ export type CheckoutResult = {
   clientSecret?: string | null;
 };
 
+export type SubscriptionResult = {
+  id: string;
+  status: string;
+  amountCents: number;
+  email: string;
+  plan?: SubscriptionPlan;
+  period?: BillingPeriod;
+  url?: string | null;
+};
+
 /** True when the publishable key is configured (client-side hint). */
 export function isStripePublishableConfigured(): boolean {
   return Boolean(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim());
+}
+
+function redirectToCheckout(url: string | null | undefined) {
+  if (url && typeof window !== "undefined") {
+    window.location.assign(url);
+  }
 }
 
 export async function startStripeCheckout(input: {
@@ -28,22 +46,24 @@ export async function startStripeCheckout(input: {
   });
   if (!res.ok) throw new Error("Checkout failed");
   const result = (await res.json()) as CheckoutResult;
-
-  if (result.url && typeof window !== "undefined") {
-    window.location.assign(result.url);
-  }
-
+  redirectToCheckout(result.url);
   return result;
 }
 
-export async function startSubscription(email: string) {
+export async function startSubscription(input: {
+  email?: string;
+  plan?: SubscriptionPlan;
+  period?: BillingPeriod;
+}): Promise<SubscriptionResult> {
   const res = await fetch("/api/stripe/subscribe", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email })
+    body: JSON.stringify(input)
   });
   if (!res.ok) throw new Error("Subscribe failed");
-  return res.json();
+  const result = (await res.json()) as SubscriptionResult;
+  redirectToCheckout(result.url);
+  return result;
 }
 
 export async function startConnectOnboarding(coachId: string) {
@@ -54,10 +74,32 @@ export async function startConnectOnboarding(coachId: string) {
   });
   if (!res.ok) throw new Error("Connect failed");
   const result = (await res.json()) as { onboardingUrl: string };
-
-  if (result.onboardingUrl && typeof window !== "undefined") {
-    window.location.assign(result.onboardingUrl);
-  }
-
+  redirectToCheckout(result.onboardingUrl);
   return result;
+}
+
+export async function openBillingPortal(): Promise<{ url: string }> {
+  const res = await fetch("/api/stripe/portal", { method: "POST" });
+  if (!res.ok) throw new Error("Billing portal failed");
+  const result = (await res.json()) as { url: string };
+  redirectToCheckout(result.url);
+  return result;
+}
+
+export async function fetchStripeStatus() {
+  const res = await fetch("/api/stripe/status");
+  if (!res.ok) throw new Error("Stripe status failed");
+  return res.json() as Promise<{
+    live: boolean;
+    subscription: {
+      planId: string;
+      status: string;
+      gracePeriodEndsAt: string | null;
+    } | null;
+    connect: {
+      chargesEnabled: boolean;
+      payoutsEnabled: boolean;
+      onboardingComplete: boolean;
+    } | null;
+  }>;
 }

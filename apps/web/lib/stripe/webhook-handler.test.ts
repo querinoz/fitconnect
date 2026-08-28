@@ -11,6 +11,14 @@ vi.mock("@/lib/db/client", () => ({
   getPrisma: vi.fn()
 }));
 
+vi.mock("./persistence", () => ({
+  isStripePgPersistenceAvailable: vi.fn(() => false),
+  claimStripeEventPg: vi.fn(),
+  upsertSubscriptionPg: vi.fn(),
+  updateSubscriptionByStripeIdPg: vi.fn(),
+  recordPaymentTransactionPg: vi.fn()
+}));
+
 import { getPrisma } from "@/lib/db/client";
 
 describe("stripe webhook handler", () => {

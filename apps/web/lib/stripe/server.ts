@@ -1,12 +1,21 @@
 import Stripe from "stripe";
-import { COACH_TAKE_HOME_RATE, PLATFORM_SUBSCRIPTION_EUR } from "./constants";
+import { COACH_TAKE_HOME_RATE } from "./constants";
 import type { CheckoutKind } from "./demo";
+import { getConnectAccountPg, upsertConnectAccountPg } from "./persistence";
+import {
+  planAmountCents,
+  planDisplayName,
+  resolveStripePriceId,
+  type BillingPeriod,
+  type SubscriptionPlan
+} from "./plans";
 import { isProductionSecurityMode } from "@/lib/security/runtime";
 
 let stripeInstance: Stripe | null = null;
 
 export function isStripeLive(): boolean {
-  return Boolean(process.env.STRIPE_SECRET_KEY?.trim());
+  const key = process.env.STRIPE_SECRET_KEY?.trim();
+  return Boolean(key && !key.includes("PASTE"));
 }
 
 export function getStripe(): Stripe {
@@ -44,6 +53,7 @@ export async function createLiveCheckout(
   input: {
     kind: CheckoutKind;
     amountCents: number;
+    userId: string;
     athleteEmail?: string;
     coachId?: string;
     programId?: string;
@@ -56,7 +66,12 @@ export async function createLiveCheckout(
     input.kind
   );
 
-  const session = await stripe.checkout.sessions.create({
+  const connect =
+    input.coachId && input.kind !== "subscription"
+      ? await getConnectAccountPg(input.coachId)
+      : null;
+
+  const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: "payment",
     customer_email: input.athleteEmail,
     line_items: [
@@ -70,7 +85,7 @@ export async function createLiveCheckout(
                 ? "Coaching session"
                 : input.kind === "program"
                   ? "Training program"
-                  : "FitConnect subscription"
+                  : "FitConnect purchase"
           }
         },
         quantity: 1
@@ -80,12 +95,22 @@ export async function createLiveCheckout(
     cancel_url: `${origin}/dashboard?checkout=cancel`,
     metadata: {
       kind: input.kind,
+      userId: input.userId,
       coachId: input.coachId ?? "",
       programId: input.programId ?? "",
       coachShareCents: String(coachShareCents),
       platformFeeCents: String(platformFeeCents)
     }
-  });
+  };
+
+  if (connect?.stripe_account_id && connect.charges_enabled) {
+    sessionParams.payment_intent_data = {
+      application_fee_amount: platformFeeCents,
+      transfer_data: { destination: connect.stripe_account_id }
+    };
+  }
+
+  const session = await stripe.checkout.sessions.create(sessionParams);
 
   return {
     id: session.id,
@@ -97,37 +122,133 @@ export async function createLiveCheckout(
   };
 }
 
-export async function createLiveSubscription(request: Request, email: string) {
+export async function createLiveSubscription(
+  request: Request,
+  input: {
+    userId: string;
+    email: string;
+    plan?: SubscriptionPlan;
+    period?: BillingPeriod;
+  }
+) {
   const stripe = getStripe();
   const origin = appOrigin(request);
-  const amountCents = PLATFORM_SUBSCRIPTION_EUR * 100;
+  const plan = input.plan ?? "athlete";
+  const period = input.period ?? "monthly";
+  const priceId = resolveStripePriceId(plan, period);
+  const amountCents = planAmountCents(plan, period);
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    customer_email: email,
-    line_items: [
-      {
+  const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = priceId
+    ? { price: priceId, quantity: 1 }
+    : {
         price_data: {
           currency: "eur",
           unit_amount: amountCents,
-          recurring: { interval: "month" },
-          product_data: { name: "FitConnect Athlete Plus" }
+          recurring: { interval: period === "annual" ? "year" : "month" },
+          product_data: { name: planDisplayName(plan) }
         },
         quantity: 1
-      }
-    ],
+      };
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    customer_email: input.email,
+    line_items: [lineItem],
     success_url: `${origin}/dashboard?subscription=success&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/dashboard?subscription=cancel`
+    cancel_url: `${origin}/pricing?subscription=cancel`,
+    metadata: {
+      kind: "subscription",
+      userId: input.userId,
+      planId: plan,
+      billingPeriod: period
+    },
+    subscription_data: {
+      metadata: {
+        userId: input.userId,
+        planId: plan
+      }
+    }
   });
 
   return {
     id: session.id,
     status: session.status ?? "open",
     amountCents,
-    email,
-    interval: "month" as const,
+    email: input.email,
+    plan,
+    period,
+    interval: period === "annual" ? ("year" as const) : ("month" as const),
     url: session.url
   };
+}
+
+export async function createLiveConnectAccount(
+  request: Request,
+  input: { coachId: string; email?: string }
+) {
+  const stripe = getStripe();
+  const origin = appOrigin(request);
+  const existing = await getConnectAccountPg(input.coachId);
+
+  let accountId = existing?.stripe_account_id;
+  if (!accountId) {
+    const account = await stripe.accounts.create({
+      type: "express",
+      country: "PT",
+      email: input.email,
+      capabilities: {
+        card_payments: { requested: true },
+        transfers: { requested: true }
+      },
+      metadata: { coachId: input.coachId }
+    });
+    accountId = account.id;
+    await upsertConnectAccountPg({
+      coachId: input.coachId,
+      stripeAccountId: accountId
+    });
+  }
+
+  const link = await stripe.accountLinks.create({
+    account: accountId,
+    refresh_url: `${origin}/coach/earnings?connect=refresh`,
+    return_url: `${origin}/coach/earnings?connect=success`,
+    type: "account_onboarding"
+  });
+
+  return {
+    id: accountId,
+    onboardingUrl: link.url,
+    chargesEnabled: existing?.charges_enabled ?? false,
+    payoutsEnabled: existing?.payouts_enabled ?? false
+  };
+}
+
+export async function createBillingPortalSession(
+  request: Request,
+  input: { customerId: string }
+) {
+  const stripe = getStripe();
+  const origin = appOrigin(request);
+  const session = await stripe.billingPortal.sessions.create({
+    customer: input.customerId,
+    return_url: `${origin}/dashboard`
+  });
+  return { url: session.url };
+}
+
+export async function syncConnectAccountFromStripe(accountId: string) {
+  const stripe = getStripe();
+  const account = await stripe.accounts.retrieve(accountId);
+  const coachId = account.metadata?.coachId;
+  if (!coachId) return;
+  await upsertConnectAccountPg({
+    coachId,
+    stripeAccountId: account.id,
+    chargesEnabled: account.charges_enabled ?? false,
+    payoutsEnabled: account.payouts_enabled ?? false,
+    onboardingComplete: account.details_submitted ?? false
+  });
 }
 
 export async function verifyStripeWebhook(request: Request) {

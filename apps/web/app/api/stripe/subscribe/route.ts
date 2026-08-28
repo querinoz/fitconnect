@@ -1,14 +1,31 @@
 import { NextResponse } from "next/server";
+import { requireAuth, isAuthFailure } from "@/lib/api/require-auth";
 import { createDemoSubscription } from "@/lib/stripe/demo";
 import { createLiveSubscription, isStripeLive } from "@/lib/stripe/server";
+import type { BillingPeriod, SubscriptionPlan } from "@/lib/stripe/plans";
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as { email?: string };
-  const email = body.email ?? "athlete@fitconnect.local";
+  const auth = await requireAuth(request);
+  if (isAuthFailure(auth)) return auth.response;
+
+  const body = (await request.json()) as {
+    email?: string;
+    plan?: SubscriptionPlan;
+    period?: BillingPeriod;
+  };
+
+  const email = body.email ?? auth.user.email ?? "athlete@fitconnect.local";
+  const plan = body.plan ?? "athlete";
+  const period = body.period ?? "monthly";
 
   if (isStripeLive()) {
     try {
-      const sub = await createLiveSubscription(request, email);
+      const sub = await createLiveSubscription(request, {
+        userId: auth.user.id,
+        email,
+        plan,
+        period
+      });
       return NextResponse.json(sub);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Stripe subscription failed";
@@ -16,6 +33,10 @@ export async function POST(request: Request) {
     }
   }
 
+  if (!auth.demo) {
+    return NextResponse.json({ error: "stripe_not_configured" }, { status: 503 });
+  }
+
   const sub = createDemoSubscription(email);
-  return NextResponse.json(sub);
+  return NextResponse.json({ ...sub, plan, period, url: null });
 }

@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
+import { requireAuth, isAuthFailure } from "@/lib/api/require-auth";
 import { createDemoCheckout, type CheckoutKind } from "@/lib/stripe/demo";
 import { createLiveCheckout, isStripeLive } from "@/lib/stripe/server";
 
 export async function POST(request: Request) {
+  const auth = await requireAuth(request);
+  if (isAuthFailure(auth)) return auth.response;
+
   const body = (await request.json()) as {
     kind?: CheckoutKind;
     amountCents?: number;
@@ -13,13 +17,15 @@ export async function POST(request: Request) {
 
   const kind = body.kind ?? "session";
   const amountCents = body.amountCents ?? 6500;
+  const athleteEmail = body.athleteEmail ?? auth.user.email ?? undefined;
 
   if (isStripeLive()) {
     try {
       const result = await createLiveCheckout(request, {
         kind,
         amountCents,
-        athleteEmail: body.athleteEmail,
+        userId: auth.user.id,
+        athleteEmail,
         coachId: body.coachId,
         programId: body.programId
       });
@@ -30,10 +36,14 @@ export async function POST(request: Request) {
     }
   }
 
+  if (!auth.demo) {
+    return NextResponse.json({ error: "stripe_not_configured" }, { status: 503 });
+  }
+
   const result = createDemoCheckout({
     kind,
     amountCents,
-    athleteEmail: body.athleteEmail,
+    athleteEmail,
     coachId: body.coachId,
     programId: body.programId
   });
