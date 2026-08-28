@@ -1,5 +1,5 @@
 {
-  "version": "3.0",
+  "version": "3.1",
   "account": "@fitconnectsports",
   "generatedAt": "2026-08-28",
   "totals": {
@@ -100,5 +100,10 @@
       "reel-hero-05-stack.mp4",
       "reel-hero-06-recovery.mp4"
     ]
+  },
+  "language": "pt",
+  "branding": {
+    "logo": "public/brand/logo-full-official.png",
+    "logomark": "public/brand/logomark-official-256.png"
   }
 }
