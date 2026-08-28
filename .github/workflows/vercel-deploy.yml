@@ -2,7 +2,7 @@ name: Vercel Production
 
 on:
   push:
-    branches: [main, master, feature/fitconnect]
+    branches: [main, master, feature/fitconnect, feat/elite-os-v2]
   workflow_dispatch:
 
 concurrency:
