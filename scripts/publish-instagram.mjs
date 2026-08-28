@@ -214,7 +214,11 @@ async function verifyPublicUrls(items) {
   for (const item of items) {
     let rel;
     if (item.type === "carousel") {
-      rel = `Carousels/${item.id}/01-${fs.readdirSync(path.join(PACK, "Carousels", item.id)).sort()[0]}`;
+      const firstSlide = fs
+        .readdirSync(path.join(PACK, "Carousels", item.id))
+        .filter((f) => f.endsWith(".png"))
+        .sort()[0];
+      rel = `Carousels/${item.id}/${firstSlide}`;
     } else if (item.type === "post") {
       rel = item.file;
     } else {
