@@ -31,7 +31,8 @@
     "instagram:discover": "node scripts/meta-discover.mjs",
     "instagram:env-check": "node scripts/instagram-env-check.mjs",
     "instagram:publish:token": "node scripts/publish-with-token.mjs",
-    "instagram:publish:token:all": "node scripts/publish-with-token.mjs --all"
+    "instagram:publish:token:all": "node scripts/publish-with-token.mjs --all",
+    "instagram:generate": "node scripts/generate-instagram-content.mjs"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",

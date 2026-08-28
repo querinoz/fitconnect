@@ -1,16 +1,16 @@
 {
-  "version": "2.0",
+  "version": "3.0",
   "account": "@fitconnectsports",
   "generatedAt": "2026-08-28",
   "totals": {
     "Stories": 18,
-    "Posts": 24,
-    "Reels": 20,
-    "CarouselSets": 8,
-    "CarouselSlides": 75,
-    "Mockups": 8,
-    "Educational": 7,
-    "GrandTotal": 152
+    "Posts": 39,
+    "ReelsCovers": 26,
+    "ReelsAnimatedMp4": 6,
+    "Mockups": 14,
+    "Educational": 12,
+    "Abstract": 5,
+    "CarouselSets": 11
   },
   "folders": {
     "Stories": "9:16 vertical — lifestyle + polls + swipe-up",
@@ -30,13 +30,75 @@
     "Stories/story-edu-swipe-up-demo.png"
   ],
   "carousels": {
-    "01-coach-athlete-lifestyle": { "slides": 10, "theme": "Coach × atleta" },
-    "02-diversity-sports": { "slides": 10, "theme": "Diversidade desportiva" },
-    "03-devices-mobile-tablet-wearos": { "slides": 10, "theme": "Mobile + tablet + WearOS" },
-    "04-multi-sport-training": { "slides": 10, "theme": "Multi-sport" },
-    "05-athlete-recovery-performance": { "slides": 10, "theme": "Recovery & performance" },
-    "06-coach-tools-deep-dive": { "slides": 10, "theme": "Ferramentas coach" },
-    "07-educational-fitconnect": { "slides": 7, "theme": "Educação app ★ saves" },
-    "08-mockups-product": { "slides": 8, "theme": "Mockups produto ★ conversão" }
+    "01-coach-athlete-lifestyle": {
+      "slides": 10,
+      "theme": "Coach × atleta"
+    },
+    "02-diversity-sports": {
+      "slides": 10,
+      "theme": "Diversidade desportiva"
+    },
+    "03-devices-mobile-tablet-wearos": {
+      "slides": 10,
+      "theme": "Mobile + tablet + WearOS"
+    },
+    "04-multi-sport-training": {
+      "slides": 10,
+      "theme": "Multi-sport"
+    },
+    "05-athlete-recovery-performance": {
+      "slides": 10,
+      "theme": "Recovery & performance"
+    },
+    "06-coach-tools-deep-dive": {
+      "slides": 10,
+      "theme": "Ferramentas coach"
+    },
+    "07-educational-fitconnect": {
+      "slides": 7,
+      "theme": "Educação app ★ saves"
+    },
+    "08-mockups-product": {
+      "slides": 8,
+      "theme": "Mockups produto ★ conversão"
+    }
+  },
+  "v3Content": {
+    "mockupsNew": [
+      "mockup-09-community-feed.png",
+      "mockup-10-ranks-leaderboard.png",
+      "mockup-11-athlete-profile.png",
+      "mockup-12-coach-search.png",
+      "mockup-13-coach-roster.png",
+      "mockup-14-inbox-nudge.png"
+    ],
+    "educationalNew": [
+      "edu-08-training-zones.png",
+      "edu-09-periodization.png",
+      "edu-10-coach-match.png",
+      "edu-11-load-management.png",
+      "edu-12-morning-handshake.png"
+    ],
+    "abstract": [
+      "abstract-01-connect-train-perform.png",
+      "abstract-02-readiness-ring.png",
+      "abstract-03-signal-grid.png",
+      "abstract-04-weekly-load.png",
+      "abstract-05-volt-pulse.png"
+    ],
+    "featurePosts": [
+      "25-feature-community-feed.png",
+      "26-feature-ranks.png",
+      "27-feature-profile.png",
+      "28-feature-coach-search.png"
+    ],
+    "animatedReels": [
+      "reel-hero-01-runner.mp4",
+      "reel-hero-02-strength.mp4",
+      "reel-hero-03-swim.mp4",
+      "reel-hero-04-cycle.mp4",
+      "reel-hero-05-stack.mp4",
+      "reel-hero-06-recovery.mp4"
+    ]
   }
 }
