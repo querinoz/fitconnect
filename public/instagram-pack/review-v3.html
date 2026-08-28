@@ -1,629 +1,241 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FitConnect — Revisão pack v3 · @fitconnectsports</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
-  <style>
-    :root { --ink:#07080A; --ink800:#1a1d24; --volt:#C7FB3A; --muted:#8b93a7; }
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:Inter,system-ui,sans-serif; background:var(--ink); color:#FAFBFC; line-height:1.5; }
-    .hero { padding:48px 32px 32px; border-bottom:1px solid var(--ink800);
-      background:radial-gradient(ellipse 60% 80% at 10% 0%, rgba(199,251,58,.12), transparent 50%), var(--ink); }
-    .hero h1 { font-family:'Space Grotesk',sans-serif; font-size:clamp(28px,4vw,42px); font-weight:700; }
-    .hero h1 span { color:var(--volt); }
-    .hero p { color:var(--muted); margin-top:8px; max-width:640px; }
-    .stats { display:flex; flex-wrap:wrap; gap:16px; margin-top:24px; }
-    .stat { background:var(--ink800); border:1px solid #2a2f3a; border-radius:12px; padding:12px 20px; }
-    .stat b { display:block; font-size:24px; color:var(--volt); font-family:'Space Grotesk',sans-serif; }
-    nav { position:sticky; top:0; z-index:50; display:flex; flex-wrap:wrap; gap:8px; padding:12px 32px;
-      background:rgba(7,8,10,.92); backdrop-filter:blur(12px); border-bottom:1px solid var(--ink800); }
-    nav a { color:var(--muted); text-decoration:none; font-size:13px; padding:6px 12px; border-radius:8px;
-      border:1px solid transparent; transition:.15s; }
-    nav a:hover { color:var(--volt); border-color:#2a2f3a; background:var(--ink800); }
-    main { max-width:1400px; margin:0 auto; padding:32px; }
-    .section { margin-bottom:56px; scroll-margin-top:72px; }
-    .section header { margin-bottom:24px; }
-    .section h2 { font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:700; }
-    .section header p { color:var(--muted); margin-top:4px; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px; }
-    .reels-grid { grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); }
-    .card { background:var(--ink800); border:1px solid #2a2f3a; border-radius:16px; overflow:hidden; }
-    .thumb { background:#0b0d11; overflow:hidden; }
-    .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
-    .reel-thumb { aspect-ratio:9/16; max-height:480px; margin:0 auto; }
-    .reel-thumb video { width:100%; height:100%; object-fit:cover; display:block; }
-    .meta { padding:14px 16px; }
-    .meta h3 { font-size:15px; font-weight:600; margin-bottom:6px; }
-    .meta p { font-size:13px; color:var(--muted); margin-bottom:8px; }
-    .meta code { font-size:11px; color:#6b7280; word-break:break-all; }
-    .meta a { display:inline-block; margin-top:8px; font-size:12px; color:var(--volt); }
-    .pill { display:inline-block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
-      background:rgba(199,251,58,.15); color:var(--volt); padding:3px 8px; border-radius:99px; margin-bottom:8px; }
-    .carousel-block { margin-bottom:32px; }
-    .carousel-block h3 { font-size:18px; margin-bottom:4px; }
-    .carousel-block .path { color:var(--muted); font-size:13px; margin-bottom:12px; }
-    .carousel-strip { display:flex; gap:12px; overflow-x:auto; padding-bottom:12px; scroll-snap-type:x mandatory; }
-    .carousel-strip figure { flex:0 0 200px; scroll-snap-align:start; }
-    .carousel-strip img { width:200px; height:200px; object-fit:cover; border-radius:12px; border:1px solid #2a2f3a; }
-    .carousel-strip figcaption { text-align:center; font-size:11px; color:var(--muted); margin-top:4px; }
-    .lightbox { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.92);
-      align-items:center; justify-content:center; padding:24px; cursor:zoom-out; }
-    .lightbox.open { display:flex; }
-    .lightbox img { max-width:95vw; max-height:90vh; border-radius:12px; }
-    footer { text-align:center; padding:32px; color:var(--muted); font-size:13px; border-top:1px solid var(--ink800); }
-  </style>
-</head>
-<body>
-  <div class="hero">
-    <h1>Fit<span>Connect</span> — Revisão pack v3</h1>
-    <p>Analisa todo o conteúdo novo antes de publicar no @fitconnectsports. Clica numa imagem para ampliar.</p>
-    <div class="stats">
-      <div class="stat"><b>51</b> imagens</div>
-      <div class="stat"><b>6</b> reels MP4</div>
-      <div class="stat"><b>3</b> carousels</div>
-      <div class="stat"><b>6</b> mockups app</div>
-    </div>
-  </div>
-  <nav>
-    <a href="#mockups">Mockups</a>
-    <a href="#features">Features</a>
-    <a href="#educational">Educativos</a>
-    <a href="#abstract">Abstratos</a>
-    <a href="#posts-mockups">Posts</a>
-    <a href="#carousels">Carousels</a>
-    <a href="#reels">Reels</a>
-  </nav>
-  <main>
-    <section id="mockups" class="section">
-      <header><h2>Mockups de app</h2><p>Feed · Ranks · Perfil · Busca coach · Roster · Inbox</p></header>
-      <div class="grid">
-    <article class="card" data-label="Community Feed">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Mockups/mockup-09-community-feed.png" alt="Community Feed" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Community Feed</h3>
-        <p>PRs, check-ins e race day no feed da comunidade.</p>
-        <code>Mockups/mockup-09-community-feed.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="Ranks / Leaderboard">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Mockups/mockup-10-ranks-leaderboard.png" alt="Ranks / Leaderboard" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Ranks / Leaderboard</h3>
-        <p>Ranking por modalidade · Top 5% · pontos semanais.</p>
-        <code>Mockups/mockup-10-ranks-leaderboard.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="Perfil atleta">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Mockups/mockup-11-athlete-profile.png" alt="Perfil atleta" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Perfil atleta</h3>
-        <p>Readiness · HRV · streak · sports multi-modalidade.</p>
-        <code>Mockups/mockup-11-athlete-profile.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="Discover / busca coach">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Mockups/mockup-12-coach-search.png" alt="Discover / busca coach" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Discover / busca coach</h3>
-        <p>12.418 coaches · filtros · rating · €/h.</p>
-        <code>Mockups/mockup-12-coach-search.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="Coach roster">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Mockups/mockup-13-coach-roster.png" alt="Coach roster" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Coach roster</h3>
-        <p>Heatmap do plantel · readiness por atleta.</p>
-        <code>Mockups/mockup-13-coach-roster.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="Inbox + nudges">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Mockups/mockup-14-inbox-nudge.png" alt="Inbox + nudges" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Inbox + nudges</h3>
-        <p>Coach ↔ atleta · AI nudges · plano ajustado.</p>
-        <code>Mockups/mockup-14-inbox-nudge.png</code>
-      </div>
-    </article></div>
-    </section>
-    <section id="features" class="section">
-      <header><h2>Posts de features</h2><p>Descrição textual das funções (feed 1:1)</p></header>
-      <div class="grid">
-    <article class="card" data-label="Feature · Feed">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/25-feature-community-feed.png" alt="Feature · Feed" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Feature · Feed</h3>
-        
-        <code>Posts/25-feature-community-feed.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="Feature · Ranks">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/26-feature-ranks.png" alt="Feature · Ranks" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Feature · Ranks</h3>
-        
-        <code>Posts/26-feature-ranks.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="Feature · Perfil">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/27-feature-profile.png" alt="Feature · Perfil" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Feature · Perfil</h3>
-        
-        <code>Posts/27-feature-profile.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="Feature · Discover">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/28-feature-coach-search.png" alt="Feature · Discover" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Feature · Discover</h3>
-        
-        <code>Posts/28-feature-coach-search.png</code>
-      </div>
-    </article></div>
-    </section>
-    <section id="educational" class="section">
-      <header><h2>Educativos v2</h2><p>Saves · autoridade · explicação rápida</p></header>
-      <div class="grid">
-    <article class="card" data-label="5 zonas de treino">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Educational/edu-08-training-zones.png" alt="5 zonas de treino" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>5 zonas de treino</h3>
-        
-        <code>Educational/edu-08-training-zones.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="Periodização">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Educational/edu-09-periodization.png" alt="Periodização" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Periodização</h3>
-        
-        <code>Educational/edu-09-periodization.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="Como escolher coach">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Educational/edu-10-coach-match.png" alt="Como escolher coach" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Como escolher coach</h3>
-        
-        <code>Educational/edu-10-coach-match.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="Load management">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Educational/edu-11-load-management.png" alt="Load management" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Load management</h3>
-        
-        <code>Educational/edu-11-load-management.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="Morning handshake">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Educational/edu-12-morning-handshake.png" alt="Morning handshake" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Morning handshake</h3>
-        
-        <code>Educational/edu-12-morning-handshake.png</code>
-      </div>
-    </article></div>
-    </section>
-    <section id="abstract" class="section">
-      <header><h2>Abstratos / brand</h2><p>Identidade visual · frases de marca</p></header>
-      <div class="grid">
-    <article class="card" data-label="Connect. Train. Perform.">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Abstract/abstract-01-connect-train-perform.png" alt="Connect. Train. Perform." loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Connect. Train. Perform.</h3>
-        
-        <code>Abstract/abstract-01-connect-train-perform.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="Readiness is the new PR">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Abstract/abstract-02-readiness-ring.png" alt="Readiness is the new PR" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Readiness is the new PR</h3>
-        
-        <code>Abstract/abstract-02-readiness-ring.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="Signal over noise">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Abstract/abstract-03-signal-grid.png" alt="Signal over noise" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Signal over noise</h3>
-        
-        <code>Abstract/abstract-03-signal-grid.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="Load up. Then recover.">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Abstract/abstract-04-weekly-load.png" alt="Load up. Then recover." loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Load up. Then recover.</h3>
-        
-        <code>Abstract/abstract-04-weekly-load.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="Your pulse. Their plan.">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Abstract/abstract-05-volt-pulse.png" alt="Your pulse. Their plan." loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>Your pulse. Their plan.</h3>
-        
-        <code>Abstract/abstract-05-volt-pulse.png</code>
-      </div>
-    </article></div>
-    </section>
-    <section id="posts-mockups" class="section">
-      <header><h2>Posts (cópias dos mockups)</h2><p>Prontos para publicar no feed</p></header>
-      <div class="grid">
-    <article class="card" data-label="25-feature-community-feed">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/25-feature-community-feed.png" alt="25-feature-community-feed" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>25-feature-community-feed</h3>
-        
-        <code>Posts/25-feature-community-feed.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="26-feature-ranks">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/26-feature-ranks.png" alt="26-feature-ranks" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>26-feature-ranks</h3>
-        
-        <code>Posts/26-feature-ranks.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="27-feature-profile">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/27-feature-profile.png" alt="27-feature-profile" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>27-feature-profile</h3>
-        
-        <code>Posts/27-feature-profile.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="28-feature-coach-search">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/28-feature-coach-search.png" alt="28-feature-coach-search" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>28-feature-coach-search</h3>
-        
-        <code>Posts/28-feature-coach-search.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="29-mockup-09-community-feed">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/29-mockup-09-community-feed.png" alt="29-mockup-09-community-feed" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>29-mockup-09-community-feed</h3>
-        
-        <code>Posts/29-mockup-09-community-feed.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="30-mockup-10-ranks-leaderboard">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/30-mockup-10-ranks-leaderboard.png" alt="30-mockup-10-ranks-leaderboard" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>30-mockup-10-ranks-leaderboard</h3>
-        
-        <code>Posts/30-mockup-10-ranks-leaderboard.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="31-mockup-11-athlete-profile">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/31-mockup-11-athlete-profile.png" alt="31-mockup-11-athlete-profile" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>31-mockup-11-athlete-profile</h3>
-        
-        <code>Posts/31-mockup-11-athlete-profile.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="32-mockup-12-coach-search">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/32-mockup-12-coach-search.png" alt="32-mockup-12-coach-search" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>32-mockup-12-coach-search</h3>
-        
-        <code>Posts/32-mockup-12-coach-search.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="33-mockup-13-coach-roster">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/33-mockup-13-coach-roster.png" alt="33-mockup-13-coach-roster" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>33-mockup-13-coach-roster</h3>
-        
-        <code>Posts/33-mockup-13-coach-roster.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="34-mockup-14-inbox-nudge">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/34-mockup-14-inbox-nudge.png" alt="34-mockup-14-inbox-nudge" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>34-mockup-14-inbox-nudge</h3>
-        
-        <code>Posts/34-mockup-14-inbox-nudge.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="abstract-01-connect-train-perform">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/abstract-01-connect-train-perform.png" alt="abstract-01-connect-train-perform" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>abstract-01-connect-train-perform</h3>
-        
-        <code>Posts/abstract-01-connect-train-perform.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="abstract-02-readiness-ring">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/abstract-02-readiness-ring.png" alt="abstract-02-readiness-ring" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>abstract-02-readiness-ring</h3>
-        
-        <code>Posts/abstract-02-readiness-ring.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="abstract-03-signal-grid">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/abstract-03-signal-grid.png" alt="abstract-03-signal-grid" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>abstract-03-signal-grid</h3>
-        
-        <code>Posts/abstract-03-signal-grid.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="abstract-04-weekly-load">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/abstract-04-weekly-load.png" alt="abstract-04-weekly-load" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>abstract-04-weekly-load</h3>
-        
-        <code>Posts/abstract-04-weekly-load.png</code>
-      </div>
-    </article>
-    <article class="card" data-label="abstract-05-volt-pulse">
-      <div class="thumb" style="aspect-ratio:1/1">
-        <img src="Posts/abstract-05-volt-pulse.png" alt="abstract-05-volt-pulse" loading="lazy" />
-      </div>
-      <div class="meta">
-        <h3>abstract-05-volt-pulse</h3>
-        
-        <code>Posts/abstract-05-volt-pulse.png</code>
-      </div>
-    </article></div>
-    </section>
-      <section id="carousels" class="section">
-        <header><h2>Carousels novos</h2><p>3 sets prontos para swipe</p></header>
-        
-    <div class="carousel-block">
-      <h3>App features (6 slides)</h3>
-      <p class="path"><code>Carousels/09-app-features/</code> · 6 slides</p>
-      <div class="carousel-strip">
-        
-          <figure>
-            <img src="Carousels/09-app-features/01-mockup-09-community-feed.png" alt="slide 1" loading="lazy" />
-            <figcaption>1/6</figcaption>
-          </figure>
-          <figure>
-            <img src="Carousels/09-app-features/02-mockup-10-ranks-leaderboard.png" alt="slide 2" loading="lazy" />
-            <figcaption>2/6</figcaption>
-          </figure>
-          <figure>
-            <img src="Carousels/09-app-features/03-mockup-11-athlete-profile.png" alt="slide 3" loading="lazy" />
-            <figcaption>3/6</figcaption>
-          </figure>
-          <figure>
-            <img src="Carousels/09-app-features/04-mockup-12-coach-search.png" alt="slide 4" loading="lazy" />
-            <figcaption>4/6</figcaption>
-          </figure>
-          <figure>
-            <img src="Carousels/09-app-features/05-mockup-13-coach-roster.png" alt="slide 5" loading="lazy" />
-            <figcaption>5/6</figcaption>
-          </figure>
-          <figure>
-            <img src="Carousels/09-app-features/06-mockup-14-inbox-nudge.png" alt="slide 6" loading="lazy" />
-            <figcaption>6/6</figcaption>
-          </figure>
-      </div>
-    </div>
-    <div class="carousel-block">
-      <h3>Educação v2 (5 slides)</h3>
-      <p class="path"><code>Carousels/10-educational-v2/</code> · 5 slides</p>
-      <div class="carousel-strip">
-        
-          <figure>
-            <img src="Carousels/10-educational-v2/01-edu-08-training-zones.png" alt="slide 1" loading="lazy" />
-            <figcaption>1/5</figcaption>
-          </figure>
-          <figure>
-            <img src="Carousels/10-educational-v2/02-edu-09-periodization.png" alt="slide 2" loading="lazy" />
-            <figcaption>2/5</figcaption>
-          </figure>
-          <figure>
-            <img src="Carousels/10-educational-v2/03-edu-10-coach-match.png" alt="slide 3" loading="lazy" />
-            <figcaption>3/5</figcaption>
-          </figure>
-          <figure>
-            <img src="Carousels/10-educational-v2/04-edu-11-load-management.png" alt="slide 4" loading="lazy" />
-            <figcaption>4/5</figcaption>
-          </figure>
-          <figure>
-            <img src="Carousels/10-educational-v2/05-edu-12-morning-handshake.png" alt="slide 5" loading="lazy" />
-            <figcaption>5/5</figcaption>
-          </figure>
-      </div>
-    </div>
-    <div class="carousel-block">
-      <h3>Brand abstract (5 slides)</h3>
-      <p class="path"><code>Carousels/11-abstract-brand/</code> · 5 slides</p>
-      <div class="carousel-strip">
-        
-          <figure>
-            <img src="Carousels/11-abstract-brand/01-abstract-01-connect-train-perform.png" alt="slide 1" loading="lazy" />
-            <figcaption>1/5</figcaption>
-          </figure>
-          <figure>
-            <img src="Carousels/11-abstract-brand/02-abstract-02-readiness-ring.png" alt="slide 2" loading="lazy" />
-            <figcaption>2/5</figcaption>
-          </figure>
-          <figure>
-            <img src="Carousels/11-abstract-brand/03-abstract-03-signal-grid.png" alt="slide 3" loading="lazy" />
-            <figcaption>3/5</figcaption>
-          </figure>
-          <figure>
-            <img src="Carousels/11-abstract-brand/04-abstract-04-weekly-load.png" alt="slide 4" loading="lazy" />
-            <figcaption>4/5</figcaption>
-          </figure>
-          <figure>
-            <img src="Carousels/11-abstract-brand/05-abstract-05-volt-pulse.png" alt="slide 5" loading="lazy" />
-            <figcaption>5/5</figcaption>
-          </figure>
-      </div>
-    </div>
-      </section>
-      <section id="reels" class="section">
-        <header><h2>Reels animados</h2><p>MP4 9:16 · ~6.5s · hero sports + frases motivacionais</p></header>
-        <div class="grid reels-grid">
-    <article class="card reel-card">
-      <div class="thumb reel-thumb">
-        <video src="Reels/Animated/reel-hero-01-runner.mp4" poster="Reels/reel-hero-01-runner-cover.png" controls playsinline loop muted></video>
-      </div>
-      <div class="meta">
-        <span class="pill">Running</span>
-        <h3>Bad night? Lighter session.</h3>
-        <code>Reels/Animated/reel-hero-01-runner.mp4</code>
-        <a href="Reels/reel-hero-01-runner-cover.png" target="_blank">Cover PNG →</a>
-      </div>
-    </article>
-    <article class="card reel-card">
-      <div class="thumb reel-thumb">
-        <video src="Reels/Animated/reel-hero-02-strength.mp4" poster="Reels/reel-hero-02-strength-cover.png" controls playsinline loop muted></video>
-      </div>
-      <div class="meta">
-        <span class="pill">Strength</span>
-        <h3>O plano muda. O atleta sente.</h3>
-        <code>Reels/Animated/reel-hero-02-strength.mp4</code>
-        <a href="Reels/reel-hero-02-strength-cover.png" target="_blank">Cover PNG →</a>
-      </div>
-    </article>
-    <article class="card reel-card">
-      <div class="thumb reel-thumb">
-        <video src="Reels/Animated/reel-hero-03-swim.mp4" poster="Reels/reel-hero-03-swim-cover.png" controls playsinline loop muted></video>
-      </div>
-      <div class="meta">
-        <span class="pill">Swimming</span>
-        <h3>Measure. Then move.</h3>
-        <code>Reels/Animated/reel-hero-03-swim.mp4</code>
-        <a href="Reels/reel-hero-03-swim-cover.png" target="_blank">Cover PNG →</a>
-      </div>
-    </article>
-    <article class="card reel-card">
-      <div class="thumb reel-thumb">
-        <video src="Reels/Animated/reel-hero-04-cycle.mp4" poster="Reels/reel-hero-04-cycle-cover.png" controls playsinline loop muted></video>
-      </div>
-      <div class="meta">
-        <span class="pill">Cycling</span>
-        <h3>Consistency beats intensity.</h3>
-        <code>Reels/Animated/reel-hero-04-cycle.mp4</code>
-        <a href="Reels/reel-hero-04-cycle-cover.png" target="_blank">Cover PNG →</a>
-      </div>
-    </article>
-    <article class="card reel-card">
-      <div class="thumb reel-thumb">
-        <video src="Reels/Animated/reel-hero-05-stack.mp4" poster="Reels/reel-hero-05-stack-cover.png" controls playsinline loop muted></video>
-      </div>
-      <div class="meta">
-        <span class="pill">Multi-sport</span>
-        <h3>Connect. Train. Perform.</h3>
-        <code>Reels/Animated/reel-hero-05-stack.mp4</code>
-        <a href="Reels/reel-hero-05-stack-cover.png" target="_blank">Cover PNG →</a>
-      </div>
-    </article>
-    <article class="card reel-card">
-      <div class="thumb reel-thumb">
-        <video src="Reels/Animated/reel-hero-06-recovery.mp4" poster="Reels/reel-hero-06-recovery-cover.png" controls playsinline loop muted></video>
-      </div>
-      <div class="meta">
-        <span class="pill">Recovery</span>
-        <h3>Rest is part of the work.</h3>
-        <code>Reels/Animated/reel-hero-06-recovery.mp4</code>
-        <a href="Reels/reel-hero-06-recovery-cover.png" target="_blank">Cover PNG →</a>
-      </div>
-    </article></div>
-      </section></main>
-  <footer>
-    Gerado em 2026-08-28 · <code>public/instagram-pack/review-v3.html</code>
-    · Ver também <code>CONTENT-V3.md</code>
-  </footer>
-  <div class="lightbox" id="lightbox"><img alt="" /></div>
-  <script>
-    const lb = document.getElementById('lightbox');
-    const lbImg = lb.querySelector('img');
-    document.querySelectorAll('.card img, .carousel-strip img').forEach(img => {
-      img.style.cursor = 'zoom-in';
-      img.addEventListener('click', () => {
-        lbImg.src = img.src;
-        lbImg.alt = img.alt;
-        lb.classList.add('open');
-      });
-    });
-    lb.addEventListener('click', () => lb.classList.remove('open'));
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('open'); });
-  </script>
-</body>
-</html>
+<!DOCTYPE html><html lang="pt"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>FitConnect — Revisão completa · @fitconnectsports</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--ink:#07080A;--ink800:#1a1d24;--volt:#C7FB3A;--muted:#8b93a7}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:Inter,system-ui,sans-serif;background:var(--ink);color:#FAFBFC;line-height:1.5}
+.hero{padding:48px 32px 32px;border-bottom:1px solid var(--ink800);background:radial-gradient(ellipse 60% 80% at 10% 0%,rgba(199,251,58,.12),transparent 50%)}
+.hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,4vw,42px);font-weight:700}.hero h1 span{color:var(--volt)}
+.hero p{color:var(--muted);margin-top:8px}.stats{display:flex;flex-wrap:wrap;gap:16px;margin-top:24px}
+.stat{background:var(--ink800);border:1px solid #2a2f3a;border-radius:12px;padding:12px 20px}.stat b{display:block;font-size:24px;color:var(--volt);font-family:'Space Grotesk',sans-serif}
+nav{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;gap:8px;padding:12px 32px;background:rgba(7,8,10,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--ink800)}
+nav a{color:var(--muted);text-decoration:none;font-size:13px;padding:6px 12px;border-radius:8px}nav a:hover{color:var(--volt);background:var(--ink800)}
+main{max-width:1400px;margin:0 auto;padding:32px}.section{margin-bottom:56px;scroll-margin-top:72px}
+.section h2{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700}.section header p{color:var(--muted);margin-top:4px;margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.reels-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.card{background:var(--ink800);border:1px solid #2a2f3a;border-radius:16px;overflow:hidden}
+.thumb{background:#0b0d11;overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.reel-thumb{aspect-ratio:9/16;max-height:480px;margin:0 auto}.reel-thumb video{width:100%;height:100%;object-fit:cover;display:block}
+.meta{padding:14px 16px}.meta h3{font-size:14px;font-weight:600;margin-bottom:6px}.meta code{font-size:10px;color:#6b7280;word-break:break-all}
+.carousel-block{margin-bottom:32px}.carousel-block h3{font-size:18px}.carousel-block .path{color:var(--muted);font-size:13px;margin-bottom:12px}
+.carousel-strip{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px}.carousel-strip figure{flex:0 0 200px}
+.carousel-strip img{width:200px;height:200px;object-fit:cover;border-radius:12px;border:1px solid #2a2f3a}
+.carousel-strip figcaption{text-align:center;font-size:11px;color:var(--muted);margin-top:4px}
+.lightbox{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.92);align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+.lightbox.open{display:flex}.lightbox img{max-width:95vw;max-height:90vh;border-radius:12px}
+footer{text-align:center;padding:32px;color:var(--muted);font-size:13px;border-top:1px solid var(--ink800)}
+</style></head><body>
+<div class="hero"><h1>Fit<span>Connect</span> — Revisão completa</h1>
+<p>Pack v3.1 + batch v2 + v3 · logo oficial · português · clica para ampliar</p>
+<div class="stats">
+  <div class="stat"><b>38</b> mockups</div>
+  <div class="stat"><b>36</b> educativos</div>
+  <div class="stat"><b>29</b> abstratos</div>
+  <div class="stat"><b>28</b> features</div>
+  <div class="stat"><b>30</b> reels</div>
+  <div class="stat"><b>17</b> carousels</div>
+</div></div>
+<nav><a href="#mockups">Mockups</a><a href="#educational">Educativos</a><a href="#abstract">Abstratos</a>
+<a href="#features">Features</a><a href="#carousels">Carousels</a><a href="#reels">Reels</a></nav>
+<main>
+  <section id="mockups" class="section"><header><h2>Mockups de app (38)</h2><p>Logo oficial + PT · mockup-09…38</p></header>
+    <div class="grid"><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-01-athlete-dashboard.png" alt="mockup-01-athlete-dashboard" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-01-athlete-dashboard</h3><code>Mockups/mockup-01-athlete-dashboard.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-02-coach-dashboard-tablet-phone.png" alt="mockup-02-coach-dashboard-tablet-phone" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-02-coach-dashboard-tablet-phone</h3><code>Mockups/mockup-02-coach-dashboard-tablet-phone.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-03-wearos-phone-live-session.png" alt="mockup-03-wearos-phone-live-session" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-03-wearos-phone-live-session</h3><code>Mockups/mockup-03-wearos-phone-live-session.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-04-three-devices-ecosystem.png" alt="mockup-04-three-devices-ecosystem" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-04-three-devices-ecosystem</h3><code>Mockups/mockup-04-three-devices-ecosystem.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-05-morning-handshake-phone.png" alt="mockup-05-morning-handshake-phone" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-05-morning-handshake-phone</h3><code>Mockups/mockup-05-morning-handshake-phone.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-06-ai-copilot-tablet.png" alt="mockup-06-ai-copilot-tablet" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-06-ai-copilot-tablet</h3><code>Mockups/mockup-06-ai-copilot-tablet.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-07-celebration-pr-phone.png" alt="mockup-07-celebration-pr-phone" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-07-celebration-pr-phone</h3><code>Mockups/mockup-07-celebration-pr-phone.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-08-theme-picker-phone.png" alt="mockup-08-theme-picker-phone" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-08-theme-picker-phone</h3><code>Mockups/mockup-08-theme-picker-phone.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-09-community-feed.png" alt="mockup-09-community-feed" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-09-community-feed</h3><code>Mockups/mockup-09-community-feed.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-10-ranks-leaderboard.png" alt="mockup-10-ranks-leaderboard" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-10-ranks-leaderboard</h3><code>Mockups/mockup-10-ranks-leaderboard.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-11-athlete-profile.png" alt="mockup-11-athlete-profile" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-11-athlete-profile</h3><code>Mockups/mockup-11-athlete-profile.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-12-coach-search.png" alt="mockup-12-coach-search" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-12-coach-search</h3><code>Mockups/mockup-12-coach-search.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-13-coach-roster.png" alt="mockup-13-coach-roster" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-13-coach-roster</h3><code>Mockups/mockup-13-coach-roster.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-14-inbox-nudge.png" alt="mockup-14-inbox-nudge" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-14-inbox-nudge</h3><code>Mockups/mockup-14-inbox-nudge.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-15-live-session.png" alt="mockup-15-live-session" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-15-live-session</h3><code>Mockups/mockup-15-live-session.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-16-weekly-calendar.png" alt="mockup-16-weekly-calendar" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-16-weekly-calendar</h3><code>Mockups/mockup-16-weekly-calendar.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-17-sleep-analysis.png" alt="mockup-17-sleep-analysis" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-17-sleep-analysis</h3><code>Mockups/mockup-17-sleep-analysis.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-18-wearos-sync.png" alt="mockup-18-wearos-sync" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-18-wearos-sync</h3><code>Mockups/mockup-18-wearos-sync.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-19-programs-marketplace.png" alt="mockup-19-programs-marketplace" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-19-programs-marketplace</h3><code>Mockups/mockup-19-programs-marketplace.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-20-coach-chat.png" alt="mockup-20-coach-chat" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-20-coach-chat</h3><code>Mockups/mockup-20-coach-chat.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-21-performance-metrics.png" alt="mockup-21-performance-metrics" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-21-performance-metrics</h3><code>Mockups/mockup-21-performance-metrics.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-22-progress-photos.png" alt="mockup-22-progress-photos" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-22-progress-photos</h3><code>Mockups/mockup-22-progress-photos.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-23-clubs-groups.png" alt="mockup-23-clubs-groups" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-23-clubs-groups</h3><code>Mockups/mockup-23-clubs-groups.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-24-subscription.png" alt="mockup-24-subscription" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-24-subscription</h3><code>Mockups/mockup-24-subscription.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-25-notifications.png" alt="mockup-25-notifications" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-25-notifications</h3><code>Mockups/mockup-25-notifications.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-26-ai-copilot.png" alt="mockup-26-ai-copilot" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-26-ai-copilot</h3><code>Mockups/mockup-26-ai-copilot.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-27-injury-prevention.png" alt="mockup-27-injury-prevention" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-27-injury-prevention</h3><code>Mockups/mockup-27-injury-prevention.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-28-hydration.png" alt="mockup-28-hydration" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-28-hydration</h3><code>Mockups/mockup-28-hydration.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-29-race-day.png" alt="mockup-29-race-day" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-29-race-day</h3><code>Mockups/mockup-29-race-day.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-30-workout-builder.png" alt="mockup-30-workout-builder" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-30-workout-builder</h3><code>Mockups/mockup-30-workout-builder.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-31-nutrition-log.png" alt="mockup-31-nutrition-log" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-31-nutrition-log</h3><code>Mockups/mockup-31-nutrition-log.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-32-team-dashboard.png" alt="mockup-32-team-dashboard" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-32-team-dashboard</h3><code>Mockups/mockup-32-team-dashboard.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-33-hr-zones.png" alt="mockup-33-hr-zones" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-33-hr-zones</h3><code>Mockups/mockup-33-hr-zones.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-34-achievements.png" alt="mockup-34-achievements" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-34-achievements</h3><code>Mockups/mockup-34-achievements.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-35-coach-finder.png" alt="mockup-35-coach-finder" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-35-coach-finder</h3><code>Mockups/mockup-35-coach-finder.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-36-morning-handshake.png" alt="mockup-36-morning-handshake" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-36-morning-handshake</h3><code>Mockups/mockup-36-morning-handshake.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-37-data-export.png" alt="mockup-37-data-export" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-37-data-export</h3><code>Mockups/mockup-37-data-export.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Mockups/mockup-38-onboarding.png" alt="mockup-38-onboarding" loading="lazy"/></div>
+    <div class="meta"><h3>mockup-38-onboarding</h3><code>Mockups/mockup-38-onboarding.png</code></div></article></div></section>
+  <section id="educational" class="section"><header><h2>Educativos (36)</h2><p>edu-08…36 · português</p></header>
+    <div class="grid"><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-01-what-is-hrv.png" alt="edu-01-what-is-hrv" loading="lazy"/></div>
+    <div class="meta"><h3>edu-01-what-is-hrv</h3><code>Educational/edu-01-what-is-hrv.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-02-morning-handshake.png" alt="edu-02-morning-handshake" loading="lazy"/></div>
+    <div class="meta"><h3>edu-02-morning-handshake</h3><code>Educational/edu-02-morning-handshake.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-03-live-session.png" alt="edu-03-live-session" loading="lazy"/></div>
+    <div class="meta"><h3>edu-03-live-session</h3><code>Educational/edu-03-live-session.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-04-ai-copilot.png" alt="edu-04-ai-copilot" loading="lazy"/></div>
+    <div class="meta"><h3>edu-04-ai-copilot</h3><code>Educational/edu-04-ai-copilot.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-05-5-reasons.png" alt="edu-05-5-reasons" loading="lazy"/></div>
+    <div class="meta"><h3>edu-05-5-reasons</h3><code>Educational/edu-05-5-reasons.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-06-cta-start-free.png" alt="edu-06-cta-start-free" loading="lazy"/></div>
+    <div class="meta"><h3>edu-06-cta-start-free</h3><code>Educational/edu-06-cta-start-free.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-07-coach-vs-athlete.png" alt="edu-07-coach-vs-athlete" loading="lazy"/></div>
+    <div class="meta"><h3>edu-07-coach-vs-athlete</h3><code>Educational/edu-07-coach-vs-athlete.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-08-training-zones.png" alt="edu-08-training-zones" loading="lazy"/></div>
+    <div class="meta"><h3>edu-08-training-zones</h3><code>Educational/edu-08-training-zones.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-09-periodization.png" alt="edu-09-periodization" loading="lazy"/></div>
+    <div class="meta"><h3>edu-09-periodization</h3><code>Educational/edu-09-periodization.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-10-coach-match.png" alt="edu-10-coach-match" loading="lazy"/></div>
+    <div class="meta"><h3>edu-10-coach-match</h3><code>Educational/edu-10-coach-match.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-11-load-management.png" alt="edu-11-load-management" loading="lazy"/></div>
+    <div class="meta"><h3>edu-11-load-management</h3><code>Educational/edu-11-load-management.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-12-morning-handshake.png" alt="edu-12-morning-handshake" loading="lazy"/></div>
+    <div class="meta"><h3>edu-12-morning-handshake</h3><code>Educational/edu-12-morning-handshake.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-13-hrv-basics.png" alt="edu-13-hrv-basics" loading="lazy"/></div>
+    <div class="meta"><h3>edu-13-hrv-basics</h3><code>Educational/edu-13-hrv-basics.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-14-sleep-performance.png" alt="edu-14-sleep-performance" loading="lazy"/></div>
+    <div class="meta"><h3>edu-14-sleep-performance</h3><code>Educational/edu-14-sleep-performance.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-15-overtraining.png" alt="edu-15-overtraining" loading="lazy"/></div>
+    <div class="meta"><h3>edu-15-overtraining</h3><code>Educational/edu-15-overtraining.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-16-nutrition.png" alt="edu-16-nutrition" loading="lazy"/></div>
+    <div class="meta"><h3>edu-16-nutrition</h3><code>Educational/edu-16-nutrition.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-17-smart-goals.png" alt="edu-17-smart-goals" loading="lazy"/></div>
+    <div class="meta"><h3>edu-17-smart-goals</h3><code>Educational/edu-17-smart-goals.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-18-taper.png" alt="edu-18-taper" loading="lazy"/></div>
+    <div class="meta"><h3>edu-18-taper</h3><code>Educational/edu-18-taper.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-19-cross-training.png" alt="edu-19-cross-training" loading="lazy"/></div>
+    <div class="meta"><h3>edu-19-cross-training</h3><code>Educational/edu-19-cross-training.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-20-mobility.png" alt="edu-20-mobility" loading="lazy"/></div>
+    <div class="meta"><h3>edu-20-mobility</h3><code>Educational/edu-20-mobility.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-21-pr-tracking.png" alt="edu-21-pr-tracking" loading="lazy"/></div>
+    <div class="meta"><h3>edu-21-pr-tracking</h3><code>Educational/edu-21-pr-tracking.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-22-why-coach.png" alt="edu-22-why-coach" loading="lazy"/></div>
+    <div class="meta"><h3>edu-22-why-coach</h3><code>Educational/edu-22-why-coach.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-23-rpe.png" alt="edu-23-rpe" loading="lazy"/></div>
+    <div class="meta"><h3>edu-23-rpe</h3><code>Educational/edu-23-rpe.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-24-breathing.png" alt="edu-24-breathing" loading="lazy"/></div>
+    <div class="meta"><h3>edu-24-breathing</h3><code>Educational/edu-24-breathing.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-25-warmup.png" alt="edu-25-warmup" loading="lazy"/></div>
+    <div class="meta"><h3>edu-25-warmup</h3><code>Educational/edu-25-warmup.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-26-cooldown.png" alt="edu-26-cooldown" loading="lazy"/></div>
+    <div class="meta"><h3>edu-26-cooldown</h3><code>Educational/edu-26-cooldown.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-27-heart-rate.png" alt="edu-27-heart-rate" loading="lazy"/></div>
+    <div class="meta"><h3>edu-27-heart-rate</h3><code>Educational/edu-27-heart-rate.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-28-injury-prevention.png" alt="edu-28-injury-prevention" loading="lazy"/></div>
+    <div class="meta"><h3>edu-28-injury-prevention</h3><code>Educational/edu-28-injury-prevention.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-29-hydration.png" alt="edu-29-hydration" loading="lazy"/></div>
+    <div class="meta"><h3>edu-29-hydration</h3><code>Educational/edu-29-hydration.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-30-mental.png" alt="edu-30-mental" loading="lazy"/></div>
+    <div class="meta"><h3>edu-30-mental</h3><code>Educational/edu-30-mental.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-31-competition.png" alt="edu-31-competition" loading="lazy"/></div>
+    <div class="meta"><h3>edu-31-competition</h3><code>Educational/edu-31-competition.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-32-deload.png" alt="edu-32-deload" loading="lazy"/></div>
+    <div class="meta"><h3>edu-32-deload</h3><code>Educational/edu-32-deload.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-33-supplements.png" alt="edu-33-supplements" loading="lazy"/></div>
+    <div class="meta"><h3>edu-33-supplements</h3><code>Educational/edu-33-supplements.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-34-failure.png" alt="edu-34-failure" loading="lazy"/></div>
+    <div class="meta"><h3>edu-34-failure</h3><code>Educational/edu-34-failure.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-35-periodization.png" alt="edu-35-periodization" loading="lazy"/></div>
+    <div class="meta"><h3>edu-35-periodization</h3><code>Educational/edu-35-periodization.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Educational/edu-36-active-rest.png" alt="edu-36-active-rest" loading="lazy"/></div>
+    <div class="meta"><h3>edu-36-active-rest</h3><code>Educational/edu-36-active-rest.png</code></div></article></div></section>
+  <section id="abstract" class="section"><header><h2>Abstratos (29)</h2><p>abstract-01…29 · marca</p></header>
+    <div class="grid"><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-01-connect-train-perform.png" alt="abstract-01-connect-train-perform" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-01-connect-train-perform</h3><code>Abstract/abstract-01-connect-train-perform.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-02-readiness-ring.png" alt="abstract-02-readiness-ring" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-02-readiness-ring</h3><code>Abstract/abstract-02-readiness-ring.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-03-signal-grid.png" alt="abstract-03-signal-grid" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-03-signal-grid</h3><code>Abstract/abstract-03-signal-grid.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-04-weekly-load.png" alt="abstract-04-weekly-load" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-04-weekly-load</h3><code>Abstract/abstract-04-weekly-load.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-05-volt-pulse.png" alt="abstract-05-volt-pulse" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-05-volt-pulse</h3><code>Abstract/abstract-05-volt-pulse.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-06-data-decisions.png" alt="abstract-06-data-decisions" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-06-data-decisions</h3><code>Abstract/abstract-06-data-decisions.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-07-smart-training.png" alt="abstract-07-smart-training" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-07-smart-training</h3><code>Abstract/abstract-07-smart-training.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-08-one-ecosystem.png" alt="abstract-08-one-ecosystem" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-08-one-ecosystem</h3><code>Abstract/abstract-08-one-ecosystem.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-09-energy-focus.png" alt="abstract-09-energy-focus" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-09-energy-focus</h3><code>Abstract/abstract-09-energy-focus.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-10-unique-athlete.png" alt="abstract-10-unique-athlete" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-10-unique-athlete</h3><code>Abstract/abstract-10-unique-athlete.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-11-sustainable.png" alt="abstract-11-sustainable" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-11-sustainable</h3><code>Abstract/abstract-11-sustainable.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-12-future-coaching.png" alt="abstract-12-future-coaching" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-12-future-coaching</h3><code>Abstract/abstract-12-future-coaching.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-13-green-light.png" alt="abstract-13-green-light" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-13-green-light</h3><code>Abstract/abstract-13-green-light.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-14-courage-rest.png" alt="abstract-14-courage-rest" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-14-courage-rest</h3><code>Abstract/abstract-14-courage-rest.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-15-evolution.png" alt="abstract-15-evolution" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-15-evolution</h3><code>Abstract/abstract-15-evolution.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-16-strong-community.png" alt="abstract-16-strong-community" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-16-strong-community</h3><code>Abstract/abstract-16-strong-community.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-17-no-limits.png" alt="abstract-17-no-limits" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-17-no-limits</h3><code>Abstract/abstract-17-no-limits.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-18-trust-process.png" alt="abstract-18-trust-process" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-18-trust-process</h3><code>Abstract/abstract-18-trust-process.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-19-morning-ritual.png" alt="abstract-19-morning-ritual" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-19-morning-ritual</h3><code>Abstract/abstract-19-morning-ritual.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-20-body-signals.png" alt="abstract-20-body-signals" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-20-body-signals</h3><code>Abstract/abstract-20-body-signals.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-21-coach-athlete.png" alt="abstract-21-coach-athlete" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-21-coach-athlete</h3><code>Abstract/abstract-21-coach-athlete.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-22-small-wins.png" alt="abstract-22-small-wins" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-22-small-wins</h3><code>Abstract/abstract-22-small-wins.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-23-discipline.png" alt="abstract-23-discipline" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-23-discipline</h3><code>Abstract/abstract-23-discipline.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-24-race-morning.png" alt="abstract-24-race-morning" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-24-race-morning</h3><code>Abstract/abstract-24-race-morning.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-25-hydrate.png" alt="abstract-25-hydrate" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-25-hydrate</h3><code>Abstract/abstract-25-hydrate.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-26-listen-rest.png" alt="abstract-26-listen-rest" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-26-listen-rest</h3><code>Abstract/abstract-26-listen-rest.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-27-team-energy.png" alt="abstract-27-team-energy" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-27-team-energy</h3><code>Abstract/abstract-27-team-energy.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-28-precision.png" alt="abstract-28-precision" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-28-precision</h3><code>Abstract/abstract-28-precision.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Abstract/abstract-29-start-today.png" alt="abstract-29-start-today" loading="lazy"/></div>
+    <div class="meta"><h3>abstract-29-start-today</h3><code>Abstract/abstract-29-start-today.png</code></div></article></div></section>
+  <section id="features" class="section"><header><h2>Posts feature (28)</h2><p>25-feature…58-feature</p></header>
+    <div class="grid"><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/25-feature-community-feed.png" alt="25-feature-community-feed" loading="lazy"/></div>
+    <div class="meta"><h3>25-feature-community-feed</h3><code>Posts/25-feature-community-feed.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/26-feature-ranks.png" alt="26-feature-ranks" loading="lazy"/></div>
+    <div class="meta"><h3>26-feature-ranks</h3><code>Posts/26-feature-ranks.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/27-feature-profile.png" alt="27-feature-profile" loading="lazy"/></div>
+    <div class="meta"><h3>27-feature-profile</h3><code>Posts/27-feature-profile.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/28-feature-coach-search.png" alt="28-feature-coach-search" loading="lazy"/></div>
+    <div class="meta"><h3>28-feature-coach-search</h3><code>Posts/28-feature-coach-search.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/35-feature-live-session.png" alt="35-feature-live-session" loading="lazy"/></div>
+    <div class="meta"><h3>35-feature-live-session</h3><code>Posts/35-feature-live-session.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/36-feature-calendar.png" alt="36-feature-calendar" loading="lazy"/></div>
+    <div class="meta"><h3>36-feature-calendar</h3><code>Posts/36-feature-calendar.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/37-feature-sleep.png" alt="37-feature-sleep" loading="lazy"/></div>
+    <div class="meta"><h3>37-feature-sleep</h3><code>Posts/37-feature-sleep.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/38-feature-wearos.png" alt="38-feature-wearos" loading="lazy"/></div>
+    <div class="meta"><h3>38-feature-wearos</h3><code>Posts/38-feature-wearos.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/39-feature-programs.png" alt="39-feature-programs" loading="lazy"/></div>
+    <div class="meta"><h3>39-feature-programs</h3><code>Posts/39-feature-programs.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/40-feature-chat.png" alt="40-feature-chat" loading="lazy"/></div>
+    <div class="meta"><h3>40-feature-chat</h3><code>Posts/40-feature-chat.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/41-feature-analytics.png" alt="41-feature-analytics" loading="lazy"/></div>
+    <div class="meta"><h3>41-feature-analytics</h3><code>Posts/41-feature-analytics.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/42-feature-progress.png" alt="42-feature-progress" loading="lazy"/></div>
+    <div class="meta"><h3>42-feature-progress</h3><code>Posts/42-feature-progress.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/43-feature-clubs.png" alt="43-feature-clubs" loading="lazy"/></div>
+    <div class="meta"><h3>43-feature-clubs</h3><code>Posts/43-feature-clubs.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/44-feature-subscription.png" alt="44-feature-subscription" loading="lazy"/></div>
+    <div class="meta"><h3>44-feature-subscription</h3><code>Posts/44-feature-subscription.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/45-feature-notifications.png" alt="45-feature-notifications" loading="lazy"/></div>
+    <div class="meta"><h3>45-feature-notifications</h3><code>Posts/45-feature-notifications.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/46-feature-ai-copilot.png" alt="46-feature-ai-copilot" loading="lazy"/></div>
+    <div class="meta"><h3>46-feature-ai-copilot</h3><code>Posts/46-feature-ai-copilot.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/47-feature-injury.png" alt="47-feature-injury" loading="lazy"/></div>
+    <div class="meta"><h3>47-feature-injury</h3><code>Posts/47-feature-injury.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/48-feature-hydration.png" alt="48-feature-hydration" loading="lazy"/></div>
+    <div class="meta"><h3>48-feature-hydration</h3><code>Posts/48-feature-hydration.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/49-feature-race-day.png" alt="49-feature-race-day" loading="lazy"/></div>
+    <div class="meta"><h3>49-feature-race-day</h3><code>Posts/49-feature-race-day.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/50-feature-builder.png" alt="50-feature-builder" loading="lazy"/></div>
+    <div class="meta"><h3>50-feature-builder</h3><code>Posts/50-feature-builder.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/51-feature-nutrition.png" alt="51-feature-nutrition" loading="lazy"/></div>
+    <div class="meta"><h3>51-feature-nutrition</h3><code>Posts/51-feature-nutrition.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/52-feature-team.png" alt="52-feature-team" loading="lazy"/></div>
+    <div class="meta"><h3>52-feature-team</h3><code>Posts/52-feature-team.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/53-feature-hr-zones.png" alt="53-feature-hr-zones" loading="lazy"/></div>
+    <div class="meta"><h3>53-feature-hr-zones</h3><code>Posts/53-feature-hr-zones.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/54-feature-achievements.png" alt="54-feature-achievements" loading="lazy"/></div>
+    <div class="meta"><h3>54-feature-achievements</h3><code>Posts/54-feature-achievements.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/55-feature-coach-finder.png" alt="55-feature-coach-finder" loading="lazy"/></div>
+    <div class="meta"><h3>55-feature-coach-finder</h3><code>Posts/55-feature-coach-finder.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/56-feature-handshake.png" alt="56-feature-handshake" loading="lazy"/></div>
+    <div class="meta"><h3>56-feature-handshake</h3><code>Posts/56-feature-handshake.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/57-feature-export.png" alt="57-feature-export" loading="lazy"/></div>
+    <div class="meta"><h3>57-feature-export</h3><code>Posts/57-feature-export.png</code></div></article><article class="card"><div class="thumb" style="aspect-ratio:1/1"><img src="Posts/58-feature-onboarding.png" alt="58-feature-onboarding" loading="lazy"/></div>
+    <div class="meta"><h3>58-feature-onboarding</h3><code>Posts/58-feature-onboarding.png</code></div></article></div></section>
+  <section id="carousels" class="section"><header><h2>Carousels (17 sets)</h2><p>Swipe sets prontos</p></header>
+    <div class="carousel-block"><h3>01-coach-athlete-lifestyle</h3><p class="path"><code>Carousels/01-coach-athlete-lifestyle/</code> · 10 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/01-coach-athlete-lifestyle/01-01-coach-tablet-track.png" alt="slide 1" loading="lazy"/><figcaption>1/10</figcaption></figure><figure><img src="Carousels/01-coach-athlete-lifestyle/02-05-coach-athlete-sidelines.png" alt="slide 2" loading="lazy"/><figcaption>2/10</figcaption></figure><figure><img src="Carousels/01-coach-athlete-lifestyle/03-08-swim-coach-poolside.png" alt="slide 3" loading="lazy"/><figcaption>3/10</figcaption></figure><figure><img src="Carousels/01-coach-athlete-lifestyle/04-14-basketball-coach-timeout.png" alt="slide 4" loading="lazy"/><figcaption>4/10</figcaption></figure><figure><img src="Carousels/01-coach-athlete-lifestyle/05-18-rowing-coach-dock.png" alt="slide 5" loading="lazy"/><figcaption>5/10</figcaption></figure><figure><img src="Carousels/01-coach-athlete-lifestyle/06-22-night-stadium-coach.png" alt="slide 6" loading="lazy"/><figcaption>6/10</figcaption></figure><figure><img src="Carousels/01-coach-athlete-lifestyle/07-27-master-athlete-coach.png" alt="slide 7" loading="lazy"/><figcaption>7/10</figcaption></figure><figure><img src="Carousels/01-coach-athlete-lifestyle/08-v2-11-black-coach-latina-swim.png" alt="slide 8" loading="lazy"/><figcaption>8/10</figcaption></figure><figure><img src="Carousels/01-coach-athlete-lifestyle/09-v2-31-black-golf-coach.png" alt="slide 9" loading="lazy"/><figcaption>9/10</figcaption></figure><figure><img src="Carousels/01-coach-athlete-lifestyle/10-v2-32-multiracial-rowing.png" alt="slide 10" loading="lazy"/><figcaption>10/10</figcaption></figure></div></div><div class="carousel-block"><h3>02-diversity-sports</h3><p class="path"><code>Carousels/02-diversity-sports/</code> · 10 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/02-diversity-sports/01-v2-01-black-sprint-coach.png" alt="slide 1" loading="lazy"/><figcaption>1/10</figcaption></figure><figure><img src="Carousels/02-diversity-sports/02-v2-02-latina-volleyball.png" alt="slide 2" loading="lazy"/><figcaption>2/10</figcaption></figure><figure><img src="Carousels/02-diversity-sports/03-v2-04-asian-figure-skating.png" alt="slide 3" loading="lazy"/><figcaption>3/10</figcaption></figure><figure><img src="Carousels/02-diversity-sports/04-v2-05-afro-capoeira.png" alt="slide 4" loading="lazy"/><figcaption>4/10</figcaption></figure><figure><img src="Carousels/02-diversity-sports/05-v2-08-south-asian-cricket.png" alt="slide 5" loading="lazy"/><figcaption>5/10</figcaption></figure><figure><img src="Carousels/02-diversity-sports/06-v2-12-indigenous-climbing.png" alt="slide 6" loading="lazy"/><figcaption>6/10</figcaption></figure><figure><img src="Carousels/02-diversity-sports/07-v2-15-black-rugby.png" alt="slide 7" loading="lazy"/><figcaption>7/10</figcaption></figure><figure><img src="Carousels/02-diversity-sports/08-v2-20-afro-caribbean-beach-volleyball.png" alt="slide 8" loading="lazy"/><figcaption>8/10</figcaption></figure><figure><img src="Carousels/02-diversity-sports/09-v2-23-middle-eastern-fencing.png" alt="slide 9" loading="lazy"/><figcaption>9/10</figcaption></figure><figure><img src="Carousels/02-diversity-sports/10-v2-26-pacific-rugby-sevens.png" alt="slide 10" loading="lazy"/><figcaption>10/10</figcaption></figure></div></div><div class="carousel-block"><h3>03-devices-mobile-tablet-wearos</h3><p class="path"><code>Carousels/03-devices-mobile-tablet-wearos/</code> · 10 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/03-devices-mobile-tablet-wearos/01-v3-01-black-kickboxing-phone-selfie.png" alt="slide 1" loading="lazy"/><figcaption>1/10</figcaption></figure><figure><img src="Carousels/03-devices-mobile-tablet-wearos/02-v3-02-latina-handball-wearos.png" alt="slide 2" loading="lazy"/><figcaption>2/10</figcaption></figure><figure><img src="Carousels/03-devices-mobile-tablet-wearos/03-v3-03-south-asian-cricket-tablet-wide.png" alt="slide 3" loading="lazy"/><figcaption>3/10</figcaption></figure><figure><img src="Carousels/03-devices-mobile-tablet-wearos/04-v3-04-black-marathon-wearos-macro.png" alt="slide 4" loading="lazy"/><figcaption>4/10</figcaption></figure><figure><img src="Carousels/03-devices-mobile-tablet-wearos/05-v3-07-middle-eastern-weightlifting-tablet.png" alt="slide 5" loading="lazy"/><figcaption>5/10</figcaption></figure><figure><img src="Carousels/03-devices-mobile-tablet-wearos/06-v3-08-latina-climbing-wearos-pov.png" alt="slide 6" loading="lazy"/><figcaption>6/10</figcaption></figure><figure><img src="Carousels/03-devices-mobile-tablet-wearos/07-v3-12-latino-futsal-wearos.png" alt="slide 7" loading="lazy"/><figcaption>7/10</figcaption></figure><figure><img src="Carousels/03-devices-mobile-tablet-wearos/08-v3-13-black-triathlon-tablet-rear.png" alt="slide 8" loading="lazy"/><figcaption>8/10</figcaption></figure><figure><img src="Carousels/03-devices-mobile-tablet-wearos/09-v3-15-afro-latina-gymnastics-wearos.png" alt="slide 9" loading="lazy"/><figcaption>9/10</figcaption></figure><figure><img src="Carousels/03-devices-mobile-tablet-wearos/10-v3-16-asian-badminton-all-devices.png" alt="slide 10" loading="lazy"/><figcaption>10/10</figcaption></figure></div></div><div class="carousel-block"><h3>04-multi-sport-training</h3><p class="path"><code>Carousels/04-multi-sport-training/</code> · 10 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/04-multi-sport-training/01-06-yoga-coach-tablet.png" alt="slide 1" loading="lazy"/><figcaption>1/10</figcaption></figure><figure><img src="Carousels/04-multi-sport-training/02-07-bjj-coach-phone.png" alt="slide 2" loading="lazy"/><figcaption>2/10</figcaption></figure><figure><img src="Carousels/04-multi-sport-training/03-09-climbing-coach-phone.png" alt="slide 3" loading="lazy"/><figcaption>3/10</figcaption></figure><figure><img src="Carousels/04-multi-sport-training/04-10-crossfit-coach-tablet.png" alt="slide 4" loading="lazy"/><figcaption>4/10</figcaption></figure><figure><img src="Carousels/04-multi-sport-training/05-13-tennis-athlete-phone.png" alt="slide 5" loading="lazy"/><figcaption>5/10</figcaption></figure><figure><img src="Carousels/04-multi-sport-training/06-17-pilates-coach-tablet.png" alt="slide 6" loading="lazy"/><figcaption>6/10</figcaption></figure><figure><img src="Carousels/04-multi-sport-training/07-24-soccer-postmatch-phone.png" alt="slide 7" loading="lazy"/><figcaption>7/10</figcaption></figure><figure><img src="Carousels/04-multi-sport-training/08-25-boxing-coach-corner.png" alt="slide 8" loading="lazy"/><figcaption>8/10</figcaption></figure><figure><img src="Carousels/04-multi-sport-training/09-30-skate-coach-park.png" alt="slide 9" loading="lazy"/><figcaption>9/10</figcaption></figure><figure><img src="Carousels/04-multi-sport-training/10-31-gymnastics-coach-tablet.png" alt="slide 10" loading="lazy"/><figcaption>10/10</figcaption></figure></div></div><div class="carousel-block"><h3>05-athlete-recovery-performance</h3><p class="path"><code>Carousels/05-athlete-recovery-performance/</code> · 10 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/05-athlete-recovery-performance/01-03-athlete-hrv-track.png" alt="slide 1" loading="lazy"/><figcaption>1/10</figcaption></figure><figure><img src="Carousels/05-athlete-recovery-performance/02-04-cyclist-live-session.png" alt="slide 2" loading="lazy"/><figcaption>2/10</figcaption></figure><figure><img src="Carousels/05-athlete-recovery-performance/03-11-morning-handshake-sunrise.png" alt="slide 3" loading="lazy"/><figcaption>3/10</figcaption></figure><figure><img src="Carousels/05-athlete-recovery-performance/04-12-celebration-pr-gym.png" alt="slide 4" loading="lazy"/><figcaption>4/10</figcaption></figure><figure><img src="Carousels/05-athlete-recovery-performance/05-15-trail-runner-summit.png" alt="slide 5" loading="lazy"/><figcaption>5/10</figcaption></figure><figure><img src="Carousels/05-athlete-recovery-performance/06-19-marathon-group-coach.png" alt="slide 6" loading="lazy"/><figcaption>6/10</figcaption></figure><figure><img src="Carousels/05-athlete-recovery-performance/07-20-powerlifter-phone-gym.png" alt="slide 7" loading="lazy"/><figcaption>7/10</figcaption></figure><figure><img src="Carousels/05-athlete-recovery-performance/08-21-recovery-foam-roll.png" alt="slide 8" loading="lazy"/><figcaption>8/10</figcaption></figure><figure><img src="Carousels/05-athlete-recovery-performance/09-v2-07-black-crossfit-pr.png" alt="slide 9" loading="lazy"/><figcaption>9/10</figcaption></figure><figure><img src="Carousels/05-athlete-recovery-performance/10-v2-25-black-triathlete.png" alt="slide 10" loading="lazy"/><figcaption>10/10</figcaption></figure></div></div><div class="carousel-block"><h3>06-coach-tools-deep-dive</h3><p class="path"><code>Carousels/06-coach-tools-deep-dive/</code> · 10 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/06-coach-tools-deep-dive/01-02-coach-phone-gym.png" alt="slide 1" loading="lazy"/><figcaption>1/10</figcaption></figure><figure><img src="Carousels/06-coach-tools-deep-dive/02-v2-03-black-basketball-coach.png" alt="slide 2" loading="lazy"/><figcaption>2/10</figcaption></figure><figure><img src="Carousels/06-coach-tools-deep-dive/03-v2-10-black-boxing-coach.png" alt="slide 3" loading="lazy"/><figcaption>3/10</figcaption></figure><figure><img src="Carousels/06-coach-tools-deep-dive/04-v2-13-black-yoga-coach.png" alt="slide 4" loading="lazy"/><figcaption>4/10</figcaption></figure><figure><img src="Carousels/06-coach-tools-deep-dive/05-v2-17-latina-dance-fitness.png" alt="slide 5" loading="lazy"/><figcaption>5/10</figcaption></figure><figure><img src="Carousels/06-coach-tools-deep-dive/06-v2-19-south-asian-badminton.png" alt="slide 6" loading="lazy"/><figcaption>6/10</figcaption></figure><figure><img src="Carousels/06-coach-tools-deep-dive/07-v2-21-latino-equestrian.png" alt="slide 7" loading="lazy"/><figcaption>7/10</figcaption></figure><figure><img src="Carousels/06-coach-tools-deep-dive/08-v2-27-latina-pole-vault.png" alt="slide 8" loading="lazy"/><figcaption>8/10</figcaption></figure><figure><img src="Carousels/06-coach-tools-deep-dive/09-v2-29-asian-taekwondo.png" alt="slide 9" loading="lazy"/><figcaption>9/10</figcaption></figure><figure><img src="Carousels/06-coach-tools-deep-dive/10-32-ai-copilot-review.png" alt="slide 10" loading="lazy"/><figcaption>10/10</figcaption></figure></div></div><div class="carousel-block"><h3>07-educational-fitconnect</h3><p class="path"><code>Carousels/07-educational-fitconnect/</code> · 7 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/07-educational-fitconnect/01-edu-01-what-is-hrv.png" alt="slide 1" loading="lazy"/><figcaption>1/7</figcaption></figure><figure><img src="Carousels/07-educational-fitconnect/02-edu-02-morning-handshake.png" alt="slide 2" loading="lazy"/><figcaption>2/7</figcaption></figure><figure><img src="Carousels/07-educational-fitconnect/03-edu-03-live-session.png" alt="slide 3" loading="lazy"/><figcaption>3/7</figcaption></figure><figure><img src="Carousels/07-educational-fitconnect/04-edu-04-ai-copilot.png" alt="slide 4" loading="lazy"/><figcaption>4/7</figcaption></figure><figure><img src="Carousels/07-educational-fitconnect/05-edu-05-5-reasons.png" alt="slide 5" loading="lazy"/><figcaption>5/7</figcaption></figure><figure><img src="Carousels/07-educational-fitconnect/06-edu-06-cta-start-free.png" alt="slide 6" loading="lazy"/><figcaption>6/7</figcaption></figure><figure><img src="Carousels/07-educational-fitconnect/07-edu-07-coach-vs-athlete.png" alt="slide 7" loading="lazy"/><figcaption>7/7</figcaption></figure></div></div><div class="carousel-block"><h3>08-mockups-product</h3><p class="path"><code>Carousels/08-mockups-product/</code> · 8 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/08-mockups-product/01-mockup-01-athlete-dashboard.png" alt="slide 1" loading="lazy"/><figcaption>1/8</figcaption></figure><figure><img src="Carousels/08-mockups-product/02-mockup-02-coach-dashboard-tablet-phone.png" alt="slide 2" loading="lazy"/><figcaption>2/8</figcaption></figure><figure><img src="Carousels/08-mockups-product/03-mockup-03-wearos-phone-live-session.png" alt="slide 3" loading="lazy"/><figcaption>3/8</figcaption></figure><figure><img src="Carousels/08-mockups-product/04-mockup-04-three-devices-ecosystem.png" alt="slide 4" loading="lazy"/><figcaption>4/8</figcaption></figure><figure><img src="Carousels/08-mockups-product/05-mockup-05-morning-handshake-phone.png" alt="slide 5" loading="lazy"/><figcaption>5/8</figcaption></figure><figure><img src="Carousels/08-mockups-product/06-mockup-06-ai-copilot-tablet.png" alt="slide 6" loading="lazy"/><figcaption>6/8</figcaption></figure><figure><img src="Carousels/08-mockups-product/07-mockup-07-celebration-pr-phone.png" alt="slide 7" loading="lazy"/><figcaption>7/8</figcaption></figure><figure><img src="Carousels/08-mockups-product/08-mockup-08-theme-picker-phone.png" alt="slide 8" loading="lazy"/><figcaption>8/8</figcaption></figure></div></div><div class="carousel-block"><h3>09-app-features</h3><p class="path"><code>Carousels/09-app-features/</code> · 6 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/09-app-features/01-mockup-09-community-feed.png" alt="slide 1" loading="lazy"/><figcaption>1/6</figcaption></figure><figure><img src="Carousels/09-app-features/02-mockup-10-ranks-leaderboard.png" alt="slide 2" loading="lazy"/><figcaption>2/6</figcaption></figure><figure><img src="Carousels/09-app-features/03-mockup-11-athlete-profile.png" alt="slide 3" loading="lazy"/><figcaption>3/6</figcaption></figure><figure><img src="Carousels/09-app-features/04-mockup-12-coach-search.png" alt="slide 4" loading="lazy"/><figcaption>4/6</figcaption></figure><figure><img src="Carousels/09-app-features/05-mockup-13-coach-roster.png" alt="slide 5" loading="lazy"/><figcaption>5/6</figcaption></figure><figure><img src="Carousels/09-app-features/06-mockup-14-inbox-nudge.png" alt="slide 6" loading="lazy"/><figcaption>6/6</figcaption></figure></div></div><div class="carousel-block"><h3>10-educational-v2</h3><p class="path"><code>Carousels/10-educational-v2/</code> · 5 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/10-educational-v2/01-edu-08-training-zones.png" alt="slide 1" loading="lazy"/><figcaption>1/5</figcaption></figure><figure><img src="Carousels/10-educational-v2/02-edu-09-periodization.png" alt="slide 2" loading="lazy"/><figcaption>2/5</figcaption></figure><figure><img src="Carousels/10-educational-v2/03-edu-10-coach-match.png" alt="slide 3" loading="lazy"/><figcaption>3/5</figcaption></figure><figure><img src="Carousels/10-educational-v2/04-edu-11-load-management.png" alt="slide 4" loading="lazy"/><figcaption>4/5</figcaption></figure><figure><img src="Carousels/10-educational-v2/05-edu-12-morning-handshake.png" alt="slide 5" loading="lazy"/><figcaption>5/5</figcaption></figure></div></div><div class="carousel-block"><h3>11-abstract-brand</h3><p class="path"><code>Carousels/11-abstract-brand/</code> · 5 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/11-abstract-brand/01-abstract-01-connect-train-perform.png" alt="slide 1" loading="lazy"/><figcaption>1/5</figcaption></figure><figure><img src="Carousels/11-abstract-brand/02-abstract-02-readiness-ring.png" alt="slide 2" loading="lazy"/><figcaption>2/5</figcaption></figure><figure><img src="Carousels/11-abstract-brand/03-abstract-03-signal-grid.png" alt="slide 3" loading="lazy"/><figcaption>3/5</figcaption></figure><figure><img src="Carousels/11-abstract-brand/04-abstract-04-weekly-load.png" alt="slide 4" loading="lazy"/><figcaption>4/5</figcaption></figure><figure><img src="Carousels/11-abstract-brand/05-abstract-05-volt-pulse.png" alt="slide 5" loading="lazy"/><figcaption>5/5</figcaption></figure></div></div><div class="carousel-block"><h3>12-app-features-v2</h3><p class="path"><code>Carousels/12-app-features-v2/</code> · 12 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/12-app-features-v2/01-mockup-15-live-session.png" alt="slide 1" loading="lazy"/><figcaption>1/12</figcaption></figure><figure><img src="Carousels/12-app-features-v2/02-mockup-16-weekly-calendar.png" alt="slide 2" loading="lazy"/><figcaption>2/12</figcaption></figure><figure><img src="Carousels/12-app-features-v2/03-mockup-17-sleep-analysis.png" alt="slide 3" loading="lazy"/><figcaption>3/12</figcaption></figure><figure><img src="Carousels/12-app-features-v2/04-mockup-18-wearos-sync.png" alt="slide 4" loading="lazy"/><figcaption>4/12</figcaption></figure><figure><img src="Carousels/12-app-features-v2/05-mockup-19-programs-marketplace.png" alt="slide 5" loading="lazy"/><figcaption>5/12</figcaption></figure><figure><img src="Carousels/12-app-features-v2/06-mockup-20-coach-chat.png" alt="slide 6" loading="lazy"/><figcaption>6/12</figcaption></figure><figure><img src="Carousels/12-app-features-v2/07-mockup-21-performance-metrics.png" alt="slide 7" loading="lazy"/><figcaption>7/12</figcaption></figure><figure><img src="Carousels/12-app-features-v2/08-mockup-22-progress-photos.png" alt="slide 8" loading="lazy"/><figcaption>8/12</figcaption></figure><figure><img src="Carousels/12-app-features-v2/09-mockup-23-clubs-groups.png" alt="slide 9" loading="lazy"/><figcaption>9/12</figcaption></figure><figure><img src="Carousels/12-app-features-v2/10-mockup-24-subscription.png" alt="slide 10" loading="lazy"/><figcaption>10/12</figcaption></figure><figure><img src="Carousels/12-app-features-v2/11-mockup-25-notifications.png" alt="slide 11" loading="lazy"/><figcaption>11/12</figcaption></figure><figure><img src="Carousels/12-app-features-v2/12-mockup-26-ai-copilot.png" alt="slide 12" loading="lazy"/><figcaption>12/12</figcaption></figure></div></div><div class="carousel-block"><h3>13-educational-v3</h3><p class="path"><code>Carousels/13-educational-v3/</code> · 12 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/13-educational-v3/01-edu-13-hrv-basics.png" alt="slide 1" loading="lazy"/><figcaption>1/12</figcaption></figure><figure><img src="Carousels/13-educational-v3/02-edu-14-sleep-performance.png" alt="slide 2" loading="lazy"/><figcaption>2/12</figcaption></figure><figure><img src="Carousels/13-educational-v3/03-edu-15-overtraining.png" alt="slide 3" loading="lazy"/><figcaption>3/12</figcaption></figure><figure><img src="Carousels/13-educational-v3/04-edu-16-nutrition.png" alt="slide 4" loading="lazy"/><figcaption>4/12</figcaption></figure><figure><img src="Carousels/13-educational-v3/05-edu-17-smart-goals.png" alt="slide 5" loading="lazy"/><figcaption>5/12</figcaption></figure><figure><img src="Carousels/13-educational-v3/06-edu-18-taper.png" alt="slide 6" loading="lazy"/><figcaption>6/12</figcaption></figure><figure><img src="Carousels/13-educational-v3/07-edu-19-cross-training.png" alt="slide 7" loading="lazy"/><figcaption>7/12</figcaption></figure><figure><img src="Carousels/13-educational-v3/08-edu-20-mobility.png" alt="slide 8" loading="lazy"/><figcaption>8/12</figcaption></figure><figure><img src="Carousels/13-educational-v3/09-edu-21-pr-tracking.png" alt="slide 9" loading="lazy"/><figcaption>9/12</figcaption></figure><figure><img src="Carousels/13-educational-v3/10-edu-22-why-coach.png" alt="slide 10" loading="lazy"/><figcaption>10/12</figcaption></figure><figure><img src="Carousels/13-educational-v3/11-edu-23-rpe.png" alt="slide 11" loading="lazy"/><figcaption>11/12</figcaption></figure><figure><img src="Carousels/13-educational-v3/12-edu-24-breathing.png" alt="slide 12" loading="lazy"/><figcaption>12/12</figcaption></figure></div></div><div class="carousel-block"><h3>14-abstract-v2</h3><p class="path"><code>Carousels/14-abstract-v2/</code> · 12 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/14-abstract-v2/01-abstract-06-data-decisions.png" alt="slide 1" loading="lazy"/><figcaption>1/12</figcaption></figure><figure><img src="Carousels/14-abstract-v2/02-abstract-07-smart-training.png" alt="slide 2" loading="lazy"/><figcaption>2/12</figcaption></figure><figure><img src="Carousels/14-abstract-v2/03-abstract-08-one-ecosystem.png" alt="slide 3" loading="lazy"/><figcaption>3/12</figcaption></figure><figure><img src="Carousels/14-abstract-v2/04-abstract-09-energy-focus.png" alt="slide 4" loading="lazy"/><figcaption>4/12</figcaption></figure><figure><img src="Carousels/14-abstract-v2/05-abstract-10-unique-athlete.png" alt="slide 5" loading="lazy"/><figcaption>5/12</figcaption></figure><figure><img src="Carousels/14-abstract-v2/06-abstract-11-sustainable.png" alt="slide 6" loading="lazy"/><figcaption>6/12</figcaption></figure><figure><img src="Carousels/14-abstract-v2/07-abstract-12-future-coaching.png" alt="slide 7" loading="lazy"/><figcaption>7/12</figcaption></figure><figure><img src="Carousels/14-abstract-v2/08-abstract-13-green-light.png" alt="slide 8" loading="lazy"/><figcaption>8/12</figcaption></figure><figure><img src="Carousels/14-abstract-v2/09-abstract-14-courage-rest.png" alt="slide 9" loading="lazy"/><figcaption>9/12</figcaption></figure><figure><img src="Carousels/14-abstract-v2/10-abstract-15-evolution.png" alt="slide 10" loading="lazy"/><figcaption>10/12</figcaption></figure><figure><img src="Carousels/14-abstract-v2/11-abstract-16-strong-community.png" alt="slide 11" loading="lazy"/><figcaption>11/12</figcaption></figure><figure><img src="Carousels/14-abstract-v2/12-abstract-17-no-limits.png" alt="slide 12" loading="lazy"/><figcaption>12/12</figcaption></figure></div></div><div class="carousel-block"><h3>15-app-features-v3</h3><p class="path"><code>Carousels/15-app-features-v3/</code> · 12 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/15-app-features-v3/01-mockup-27-injury-prevention.png" alt="slide 1" loading="lazy"/><figcaption>1/12</figcaption></figure><figure><img src="Carousels/15-app-features-v3/02-mockup-28-hydration.png" alt="slide 2" loading="lazy"/><figcaption>2/12</figcaption></figure><figure><img src="Carousels/15-app-features-v3/03-mockup-29-race-day.png" alt="slide 3" loading="lazy"/><figcaption>3/12</figcaption></figure><figure><img src="Carousels/15-app-features-v3/04-mockup-30-workout-builder.png" alt="slide 4" loading="lazy"/><figcaption>4/12</figcaption></figure><figure><img src="Carousels/15-app-features-v3/05-mockup-31-nutrition-log.png" alt="slide 5" loading="lazy"/><figcaption>5/12</figcaption></figure><figure><img src="Carousels/15-app-features-v3/06-mockup-32-team-dashboard.png" alt="slide 6" loading="lazy"/><figcaption>6/12</figcaption></figure><figure><img src="Carousels/15-app-features-v3/07-mockup-33-hr-zones.png" alt="slide 7" loading="lazy"/><figcaption>7/12</figcaption></figure><figure><img src="Carousels/15-app-features-v3/08-mockup-34-achievements.png" alt="slide 8" loading="lazy"/><figcaption>8/12</figcaption></figure><figure><img src="Carousels/15-app-features-v3/09-mockup-35-coach-finder.png" alt="slide 9" loading="lazy"/><figcaption>9/12</figcaption></figure><figure><img src="Carousels/15-app-features-v3/10-mockup-36-morning-handshake.png" alt="slide 10" loading="lazy"/><figcaption>10/12</figcaption></figure><figure><img src="Carousels/15-app-features-v3/11-mockup-37-data-export.png" alt="slide 11" loading="lazy"/><figcaption>11/12</figcaption></figure><figure><img src="Carousels/15-app-features-v3/12-mockup-38-onboarding.png" alt="slide 12" loading="lazy"/><figcaption>12/12</figcaption></figure></div></div><div class="carousel-block"><h3>16-educational-v4</h3><p class="path"><code>Carousels/16-educational-v4/</code> · 12 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/16-educational-v4/01-edu-25-warmup.png" alt="slide 1" loading="lazy"/><figcaption>1/12</figcaption></figure><figure><img src="Carousels/16-educational-v4/02-edu-26-cooldown.png" alt="slide 2" loading="lazy"/><figcaption>2/12</figcaption></figure><figure><img src="Carousels/16-educational-v4/03-edu-27-heart-rate.png" alt="slide 3" loading="lazy"/><figcaption>3/12</figcaption></figure><figure><img src="Carousels/16-educational-v4/04-edu-28-injury-prevention.png" alt="slide 4" loading="lazy"/><figcaption>4/12</figcaption></figure><figure><img src="Carousels/16-educational-v4/05-edu-29-hydration.png" alt="slide 5" loading="lazy"/><figcaption>5/12</figcaption></figure><figure><img src="Carousels/16-educational-v4/06-edu-30-mental.png" alt="slide 6" loading="lazy"/><figcaption>6/12</figcaption></figure><figure><img src="Carousels/16-educational-v4/07-edu-31-competition.png" alt="slide 7" loading="lazy"/><figcaption>7/12</figcaption></figure><figure><img src="Carousels/16-educational-v4/08-edu-32-deload.png" alt="slide 8" loading="lazy"/><figcaption>8/12</figcaption></figure><figure><img src="Carousels/16-educational-v4/09-edu-33-supplements.png" alt="slide 9" loading="lazy"/><figcaption>9/12</figcaption></figure><figure><img src="Carousels/16-educational-v4/10-edu-34-failure.png" alt="slide 10" loading="lazy"/><figcaption>10/12</figcaption></figure><figure><img src="Carousels/16-educational-v4/11-edu-35-periodization.png" alt="slide 11" loading="lazy"/><figcaption>11/12</figcaption></figure><figure><img src="Carousels/16-educational-v4/12-edu-36-active-rest.png" alt="slide 12" loading="lazy"/><figcaption>12/12</figcaption></figure></div></div><div class="carousel-block"><h3>17-abstract-v3</h3><p class="path"><code>Carousels/17-abstract-v3/</code> · 12 slides</p>
+    <div class="carousel-strip"><figure><img src="Carousels/17-abstract-v3/01-abstract-18-trust-process.png" alt="slide 1" loading="lazy"/><figcaption>1/12</figcaption></figure><figure><img src="Carousels/17-abstract-v3/02-abstract-19-morning-ritual.png" alt="slide 2" loading="lazy"/><figcaption>2/12</figcaption></figure><figure><img src="Carousels/17-abstract-v3/03-abstract-20-body-signals.png" alt="slide 3" loading="lazy"/><figcaption>3/12</figcaption></figure><figure><img src="Carousels/17-abstract-v3/04-abstract-21-coach-athlete.png" alt="slide 4" loading="lazy"/><figcaption>4/12</figcaption></figure><figure><img src="Carousels/17-abstract-v3/05-abstract-22-small-wins.png" alt="slide 5" loading="lazy"/><figcaption>5/12</figcaption></figure><figure><img src="Carousels/17-abstract-v3/06-abstract-23-discipline.png" alt="slide 6" loading="lazy"/><figcaption>6/12</figcaption></figure><figure><img src="Carousels/17-abstract-v3/07-abstract-24-race-morning.png" alt="slide 7" loading="lazy"/><figcaption>7/12</figcaption></figure><figure><img src="Carousels/17-abstract-v3/08-abstract-25-hydrate.png" alt="slide 8" loading="lazy"/><figcaption>8/12</figcaption></figure><figure><img src="Carousels/17-abstract-v3/09-abstract-26-listen-rest.png" alt="slide 9" loading="lazy"/><figcaption>9/12</figcaption></figure><figure><img src="Carousels/17-abstract-v3/10-abstract-27-team-energy.png" alt="slide 10" loading="lazy"/><figcaption>10/12</figcaption></figure><figure><img src="Carousels/17-abstract-v3/11-abstract-28-precision.png" alt="slide 11" loading="lazy"/><figcaption>11/12</figcaption></figure><figure><img src="Carousels/17-abstract-v3/12-abstract-29-start-today.png" alt="slide 12" loading="lazy"/><figcaption>12/12</figcaption></figure></div></div></section>
+  <section id="reels" class="section"><header><h2>Reels animados (30)</h2><p>MP4 9:16 · PT · logo oficial</p></header>
+    <div class="grid reels-grid"><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-01-runner.mp4" poster="Reels/reel-hero-01-runner-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-01-runner</h3><code>Reels/Animated/reel-hero-01-runner.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-02-strength.mp4" poster="Reels/reel-hero-02-strength-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-02-strength</h3><code>Reels/Animated/reel-hero-02-strength.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-03-swim.mp4" poster="Reels/reel-hero-03-swim-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-03-swim</h3><code>Reels/Animated/reel-hero-03-swim.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-04-cycle.mp4" poster="Reels/reel-hero-04-cycle-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-04-cycle</h3><code>Reels/Animated/reel-hero-04-cycle.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-05-stack.mp4" poster="Reels/reel-hero-05-stack-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-05-stack</h3><code>Reels/Animated/reel-hero-05-stack.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-06-recovery.mp4" poster="Reels/reel-hero-06-recovery-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-06-recovery</h3><code>Reels/Animated/reel-hero-06-recovery.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-07-wakeup.mp4" poster="Reels/reel-hero-07-wakeup-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-07-wakeup</h3><code>Reels/Animated/reel-hero-07-wakeup.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-08-reps.mp4" poster="Reels/reel-hero-08-reps-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-08-reps</h3><code>Reels/Animated/reel-hero-08-reps.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-09-body.mp4" poster="Reels/reel-hero-09-body-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-09-body</h3><code>Reels/Animated/reel-hero-09-body.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-10-remote.mp4" poster="Reels/reel-hero-10-remote-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-10-remote</h3><code>Reels/Animated/reel-hero-10-remote.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-11-pr.mp4" poster="Reels/reel-hero-11-pr-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-11-pr</h3><code>Reels/Animated/reel-hero-11-pr.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-12-hard-weeks.mp4" poster="Reels/reel-hero-12-hard-weeks-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-12-hard-weeks</h3><code>Reels/Animated/reel-hero-12-hard-weeks.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-13-sync.mp4" poster="Reels/reel-hero-13-sync-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-13-sync</h3><code>Reels/Animated/reel-hero-13-sync.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-14-tomorrow.mp4" poster="Reels/reel-hero-14-tomorrow-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-14-tomorrow</h3><code>Reels/Animated/reel-hero-14-tomorrow.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-15-technique.mp4" poster="Reels/reel-hero-15-technique-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-15-technique</h3><code>Reels/Animated/reel-hero-15-technique.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-16-recovery-pr.mp4" poster="Reels/reel-hero-16-recovery-pr-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-16-recovery-pr</h3><code>Reels/Animated/reel-hero-16-recovery-pr.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-17-one-percent.mp4" poster="Reels/reel-hero-17-one-percent-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-17-one-percent</h3><code>Reels/Animated/reel-hero-17-one-percent.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-18-pocket-gym.mp4" poster="Reels/reel-hero-18-pocket-gym-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-18-pocket-gym</h3><code>Reels/Animated/reel-hero-18-pocket-gym.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-19-warmup.mp4" poster="Reels/reel-hero-19-warmup-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-19-warmup</h3><code>Reels/Animated/reel-hero-19-warmup.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-20-hydrate.mp4" poster="Reels/reel-hero-20-hydrate-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-20-hydrate</h3><code>Reels/Animated/reel-hero-20-hydrate.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-21-race-day.mp4" poster="Reels/reel-hero-21-race-day-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-21-race-day</h3><code>Reels/Animated/reel-hero-21-race-day.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-22-coach-team.mp4" poster="Reels/reel-hero-22-coach-team-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-22-coach-team</h3><code>Reels/Animated/reel-hero-22-coach-team.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-23-zones.mp4" poster="Reels/reel-hero-23-zones-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-23-zones</h3><code>Reels/Animated/reel-hero-23-zones.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-24-streak.mp4" poster="Reels/reel-hero-24-streak-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-24-streak</h3><code>Reels/Animated/reel-hero-24-streak.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-25-match.mp4" poster="Reels/reel-hero-25-match-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-25-match</h3><code>Reels/Animated/reel-hero-25-match.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-26-morning.mp4" poster="Reels/reel-hero-26-morning-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-26-morning</h3><code>Reels/Animated/reel-hero-26-morning.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-27-data.mp4" poster="Reels/reel-hero-27-data-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-27-data</h3><code>Reels/Animated/reel-hero-27-data.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-28-start.mp4" poster="Reels/reel-hero-28-start-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-28-start</h3><code>Reels/Animated/reel-hero-28-start.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-29-deload.mp4" poster="Reels/reel-hero-29-deload-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-29-deload</h3><code>Reels/Animated/reel-hero-29-deload.mp4</code></div></article><article class="card reel-card"><div class="thumb reel-thumb"><video src="Reels/Animated/reel-hero-30-breathe.mp4" poster="Reels/reel-hero-30-breathe-cover.png" controls playsinline loop muted></video></div>
+    <div class="meta"><h3>reel-hero-30-breathe</h3><code>Reels/Animated/reel-hero-30-breathe.mp4</code></div></article></div></section></main>
+<footer>Gerado 2026-08-28 · <code>review-v3.html</code> · LogoMark oficial</footer>
+<div class="lightbox" id="lightbox"><img alt=""/></div>
+<script>
+const lb=document.getElementById('lightbox'),lbImg=lb.querySelector('img');
+document.querySelectorAll('.card img,.carousel-strip img').forEach(img=>{
+  img.style.cursor='zoom-in';img.addEventListener('click',()=>{lbImg.src=img.src;lb.classList.add('open');});
+});
+lb.addEventListener('click',()=>lb.classList.remove('open'));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')lb.classList.remove('open');});
+</script></body></html>

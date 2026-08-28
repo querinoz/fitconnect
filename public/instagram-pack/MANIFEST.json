@@ -105,5 +105,21 @@
   "branding": {
     "logo": "public/brand/logo-full-official.png",
     "logomark": "public/brand/logomark-official-256.png"
+  },
+  "batchV2": {
+    "mockups": 12,
+    "educational": 12,
+    "abstract": 12,
+    "features": 12,
+    "reels": 12,
+    "generatedAt": "2026-08-28"
+  },
+  "batchV3": {
+    "mockups": 12,
+    "educational": 12,
+    "abstract": 12,
+    "features": 12,
+    "reels": 12,
+    "generatedAt": "2026-08-28"
   }
 }

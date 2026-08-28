@@ -33,6 +33,8 @@
     "instagram:publish:token": "node scripts/publish-with-token.mjs",
     "instagram:publish:token:all": "node scripts/publish-with-token.mjs --all",
     "instagram:generate": "node scripts/generate-instagram-content.mjs",
+    "instagram:generate:batch-v2": "node scripts/generate-instagram-batch-v2.mjs",
+    "instagram:generate:batch-v3": "node scripts/generate-instagram-batch-v3.mjs",
     "instagram:review": "node scripts/build-instagram-review-v3.mjs"
   },
   "dependencies": {
