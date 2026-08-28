@@ -27,7 +27,8 @@
     "instagram:publish": "node scripts/publish-instagram.mjs --priority",
     "instagram:publish:dry": "node scripts/publish-instagram.mjs --dry-run",
     "instagram:verify": "node scripts/publish-instagram.mjs --verify",
-    "instagram:discover": "node scripts/meta-discover.mjs"
+    "instagram:discover": "node scripts/meta-discover.mjs",
+    "instagram:env-check": "node scripts/instagram-env-check.mjs"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
