@@ -67,8 +67,9 @@ fs.writeFileSync(envPath, envContent);
 console.log(`✓ Guardado em .env.local (gitignored)\n`);
 
 // Publicar
-console.log("📤 A publicar fila prioritária...\n");
-execSync("node scripts/publish-instagram.mjs --priority", {
+const publishArgs = process.argv.includes("--all") ? "--all" : "--priority";
+console.log(`📤 A publicar (${publishArgs})...\n`);
+execSync(`node scripts/publish-instagram.mjs ${publishArgs}`, {
   stdio: "inherit",
   env: { ...process.env, IG_USER_ID: target.igId, IG_ACCESS_TOKEN: target.pageToken }
 });

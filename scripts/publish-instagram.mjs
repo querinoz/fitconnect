@@ -100,8 +100,70 @@ Swipe → vê a diversidade que nos define.
 
 Connect. Train. Perform. 💚
 
-#FitConnect #AthleteLife #SportsTech #ConnectTrainPerform`
+#FitConnect #AthleteLife #SportsTech #ConnectTrainPerform`,
+
+  coachAthlete: `Coach × atleta — a ligação que muda o jogo.
+
+Readiness em tempo real · Nudges inteligentes · Plano que adapta ao atleta.
+
+Connect. Train. Perform. 💚
+
+#FitConnect #CoachLife #AthleteLife #SportsTech #ConnectTrainPerform`,
+
+  multiSport: `Uma identidade. Vários desportos.
+
+O teu perfil de atleta viaja contigo — da pista ao tatame, do mar ao ginásio.
+
+#FitConnect #MultiSport #AthleteLife #ConnectTrainPerform`,
+
+  recovery: `Recovery-aware training — treina mais inteligente, não só mais forte.
+
+HRV · sono · carga · readiness — tudo num só lugar.
+
+#FitConnect #Recovery #HRV #SportsTech #ConnectTrainPerform`,
+
+  coachTools: `Ferramentas que todo coach precisa.
+
+Roster heatmap · AI alerts · live session · nudges — o FitConnect no teu bolso.
+
+#FitConnect #CoachLife #CoachApp #SportsTech #ConnectTrainPerform`,
+
+  defaultPost: `Connect. Train. Perform. 💚
+
+O FitConnect liga atletas e coaches com readiness, HRV e treino ao vivo.
+
+Link na bio → fitconnect.app
+
+#FitConnect #SportsTech #ConnectTrainPerform #AthleteLife #CoachLife`
 };
+
+const CAROUSEL_CAPTIONS = {
+  "01-coach-athlete-lifestyle": CAPTIONS.coachAthlete,
+  "02-diversity-sports": CAPTIONS.diversity,
+  "03-devices-mobile-tablet-wearos": CAPTIONS.devices,
+  "04-multi-sport-training": CAPTIONS.multiSport,
+  "05-athlete-recovery-performance": CAPTIONS.recovery,
+  "06-coach-tools-deep-dive": CAPTIONS.coachTools,
+  "07-educational-fitconnect": CAPTIONS.educational,
+  "08-mockups-product": CAPTIONS.mockups
+};
+
+const POST_CAPTIONS = {
+  "Posts/22-mockup-athlete-dashboard.png": CAPTIONS.mockupDashboard,
+  "Posts/23-mockup-ecosystem.png": CAPTIONS.devices,
+  "Posts/24-mockup-ai-copilot.png": CAPTIONS.educational
+};
+
+const CAROUSEL_ORDER = [
+  "07-educational-fitconnect",
+  "08-mockups-product",
+  "02-diversity-sports",
+  "03-devices-mobile-tablet-wearos",
+  "01-coach-athlete-lifestyle",
+  "04-multi-sport-training",
+  "05-athlete-recovery-performance",
+  "06-coach-tools-deep-dive"
+];
 
 // ── Priority publish queue (from POSTING-STRATEGY.md) ──
 const PRIORITY_QUEUE = [
@@ -285,12 +347,113 @@ async function runPriority(dryRun) {
   return results;
 }
 
+function buildAllQueue() {
+  const queue = [];
+
+  for (const id of CAROUSEL_ORDER) {
+    const dir = path.join(PACK, "Carousels", id);
+    if (!fs.existsSync(dir)) continue;
+    queue.push({
+      type: "carousel",
+      id,
+      caption: CAROUSEL_CAPTIONS[id] || CAPTIONS.defaultPost
+    });
+  }
+
+  const posts = fs
+    .readdirSync(path.join(PACK, "Posts"))
+    .filter((f) => f.endsWith(".png"))
+    .sort();
+  for (const file of posts) {
+    const rel = `Posts/${file}`;
+    queue.push({
+      type: "post",
+      file: rel,
+      caption: POST_CAPTIONS[rel] || CAPTIONS.defaultPost
+    });
+  }
+
+  const stories = fs
+    .readdirSync(path.join(PACK, "Stories"))
+    .filter((f) => f.endsWith(".png"))
+    .sort();
+  for (const file of stories) {
+    queue.push({ type: "story", file: `Stories/${file}`, caption: "" });
+  }
+
+  const reelsDir = path.join(PACK, "Reels");
+  if (fs.existsSync(reelsDir)) {
+    const reels = fs
+      .readdirSync(reelsDir)
+      .filter((f) => f.endsWith(".png"))
+      .sort();
+    for (const file of reels) {
+      queue.push({
+        type: "story",
+        file: `Reels/${file}`,
+        caption: "",
+        note: "reel-cover"
+      });
+    }
+  }
+
+  return queue;
+}
+
+async function runQueue(queue, dryRun, label) {
+  console.log(`\n📋 ${label} (${queue.length} items)\n`);
+  const results = [];
+
+  for (let i = 0; i < queue.length; i++) {
+    const item = queue[i];
+    const progress = `[${i + 1}/${queue.length}]`;
+
+    if (dryRun) {
+      const detail = item.note ? ` (${item.note})` : "";
+      console.log(`${progress} [DRY-RUN] ${item.type}: ${item.id ?? item.file}${detail}`);
+      continue;
+    }
+
+    try {
+      let mediaId;
+      if (item.type === "carousel") {
+        console.log(`${progress} Carousel: ${item.id}`);
+        mediaId = await publishCarousel(item.id, item.caption);
+      } else if (item.type === "post") {
+        console.log(`${progress} Post: ${item.file}`);
+        mediaId = await publishSinglePost(item.file, item.caption);
+      } else if (item.type === "story") {
+        console.log(`${progress} Story: ${item.file}${item.note ? ` (${item.note})` : ""}`);
+        mediaId = await publishStory(item.file);
+      }
+      results.push({ ...item, mediaId, ok: true });
+    } catch (err) {
+      console.error(`  ✗ Erro: ${err.message}`);
+      results.push({ ...item, error: err.message, ok: false });
+    }
+
+    if (i < queue.length - 1) {
+      const delay = item.type === "story" ? STORY_DELAY_MS : DELAY_MS;
+      console.log(`  ⏳ Aguardando ${delay / 1000}s...\n`);
+      await sleep(delay);
+    }
+  }
+
+  return results;
+}
+
+async function runAll(dryRun) {
+  const queue = buildAllQueue();
+  return runQueue(queue, dryRun, "Publicação completa");
+}
+
 // ── Main ──
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const verifyOnly = args.includes("--verify");
-const priority = args.includes("--priority") || (args.length === 0 && !verifyOnly);
 const all = args.includes("--all");
+const priority =
+  !all && (args.includes("--priority") || (args.length === 0 && !verifyOnly));
 
 if (!IG_USER_ID || !IG_ACCESS_TOKEN) {
   console.error(`
@@ -315,23 +478,36 @@ console.log(`Dry-run: ${dryRun}\n`);
 
 try {
   await verifyCredentials();
-  await verifyPublicUrls(PRIORITY_QUEUE);
+
+  const queueToVerify = all ? buildAllQueue().slice(0, 3) : PRIORITY_QUEUE;
+  await verifyPublicUrls(queueToVerify);
 
   if (verifyOnly) {
-    console.log("\n✅ Credenciais e URLs OK — pronto para publicar.");
+    const total = all ? buildAllQueue().length : PRIORITY_QUEUE.length;
+    console.log(`\n✅ Credenciais e URLs OK — pronto para publicar (${total} items).`);
     process.exit(0);
   }
 
-  if (priority) {
-    const results = await runPriority(dryRun);
+  let results = [];
+
+  if (all) {
+    const queue = buildAllQueue();
+    const carousels = queue.filter((q) => q.type === "carousel").length;
+    const posts = queue.filter((q) => q.type === "post").length;
+    const stories = queue.filter((q) => q.type === "story").length;
+    const reelCovers = queue.filter((q) => q.note === "reel-cover").length;
+    console.log(
+      `\n📦 Modo --all: ${queue.length} items (${carousels} carousels, ${posts} posts, ${stories} stories incl. ${reelCovers} reel covers)\n`
+    );
+    results = await runAll(dryRun);
+  } else if (priority) {
+    results = await runPriority(dryRun);
+  }
+
+  if (results.length) {
     const ok = results.filter((r) => r.ok).length;
     const fail = results.filter((r) => r.ok === false).length;
     console.log(`\n✅ Concluído: ${ok} publicados, ${fail} falhas`);
-  }
-
-  if (all) {
-    console.log("\n⚠️  --all: publicação completa não implementada nesta versão.");
-    console.log("    Use --priority para a fila recomendada.");
   }
 } catch (err) {
   console.error(`\n❌ Falha: ${err.message}`);
