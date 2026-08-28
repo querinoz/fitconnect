@@ -21,18 +21,21 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import {
   buildContentPool,
   buildStrategicQueue,
   summarizeQueue
 } from "./instagram-strategic-queue.mjs";
 
-// Load .env.local if present (local publish without Cursor secrets)
+const PROFILE_CACHE = path.resolve("/workspace/.instagram-profile-cache.json");
+
+// Load .env.local — always override stale shell env
 const envLocal = path.resolve("/workspace/.env.local");
 if (fs.existsSync(envLocal)) {
   for (const line of fs.readFileSync(envLocal, "utf8").split("\n")) {
     const m = line.match(/^([A-Z_][A-Z0-9_]*)=(.*)$/);
-    if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
+    if (m) process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
   }
 }
 
@@ -259,8 +262,48 @@ const PRIORITY_QUEUE = [
   { type: "carousel", id: "03-devices-mobile-tablet-wearos", caption: CAPTIONS.devices },
 ];
 
-function sleep(ms) {
-  return new Promise((r) => setTimeout(r, ms));
+function captionFingerprint(caption) {
+  return (caption || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\p{L}\p{N}\s]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 100);
+}
+
+function loadProfileCaptionFingerprints() {
+  if (!fs.existsSync(PROFILE_CACHE)) return new Set();
+  try {
+    const cache = JSON.parse(fs.readFileSync(PROFILE_CACHE, "utf8"));
+    return new Set((cache.captionFingerprints || []).map((c) => c.fp));
+  } catch {
+    return new Set();
+  }
+}
+
+async function syncProfileIfNeeded() {
+  if (!process.argv.includes("--sync-profile") && !process.argv.includes("--strategic")) return;
+  console.log("🔄 A sincronizar com perfil @fitconnectsports...\n");
+  const { execSync } = await import("node:child_process");
+  try {
+    execSync("node scripts/sync-instagram-profile.mjs", {
+      stdio: "inherit",
+      env: { ...process.env, IG_ACCESS_TOKEN: IG_ACCESS_TOKEN, IG_USER_ID: IG_USER_ID }
+    });
+  } catch (e) {
+    console.warn("⚠️  Sync do perfil falhou — a continuar só com progress local\n");
+  }
+}
+
+function shouldSkipDuplicateCaption(item, profileCaptions) {
+  if (!item.caption || item.type === "story") return false;
+  const fp = captionFingerprint(item.caption);
+  if (!fp || fp.length < 20) return false;
+  // Skip generic default caption if already heavily used on profile
+  if (fp.includes("connect train perform") && profileCaptions.has(fp)) return true;
+  return profileCaptions.has(fp);
 }
 
 function itemKey(item) {
@@ -475,9 +518,17 @@ function buildStrategicFeedQueue() {
   return buildStrategicQueue(buildAllQueue());
 }
 
-async function runQueue(queue, dryRun, label, { resume = false } = {}) {
+async function runQueue(queue, dryRun, label, { resume = false, skipCaptionDupes = true } = {}) {
   const published = resume ? loadPublishedKeys() : new Set();
-  const pending = resume ? queue.filter((item) => !published.has(itemKey(item))) : queue;
+  let pending = resume ? queue.filter((item) => !published.has(itemKey(item))) : queue;
+
+  const profileCaptions = loadProfileCaptionFingerprints();
+  if (skipCaptionDupes && profileCaptions.size) {
+    const before = pending.length;
+    pending = pending.filter((item) => !shouldSkipDuplicateCaption(item, profileCaptions));
+    const skipped = before - pending.length;
+    if (skipped) console.log(`🚫 ${skipped} items ignorados (legenda já no perfil)\n`);
+  }
 
   if (resume && published.size) {
     console.log(`↩️  Resume: ${published.size} já publicados, ${pending.length} restantes\n`);
@@ -591,6 +642,7 @@ console.log(`Dry-run: ${dryRun}\n`);
 
 try {
   if (!dryRun) await verifyCredentials();
+  await syncProfileIfNeeded();
 
   const queueToVerify = strategic
     ? buildStrategicFeedQueue().slice(0, 3)

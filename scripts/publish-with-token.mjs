@@ -64,6 +64,9 @@ if (!target) {
 const envPath = path.resolve("/workspace/.env.local");
 const envContent = `IG_USER_ID=${target.igId}\nIG_ACCESS_TOKEN=${target.pageToken}\n`;
 fs.writeFileSync(envPath, envContent);
+// Override process env so child script uses fresh page token
+process.env.IG_USER_ID = target.igId;
+process.env.IG_ACCESS_TOKEN = target.pageToken;
 console.log(`✓ Guardado em .env.local (gitignored)\n`);
 
 // Publicar
