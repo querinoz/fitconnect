@@ -1,169 +1,428 @@
 {
-  "profile": "@fitconnectsports",
-  "bioLink": "https://fitconnect-phi.vercel.app",
-  "schedule": { "days": ["tuesday", "friday"], "timezone": "Europe/Lisbon" },
+  "version": "grid32",
+  "handle": "@fitconnectsports",
+  "dimensions": {
+    "feed": "1080x1440",
+    "grid": "4x8",
+    "ratio": "3:4"
+  },
+  "publishOrder": "g32_01 → g32_32 (row1 bottom, row8 top on profile)",
   "posts": [
     {
-      "id": "post01",
-      "type": "reel",
-      "media": ["assets/post01_capa_reel.png"],
-      "video": "generated/reel01_hexatar.mp4",
-      "captionFile": "captions/post01.txt",
-      "cover": "assets/post01_capa_reel.png"
-    },
-    {
-      "id": "post02",
-      "type": "carousel",
-      "media": [
-        "assets/post02_p1.png",
-        "assets/post02_p2.png",
-        "assets/post02_p3.png",
-        "assets/post02_p4.png",
-        "assets/post02_p5.png",
-        "assets/post02_p6.png"
-      ],
-      "captionFile": "captions/post02.txt"
-    },
-    {
-      "id": "post03",
+      "id": "g32_01",
       "type": "image",
-      "media": ["assets/post03_quatro_apps.png"],
-      "captionFile": "captions/post03.txt"
-    },
-    {
-      "id": "post04",
-      "type": "reel",
-      "media": ["assets/post04_capa_reel.png"],
-      "video": "generated/reel04_hexatar_design.mp4",
-      "captionFile": "captions/post04.txt",
-      "cover": "assets/post04_capa_reel.png"
-    },
-    {
-      "id": "post05",
-      "type": "carousel",
+      "grid": {
+        "row": 1,
+        "col": 1
+      },
+      "chapter": "FITCONNECT",
       "media": [
-        "assets/post05_p1.png",
-        "assets/post05_p2.png",
-        "assets/post05_p3.png",
-        "assets/post05_p4.png",
-        "assets/post05_p5.png"
+        "assets/g32_01.png"
       ],
-      "captionFile": "captions/post05.txt"
+      "captionFile": "g32_01.txt"
     },
     {
-      "id": "post06",
-      "type": "reel",
-      "media": ["assets/post06_capa_reel.png"],
-      "video": "generated/reel06_desafio7.mp4",
-      "captionFile": "captions/post06.txt",
-      "cover": "assets/post06_capa_reel.png"
-    },
-    {
-      "id": "post07",
-      "type": "carousel",
-      "media": [
-        "assets/post07_p1.png",
-        "assets/post07_p2.png",
-        "assets/post07_p3.png",
-        "assets/post07_p4.png",
-        "assets/post07_p5.png"
-      ],
-      "captionFile": "captions/post07.txt"
-    },
-    {
-      "id": "post08",
+      "id": "g32_02",
       "type": "image",
-      "media": ["assets/post08_treinador_adivinha.png"],
-      "captionFile": "captions/post08.txt"
-    },
-    {
-      "id": "post09",
-      "type": "carousel",
+      "grid": {
+        "row": 1,
+        "col": 2
+      },
+      "chapter": "ELITE OS",
       "media": [
-        "assets/post09_p1.png",
-        "assets/post09_p2.png",
-        "assets/post09_p3.png",
-        "assets/post09_p4.png",
-        "assets/post09_p5.png"
+        "assets/g32_02.png"
       ],
-      "captionFile": "captions/post09.txt"
+      "captionFile": "g32_02.txt"
     },
     {
-      "id": "post10",
-      "type": "reel",
-      "media": ["assets/post10_capa_reel.png"],
-      "video": "generated/reel10_prontidao.mp4",
-      "captionFile": "captions/post10.txt",
-      "cover": "assets/post10_capa_reel.png"
-    },
-    {
-      "id": "post11",
+      "id": "g32_03",
       "type": "image",
-      "media": ["assets/post11_consistencia.png"],
-      "captionFile": "captions/post11.txt"
-    },
-    {
-      "id": "post12",
-      "type": "carousel",
+      "grid": {
+        "row": 1,
+        "col": 3
+      },
+      "chapter": "HEXATAR",
       "media": [
-        "assets/post12_p1.png",
-        "assets/post12_p2.png",
-        "assets/post12_p3.png",
-        "assets/post12_p4.png",
-        "assets/post12_p5.png"
+        "assets/g32_03.png"
       ],
-      "captionFile": "captions/post12.txt"
+      "captionFile": "g32_03.txt"
     },
     {
-      "id": "post13",
-      "type": "reel",
-      "media": ["assets/post13_capa_reel.png"],
-      "video": "generated/reel13_wearos.mp4",
-      "captionFile": "captions/post13.txt",
-      "cover": "assets/post13_capa_reel.png"
-    },
-    {
-      "id": "post14",
+      "id": "g32_04",
       "type": "image",
-      "media": ["assets/post14_marketplace.png"],
-      "captionFile": "captions/post14.txt"
-    },
-    {
-      "id": "post15",
-      "type": "carousel",
+      "grid": {
+        "row": 1,
+        "col": 4
+      },
+      "chapter": "PREVIEW",
       "media": [
-        "assets/post15_p1.png",
-        "assets/post15_p2.png",
-        "assets/post15_p3.png",
-        "assets/post15_p4.png"
+        "assets/g32_04.png"
       ],
-      "captionFile": "captions/post15.txt"
+      "captionFile": "g32_04.txt"
     },
     {
-      "id": "post16",
-      "type": "reel",
-      "media": ["assets/post16_capa_reel.png"],
-      "video": "generated/reel16_public.mp4",
-      "captionFile": "captions/post16.txt",
-      "cover": "assets/post16_capa_reel.png"
-    },
-    {
-      "id": "post17",
+      "id": "g32_05",
       "type": "image",
-      "media": ["assets/post17_manifesto.png"],
-      "captionFile": "captions/post17.txt"
+      "grid": {
+        "row": 2,
+        "col": 1
+      },
+      "chapter": "O PROBLEMA",
+      "media": [
+        "assets/g32_05.png"
+      ],
+      "captionFile": "g32_05.txt"
     },
     {
-      "id": "post18",
-      "type": "carousel",
+      "id": "g32_06",
+      "type": "image",
+      "grid": {
+        "row": 2,
+        "col": 2
+      },
+      "chapter": "O PROBLEMA",
       "media": [
-        "assets/post18_p1.png",
-        "assets/post18_p2.png",
-        "assets/post18_p3.png",
-        "assets/post18_p4.png",
-        "assets/post18_p5.png"
+        "assets/g32_06.png"
       ],
-      "captionFile": "captions/post18.txt"
+      "captionFile": "g32_06.txt"
+    },
+    {
+      "id": "g32_07",
+      "type": "image",
+      "grid": {
+        "row": 2,
+        "col": 3
+      },
+      "chapter": "O PROBLEMA",
+      "media": [
+        "assets/g32_07.png"
+      ],
+      "captionFile": "g32_07.txt"
+    },
+    {
+      "id": "g32_08",
+      "type": "image",
+      "grid": {
+        "row": 2,
+        "col": 4
+      },
+      "chapter": "A VIRAR",
+      "media": [
+        "assets/g32_08.png"
+      ],
+      "captionFile": "g32_08.txt"
+    },
+    {
+      "id": "g32_09",
+      "type": "image",
+      "grid": {
+        "row": 3,
+        "col": 1
+      },
+      "chapter": "A SOLUÇÃO",
+      "media": [
+        "assets/g32_09.png"
+      ],
+      "captionFile": "g32_09.txt"
+    },
+    {
+      "id": "g32_10",
+      "type": "image",
+      "grid": {
+        "row": 3,
+        "col": 2
+      },
+      "chapter": "HEALTH CONNECT",
+      "media": [
+        "assets/g32_10.png"
+      ],
+      "captionFile": "g32_10.txt"
+    },
+    {
+      "id": "g32_11",
+      "type": "image",
+      "grid": {
+        "row": 3,
+        "col": 3
+      },
+      "chapter": "HOJE",
+      "media": [
+        "assets/g32_11.png"
+      ],
+      "captionFile": "g32_11.txt"
+    },
+    {
+      "id": "g32_12",
+      "type": "image",
+      "grid": {
+        "row": 3,
+        "col": 4
+      },
+      "chapter": "TREINAR",
+      "media": [
+        "assets/g32_12.png"
+      ],
+      "captionFile": "g32_12.txt"
+    },
+    {
+      "id": "g32_13",
+      "type": "image",
+      "grid": {
+        "row": 4,
+        "col": 1
+      },
+      "chapter": "FUNCIONALIDADES",
+      "media": [
+        "assets/g32_13.png"
+      ],
+      "captionFile": "g32_13.txt"
+    },
+    {
+      "id": "g32_14",
+      "type": "image",
+      "grid": {
+        "row": 4,
+        "col": 2
+      },
+      "chapter": "FUNCIONALIDADES",
+      "media": [
+        "assets/g32_14.png"
+      ],
+      "captionFile": "g32_14.txt"
+    },
+    {
+      "id": "g32_15",
+      "type": "image",
+      "grid": {
+        "row": 4,
+        "col": 3
+      },
+      "chapter": "FUNCIONALIDADES",
+      "media": [
+        "assets/g32_15.png"
+      ],
+      "captionFile": "g32_15.txt"
+    },
+    {
+      "id": "g32_16",
+      "type": "image",
+      "grid": {
+        "row": 4,
+        "col": 4
+      },
+      "chapter": "FUNCIONALIDADES",
+      "media": [
+        "assets/g32_16.png"
+      ],
+      "captionFile": "g32_16.txt"
+    },
+    {
+      "id": "g32_17",
+      "type": "image",
+      "grid": {
+        "row": 5,
+        "col": 1
+      },
+      "chapter": "TREINO",
+      "media": [
+        "assets/g32_17.png"
+      ],
+      "captionFile": "g32_17.txt"
+    },
+    {
+      "id": "g32_18",
+      "type": "image",
+      "grid": {
+        "row": 5,
+        "col": 2
+      },
+      "chapter": "TREINO",
+      "media": [
+        "assets/g32_18.png"
+      ],
+      "captionFile": "g32_18.txt"
+    },
+    {
+      "id": "g32_19",
+      "type": "image",
+      "grid": {
+        "row": 5,
+        "col": 3
+      },
+      "chapter": "TREINO",
+      "media": [
+        "assets/g32_19.png"
+      ],
+      "captionFile": "g32_19.txt"
+    },
+    {
+      "id": "g32_20",
+      "type": "image",
+      "grid": {
+        "row": 5,
+        "col": 4
+      },
+      "chapter": "TELEMETRIA",
+      "media": [
+        "assets/g32_20.png"
+      ],
+      "captionFile": "g32_20.txt"
+    },
+    {
+      "id": "g32_21",
+      "type": "image",
+      "grid": {
+        "row": 6,
+        "col": 1
+      },
+      "chapter": "COACH OS",
+      "media": [
+        "assets/g32_21.png"
+      ],
+      "captionFile": "g32_21.txt"
+    },
+    {
+      "id": "g32_22",
+      "type": "image",
+      "grid": {
+        "row": 6,
+        "col": 2
+      },
+      "chapter": "COACH OS",
+      "media": [
+        "assets/g32_22.png"
+      ],
+      "captionFile": "g32_22.txt"
+    },
+    {
+      "id": "g32_23",
+      "type": "image",
+      "grid": {
+        "row": 6,
+        "col": 3
+      },
+      "chapter": "COACH OS",
+      "media": [
+        "assets/g32_23.png"
+      ],
+      "captionFile": "g32_23.txt"
+    },
+    {
+      "id": "g32_24",
+      "type": "image",
+      "grid": {
+        "row": 6,
+        "col": 4
+      },
+      "chapter": "COACH OS",
+      "media": [
+        "assets/g32_24.png"
+      ],
+      "captionFile": "g32_24.txt"
+    },
+    {
+      "id": "g32_25",
+      "type": "image",
+      "grid": {
+        "row": 7,
+        "col": 1
+      },
+      "chapter": "COMUNIDADE",
+      "media": [
+        "assets/g32_25.png"
+      ],
+      "captionFile": "g32_25.txt"
+    },
+    {
+      "id": "g32_26",
+      "type": "image",
+      "grid": {
+        "row": 7,
+        "col": 2
+      },
+      "chapter": "DESCOBRIR",
+      "media": [
+        "assets/g32_26.png"
+      ],
+      "captionFile": "g32_26.txt"
+    },
+    {
+      "id": "g32_27",
+      "type": "image",
+      "grid": {
+        "row": 7,
+        "col": 3
+      },
+      "chapter": "WEAR OS",
+      "media": [
+        "assets/g32_27.png"
+      ],
+      "captionFile": "g32_27.txt"
+    },
+    {
+      "id": "g32_28",
+      "type": "image",
+      "grid": {
+        "row": 7,
+        "col": 4
+      },
+      "chapter": "SYNC",
+      "media": [
+        "assets/g32_28.png"
+      ],
+      "captionFile": "g32_28.txt"
+    },
+    {
+      "id": "g32_29",
+      "type": "image",
+      "grid": {
+        "row": 8,
+        "col": 1
+      },
+      "chapter": "CONFIANÇA",
+      "media": [
+        "assets/g32_29.png"
+      ],
+      "captionFile": "g32_29.txt"
+    },
+    {
+      "id": "g32_30",
+      "type": "image",
+      "grid": {
+        "row": 8,
+        "col": 2
+      },
+      "chapter": "CONFIANÇA",
+      "media": [
+        "assets/g32_30.png"
+      ],
+      "captionFile": "g32_30.txt"
+    },
+    {
+      "id": "g32_31",
+      "type": "image",
+      "grid": {
+        "row": 8,
+        "col": 3
+      },
+      "chapter": "LISTA DE ESPERA",
+      "media": [
+        "assets/g32_31.png"
+      ],
+      "captionFile": "g32_31.txt"
+    },
+    {
+      "id": "g32_32",
+      "type": "image",
+      "grid": {
+        "row": 8,
+        "col": 4
+      },
+      "chapter": "CTA",
+      "media": [
+        "assets/g32_32.png"
+      ],
+      "captionFile": "g32_32.txt"
     }
   ]
 }

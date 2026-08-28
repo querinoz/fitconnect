@@ -75,7 +75,9 @@
     "instagram:sync-public": "node scripts/instagram/sync-public.mjs",
     "instagram:rebuild": "node marketing/instagram/build-premium.mjs && node marketing/instagram/merge-heroes.mjs && node scripts/instagram/generate-reels.mjs --force && node scripts/instagram/sync-public.mjs",
     "instagram:publish-all": "node scripts/instagram/publish-all.mjs",
-    "instagram:publish": "node scripts/instagram/publish.mjs"
+    "instagram:publish": "node scripts/instagram/publish.mjs",
+    "instagram:build-grid32": "node marketing/instagram/build-grid32.mjs",
+    "instagram:prepare-grid32": "node marketing/instagram/build-grid32.mjs && node scripts/instagram/sync-public.mjs"
   },
   "devDependencies": {
     "@prisma/client": "^7.8.0",

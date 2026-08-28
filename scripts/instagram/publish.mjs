@@ -27,12 +27,16 @@ function loadManifest() {
 }
 
 function loadCaption(post) {
-  const file = path.join(CONTENT, post.captionFile);
+  const rel = post.captionFile;
+  const file = rel.includes("/")
+    ? path.join(CONTENT, rel)
+    : path.join(CONTENT, "captions", rel);
   return fs.readFileSync(file, "utf8").trim();
 }
 
 function resolveMedia(rel) {
-  return path.join(CONTENT, rel);
+  if (rel.startsWith("assets/")) return path.join(CONTENT, rel);
+  return path.join(CONTENT, "assets", path.basename(rel));
 }
 
 async function graphPost(pathname, body) {
@@ -108,8 +112,9 @@ async function publishPost(post, dryRun) {
   }
 
   if (post.type === "image") {
+    const mediaPath = resolveMedia(post.media[0]);
     const containerId = await graphPost(`/${process.env.INSTAGRAM_USER_ID}/media`, {
-      image_url: `${mediaBaseUrl()}/${path.basename(resolveMedia(post.media[0]))}`,
+      image_url: `${mediaBaseUrl()}/${path.basename(mediaPath)}`,
       caption
     });
     await waitForContainer(containerId.id);

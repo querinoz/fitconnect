@@ -20,8 +20,10 @@ export const TOKENS = {
   line: "#233046"
 };
 
-export const FEED = { w: 1080, h: 1350 };
+export const FEED = { w: 1080, h: 1440 };
+export const FEED_SAFE = { w: 1012, h: 1350, padX: 34, padY: 45 };
 export const REEL = { w: 1080, h: 1920 };
+export const REEL_SAFE = { top: 480, bottom: 1440 };
 
 const LOGO_MARK = path.join(ROOT, "apps/web/public/brand/fitconnect-logo-256.png");
 const LOGO_MASTER = path.join(ROOT, "apps/web/public/brand/fitconnect-logo-master.png");
@@ -122,6 +124,58 @@ function esc(s) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+export async function gridFeedSlide({
+  row,
+  col,
+  eyebrow,
+  headline,
+  sub,
+  screenshot = null,
+  rowTheme = "brand"
+}) {
+  const { w, h } = FEED;
+  const themes = {
+    brand: { accent: TOKENS.voltline, band: "#0A1018" },
+    problem: { accent: "#FF3A5C", band: "#120A0E" },
+    solution: { accent: TOKENS.voltline, band: "#0C1218" },
+    feature: { accent: "#3CD7FF", band: "#081018" },
+    train: { accent: "#00E090", band: "#081410" },
+    coach: { accent: "#6C63FF", band: "#0C0A14" },
+    social: { accent: "#00DDB4", band: "#081210" },
+    cta: { accent: TOKENS.voltline, band: "#101408" }
+  };
+  const t = themes[rowTheme] ?? themes.brand;
+  const colLabel = `${col}/4`;
+
+  const bandSvg = Buffer.from(`<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="${w}" height="${h}" fill="${TOKENS.floor}"/>
+    <rect width="${w}" height="8" fill="${t.accent}" fill-opacity="0.85"/>
+    <rect x="0" y="8" width="${w}" height="112" fill="${t.band}"/>
+    <text x="90" y="52" font-family="monospace" font-size="18" fill="${t.accent}" opacity="0.9">LINHA ${row} · ${colLabel}</text>
+    <text x="90" y="88" font-family="monospace" font-size="22" font-weight="600" letter-spacing="3" fill="${TOKENS.voltline}">${esc(eyebrow)}</text>
+    <line x1="90" y1="108" x2="${w - 90}" y2="108" stroke="${TOKENS.line}" stroke-width="1"/>
+    <text x="90" y="${screenshot ? 200 : 420}" font-family="Arial,Helvetica,sans-serif" font-size="64" font-weight="800" fill="${TOKENS.ink}">${esc(headline)}</text>
+    ${sub ? `<text x="90" y="${screenshot ? 280 : 500}" font-family="Arial" font-size="34" fill="${TOKENS.soft}">${esc(sub)}</text>` : ""}
+  </svg>`);
+
+  const layers = [{ input: bandSvg, top: 0, left: 0 }];
+
+  if (screenshot && fs.existsSync(screenshot)) {
+    const phone = await phoneMockup(screenshot, { phoneW: 460 });
+    const meta = await sharp(phone).metadata();
+    layers.push({ input: phone, top: 320, left: Math.round((w - meta.width) / 2) });
+  }
+
+  const composed = await sharp({
+    create: { width: w, height: h, channels: 4, background: TOKENS.floor }
+  })
+    .composite(layers)
+    .png()
+    .toBuffer();
+
+  return brandOverlay(composed);
 }
 
 export async function writePng(dest, buffer) {

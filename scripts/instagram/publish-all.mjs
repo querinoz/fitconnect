@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "../..");
-const DELAY_MS = 45_000;
+const DELAY_MS = Number(process.env.INSTAGRAM_PUBLISH_DELAY_MS ?? 25_000);
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
