@@ -1,5 +1,7 @@
 # FitConnect Instagram — @fitconnectsports
 
+**Contacto:** fitconnectsports@gmail.com
+
 Pipeline para preparar e publicar os 18 posts do kit Elite OS.
 
 ## Estado atual do perfil

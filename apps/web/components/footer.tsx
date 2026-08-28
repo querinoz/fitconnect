@@ -5,6 +5,7 @@ import { Github, Instagram, Twitter, Youtube } from "lucide-react";
 import { Logo } from "./brand/logo";
 import { Wordmark } from "./brand/wordmark";
 import { useT } from "@/lib/i18n-provider";
+import { FITCONNECT_INSTAGRAM_URL, mailto } from "@/lib/site/contact";
 
 export function Footer() {
   const t = useT();
@@ -32,11 +33,11 @@ export function Footer() {
     { label: t("footer", "privacy"), href: "/privacy" },
     { label: t("footer", "terms"), href: "/terms" },
     { label: t("footer", "trustSafety"), href: "/privacy#trust" },
-    { label: t("footer", "contact"), href: "mailto:security@fitconnect.app" }
+    { label: t("footer", "contact"), href: mailto() }
   ];
 
   const social = [
-    { label: "Instagram", icon: Instagram, href: "#" },
+    { label: "Instagram", icon: Instagram, href: FITCONNECT_INSTAGRAM_URL },
     { label: "Twitter", icon: Twitter, href: "#" },
     { label: "YouTube", icon: Youtube, href: "#" },
     {

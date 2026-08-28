@@ -59,7 +59,7 @@ async function graphGet(pathname, query = {}) {
 }
 
 async function waitForContainer(containerId) {
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 60; i++) {
     const status = await graphGet(`/${containerId}`, { fields: "status_code" });
     if (status.status_code === "FINISHED") return;
     if (status.status_code === "ERROR") throw new Error(`container error: ${containerId}`);

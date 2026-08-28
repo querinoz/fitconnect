@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 import { ArrowRight, Mail } from "lucide-react";
 import { useT } from "@/lib/i18n-provider";
+import { FITCONNECT_CONTACT_EMAIL, mailto } from "@/lib/site/contact";
 
 export function Cta() {
   const t = useT();
@@ -31,9 +32,9 @@ export function Cta() {
             <Link href="/trainer">{t("cta", "secondary")}</Link>
           </Button>
           <Button asChild variant="ghost" size="lg">
-            <Link href="mailto:hello@fitconnect.app" className="gap-2">
+            <Link href={mailto()} className="gap-2">
               <Mail aria-hidden className="h-4 w-4" />
-              Email us
+              {FITCONNECT_CONTACT_EMAIL}
             </Link>
           </Button>
         </div>

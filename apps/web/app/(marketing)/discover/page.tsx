@@ -7,6 +7,7 @@ import { TrainerCardSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { SPORTS, TRAINERS, type Modality, type Sport } from "@/lib/data";
+import { mailto } from "@/lib/site/contact";
 import {
   ArrowRight,
   Filter,
@@ -470,7 +471,7 @@ function DiscoverInner() {
                     {t("discover", "handPairBody")}
                   </p>
                   <Button asChild className="mt-5">
-                    <a href="mailto:match@fitconnect.app">
+                    <a href={mailto()}>
                       {t("discover", "handPairCta")}{" "}
                       <ArrowRight className="h-4 w-4" />
                     </a>

@@ -1,5 +1,5 @@
 Uma app conta os passos. Outra guarda as corridas. Outra tem o plano de treino. Outra pesa-te. E nenhuma sabe o que a do lado está a fazer.
 O resultado é que ninguém tem uma imagem única do próprio progresso — só quatro imagens parciais que nunca se juntam. E o que não se consegue ver inteiro, não se consegue melhorar.
-O FitConnect não te pede para abandonares nada disso. Liga-se ao Strava e ao Health Connect, lê o que já registas, e junta tudo numa só progressão. Sem registar o mesmo treino duas vezes.
+O FitConnect não te pede para abandonares nada disso. Liga-se às apps que já usas e ao Health Connect, lê o que já registas, e junta tudo numa só progressão. Sem registar o mesmo treino duas vezes.
 Quantas apps de fitness tens instaladas neste momento? Responde com o número — aposto que é mais do que pensas.
-#strava #healthconnect #corrida #ciclismo #wearos #android #appfitness #fitconnect #dadosdetreino
+#healthconnect #corrida #ciclismo #wearos #android #appfitness #fitconnect #dadosdetreino

@@ -1,10 +1,32 @@
 [
   {
-    "at": "2026-08-28T09:35:11.765Z",
-    "post": "post02",
-    "result": {
-      "dryRun": true,
-      "id": "post02"
-    }
+    "at": "2026-08-28T10:54:38.304Z",
+    "action": "delete-all",
+    "deleted": [
+      {
+        "id": "18120023149681571",
+        "type": "CAROUSEL_ALBUM",
+        "result": {
+          "success": true,
+          "deleted_id": "18120023149681571"
+        }
+      },
+      {
+        "id": "18181444732371777",
+        "type": "VIDEO",
+        "result": {
+          "success": true,
+          "deleted_id": "18181444732371777"
+        }
+      },
+      {
+        "id": "18140850898577051",
+        "type": "IMAGE",
+        "result": {
+          "success": true,
+          "deleted_id": "18140850898577051"
+        }
+      }
+    ]
   }
 ]

@@ -68,6 +68,13 @@
     "instagram:prepare": "pnpm instagram:sync && pnpm instagram:captions && pnpm instagram:reels",
     "instagram:status": "node scripts/instagram/status.mjs",
     "instagram:discover": "node scripts/instagram/discover.mjs",
+    "instagram:setup": "node scripts/instagram/setup-env.mjs",
+    "instagram:delete-all": "node scripts/instagram/delete-all.mjs",
+    "instagram:build-premium": "node marketing/instagram/build-premium.mjs",
+    "instagram:merge-heroes": "node marketing/instagram/merge-heroes.mjs",
+    "instagram:sync-public": "node scripts/instagram/sync-public.mjs",
+    "instagram:rebuild": "node marketing/instagram/build-premium.mjs && node marketing/instagram/merge-heroes.mjs && node scripts/instagram/generate-reels.mjs --force && node scripts/instagram/sync-public.mjs",
+    "instagram:publish-all": "node scripts/instagram/publish-all.mjs",
     "instagram:publish": "node scripts/instagram/publish.mjs"
   },
   "devDependencies": {
