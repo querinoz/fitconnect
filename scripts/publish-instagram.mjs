@@ -43,6 +43,7 @@ const IG_ACCESS_TOKEN = process.env.IG_ACCESS_TOKEN || process.env.META_ACCESS_T
 
 const DELAY_MS = Number(process.env.IG_PUBLISH_DELAY_MS || 90_000); // 90s entre posts
 const STORY_DELAY_MS = Number(process.env.IG_STORY_DELAY_MS || 30_000);
+const PROGRESS_FILE = path.resolve("/workspace/.instagram-publish-progress.json");
 
 const CAPTIONS = {
   educational: `📊 HRV explicado em 60 segundos.
@@ -179,6 +180,38 @@ const PRIORITY_QUEUE = [
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+function itemKey(item) {
+  if (item.type === "carousel") return `carousel:${item.id}`;
+  return `${item.type}:${item.file}`;
+}
+
+function loadPublishedKeys() {
+  if (!fs.existsSync(PROGRESS_FILE)) return new Set();
+  try {
+    const data = JSON.parse(fs.readFileSync(PROGRESS_FILE, "utf8"));
+    return new Set((data.published || []).map((e) => e.key));
+  } catch {
+    return new Set();
+  }
+}
+
+function saveProgress(item, mediaId) {
+  let data = { published: [] };
+  if (fs.existsSync(PROGRESS_FILE)) {
+    try {
+      data = JSON.parse(fs.readFileSync(PROGRESS_FILE, "utf8"));
+    } catch {
+      data = { published: [] };
+    }
+  }
+  data.published.push({
+    key: itemKey(item),
+    mediaId,
+    at: new Date().toISOString()
+  });
+  fs.writeFileSync(PROGRESS_FILE, JSON.stringify(data, null, 2));
 }
 
 function publicUrl(relativePath) {
@@ -404,13 +437,20 @@ function buildAllQueue() {
   return queue;
 }
 
-async function runQueue(queue, dryRun, label) {
-  console.log(`\n📋 ${label} (${queue.length} items)\n`);
+async function runQueue(queue, dryRun, label, { resume = false } = {}) {
+  const published = resume ? loadPublishedKeys() : new Set();
+  const pending = resume ? queue.filter((item) => !published.has(itemKey(item))) : queue;
+
+  if (resume && published.size) {
+    console.log(`↩️  Resume: ${published.size} já publicados, ${pending.length} restantes\n`);
+  }
+
+  console.log(`\n📋 ${label} (${pending.length} items)\n`);
   const results = [];
 
-  for (let i = 0; i < queue.length; i++) {
-    const item = queue[i];
-    const progress = `[${i + 1}/${queue.length}]`;
+  for (let i = 0; i < pending.length; i++) {
+    const item = pending[i];
+    const progress = `[${i + 1}/${pending.length}]`;
 
     if (dryRun) {
       const detail = item.note ? ` (${item.note})` : "";
@@ -431,12 +471,13 @@ async function runQueue(queue, dryRun, label) {
         mediaId = await publishStory(item.file);
       }
       results.push({ ...item, mediaId, ok: true });
+      saveProgress(item, mediaId);
     } catch (err) {
       console.error(`  ✗ Erro: ${err.message}`);
       results.push({ ...item, error: err.message, ok: false });
     }
 
-    if (i < queue.length - 1) {
+    if (i < pending.length - 1) {
       const delay = item.type === "story" ? STORY_DELAY_MS : DELAY_MS;
       console.log(`  ⏳ Aguardando ${delay / 1000}s...\n`);
       await sleep(delay);
@@ -446,9 +487,9 @@ async function runQueue(queue, dryRun, label) {
   return results;
 }
 
-async function runAll(dryRun) {
+async function runAll(dryRun, resume = false) {
   const queue = buildAllQueue();
-  return runQueue(queue, dryRun, "Publicação completa");
+  return runQueue(queue, dryRun, "Publicação completa", { resume });
 }
 
 // ── Main ──
@@ -456,6 +497,7 @@ const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const verifyOnly = args.includes("--verify");
 const all = args.includes("--all");
+const resume = args.includes("--resume");
 const priority =
   !all && (args.includes("--priority") || (args.length === 0 && !verifyOnly));
 
@@ -503,7 +545,7 @@ try {
     console.log(
       `\n📦 Modo --all: ${queue.length} items (${carousels} carousels, ${posts} posts, ${stories} stories incl. ${reelCovers} reel covers)\n`
     );
-    results = await runAll(dryRun);
+    results = await runAll(dryRun, resume);
   } else if (priority) {
     results = await runPriority(dryRun);
   }

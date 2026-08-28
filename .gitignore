@@ -6,6 +6,7 @@ dist/
 .env*.local
 .env.local
 .env.instagram
+.instagram-publish-progress.json
 .vercel
 *.tsbuildinfo
 next-env.d.ts
