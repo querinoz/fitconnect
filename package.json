@@ -21,7 +21,12 @@
     "env:start": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-start.ps1",
     "env:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-stop.ps1",
     "env:clean": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-clean.ps1",
-    "env:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-status.ps1"
+    "env:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-status.ps1",
+    "instagram:organize": "node scripts/organize-instagram-pack.mjs",
+    "instagram:gallery": "node scripts/build-instagram-gallery.mjs",
+    "instagram:publish": "node scripts/publish-instagram.mjs --priority",
+    "instagram:publish:dry": "node scripts/publish-instagram.mjs --dry-run",
+    "instagram:verify": "node scripts/publish-instagram.mjs --verify"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",

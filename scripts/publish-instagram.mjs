@@ -101,7 +101,7 @@ const PRIORITY_QUEUE = [
   { type: "carousel", id: "08-mockups-product", caption: CAPTIONS.mockups },
   { type: "carousel", id: "02-diversity-sports", caption: CAPTIONS.diversity },
   { type: "story", file: "story-edu-swipe-up-demo.png", caption: "" },
-  { type: "post", file: "Posts/06-latina-soccer.png", caption: CAPTIONS.lifestyle },
+  { type: "post", file: "Posts/10-v2-06-latina-soccer.png", caption: CAPTIONS.lifestyle },
   { type: "carousel", id: "03-devices-mobile-tablet-wearos", caption: CAPTIONS.devices },
 ];
 
@@ -135,6 +135,24 @@ async function verifyCredentials() {
   });
   console.log(`✓ Conta: @${me.username ?? me.name ?? me.id} (${me.id})`);
   return me;
+}
+
+async function verifyPublicUrls(items) {
+  console.log("\nVerificando URLs públicas das imagens...");
+  for (const item of items) {
+    let rel;
+    if (item.type === "carousel") {
+      rel = `Carousels/${item.id}/01-${fs.readdirSync(path.join(PACK, "Carousels", item.id)).sort()[0]}`;
+    } else if (item.type === "post") {
+      rel = item.file;
+    } else {
+      rel = `Stories/${path.basename(item.file)}`;
+    }
+    const url = publicUrl(rel);
+    const res = await fetch(url, { method: "HEAD" });
+    if (!res.ok) throw new Error(`URL inacessível (${res.status}): ${url}`);
+    console.log(`  ✓ ${res.status} ${rel}`);
+  }
 }
 
 async function createImageContainer(imageUrl, opts = {}) {
@@ -260,7 +278,8 @@ async function runPriority(dryRun) {
 // ── Main ──
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
-const priority = args.includes("--priority") || args.length === 0;
+const verifyOnly = args.includes("--verify");
+const priority = args.includes("--priority") || (args.length === 0 && !verifyOnly);
 const all = args.includes("--all");
 
 if (!IG_USER_ID || !IG_ACCESS_TOKEN) {
@@ -286,6 +305,12 @@ console.log(`Dry-run: ${dryRun}\n`);
 
 try {
   await verifyCredentials();
+  await verifyPublicUrls(PRIORITY_QUEUE);
+
+  if (verifyOnly) {
+    console.log("\n✅ Credenciais e URLs OK — pronto para publicar.");
+    process.exit(0);
+  }
 
   if (priority) {
     const results = await runPriority(dryRun);
