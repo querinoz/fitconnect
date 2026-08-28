@@ -210,15 +210,22 @@ Morning handshake — o primeiro check-in do dia.
 3. Story → imagem individual de `Stories/`
 4. Reel → gravar ou importar vídeo + definir cover
 
-### Opção C — API Meta (automação futura)
+### Opção C — API Meta (automação)
 
-Requisitos:
-- Conta Instagram **Business** ou **Creator**
-- Página Facebook ligada
-- App Meta com `instagram_content_publish`
-- Token de longa duração
+```bash
+# Feed premium — mix dinâmico (recomendado, estilo Nike)
+npm run instagram:publish:strategic
 
-Ver `public/instagram/publish-via-api.mjs`
+# Preview da ordem sem publicar
+npm run instagram:publish:strategic:dry
+
+# Publicar só N items por sessão (espaçar no tempo)
+node scripts/publish-instagram.mjs --strategic --resume --batch 12
+```
+
+A fila `--strategic` intercala pilares: educação · marca · lifestyle · produto · feature · stories — nunca o mesmo tipo seguido.
+
+Ver `scripts/instagram-strategic-queue.mjs` e `docs/DESIGN.md`.
 
 ---
 

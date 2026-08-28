@@ -13,12 +13,19 @@
  *   node scripts/publish-instagram.mjs --dry-run          # simula
  *   node scripts/publish-instagram.mjs --priority         # publica ordem recomendada
  *   node scripts/publish-instagram.mjs --all              # publica tudo (lento!)
+ *   node scripts/publish-instagram.mjs --strategic        # feed premium — mix dinâmico (recomendado)
+ *   node scripts/publish-instagram.mjs --strategic --batch 12  # só N items por sessão
  *   node scripts/publish-instagram.mjs --carousel 07-educational-fitconnect
  *   node scripts/publish-instagram.mjs --post Posts/22-mockup-athlete-dashboard.png
  */
 
 import fs from "node:fs";
 import path from "node:path";
+import {
+  buildContentPool,
+  buildStrategicQueue,
+  summarizeQueue
+} from "./instagram-strategic-queue.mjs";
 
 // Load .env.local if present (local publish without Cursor secrets)
 const envLocal = path.resolve("/workspace/.env.local");
@@ -129,13 +136,65 @@ Roster heatmap · AI alerts · live session · nudges — o FitConnect no teu bo
 
 #FitConnect #CoachLife #CoachApp #SportsTech #ConnectTrainPerform`,
 
-  defaultPost: `Connect. Train. Perform. 💚
+  defaultPost: `Liga. Treina. Perform. 💚
 
 O FitConnect liga atletas e coaches com readiness, HRV e treino ao vivo.
 
 Link na bio → fitconnect.app
 
-#FitConnect #SportsTech #ConnectTrainPerform #AthleteLife #CoachLife`
+#FitConnect #SportsTech #LigaTreinaPerform #AthleteLife #CoachLife`,
+
+  abstract: `Liga. Treina. Perform.
+
+Marca · Atitude · Performance.
+
+#FitConnect #LigaTreinaPerform #SportsTech #AthleteLife`,
+
+  featurePost: `✨ FitConnect — feito para atletas que levam o treino a sério.
+
+Liga. Treina. Perform. 💚
+
+Link na bio → fitconnect.app
+
+#FitConnect #SportsTech #LigaTreinaPerform #AthleteOS`,
+
+  eduPost: `📊 Educação para atletas.
+
+Swipe mental → aplica no treino de amanhã.
+
+Liga. Treina. Perform. 💚
+
+#FitConnect #HRV #Recovery #ConnectTrainPerform #CoachLife`,
+
+  mockupPost: `📱 O teu coach. Os teus dados. Um só lugar.
+
+Liga. Treina. Perform.
+
+Experimenta grátis → link na bio
+
+#FitConnect #AppDesign #SportsTech #WearOS #LigaTreinaPerform`,
+
+  carouselEdu: `📊 Educação que salva no feed.
+
+Swipe → e leva contigo.
+
+Liga. Treina. Perform. 💚
+
+#FitConnect #HRV #Recovery #SportsTech #LigaTreinaPerform`,
+
+  carouselProduct: `📱 FitConnect — onde treinas, nós estamos.
+
+Mobile · WearOS · Tablet · Sync total.
+
+Liga. Treina. Perform.
+
+#FitConnect #SportsTech #AppDesign #WearOS #LigaTreinaPerform`,
+
+  carouselAbstract: `Liga. Treina. Perform.
+
+Marca · Propósito · Performance.
+
+#FitConnect #LigaTreinaPerform #AthleteLife`
 };
 
 const CAROUSEL_CAPTIONS = {
@@ -146,8 +205,30 @@ const CAROUSEL_CAPTIONS = {
   "05-athlete-recovery-performance": CAPTIONS.recovery,
   "06-coach-tools-deep-dive": CAPTIONS.coachTools,
   "07-educational-fitconnect": CAPTIONS.educational,
-  "08-mockups-product": CAPTIONS.mockups
+  "08-mockups-product": CAPTIONS.mockups,
+  "09-app-features": CAPTIONS.carouselProduct,
+  "10-educational-v2": CAPTIONS.carouselEdu,
+  "11-abstract-brand": CAPTIONS.carouselAbstract,
+  "12-app-features-v2": CAPTIONS.carouselProduct,
+  "13-educational-v3": CAPTIONS.carouselEdu,
+  "14-abstract-v2": CAPTIONS.carouselAbstract,
+  "15-app-features-v3": CAPTIONS.carouselProduct,
+  "16-educational-v4": CAPTIONS.carouselEdu,
+  "17-abstract-v3": CAPTIONS.carouselAbstract
 };
+
+function captionFor(type, idOrFile) {
+  if (type === "carousel") {
+    return CAROUSEL_CAPTIONS[idOrFile] || CAPTIONS.defaultPost;
+  }
+  if (POST_CAPTIONS[idOrFile]) return POST_CAPTIONS[idOrFile];
+  const base = path.basename(idOrFile).toLowerCase();
+  if (base.includes("feature")) return CAPTIONS.featurePost;
+  if (base.startsWith("abstract-")) return CAPTIONS.abstract;
+  if (base.startsWith("edu-")) return CAPTIONS.eduPost;
+  if (base.includes("mockup")) return CAPTIONS.mockupPost;
+  return CAPTIONS.lifestyle;
+}
 
 const POST_CAPTIONS = {
   "Posts/22-mockup-athlete-dashboard.png": CAPTIONS.mockupDashboard,
@@ -385,56 +466,13 @@ async function runPriority(dryRun) {
 }
 
 function buildAllQueue() {
-  const queue = [];
+  return buildContentPool({
+    captionFor: (type, id) => captionFor(type, id)
+  });
+}
 
-  for (const id of CAROUSEL_ORDER) {
-    const dir = path.join(PACK, "Carousels", id);
-    if (!fs.existsSync(dir)) continue;
-    queue.push({
-      type: "carousel",
-      id,
-      caption: CAROUSEL_CAPTIONS[id] || CAPTIONS.defaultPost
-    });
-  }
-
-  const posts = fs
-    .readdirSync(path.join(PACK, "Posts"))
-    .filter((f) => f.endsWith(".png"))
-    .sort();
-  for (const file of posts) {
-    const rel = `Posts/${file}`;
-    queue.push({
-      type: "post",
-      file: rel,
-      caption: POST_CAPTIONS[rel] || CAPTIONS.defaultPost
-    });
-  }
-
-  const stories = fs
-    .readdirSync(path.join(PACK, "Stories"))
-    .filter((f) => f.endsWith(".png"))
-    .sort();
-  for (const file of stories) {
-    queue.push({ type: "story", file: `Stories/${file}`, caption: "" });
-  }
-
-  const reelsDir = path.join(PACK, "Reels");
-  if (fs.existsSync(reelsDir)) {
-    const reels = fs
-      .readdirSync(reelsDir)
-      .filter((f) => f.endsWith(".png"))
-      .sort();
-    for (const file of reels) {
-      queue.push({
-        type: "story",
-        file: `Reels/${file}`,
-        caption: "",
-        note: "reel-cover"
-      });
-    }
-  }
-
-  return queue;
+function buildStrategicFeedQueue() {
+  return buildStrategicQueue(buildAllQueue());
 }
 
 async function runQueue(queue, dryRun, label, { resume = false } = {}) {
@@ -492,14 +530,43 @@ async function runAll(dryRun, resume = false) {
   return runQueue(queue, dryRun, "Publicação completa", { resume });
 }
 
+async function runStrategic(dryRun, resume = false, batchLimit = 0) {
+  let queue = buildStrategicFeedQueue();
+  if (resume) {
+    const published = loadPublishedKeys();
+    queue = queue.filter((item) => !published.has(itemKey(item)));
+  }
+  if (batchLimit > 0) queue = queue.slice(0, batchLimit);
+
+  const mix = summarizeQueue(queue);
+  console.log("\n🎯 Mix estratégico (feed premium):");
+  for (const [pillar, count] of Object.entries(mix).sort((a, b) => b[1] - a[1])) {
+    console.log(`   ${pillar}: ${count}`);
+  }
+  console.log("");
+
+  // Preview da ordem (primeiros 8)
+  console.log("📐 Ordem dos primeiros posts:");
+  queue.slice(0, 8).forEach((item, i) => {
+    const label = item.id ?? path.basename(item.file);
+    console.log(`   ${i + 1}. [${item.pillar}] ${item.type}: ${label}`);
+  });
+  if (queue.length > 8) console.log(`   … +${queue.length - 8} mais\n`);
+
+  return runQueue(queue, dryRun, "Publicação estratégica (feed premium)", { resume: false });
+}
+
 // ── Main ──
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const verifyOnly = args.includes("--verify");
 const all = args.includes("--all");
+const strategic = args.includes("--strategic");
 const resume = args.includes("--resume");
+const batchIdx = args.indexOf("--batch");
+const batchLimit = batchIdx >= 0 ? Number(args[batchIdx + 1] || 0) : 0;
 const priority =
-  !all && (args.includes("--priority") || (args.length === 0 && !verifyOnly));
+  !all && !strategic && (args.includes("--priority") || (args.length === 0 && !verifyOnly));
 
 if (!IG_USER_ID || !IG_ACCESS_TOKEN) {
   console.error(`
@@ -523,10 +590,14 @@ console.log(`Public URL base: ${PUBLIC_BASE}`);
 console.log(`Dry-run: ${dryRun}\n`);
 
 try {
-  await verifyCredentials();
+  if (!dryRun) await verifyCredentials();
 
-  const queueToVerify = all ? buildAllQueue().slice(0, 3) : PRIORITY_QUEUE;
-  await verifyPublicUrls(queueToVerify);
+  const queueToVerify = strategic
+    ? buildStrategicFeedQueue().slice(0, 3)
+    : all
+      ? buildAllQueue().slice(0, 3)
+      : PRIORITY_QUEUE;
+  if (!dryRun) await verifyPublicUrls(queueToVerify);
 
   if (verifyOnly) {
     const total = all ? buildAllQueue().length : PRIORITY_QUEUE.length;
@@ -536,7 +607,16 @@ try {
 
   let results = [];
 
-  if (all) {
+  if (strategic) {
+    const full = buildStrategicFeedQueue();
+    const published = resume ? loadPublishedKeys() : new Set();
+    const pending = resume ? full.filter((i) => !published.has(itemKey(i))) : full;
+    const count = batchLimit > 0 ? Math.min(batchLimit, pending.length) : pending.length;
+    console.log(
+      `\n🎯 Modo --strategic: ${count} items nesta sessão (${pending.length} pendentes no total)\n`
+    );
+    results = await runStrategic(dryRun, resume, batchLimit);
+  } else if (all) {
     const queue = buildAllQueue();
     const carousels = queue.filter((q) => q.type === "carousel").length;
     const posts = queue.filter((q) => q.type === "post").length;

@@ -116,7 +116,7 @@ Future ($199/mo) gives you one generalist strength coach. Trainerize gives coach
 | Styling | **Tailwind CSS 3** | Design tokens in `tailwind.config.ts`, custom keyframes |
 | Animation | **Framer Motion 11** | Hero parallax, scroll-reveal, micro-interactions |
 | Charts | **Recharts 2.13** | Area/Bar/Line for dashboard analytics |
-| Icons | **lucide-react** | Consistent line iconography, the Dumbbell is the logo mark |
+| Icons | **lucide-react** | UI icons — **não** usar como logomarca (ver `docs/DESIGN.md`) |
 | Primitives | **Radix UI** | Dialogs, dropdowns, tabs, avatars |
 | Type fonts | **Inter** &amp; **Space Grotesk** | Body + display, paired with `font-feature-settings: ss01, cv01` |
 | State | **Zustand 5** | Tiny, ergonomic, no providers |
@@ -156,7 +156,8 @@ fitconnect/
 │   ├── data.ts              # Trainers, programs, methodology, comparison, posts, quotes
 │   └── utils.ts             # cn, formatPrice, formatCompact, clamp, pct
 ├── tailwind.config.ts       # Brand · accent · signal · plasma · ink palettes
-├── BRAND.md                 # Mission, logo, palette, type, motion, photography, voice
+├── docs/DESIGN.md           # Logomarca oficial, cores, tipografia, voz (PT)
+├── BRAND.md                 # (legado — ver docs/DESIGN.md)
 ├── MARKETING.md             # Personas, positioning, channels, 8-week launch, content calendar
 ├── README.md                # You are here
 ├── Dockerfile               # Multi-stage Node 20 alpine
@@ -290,37 +291,51 @@ We are not a hype brand. We are not a wellness brand. We are not a SaaS brand. W
 
 ## 2. The mark
 
-The FitConnect mark is the **Lucide Dumbbell icon** sitting in a **rounded square gradient pill** (cyan 400 → lime 500, 135°), 9×9 at the standard, with **2xl rounded corners**.
+A logomarca oficial do FitConnect é o **LogoMark** (hexágono + linha de pulso) com o wordmark **Fit** (branco) + **Connect** (verde volt `#C7FB3A`).
 
-```tsx
-<div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-400 to-accent-500 text-ink-950">
-  <Dumbbell className="h-5 w-5" />
-</div>
+**Ficheiros oficiais** (`public/brand/`):
+
+| Asset | Ficheiro | Uso |
+| --- | --- | --- |
+| Logo completa | `logo-full-official.png` | Headers, marketing, README, Instagram |
+| LogoMark 256px | `logomark-official-256.png` | Apps, mockups, avatares |
+| LogoMark SVG | `logomark.svg` | Vetor quando suportado |
+
+```html
+<!-- Logo completa -->
+<img src="/brand/logo-full-official.png" alt="FitConnect" height="44" />
+
+<!-- Só o ícone (espaços reduzidos: favicon, dock, watermark) -->
+<img src="/brand/logomark-official-256.png" alt="FitConnect" height="40" />
 ```
 
 ### Wordmark
-- Full lockup: **`Fit` (white) + `Connect` (cyan 400)**, set in Space Grotesk Bold, with normal letter-spacing, no italics.
-- Standalone wordmark variant: all white on dark, cyan-400 on light.
+- Full lockup: **LogoMark + `Fit` (white) + `Connect` (volt `#C7FB3A`)**, Space Grotesk Bold.
+- Standalone wordmark: mesmo split de cores sobre fundo escuro (`#07080A`).
 
 ```tsx
-<span className="font-display font-bold">
-  Fit<span className="text-brand-400">Connect</span>
-</span>
+<div className="flex items-center gap-3">
+  <img src="/brand/logomark-official-256.png" alt="" className="h-9 w-9" />
+  <span className="font-display font-bold">
+    Fit<span className="text-[#C7FB3A]">Connect</span>
+  </span>
+</div>
 ```
 
 ### Clearspace
-Minimum clearspace around the mark = the height of the Dumbbell glyph (= half the pill height). Do not crowd it with copy or other icons.
+Minimum clearspace around the mark = the height of the LogoMark glyph. Do not crowd it with copy or other icons.
 
 ### Do
-- Use the gradient pill against any dark surface (`ink-950`, `ink-900`).
-- Use the wordmark on its own when the mark would compete (e.g. headers).
-- Pair with a glow halo when the surface is particularly busy.
+- Use assets from `public/brand/` only.
+- Use LogoMark alone in favicons, app icons, and tight UI slots.
+- Use full lockup for brand-first contexts (landing, press, social).
 
 ### Don&rsquo;t
-- Don&rsquo;t apply the gradient to the glyph itself — the glyph stays solid `ink-950`.
-- Don&rsquo;t use the wordmark in a colour other than white / cyan-400 / `ink-950`.
-- Don&rsquo;t rotate the mark.
-- Don&rsquo;t outline it.
+- Don&rsquo;t substitute Lucide Dumbbell or generic fitness icons for the LogoMark.
+- Don&rsquo;t distort, rotate, or recolour the official logo files.
+- Don&rsquo;t use the wordmark without the LogoMark in primary brand contexts.
+
+> Full guidelines: **`docs/DESIGN.md`**
 
 ### Variants
 | Use | Construction |

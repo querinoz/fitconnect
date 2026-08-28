@@ -67,7 +67,11 @@ fs.writeFileSync(envPath, envContent);
 console.log(`✓ Guardado em .env.local (gitignored)\n`);
 
 // Publicar
-const publishArgs = process.argv.includes("--all") ? "--all" : "--priority";
+const publishArgs = process.argv.includes("--all")
+  ? "--all"
+  : process.argv.includes("--strategic")
+    ? "--strategic --resume"
+    : "--priority";
 console.log(`📤 A publicar (${publishArgs})...\n`);
 execSync(`node scripts/publish-instagram.mjs ${publishArgs}`, {
   stdio: "inherit",
