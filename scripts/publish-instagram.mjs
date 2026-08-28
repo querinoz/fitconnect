@@ -26,7 +26,7 @@ const API_BASE = `https://graph.facebook.com/${API_VERSION}`;
 const PACK = path.resolve("/workspace/public/instagram-pack");
 const PUBLIC_BASE =
   process.env.PUBLIC_BASE_URL?.replace(/\/$/, "") ||
-  "https://fitconnect-phi.vercel.app/instagram-pack";
+  "https://raw.githubusercontent.com/querinoz/fitconnect/cursor/instagram-api-publish-3f4b/public/instagram-pack";
 
 const IG_USER_ID = process.env.IG_USER_ID;
 const IG_ACCESS_TOKEN = process.env.IG_ACCESS_TOKEN;
