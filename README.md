@@ -118,8 +118,23 @@ Future ($199/mo) gives you one generalist strength coach. Trainerize gives coach
 | Charts | **Recharts 2.13** | Area/Bar/Line for dashboard analytics |
 | Icons | **lucide-react** | UI icons — **não** usar como logomarca (ver `docs/DESIGN.md`) |
 | Primitives | **Radix UI** | Dialogs, dropdowns, tabs, avatars |
-| Type fonts | **Inter** &amp; **Space Grotesk** | Body + display, paired with `font-feature-settings: ss01, cv01` |
+| Type fonts | **Syne**, **Plus Jakarta Sans**, **JetBrains Mono** | Display, body, metrics |
 | State | **Zustand 5** | Tiny, ergonomic, no providers |
+
+## 🎨 Design system (Elite OS)
+
+| Resource | Path |
+| --- | --- |
+| Canonical spec | [`docs/design/FITCONNECT_DESIGN_SYSTEM.md`](docs/design/FITCONNECT_DESIGN_SYSTEM.md) |
+| Brand rules | [`docs/design/FITCONNECT_BRAND_SYSTEM.md`](docs/design/FITCONNECT_BRAND_SYSTEM.md) |
+| Tokens (TS) | `lib/theme/elite-tokens.ts` |
+| Tokens (CSS) | `app/voltline.css` |
+| Official logo | `components/brand/fitconnect-logo.tsx` |
+| App header | `components/shell/elite-header.tsx` |
+
+**Colors:** Deep Obsidian `#090402` · Voltline `#C8FF00` · Connect `#00DDB4`  
+**HOME = Social Feed** at `/feed` (authenticated app shell).  
+**Android / Wear OS:** PLANNED — this repo is web-only.
 
 ## 🗂 Project tree
 

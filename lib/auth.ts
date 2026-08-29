@@ -68,7 +68,7 @@ export function validateCredentials(
 
 export function dashboardPathForRole(role: UserRole): string {
   if (role === "coach") return "/coach/dashboard";
-  return "/dashboard";
+  return "/feed";
 }
 
 /** Same-origin paths only — for optional `next` sign-in redirects. */

@@ -1,5 +1,7 @@
 # FitConnect — Design System & Branding
 
+> **Canonical docs:** See [`docs/design/FITCONNECT_DESIGN_SYSTEM.md`](./design/FITCONNECT_DESIGN_SYSTEM.md) for the full Elite OS specification.
+
 **Tagline (PT):** Liga. Treina. Perform.
 
 ---
@@ -49,8 +51,8 @@ A identidade visual do FitConnect usa **sempre** a logomarca oficial. Não usar 
 
 | Token | Hex | Uso |
 |-------|-----|-----|
-| `volt` | `#C7FB3A` | Accent principal, "Connect" no wordmark, CTAs |
-| `ink` | `#07080A` | Fundo principal |
+| `volt` | `#C8FF00` | Accent principal, "Connect" no wordmark, CTAs |
+| `ink` | `#090402` | Fundo principal (Deep Obsidian) |
 | `cyan` | `#22d3ee` | Dados, HRV, tech |
 | `white` | `#FAFBFC` | "Fit" no wordmark, texto principal |
 
@@ -60,8 +62,9 @@ A identidade visual do FitConnect usa **sempre** a logomarca oficial. Não usar 
 
 | Papel | Fonte |
 |-------|-------|
-| Display / títulos | **Space Grotesk** Bold |
-| Corpo | **Inter** Regular–Bold |
+| Display / títulos | **Syne** Bold |
+| Corpo | **Plus Jakarta Sans** Regular–Bold |
+| Métricas | **JetBrains Mono** |
 
 ---
 

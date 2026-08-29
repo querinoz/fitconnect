@@ -1,21 +1,22 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Activity, Dumbbell, Smartphone, UserRound, UsersRound } from "lucide-react";
+import { Activity, Smartphone, UserRound, UsersRound, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/brand/logo";
+import { FitConnectLogo } from "@/components/brand/fitconnect-logo";
 import { validateCredentials } from "@/lib/auth";
 import { useAuthStore } from "@/lib/auth-store";
 
 const DEMOS = [
   {
     role: "athlete",
-    title: "Athlete dashboard",
-    subtitle: "Readiness, today plan, live session and coach updates.",
+    title: "Athlete — Social Feed",
+    subtitle: "HOME feed, discover, squads and profile with Elite OS shell.",
     icon: UserRound,
     username: "Athlete",
     password: "Athlete",
-    href: "/dashboard?demo=1"
+    href: "/feed"
   },
   {
     role: "coach",
@@ -43,36 +44,37 @@ export function MobileAppLauncher() {
     <main className="min-h-dvh bg-ink-950 text-ink-100">
       <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col px-5 py-5">
         <header className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => router.push("/")}
-            className="flex items-center gap-2 rounded-xl text-left focus-visible:outline-none"
-            aria-label="Back to FitConnect landing page"
+          <FitConnectLogo variant="full" href="/" />
+          <Link
+            href="/mobile/qr"
+            aria-label="QR code para telemóvel"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-glass-border bg-glass-md text-volt-500 hover:bg-glass-hi transition-colors"
           >
-            <Logo className="h-10 w-10" animated />
-            <span className="font-display text-lg font-bold">
-              Fit<span className="text-brand-400">Connect</span>
-            </span>
-          </button>
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-ink-800 bg-ink-900 text-brand-300">
-            <Smartphone className="h-5 w-5" aria-hidden="true" />
-          </span>
+            <QrCode className="h-5 w-5" aria-hidden />
+          </Link>
         </header>
 
         <section className="flex flex-1 flex-col justify-center py-10">
-          <p className="inline-flex w-fit items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-200">
-            <Activity className="h-3.5 w-3.5" aria-hidden="true" />
+          <p className="inline-flex w-fit items-center gap-2 rounded-full border border-volt-500/30 bg-glass-volt px-3 py-1 text-xs font-semibold text-volt-300">
+            <Activity className="h-3.5 w-3.5" aria-hidden />
             Mobile app demo
           </p>
           <h1 className="mt-5 font-display text-4xl font-bold leading-tight text-balance">
             Choose the app view to open.
           </h1>
           <p className="mt-3 text-sm leading-6 text-ink-300">
-            These buttons sign into the demo accounts and open the real mobile
-            dashboard routes with the bottom dock layout.
+            Sign in with demo accounts and open the real mobile shell with dock
+            navigation.
           </p>
 
-          <div className="mt-8 space-y-3">
+          <Button asChild variant="outline" className="mt-6 w-full border-glass-border">
+            <Link href="/mobile/qr">
+              <QrCode className="h-4 w-4" aria-hidden />
+              Abrir no telemóvel (QR code)
+            </Link>
+          </Button>
+
+          <div className="mt-6 space-y-3">
             {DEMOS.map((demo) => {
               const Icon = demo.icon;
               return (
@@ -82,11 +84,11 @@ export function MobileAppLauncher() {
                   onClick={() =>
                     openDemo(demo.username, demo.password, demo.href)
                   }
-                  className="group w-full rounded-2xl border border-ink-800 bg-ink-900/80 p-4 text-left shadow-lg shadow-black/20 transition hover:border-brand-500/40 hover:bg-ink-900 focus-visible:outline-none"
+                  className="group w-full rounded-glass border border-glass-border bg-glass-md p-4 text-left transition hover:border-volt-500/40 hover:bg-glass-hi focus-visible:outline-none"
                 >
                   <span className="flex items-center gap-3">
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-400 to-accent-500 text-ink-950">
-                      <Icon className="h-5 w-5" aria-hidden="true" />
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-grad-pulse text-ink-950">
+                      <Icon className="h-5 w-5" aria-hidden />
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block font-semibold text-ink-50">
@@ -107,10 +109,10 @@ export function MobileAppLauncher() {
           <Button
             type="button"
             variant="outline"
-            className="w-full border-ink-800"
+            className="w-full border-glass-border"
             onClick={() => router.push("/signin")}
           >
-            <Dumbbell className="h-4 w-4" aria-hidden="true" />
+            <Smartphone className="h-4 w-4" aria-hidden />
             Use another account
           </Button>
         </footer>

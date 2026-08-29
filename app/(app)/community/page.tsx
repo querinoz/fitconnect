@@ -1,13 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Nav } from "@/components/nav";
-import { Footer } from "@/components/footer";
+import { PageChrome } from "@/components/shell/page-chrome";
 import { Cta } from "@/components/cta";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { CelebrationRibbon } from "@/components/celebration-ribbon";
-import { DemoBanner } from "@/components/demo-banner";
 import { COMMUNITY_POSTS, SPORTS, type Sport } from "@/lib/data";
 import {
   Award,
@@ -74,9 +72,7 @@ export default function CommunityPage() {
   }, [q, kind, sport]);
 
   return (
-    <>
-      <DemoBanner />
-      <Nav />
+    <PageChrome>
       <main id="main" className="mx-auto max-w-7xl px-6 py-10">
         <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -323,7 +319,6 @@ export default function CommunityPage() {
           <Cta />
         </div>
       </main>
-      <Footer />
-    </>
+    </PageChrome>
   );
 }

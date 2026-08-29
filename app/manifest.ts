@@ -5,10 +5,10 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "FitConnect",
     short_name: "FitConnect",
     description: "Coach × athlete training, live.",
-    start_url: "/dashboard",
+    start_url: "/feed",
     display: "standalone",
-    background_color: "#07080A",
-    theme_color: "#07080A",
+    background_color: "#090402",
+    theme_color: "#090402",
     orientation: "portrait",
     icons: [
       { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },

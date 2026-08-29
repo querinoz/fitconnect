@@ -2,13 +2,11 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Nav } from "@/components/nav";
-import { Footer } from "@/components/footer";
+import { PageChrome } from "@/components/shell/page-chrome";
 import { TrainerCard } from "@/components/trainer-card";
 import { TrainerCardSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
-import { DemoBanner } from "@/components/demo-banner";
 import { Atmosphere } from "@/components/marketing/atmosphere";
 import { SPORTS, TRAINERS, type Modality, type Sport } from "@/lib/data";
 import {
@@ -34,9 +32,7 @@ export default function DiscoverPage() {
 
 function DiscoverFallback() {
   return (
-    <>
-      <DemoBanner />
-      <Nav />
+    <PageChrome>
       <main id="main" className="mx-auto max-w-7xl px-6 py-10">
         <div className="h-10 w-72 skeleton mb-4" />
         <div className="grid lg:grid-cols-[280px_1fr] gap-8">
@@ -48,8 +44,7 @@ function DiscoverFallback() {
           </div>
         </div>
       </main>
-      <Footer />
-    </>
+    </PageChrome>
   );
 }
 
@@ -222,9 +217,7 @@ function DiscoverInner() {
   );
 
   return (
-    <>
-      <DemoBanner />
-      <Nav />
+    <PageChrome>
       <main id="main" className="mx-auto max-w-7xl px-6 py-10">
         <div className="relative isolate -mx-6 px-6 mb-4 pt-2 pb-6">
           <div className="pointer-events-none absolute inset-x-0 -top-12 bottom-0 -z-10 overflow-hidden [mask-image:linear-gradient(to_bottom,black,transparent_85%)]">
@@ -362,8 +355,7 @@ function DiscoverInner() {
           </div>
         </div>
       </main>
-      <Footer />
-    </>
+    </PageChrome>
   );
 }
 

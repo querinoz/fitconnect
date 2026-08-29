@@ -91,13 +91,13 @@ const config: Config = {
         }
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
         display: [
-          "var(--font-display, ui-sans-serif)",
+          "var(--font-display)",
           "system-ui",
           "sans-serif"
         ],
-        mono: ["ui-monospace", "monospace"]
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"]
       },
       keyframes: {
         "fade-up": {

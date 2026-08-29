@@ -4,7 +4,7 @@
   "private": true,
   "description": "FitConnect — Marketplace connecting athletes with specialised personal trainers",
   "scripts": {
-    "dev": "next dev -p 3001",
+    "dev": "next dev -p 3001 -H 0.0.0.0",
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "next lint",
@@ -14,7 +14,7 @@
     "test:ui": "vitest --ui",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "audit:mobile": "node scripts/lighthouse-mobile.mjs http://localhost:3001",
+    "design:review": "node scripts/capture-design-review.mjs",
     "smoke": "node scripts/smoke-test.mjs http://localhost:3001",
     "smoke:mobile": "node scripts/mobile-pwa-check.mjs http://localhost:3001",
     "smoke:all": "npm run smoke && npm run smoke:mobile",
@@ -38,7 +38,8 @@
     "instagram:generate": "node scripts/generate-instagram-content.mjs",
     "instagram:generate:batch-v2": "node scripts/generate-instagram-batch-v2.mjs",
     "instagram:generate:batch-v3": "node scripts/generate-instagram-batch-v3.mjs",
-    "instagram:review": "node scripts/build-instagram-review-v3.mjs"
+    "instagram:review": "node scripts/build-instagram-review-v3.mjs",
+    "mobile:qr": "node scripts/mobile-qr.mjs"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
@@ -53,6 +54,7 @@
     "framer-motion": "^11.11.17",
     "lucide-react": "^0.460.0",
     "next": "^14.2.18",
+    "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "recharts": "^2.13.3",
@@ -65,6 +67,7 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^22.9.0",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.7.0",
