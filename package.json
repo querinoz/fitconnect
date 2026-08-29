@@ -22,6 +22,8 @@
     "env:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-stop.ps1",
     "env:clean": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-clean.ps1",
     "env:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-status.ps1",
+    "android": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/android-emulator-open.ps1",
+    "android:unix": "bash scripts/android-emulator-open.sh",
     "instagram:organize": "node scripts/organize-instagram-pack.mjs",
     "instagram:gallery": "node scripts/build-instagram-gallery.mjs",
     "instagram:publish": "node scripts/publish-instagram.mjs --priority",

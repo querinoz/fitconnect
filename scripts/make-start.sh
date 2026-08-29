@@ -61,8 +61,15 @@ if [[ "$NO_SMOKE" != "1" ]]; then
 fi
 
 if [[ "$NO_BROWSER" != "1" ]]; then
-  step "Opening browser"
-  urls=("$BASE_URL/" "$BASE_URL/dashboard" "$BASE_URL/coach/dashboard" "$BASE_URL/discover")
+  step "Opening app surfaces in browser"
+  urls=(
+    "$BASE_URL/"
+    "$BASE_URL/signin"
+    "$BASE_URL/feed"
+    "$BASE_URL/coach/dashboard"
+    "$BASE_URL/mobile"
+    "$BASE_URL/mobile/qr"
+  )
   if command -v xdg-open >/dev/null; then
     for u in "${urls[@]}"; do xdg-open "$u" 2>/dev/null || true; done
   elif command -v open >/dev/null; then
@@ -70,4 +77,23 @@ if [[ "$NO_BROWSER" != "1" ]]; then
   fi
 fi
 
-echo "Demo sign-in: Athlete/Athlete | Coach/Coach | Admin/Admin"
+# Optional: open PWA on Android emulator if adb + device are available
+if command -v adb >/dev/null && adb devices 2>/dev/null | awk 'NR>1 && $2=="device"{found=1} END{exit !found}'; then
+  step "Android emulator detected — opening FitConnect PWA"
+  bash "$ROOT/scripts/android-emulator-open.sh" /mobile || true
+else
+  echo ""
+  echo "Android: no emulator/adb detected (optional)."
+  echo "  Boot Android Studio emulator, then: make android"
+fi
+
+echo ""
+echo "Surfaces:"
+echo "  Landing   $BASE_URL/"
+echo "  Athlete   $BASE_URL/feed"
+echo "  Coach     $BASE_URL/coach/dashboard"
+echo "  Mobile    $BASE_URL/mobile"
+echo "  QR        $BASE_URL/mobile/qr"
+echo "  Emulator  http://10.0.2.2:$PORT/mobile  (via make android)"
+echo ""
+echo "Demo sign-in: ines@fitconnect.local / Athlete | Coach/Coach | Admin/Admin"

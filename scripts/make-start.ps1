@@ -74,15 +74,43 @@ if (-not $NoSmoke) {
 }
 
 if (-not $NoBrowser) {
-  Write-Step "Opening app in browser"
+  Write-Step "Opening app surfaces in browser"
   $urls = @(
     "$BaseUrl/",
-    "$BaseUrl/dashboard",
+    "$BaseUrl/signin",
+    "$BaseUrl/feed",
     "$BaseUrl/coach/dashboard",
-    "$BaseUrl/discover"
+    "$BaseUrl/mobile",
+    "$BaseUrl/mobile/qr"
   )
   foreach ($u in $urls) { Start-Process $u }
 }
 
+# Optional: open PWA on Android emulator if adb + device are available
+$adb = Get-Command adb -ErrorAction SilentlyContinue
+if ($adb) {
+  $devices = & adb devices 2>$null | Select-Object -Skip 1 | Where-Object { $_ -match "\tdevice$" }
+  if ($devices) {
+    Write-Step "Android emulator detected — opening FitConnect PWA"
+    & "$PSScriptRoot\android-emulator-open.ps1" -Port $Port -Path "/mobile"
+  } else {
+    Write-Host ""
+    Write-Host "Android: no emulator connected. Start one in Android Studio, then:" -ForegroundColor DarkGray
+    Write-Host "  make android   or   .\scripts\android-emulator-open.ps1" -ForegroundColor DarkGray
+  }
+} else {
+  Write-Host ""
+  Write-Host "Android: adb not on PATH (optional). For emulator PWA:" -ForegroundColor DarkGray
+  Write-Host "  Install platform-tools, boot emulator, run: make android" -ForegroundColor DarkGray
+}
+
 Write-Host ""
-Write-Host "Demo sign-in: Athlete/Athlete | Coach/Coach | Admin/Admin" -ForegroundColor DarkGray
+Write-Host "Surfaces:" -ForegroundColor Cyan
+Write-Host "  Landing   $BaseUrl/"
+Write-Host "  Athlete   $BaseUrl/feed"
+Write-Host "  Coach     $BaseUrl/coach/dashboard"
+Write-Host "  Mobile    $BaseUrl/mobile"
+Write-Host "  QR        $BaseUrl/mobile/qr"
+Write-Host "  Emulator  http://10.0.2.2:$Port/mobile  (via make android)"
+Write-Host ""
+Write-Host "Demo sign-in: ines@fitconnect.local / Athlete | Coach/Coach | Admin/Admin" -ForegroundColor DarkGray
