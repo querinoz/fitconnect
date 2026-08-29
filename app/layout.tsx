@@ -1,25 +1,31 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { JetBrains_Mono, Plus_Jakarta_Sans, Syne } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SkipLink } from "@/components/skip-link";
 
-const inter = Inter({
+const body = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-body",
   display: "swap"
 });
 
-const display = Space_Grotesk({
+const display = Syne({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap"
 });
 
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap"
+});
+
 export const metadata: Metadata = {
-  title: "FitConnect — Train with world-class specialists",
+  title: "FitConnect Elite OS — Train with world-class specialists",
   description:
-    "Connect with elite personal trainers for any sport you love. Yoga, surf, climbing, MMA and more — in person or online.",
+    "The operating system for elite human performance. Connect with specialists, track telemetry, and perform at your peak.",
   metadataBase: new URL("https://fitconnect.querinoz.dev"),
   applicationName: "FitConnect",
   manifest: "/app.webmanifest",
@@ -29,19 +35,25 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent"
   },
   icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/apple-touch-icon.svg", sizes: "180x180", type: "image/svg+xml" }]
+    icon: [{ url: "/brand/logomark-official-64.png", type: "image/png" }],
+    apple: [
+      {
+        url: "/brand/logomark-official-128.png",
+        sizes: "180x180",
+        type: "image/png"
+      }
+    ]
   },
   openGraph: {
-    title: "FitConnect — Train with world-class specialists",
+    title: "FitConnect Elite OS",
     description:
-      "Discover, book and train with the best specialised personal trainers in the world.",
+      "The operating system for elite human performance.",
     type: "website"
   }
 };
 
 export const viewport: Viewport = {
-  themeColor: [{ color: "#07080A" }],
+  themeColor: [{ color: "#090402" }],
   colorScheme: "dark",
   width: "device-width",
   initialScale: 1
@@ -56,7 +68,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-motion="full"
-      className={`${inter.variable} ${display.variable} dark`}
+      className={`${body.variable} ${display.variable} ${mono.variable} dark`}
     >
       <body className="min-h-screen antialiased font-sans">
         <Providers>

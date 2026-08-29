@@ -4,6 +4,9 @@ out/
 build/
 dist/
 .env*.local
+.env.local
+.env.instagram
+.instagram-publish-progress.json
 .vercel
 *.tsbuildinfo
 next-env.d.ts
@@ -15,3 +18,4 @@ next-env.d.ts
 playwright-report/
 test-results/
 /coverage/
+.instagram-profile-cache.json

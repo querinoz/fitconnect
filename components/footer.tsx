@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { Github, Instagram, Twitter, Youtube } from "lucide-react";
-import { Logo } from "./brand/logo";
-import { Wordmark } from "./brand/wordmark";
+import { FitConnectLogo } from "./brand/fitconnect-logo";
 import { useT } from "@/lib/i18n-provider";
 
 export function Footer() {
@@ -50,11 +49,10 @@ export function Footer() {
         <div className="md:col-span-4">
           <Link
             href="/"
-            className="flex items-center gap-2.5"
+            className="inline-flex items-center"
             aria-label="FitConnect — home"
           >
-            <Logo className="h-9 w-9" />
-            <Wordmark size={18} />
+            <FitConnectLogo variant="full" />
           </Link>
           <p className="mt-4 text-sm text-ink-400 max-w-xs leading-relaxed">
             {t("footer", "tagline")}

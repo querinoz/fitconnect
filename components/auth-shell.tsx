@@ -6,13 +6,13 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState, type FormEvent } from "react";
 import {
   ArrowRight,
-  Dumbbell,
   Lock,
   LogOut,
   Mail,
   Sparkles,
   User
 } from "lucide-react";
+import { FitConnectLogo } from "@/components/brand/fitconnect-logo";
 import {
   dashboardPathForRole,
   validateCredentials
@@ -112,14 +112,9 @@ export function AuthShell({
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <Link
             href="/"
-            className="flex items-center gap-2 font-display font-bold text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 rounded-xl"
+            className="inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-volt-500/50 rounded-xl"
           >
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand-400 to-accent-500 text-ink-950 shadow-glow">
-              <Dumbbell className="h-5 w-5" aria-hidden="true" />
-            </span>
-            <span>
-              Fit<span className="text-brand-400">Connect</span>
-            </span>
+            <FitConnectLogo variant="full" priority />
           </Link>
           <LangPicker compact />
         </div>

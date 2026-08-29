@@ -4,15 +4,17 @@ import { MobileShell } from "./mobile-shell";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
 
 vi.mock("next/image", () => ({
-  default: (props: { alt: string }) => <img {...props} alt={props.alt ?? ""} />
+  default: ({ alt, priority: _p, ...props }: { alt: string; priority?: boolean }) => (
+    <img {...props} alt={alt ?? ""} />
+  )
 }));
 
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/dashboard"
+  usePathname: () => "/feed"
 }));
 
 describe("<MobileShell />", () => {
-  it("renders top bar, content, dock", async () => {
+  it("renders elite header, content, dock", async () => {
     render(
       <ThemeProvider forceThemeId="voltline">
         <MobileShell role="athlete" name="Inês" avatarUrl="/a.png">
@@ -20,10 +22,11 @@ describe("<MobileShell />", () => {
         </MobileShell>
       </ThemeProvider>
     );
-    expect(screen.getByText("Inês")).toBeInTheDocument();
+    expect(screen.getByLabelText("FitConnect — home feed")).toBeInTheDocument();
+    expect(screen.getByLabelText("Open settings")).toBeInTheDocument();
     expect(screen.getByTestId("content")).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByLabelText("Today")).toBeInTheDocument();
+      expect(screen.getByLabelText("Home")).toBeInTheDocument();
     });
   });
 });

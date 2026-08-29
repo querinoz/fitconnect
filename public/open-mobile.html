@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FitConnect — Abrir no telemóvel</title>
+  <style>
+    :root { color-scheme: dark; --bg:#090402; --text:#F2F3F6; --muted:#8A8378; --accent:#C8FF00; }
+    body { margin:0; font-family: system-ui,sans-serif; background:var(--bg); color:var(--text); padding:24px 16px; }
+    h1 { font-size:1.4rem; margin:0 0 8px; }
+    p { color:var(--muted); line-height:1.5; font-size:.9rem; }
+    label { display:block; font-size:.75rem; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); margin:20px 0 8px; }
+    input, select { width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,.1); background:#111; color:var(--text); font-size:1rem; box-sizing:border-box; }
+    .row { display:flex; gap:8px; }
+    .row input:first-child { flex:1; }
+    .row input:last-child { width:80px; flex:none; }
+    #qr { margin:24px auto; display:block; border-radius:16px; max-width:280px; width:100%; }
+    #url { word-break:break-all; color:var(--accent); font-family:monospace; font-size:.85rem; text-align:center; margin-top:12px; }
+    button { margin-top:12px; width:100%; padding:12px; border-radius:12px; border:1px solid rgba(200,255,0,.3); background:rgba(200,255,0,.1); color:var(--accent); font-weight:600; cursor:pointer; }
+    .note { margin-top:24px; padding:14px; border-radius:12px; border:1px solid rgba(245,184,68,.2); background:rgba(245,184,68,.05); font-size:.8rem; }
+  </style>
+</head>
+<body>
+  <h1>FitConnect — Abrir no telemóvel</h1>
+  <p>Introduz o IP que o <code>npm run dev</code> mostra em <strong>Network:</strong> (ex: 192.168.1.76)</p>
+
+  <label for="ip">IP do PC</label>
+  <div class="row">
+    <input id="ip" type="text" placeholder="192.168.1.76" inputmode="decimal" />
+    <input id="port" type="text" value="3001" aria-label="Porta" />
+  </div>
+
+  <label for="path">Página</label>
+  <select id="path">
+    <option value="/mobile">Mobile app</option>
+    <option value="/feed">Feed (HOME)</option>
+    <option value="/signin">Sign in</option>
+  </select>
+
+  <canvas id="qr" width="280" height="280"></canvas>
+  <div id="url"></div>
+  <button type="button" id="copy">Copiar URL</button>
+
+  <div class="note">
+    <strong>Não abre?</strong> Mesma Wi‑Fi, reinicia <code>npm run dev</code>, permite firewall Windows na porta 3001.
+    Demo: ines@fitconnect.local / Athlete
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <script>
+    const ipEl = document.getElementById('ip');
+    const portEl = document.getElementById('port');
+    const pathEl = document.getElementById('path');
+    const urlEl = document.getElementById('url');
+    const canvas = document.getElementById('qr');
+
+    function render() {
+      const ip = ipEl.value.trim();
+      const port = portEl.value.trim() || '3001';
+      const path = pathEl.value;
+      if (!ip) { urlEl.textContent = 'Introduz o IP...'; return; }
+      const url = 'http://' + ip + ':' + port + path;
+      urlEl.textContent = url;
+      QRCode.toCanvas(canvas, url, { margin: 2, width: 280, color: { dark: '#C8FF00', light: '#090402' } });
+    }
+
+    [ipEl, portEl, pathEl].forEach(el => el.addEventListener('input', render));
+    document.getElementById('copy').onclick = () => {
+      const ip = ipEl.value.trim();
+      if (!ip) return;
+      navigator.clipboard.writeText(urlEl.textContent);
+      document.getElementById('copy').textContent = 'Copiado!';
+      setTimeout(() => document.getElementById('copy').textContent = 'Copiar URL', 2000);
+    };
+    ipEl.value = localStorage.getItem('fc-mobile-ip') || '';
+    ipEl.addEventListener('change', () => localStorage.setItem('fc-mobile-ip', ipEl.value));
+    render();
+  </script>
+</body>
+</html>

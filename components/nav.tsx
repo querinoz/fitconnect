@@ -10,8 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { LangPicker } from "./lang-picker";
-import { Logo } from "./brand/logo";
-import { Wordmark } from "./brand/wordmark";
+import { FitConnectLogo } from "./brand/fitconnect-logo";
 import { useT } from "@/lib/i18n-provider";
 import { cn } from "@/lib/utils";
 
@@ -70,20 +69,10 @@ export function Nav() {
         <div className="flex items-center gap-8">
           <Link
             href="/"
-            className="fc-vt-wordmark group flex items-center gap-2.5"
+            className="fc-vt-wordmark group flex items-center"
             aria-label="FitConnect — home"
           >
-            <span
-              aria-hidden="true"
-              className="relative grid h-9 w-9 place-items-center rounded-xl shadow-glow transition-transform group-hover:rotate-3"
-            >
-              <Logo className="h-9 w-9" />
-              <span
-                aria-hidden="true"
-                className="absolute -inset-0.5 -z-10 rounded-xl bg-gradient-to-br from-brand-400 to-accent-500 opacity-30 blur"
-              />
-            </span>
-            <Wordmark size={18} className="hidden sm:inline-block" />
+            <FitConnectLogo variant="full" priority />
           </Link>
 
           <nav

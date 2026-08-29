@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="FitConnect">
+  <path d="M60 14 L98 36 L98 84 L60 106 L22 84 L22 36 Z" fill="none" stroke="#3A4558" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M60 14 L98 36 L98 84" fill="none" stroke="#C7FB3A" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M30 60 H48 L54 42 L66 78 L72 60 H90" fill="none" stroke="#C7FB3A" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>
