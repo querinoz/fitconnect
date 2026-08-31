@@ -77,17 +77,21 @@
     "instagram:publish-all": "node scripts/instagram/publish-all.mjs",
     "instagram:publish": "node scripts/instagram/publish.mjs",
     "instagram:build-grid32": "node marketing/instagram/build-grid32.mjs",
-    "instagram:prepare-grid32": "node marketing/instagram/build-grid32.mjs && node scripts/instagram/sync-public.mjs"
+    "instagram:prepare-grid32": "node marketing/instagram/build-grid32.mjs && node scripts/instagram/sync-public.mjs",
+    "p1-auth:bridge": "node scripts/p1-auth-live-bridge-check.mjs",
+    "p1-auth:backfill": "node scripts/p1-auth-firebase-role-backfill.mjs",
+    "p1-auth:cleanup-test-users": "node scripts/p1-auth-cleanup-test-users.mjs"
   },
   "devDependencies": {
     "@prisma/client": "^7.8.0",
     "chrome-launcher": "^1.1.2",
     "convex": "^1.39.1",
+    "ffmpeg-static": "^5.2.0",
+    "firebase-admin": "^13.4.0",
     "lighthouse": "^12.6.0",
     "pg": "^8.13.1",
     "prisma": "^7.8.0",
     "sharp": "^0.34.5",
-    "ffmpeg-static": "^5.2.0",
     "tsx": "^4.22.2",
     "turbo": "^2.5.4",
     "typescript": "^5.6.3"

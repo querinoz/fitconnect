@@ -4,6 +4,8 @@ out/
 build/
 dist/
 .env*.local
+.firebase/
+users.json
 .vercel
 *.tsbuildinfo
 next-env.d.ts
@@ -12,6 +14,7 @@ next-env.d.ts
 .fitconnect/
 .superpowers/
 .worktrees/
+.artifacts/
 playwright-report/
 test-results/
 /coverage/
@@ -47,7 +50,10 @@ android/app/google-services.json
 android/local.properties
 android/.auth-qa/
 
-# Local DEBUG APK QR distribution artifacts (never commit)
+functions/node_modules/
+functions/lib/
+*.service-account.json
+**/firebase-adminsdk*.json
 .fitconnect-local-distribution/
 
 # Python caches (QR / brand scripts)
