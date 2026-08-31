@@ -88,8 +88,35 @@ class AthleteContentResolverTest {
     }
 
     @Test
-    fun formatSleepMinutes() {
-        assertEquals("7h 18m", AthleteDemoCatalog.formatSleepMinutes(438))
-        assertEquals("8h", AthleteDemoCatalog.formatSleepMinutes(480))
+    fun discoverMapPreviewUsesCatalogWhenRouteMissing() {
+        val ui = AthleteContentResolver.discoverMapPreview(null, null)
+        assertTrue(ui.isAnyDemo)
+        assertEquals(AthleteDemoCatalog.DISCOVER_MAP_DISTANCE_KM, ui.distanceKm.value, 0.01)
+        assertEquals(AthleteDemoCatalog.DISCOVER_MAP_HR_BPM, ui.heartRateBpm.value)
+    }
+
+    @Test
+    fun vaultBadgesSeparatesShareableAndPrivate() {
+        val ui = AthleteContentResolver.vaultBadges()
+        assertTrue(ui.isDemo)
+        assertTrue(ui.shareableKm > 0.0)
+        assertTrue(ui.privateKm > 0.0)
+        assertTrue(ui.summary.contains(AthleteDemoCatalog.MODE_LABEL))
+    }
+
+    @Test
+    fun profileSurfaceMarksDemo() {
+        val ui = AthleteContentResolver.profileSurface("Test Athlete")
+        assertTrue(ui.isAnyDemo)
+        assertEquals(AthleteDataProvenance.LOCAL_DEMO, ui.displayName.provenance)
+        assertEquals(AthleteDemoCatalog.HEXATAR_DETERMINISTIC_NOTE, ui.hexatarNote)
+    }
+
+    @Test
+    fun trainSurfaceDetectsDemoCapture() {
+        val demo = AthleteContentResolver.trainSurface(AthleteDemoCatalog.TRAIN_CAPTURE_SOURCE)
+        assertTrue(demo.isDemoCapture)
+        val live = AthleteContentResolver.trainSurface("HEALTH_CONNECT")
+        assertTrue(!live.isDemoCapture)
     }
 }

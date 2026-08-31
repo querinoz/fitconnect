@@ -26,6 +26,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.fitconnect.android.athlete.ascend.ActivityAscendBridge
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.demo.AthleteContentResolver
+import com.fitconnect.android.athlete.demo.AthleteDemoBanner
+import com.fitconnect.android.athlete.demo.AthleteDemoCatalog
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.capture.GpsFeedStatus
@@ -150,13 +153,20 @@ fun ActivityScreen() {
         }.takeIf { it >= 0 }
     }
     val liveSession = snap.phase != LiveActivityPhase.IDLE
+    val trainUi = remember(snap.sourceLabel) { AthleteContentResolver.trainSurface(snap.sourceLabel) }
 
     AthleteScreenScaffold(
         title = "Activity",
-        subtitle = "Live cockpit · ${snap.sourceLabel}",
+        subtitle = "Live cockpit · ${trainUi.sourceLabel}",
         overline = "ATHLETE OS · CAPTURE",
         testTag = "athlete_activity",
     ) {
+        item {
+            AthleteDemoBanner(
+                visible = trainUi.isDemoCapture,
+                modifier = Modifier.testTag("activity_demo_banner"),
+            )
+        }
         item {
             EliteStack {
                 EliteSysLabel(

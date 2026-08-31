@@ -26,7 +26,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.demo.AthleteContentResolver
+import com.fitconnect.android.athlete.demo.AthleteDemoBanner
+import com.fitconnect.android.athlete.demo.AthleteDemoCatalog
 import com.fitconnect.android.athlete.domain.CoachCard
+import com.fitconnect.android.athlete.domain.DiscoverMapPreviewUi
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteLoad
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
@@ -130,17 +134,23 @@ fun DiscoverScreen() {
             city.isBlank() || coach.city.contains(city, ignoreCase = true)
         }
         AthleteScreenScaffold(
-            title = "Discover coaches",
-            subtitle = "Performance marketplace · ${DemoPersona.MODE_LABEL}",
-            overline = "DISCOVER · MARKET",
+            title = "Analysis · Coach marketplace",
+            subtitle = "Discover coaches · ${DemoPersona.MODE_LABEL}",
+            overline = "ATHLETE OS · ANALYSIS",
             testTag = "athlete_discover",
         ) {
             item {
+                AthleteDemoBanner(visible = true, modifier = Modifier.testTag("discover_demo_banner"))
+            }
+            item {
                 val route = container.geo.routes.all().firstOrNull()
+                val mapUi = AthleteContentResolver.discoverMapPreview(
+                    routeDistanceKm = route?.distanceKm,
+                    routeDurationMin = route?.estimatedMinutes,
+                )
                 LocalMapPreview(
+                    preview = mapUi,
                     markerCount = markers.size.coerceAtLeast(2),
-                    distanceKm = route?.distanceKm ?: 8.2,
-                    durationMin = route?.estimatedMinutes ?: 42,
                 )
             }
             item {
@@ -196,7 +206,7 @@ fun DiscoverScreen() {
                                         targetKind = BookingTargetKind.COACH,
                                         targetId = draft.coach.id,
                                         clientId = LocalAthleteRepository.ATHLETE_ID,
-                                        clientName = "Inês Costa",
+                                        clientName = AthleteDemoCatalog.DEMO_ATHLETE_DISPLAY_NAME,
                                         startEpochMs = start,
                                         durationMin = draft.durationMin,
                                         mode = SessionMode.PRIVATE,
@@ -397,9 +407,8 @@ private fun BookingSheet(
 
 @Composable
 private fun LocalMapPreview(
+    preview: DiscoverMapPreviewUi,
     markerCount: Int,
-    distanceKm: Double,
-    durationMin: Int,
 ) {
     val floor = MaterialTheme.colorScheme.background
     val elevated = MaterialTheme.colorScheme.surface
@@ -438,16 +447,17 @@ private fun LocalMapPreview(
             drawCircle(teal, radius = 8f, center = path.first())
         }
         Column(modifier = Modifier.padding(EliteSpace.Md)) {
-            EliteBadge(text = "LOCAL MAP")
+            EliteBadge(text = "LOCAL MAP · ${AthleteDemoCatalog.MODE_LABEL}")
             EliteSysLabel("GPS · DEMO INSTRUMENT")
             Text(
-                "Route · ${"%.1f".format(distanceKm)} km · ${durationMin} min",
+                "Route · ${"%.1f".format(preview.distanceKm.value)} km · ${preview.durationMin.value} min",
                 style = MaterialTheme.typography.titleMedium,
             )
             Text(
-                "HR 148 bpm · Pace 5:12/km · Markers $markerCount · not live GPS",
+                "HR ${preview.heartRateBpm.value} bpm · Pace ${preview.paceLabel.value} · Markers $markerCount · not live GPS",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.testTag("discover_map_provenance"),
             )
         }
     }

@@ -8,7 +8,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.demo.AthleteContentResolver
+import com.fitconnect.android.athlete.demo.AthleteDemoBanner
+import com.fitconnect.android.athlete.demo.AthleteDemoCatalog
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.designui.components.AscendAchievementCard
@@ -30,6 +35,7 @@ fun PerformanceVaultScreen() {
     val locale by container.platform.localeManager.observe().collectAsState(initial = AppLocale.EN)
     val lang = locale.bcp47
     val snap = container.ascend.snapshot(LocalAthleteRepository.ATHLETE_ID)
+    val vaultBadges = remember { AthleteContentResolver.vaultBadges() }
     var tab by remember { mutableIntStateOf(0) }
     val t = { key: String -> AscendCopy.t(lang, key) }
 
@@ -40,11 +46,16 @@ fun PerformanceVaultScreen() {
         testTag = "ascend_vault",
     ) {
         item {
-            val progress = com.fitconnect.ascend.badges.BadgeProgressEngine.evaluate(emptyList())
+            AthleteDemoBanner(
+                visible = vaultBadges.isDemo,
+                modifier = Modifier.testTag("vault_demo_banner"),
+            )
+        }
+        item {
             EliteCard {
                 EliteStack {
-                    EliteSysLabel("SHAREABLE BADGES")
-                    Text(progress.emptyCopy, style = MaterialTheme.typography.bodyMedium)
+                    EliteSysLabel("SHAREABLE BADGES · ${AthleteDemoCatalog.MODE_LABEL}")
+                    Text(vaultBadges.summary, style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }

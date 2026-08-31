@@ -25,3 +25,35 @@ data class TodayReadinessUi(
     val sleepLabel: Provenanced<String>,
     val isAnyDemo: Boolean,
 )
+
+/** Analysis tab — coach marketplace map strip (not live GPS). */
+data class DiscoverMapPreviewUi(
+    val distanceKm: Provenanced<Double>,
+    val durationMin: Provenanced<Int>,
+    val heartRateBpm: Provenanced<Int>,
+    val paceLabel: Provenanced<String>,
+    val isAnyDemo: Boolean,
+)
+
+/** Achievements vault — shareable badge distance from seeded workouts. */
+data class VaultBadgeUi(
+    val shareableKm: Double,
+    val privateKm: Double,
+    val summary: String,
+    val isDemo: Boolean,
+)
+
+/** Profile identity blocks — repo-sourced until backend profile exists. */
+data class ProfileSurfaceUi(
+    val displayName: Provenanced<String>,
+    val bodyMetricsDemo: Boolean,
+    val goalsDemo: Boolean,
+    val hexatarNote: String,
+    val isAnyDemo: Boolean,
+)
+
+/** Train FAB capture — live engine source labeling. */
+data class TrainSurfaceUi(
+    val sourceLabel: String,
+    val isDemoCapture: Boolean,
+)

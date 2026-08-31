@@ -25,6 +25,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.demo.AthleteContentResolver
+import com.fitconnect.android.athlete.demo.AthleteDemoBanner
+import com.fitconnect.android.athlete.demo.AthleteDemoCatalog
 import com.fitconnect.android.athlete.domain.AthleteGoal
 import com.fitconnect.android.athlete.domain.AthleteProfile
 import com.fitconnect.android.athlete.domain.BodyMetrics
@@ -93,6 +96,13 @@ fun ProfileScreen(
         subtitle = "Identity · appearance · goals · devices",
         testTag = "athlete_profile",
     ) {
+        val profileSurface = profile?.let { AthleteContentResolver.profileSurface(it.displayName) }
+        item {
+            AthleteDemoBanner(
+                visible = profileSurface?.isAnyDemo == true,
+                modifier = Modifier.testTag("profile_demo_banner"),
+            )
+        }
         profile?.let { p ->
             item {
                 val ascend = container.ascend.snapshot(LocalAthleteRepository.ATHLETE_ID)
@@ -128,6 +138,10 @@ fun ProfileScreen(
                             modifier = Modifier.testTag("elite_player_card"),
                         )
                         patent.rank?.let { EliteTierChip(it) }
+                        EliteSysLabel(
+                            profileSurface?.hexatarNote ?: AthleteDemoCatalog.HEXATAR_DETERMINISTIC_NOTE,
+                            modifier = Modifier.testTag("profile_hexatar_note"),
+                        )
                         EliteSysLabel(
                             streak?.let { "${it.days} DAY STREAK · ${DemoPersona.MODE_LABEL}" }
                                 ?: "NO CONSISTENCY DATA YET",
@@ -229,14 +243,14 @@ fun ProfileScreen(
         body?.let { metrics ->
             item {
                 EliteStack {
-                    EliteSysLabel("BODY METRICS")
+                    EliteSysLabel("BODY METRICS · ${AthleteDemoCatalog.MODE_LABEL}")
                     EliteMetricCard(label = "Weight", value = "${metrics.weightKg} kg")
                     EliteMetricCard(label = "Hydration", value = "${metrics.hydrationLiters} L")
                     EliteMetricCard(label = "Nutrition", value = "${metrics.nutritionKcal} kcal")
                 }
             }
         }
-        item { Text("Goals", style = MaterialTheme.typography.titleMedium) }
+        item { Text("Goals · ${AthleteDemoCatalog.MODE_LABEL}", style = MaterialTheme.typography.titleMedium) }
         items(goals, key = { it.id }) { goal ->
             EliteCard {
                 EliteStack(spacing = EliteSpace.Sm) {
@@ -307,13 +321,7 @@ fun ProfileScreen(
                 label = "Sign out",
                 variant = EliteButtonVariant.Ghost,
                 modifier = Modifier.testTag("athlete_sign_out"),
-                onClick = {
-                    scope.launch {
-                        container.platform.authRepository.logout()
-                        container.platform.analytics.reset()
-                        onSignedOut()
-                    }
-                },
+                onClick = onSignedOut,
             )
         }
     }
