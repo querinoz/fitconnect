@@ -44,6 +44,10 @@ object EliteSurfaceColors {
     const val LIGHT_ON_SURFACE_MUTED: Long = 0xFF111827L
     const val LIGHT_SURFACE: Long = 0xFFF3F1F8L
     const val LIGHT_SURFACE_CONTAINER: Long = 0xFFD8D4E6L
+    const val MOLD_SURFACE: Long = 0xFF0D1321L
+    const val NEU_HIGHLIGHT_EDGE: Long = 0xFF161F34L
+    const val NEU_MUTED: Long = 0xFF8A99ADL
+    const val NEU_SHADOW_DEEP: Long = 0xFF020408L
     const val ON_PATENT_AMBER: Long = 0xFF241700L
     const val ON_PATENT_CYAN: Long = 0xFF04222BL
     const val ON_PATENT_LEGEND: Long = 0xFF1B0729L

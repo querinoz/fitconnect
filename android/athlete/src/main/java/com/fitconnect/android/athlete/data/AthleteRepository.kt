@@ -1,5 +1,6 @@
 package com.fitconnect.android.athlete.data
 
+import com.fitconnect.android.athlete.demo.AthleteDemoCatalog
 import com.fitconnect.android.athlete.domain.Achievement
 import com.fitconnect.android.athlete.domain.AthleteGoal
 import com.fitconnect.android.athlete.domain.AthleteProfile
@@ -112,10 +113,11 @@ class LocalAthleteRepository(
         // provider has synced data for this athlete.
         val vitals = telemetry.readinessVitals(ATHLETE_ID)
         val inputs = ReadinessInputs(
-            hrvMs = vitals.hrvMs?.roundToInt() ?: 64,
-            sleepQuality = vitals.sleepMinutes?.let { ((it / 480.0) * 100).coerceIn(0.0, 100.0).roundToInt() } ?: 86,
-            restingHrBpm = vitals.restingHr?.roundToInt() ?: 48,
-            subjective = 80,
+            hrvMs = vitals.hrvMs?.roundToInt() ?: AthleteDemoCatalog.FALLBACK_HRV_MS,
+            sleepQuality = vitals.sleepMinutes?.let { ((it / 480.0) * 100).coerceIn(0.0, 100.0).roundToInt() }
+                ?: AthleteDemoCatalog.FALLBACK_SLEEP_QUALITY,
+            restingHrBpm = vitals.restingHr?.roundToInt() ?: AthleteDemoCatalog.FALLBACK_RESTING_HR_BPM,
+            subjective = AthleteDemoCatalog.FALLBACK_SUBJECTIVE,
             acuteLoad = 0.0,
             chronicLoad = 0.0,
         )
@@ -162,9 +164,10 @@ class LocalAthleteRepository(
         val vitals = telemetry.readinessVitals(ATHLETE_ID)
         val snap = RecoverySnapshot(
             score = 78,
-            sleepQuality = vitals.sleepMinutes?.let { ((it / 480.0) * 100).coerceIn(0.0, 100.0).roundToInt() } ?: 86,
-            hrvMs = vitals.hrvMs?.roundToInt() ?: 64,
-            restingHrBpm = vitals.restingHr?.roundToInt() ?: 48,
+            sleepQuality = vitals.sleepMinutes?.let { ((it / 480.0) * 100).coerceIn(0.0, 100.0).roundToInt() }
+                ?: AthleteDemoCatalog.FALLBACK_SLEEP_QUALITY,
+            hrvMs = vitals.hrvMs?.roundToInt() ?: AthleteDemoCatalog.FALLBACK_HRV_MS,
+            restingHrBpm = vitals.restingHr?.roundToInt() ?: AthleteDemoCatalog.FALLBACK_RESTING_HR_BPM,
             timeline = listOf(
                 RecoveryPoint("Mon", 72),
                 RecoveryPoint("Tue", 68),

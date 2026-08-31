@@ -17,7 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.demo.AthleteContentResolver
+import com.fitconnect.android.athlete.demo.AthleteDemoBanner
 import com.fitconnect.android.athlete.domain.HomeSnapshot
+import com.fitconnect.android.athlete.domain.TodayReadinessUi
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteLoad
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
@@ -25,7 +28,6 @@ import com.fitconnect.android.design.EliteSurfaceColors
 import com.fitconnect.android.designui.charts.EliteChart
 import com.fitconnect.android.designui.charts.EliteChartKind
 import com.fitconnect.android.designui.charts.EliteChartModel
-import com.fitconnect.android.designui.charts.EliteChartPoint
 import com.fitconnect.android.designui.components.AscendMissionCard
 import com.fitconnect.android.designui.components.AscendStreakCard
 import com.fitconnect.android.designui.components.AscendXPBar
@@ -33,8 +35,6 @@ import com.fitconnect.android.designui.components.EliteAiDirective
 import com.fitconnect.android.designui.components.EliteAiFab
 import com.fitconnect.android.designui.components.EliteBadge
 import com.fitconnect.android.designui.components.EliteBentoCard
-import com.fitconnect.android.designui.components.EliteBentoMetric
-import com.fitconnect.android.designui.components.EliteBentoRow
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
@@ -44,11 +44,9 @@ import com.fitconnect.android.designui.components.EliteFeedPost
 import com.fitconnect.android.designui.components.EliteFlowRow
 import com.fitconnect.android.designui.components.EliteLiveDot
 import com.fitconnect.android.designui.components.EliteMetricCard
-import com.fitconnect.android.designui.components.ElitePrimeInstrument
 import com.fitconnect.android.designui.components.EliteSectionHeader
 import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.designui.components.EliteSysLabel
-import com.fitconnect.android.designui.components.eliteDayStrain
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.android.fitness.domain.HealthConnectSdkState
@@ -81,17 +79,35 @@ fun HomeScreen(
     val container = LocalAthleteContainer.current
     val scope = rememberCoroutineScope()
     var result by remember { mutableStateOf<AppResult<HomeSnapshot>?>(null) }
+    var todayUi by remember { mutableStateOf<TodayReadinessUi?>(null) }
+    var athleteLabel by remember { mutableStateOf<String?>(null) }
+    var sessionLocalDemo by remember { mutableStateOf(false) }
 
     var worldPulse by remember { mutableStateOf<List<com.fitconnect.android.community.domain.CommunityPost>>(emptyList()) }
     var worldNames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
     var worldAvatars by remember { mutableStateOf<Map<String, String?>>(emptyMap()) }
 
     fun reload() {
-        scope.launch { result = container.athleteRepository.home() }
+        scope.launch {
+            val homeResult = container.athleteRepository.home()
+            result = homeResult
+            if (homeResult is AppResult.Ok) {
+                todayUi = AthleteContentResolver.todayReadiness(
+                    athleteId = LocalAthleteRepository.ATHLETE_ID,
+                    home = homeResult.value,
+                    telemetry = container.telemetry.athleteFacade,
+                )
+            }
+        }
     }
 
     LaunchedEffect(Unit) {
         container.platform.analytics.screen("athlete_home")
+        sessionLocalDemo = container.platform.sessionStore.snapshot().isLocalDemo
+        athleteLabel = (container.athleteRepository.profile() as? AppResult.Ok)
+            ?.value
+            ?.displayName
+            ?.uppercase()
         reload()
         container.community.seedIfNeeded()
         val page = container.community.feed.feed(
@@ -114,14 +130,8 @@ fun HomeScreen(
         val t = { key: String -> AscendCopy.t(lang, key) }
         val daily = ascend.missions.firstOrNull { it.kind == MissionKind.DAILY }
         val streak = ascend.streaks.firstOrNull { it.kind == StreakKind.PERFORMANCE }
-        val nervous = when {
-            home.readiness.recoveryScore >= 75 -> "OPTIMAL"
-            home.readiness.recoveryScore >= 50 -> "BALANCED"
-            home.readiness.recoveryScore >= 30 -> "CAUTION"
-            else -> "STRAIN"
-        }
-        val strain = eliteDayStrain(home.readiness.score)
         val hcState = HealthConnectSdkMapper.probe(LocalContext.current)
+        val readinessUi = todayUi
         AthleteScreenScaffold(
             title = home.greeting,
             subtitle = "Performance cockpit · ${DemoPersona.MODE_LABEL}",
@@ -146,39 +156,17 @@ fun HomeScreen(
                 }
             }
             item {
-                ElitePrimeInstrument(
-                    score = home.readiness.recoveryScore,
-                    showCaption = false,
+                AthleteDemoBanner(
+                    visible = sessionLocalDemo || readinessUi?.isAnyDemo == true,
                 )
             }
-            item {
-                EliteBentoRow {
-                    EliteBentoMetric(
-                        label = "HRV",
-                        value = "${home.readiness.hrvMs}",
-                        unit = "ms",
-                        delta = "READINESS ${home.readiness.score}%",
-                        modifier = Modifier.weight(1f),
-                        onClick = onOpenRecovery,
-                    )
-                    EliteBentoMetric(
-                        label = "DAY STRAIN",
-                        value = "%.1f".format(strain),
-                        unit = "/ 21",
-                        delta = "LOAD ${"%.1f".format(home.readiness.trainingLoad)}",
-                        accentVolt = false,
-                        modifier = Modifier.weight(1f),
+            readinessUi?.let { ui ->
+                item {
+                    TodayReadinessPanel(
+                        ui = ui,
+                        athleteLabel = athleteLabel,
                     )
                 }
-            }
-            item {
-                EliteBentoMetric(
-                    label = "SLEEP",
-                    value = "${home.readiness.sleepQuality}",
-                    unit = "% quality",
-                    delta = nervous,
-                    onClick = onOpenSleep,
-                )
             }
             item {
                 EliteAiDirective(
@@ -308,13 +296,7 @@ fun HomeScreen(
                 EliteChart(
                     model = EliteChartModel(
                         kind = EliteChartKind.READINESS,
-                        points = listOf(
-                            EliteChartPoint(0f, 70f),
-                            EliteChartPoint(1f, 74f),
-                            EliteChartPoint(2f, 68f),
-                            EliteChartPoint(3f, 80f),
-                            EliteChartPoint(4f, home.readiness.score.toFloat()),
-                        ),
+                        points = AthleteContentResolver.readinessChartPoints(home.readiness.score),
                         contentDescription = "Readiness trend",
                     ),
                     modifier = Modifier.testTag("athlete_home_readiness_chart"),

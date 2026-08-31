@@ -183,6 +183,18 @@ fun DesignSystemCatalog(
             }
         }
         item {
+            Section("Neumorphic") {
+                com.fitconnect.android.designui.neumorphic.EliteReadinessNeumorphicCard(
+                    telemetry = com.fitconnect.android.designui.neumorphic.ReadinessTelemetry(
+                        readinessPercent = 85,
+                        hrvMs = 68,
+                        load = 0.82f,
+                    ),
+                    athleteLabel = "INÊS MARTINS",
+                )
+            }
+        }
+        item {
             Section("Cards") {
                 EliteMetricCard(label = "Readiness", value = "82")
                 ElitePersonCard(title = "Person shell", subtitle = "Athlete/Coach reuse this card")

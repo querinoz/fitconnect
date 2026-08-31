@@ -41,6 +41,12 @@ export const COLOR_TOKENS = {
   onVolt: "#0f1400",
   instrumentMuted: "#8a93a0",
 
+  // Neumorphic mold layer (OLED-dark soft UI) — distinct from --eos-surface glass stack.
+  moldSurface: "#0d1321",
+  neuHighlightEdge: "#161f34",
+  neuShadowDeep: "#020408",
+  neuMuted: "#8a99ad",
+
   // Progression only — never on HRV / strain / ring. ATIVO = telemetry, ELITE = voltline, FORTE = recovery.
   patentSteel: "#7a8899",
   onPatentSteel: "#14191f",
