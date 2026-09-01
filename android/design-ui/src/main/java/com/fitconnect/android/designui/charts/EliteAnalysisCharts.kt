@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -29,6 +30,8 @@ fun EliteWeeklyLoadChart(
     bars: List<EliteWeeklyLoadBar>,
     modifier: Modifier = Modifier,
     heroLoad: Float? = null,
+    heroColor: Color = EliteChartPalette.Hero,
+    heroLabel: String = "TODAY LOAD",
     contentDescription: String = "Weekly training load",
 ) {
     val maxLoad = bars.maxOfOrNull { it.load }?.coerceAtLeast(1f) ?: 1f
@@ -42,10 +45,10 @@ fun EliteWeeklyLoadChart(
             Text(
                 text = "${value.toInt()}",
                 style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
-                color = EliteChartPalette.Hero,
+                color = heroColor,
             )
             Text(
-                text = "TODAY LOAD",
+                text = heroLabel,
                 style = EliteMonoTextStyle,
                 color = EliteChartPalette.Axis,
             )
@@ -63,7 +66,7 @@ fun EliteWeeklyLoadChart(
                 val left = gap + index * (barWidth + gap)
                 val top = size.height - barHeight - 16f
                 drawRoundRect(
-                    color = if (bar.isToday) EliteChartPalette.Hero else EliteChartPalette.Muted,
+                    color = if (bar.isToday) heroColor else EliteChartPalette.Muted,
                     topLeft = Offset(left, top),
                     size = Size(barWidth, barHeight),
                     cornerRadius = androidx.compose.ui.geometry.CornerRadius(6f, 6f),
@@ -84,7 +87,7 @@ fun EliteWeeklyLoadChart(
                 Text(
                     text = bar.label,
                     style = EliteMonoTextStyle,
-                    color = if (bar.isToday) EliteChartPalette.Hero else EliteChartPalette.Axis,
+                    color = if (bar.isToday) heroColor else EliteChartPalette.Axis,
                 )
             }
         }
@@ -210,4 +213,101 @@ fun EliteZoneRingChart(
             }
         }
     }
+}
+
+@Composable
+fun EliteStreakTrendChart(
+    values: List<Int>,
+    labels: List<String>,
+    heroDays: Int,
+    modifier: Modifier = Modifier,
+    contentDescription: String = "Streak trend",
+) {
+    val max = values.maxOrNull()?.coerceAtLeast(1) ?: 1
+    Column(
+        modifier = modifier.semantics { this.contentDescription = contentDescription },
+        verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
+    ) {
+        Text(
+            text = "$heroDays",
+            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
+            color = EliteChartPalette.Hero,
+        )
+        Text(
+            text = "DAY STREAK",
+            style = EliteMonoTextStyle,
+            color = EliteChartPalette.Axis,
+        )
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp),
+        ) {
+            val barWidth = size.width / (values.size * 2f)
+            val gap = barWidth
+            values.forEachIndexed { index, value ->
+                val fraction = value.toFloat() / max
+                val barHeight = size.height * 0.75f * fraction
+                val left = gap + index * (barWidth + gap)
+                val top = size.height - barHeight - 12f
+                drawRoundRect(
+                    color = EliteChartPalette.Muted,
+                    topLeft = Offset(left, top),
+                    size = Size(barWidth, barHeight),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(6f, 6f),
+                )
+            }
+            val heroIndex = values.indexOf(heroDays).takeIf { it >= 0 } ?: values.lastIndex
+            val heroFraction = values[heroIndex].toFloat() / max
+            val heroHeight = size.height * 0.75f * heroFraction
+            val heroLeft = gap + heroIndex * (barWidth + gap)
+            val heroTop = size.height - heroHeight - 12f
+            drawRoundRect(
+                color = EliteChartPalette.Hero,
+                topLeft = Offset(heroLeft, heroTop),
+                size = Size(barWidth, heroHeight),
+                cornerRadius = androidx.compose.ui.geometry.CornerRadius(6f, 6f),
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            labels.forEachIndexed { index, label ->
+                Text(
+                    text = label,
+                    style = EliteMonoTextStyle,
+                    color = if (values.getOrNull(index) == heroDays) {
+                        EliteChartPalette.Hero
+                    } else {
+                        EliteChartPalette.Axis
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun EliteXpProgressChart(
+    values: List<Int>,
+    labels: List<String>,
+    todayIndex: Int,
+    modifier: Modifier = Modifier,
+    contentDescription: String = "XP progress",
+) {
+    EliteWeeklyLoadChart(
+        modifier = modifier.semantics { this.contentDescription = contentDescription },
+        bars = values.mapIndexed { index, value ->
+            EliteWeeklyLoadBar(
+                label = labels[index],
+                load = value.toFloat(),
+                isToday = index == todayIndex,
+            )
+        },
+        heroLoad = values.getOrNull(todayIndex)?.toFloat(),
+        heroColor = EliteChartPalette.Success,
+        heroLabel = "XP THIS WEEK",
+        contentDescription = contentDescription,
+    )
 }

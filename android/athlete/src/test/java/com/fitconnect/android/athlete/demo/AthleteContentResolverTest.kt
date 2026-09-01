@@ -124,6 +124,15 @@ class AthleteContentResolverTest {
     }
 
     @Test
+    fun vaultProgressProvidesDemoCharts() {
+        val ui = AthleteContentResolver.vaultProgress()
+        assertTrue(ui.isAnyDemo)
+        assertEquals(7, ui.xpWeekly.size)
+        assertEquals(AthleteDemoCatalog.VAULT_HERO_STREAK_DAYS, ui.heroStreakDays.value)
+        assertEquals(AthleteDemoCatalog.VAULT_XP_TODAY_INDEX, ui.xpTodayIndex)
+    }
+
+    @Test
     fun trainSurfaceDetectsDemoCapture() {
         val demo = AthleteContentResolver.trainSurface(AthleteDemoCatalog.TRAIN_CAPTURE_SOURCE)
         assertTrue(demo.isDemoCapture)

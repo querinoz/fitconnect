@@ -54,6 +54,17 @@ data class VaultBadgeUi(
     val isDemo: Boolean,
 )
 
+/** Achievements vault — XP and streak progress charts. */
+data class VaultProgressUi(
+    val xpWeekly: List<Provenanced<Int>>,
+    val xpLabels: List<String>,
+    val xpTodayIndex: Int,
+    val streakWeekly: List<Provenanced<Int>>,
+    val streakLabels: List<String>,
+    val heroStreakDays: Provenanced<Int>,
+    val isAnyDemo: Boolean,
+)
+
 /** Profile identity blocks — repo-sourced until backend profile exists. */
 data class ProfileSurfaceUi(
     val displayName: Provenanced<String>,

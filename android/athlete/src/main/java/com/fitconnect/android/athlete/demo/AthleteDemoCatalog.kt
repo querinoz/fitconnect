@@ -31,6 +31,14 @@ object AthleteDemoCatalog {
     /** Zone minutes Z1–Z5 */
     val ANALYSIS_ZONE_MINUTES: List<Int> = listOf(45, 120, 55, 30, 10)
 
+    // Achievements vault — XP + streak progress charts (LOCAL_DEMO)
+    val VAULT_XP_WEEK_LABELS: List<String> = listOf("W1", "W2", "W3", "W4", "W5", "W6", "W7")
+    val VAULT_XP_WEEKLY: List<Int> = listOf(120, 180, 240, 200, 320, 280, 360)
+    const val VAULT_XP_TODAY_INDEX: Int = 6
+    val VAULT_STREAK_WEEK_LABELS: List<String> = listOf("W1", "W2", "W3", "W4", "W5", "W6", "W7")
+    val VAULT_STREAK_WEEKLY: List<Int> = listOf(3, 5, 6, 7, 8, 9, 12)
+    const val VAULT_HERO_STREAK_DAYS: Int = 12
+
     // Analysis tab (coach marketplace map strip — not live GPS)
     const val DISCOVER_MAP_DISTANCE_KM: Double = 8.2
     const val DISCOVER_MAP_DURATION_MIN: Int = 42

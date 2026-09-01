@@ -9,6 +9,7 @@ import com.fitconnect.android.athlete.domain.Provenanced
 import com.fitconnect.android.athlete.domain.TodayReadinessUi
 import com.fitconnect.android.athlete.domain.TrainSurfaceUi
 import com.fitconnect.android.athlete.domain.VaultBadgeUi
+import com.fitconnect.android.athlete.domain.VaultProgressUi
 import com.fitconnect.android.designui.charts.EliteChartPoint
 import com.fitconnect.android.telemetry.integration.AthleteTelemetryFacade
 import com.fitconnect.ascend.badges.BadgeProgressEngine
@@ -165,6 +166,28 @@ object AthleteContentResolver {
             heartRateBpm = hr,
             paceLabel = pace,
             isAnyDemo = listOf(distance, duration, hr, pace).any { it.isDemo },
+        )
+    }
+
+    fun vaultProgress(): VaultProgressUi {
+        val demo = AthleteDataProvenance.LOCAL_DEMO
+        val label = AthleteDemoCatalog.MODE_LABEL
+        return VaultProgressUi(
+            xpWeekly = AthleteDemoCatalog.VAULT_XP_WEEKLY.map {
+                Provenanced(it, demo, label)
+            },
+            xpLabels = AthleteDemoCatalog.VAULT_XP_WEEK_LABELS,
+            xpTodayIndex = AthleteDemoCatalog.VAULT_XP_TODAY_INDEX,
+            streakWeekly = AthleteDemoCatalog.VAULT_STREAK_WEEKLY.map {
+                Provenanced(it, demo, label)
+            },
+            streakLabels = AthleteDemoCatalog.VAULT_STREAK_WEEK_LABELS,
+            heroStreakDays = Provenanced(
+                AthleteDemoCatalog.VAULT_HERO_STREAK_DAYS,
+                demo,
+                label,
+            ),
+            isAnyDemo = true,
         )
     }
 
