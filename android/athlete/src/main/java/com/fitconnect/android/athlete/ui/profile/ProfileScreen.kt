@@ -1,7 +1,6 @@
 package com.fitconnect.android.athlete.ui.profile
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,23 +35,19 @@ import com.fitconnect.android.athlete.ui.LocalAthletePatentStatus
 import com.fitconnect.android.athlete.ui.LocalAthleteSignOut
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.design.EliteSurfaceColors
-import com.fitconnect.android.designui.components.EliteAchievementTile
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
-import com.fitconnect.android.designui.components.EliteHexatar
-import com.fitconnect.android.designui.components.EliteHexatarProfile
 import com.fitconnect.android.designui.components.EliteMetricCard
 import com.fitconnect.android.designui.components.EliteMetricTile
 import com.fitconnect.android.designui.components.EliteProgress
 import com.fitconnect.android.designui.components.EliteSettingsRow
 import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.designui.components.EliteSysLabel
-import com.fitconnect.android.designui.components.EliteTierBadge
-import com.fitconnect.android.designui.components.EliteTierChip
 import com.fitconnect.android.designui.components.EliteTierProgress
 import com.fitconnect.android.designui.components.fillColor
 import com.fitconnect.android.designui.identity.Patent
+import com.fitconnect.android.designui.neumorphic.EosPremiumCard
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.ascend.domain.AchievementCategory
@@ -116,37 +111,17 @@ fun ProfileScreen(
                 }
                 val patent = LocalAthletePatentStatus.current
                 EliteStack(spacing = EliteSpace.Md) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Box {
-                            EliteHexatar(
-                                userId = LocalAthleteRepository.ATHLETE_ID,
-                                contentDescription = p.displayName,
-                                diameter = EliteHexatarProfile,
-                                modifier = Modifier.testTag("profile_hexatar"),
-                            )
-                            EliteTierBadge(
-                                rank = patent.rank,
-                                modifier = Modifier.align(Alignment.BottomEnd),
-                            )
-                        }
-                        Text(
-                            p.displayName,
-                            style = MaterialTheme.typography.headlineSmall,
-                            modifier = Modifier.testTag("elite_player_card"),
-                        )
-                        patent.rank?.let { EliteTierChip(it) }
-                        EliteSysLabel(
-                            profileSurface?.hexatarNote ?: AthleteDemoCatalog.HEXATAR_DETERMINISTIC_NOTE,
-                            modifier = Modifier.testTag("profile_hexatar_note"),
-                        )
-                        EliteSysLabel(
-                            streak?.let { "${it.days} DAY STREAK · ${DemoPersona.MODE_LABEL}" }
-                                ?: "NO CONSISTENCY DATA YET",
-                        )
-                    }
+                    ProfileHeroSection(
+                        userId = LocalAthleteRepository.ATHLETE_ID,
+                        displayName = p.displayName,
+                        level = ascend.level.level,
+                        totalXp = ascend.totalXp,
+                        rank = patent.rank,
+                        hexatarNote = profileSurface?.hexatarNote
+                            ?: AthleteDemoCatalog.HEXATAR_DETERMINISTIC_NOTE,
+                        streakLabel = streak?.let { "${it.days} DAY STREAK · ${DemoPersona.MODE_LABEL}" }
+                            ?: "NO CONSISTENCY DATA YET",
+                    )
                     EliteTierProgress(
                         title = patent.nextPatent?.name ?: Patent.INICIADO.name,
                         progress = patent.progressToNext,
@@ -197,7 +172,7 @@ fun ProfileScreen(
                         onClick = onOpenSettings,
                     )
                     if (titles.isNotEmpty()) {
-                        EliteCard(variant = com.fitconnect.android.designui.components.EliteCardVariant.Glass) {
+                        EosPremiumCard(modifier = Modifier.fillMaxWidth()) {
                             EliteStack(spacing = EliteSpace.Sm) {
                                 EliteSysLabel("FEATURED TITLES · UNLOCKED")
                                 titles.take(4).forEach { title ->
@@ -210,20 +185,28 @@ fun ProfileScreen(
                         ascend.achievements.firstOrNull { it.definition.id == id }
                     }
                     if (achievementTiles.isNotEmpty()) {
-                        EliteSysLabel("ACHIEVEMENTS")
-                        achievementTiles.chunked(4).forEach { row ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
-                            ) {
-                                row.forEach { item ->
-                                    EliteAchievementTile(
-                                        emoji = achievementGlyph(item.definition.category),
-                                        label = t(item.definition.nameKey),
-                                        domain = achievementDomain(item.definition.category),
-                                        unlocked = item.unlocked,
-                                        modifier = Modifier.weight(1f),
-                                    )
+                        EosPremiumCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("profile_recent_badges"),
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                                EliteSysLabel("RECENT BADGES · ${AthleteDemoCatalog.MODE_LABEL}")
+                                achievementTiles.chunked(4).forEach { row ->
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
+                                    ) {
+                                        row.forEach { item ->
+                                            ProfileAchievementTile(
+                                                emoji = achievementGlyph(item.definition.category),
+                                                label = t(item.definition.nameKey),
+                                                domain = achievementDomain(item.definition.category),
+                                                unlocked = item.unlocked,
+                                                modifier = Modifier.weight(1f),
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -231,7 +214,7 @@ fun ProfileScreen(
                 }
             }
             item {
-                EliteCard {
+                EosPremiumCard(modifier = Modifier.fillMaxWidth()) {
                     EliteStack(spacing = EliteSpace.Md) {
                         ProfileField(label = "Medical", value = p.medicalNotes ?: "None on file")
                         ProfileField(label = "Emergency", value = p.emergencyContact ?: "Not set")
@@ -317,11 +300,10 @@ fun ProfileScreen(
             }
         }
         item {
-            EliteButton(
+            ProfileDestructiveAction(
                 label = "Sign out",
-                variant = EliteButtonVariant.Ghost,
-                modifier = Modifier.testTag("athlete_sign_out"),
                 onClick = onSignedOut,
+                testTag = "athlete_sign_out",
             )
         }
     }
