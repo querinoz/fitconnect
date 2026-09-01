@@ -26,6 +26,17 @@ data class TodayReadinessUi(
     val isAnyDemo: Boolean,
 )
 
+/** Analysis tab — performance charts + coach marketplace map strip. */
+data class AnalysisSurfaceUi(
+    val weeklyLoad: List<Provenanced<Float>>,
+    val weeklyLabels: List<String>,
+    val todayIndex: Int,
+    val hrvTrendMs: List<Provenanced<Float>>,
+    val hrvDeltaPercent: Provenanced<Float>,
+    val zoneMinutes: List<Provenanced<Int>>,
+    val isAnyDemo: Boolean,
+)
+
 /** Analysis tab — coach marketplace map strip (not live GPS). */
 data class DiscoverMapPreviewUi(
     val distanceKm: Provenanced<Double>,

@@ -3,7 +3,6 @@ package com.fitconnect.android.designui.charts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -42,13 +41,13 @@ data class EliteChartModel(
 )
 
 fun EliteChartKind.tokenColor(): Color = when (this) {
-    EliteChartKind.HRV -> EliteSurfaceCharts.HRV.toColor()
-    EliteChartKind.HEART_RATE -> EliteSurfaceCharts.HEART_RATE.toColor()
-    EliteChartKind.READINESS -> EliteSurfaceCharts.READINESS.toColor()
+    EliteChartKind.HRV -> EliteChartPalette.Secondary
+    EliteChartKind.HEART_RATE -> EliteSurfaceCharts.NEGATIVE.toColor()
+    EliteChartKind.READINESS -> EliteChartPalette.Secondary
     EliteChartKind.SLEEP -> EliteSurfaceCharts.SLEEP.toColor()
     EliteChartKind.RECOVERY -> EliteSurfaceCharts.RECOVERY.toColor()
     EliteChartKind.PERFORMANCE -> EliteSurfaceCharts.PERFORMANCE.toColor()
-    EliteChartKind.TRAINING_LOAD -> EliteSurfaceCharts.TRAINING_LOAD.toColor()
+    EliteChartKind.TRAINING_LOAD -> EliteChartPalette.Muted
     EliteChartKind.WEIGHT -> EliteSurfaceCharts.WEIGHT.toColor()
     EliteChartKind.HYDRATION -> EliteSurfaceCharts.HYDRATION.toColor()
 }
@@ -64,7 +63,7 @@ fun EliteChart(
     height: Int = 160,
 ) {
     val stroke = model.kind.tokenColor()
-    val grid = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+    val grid = EliteChartPalette.Axis.copy(alpha = 0.2f)
     Canvas(
         modifier = modifier
             .fillMaxWidth()

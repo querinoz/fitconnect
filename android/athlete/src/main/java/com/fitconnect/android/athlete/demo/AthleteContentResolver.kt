@@ -1,5 +1,6 @@
 package com.fitconnect.android.athlete.demo
 
+import com.fitconnect.android.athlete.domain.AnalysisSurfaceUi
 import com.fitconnect.android.athlete.domain.AthleteDataProvenance
 import com.fitconnect.android.athlete.domain.DiscoverMapPreviewUi
 import com.fitconnect.android.athlete.domain.HomeSnapshot
@@ -97,6 +98,33 @@ object AthleteContentResolver {
         return template.mapIndexed { index, y ->
             EliteChartPoint(index.toFloat(), y)
         } + EliteChartPoint(template.size.toFloat(), latestScore.toFloat())
+    }
+
+    fun analysisSurface(): AnalysisSurfaceUi {
+        val demo = AthleteDataProvenance.LOCAL_DEMO
+        val label = AthleteDemoCatalog.MODE_LABEL
+        val weeklyLoad = AthleteDemoCatalog.ANALYSIS_WEEKLY_LOAD.map {
+            Provenanced(it, demo, label)
+        }
+        val hrvTrend = AthleteDemoCatalog.ANALYSIS_HRV_TREND_MS.map {
+            Provenanced(it, demo, label)
+        }
+        val zones = AthleteDemoCatalog.ANALYSIS_ZONE_MINUTES.map {
+            Provenanced(it, demo, label)
+        }
+        return AnalysisSurfaceUi(
+            weeklyLoad = weeklyLoad,
+            weeklyLabels = AthleteDemoCatalog.ANALYSIS_WEEK_LABELS,
+            todayIndex = AthleteDemoCatalog.ANALYSIS_TODAY_INDEX,
+            hrvTrendMs = hrvTrend,
+            hrvDeltaPercent = Provenanced(
+                AthleteDemoCatalog.ANALYSIS_HRV_DELTA_PCT,
+                demo,
+                label,
+            ),
+            zoneMinutes = zones,
+            isAnyDemo = true,
+        )
     }
 
     fun discoverMapPreview(

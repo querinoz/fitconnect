@@ -34,8 +34,15 @@ import com.fitconnect.android.athlete.domain.DiscoverMapPreviewUi
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteLoad
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
+import com.fitconnect.android.design.EliteSurfaceColors
+import com.fitconnect.android.designui.charts.EliteChartPalette
+import com.fitconnect.android.designui.charts.EliteChartPoint
+import com.fitconnect.android.designui.charts.EliteHrvTrendChart
+import com.fitconnect.android.designui.charts.EliteWeeklyLoadBar
+import com.fitconnect.android.designui.charts.EliteWeeklyLoadChart
+import com.fitconnect.android.designui.charts.EliteZoneRingChart
+import com.fitconnect.android.designui.charts.EliteZoneSegment
 import com.fitconnect.android.designui.components.EliteAvatar
-import com.fitconnect.android.designui.components.EliteBadge
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
@@ -45,8 +52,12 @@ import com.fitconnect.android.designui.components.EliteSectionHeader
 import com.fitconnect.android.designui.components.EliteSwitch
 import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.components.EliteTextField
+import com.fitconnect.android.designui.neumorphic.EosGlassBadge
+import com.fitconnect.android.designui.neumorphic.EosNeumorphicColors
+import com.fitconnect.android.designui.neumorphic.EosPremiumWell
 import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
+import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.android.foundation.auth.DemoPersona
 import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.geo.booking.BookingRequest
@@ -133,14 +144,80 @@ fun DiscoverScreen() {
         val filtered = coaches.filter { coach ->
             city.isBlank() || coach.city.contains(city, ignoreCase = true)
         }
+        val analysis = remember { AthleteContentResolver.analysisSurface() }
         AthleteScreenScaffold(
-            title = "Analysis · Coach marketplace",
-            subtitle = "Discover coaches · ${DemoPersona.MODE_LABEL}",
+            title = "Analysis",
+            subtitle = "Load · HRV · zones · ${DemoPersona.MODE_LABEL}",
             overline = "ATHLETE OS · ANALYSIS",
             testTag = "athlete_discover",
         ) {
             item {
-                AthleteDemoBanner(visible = true, modifier = Modifier.testTag("discover_demo_banner"))
+                AthleteDemoBanner(
+                    visible = analysis.isAnyDemo,
+                    modifier = Modifier.testTag("discover_demo_banner"),
+                )
+            }
+            item {
+                EliteSectionHeader(title = "Performance signals", overline = AthleteDemoCatalog.MODE_LABEL)
+            }
+            item {
+                EosPremiumWell(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("analysis_weekly_load_chart"),
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                        EliteSysLabel("WEEKLY LOAD")
+                        EliteWeeklyLoadChart(
+                            bars = analysis.weeklyLoad.mapIndexed { index, load ->
+                                EliteWeeklyLoadBar(
+                                    label = analysis.weeklyLabels[index],
+                                    load = load.value,
+                                    isToday = index == analysis.todayIndex,
+                                )
+                            },
+                        )
+                    }
+                }
+            }
+            item {
+                EosPremiumWell(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("analysis_hrv_trend_chart"),
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                        EliteSysLabel("HRV TREND · 7D")
+                        EliteHrvTrendChart(
+                            points = analysis.hrvTrendMs.mapIndexed { index, point ->
+                                EliteChartPoint(index.toFloat(), point.value)
+                            },
+                            deltaPercent = analysis.hrvDeltaPercent.value,
+                        )
+                    }
+                }
+            }
+            item {
+                EosPremiumWell(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("analysis_zone_ring_chart"),
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                        EliteSysLabel("TRAINING ZONES")
+                        EliteZoneRingChart(
+                            segments = analysis.zoneMinutes.mapIndexed { index, minutes ->
+                                EliteZoneSegment(
+                                    zone = index + 1,
+                                    minutes = minutes.value,
+                                )
+                            },
+                        )
+                    }
+                }
+            }
+            item {
+                EliteSectionHeader(title = "Coach marketplace", overline = "DISCOVER")
             }
             item {
                 val route = container.geo.routes.all().firstOrNull()
@@ -410,11 +487,9 @@ private fun LocalMapPreview(
     preview: DiscoverMapPreviewUi,
     markerCount: Int,
 ) {
-    val floor = MaterialTheme.colorScheme.background
-    val elevated = MaterialTheme.colorScheme.surface
-    val volt = MaterialTheme.colorScheme.primary
-    val teal = MaterialTheme.colorScheme.secondary
-    val alert = MaterialTheme.colorScheme.error
+    val floor = EosNeumorphicColors.Floor
+    val elevated = EosNeumorphicColors.MoldSurface
+    val route = EliteChartPalette.Secondary
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -426,10 +501,19 @@ private fun LocalMapPreview(
             drawRect(floor)
             val step = size.width / 8f
             for (i in 1 until 8) {
-                drawLine(elevated.copy(alpha = 0.6f), Offset(step * i, 0f), Offset(step * i, size.height), 2f)
-                drawLine(elevated.copy(alpha = 0.6f), Offset(0f, step * i * 0.5f), Offset(size.width, step * i * 0.5f), 2f)
+                drawLine(
+                    EliteChartPalette.Axis.copy(alpha = 0.15f),
+                    Offset(step * i, 0f),
+                    Offset(step * i, size.height),
+                    2f,
+                )
+                drawLine(
+                    EliteChartPalette.Axis.copy(alpha = 0.15f),
+                    Offset(0f, step * i * 0.5f),
+                    Offset(size.width, step * i * 0.5f),
+                    2f,
+                )
             }
-            // Deterministic LOCAL_DEMO activity path (not live GPS)
             val path = listOf(
                 Offset(size.width * 0.18f, size.height * 0.72f),
                 Offset(size.width * 0.32f, size.height * 0.55f),
@@ -438,16 +522,15 @@ private fun LocalMapPreview(
                 Offset(size.width * 0.78f, size.height * 0.38f),
             )
             for (i in 0 until path.lastIndex) {
-                drawLine(volt.copy(alpha = 0.85f), path[i], path[i + 1], strokeWidth = 5f)
+                drawLine(route.copy(alpha = 0.85f), path[i], path[i + 1], strokeWidth = 5f)
             }
-            // Zone bands (demo)
-            drawCircle(alert.copy(alpha = 0.25f), radius = 28f, center = path[2])
-            drawCircle(teal.copy(alpha = 0.3f), radius = 22f, center = path[3])
-            drawCircle(volt, radius = 10f, center = path.last())
-            drawCircle(teal, radius = 8f, center = path.first())
+            drawCircle(EliteChartPalette.zone(4).copy(alpha = 0.25f), radius = 28f, center = path[2])
+            drawCircle(EliteChartPalette.zone(2).copy(alpha = 0.3f), radius = 22f, center = path[3])
+            drawCircle(EliteChartPalette.Muted, radius = 10f, center = path.last())
+            drawCircle(EliteChartPalette.Secondary, radius = 8f, center = path.first())
         }
         Column(modifier = Modifier.padding(EliteSpace.Md)) {
-            EliteBadge(text = "LOCAL MAP · ${AthleteDemoCatalog.MODE_LABEL}")
+            EosGlassBadge(text = "LOCAL MAP · ${AthleteDemoCatalog.MODE_LABEL}")
             EliteSysLabel("GPS · DEMO INSTRUMENT")
             Text(
                 "Route · ${"%.1f".format(preview.distanceKm.value)} km · ${preview.durationMin.value} min",
@@ -456,7 +539,7 @@ private fun LocalMapPreview(
             Text(
                 "HR ${preview.heartRateBpm.value} bpm · Pace ${preview.paceLabel.value} · Markers $markerCount · not live GPS",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = EliteSurfaceColors.CHART_AXIS.toColor(),
                 modifier = Modifier.testTag("discover_map_provenance"),
             )
         }

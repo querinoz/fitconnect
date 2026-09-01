@@ -113,6 +113,17 @@ class AthleteContentResolverTest {
     }
 
     @Test
+    fun analysisSurfaceProvidesDemoCharts() {
+        val ui = AthleteContentResolver.analysisSurface()
+        assertTrue(ui.isAnyDemo)
+        assertEquals(7, ui.weeklyLoad.size)
+        assertEquals(AthleteDemoCatalog.ANALYSIS_TODAY_INDEX, ui.todayIndex)
+        assertEquals(7, ui.hrvTrendMs.size)
+        assertEquals(5, ui.zoneMinutes.size)
+        assertEquals(AthleteDemoCatalog.ANALYSIS_HRV_DELTA_PCT, ui.hrvDeltaPercent.value, 0.01f)
+    }
+
+    @Test
     fun trainSurfaceDetectsDemoCapture() {
         val demo = AthleteContentResolver.trainSurface(AthleteDemoCatalog.TRAIN_CAPTURE_SOURCE)
         assertTrue(demo.isDemoCapture)

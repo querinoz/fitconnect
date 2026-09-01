@@ -8,8 +8,9 @@ import org.junit.Test
 class EliteChartKindTest {
     @Test
     fun kindsResolveToChartTokens() {
-        assertEquals(EliteSurfaceCharts.READINESS.toColor(), EliteChartKind.READINESS.tokenColor())
-        assertEquals(EliteSurfaceCharts.HRV.toColor(), EliteChartKind.HRV.tokenColor())
-        assertEquals(EliteSurfaceCharts.HEART_RATE.toColor(), EliteChartKind.HEART_RATE.tokenColor())
+        assertEquals(EliteChartPalette.Secondary, EliteChartKind.HRV.tokenColor())
+        assertEquals(EliteChartPalette.Secondary, EliteChartKind.READINESS.tokenColor())
+        assertEquals(EliteSurfaceCharts.NEGATIVE.toColor(), EliteChartKind.HEART_RATE.tokenColor())
+        assertEquals(EliteChartPalette.Muted, EliteChartKind.TRAINING_LOAD.tokenColor())
     }
 }
