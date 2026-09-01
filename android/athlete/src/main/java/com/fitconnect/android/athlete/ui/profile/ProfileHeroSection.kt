@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.fitconnect.android.designui.charts.EliteChartPalette
 import com.fitconnect.android.designui.components.EliteHexatar
@@ -40,7 +42,7 @@ fun ProfileHeroSection(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box {
+        Box(modifier = Modifier.padding(top = EliteSpace.Sm, bottom = EliteSpace.Xs)) {
             EliteHexatar(
                 userId = userId,
                 contentDescription = displayName,
@@ -77,7 +79,12 @@ fun ProfileHeroSection(
                 Text(
                     text = displayName,
                     style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.testTag("elite_player_card"),
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("elite_player_card"),
                 )
                 Text(
                     text = "LEVEL ${level.toString().padStart(2, '0')}",

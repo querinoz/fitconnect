@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.fitconnect.android.design.EliteSurfaceColors
 import com.fitconnect.android.design.EliteSurfaceGlass
@@ -96,6 +97,8 @@ fun EosGlassBadge(
             text = text,
             style = MaterialTheme.typography.labelSmall,
             color = contentColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(horizontal = EliteSpace.Sm, vertical = EliteSpace.Xxs),
         )
     }

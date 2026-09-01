@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextOverflow
 import com.fitconnect.android.athlete.ui.LocalAthleteHeaderController
 import com.fitconnect.android.design.EliteSurfaceInstrument
 import com.fitconnect.android.designui.components.EliteBadge
@@ -82,18 +83,30 @@ fun AthleteScreenScaffold(
                                 horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                overline?.let { EliteSysLabel(it) }
+                                overline?.let {
+                                    EliteSysLabel(
+                                        it,
+                                        modifier = Modifier.weight(1f, fill = false),
+                                    )
+                                }
                                 EliteBadge(
                                     text = DemoPersona.MODE_LABEL,
                                     modifier = Modifier.testTag("athlete_local_demo_badge"),
                                 )
                             }
-                            Text(title, style = MaterialTheme.typography.headlineMedium)
+                            Text(
+                                title,
+                                style = MaterialTheme.typography.headlineMedium,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                             if (subtitle != null) {
                                 Text(
                                     subtitle,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier.padding(top = EliteSpace.Xs),
                                 )
                             }

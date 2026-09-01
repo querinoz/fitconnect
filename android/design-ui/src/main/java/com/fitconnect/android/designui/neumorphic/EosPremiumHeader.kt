@@ -23,7 +23,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.text.style.TextOverflow
 import com.fitconnect.android.designui.R
+import com.fitconnect.android.designui.theme.isCompactAthleteHeader
 import com.fitconnect.android.designui.theme.EliteMonoTextStyle
 import com.fitconnect.android.designui.theme.EliteSpace
 
@@ -33,6 +36,7 @@ fun EosPremiumHeader(
     onLogoTap: () -> Unit = {},
     trailing: @Composable RowScope.() -> Unit = {},
 ) {
+    val compact = isCompactAthleteHeader()
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -40,11 +44,12 @@ fun EosPremiumHeader(
             .statusBarsPadding()
             .padding(horizontal = EliteSpace.Inset, vertical = EliteSpace.Lg)
             .testTag("eos_premium_header"),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(
             modifier = Modifier
+                .weight(1f)
                 .clickable(onClick = onLogoTap)
                 .semantics { contentDescription = "FitConnect home" },
             verticalAlignment = Alignment.CenterVertically,
@@ -64,25 +69,36 @@ fun EosPremiumHeader(
                     fontWeight = FontWeight.Black,
                     letterSpacing = 1.sp,
                 ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
+        }
+        if (!compact) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .background(EosNeumorphicColors.Voltline, CircleShape),
+                )
+                Text(
+                    text = "ELITE_OS // LIVE",
+                    color = EosNeumorphicColors.TextMuted,
+                    style = EliteMonoTextStyle.copy(
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
+            horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs),
         ) {
-            Box(
-                modifier = Modifier
-                    .size(6.dp)
-                    .background(EosNeumorphicColors.Voltline, CircleShape),
-            )
-            Text(
-                text = "ELITE_OS // LIVE",
-                color = EosNeumorphicColors.TextMuted,
-                style = EliteMonoTextStyle.copy(
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                ),
-            )
             trailing()
         }
     }

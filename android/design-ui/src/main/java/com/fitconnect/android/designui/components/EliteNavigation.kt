@@ -220,6 +220,8 @@ fun EliteSysLabel(
         text = text.uppercase(),
         style = EliteMonoTextStyle,
         color = com.fitconnect.android.design.EliteSurfaceColors.INSTRUMENT_MUTED.toColor(),
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
         modifier = modifier,
     )
 }

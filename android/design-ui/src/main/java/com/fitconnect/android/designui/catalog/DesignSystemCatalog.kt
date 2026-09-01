@@ -1,5 +1,6 @@
 package com.fitconnect.android.designui.catalog
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,12 +25,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import com.fitconnect.android.designui.charts.EliteChartPalette
+import com.fitconnect.android.designui.charts.EliteChartZoneStrip
+import com.fitconnect.android.designui.charts.EliteWeeklyLoadBar
+import com.fitconnect.android.designui.charts.EliteWeeklyLoadChart
+import com.fitconnect.android.designui.neumorphic.EosGlassBadge
+import com.fitconnect.android.designui.neumorphic.EosGlassSurface
+import com.fitconnect.android.designui.neumorphic.EosPremiumBottomNavigation
+import com.fitconnect.android.designui.neumorphic.EosPremiumCard
+import com.fitconnect.android.designui.neumorphic.EosPremiumWell
+import com.fitconnect.android.designui.neumorphic.EliteReadinessNeumorphicCard
+import com.fitconnect.android.designui.neumorphic.ReadinessTelemetry
+import com.fitconnect.android.designui.components.EliteNavItem
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Home
 import com.fitconnect.android.designui.charts.EliteChart
 import com.fitconnect.android.designui.charts.EliteChartKind
 import com.fitconnect.android.designui.charts.EliteChartModel
 import com.fitconnect.android.designui.charts.EliteChartPoint
 import com.fitconnect.android.designui.components.EliteAchievementTile
-import com.fitconnect.android.designui.components.EliteBadge
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
@@ -183,9 +197,67 @@ fun DesignSystemCatalog(
             }
         }
         item {
+            Section("Neu-glass (Elite OS 2026)") {
+                Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+                    Text(
+                        "Neumorphic = anchored · Glass = floating · Max 2 blur layers/screen",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                        listOf(
+                            "Hero" to EliteChartPalette.Hero,
+                            "Success" to EliteChartPalette.Success,
+                            "Negative" to EliteChartPalette.Negative,
+                            "Secondary" to EliteChartPalette.Secondary,
+                            "Muted" to EliteChartPalette.Muted,
+                            "Axis" to EliteChartPalette.Axis,
+                        ).forEach { (label, color) ->
+                            Box(
+                                modifier = Modifier
+                                    .height(28.dp)
+                                    .padding(horizontal = 2.dp)
+                                    .background(color.copy(alpha = 0.35f))
+                                    .padding(horizontal = EliteSpace.Xs, vertical = EliteSpace.Xxs),
+                            ) {
+                                Text(label, style = MaterialTheme.typography.labelSmall, color = color)
+                            }
+                        }
+                    }
+                    EosGlassSurface(modifier = Modifier.fillMaxWidth(), enableBlur = false) {
+                        Text(
+                            "EosGlassSurface — floating chrome (nav, FAB, badges)",
+                            modifier = Modifier.padding(EliteSpace.Md),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                    EosGlassBadge(text = "GLASS BADGE")
+                    EosPremiumCard {
+                        Text("EosPremiumCard — anchored metrics/lists", style = MaterialTheme.typography.bodyMedium)
+                    }
+                    EosPremiumWell {
+                        EliteWeeklyLoadChart(
+                            bars = listOf(
+                                EliteWeeklyLoadBar("M", 42f),
+                                EliteWeeklyLoadBar("T", 68f, isToday = true),
+                                EliteWeeklyLoadBar("W", 35f),
+                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                    EliteChartZoneStrip(secondsInZone = intArrayOf(120, 240, 360, 180, 60))
+                    EosPremiumBottomNavigation(
+                        items = listOf(
+                            EliteNavItem("Today", Icons.Outlined.Home, true, {}, "catalog_nav_today"),
+                        ),
+                    )
+                }
+            }
+        }
+        item {
             Section("Neumorphic") {
-                com.fitconnect.android.designui.neumorphic.EliteReadinessNeumorphicCard(
-                    telemetry = com.fitconnect.android.designui.neumorphic.ReadinessTelemetry(
+                EliteReadinessNeumorphicCard(
+                    telemetry = ReadinessTelemetry(
                         readinessPercent = 85,
                         hrvMs = 68,
                         load = 0.82f,
