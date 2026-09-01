@@ -165,8 +165,10 @@ private fun EliteNavRailTab(item: EliteNavItem, expanded: Boolean) {
 }
 
 @Composable
-private fun RowScope.EliteNavTab(item: EliteNavItem) {
-    val selectedColor = MaterialTheme.colorScheme.primary
+fun RowScope.EliteNavTab(
+    item: EliteNavItem,
+    selectedColor: Color = MaterialTheme.colorScheme.primary,
+) {
     val idleColor = MaterialTheme.colorScheme.onSurfaceVariant
     val onSelected = MaterialTheme.colorScheme.onPrimary
     Column(

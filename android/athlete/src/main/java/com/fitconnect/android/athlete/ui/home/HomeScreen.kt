@@ -3,6 +3,11 @@ package com.fitconnect.android.athlete.ui.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,12 +38,15 @@ import com.fitconnect.android.designui.components.AscendStreakCard
 import com.fitconnect.android.designui.components.AscendXPBar
 import com.fitconnect.android.designui.components.EliteAiDirective
 import com.fitconnect.android.designui.components.EliteAiFab
-import com.fitconnect.android.designui.components.EliteBadge
 import com.fitconnect.android.designui.components.EliteBentoCard
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteCardVariant
+import com.fitconnect.android.designui.neumorphic.EosGlassBadge
+import com.fitconnect.android.designui.neumorphic.EosPremiumCard
+import com.fitconnect.android.designui.neumorphic.EosPremiumWell
+import com.fitconnect.android.designui.neumorphic.EosNeumorphicColors
 import com.fitconnect.android.designui.components.EliteChip
 import com.fitconnect.android.designui.components.EliteFeedPost
 import com.fitconnect.android.designui.components.EliteFlowRow
@@ -152,7 +160,17 @@ fun HomeScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
                     EliteSysLabel("ATHLETE OS · TODAY")
                     Text(home.greeting, style = MaterialTheme.typography.headlineMedium)
-                    EliteBadge(text = DemoPersona.MODE_LABEL)
+                    EosGlassBadge(
+                        text = DemoPersona.MODE_LABEL,
+                        modifier = Modifier.testTag("athlete_local_demo_badge"),
+                    )
+                }
+            }
+            streak?.let { active ->
+                if (active.days > 0) {
+                    item {
+                        TodayStreakBar(days = active.days)
+                    }
                 }
             }
             item {
@@ -293,18 +311,27 @@ fun HomeScreen(
                 )
             }
             item {
-                EliteChart(
-                    model = EliteChartModel(
-                        kind = EliteChartKind.READINESS,
-                        points = AthleteContentResolver.readinessChartPoints(home.readiness.score),
-                        contentDescription = "Readiness trend",
-                    ),
-                    modifier = Modifier.testTag("athlete_home_readiness_chart"),
-                )
+                EosPremiumWell(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(160.dp)
+                        .testTag("athlete_home_readiness_chart"),
+                ) {
+                    EliteChart(
+                        model = EliteChartModel(
+                            kind = EliteChartKind.READINESS,
+                            points = AthleteContentResolver.readinessChartPoints(home.readiness.score),
+                            contentDescription = "Readiness trend",
+                        ),
+                    )
+                }
             }
             home.nextSession?.let { session ->
                 item {
-                    EliteCard(onClick = { onOpenSession(session.id) }) {
+                    EosPremiumCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { onOpenSession(session.id) },
+                    ) {
                         EliteSysLabel("UPCOMING SESSION")
                         Text(session.title, style = MaterialTheme.typography.titleLarge)
                         Text(
@@ -316,21 +343,37 @@ fun HomeScreen(
                 }
             }
             item {
-                EliteStack {
-                    EliteMetricCard(
-                        label = "Conditions",
-                        value = "${home.weather.tempC}°",
-                        accent = EliteSurfaceColors.TELEMETRY.toColor(),
-                    )
-                    Text(home.weather.summary, style = MaterialTheme.typography.bodyMedium)
+                EosPremiumCard(modifier = Modifier.fillMaxWidth()) {
+                    EliteSysLabel("CONDITIONS")
+                    Spacer(modifier = Modifier.height(EliteSpace.Xs))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            "${home.weather.tempC}°",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = EliteSurfaceColors.TELEMETRY.toColor(),
+                        )
+                        Text(
+                            home.weather.summary,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = EosNeumorphicColors.TextMuted,
+                        )
+                    }
                 }
             }
             home.coachMessage?.let { msg ->
                 item {
-                    EliteCard(variant = EliteCardVariant.Person) {
+                    EosPremiumCard(modifier = Modifier.fillMaxWidth()) {
                         EliteSysLabel("COACH CHANNEL")
+                        Spacer(modifier = Modifier.height(EliteSpace.Xs))
                         Text(msg.from, style = MaterialTheme.typography.titleMedium)
-                        Text(msg.preview, style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            "\"${msg.preview}\"",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = EosNeumorphicColors.TextMuted,
+                        )
                     }
                 }
             }
@@ -367,7 +410,7 @@ fun HomeScreen(
             }
             item { EliteSectionHeader(title = "Recent activity", overline = "TELEMETRY") }
             items(home.recentActivity) { line ->
-                EliteCard(variant = EliteCardVariant.Glass) {
+                EosPremiumCard(modifier = Modifier.fillMaxWidth()) {
                     Text(line, style = MaterialTheme.typography.bodyLarge)
                 }
             }

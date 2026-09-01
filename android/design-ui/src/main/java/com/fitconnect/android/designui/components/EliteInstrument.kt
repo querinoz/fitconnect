@@ -347,14 +347,14 @@ fun EliteAiFab(
     modifier: Modifier = Modifier,
     contentDescription: String = "AI Coach",
 ) {
-    val volt = MaterialTheme.colorScheme.primary
+    val accent = EliteSurfaceColors.IRIS.toColor()
     val elevated = EliteSurfaceColors.ELEVATED.toColor()
     Box(
         modifier = modifier
             .size(Accessibility.PREFERRED_TOUCH_TARGET_DP.dp + 8.dp)
             .clip(CircleShape)
-            .background(elevated.copy(alpha = 0.72f))
-            .border(EliteBorder.Thin, volt.copy(alpha = 0.35f), CircleShape)
+            .background(elevated.copy(alpha = 0.55f))
+            .border(EliteBorder.Thin, accent.copy(alpha = 0.35f), CircleShape)
             .clickable(onClick = onClick)
             .testTag("elite_ai_fab")
             .semantics { this.contentDescription = contentDescription },
@@ -363,7 +363,7 @@ fun EliteAiFab(
         Icon(
             imageVector = Icons.Filled.Star,
             contentDescription = null,
-            tint = volt,
+            tint = accent,
             modifier = Modifier.size(28.dp),
         )
     }

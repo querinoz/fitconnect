@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -20,7 +21,10 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Analytics
 import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.platform.LocalConfiguration
@@ -34,6 +38,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
@@ -61,12 +66,16 @@ import com.fitconnect.android.designui.atmosphere.HoneycombAtmosphere
 import com.fitconnect.android.designui.atmosphere.LocalAtmosphereMotionScale
 import com.fitconnect.android.designui.atmosphere.LocalHoneycombEmptyBoost
 import com.fitconnect.android.designui.components.EliteCinematicBackground
-import com.fitconnect.android.designui.components.EliteFloatingNavBar
-import com.fitconnect.android.designui.components.EliteHeader
+import com.fitconnect.android.designui.components.EliteHexatar
+import com.fitconnect.android.designui.components.EliteHexatarHeader
 import com.fitconnect.android.designui.components.EliteNavItem
 import com.fitconnect.android.designui.components.EliteNavRail
 import com.fitconnect.android.designui.components.EliteOfflineBanner
-import com.fitconnect.android.designui.components.EliteTrainFab
+import com.fitconnect.android.designui.components.EliteTierBadge
+import com.fitconnect.android.designui.neumorphic.EosPremiumBottomNavigation
+import com.fitconnect.android.designui.neumorphic.EosPremiumHeader
+import com.fitconnect.android.designui.neumorphic.EosTrainActionFab
+import com.fitconnect.android.foundation.a11y.Accessibility
 import com.fitconnect.android.designui.identity.PatentSignals
 import com.fitconnect.android.designui.identity.PatentStatus
 import com.fitconnect.android.designui.theme.LocalHoneycombIntensity
@@ -248,46 +257,46 @@ fun AthleteOsApp(
                             )
                         }
                         if (showHeader) {
-                            val collapse = headerCollapse
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(headerHeight * (1f - collapse))
-                                    .clipToBounds(),
-                            ) {
-                                EliteHeader(
-                                    userId = LocalAthleteRepository.ATHLETE_ID,
-                                    userName = headerName,
-                                    streakDays = streakDays,
-                                    rank = patentStatus.rank,
-                                    collapsedFraction = collapse,
-                                    onLogoTap = {
-                                        if (current == AthleteDest.HOME.route) {
-                                            headerController.onScrollToTop()
-                                        } else {
-                                            goHome()
-                                        }
-                                    },
-                                    onAvatarTap = {
-                                        navController.navigate(AthleteDest.PROFILE.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        }
-                                    },
-                                    onNotificationsTap = {
-                                        navController.navigate(AthleteDest.NOTIFICATIONS.route)
-                                    },
-                                )
-                            }
+                            EosPremiumHeader(
+                                onLogoTap = {
+                                    if (current == AthleteDest.HOME.route) {
+                                        headerController.onScrollToTop()
+                                    } else {
+                                        goHome()
+                                    }
+                                },
+                                trailing = {
+                                    IconButton(
+                                        onClick = {
+                                            navController.navigate(AthleteDest.NOTIFICATIONS.route)
+                                        },
+                                        modifier = Modifier.size(Accessibility.MIN_TOUCH_TARGET_DP.dp),
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Notifications,
+                                            contentDescription = "Notifications",
+                                            tint = EliteSurfaceColors.INSTRUMENT_MUTED.toColor(),
+                                        )
+                                    }
+                                    Box {
+                                        EliteHexatar(
+                                            userId = LocalAthleteRepository.ATHLETE_ID,
+                                            contentDescription = headerName,
+                                            diameter = EliteHexatarHeader,
+                                        )
+                                        EliteTierBadge(
+                                            rank = patentStatus.rank,
+                                            modifier = Modifier.align(Alignment.BottomEnd),
+                                        )
+                                    }
+                                },
+                            )
                         }
                     }
                 },
                 bottomBar = {
                     if (!hideNav && !useRail) {
-                        EliteFloatingNavBar(
+                        EosPremiumBottomNavigation(
                             modifier = Modifier.testTag("athlete_bottom_nav"),
                             items = navItems,
                         )
@@ -295,11 +304,10 @@ fun AthleteOsApp(
                 },
                 floatingActionButton = {
                     if (!hideNav) {
-                        EliteTrainFab(
+                        EosTrainActionFab(
                             onClick = {
                                 navController.navigate(AthleteDest.ACTIVITY.route)
                             },
-                            expanded = expandedRail,
                         )
                     }
                 },
