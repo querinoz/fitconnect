@@ -33,6 +33,23 @@ export const CHART_TOKENS = {
   trainingLoad: "chartSeries1",
   weight: "chartSeries3",
   hydration: "chartSeries1",
+  /** Hero metric / destaque do grafico (voltline pleno). */
+  voltline: "chartVoltline",
+  /** Delta positivo / sucesso. */
+  success: "chartSuccess",
+  /** Delta negativo / alerta. */
+  negative: "chartNegative",
+  /** Serie secundaria (tendencia, HRV). */
+  secondary: "chartSecondary",
+  /** Barras/segmentos nao destacados. */
+  muted: "chartMuted",
+  /** Labels de eixo / dias secundarios. */
+  axis: "chartAxis",
+  zone1: "chartZone1",
+  zone2: "chartZone2",
+  zone3: "chartZone3",
+  zone4: "chartZone4",
+  zone5: "chartZone5",
 } as const;
 
 /** Ordem FIXA de atribuicao de series. Nunca ciclar; a 5a serie vira "Outros". */

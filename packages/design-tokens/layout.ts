@@ -21,6 +21,8 @@ export const RADIUS_TOKENS = {
   md: 12,
   lg: 16,
   xl: 24,
+  /** Neumorphic mold cards — ancorados ao ecra. */
+  neumorphic: 20,
   full: 999,
 } as const;
 
@@ -62,6 +64,10 @@ export const GLASS_TOKENS = {
   blurL3: 8,
   blurL4: 12,
   blurL5: 20,
+  /** Standard floating chrome blur (nav, FAB) — 10–16dp band. */
+  blurStandard: 12,
+  blurMin: 10,
+  blurMax: 16,
 } as const;
 
 /**

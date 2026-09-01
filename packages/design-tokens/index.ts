@@ -127,6 +127,30 @@ export const COLOR_TOKENS = {
   // WCAG AA como texto; serve so para ornamento. Este mede >=4.5:1.
   chartInk: "rgba(228, 225, 238, 0.56)",
 
+  // ── Chart palette (Elite OS neu-glass, 2026-03) ───────────────────────────
+  // Hero metric / destaque do dia — voltline pleno (um por ecra).
+  chartVoltline: "#c8ff00",
+  // Delta positivo / sucesso semantico.
+  chartSuccess: "#7ed957",
+  // Delta negativo / alerta semantico.
+  chartNegative: "#e24b4a",
+  // Serie secundaria (tendencia, linha HRV).
+  chartSecondary: "#5b9bd1",
+  // Barras/segmentos nao destacados.
+  chartMuted: "#262f47",
+  // Labels de eixo / dias secundarios.
+  chartAxis: "#5b6478",
+  // Zonas de treino Z1–Z5 (convencao Garmin/Strava/TrainingPeaks, frio→quente).
+  chartZone1: "#5b9bd1",
+  chartZone2: "#5dcaa5",
+  chartZone3: "#97c459",
+  chartZone4: "#ef9f27",
+  chartZone5: "#e24b4a",
+
+  // ── Glass surface (floating chrome — nav, FAB, badges) ────────────────────
+  glassBg: "rgba(255, 255, 255, 0.07)",
+  glassBorder: "rgba(255, 255, 255, 0.13)",
+
   // ── Text ──────────────────────────────────────────────────────────────────
   onSurface: "#e4e1ee",
   onSurfaceMuted: "#c7c4d8",

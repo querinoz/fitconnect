@@ -149,6 +149,19 @@
      REPROVA WCAG AA como texto -- serve so para ornamento. Este mede >=4.5:1. */
   --eos-chart-ink: rgba(228, 225, 238, 0.56);
 
+  /* Elite OS neu-glass chart palette (sync with COLOR_TOKENS.chart*) */
+  --eos-chart-voltline: #c8ff00;
+  --eos-chart-success: #7ed957;
+  --eos-chart-negative: #e24b4a;
+  --eos-chart-secondary: #5b9bd1;
+  --eos-chart-muted: #262f47;
+  --eos-chart-axis: #5b6478;
+  --eos-chart-zone-1: #5b9bd1;
+  --eos-chart-zone-2: #5dcaa5;
+  --eos-chart-zone-3: #97c459;
+  --eos-chart-zone-4: #ef9f27;
+  --eos-chart-zone-5: #e24b4a;
+
   /* ── Extended palette ── */
   --cyan-500: #00bfff;
   --cyan-dim: rgba(0, 191, 255, 0.1);
@@ -183,9 +196,9 @@
    4. GLASS SYSTEM
    ═══════════════════════════════════════════════════════════════ */
 
-  --eos-glass-bg: rgba(255, 255, 255, 0.06);
-  --eos-glass-border: rgba(255, 255, 255, 0.08);
-  --eos-glass-blur: 20px;
+  --eos-glass-bg: rgba(255, 255, 255, 0.07);
+  --eos-glass-border: rgba(255, 255, 255, 0.13);
+  --eos-glass-blur: 12px;
 
   /* ── Glass surface tiers ── */
   --glass-lo: rgba(255, 255, 255, 0.03);
@@ -295,6 +308,22 @@
   --shadow-focus: 0 0 0 1px rgba(200, 255, 0, 0.28),
     0 18px 60px -36px var(--volt-glow);
 
+  /* ── Neumorphic mold (OLED-dark soft UI) ── */
+  --eos-mold-surface: #0d1321;
+  --eos-neu-highlight: rgba(255, 255, 255, 0.03);
+  --eos-neu-highlight-edge: #161f34;
+  --eos-neu-shadow: rgba(0, 0, 0, 0.7);
+  --eos-neu-shadow-deep: #020408;
+  --eos-neu-rim: rgba(17, 24, 39, 0.5);
+  --eos-neu-text-primary: #ffffff;
+  --eos-neu-text-muted: #8a99ad;
+  --eos-shadow-convex:
+    6px 6px 14px var(--eos-neu-shadow-deep),
+    -6px -6px 14px var(--eos-neu-highlight-edge);
+  --eos-shadow-concave:
+    inset 6px 6px 12px var(--eos-neu-shadow-deep),
+    inset -6px -6px 12px var(--eos-neu-highlight-edge);
+
 /* ═══════════════════════════════════════════════════════════════
    9. SAFE AREAS & LAYOUT
    ═══════════════════════════════════════════════════════════════ */
@@ -311,6 +340,49 @@
 
 html[data-motion="reduced"] {
   --motion-duration: 0ms;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NEUMORPHIC UTILITIES — molded OLED-dark surfaces
+   WCAG: 1px contrast rim + explicit text tokens; metrics use voltline.
+   ═══════════════════════════════════════════════════════════════ */
+
+.shadow-eos-convex {
+  background-color: var(--eos-mold-surface);
+  box-shadow: var(--eos-shadow-convex);
+  border: 1px solid var(--eos-neu-rim);
+}
+
+.shadow-eos-concave {
+  background-color: var(--eos-mold-surface);
+  box-shadow: var(--eos-shadow-concave);
+  border: 1px solid color-mix(in srgb, var(--eos-neu-shadow-deep) 60%, transparent);
+}
+
+.eos-neu-pressable {
+  background-color: var(--eos-mold-surface);
+  box-shadow: var(--eos-shadow-convex);
+  border: 1px solid var(--eos-neu-rim);
+  transition:
+    box-shadow var(--eos-duration-micro) var(--eos-ease-out),
+    transform var(--eos-duration-micro) var(--eos-ease-out),
+    border-color var(--eos-duration-micro) var(--eos-ease-out);
+}
+
+.eos-neu-pressable:hover {
+  border-color: color-mix(in srgb, var(--eos-neu-highlight-edge) 80%, var(--eos-neu-rim));
+}
+
+.eos-neu-pressable:active,
+.eos-neu-pressable[aria-pressed="true"] {
+  box-shadow: var(--eos-shadow-concave);
+  transform: scale(0.99);
+}
+
+.eos-neu-well {
+  background-color: var(--eos-floor);
+  box-shadow: var(--eos-shadow-concave);
+  border: 1px solid color-mix(in srgb, var(--eos-neu-shadow-deep) 70%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {

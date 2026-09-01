@@ -33,6 +33,19 @@ describe("COLOR_TOKENS ↔ elite-os.css sync", () => {
     ["chartDivMid", "chart-div-mid"],
     ["chartDivCool3", "chart-div-cool-3"],
     ["chartInk", "chart-ink"],
+    ["chartVoltline", "chart-voltline"],
+    ["chartSuccess", "chart-success"],
+    ["chartNegative", "chart-negative"],
+    ["chartSecondary", "chart-secondary"],
+    ["chartMuted", "chart-muted"],
+    ["chartAxis", "chart-axis"],
+    ["chartZone1", "chart-zone-1"],
+    ["chartZone2", "chart-zone-2"],
+    ["chartZone3", "chart-zone-3"],
+    ["chartZone4", "chart-zone-4"],
+    ["chartZone5", "chart-zone-5"],
+    ["glassBg", "glass-bg"],
+    ["glassBorder", "glass-border"],
     ["floor", "floor"],
     ["voltline", "voltline"],
     ["connect", "connect"],
@@ -46,6 +59,10 @@ describe("COLOR_TOKENS ↔ elite-os.css sync", () => {
     ["patentMint", "patent-mint"],
     ["patentLegend", "patent-legend"],
     ["patentEmber", "patent-ember"],
+    ["moldSurface", "mold-surface"],
+    ["neuHighlightEdge", "neu-highlight-edge"],
+    ["neuShadowDeep", "neu-shadow-deep"],
+    ["neuMuted", "neu-text-muted"],
   ];
 
   it.each(pairs)("COLOR_TOKENS.%s matches --eos-%s in CSS", (tokenKey, cssKey) => {
@@ -54,6 +71,8 @@ describe("COLOR_TOKENS ↔ elite-os.css sync", () => {
     expect(cssVal, `missing --eos-${cssKey} in elite-os.css`).toBeDefined();
     if (tokenVal.startsWith("#") && cssVal.startsWith("#")) {
       expect(norm(tokenVal)).toBe(norm(cssVal));
+    } else if (tokenVal.startsWith("rgba") && cssVal.startsWith("rgba")) {
+      expect(tokenVal.replace(/\s/g, "")).toBe(cssVal.replace(/\s/g, ""));
     }
   });
 });

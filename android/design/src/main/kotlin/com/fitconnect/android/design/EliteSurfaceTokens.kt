@@ -8,6 +8,7 @@ package com.fitconnect.android.design
 object EliteSurfaceColors {
     const val ALERT: Long = 0xFFFF3A5CL
     const val CARBON: Long = 0xFF111827L
+    const val CHART_AXIS: Long = 0xFF5B6478L
     const val CHART_DIV_COOL_1: Long = 0xFF00758EL
     const val CHART_DIV_COOL_2: Long = 0xFF0095B5L
     const val CHART_DIV_COOL_3: Long = 0xFF00B7DDL
@@ -16,6 +17,9 @@ object EliteSurfaceColors {
     const val CHART_DIV_WARM_2: Long = 0xFFB37900L
     const val CHART_DIV_WARM_3: Long = 0xFFDB9400L
     const val CHART_INK: Long = 0x8FE4E1EEL
+    const val CHART_MUTED: Long = 0xFF262F47L
+    const val CHART_NEGATIVE: Long = 0xFFE24B4AL
+    const val CHART_SECONDARY: Long = 0xFF5B9BD1L
     const val CHART_SEQ_1: Long = 0xFF003947L
     const val CHART_SEQ_2: Long = 0xFF00566AL
     const val CHART_SEQ_3: Long = 0xFF00758EL
@@ -26,11 +30,20 @@ object EliteSurfaceColors {
     const val CHART_SERIES_2: Long = 0xFF7EA200L
     const val CHART_SERIES_3: Long = 0xFF7F80FFL
     const val CHART_SERIES_4: Long = 0xFFC38400L
+    const val CHART_SUCCESS: Long = 0xFF7ED957L
+    const val CHART_VOLTLINE: Long = 0xFFC8FF00L
+    const val CHART_ZONE_1: Long = 0xFF5B9BD1L
+    const val CHART_ZONE_2: Long = 0xFF5DCAA5L
+    const val CHART_ZONE_3: Long = 0xFF97C459L
+    const val CHART_ZONE_4: Long = 0xFFEF9F27L
+    const val CHART_ZONE_5: Long = 0xFFE24B4AL
     const val CONNECT: Long = 0xFF00DDB4L
     const val CONNECT_DIM: Long = 0x1A00DDB4L
     const val CYAN: Long = 0xFF00BFFFL
     const val ELEVATED: Long = 0xFF151B2DL
     const val FLOOR: Long = 0xFF070B14L
+    const val GLASS_BG: Long = 0x12FFFFFFL
+    const val GLASS_BORDER: Long = 0x21FFFFFFL
     const val INSTRUMENT_BEZEL: Long = 0xFF161A22L
     const val INSTRUMENT_FACE: Long = 0xFF0A0E15L
     const val INSTRUMENT_GROOVE: Long = 0xFF05070BL
@@ -99,6 +112,7 @@ object EliteSurfaceRadius {
     const val MD: Int = 12
     const val LG: Int = 16
     const val XL: Int = 24
+    const val NEUMORPHIC: Int = 20
     const val FULL: Int = 999
 }
 
@@ -135,6 +149,9 @@ object EliteSurfaceGlass {
     const val BLUR_L_3: Int = 8
     const val BLUR_L_4: Int = 12
     const val BLUR_L_5: Int = 20
+    const val BLUR_STANDARD: Int = 12
+    const val BLUR_MIN: Int = 10
+    const val BLUR_MAX: Int = 16
 }
 
 object EliteSurfaceAtmosphere {
@@ -257,4 +274,15 @@ object EliteSurfaceCharts {
     const val TRAINING_LOAD: Long = 0xFF00A2C4L
     const val WEIGHT: Long = 0xFF7F80FFL
     const val HYDRATION: Long = 0xFF00A2C4L
+    const val VOLTLINE: Long = 0xFFC8FF00L
+    const val SUCCESS: Long = 0xFF7ED957L
+    const val NEGATIVE: Long = 0xFFE24B4AL
+    const val SECONDARY: Long = 0xFF5B9BD1L
+    const val MUTED: Long = 0xFF262F47L
+    const val AXIS: Long = 0xFF5B6478L
+    const val ZONE_1: Long = 0xFF5B9BD1L
+    const val ZONE_2: Long = 0xFF5DCAA5L
+    const val ZONE_3: Long = 0xFF97C459L
+    const val ZONE_4: Long = 0xFFEF9F27L
+    const val ZONE_5: Long = 0xFFE24B4AL
 }
