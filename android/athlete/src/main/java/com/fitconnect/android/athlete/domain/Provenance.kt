@@ -23,6 +23,7 @@ data class TodayReadinessUi(
     val hrvMs: Provenanced<Int>,
     val load: Provenanced<Float>,
     val sleepLabel: Provenanced<String>,
+    val steps: Provenanced<Int>,
     val isAnyDemo: Boolean,
 )
 

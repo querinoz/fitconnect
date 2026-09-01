@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.fitconnect.android.athlete"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 26
@@ -33,6 +33,7 @@ dependencies {
     implementation(project(":core-capture"))
     implementation(project(":core:fitness"))
     implementation(project(":shared"))
+    implementation(libs.androidx.health.connect.client)
     implementation(project(":ascend"))
     implementation(project(":design"))
     implementation(project(":design-ui"))

@@ -52,6 +52,7 @@ private fun TodayProvenanceFootnote(ui: TodayReadinessUi) {
         add(provenanceLine("HRV", ui.hrvMs))
         add(provenanceLine("Load", ui.load))
         add(provenanceLine("Sleep", ui.sleepLabel))
+        add(provenanceLine("Steps", ui.steps))
     }
     Text(
         text = lines.joinToString(" · "),

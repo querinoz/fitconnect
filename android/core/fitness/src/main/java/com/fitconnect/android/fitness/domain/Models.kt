@@ -46,6 +46,12 @@ data class WorkoutStreams(
     val altitudeM: List<Double> = emptyList(),
 )
 
+/**
+ * In-memory / provider workout. When persisted to Postgres `public.activities`,
+ * [id] MUST equal the canonical activity UUID (same ID for Web / Wear / ASCEND /
+ * Squad). Units: distanceM meters, elevationGainM meters, avgHeartRateBpm bpm,
+ * durationMs ms. Prefer [caloriesKcal]; [caloriesKj] is legacy naming.
+ */
 data class WorkoutSession(
     val id: String,
     val userId: String,
@@ -57,7 +63,9 @@ data class WorkoutSession(
     val distanceM: Double? = null,
     val elevationGainM: Double? = null,
     val avgHeartRateBpm: Double? = null,
+    /** @deprecated Prefer caloriesKcal — storage canonical unit is kcal. */
     val caloriesKj: Double? = null,
+    val caloriesKcal: Double? = null,
     val deviceName: String? = null,
     val streams: WorkoutStreams = WorkoutStreams(),
     val mergedFrom: List<Pair<ProviderId, String>> = emptyList(),
@@ -65,6 +73,9 @@ data class WorkoutSession(
 ) {
     val durationMs: Long get() = (endedAtEpochMs - startedAtEpochMs).coerceAtLeast(0)
     val shareable: Boolean get() = constraints.shareable
+    /** Resolved kcal for persistence (canonical). */
+    val energyKcal: Double?
+        get() = caloriesKcal ?: caloriesKj?.div(4.184)
 }
 
 interface FitnessProvider {

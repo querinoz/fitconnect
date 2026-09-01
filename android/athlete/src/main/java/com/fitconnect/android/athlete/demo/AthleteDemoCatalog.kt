@@ -16,6 +16,7 @@ object AthleteDemoCatalog {
     const val FALLBACK_SLEEP_MINUTES: Int = 438 // 7h 18m
     const val FALLBACK_SLEEP_LABEL: String = "7h 18m"
     const val FALLBACK_SUBJECTIVE: Int = 80
+    const val FALLBACK_STEPS: Int = 8_420
 
     const val DEMO_ATHLETE_DISPLAY_NAME: String = "Inês Costa"
 

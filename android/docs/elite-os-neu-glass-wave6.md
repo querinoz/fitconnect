@@ -13,6 +13,7 @@
 | Achievements | `android/wave3-achievements-screenshot.png` |
 | Profile | `android/wave4-profile-screenshot.png` |
 | Train | `android/wave5-train-screenshot.png` |
+| Today (wave 7 editorial) | `android/wave7-today-screenshot.png` |
 
 ## Visual rules applied
 
@@ -35,7 +36,7 @@
 | 3 | `19facaf` | Achievements |
 | 4 | `83fb58d` | Profile |
 | 5 | `ff04981` | Train |
-| 6 | (this commit) | Catalog + typography/responsive fixes |
+| 6 | `93928e2` | Catalog + typography/responsive fixes |
 
 ## Typography & layout fixes (wave 6)
 
@@ -52,3 +53,5 @@
 ## Design system entry point
 
 `android/design-ui/.../catalog/DesignSystemCatalog.kt` — section **Neu-glass (Elite OS 2026)** documents chart palette, `EosGlassSurface`, `EosPremiumCard/Well`, zone strip, bottom nav.
+
+Canonical spec (repo-wide): [docs/design/ELITE_OS_NEU_GLASS.md](../../docs/design/ELITE_OS_NEU_GLASS.md)

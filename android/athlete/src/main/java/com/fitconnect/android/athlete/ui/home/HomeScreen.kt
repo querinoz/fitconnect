@@ -1,18 +1,12 @@
 package com.fitconnect.android.athlete.ui.home
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,7 +14,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
+import androidx.health.connect.client.PermissionController
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
 import com.fitconnect.android.athlete.demo.AthleteContentResolver
 import com.fitconnect.android.athlete.demo.AthleteDemoBanner
@@ -29,41 +23,16 @@ import com.fitconnect.android.athlete.domain.TodayReadinessUi
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteLoad
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
-import com.fitconnect.android.design.EliteSurfaceColors
-import com.fitconnect.android.designui.charts.EliteChart
-import com.fitconnect.android.designui.charts.EliteChartKind
-import com.fitconnect.android.designui.charts.EliteChartModel
-import com.fitconnect.android.designui.components.AscendMissionCard
-import com.fitconnect.android.designui.components.AscendStreakCard
-import com.fitconnect.android.designui.components.AscendXPBar
-import com.fitconnect.android.designui.components.EliteAiDirective
 import com.fitconnect.android.designui.components.EliteAiFab
-import com.fitconnect.android.designui.components.EliteBentoCard
-import com.fitconnect.android.designui.components.EliteButton
-import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteCardVariant
-import com.fitconnect.android.designui.neumorphic.EosGlassBadge
-import com.fitconnect.android.designui.neumorphic.EosPremiumCard
-import com.fitconnect.android.designui.neumorphic.EosPremiumWell
-import com.fitconnect.android.designui.neumorphic.EosNeumorphicColors
-import com.fitconnect.android.designui.components.EliteChip
-import com.fitconnect.android.designui.components.EliteFeedPost
-import com.fitconnect.android.designui.components.EliteFlowRow
-import com.fitconnect.android.designui.components.EliteLiveDot
-import com.fitconnect.android.designui.components.EliteMetricCard
-import com.fitconnect.android.designui.components.EliteSectionHeader
-import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.theme.EliteSpace
-import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.android.fitness.domain.HealthConnectSdkState
+import com.fitconnect.android.fitness.healthconnect.HealthConnectIntents
+import com.fitconnect.android.fitness.healthconnect.HealthConnectPermissionState
 import com.fitconnect.android.fitness.healthconnect.HealthConnectSdkMapper
-import com.fitconnect.android.foundation.auth.DemoPersona
 import com.fitconnect.android.foundation.common.AppResult
-import com.fitconnect.android.foundation.i18n.AppLocale
-import com.fitconnect.ascend.copy.AscendCopy
-import com.fitconnect.ascend.domain.MissionKind
 import com.fitconnect.ascend.domain.StreakKind
 import kotlinx.coroutines.launch
 
@@ -90,10 +59,15 @@ fun HomeScreen(
     var todayUi by remember { mutableStateOf<TodayReadinessUi?>(null) }
     var athleteLabel by remember { mutableStateOf<String?>(null) }
     var sessionLocalDemo by remember { mutableStateOf(false) }
+    var recentSessions by remember { mutableStateOf<List<TodaySessionCardUi>>(emptyList()) }
 
-    var worldPulse by remember { mutableStateOf<List<com.fitconnect.android.community.domain.CommunityPost>>(emptyList()) }
-    var worldNames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
-    var worldAvatars by remember { mutableStateOf<Map<String, String?>>(emptyMap()) }
+    suspend fun loadSessions(includeDemoFallback: Boolean) {
+        val workouts = container.fitness.workoutStore.listOwn(LocalAthleteRepository.ATHLETE_ID)
+        recentSessions = TodaySessionResolver.resolve(
+            workouts = workouts,
+            includeDemoFallback = includeDemoFallback,
+        )
+    }
 
     fun reload() {
         scope.launch {
@@ -105,6 +79,7 @@ fun HomeScreen(
                     home = homeResult.value,
                     telemetry = container.telemetry.athleteFacade,
                 )
+                loadSessions(sessionLocalDemo || todayUi?.isAnyDemo != false)
             }
         }
     }
@@ -117,32 +92,41 @@ fun HomeScreen(
             ?.displayName
             ?.uppercase()
         reload()
-        container.community.seedIfNeeded()
-        val page = container.community.feed.feed(
-            com.fitconnect.android.community.feed.FeedRequest(
-                viewerId = LocalAthleteRepository.ATHLETE_ID,
-                kind = com.fitconnect.android.community.feed.FeedKind.FOLLOWING,
-                limit = 3,
-            ),
-        )
-        worldPulse = page.items
-        val ids = page.items.map { it.authorId }.distinct()
-        worldNames = ids.associateWith { id -> container.community.profiles.get(id)?.displayName ?: id }
-        worldAvatars = ids.associateWith { id -> container.community.profiles.get(id)?.avatarUri }
     }
 
     AthleteLoad(result = result, onRetry = ::reload) { home ->
-        val locale by container.platform.localeManager.observe().collectAsState(initial = AppLocale.EN)
-        val lang = locale.bcp47
         val ascend = container.ascend.snapshot(LocalAthleteRepository.ATHLETE_ID)
-        val t = { key: String -> AscendCopy.t(lang, key) }
-        val daily = ascend.missions.firstOrNull { it.kind == MissionKind.DAILY }
         val streak = ascend.streaks.firstOrNull { it.kind == StreakKind.PERFORMANCE }
-        val hcState = HealthConnectSdkMapper.probe(LocalContext.current)
+        val context = LocalContext.current
+        val hcScope = rememberCoroutineScope()
+        val hcState = HealthConnectSdkMapper.probe(context)
+        var permissionState by remember {
+            mutableStateOf(HealthConnectPermissionState.SDK_NOT_READY)
+        }
+        LaunchedEffect(hcState) {
+            permissionState = container.fitness.healthConnectPermissions.permissionState()
+            if (hcState == HealthConnectSdkState.AVAILABLE &&
+                permissionState == HealthConnectPermissionState.GRANTED
+            ) {
+                container.fitness.syncHealthConnect()
+                loadSessions(sessionLocalDemo || todayUi?.isAnyDemo != false)
+            }
+        }
+        val permissionLauncher = rememberLauncherForActivityResult(
+            PermissionController.createRequestPermissionResultContract(),
+        ) {
+            hcScope.launch {
+                permissionState = container.fitness.healthConnectPermissions.permissionState()
+                if (permissionState == HealthConnectPermissionState.GRANTED) {
+                    container.fitness.syncHealthConnect()
+                    loadSessions(sessionLocalDemo || todayUi?.isAnyDemo != false)
+                }
+            }
+        }
         val readinessUi = todayUi
         AthleteScreenScaffold(
             title = home.greeting,
-            subtitle = "Performance cockpit · ${DemoPersona.MODE_LABEL}",
+            subtitle = "Performance cockpit",
             overline = "ATHLETE OS · TODAY",
             testTag = "athlete_home",
             showTitle = false,
@@ -152,19 +136,27 @@ fun HomeScreen(
                 item {
                     HealthConnectStatusCard(
                         state = hcState,
-                        onAction = onOpenActivity,
+                        onAction = { HealthConnectIntents.openInstallOrUpdate(context, hcState) },
+                    )
+                }
+            } else if (permissionState != HealthConnectPermissionState.GRANTED) {
+                item {
+                    HealthConnectPermissionCard(
+                        permissionState = permissionState,
+                        onRequestPermissions = {
+                            permissionLauncher.launch(
+                                container.fitness.healthConnectPermissions.onboardingPermissions(),
+                            )
+                        },
+                        onOpenSettings = { HealthConnectIntents.openManageData(context) },
                     )
                 }
             }
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
-                    EliteSysLabel("ATHLETE OS · TODAY")
-                    Text(home.greeting, style = MaterialTheme.typography.headlineMedium)
-                    EosGlassBadge(
-                        text = DemoPersona.MODE_LABEL,
-                        modifier = Modifier.testTag("athlete_local_demo_badge"),
-                    )
-                }
+                TodayEditorialHeader(
+                    greeting = home.greeting,
+                    showDemoBadge = sessionLocalDemo || readinessUi?.isAnyDemo == true,
+                )
             }
             streak?.let { active ->
                 if (active.days > 0) {
@@ -185,251 +177,43 @@ fun HomeScreen(
                         athleteLabel = athleteLabel,
                     )
                 }
+                item {
+                    TodayMetricStrip(
+                        hrvMs = ui.hrvMs,
+                        sleepLabel = ui.sleepLabel,
+                        steps = ui.steps,
+                        load = ui.load,
+                    )
+                }
             }
             item {
-                EliteAiDirective(
+                TodayCompactAiCta(
                     body = home.readiness.recommendation,
-                    action = "Start session",
+                    actionLabel = "Start session",
                     onAction = onOpenActivity,
                 )
             }
             item {
-                EliteBentoCard(onClick = onOpenCommunity) {
-                    val squad = remember {
-                        container.ascend.joinChallenge(LocalAthleteRepository.ATHLETE_ID, "squad-fc-week")
-                        container.ascend.squadChallenge(
-                            "squad-fc-week",
-                            listOf(
-                                LocalAthleteRepository.ATHLETE_ID,
-                                com.fitconnect.ascend.demo.AscendDemo.INES,
-                                com.fitconnect.ascend.demo.AscendDemo.MARINA,
-                            ),
-                        )
-                    }
-                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
-                        EliteLiveDot(live = false, label = "SQUAD · LOCAL_DEMO")
-                        Text("FC Performance", style = MaterialTheme.typography.titleLarge)
-                        if (squad == null) {
-                            Text(
-                                "Squad protocol not seeded.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                TodaySessionCarousel(
+                    sessions = recentSessions,
+                    onSessionClick = { sessionId ->
+                        if (sessionId.startsWith("demo:")) {
+                            onOpenActivity()
                         } else {
-                            Text(
-                                "${"%.1f".format(squad.progress / 1000.0)} / ${"%.0f".format(squad.target / 1000.0)} km",
-                                style = MaterialTheme.typography.bodyLarge,
-                            )
-                            squad.contributions.entries.take(3).forEach { (athlete, meters) ->
-                                Text(
-                                    "${athlete.substringBefore("@")} · ${"%.1f".format(meters / 1000.0)} km",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
+                            onOpenSession(sessionId)
                         }
-                    }
-                }
-            }
-            if (worldPulse.isNotEmpty()) {
-                item {
-                    EliteSectionHeader(
-                        title = "World signal",
-                        overline = "LOCAL_DEMO",
-                        actionLabel = "SEE ALL",
-                        onAction = onOpenCommunity,
-                    )
-                }
-                items(worldPulse, key = { it.id }) { post ->
-                    val media = post.media.firstOrNull()
-                    EliteFeedPost(
-                        authorId = post.authorId,
-                        authorName = worldNames[post.authorId] ?: post.authorId,
-                        authorInitials = (worldNames[post.authorId] ?: post.authorId)
-                            .split(" ")
-                            .mapNotNull { it.firstOrNull()?.uppercaseChar()?.toString() }
-                            .take(2)
-                            .joinToString("")
-                            .ifBlank { "FC" },
-                        avatarName = worldAvatars[post.authorId],
-                        kindLabel = post.kind.name,
-                        timeLabel = "LIVE WORLD",
-                        body = post.text,
-                        imageName = media?.thumbnailUrl ?: media?.localUri,
-                        videoRawName = media?.takeIf {
-                            it.kind == com.fitconnect.android.community.domain.MediaKind.VIDEO
-                        }?.localUri,
-                        facts = post.workoutFacts?.takeIf { post.shareTelemetryFacts }?.let { facts ->
-                            listOfNotNull(
-                                facts.distanceMeters?.let { "KM" to "%.1f".format(it / 1000.0) },
-                                "MIN" to facts.durationMinutes.toString(),
-                            )
-                        }.orEmpty(),
-                        compact = true,
-                        onReact = {},
-                        onClick = onOpenCommunity,
-                    )
-                }
-            }
-            daily?.let { mission ->
-                item {
-                    AscendMissionCard(
-                        overline = "TODAY'S PERFORMANCE TARGET",
-                        title = t(mission.objectiveKey),
-                        progressLabel = "${mission.progress.toInt()} / ${mission.target.toInt()}",
-                        why = t(mission.whyKey),
-                        progress = (mission.progress / mission.target).toFloat(),
-                    )
-                }
-            }
-            item {
-                AscendXPBar(
-                    rankLabel = t(ascend.level.rank.nameKey),
-                    level = ascend.level.level,
-                    xpLabel = "${ascend.totalXp} / ${ascend.totalXp + ascend.level.xpToNext} XP",
-                    remainingLabel = "+${ascend.level.xpToNext} XP TO NEXT LEVEL",
-                    progress = ascend.level.progressPercent / 100f,
-                    nextUnlock = ascend.level.nextUnlock?.let { t(it.nameKey) },
+                    },
+                    onSeeAll = onOpenActivity,
                 )
-            }
-            streak?.let { active ->
-                item {
-                    AscendStreakCard(
-                        title = t("ui.streak"),
-                        daysLabel = "${active.days}",
-                        statusLabel = active.status.name,
-                        body = "Recovery days can protect this streak. Rest is part of performance.",
-                    )
-                }
-            }
-            item {
-                EliteButton(
-                    label = t("ui.vault"),
-                    variant = EliteButtonVariant.Secondary,
-                    onClick = onOpenVault,
-                    modifier = Modifier.testTag("home_open_vault"),
-                )
-            }
-            item {
-                EosPremiumWell(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(160.dp)
-                        .testTag("athlete_home_readiness_chart"),
-                ) {
-                    EliteChart(
-                        model = EliteChartModel(
-                            kind = EliteChartKind.READINESS,
-                            points = AthleteContentResolver.readinessChartPoints(home.readiness.score),
-                            contentDescription = "Readiness trend",
-                        ),
-                    )
-                }
-            }
-            home.nextSession?.let { session ->
-                item {
-                    EosPremiumCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = { onOpenSession(session.id) },
-                    ) {
-                        EliteSysLabel("UPCOMING SESSION")
-                        Text(session.title, style = MaterialTheme.typography.titleLarge)
-                        Text(
-                            "${session.sport.value} · ${session.durationMin} min",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            }
-            item {
-                EosPremiumCard(modifier = Modifier.fillMaxWidth()) {
-                    EliteSysLabel("CONDITIONS")
-                    Spacer(modifier = Modifier.height(EliteSpace.Xs))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(
-                            "${home.weather.tempC}°",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = EliteSurfaceColors.TELEMETRY.toColor(),
-                        )
-                        Text(
-                            home.weather.summary,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = EosNeumorphicColors.TextMuted,
-                        )
-                    }
-                }
-            }
-            home.coachMessage?.let { msg ->
-                item {
-                    EosPremiumCard(modifier = Modifier.fillMaxWidth()) {
-                        EliteSysLabel("COACH CHANNEL")
-                        Spacer(modifier = Modifier.height(EliteSpace.Xs))
-                        Text(msg.from, style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            "\"${msg.preview}\"",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = EosNeumorphicColors.TextMuted,
-                        )
-                    }
-                }
-            }
-            item { EliteSectionHeader(title = "Today's plan", overline = "TASKS") }
-            items(home.tasks, key = { it.id }) { task ->
-                EliteCard(onClick = {
-                    scope.launch {
-                        container.athleteRepository.toggleTask(task.id)
-                        reload()
-                    }
-                }) {
-                    Text(
-                        if (task.done) "✓ ${task.title}" else task.title,
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                }
-            }
-            item {
-                EliteStack {
-                    EliteSectionHeader(title = "Quick actions", overline = "NAV")
-                    EliteFlowRow {
-                        home.quickActions.take(3).forEach { action ->
-                            EliteChip(label = action, onClick = {
-                                when {
-                                    action.contains("session", true) -> onOpenTraining()
-                                    action.contains("readiness", true) -> onOpenRecovery()
-                                    action.contains("program", true) -> onOpenPrograms()
-                                    else -> onOpenNotifications()
-                                }
-                            })
-                        }
-                    }
-                }
-            }
-            item { EliteSectionHeader(title = "Recent activity", overline = "TELEMETRY") }
-            items(home.recentActivity) { line ->
-                EosPremiumCard(modifier = Modifier.fillMaxWidth()) {
-                    Text(line, style = MaterialTheme.typography.bodyLarge)
-                }
-            }
-            item {
-                EliteStack {
-                    EliteButton(
-                        "Start monitoring",
-                        onClick = onOpenActivity,
-                        modifier = Modifier.testTag("home_start_monitoring"),
-                    )
-                    EliteChip(label = "Recovery", onClick = onOpenRecovery)
-                }
             }
             if (home.readiness.warnings.isNotEmpty()) {
                 item {
                     EliteCard(variant = EliteCardVariant.Metric) {
-                        EliteSysLabel("ALERTS")
-                        home.readiness.warnings.forEach {
-                            Text(it, color = MaterialTheme.colorScheme.error)
+                        Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
+                            EliteSysLabel("ALERTS")
+                            home.readiness.warnings.forEach { warning ->
+                                Text(warning, color = MaterialTheme.colorScheme.error)
+                            }
                         }
                     }
                 }

@@ -10,6 +10,7 @@ import com.fitconnect.android.ai.di.AiContainer
 import com.fitconnect.android.ai.di.DefaultAiContainer
 import com.fitconnect.android.athlete.di.AthleteContainer
 import com.fitconnect.android.athlete.di.DefaultAthleteContainer
+import com.fitconnect.android.athlete.di.DefaultFitnessContainer
 import com.fitconnect.android.coach.di.CoachContainer
 import com.fitconnect.android.coach.di.DefaultCoachContainer
 import com.fitconnect.android.foundation.common.AppResult
@@ -130,7 +131,14 @@ class FitConnectApplication : Application() {
     val athleteContainer: AthleteContainer
         get() = athleteContainerRef ?: synchronized(athleteLock) {
             athleteContainerRef ?: DefaultAthleteContainer(
-                container, sportsContainer, geoContainer, telemetryContainer, aiContainer,
+                container,
+                sportsContainer,
+                geoContainer,
+                telemetryContainer,
+                aiContainer,
+                fitness = DefaultFitnessContainer(this) {
+                    com.fitconnect.android.athlete.data.LocalAthleteRepository.ATHLETE_ID
+                },
                 ascend = ascendEngine,
             ).also {
                 athleteContainerRef = it

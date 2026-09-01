@@ -83,13 +83,29 @@ object AthleteContentResolver {
             sourceLabel = if (anyInputDemo) AthleteDemoCatalog.MODE_LABEL else SPORTS_ENGINE_SOURCE,
         )
 
-        val isAnyDemo = listOf(hrvMs, sleepLabel, readinessPercent, load).any { it.isDemo }
+        val stepsMeasured = telemetry.overview(athleteId).latestSteps?.value
+        val steps = if (stepsMeasured != null) {
+            Provenanced(
+                value = stepsMeasured.roundToInt(),
+                provenance = AthleteDataProvenance.MEASURED,
+                sourceLabel = TELEMETRY_SOURCE,
+            )
+        } else {
+            Provenanced(
+                value = AthleteDemoCatalog.FALLBACK_STEPS,
+                provenance = AthleteDataProvenance.LOCAL_DEMO,
+                sourceLabel = AthleteDemoCatalog.MODE_LABEL,
+            )
+        }
+
+        val isAnyDemo = listOf(hrvMs, sleepLabel, readinessPercent, load, steps).any { it.isDemo }
 
         return TodayReadinessUi(
             readinessPercent = readinessPercent,
             hrvMs = hrvMs,
             load = load,
             sleepLabel = sleepLabel,
+            steps = steps,
             isAnyDemo = isAnyDemo,
         )
     }

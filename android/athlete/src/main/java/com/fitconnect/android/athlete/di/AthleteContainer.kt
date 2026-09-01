@@ -20,6 +20,7 @@ interface AthleteContainer {
     val sports: SportsContainer
     val geo: GeoContainer
     val telemetry: TelemetryContainer
+    val fitness: FitnessContainer
     val ai: AiContainer
     val community: CommunityContainer
     val sportsEngine: SportsEngine
@@ -36,6 +37,7 @@ class DefaultAthleteContainer(
     override val telemetry: TelemetryContainer,
     override val ai: AiContainer,
     override val community: CommunityContainer = DefaultCommunityContainer(),
+    override val fitness: FitnessContainer,
     override val ascend: AscendEngine = AscendEngine(
         demoLabeledUsers = setOf(
             LocalAthleteRepository.ATHLETE_ID,
