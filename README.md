@@ -30,21 +30,23 @@ Be factual. Labels below are the only status language that should be copied.
 
 | Area | Status |
 |------|--------|
-| Elite OS visual system | ENGINEERING COMPLETE (tokens / IA) |
-| Android athlete/coach UI | LOCAL DEMO (many flows) |
-| Web landing + dashboards | LOCAL DEMO / PARTIAL (demo mode still used in CI) |
-| Firebase + identity APIs | PARTIAL (LOCAL_AUTH PASS; PRODUCTION_AUTH PENDING_HUMAN) |
-| Postgres RLS identity SQL | PARTIAL (engineering; live DB apply PENDING_HUMAN) |
-| Strava own-athlete OAuth | PARTIAL (policy gaps remain — P0-SEC) |
+| Elite OS visual system | ENGINEERING COMPLETE (tokens / IA / chart palette) |
+| Android athlete neu-glass UI | ENGINEERING COMPLETE (waves 0–6: Today · Analysis · Achievements · Profile · Train) |
+| Android coach UI | LOCAL DEMO (neu-glass not applied) |
+| Android athlete/coach data flows | LOCAL DEMO (many flows) |
+| Web landing + dashboards | LOCAL DEMO / PARTIAL (CI keeps an explicit demo job; **auth-prod-like** job uses DEMO_MODE=false) |
+| Firebase + identity APIs | ENGINEERING PASS / PRODUCTION_AUTH PENDING_HUMAN |
+| Postgres RLS identity SQL | ENGINEERING PASS (live IDOR 2026-09-02); hosted JWT trust PENDING_HUMAN |
+| Strava own-athlete OAuth | PARTIAL (P0-SEC engineering PASS 2026-08-29; policy ops remain) |
 | GPS / live capture | PLANNED / placeholder (`EliteCapture`) |
 | Realtime production default | UNVERIFIED (Broadcast still CI/demo default) |
 | Watch phone sync | UNVERIFIED |
-| ASCEND | PARTIAL (two progression truths) |
+| ASCEND | PARTIAL (canonical SQL path + labeled demo adapters) |
 | Social / Squad persistence | PLANNED (v1 has **no** Stories/Reels) |
 | Human production infra | PENDING_HUMAN |
 | **Release** | **PRODUCTION NO-GO** |
 
-P0-DOCS (frozen master plan) is written. Next **code** phase is **P0-SEC**.
+P0-SEC is **historical PASS** (2026-08-29). P1-DATA is **reconciled** (`016`/`017` on this branch). P1-AUTH **engineering** is PASS. Production remains **NO-GO**. Next authorized **product** phase: **WORKOUT-ENGINE WAVE 2** (not started).
 
 ## 4. Current Roadmap
 
@@ -52,13 +54,11 @@ P0-DOCS (frozen master plan) is written. Next **code** phase is **P0-SEC**.
 
 ## 5. Current Phase
 
-**P0-SEC** (active next engineering phase)
+**P1-AUTH engineering PASS. Production auth PENDING_HUMAN. History freeze: local commits on this branch, not pushed.**
 
-Sequence:
+Next authorized phase (do not auto-start): **WORKOUT-ENGINE WAVE 2**
 
-P0-SEC → P1-DATA → P1-AUTH → P2-CORE → P2-GPS → P3-REALTIME → P4-ASCEND → P5-SOCIAL → P6-SQUAD → P7-WATCH → P8 → P9 → P10-HUMAN → P11-QA → P12
-
-Social v1 does **not** include Stories/Reels.
+Historical sequence in the frozen master plan is not the current truth. P0-SEC already stamped PASS.
 
 ## 6. Architecture
 
@@ -75,7 +75,7 @@ Canonical decisions: [docs/master-plan/18_TECHNOLOGY_DECISIONS.md](docs/master-p
 | Server mapper | Prisma (privileged server only; not a second user-facing schema) |
 | Realtime (target) | Convex events + Supabase presence/chat |
 | Realtime (today) | BroadcastChannel / demo default in CI |
-| Fitness data | Health Connect via `FitnessProvider` |
+| Fitness data | Health Connect via `FitnessProvider` (Jetpack **1.1.0**, read path on Android) |
 | Strava | Own-athlete adapter; must not enter social graphs |
 | Metrics | Elite Core (Rust) — PARTIAL |
 | Maps | MapLibre / OpenFreeMap after real GPS — GPS UNVERIFIED |
@@ -95,7 +95,7 @@ Canonical decisions: [docs/master-plan/18_TECHNOLOGY_DECISIONS.md](docs/master-p
 
 | Domain | Status |
 |--------|--------|
-| Athlete OS (Today / Analysis / Achievements / Profile + Train FAB) | PARTIAL — UI ENGINEERING COMPLETE; data often LOCAL DEMO |
+| Athlete OS (Today / Analysis / Achievements / Profile + Train FAB) | PARTIAL — **neu-glass UI ENGINEERING COMPLETE** (Android); data often LOCAL DEMO |
 | Coach OS | PARTIAL — UI; live roster/authz UNVERIFIED |
 | Performance / readiness / telemetry | PARTIAL — demo + mixed stores |
 | Social v1 (profiles, posts, photos, comments, reactions, privacy) | PLANNED persistence; **no Stories/Reels** |
@@ -130,6 +130,16 @@ emulator -avd fitconnect_phone
 ```
 
 Guides: [docs/android/ANDROID_LOCAL_DEMO_GUIDE.md](docs/android/ANDROID_LOCAL_DEMO_GUIDE.md) · [docs/android/README.md](docs/android/README.md)
+
+**Neu-glass (athlete surfaces):** [docs/design/ELITE_OS_NEU_GLASS.md](docs/design/ELITE_OS_NEU_GLASS.md) · wave report [android/docs/elite-os-neu-glass-wave6.md](android/docs/elite-os-neu-glass-wave6.md)
+
+**Strength workout engine (openGym gap — native, not a clone):** Wave 1 domain foundation — `ProgressionEngine`, `OneRepMaxEstimator`, migration `017`, specs in [docs/product/workout-engine/](docs/product/workout-engine/) · gap analysis [docs/product/open-gym-gap-analysis/](docs/product/open-gym-gap-analysis/). Guided execution UI = **PLANNED** (Wave 2).
+
+Regenerate Compose tokens after `packages/design-tokens` changes:
+
+```powershell
+pnpm tokens:kotlin
+```
 
 `assembleRelease` / Play signing / `google-services.json` for FCM: **PENDING_HUMAN**. Not claimed here.
 

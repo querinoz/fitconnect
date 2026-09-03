@@ -1,6 +1,8 @@
 # CLAUDE.md — FitConnect · Memória Persistente do Projeto
 
-> **CURRENT STATUS (2026-08-20):** Production = **NO-GO**. Active next phase = **P0-SEC**. Canonical execution plan = [`docs/master-plan/`](docs/master-plan/21_FINAL_ROADMAP.md). Entry point = [`README.md`](README.md).
+> **CURRENT STATUS (2026-09-03):** Production = **NO-GO**. P0-SEC = PASS. P1-DATA reconciled. P1-AUTH engineering = PASS. Next authorized product phase = **WORKOUT-ENGINE WAVE 2** (not started). Entry point = [`README.md`](README.md).
+>
+> **Android athlete neu-glass:** ENGINEERING COMPLETE (waves 0–6) — see [`docs/design/ELITE_OS_NEU_GLASS.md`](docs/design/ELITE_OS_NEU_GLASS.md).
 >
 > Architecture rules in [`AGENTS.md`](AGENTS.md) remain in force (Strava never social; Health Connect is the data core).
 >
@@ -91,6 +93,21 @@ fitconnect/
 
 - `ui-glass/` — ~47 imports, não apagar até migração completa
 - `--volt-*` / `--ink-*` — aliases em `voltline.css`
+
+### Neu-glass Android (2026-09-01)
+
+Athlete surfaces on Compose use **neu-glass**: neumorphic anchored data + glass floating chrome.
+
+| Item | Location |
+|------|----------|
+| Spec | `docs/design/ELITE_OS_NEU_GLASS.md` |
+| Glass primitive | `android/design-ui/.../EosGlassSurface.kt` |
+| Chart tokens | `packages/design-tokens/semantic.ts` → `CHART_TOKENS` |
+| Typography | `android/design-ui/.../EliteTypography.kt` (all Material3 slots) |
+| Responsive | `android/design-ui/.../EliteResponsive.kt` |
+| Catalog | `DesignSystemCatalog.kt` — section **Neu-glass (Elite OS 2026)** |
+
+Waves 0–6 commits on `feat/elite-os-v2`: `4f6f3dd` … `93928e2`. Coach OS not in scope.
 
 ---
 

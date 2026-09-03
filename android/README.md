@@ -2,7 +2,7 @@
 
 Kotlin + Jetpack Compose application per **ADR-005**. This is the **production-track** mobile codebase (not a Play GO).
 
-Status: **LOCAL DEMO** · Watch sync **UNVERIFIED** · **PRODUCTION = NO-GO**
+Status: **LOCAL DEMO** · Athlete **neu-glass UI ENGINEERING COMPLETE** (waves 0–6) · Watch sync **UNVERIFIED** · **PRODUCTION = NO-GO**
 
 `apps/mobile` (Expo) is **frozen legacy** and must not receive new features.
 
@@ -13,14 +13,31 @@ Status: **LOCAL DEMO** · Watch sync **UNVERIFIED** · **PRODUCTION = NO-GO**
 | `:app` | Application shell, navigation, theme wiring |
 | `:foundation` | Errors, logging, network, storage, offline queue, analytics, DI root |
 | `:design` | Generated Elite Surface color tokens (`pnpm tokens:kotlin`) |
+| `:design-ui` | Neu-glass primitives, charts, typography, design catalog |
+| `:athlete` | Athlete surfaces (Today, Analysis, Achievements, Profile, Train) |
 | `:core-capture` | Capture/sensor bridge scaffold (`EliteCapture` is a placeholder) |
 | `:wear` | Wear OS module (P7 certification PENDING_HUMAN) |
+
+## Neu-glass (athlete surfaces)
+
+Waves 0–6 on branch `feat/elite-os-v2` — Today · Analysis · Achievements · Profile · Train FAB.
+
+| Doc | Content |
+|-----|---------|
+| [docs/design/ELITE_OS_NEU_GLASS.md](../docs/design/ELITE_OS_NEU_GLASS.md) | Canonical spec |
+| [docs/elite-os-neu-glass-wave6.md](docs/elite-os-neu-glass-wave6.md) | Final report + screenshots |
+
+Screenshots: `wave1-today-screenshot.png` … `wave5-train-screenshot.png` in this directory.
+
+In-app catalog: `fitconnect://app/catalog` → **Neu-glass (Elite OS 2026)** section.
 
 ## Commands
 
 ```powershell
 cd android
 .\gradlew.bat :foundation:test
+.\gradlew.bat :design-ui:testDebugUnitTest
+.\gradlew.bat :athlete:testDebugUnitTest
 .\gradlew.bat :app:assembleDebug
 .\gradlew.bat :wear:assembleDebug
 ```
@@ -50,6 +67,13 @@ Source of truth: `packages/design-tokens`. Regenerate Kotlin:
 pnpm tokens:kotlin
 pnpm tokens:kotlin:check
 ```
+
+Key Compose paths:
+
+- `design-ui/.../neumorphic/EosGlassSurface.kt` — glass chrome
+- `design-ui/.../theme/EliteTypography.kt` — full Material3 font mapping
+- `design-ui/.../theme/EliteResponsive.kt` — compact breakpoints
+- `design-ui/.../charts/EliteChartPalette.kt` — chart colors from tokens
 
 ## Phase status
 

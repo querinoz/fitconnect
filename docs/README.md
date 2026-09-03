@@ -1,10 +1,12 @@
 # FitConnect documentation index
 
+**Current truth (2026-09-03):** [audit/RECONCILIATION_RESULT.md](audit/RECONCILIATION_RESULT.md) — history freeze. P1-AUTH engineering PASS. **Production remains NO-GO.**
+
 **Canonical entry:** [README.md](../README.md)
 
-**Current phase:** P0-SEC
+**Diagnostic snapshot:** [audit/FINAL_DIRECTION.md](audit/FINAL_DIRECTION.md)
 
-**Production:** NO-GO
+**Frozen master-plan “current phase: P0-SEC” is HISTORICAL** (P0-SEC stamped PASS 2026-08-29). Do not copy it into new work. Next authorized product phase: **WORKOUT-ENGINE WAVE 2** (not started).
 
 Prefer this index over archived reports. Status vocabulary: PASS · FAIL · BLOCKED · PENDING_HUMAN · UNVERIFIED · PLANNED · DEPRECATED · HISTORICAL.
 
@@ -14,7 +16,7 @@ Prefer this index over archived reports. Status vocabulary: PASS · FAIL · BLOC
 |----------|------|
 | [README.md](../README.md) | Product entry point |
 | [AGENTS.md](../AGENTS.md) | Architecture rules (Strava / providers / IA) |
-| [CLAUDE.md](../CLAUDE.md) | Project memory — **defer to master-plan for current status** |
+| [CLAUDE.md](../CLAUDE.md) | Project memory — **README is current status; master-plan is frozen history** |
 | [SECURITY.md](../SECURITY.md) | Vulnerability reporting |
 | [LICENSE](../LICENSE) | MIT |
 
@@ -44,11 +46,17 @@ Prefer this index over archived reports. Status vocabulary: PASS · FAIL · BLOC
 
 ## D. Auth / data / security (engineering evidence)
 
-These describe **LOCAL / engineering** work. They do **not** skip P0-SEC and do **not** mean production PASS.
+These describe **LOCAL / engineering** work. They do **not** mean production PASS.
 
 | Document | Role |
 |----------|------|
 | [auth/HUMAN_AUTH_CONFIGURATION.md](auth/HUMAN_AUTH_CONFIGURATION.md) | Human auth handoff |
+| [auth/P1_AUTH_IDENTITY_FLOW.md](auth/P1_AUTH_IDENTITY_FLOW.md) | Firebase UID → identity_profiles → RLS |
+| [auth/P1_AUTH_TEST_MATRIX.md](auth/P1_AUTH_TEST_MATRIX.md) | Auth / API / RLS matrix (2026-09-02) |
+| [auth/HUMAN_DEPENDENCIES_P1_AUTH.md](auth/HUMAN_DEPENDENCIES_P1_AUTH.md) | Engineering vs PENDING_HUMAN |
+| [data/P1_DATA_RECONCILIATION.md](data/P1_DATA_RECONCILIATION.md) | 016/017 account + ASCEND stores |
+| [audit/WORKTREE_RECONCILIATION.md](audit/WORKTREE_RECONCILIATION.md) | Dirty-tree classification |
+| [audit/P1_AUTH_EXECUTION_REPORT.md](audit/P1_AUTH_EXECUTION_REPORT.md) | This phase evidence |
 | [auth/GOOGLE_FIREBASE_SETUP.md](auth/GOOGLE_FIREBASE_SETUP.md) | Firebase / Google setup |
 | [auth/AUTH_IMPLEMENTATION_REPORT.md](auth/AUTH_IMPLEMENTATION_REPORT.md) | Auth engineering report |
 | [data/DATA_UNIFICATION_REPORT.md](data/DATA_UNIFICATION_REPORT.md) | Identity / data unification |
@@ -69,6 +77,8 @@ These describe **LOCAL / engineering** work. They do **not** skip P0-SEC and do 
 | Document | Role |
 |----------|------|
 | [android/README.md](android/README.md) | Android docs index |
+| [../android/docs/elite-os-neu-glass-wave6.md](../android/docs/elite-os-neu-glass-wave6.md) | Neu-glass wave 6 report + screenshots |
+| [design/ELITE_OS_NEU_GLASS.md](design/ELITE_OS_NEU_GLASS.md) | Neu-glass canonical spec |
 | [android/ANDROID_LOCAL_DEMO_GUIDE.md](android/ANDROID_LOCAL_DEMO_GUIDE.md) | Local demo install |
 | [android/ANDROID_HUMAN_PENDING.md](android/ANDROID_HUMAN_PENDING.md) | Android PENDING_HUMAN |
 | [android/wear/WEAR_PRODUCT_GAP_ANALYSIS.md](android/wear/WEAR_PRODUCT_GAP_ANALYSIS.md) | Watch gaps |
@@ -77,7 +87,8 @@ These describe **LOCAL / engineering** work. They do **not** skip P0-SEC and do 
 
 | Document | Role |
 |----------|------|
-| [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) | Elite OS design system |
+| [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) | Elite OS design system (tokens, chart palette, neu-glass) |
+| [design/ELITE_OS_NEU_GLASS.md](design/ELITE_OS_NEU_GLASS.md) | Android neu-glass waves 0–6 (athlete surfaces) |
 | [design/FITCONNECT_SURFACE_SYSTEM.md](design/FITCONNECT_SURFACE_SYSTEM.md) | Surface system |
 | [03-ux-m3-expressive.md](03-ux-m3-expressive.md) | Athlete IA (4 destinations + Train FAB) |
 | [01-strava-2026.md](01-strava-2026.md) | Strava 2026 policy |
