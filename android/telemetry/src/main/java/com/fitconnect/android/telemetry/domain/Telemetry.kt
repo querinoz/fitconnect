@@ -103,7 +103,12 @@ data class SleepSession(
     val durationMs: Long get() = end.epochMs - start.epochMs
 }
 
-/** Normalized imported workout. Sport interpretation belongs to :sports. */
+/**
+ * Normalized imported workout (telemetry package).
+ * When synced to Postgres, [id] = public.activities.id; [distanceMeters] = m;
+ * [calories] = kcal; heart rates = bpm. Prefer Fitness domain WorkoutSession
+ * for product persistence paths.
+ */
 data class WorkoutSession(
     val id: String,
     val athleteId: String,

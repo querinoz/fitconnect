@@ -12,6 +12,11 @@ import com.fitconnect.shared.workout.WorkoutSport
 /** Process-wide watch session handle. Set from [WearMainActivity]. */
 object WearRuntime {
     @Volatile var engine: LiveActivityEngine? = null
+    /**
+     * In-progress local id. On sync/complete this MUST reconcile to canonical
+     * `activities.id` (UUID). Local `wear-*` ids are not a second product truth
+     * (P1-DATA / P7-WATCH).
+     */
     @Volatile var sessionId: String = "wear-local"
     @Volatile var deviceId: String = "wear"
     @Volatile var sequence: Long = 0L

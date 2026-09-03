@@ -31,25 +31,9 @@ class UnavailableHealthDataRepository : HealthDataRepository {
 
 class AndroidHealthDataRepository(
     private val context: Context,
+    private val heartRateReader: HealthConnectHeartRateReader = HealthConnectHeartRateReader(context),
 ) : HealthDataRepository {
     override fun sdkAvailability(): MetricAvailability = HealthConnectAvailability.status(context)
 
-    override suspend fun latestHeartRate(nowEpochMs: Long): HeartRate {
-        val sdk = sdkAvailability()
-        if (sdk != MetricAvailability.AVAILABLE) {
-            return HeartRate.unavailable(
-                timestampEpochMs = nowEpochMs,
-                availability = sdk,
-                source = DataSourceKind.HEALTH_CONNECT,
-                deviceId = "health_connect",
-            )
-        }
-        // SDK present is not the same as READ_HEART_RATE granted or records existing.
-        return HeartRate.unavailable(
-            timestampEpochMs = nowEpochMs,
-            availability = MetricAvailability.PERMISSION_DENIED,
-            source = DataSourceKind.HEALTH_CONNECT,
-            deviceId = "health_connect",
-        )
-    }
+    override suspend fun latestHeartRate(nowEpochMs: Long): HeartRate = heartRateReader.latest(nowEpochMs)
 }

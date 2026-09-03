@@ -5,9 +5,9 @@ import com.fitconnect.android.telemetry.domain.MetricType
 import com.fitconnect.android.telemetry.domain.ProviderId
 
 /**
- * Health Connect — first-class Android integration. Runs in simulated mode
- * until the androidx.health.connect client dependency + device support is
- * wired; the contract, capability surface and permission states are final.
+ * Health Connect — first-class Android integration. Device Center still lists
+ * simulated samples until [com.fitconnect.android.athlete.di.FitnessContainer]
+ * sync results are bridged into the telemetry store.
  */
 class HealthConnectProvider(source: SimulatedProviderSource) :
     BaseSimulatedProvider(ProviderId.HEALTH_CONNECT, "Health Connect", source) {
