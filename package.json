@@ -80,7 +80,9 @@
     "instagram:prepare-grid32": "node marketing/instagram/build-grid32.mjs && node scripts/instagram/sync-public.mjs",
     "p1-auth:bridge": "node scripts/p1-auth-live-bridge-check.mjs",
     "p1-auth:backfill": "node scripts/p1-auth-firebase-role-backfill.mjs",
-    "p1-auth:cleanup-test-users": "node scripts/p1-auth-cleanup-test-users.mjs"
+    "p1-auth:cleanup-test-users": "node scripts/p1-auth-cleanup-test-users.mjs",
+    "p1-auth:provision-android-user": "node scripts/p1-auth-provision-android-test-user.mjs",
+    "test:auth-prod": "pnpm --filter @fitconnect/web test:auth-prod"
   },
   "devDependencies": {
     "@prisma/client": "^7.8.0",

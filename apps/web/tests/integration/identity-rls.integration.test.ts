@@ -1,121 +1,295 @@
-import { beforeAll, describe, expect, it } from "vitest";
+/**
+ * Live two-user identity RLS IDOR against Supabase project beuiammeedpovdkmhluw.
+ *
+ * Connection may use DIRECT_URL (postgres has BYPASSRLS) for session bootstrap only.
+ * All certified assertions run after `SET LOCAL ROLE authenticated` with JWT sub claim.
+ *
+ * Opt-in: P0_SEC_LIVE_RLS=1
+ * Never prints connection strings, passwords, or JWTs.
+ */
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { PrismaClient } from "@prisma/client";
+import pg from "pg";
+
+const DATABASE_URL = (process.env.DIRECT_URL || process.env.DATABASE_URL)?.trim();
+const LIVE_RLS = process.env.P0_SEC_LIVE_RLS === "1";
+
+const USER_A = "rls_test_user_a";
+const USER_B = "rls_test_user_b";
 
 function statementsFromMigration(sql: string): string[] {
   return sql
-    .split("--;;")
+    .split(/\r?\n--;;\r?\n/)
     .map((part) => part.trim())
-    .filter((part) => part.length > 0 && !part.startsWith("-- 012") && !part.startsWith("-- 013"));
+    .filter((part) => {
+      if (!part) return false;
+      const lines = part.split(/\r?\n/).filter((l) => l.trim() && !l.trim().startsWith("--"));
+      return lines.length > 0;
+    });
 }
 
-const DATABASE_URL = process.env.DATABASE_URL;
+function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return "unparseable";
+  }
+}
 
-describe.skipIf(!DATABASE_URL)("identity RLS two-user IDOR", () => {
-  let prisma: PrismaClient;
+type RoleSnapshot = {
+  current_user: string;
+  session_user: string;
+  rolsuper: boolean;
+  rolbypassrls: boolean;
+};
+
+describe.skipIf(!DATABASE_URL || !LIVE_RLS)("identity RLS two-user IDOR (authenticated role)", () => {
+  let client: pg.Client;
+  let certRole: RoleSnapshot;
+
+  async function roleSnapshot(): Promise<RoleSnapshot> {
+    const { rows } = await client.query<RoleSnapshot>(`
+      select current_user::text as current_user,
+             session_user::text as session_user,
+             (select rolsuper from pg_roles where rolname = current_user) as rolsuper,
+             (select rolbypassrls from pg_roles where rolname = current_user) as rolbypassrls
+    `);
+    return rows[0]!;
+  }
+
+  /** Privileged connection work (seed / migration) — not used for PASS evidence. */
+  async function asAdmin(fn: () => Promise<void>) {
+    await client.query("begin");
+    try {
+      await fn();
+      await client.query("commit");
+    } catch (err) {
+      await client.query("rollback");
+      throw err;
+    }
+  }
+
+  /** RLS-scoped user context — certification evidence. */
+  async function asAuthenticated(uid: string, fn: () => Promise<void>) {
+    await client.query("begin");
+    try {
+      await client.query("set local role authenticated");
+      await client.query("select set_config('request.jwt.claim.sub', $1, true)", [uid]);
+      await client.query(
+        "select set_config('request.jwt.claims', $1, true)",
+        [JSON.stringify({ sub: uid, role: "authenticated" })]
+      );
+      const snap = await roleSnapshot();
+      expect(snap.current_user).toBe("authenticated");
+      expect(snap.rolsuper).toBe(false);
+      expect(snap.rolbypassrls).toBe(false);
+      await fn();
+      await client.query("commit");
+    } catch (err) {
+      await client.query("rollback");
+      throw err;
+    }
+  }
 
   beforeAll(async () => {
-    if (!DATABASE_URL) return;
-    prisma = new PrismaClient();
-    await prisma.$executeRawUnsafe("create schema if not exists auth");
-    await prisma.$executeRawUnsafe(`
-      create or replace function auth.jwt() returns jsonb
-      language sql stable as $fn$
-        select jsonb_build_object('sub', current_setting('request.jwt.claim.sub', true))
-      $fn$
-    `);
-    const sql012 = readFileSync(
-      path.resolve(__dirname, "../../../../supabase/migrations/012_firebase_identity.sql"),
-      "utf8"
-    );
-    for (const statement of statementsFromMigration(sql012)) {
-      await prisma.$executeRawUnsafe(statement);
-    }
-    const sql013 = readFileSync(
-      path.resolve(__dirname, "../../../../supabase/migrations/013_p0_sec.sql"),
-      "utf8"
-    );
-    for (const statement of statementsFromMigration(sql013)) {
-      await prisma.$executeRawUnsafe(statement);
-    }
-  }, 60_000);
+    if (!DATABASE_URL || !LIVE_RLS) return;
+    client = new pg.Client({
+      connectionString: DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    });
+    await client.connect();
 
-  it("allows own profile and denies cross-user read/update/role escalation", async () => {
-    if (!DATABASE_URL) return;
+    // Ensure identity migrations present (idempotent).
+    // Do not recreate auth.jwt() — auth schema is owned by Supabase; firebase_uid()
+    // prefers request.jwt.claim.sub which we set per assertion.
 
-    await prisma.$transaction(async (tx) => {
-      await tx.$executeRawUnsafe("select set_config('request.jwt.claim.sub', 'user-a', true)");
-      await tx.$executeRawUnsafe(`
-        insert into identity_profiles (id, email, display_name)
-        values ('user-a', 'a@fitconnect.app', 'User A')
-        on conflict (id) do nothing
-      `);
-      await tx.$executeRawUnsafe(`
-        insert into user_roles (uid, role) values ('user-a', 'athlete')
-        on conflict (uid) do nothing
-      `);
+    for (const file of ["012_firebase_identity.sql", "013_p0_sec.sql"]) {
+      const sql = readFileSync(
+        path.resolve(__dirname, `../../../../supabase/migrations/${file}`),
+        "utf8"
+      );
+      for (const statement of statementsFromMigration(sql)) {
+        await client.query(statement);
+      }
+    }
+
+    await client.query("begin");
+    await client.query("set local role authenticated");
+    certRole = await roleSnapshot();
+    await client.query("rollback");
+
+    // Safe metadata for evidence logs (no secrets).
+    // eslint-disable-next-line no-console
+    console.log(
+      JSON.stringify({
+        PROJECT_REF: "beuiammeedpovdkmhluw",
+        DB_HOST: hostOf(DATABASE_URL),
+        DATABASE_ROLE_FOR_RLS_TEST:
+          certRole.current_user === "authenticated" && !certRole.rolsuper && !certRole.rolbypassrls
+            ? "VALID"
+            : "INVALID_BYPASS",
+        CERT_ROLE: certRole
+      })
+    );
+
+    if (
+      certRole.current_user !== "authenticated" ||
+      certRole.rolsuper ||
+      certRole.rolbypassrls
+    ) {
+      throw new Error("DATABASE_ROLE_FOR_RLS_TEST=INVALID_BYPASS");
+    }
+
+    // Clean prior synthetic rows (admin).
+    await asAdmin(async () => {
+      await client.query("delete from account_deletion_requests where uid in ($1, $2)", [
+        USER_A,
+        USER_B
+      ]);
+      await client.query("delete from onboarding_state where uid in ($1, $2)", [USER_A, USER_B]);
+      await client.query("delete from user_preferences where uid in ($1, $2)", [USER_A, USER_B]);
+      await client.query("delete from user_roles where uid in ($1, $2)", [USER_A, USER_B]);
+      await client.query("delete from identity_profiles where id in ($1, $2)", [USER_A, USER_B]);
+    });
+  }, 120_000);
+
+  afterAll(async () => {
+    if (!client) return;
+    try {
+      await asAdmin(async () => {
+        await client.query("delete from account_deletion_requests where uid in ($1, $2)", [
+          USER_A,
+          USER_B
+        ]);
+        await client.query("delete from onboarding_state where uid in ($1, $2)", [USER_A, USER_B]);
+        await client.query("delete from user_preferences where uid in ($1, $2)", [USER_A, USER_B]);
+        await client.query("delete from user_roles where uid in ($1, $2)", [USER_A, USER_B]);
+        await client.query("delete from identity_profiles where id in ($1, $2)", [USER_A, USER_B]);
+      });
+    } catch {
+      /* cleanup best-effort */
+    }
+    await client.end().catch(() => undefined);
+  });
+
+  it("A creates own profile; B creates own; cross-read denied", async () => {
+    await asAuthenticated(USER_A, async () => {
+      await client.query(
+        `insert into identity_profiles (id, email, display_name)
+         values ($1, 'rls-a@fitconnect.test', 'RLS Test Athlete A')`,
+        [USER_A]
+      );
+      await client.query(
+        `insert into user_roles (uid, role) values ($1, 'athlete')`,
+        [USER_A]
+      );
+      const own = await client.query(`select id, display_name from identity_profiles where id = $1`, [
+        USER_A
+      ]);
+      expect(own.rows).toHaveLength(1);
+      expect(own.rows[0].display_name).toBe("RLS Test Athlete A");
     });
 
-    await prisma.$transaction(async (tx) => {
-      await tx.$executeRawUnsafe("select set_config('request.jwt.claim.sub', 'user-b', true)");
-      await tx.$executeRawUnsafe(`
-        insert into identity_profiles (id, email, display_name)
-        values ('user-b', 'b@fitconnect.app', 'User B')
-        on conflict (id) do nothing
-      `);
-
-      const own = await tx.$queryRawUnsafe<Array<{ id: string }>>(
-        "select id from identity_profiles where id = 'user-b'"
+    await asAuthenticated(USER_B, async () => {
+      await client.query(
+        `insert into identity_profiles (id, email, display_name)
+         values ($1, 'rls-b@fitconnect.test', 'RLS Test Athlete B')`,
+        [USER_B]
       );
-      expect(own).toHaveLength(1);
-
-      const other = await tx.$queryRawUnsafe<Array<{ id: string }>>(
-        "select id from identity_profiles where id = 'user-a'"
+      await client.query(
+        `insert into user_roles (uid, role) values ($1, 'athlete')`,
+        [USER_B]
       );
-      expect(other).toHaveLength(0);
+      const own = await client.query(`select id from identity_profiles where id = $1`, [USER_B]);
+      expect(own.rows).toHaveLength(1);
 
-      const updated = await tx.$executeRawUnsafe(
-        "update identity_profiles set display_name = 'hacked' where id = 'user-a'"
-      );
-      expect(updated).toBe(0);
+      const other = await client.query(`select id from identity_profiles where id = $1`, [USER_A]);
+      expect(other.rows).toHaveLength(0);
 
-      await expect(
-        tx.$executeRawUnsafe("insert into user_roles (uid, role) values ('user-a', 'coach')")
-      ).rejects.toThrow();
-
-      await expect(
-        tx.$executeRawUnsafe("insert into user_roles (uid, role) values ('user-b', 'admin')")
-      ).rejects.toThrow();
+      const all = await client.query(`select id from identity_profiles`);
+      expect(all.rows.every((r) => r.id === USER_B)).toBe(true);
     });
 
-    await prisma.$transaction(async (tx) => {
-      await tx.$executeRawUnsafe("select set_config('request.jwt.claim.sub', '', true)");
-      const anon = await tx.$queryRawUnsafe<Array<{ id: string }>>(
-        "select id from identity_profiles"
-      );
-      expect(anon).toHaveLength(0);
+    await asAuthenticated(USER_A, async () => {
+      const other = await client.query(`select id from identity_profiles where id = $1`, [USER_B]);
+      expect(other.rows).toHaveLength(0);
     });
   });
 
-  it("allows own identity DELETE and denies the other user", async () => {
-    if (!DATABASE_URL) return;
-
-    await prisma.$transaction(async (tx) => {
-      await tx.$executeRawUnsafe("select set_config('request.jwt.claim.sub', 'user-a', true)");
-      const other = await tx.$executeRawUnsafe(
-        "delete from identity_profiles where id = 'user-b'"
+  it("A update own ALLOW; A update B DENY; B update A DENY", async () => {
+    await asAuthenticated(USER_A, async () => {
+      const own = await client.query(
+        `update identity_profiles set display_name = 'RLS Test Athlete A*' where id = $1`,
+        [USER_A]
       );
-      expect(other).toBe(0);
+      expect(own.rowCount).toBe(1);
+
+      const other = await client.query(
+        `update identity_profiles set display_name = 'hacked' where id = $1`,
+        [USER_B]
+      );
+      expect(other.rowCount).toBe(0);
     });
 
-    await prisma.$transaction(async (tx) => {
-      await tx.$executeRawUnsafe("select set_config('request.jwt.claim.sub', 'user-b', true)");
-      const own = await tx.$executeRawUnsafe(
-        "delete from user_roles where uid = 'user-b'"
+    await asAuthenticated(USER_B, async () => {
+      const other = await client.query(
+        `update identity_profiles set display_name = 'hacked-by-b' where id = $1`,
+        [USER_A]
       );
-      expect(own).toBeGreaterThanOrEqual(0);
-      await tx.$executeRawUnsafe("delete from identity_profiles where id = 'user-b'");
+      expect(other.rowCount).toBe(0);
+      const check = await client.query(
+        `select display_name from identity_profiles where id = $1`,
+        [USER_B]
+      );
+      expect(check.rows[0].display_name).toBe("RLS Test Athlete B");
+    });
+
+    // Confirm A name unchanged by B (read as A).
+    await asAuthenticated(USER_A, async () => {
+      const row = await client.query(
+        `select display_name from identity_profiles where id = $1`,
+        [USER_A]
+      );
+      expect(row.rows[0].display_name).toBe("RLS Test Athlete A*");
+    });
+  });
+
+  it("role escalation DENY (self-promote to admin / write other role)", async () => {
+    await asAuthenticated(USER_B, async () => {
+      await expect(
+        client.query(`insert into user_roles (uid, role) values ($1, 'admin')`, [USER_B])
+      ).rejects.toThrow();
+
+      await expect(
+        client.query(`insert into user_roles (uid, role) values ($1, 'coach')`, [USER_A])
+      ).rejects.toThrow();
+    });
+  });
+
+  it("unauthenticated (empty sub) DENY all identity rows", async () => {
+    await asAuthenticated("", async () => {
+      const rows = await client.query(`select id from identity_profiles`);
+      expect(rows.rows).toHaveLength(0);
+    });
+  });
+
+  it("A delete B DENY; A delete own ALLOW; B delete own ALLOW", async () => {
+    await asAuthenticated(USER_A, async () => {
+      const denied = await client.query(`delete from identity_profiles where id = $1`, [USER_B]);
+      expect(denied.rowCount).toBe(0);
+    });
+
+    await asAuthenticated(USER_A, async () => {
+      await client.query(`delete from user_roles where uid = $1`, [USER_A]);
+      const del = await client.query(`delete from identity_profiles where id = $1`, [USER_A]);
+      expect(del.rowCount).toBe(1);
+    });
+
+    await asAuthenticated(USER_B, async () => {
+      await client.query(`delete from user_roles where uid = $1`, [USER_B]);
+      const del = await client.query(`delete from identity_profiles where id = $1`, [USER_B]);
+      expect(del.rowCount).toBe(1);
     });
   });
 });

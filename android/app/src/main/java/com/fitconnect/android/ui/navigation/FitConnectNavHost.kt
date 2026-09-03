@@ -66,7 +66,9 @@ import com.fitconnect.android.foundation.storage.needsIdentityRoleSelection
 import com.fitconnect.android.ui.onboarding.CoachOnboardingScreen
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 @Composable
 fun FitConnectNavHost(
     navController: NavHostController = rememberNavController(),
@@ -93,9 +95,11 @@ fun FitConnectNavHost(
             } else {
                 AppDestination.fromCore(decision.redirectTo ?: CoreRoute.GUEST)
             }
-            navController.navigate(dest.route) {
-                if (target == CoreRoute.HOME || target == CoreRoute.GUEST) {
-                    popUpTo(0) { inclusive = true }
+            withContext(Dispatchers.Main.immediate) {
+                navController.navigate(dest.route) {
+                    if (target == CoreRoute.HOME || target == CoreRoute.GUEST) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             }
         }

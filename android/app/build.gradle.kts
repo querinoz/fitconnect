@@ -45,7 +45,7 @@ val releaseSigningReady = keystorePropsFile.exists().also { exists ->
 
 android {
     namespace = "com.fitconnect.android"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.fitconnect.android"
@@ -82,7 +82,10 @@ android {
     buildTypes {
         debug {
             isDebuggable = true
-            applicationIdSuffix = ".debug"
+            // Firebase google-services.json matches release applicationId only.
+            if (!fcmConfigured) {
+                applicationIdSuffix = ".debug"
+            }
             buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3001\"")
             buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
             buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseAnon\"")
@@ -219,9 +222,17 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
 
     debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.kotlinx.coroutines.android)
 }
 
 // Apply Google Services / Crashlytics / Perf only when Firebase config is present

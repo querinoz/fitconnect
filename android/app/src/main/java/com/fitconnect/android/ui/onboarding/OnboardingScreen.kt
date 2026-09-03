@@ -75,7 +75,8 @@ fun OnboardingScreen(
     var hydrated by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        step = keyValueStore.athleteOnboardingStep()
+        val persistedStep = keyValueStore.athleteOnboardingStep()
+        step = maxOf(step, persistedStep)
         sport = keyValueStore.athleteOnboardingSport()
         goal = keyValueStore.athleteOnboardingGoal()
         hydrated = true
@@ -85,18 +86,23 @@ fun OnboardingScreen(
         step = next
         scope.launch {
             keyValueStore.setAthleteOnboardingStep(next)
-            identityRemote?.putOnboarding(
-                IdentityOnboarding(
-                    uid = "",
-                    role = UserRole.ATHLETE,
-                    step = next,
-                    completed = false,
-                    payload = org.json.JSONObject()
-                        .put("sport", sport)
-                        .put("goal", goal)
-                        .toString(),
-                ),
-            )
+            val remote = identityRemote ?: return@launch
+            launch {
+                runCatching {
+                    remote.putOnboarding(
+                        IdentityOnboarding(
+                            uid = "",
+                            role = UserRole.ATHLETE,
+                            step = next,
+                            completed = false,
+                            payload = org.json.JSONObject()
+                                .put("sport", sport)
+                                .put("goal", goal)
+                                .toString(),
+                        ),
+                    )
+                }
+            }
         }
     }
 
@@ -114,7 +120,11 @@ fun OnboardingScreen(
         verticalArrangement = Arrangement.spacedBy(EliteSpace.Md),
     ) {
         EliteBadge(text = DemoPersona.MODE_LABEL)
-        EliteOnboardingProgress(step = step, total = ATHLETE_STEPS.size)
+        EliteOnboardingProgress(
+            step = step,
+            total = ATHLETE_STEPS.size,
+            modifier = Modifier.testTag("onboarding_step_$step"),
+        )
         Text("Athlete onboarding", style = MaterialTheme.typography.headlineSmall)
         Text(
             "System initialization · ${ATHLETE_STEPS[step]}",
@@ -129,7 +139,11 @@ fun OnboardingScreen(
                     "Connect. Train. Perform. Configure your cockpit once — change anytime in Profile.",
                     style = MaterialTheme.typography.bodyLarge,
                 )
-                EliteButton(label = "Continue", onClick = { persistStep(1) })
+                EliteButton(
+                    label = "Continue",
+                    onClick = { persistStep(1) },
+                    modifier = Modifier.testTag("onboarding_continue"),
+                )
             }
             1 -> {
                 Text("Choose your primary sport", style = MaterialTheme.typography.titleMedium)
@@ -146,7 +160,11 @@ fun OnboardingScreen(
                 Text("Selected: $sport", style = MaterialTheme.typography.bodyMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
                     EliteButton(label = "Back", variant = EliteButtonVariant.Ghost, onClick = { persistStep(0) })
-                    EliteButton(label = "Continue", onClick = { persistStep(2) })
+                    EliteButton(
+                        label = "Continue",
+                        onClick = { persistStep(2) },
+                        modifier = Modifier.testTag("onboarding_continue"),
+                    )
                 }
             }
             2 -> {
@@ -178,6 +196,7 @@ fun OnboardingScreen(
                         label = "Continue",
                         enabled = goal.isNotBlank(),
                         onClick = { persistStep(3) },
+                        modifier = Modifier.testTag("onboarding_continue"),
                     )
                 }
             }
@@ -193,11 +212,20 @@ fun OnboardingScreen(
                 Text("Selected: $wearable", style = MaterialTheme.typography.bodyMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
                     EliteButton(label = "Back", variant = EliteButtonVariant.Ghost, onClick = { persistStep(2) })
-                    EliteButton(label = "Skip", variant = EliteButtonVariant.Secondary, onClick = {
-                        wearable = "Skip for now"
-                        persistStep(4)
-                    })
-                    EliteButton(label = "Continue", onClick = { persistStep(4) })
+                    EliteButton(
+                        label = "Skip",
+                        variant = EliteButtonVariant.Secondary,
+                        onClick = {
+                            wearable = "Skip for now"
+                            persistStep(4)
+                        },
+                        modifier = Modifier.testTag("onboarding_skip"),
+                    )
+                    EliteButton(
+                        label = "Continue",
+                        onClick = { persistStep(4) },
+                        modifier = Modifier.testTag("onboarding_continue"),
+                    )
                 }
             }
             4 -> {
@@ -216,7 +244,11 @@ fun OnboardingScreen(
                 Text("Selected: $plan", style = MaterialTheme.typography.bodyMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
                     EliteButton(label = "Back", variant = EliteButtonVariant.Ghost, onClick = { persistStep(3) })
-                    EliteButton(label = "Continue", onClick = { persistStep(5) })
+                    EliteButton(
+                        label = "Continue",
+                        onClick = { persistStep(5) },
+                        modifier = Modifier.testTag("onboarding_continue"),
+                    )
                 }
             }
             else -> {
@@ -236,19 +268,24 @@ fun OnboardingScreen(
                         onClick = {
                             scope.launch {
                                 keyValueStore.markOnboardingDone()
-                                identityRemote?.putOnboarding(
-                                    IdentityOnboarding(
-                                        uid = "",
-                                        role = UserRole.ATHLETE,
-                                        step = 5,
-                                        completed = true,
-                                        payload = org.json.JSONObject()
-                                            .put("sport", sport)
-                                            .put("goal", goal)
-                                            .toString(),
-                                    ),
-                                )
                                 onFinished()
+                                val remote = identityRemote ?: return@launch
+                                launch {
+                                    runCatching {
+                                        remote.putOnboarding(
+                                            IdentityOnboarding(
+                                                uid = "",
+                                                role = UserRole.ATHLETE,
+                                                step = 5,
+                                                completed = true,
+                                                payload = org.json.JSONObject()
+                                                    .put("sport", sport)
+                                                    .put("goal", goal)
+                                                    .toString(),
+                                            ),
+                                        )
+                                    }
+                                }
                             }
                         },
                     )

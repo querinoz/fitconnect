@@ -82,4 +82,26 @@ describe("require-auth production IDOR", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.response.status).toBe(401);
   });
+
+  it("rejects malformed bearer tokens", async () => {
+    const result = await requireAuth(
+      new Request("http://localhost/api/v1/identity/profile", {
+        headers: { Authorization: "Bearer not-a-jwt" }
+      })
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.response.status).toBe(401);
+  });
+
+  it("binds user.id to Firebase sub, not a local demo persona", async () => {
+    vi.mocked(lookupIdentityRole).mockResolvedValue("athlete");
+    const result = await requireAuth(authedRequest("firebase-uid-abc", "/api/v1/identity/profile"));
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.user.id).toBe("firebase-uid-abc");
+      expect(result.demo).toBe(false);
+      expect(result.user.id).not.toBe("demo-user");
+      expect(result.user.id).not.toMatch(/^a-ines/);
+    }
+  });
 });

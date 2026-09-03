@@ -84,25 +84,51 @@ export async function bootstrapIdentityProfile(input: {
 
   let row = existing as ProfileRow | null;
   if (!row) {
+    // Upsert: concurrent first-login must not create duplicate identities.
+    // PK on identity_profiles.id + RLS with_check(id = firebase_uid()).
     const { data, error } = await client
       .from("identity_profiles")
-      .insert({
-        id: input.uid,
-        email: input.email ?? null,
-        display_name: input.displayName ?? null,
-        avatar_url: input.avatarUrl ?? null,
-        locale: input.locale ?? null,
-        timezone: input.timezone ?? null,
-        accent: input.accent ?? null,
-        created_at: now,
-        updated_at: now
-      })
+      .upsert(
+        {
+          id: input.uid,
+          email: input.email ?? null,
+          display_name: input.displayName ?? null,
+          avatar_url: input.avatarUrl ?? null,
+          locale: input.locale ?? null,
+          timezone: input.timezone ?? null,
+          accent: input.accent ?? null,
+          created_at: now,
+          updated_at: now
+        },
+        { onConflict: "id", ignoreDuplicates: true }
+      )
       .select("*")
-      .single();
-    if (error || !data) {
-      return { profile: null, error: error?.message ?? "profile_insert_denied", status: 403 };
+      .maybeSingle();
+
+    if (error) {
+      // Race: another request inserted — re-read own row.
+      const { data: raced, error: raceErr } = await client
+        .from("identity_profiles")
+        .select("*")
+        .eq("id", input.uid)
+        .maybeSingle();
+      if (raceErr || !raced) {
+        return { profile: null, error: error.message ?? "profile_insert_denied", status: 403 };
+      }
+      row = raced as ProfileRow;
+    } else if (data) {
+      row = data as ProfileRow;
+    } else {
+      const { data: after, error: afterErr } = await client
+        .from("identity_profiles")
+        .select("*")
+        .eq("id", input.uid)
+        .maybeSingle();
+      if (afterErr || !after) {
+        return { profile: null, error: afterErr?.message ?? "profile_insert_denied", status: 403 };
+      }
+      row = after as ProfileRow;
     }
-    row = data as ProfileRow;
   }
 
   const role = await lookupIdentityRole(input.uid, input.accessToken);

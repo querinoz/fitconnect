@@ -109,16 +109,17 @@ export function CommandPalette({ role, open, onOpenChange }: CommandPaletteProps
       });
     }
 
-    const actions: CommandItem[] = [
-      {
+    const actions: CommandItem[] = [];
+    if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
+      actions.push({
         id: "demo",
         label: cp.openDemo,
         section: "actions",
         icon: PlayCircle,
         href: demoHref,
         keywords: ["demo", "panel", "widgets"]
-      }
-    ];
+      });
+    }
 
     return [...nav, ...actions];
   }, [cp, dashboardHref, demoHref, role]);

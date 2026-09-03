@@ -10,6 +10,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:auth-prod": "vitest run lib/auth lib/api/require-auth tests/auth tests/data/p1-data-contracts.test.ts",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:integration": "vitest run --config vitest.config.integration.ts",

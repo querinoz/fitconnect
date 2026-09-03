@@ -25,6 +25,23 @@ export function shouldEnforceFirebaseAuth(options: {
   return !options.demoMode && options.firebaseConfigured;
 }
 
+/**
+ * P1-AUTH fail-closed gate for HTML protected routes.
+ * - demo: open (explicit LOCAL_DEMO)
+ * - prod + Firebase configured: require session cookie shape
+ * - prod + Firebase missing: deny (do not leave dashboards open)
+ */
+export type ProtectedRouteGate = "open" | "require_firebase" | "auth_unavailable";
+
+export function resolveProtectedRouteGate(options: {
+  demoMode: boolean;
+  firebaseConfigured: boolean;
+}): ProtectedRouteGate {
+  if (options.demoMode) return "open";
+  if (!options.firebaseConfigured) return "auth_unavailable";
+  return "require_firebase";
+}
+
 /** @deprecated Identity is Firebase Auth. Kept for existing tests; use shouldEnforceFirebaseAuth. */
 export function shouldEnforceSupabaseAuth(options: {
   demoMode: boolean;

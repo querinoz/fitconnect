@@ -9,6 +9,7 @@ import type { UserRole } from "@/lib/auth";
 import { dashboardPathForRole, validateCredentials } from "@/lib/auth";
 import { persistClientAuthSession } from "@/lib/auth/complete-login";
 import { demoRoleForPath, isAthleteAppPath, isCoachAppPath } from "@/lib/auth/demo-path";
+import { isDemoModeEnv } from "@/lib/auth/middleware-auth";
 import { LiquidLoader } from "@/components/ui-glass/liquid-loader";
 import { VoltButton } from "@/components/ui-glass/volt-button";
 
@@ -32,6 +33,10 @@ function demoUserForPath(pathname: string, demoParam: string | null) {
   return null;
 }
 
+/**
+ * Client gate for app shells. Demo auto-login (?demo= / path demos) only when
+ * NEXT_PUBLIC_DEMO_MODE=true. With demo off, UI cannot invent authenticated users.
+ */
 export function AuthGate({ children, roles }: AuthGateProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -41,7 +46,7 @@ export function AuthGate({ children, roles }: AuthGateProps) {
   const [demoParam, setDemoParam] = useState<string | null>(null);
 
   const rolesKey = roles?.join(",") ?? "";
-  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+  const isDemoMode = isDemoModeEnv(process.env.NEXT_PUBLIC_DEMO_MODE);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -53,15 +58,14 @@ export function AuthGate({ children, roles }: AuthGateProps) {
     return () => window.clearTimeout(t);
   }, []);
 
-  // Auto-login demo coach/athlete — switch role when ?demo=coach|athlete or path implies role
+  // LOCAL_DEMO only — never honor ?demo= when production demo flag is off.
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !isDemoMode) return;
 
     const explicitDemo =
       demoParam === "1" || demoParam === "coach" || demoParam === "athlete";
     const pathDemo =
-      isDemoMode &&
-      (pathname.startsWith("/coach") || isCoachAppPath(pathname) || isAthleteDemoPath(pathname));
+      pathname.startsWith("/coach") || isCoachAppPath(pathname) || isAthleteDemoPath(pathname);
 
     if (!explicitDemo && !pathDemo) return;
 
@@ -80,15 +84,16 @@ export function AuthGate({ children, roles }: AuthGateProps) {
     if (!hydrated && !timedOut) return;
     if (!user) {
       const next = encodeURIComponent(pathname);
-      const demo =
-        isCoachAppPath(pathname)
+      const demoSuffix = isDemoMode
+        ? isCoachAppPath(pathname)
           ? "&demo=coach"
           : isAthleteDemoPath(pathname)
             ? "&demo=athlete"
-            : "";
-      router.replace(`/signin?next=${next}${demo}`);
+            : ""
+        : "";
+      router.replace(`/signin?next=${next}${demoSuffix}`);
     }
-  }, [hydrated, timedOut, user, router, pathname]);
+  }, [hydrated, timedOut, user, router, pathname, isDemoMode]);
 
   useEffect(() => {
     if (!hydrated || !user) return;
@@ -108,19 +113,29 @@ export function AuthGate({ children, roles }: AuthGateProps) {
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 text-center">
         <p className="text-lg font-semibold text-ink-100">Sign in required</p>
         <p className="max-w-sm text-sm text-ink-400">
-          Use demo credentials: Coach / Coach or Athlete / Athlete
+          {isDemoMode
+            ? "Use demo credentials: Coach / Coach or Athlete / Athlete"
+            : "Sign in with your FitConnect account to continue."}
         </p>
         <div className="flex flex-wrap justify-center gap-3">
-          <VoltButton asChild>
-            <Link href={`/signin?next=${encodeURIComponent(pathname)}&demo=coach`}>
-              Sign in as coach
-            </Link>
-          </VoltButton>
-          <VoltButton variant="ghost" asChild>
-            <Link href={`/signin?next=${encodeURIComponent(pathname)}&demo=athlete`}>
-              Sign in as athlete
-            </Link>
-          </VoltButton>
+          {isDemoMode ? (
+            <>
+              <VoltButton asChild>
+                <Link href={`/signin?next=${encodeURIComponent(pathname)}&demo=coach`}>
+                  Sign in as coach
+                </Link>
+              </VoltButton>
+              <VoltButton variant="ghost" asChild>
+                <Link href={`/signin?next=${encodeURIComponent(pathname)}&demo=athlete`}>
+                  Sign in as athlete
+                </Link>
+              </VoltButton>
+            </>
+          ) : (
+            <VoltButton asChild>
+              <Link href={`/signin?next=${encodeURIComponent(pathname)}`}>Sign in</Link>
+            </VoltButton>
+          )}
         </div>
       </div>
     );

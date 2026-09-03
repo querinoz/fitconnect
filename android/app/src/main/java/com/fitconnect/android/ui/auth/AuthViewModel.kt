@@ -20,6 +20,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * Android UI auth phases. Canonical cross-surface names live in
+ * [com.fitconnect.android.foundation.auth.CanonicalAuthState]:
+ * IDLE(no user)→SIGNED_OUT, AUTHENTICATING→AUTHENTICATING,
+ * SYNCHRONIZING→BOOTSTRAPPING, SUCCESS→READY, ERROR→AUTH_ERROR.
+ */
 enum class AuthPhase {
     IDLE,
     AUTHENTICATING,
@@ -85,7 +91,10 @@ class AuthViewModel(
         viewModelScope.launch {
             begin(AuthPhase.AUTHENTICATING)
             when (val result = auth.signUp(email, password, confirm)) {
-                is AppResult.Ok -> complete(result.value, fromEmail = true)
+                is AppResult.Ok -> {
+                    begin(AuthPhase.SYNCHRONIZING)
+                    complete(result.value, fromEmail = true)
+                }
                 is AppResult.Err -> fail(result.error)
             }
         }
@@ -139,7 +148,10 @@ class AuthViewModel(
         viewModelScope.launch {
             begin(AuthPhase.AUTHENTICATING)
             when (val result = auth.signIn(provider, credentials)) {
-                is AppResult.Ok -> complete(result.value, fromEmail = provider == AuthProviderKind.EMAIL_PASSWORD)
+                is AppResult.Ok -> {
+                    begin(AuthPhase.SYNCHRONIZING)
+                    complete(result.value, fromEmail = provider == AuthProviderKind.EMAIL_PASSWORD)
+                }
                 is AppResult.Err -> fail(result.error)
             }
         }

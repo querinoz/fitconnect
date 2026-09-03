@@ -63,6 +63,15 @@ function base64UrlToJson(segment: string): Record<string, unknown> {
   >;
 }
 
+function toBufferSource(bytes: Uint8Array): BufferSource {
+  if (typeof Buffer !== "undefined") {
+    return Buffer.from(bytes);
+  }
+  const copy = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(copy).set(bytes);
+  return copy;
+}
+
 function maxAgeSeconds(cacheControl: string | null): number {
   if (!cacheControl) return 0;
   const match = /max-age\s*=\s*(\d+)/i.exec(cacheControl);
@@ -160,12 +169,12 @@ export async function verifyFirebaseIdToken(
     if (!key) return null;
 
     const signed = new TextEncoder().encode(`${parts[0]}.${parts[1]}`);
-    const signature = base64UrlToArrayBuffer(parts[2]!);
+    const signature = toBufferSource(base64UrlToBytes(parts[2]!));
     const signatureValid = await crypto.subtle.verify(
       { name: "RSASSA-PKCS1-v1_5" },
       key,
       signature,
-      signed
+      toBufferSource(signed)
     );
     if (!signatureValid) return null;
 

@@ -3,7 +3,7 @@ import { STORAGE_KEY } from "@/lib/i18n/server";
 import { SUPPORTED_LANGS, type Lang } from "@/lib/i18n";
 import {
   isDemoModeEnv,
-  shouldEnforceFirebaseAuth,
+  resolveProtectedRouteGate,
   hasFirebaseSessionCookie,
   isProtectedPath,
 } from "@/lib/auth/middleware-auth";
@@ -34,9 +34,17 @@ export async function middleware(request: NextRequest) {
 
   const demoMode = isDemoModeEnv(process.env.NEXT_PUBLIC_DEMO_MODE);
   const firebaseConfigured = isFirebaseWebConfigured();
+  const gate = resolveProtectedRouteGate({ demoMode, firebaseConfigured });
 
-  if (!shouldEnforceFirebaseAuth({ demoMode, firebaseConfigured })) {
+  if (gate === "open") {
     return NextResponse.next();
+  }
+
+  if (gate === "auth_unavailable") {
+    const signIn = new URL("/signin", request.url);
+    signIn.searchParams.set("next", pathname);
+    signIn.searchParams.set("error", "auth_not_configured");
+    return NextResponse.redirect(signIn);
   }
 
   const firebaseCookie = request.cookies.get(FIREBASE_ID_COOKIE)?.value;
@@ -44,12 +52,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // SECURITY: the demo-session cookie is NOT an authentication factor. We only
-  // reach this point when shouldEnforceFirebaseAuth() is true, i.e. demo mode
-  // is OFF and Firebase is configured -- so honouring it here let anyone set
-  // `fc-demo-session=user-x` in the browser and walk into every protected page.
-  // Demo deployments skip this whole block at the shouldEnforceFirebaseAuth
-  // check above.
+  // SECURITY: demo-session cookie is NOT an auth factor when Firebase gate is on.
   const signIn = new URL("/signin", request.url);
   signIn.searchParams.set("next", pathname);
   return NextResponse.redirect(signIn);

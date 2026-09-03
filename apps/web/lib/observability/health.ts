@@ -1,3 +1,5 @@
+import { isFirebaseWebConfigured } from "@/lib/firebase/config";
+
 export type HealthDependency = {
   name: string;
   status: "ok" | "degraded" | "down";
@@ -20,13 +22,17 @@ export function buildHealthReport(env: NodeJS.ProcessEnv = process.env): HealthR
   const deps: HealthDependency[] = [];
 
   const demoMode = env.NEXT_PUBLIC_DEMO_MODE === "true";
-  const supabaseReady =
-    configured(env, "NEXT_PUBLIC_SUPABASE_URL") && configured(env, "NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  const firebaseReady = isFirebaseWebConfigured(env);
 
+  // Auth authority is Firebase IdP — not Supabase Auth.
   deps.push({
     name: "auth",
-    status: demoMode ? "ok" : supabaseReady ? "ok" : "degraded",
-    detail: demoMode ? "demo mode" : supabaseReady ? "supabase" : "missing supabase keys"
+    status: demoMode ? "ok" : firebaseReady ? "ok" : "down",
+    detail: demoMode
+      ? "demo mode (LOCAL_DEMO)"
+      : firebaseReady
+        ? "firebase idp"
+        : "AUTH_UNAVAILABLE — firebase web config missing"
   });
 
   deps.push({
@@ -76,21 +82,25 @@ export function buildHealthReport(env: NodeJS.ProcessEnv = process.env): HealthR
 
   deps.push({
     name: "firebase",
-    status: configured(env, "NEXT_PUBLIC_FIREBASE_API_KEY") &&
-      configured(env, "NEXT_PUBLIC_FIREBASE_PROJECT_ID") &&
-      configured(env, "NEXT_PUBLIC_FIREBASE_APP_ID")
-      ? "ok"
-      : "degraded",
-    detail:
-      configured(env, "NEXT_PUBLIC_FIREBASE_APP_ID")
-        ? [
-            "web sdk",
-            configured(env, "NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY") ? "app check" : null,
-            configured(env, "NEXT_PUBLIC_FIREBASE_VAPID_KEY") ? "fcm" : null
-          ]
-            .filter(Boolean)
-            .join(" + ")
-        : "not configured"
+    status: firebaseReady ? "ok" : "down",
+    detail: firebaseReady
+      ? [
+          "web sdk",
+          configured(env, "NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY") ? "app check" : null,
+          configured(env, "NEXT_PUBLIC_FIREBASE_VAPID_KEY") ? "fcm" : null
+        ]
+          .filter(Boolean)
+          .join(" + ")
+      : "not configured"
+  });
+
+  deps.push({
+    name: "supabase_data",
+    status:
+      configured(env, "NEXT_PUBLIC_SUPABASE_URL") && configured(env, "NEXT_PUBLIC_SUPABASE_ANON_KEY")
+        ? "ok"
+        : "degraded",
+    detail: "DATABASE / RLS plane — not IdP"
   });
 
   deps.push({
@@ -99,10 +109,11 @@ export function buildHealthReport(env: NodeJS.ProcessEnv = process.env): HealthR
     detail: resolveRealtimeDetail(env)
   });
 
+  const hasDown = !demoMode && deps.some((d) => d.status === "down");
   const hasDegraded = !demoMode && deps.some((d) => d.status !== "ok");
 
   return {
-    status: hasDegraded ? "degraded" : "ok",
+    status: hasDown || hasDegraded ? "degraded" : "ok",
     timestamp: new Date().toISOString(),
     version: env.npm_package_version ?? "0.1.0",
     dependencies: deps
@@ -115,7 +126,7 @@ function resolveRealtimeDetail(env: NodeJS.ProcessEnv): string {
     return "convex";
   }
   if (provider === "supabase" && env.NEXT_PUBLIC_SUPABASE_URL) {
-    return "supabase realtime";
+    return "supabase realtime (NOT authority)";
   }
   return "broadcast channel (demo)";
 }

@@ -61,7 +61,7 @@ class AndroidFirebaseAuthGateway(
 
     override suspend fun current(): AppResult<IdentitySnapshot?> {
         val user = auth.currentUser ?: return AppResult.Ok(null)
-        return snapshot(user)
+        return snapshot(user, forceRefresh = false)
     }
 
     override suspend fun getIdToken(forceRefresh: Boolean): AppResult<String> {
@@ -101,7 +101,7 @@ class AndroidFirebaseAuthGateway(
     private suspend fun runFirebase(block: suspend () -> FirebaseUser?): AppResult<IdentitySnapshot> =
         runCatching {
             val user = block() ?: throw MissingUser()
-            snapshot(user)
+            snapshot(user, forceRefresh = true)
         }.getOrElse { mapFirebase(it) }
 
     private suspend fun runFirebaseUnit(block: suspend () -> Unit): AppResult<Unit> =
@@ -110,8 +110,8 @@ class AndroidFirebaseAuthGateway(
             AppResult.Ok(Unit)
         }.getOrElse { mapFirebase(it) }
 
-    private suspend fun snapshot(user: FirebaseUser): AppResult<IdentitySnapshot> {
-        val token = user.getIdToken(false).await().token
+    private suspend fun snapshot(user: FirebaseUser, forceRefresh: Boolean): AppResult<IdentitySnapshot> {
+        val token = user.getIdToken(forceRefresh).await().token
             ?: return AuthErrorMapper.err(AppError.AuthKind.SESSION_EXPIRED)
         return AppResult.Ok(
             IdentitySnapshot(

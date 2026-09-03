@@ -124,6 +124,19 @@ class FirebaseAuthRepositoryTest {
     }
 
     @Test
+    fun tokenRefreshFailureDoesNotInventSession() = runBlocking {
+        val gateway = FakeFirebaseAuthGateway(failIdToken = true)
+        val session = SecureSessionStore(InMemorySecureStore())
+        val repo = FirebaseAuthRepository(gateway, session, logger)
+        repo.signUp("a@b.com", "password1", "password1")
+        val refreshed = repo.refresh()
+        assertEquals(
+            AppError.AuthKind.REFRESH_FAILED,
+            ((refreshed as AppResult.Err).error as AppError.Auth).kind,
+        )
+    }
+
+    @Test
     fun sessionRestoreUsesFirebaseUid() = runBlocking {
         val gateway = FakeFirebaseAuthGateway()
         val session = SecureSessionStore(InMemorySecureStore())
@@ -283,6 +296,7 @@ private class FakeFederatedHost(
 private class FakeFirebaseAuthGateway(
     override val isAvailable: Boolean = true,
     private val rejectLink: Boolean = false,
+    private val failIdToken: Boolean = false,
 ) : FirebaseAuthGateway {
     var lastUid: String = "uid-1"
     var verified: Boolean = false
@@ -324,7 +338,9 @@ private class FakeFirebaseAuthGateway(
     override suspend fun current(): AppResult<IdentitySnapshot?> =
         if (currentEmail == null && providers.isEmpty()) AppResult.Ok(null) else snapshot()
 
-    override suspend fun getIdToken(forceRefresh: Boolean): AppResult<String> = AppResult.Ok("id-token")
+    override suspend fun getIdToken(forceRefresh: Boolean): AppResult<String> =
+        if (failIdToken) AuthErrorMapper.err(AppError.AuthKind.REFRESH_FAILED)
+        else AppResult.Ok("id-token")
 
     override suspend fun linkEmail(email: String, password: String): AppResult<IdentitySnapshot> {
         providers.add(AuthProviderKind.EMAIL_PASSWORD)

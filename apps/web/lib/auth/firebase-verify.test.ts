@@ -15,6 +15,11 @@ const PROJECT_ID = "fitconnect-test";
 const KID = "test-key-1";
 
 vi.stubGlobal("crypto", webcrypto);
+Object.defineProperty(globalThis, "crypto", {
+  value: webcrypto,
+  configurable: true,
+  writable: true
+});
 
 function b64u(input: string | Uint8Array): string {
   const bytes = typeof input === "string" ? new TextEncoder().encode(input) : input;
@@ -65,15 +70,22 @@ function validClaims(overrides: Record<string, unknown> = {}) {
 /** Serve the public half of `keyPair` as Google's JWKS would. */
 async function stubJwks(publicKey: CryptoKey, kid = KID) {
   const jwk = await webcrypto.subtle.exportKey("jwk", publicKey);
-  vi.stubGlobal(
-    "fetch",
-    vi.fn(async () =>
-      new Response(JSON.stringify({ keys: [{ ...jwk, kid, alg: "RS256", use: "sig" }] }), {
-        status: 200,
-        headers: { "cache-control": "public, max-age=3600" }
-      })
-    )
+  const published = {
+    kty: jwk.kty,
+    n: jwk.n,
+    e: jwk.e,
+    kid,
+    alg: "RS256",
+    use: "sig"
+  };
+  const fetchMock = vi.fn(async () =>
+    new Response(JSON.stringify({ keys: [published] }), {
+      status: 200,
+      headers: { "cache-control": "public, max-age=3600" }
+    })
   );
+  vi.stubGlobal("fetch", fetchMock);
+  globalThis.fetch = fetchMock as unknown as typeof fetch;
 }
 
 let keyPair: CryptoKeyPair;
@@ -164,7 +176,9 @@ describe("verifyFirebaseIdToken", () => {
   });
 
   it("returns null instead of throwing when the JWKS endpoint fails", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => new Response("nope", { status: 503 })));
+    const fetchMock = vi.fn(async () => new Response("nope", { status: 503 }));
+    vi.stubGlobal("fetch", fetchMock);
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
     __resetFirebaseKeyCacheForTests();
     const token = await sign(keyPair.privateKey, { alg: "RS256", kid: KID, typ: "JWT" }, validClaims());
     expect(await verifyFirebaseIdToken(token, { projectId: PROJECT_ID })).toBeNull();

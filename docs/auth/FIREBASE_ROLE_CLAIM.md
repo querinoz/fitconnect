@@ -1,9 +1,9 @@
 # Firebase `role: authenticated` claim (Supabase bridge)
 
-**Project:** `fitconnect-5d2ba`  
-**Supabase:** Third-Party Firebase Auth **ENABLED**  
-**Billing:** Blaze (`billingEnabled: true`, account `015969-A071A4-798EF1`)  
-**Identity Platform:** enabled — blocking functions registered in Console
+**Project:** `fitconnect-5d2ba`
+**Supabase:** Third-Party Firebase Auth **ENABLED**
+**Billing:** Blaze (`billingEnabled: true`, account `015969-A071A4-798EF1`)
+**Identity Platform:** enabled â€” blocking functions registered in Console
 
 Supabase Data API requires every Firebase ID token to include:
 
@@ -13,15 +13,49 @@ Supabase Data API requires every Firebase ID token to include:
 
 Without it, PostgREST assigns `anon` and RLS denies access (401/403).
 
-## Status (2026-08-31 — certified)
+## Status (2026-08-31 â€” certified)
 
 | Check | Status |
 | --- | --- |
 | `functions/` build (`npm run build`) | **PASS** |
-| Deploy (`beforecreated`, `beforesignedin`, `processSignUp`) | **PASS** — all **us-central1** |
-| Console → Blocking functions | **PASS** — `beforecreated` + `beforesignedin` registered |
-| `pnpm p1-auth:bridge` | **PASS** — `JWT_ROLE=authenticated`, `SUPABASE_REST_STATUS=200` |
-| `pnpm p1-auth:backfill` | **PASS** — ADC, existing users updated |
+| Deploy (`beforecreated`, `beforesignedin`, `processSignUp`) | **PASS** â€” all **us-central1** |
+| Console â†’ Blocking functions | **PASS** â€” `beforecreated` + `beforesignedin` registered |
+| `pnpm p1-auth:bridge` | **PASS** â€” `JWT_ROLE=authenticated`, `SUPABASE_REST_STATUS=200` |
+| `pnpm p1-auth:backfill` | **PASS** â€” ADC, existing users updated |
+| Android in-app session (`P1AuthSessionInstrumentationTest`) | **PASS** â€” email/password sign-in â†’ logout â†’ relogin, same Firebase UID (2/2 runs, emulator API 37) |
+
+### Android in-app session (email/password only)
+
+**Test class:** `android/app/src/androidTest/java/com/fitconnect/android/auth/P1AuthSessionInstrumentationTest.kt`
+
+**Account:** `p1auth.instrumentation@fitconnect-qa.invalid` (synthetic `@fitconnect-qa.invalid`, provisioned via Admin SDK â€” not Google Auth)
+
+**Environment:** real Firebase project `fitconnect-5d2ba` (no Auth emulator; no test flavor). Run against emulator with Play Services.
+
+**Prerequisites:**
+
+```powershell
+pnpm p1-auth:provision-android-user
+adb -s emulator-5554 shell pm clear com.fitconnect.android   # before suite; do NOT run inside test
+```
+
+**Run:**
+
+```powershell
+cd D:\fitconnect\android
+$env:ANDROID_SERIAL = "emulator-5554"
+.\gradlew.bat :app:connectedDebugAndroidTest
+```
+
+**Certifies:** guest â†’ email/password sign-in â†’ role select â†’ athlete onboarding â†’ Athlete OS (`athlete_os`) â†’ Profile sign-out â†’ guest â†’ relogin with **same** `SessionStore.userId` (Firebase UID).
+
+**Not certified here:** Google Sign-In on emulator (external blocker), Firebase Auth emulator, MIUI physical install restrictions.
+
+**Production bugs fixed during certification (not `AndroidFirebaseAuthGateway`):**
+
+1. `OnboardingScreen` â€” local-first `onFinished()` before remote `putOnboarding`; non-blocking identity sync on step advances.
+2. `ProfileScreen` â€” sign-out delegates to `LocalAthleteSignOut` (removed duplicate logout that resumed on DataStore thread).
+3. `FitConnectNavHost.navigateGuarded` â€” navigation forced onto `Dispatchers.Main.immediate` after suspend auth/storage work.
 
 ---
 
@@ -49,7 +83,7 @@ node -v             # v20.19.0
 cd functions && npm install && npm run build
 ```
 
-### 3. Audience mismatch on Gen2 blocking functions (us-east1 → us-central1 + SDK bump)
+### 3. Audience mismatch on Gen2 blocking functions (us-east1 â†’ us-central1 + SDK bump)
 
 **Symptom:** sign-up returns 503 / Error 47. Function logs:
 
@@ -76,7 +110,7 @@ Expected "run.app" but got "https://us-east1-fitconnect-5d2ba.cloudfunctions.net
    npx firebase-tools deploy --only functions --project fitconnect-5d2ba
    ```
 
-2. Bump `firebase-functions` **^6.4.0 → ^7.2.2** — accepts both `run.app` and `cloudfunctions.net` audiences ([firebase-tools#9997](https://github.com/firebase/firebase-tools/issues/9997)). Without this bump, nobody reconstructs the fix in six months.
+2. Bump `firebase-functions` **^6.4.0 â†’ ^7.2.2** â€” accepts both `run.app` and `cloudfunctions.net` audiences ([firebase-tools#9997](https://github.com/firebase/firebase-tools/issues/9997)). Without this bump, nobody reconstructs the fix in six months.
 
 **Orphan cost:** failed us-east1 deploy left a `gcf-artifacts` repo in us-east1 (~87 MB). Safe to delete after human approval (no functions remain in us-east1):
 
@@ -110,6 +144,7 @@ Requires ADC principal with **Firebase Authentication Admin** (`roles/firebaseau
 | `scripts/p1-auth-firebase-role-backfill.mjs` | Admin SDK claim backfill (ADC or SA JSON) |
 | `scripts/p1-auth-live-bridge-check.mjs` | Live probe; auto-deletes `@fitconnect-qa.invalid` unless `P1_AUTH_KEEP_TEST_USER=1` |
 | `scripts/p1-auth-cleanup-test-users.mjs` | Dry-run list / `--confirm` bulk delete of synthetic accounts |
+| `scripts/p1-auth-provision-android-test-user.mjs` | Verified `@fitconnect-qa.invalid` user for Android instrumentation |
 
 **API versions:**
 
@@ -117,7 +152,7 @@ Requires ADC principal with **Firebase Authentication Admin** (`roles/firebaseau
 | --- | --- | --- |
 | `beforecreated` | v2 `firebase-functions/v2/identity` | Yes (blocking `beforeCreate`) |
 | `beforesignedin` | v2 | Yes (blocking `beforeSignIn`) |
-| `processSignUp` | v1 `auth.user().onCreate` | No — classic Auth trigger (async fallback) |
+| `processSignUp` | v1 `auth.user().onCreate` | No â€” classic Auth trigger (async fallback) |
 
 Client force-refresh after auth:
 
@@ -128,7 +163,7 @@ Client force-refresh after auth:
 
 ## Prerequisites (human gates)
 
-### GATE 1 — Node 20
+### GATE 1 â€” Node 20
 
 ```powershell
 nvm install 20 && nvm use 20
@@ -137,7 +172,7 @@ cd D:\fitconnect\functions
 npm install && npm run build
 ```
 
-### GATE 2 — gcloud + Firebase CLI auth
+### GATE 2 â€” gcloud + Firebase CLI auth
 
 ```powershell
 gcloud auth login
@@ -145,16 +180,16 @@ gcloud config set project fitconnect-5d2ba
 npx firebase-tools login
 ```
 
-### GATE 3 — Enable APIs
+### GATE 3 â€” Enable APIs
 
 ```powershell
 gcloud services enable cloudfunctions.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com eventarc.googleapis.com run.googleapis.com pubsub.googleapis.com logging.googleapis.com --project=fitconnect-5d2ba
 gcloud services list --enabled --project=fitconnect-5d2ba --filter="name:identitytoolkit"
 ```
 
-### GATE 4 — Identity Platform
+### GATE 4 â€” Identity Platform
 
-Firebase Console → Authentication → Settings → Identity Platform enabled.  
+Firebase Console â†’ Authentication â†’ Settings â†’ Identity Platform enabled.
 Blocking functions panel must show `beforecreated(us-central1)` and `beforesignedin(us-central1)`.
 
 ---
@@ -221,7 +256,7 @@ Keep synthetic account for debugging: `P1_AUTH_KEEP_TEST_USER=1 pnpm p1-auth:bri
 Bridge auto-deletes `@fitconnect-qa.invalid` accounts it creates. For bulk cleanup of accumulated accounts:
 
 ```powershell
-pnpm p1-auth:cleanup-test-users          # dry-run — lists accounts, no deletes
+pnpm p1-auth:cleanup-test-users          # dry-run â€” lists accounts, no deletes
 pnpm p1-auth:cleanup-test-users --confirm   # deletes after human reviews dry-run list
 ```
 

@@ -3,7 +3,9 @@ import {
   isDemoModeEnv,
   isSupabaseConfiguredEnv,
   shouldEnforceSupabaseAuth,
+  resolveProtectedRouteGate,
   hasValidDemoSessionCookie,
+  hasFirebaseSessionCookie,
   isProtectedPath,
 } from "./middleware-auth";
 
@@ -35,6 +37,16 @@ describe("middleware auth policy", () => {
     ).toBe(false);
   });
 
+  it("fail-closes HTML dashboards when Firebase is missing and demo is off", () => {
+    expect(resolveProtectedRouteGate({ demoMode: false, firebaseConfigured: false })).toBe(
+      "auth_unavailable"
+    );
+    expect(resolveProtectedRouteGate({ demoMode: false, firebaseConfigured: true })).toBe(
+      "require_firebase"
+    );
+    expect(resolveProtectedRouteGate({ demoMode: true, firebaseConfigured: false })).toBe("open");
+  });
+
   it("detects Supabase env configuration", () => {
     expect(isSupabaseConfiguredEnv("https://x.supabase.co", "anon-key")).toBe(true);
     expect(isSupabaseConfiguredEnv(undefined, "anon-key")).toBe(false);
@@ -53,5 +65,16 @@ describe("middleware auth policy", () => {
     expect(isProtectedPath("/insights/export")).toBe(true);
     expect(isProtectedPath("/dashboard")).toBe(true);
     expect(isProtectedPath("/")).toBe(false);
+  });
+});
+
+describe("Firebase session cookie shape", () => {
+  it("accepts three-segment JWT-shaped cookies only", () => {
+    expect(hasFirebaseSessionCookie("aaa.bbb.ccc")).toBe(true);
+    expect(hasFirebaseSessionCookie("not-a-jwt")).toBe(false);
+    expect(hasFirebaseSessionCookie("only.two")).toBe(false);
+    expect(hasFirebaseSessionCookie("")).toBe(false);
+    expect(hasFirebaseSessionCookie(undefined)).toBe(false);
+    expect(hasFirebaseSessionCookie("demo-session")).toBe(false);
   });
 });
