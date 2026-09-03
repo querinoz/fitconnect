@@ -52,3 +52,4 @@ export function clamp(value: number, min: number, max: number) {
 }
 
 export * from "./readiness";
+export { computeProgressionTarget, estimateOneRepMax } from "./strength/progression";

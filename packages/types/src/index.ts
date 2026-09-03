@@ -31,6 +31,25 @@ export type {
 export { ACTIVITY_UNITS, READINESS_UNITS, kjToKcal, kcalToKj } from "./canonical";
 
 export type {
+  ExerciseMode,
+  ProgressionRule,
+  ProgressionState,
+  SideMode,
+  SetType,
+  EffortScale,
+  StrengthSessionStatus,
+  CanonicalExercise,
+  CanonicalWorkoutSet,
+  CanonicalStrengthSession,
+  PreviousSetPerformance,
+  ProgressionInput,
+  ProgressionTarget,
+  OneRepMaxEstimate
+} from "./strength";
+
+export { STRENGTH_SCHEMA_VERSION, EXPORT_SCHEMA_VERSION } from "./strength";
+
+export type {
   StravaSportType,
   StravaLegacyActivityType,
   StravaSummaryActivity,
