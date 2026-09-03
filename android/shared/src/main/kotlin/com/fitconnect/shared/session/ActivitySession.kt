@@ -25,6 +25,11 @@ enum class ActivitySessionEvent {
     RESET,
 }
 
+/**
+ * Live session lease identity. When the workout is completed and synced,
+ * [sessionId] must become (or already be) the canonical `activities.id` UUID
+ * so Wear / phone / Web / ASCEND refer to the same activity.
+ */
 data class ActivitySession(
     val sessionId: String,
     val state: ActivitySessionState = ActivitySessionState.IDLE,

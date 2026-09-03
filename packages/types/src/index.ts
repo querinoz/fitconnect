@@ -13,6 +13,24 @@ export type {
 } from "./domain";
 
 export type {
+  CanonicalRole,
+  ActivityVisibility,
+  CanonicalSport,
+  CanonicalActivity,
+  CanonicalIdentityKeys,
+  CanonicalIdentityProfile,
+  CanonicalXpEvent,
+  CanonicalBadgeDefinition,
+  CanonicalUserBadge,
+  CanonicalReadinessSnapshot,
+  CanonicalNotification,
+  CanonicalDomainEventName,
+  CanonicalDomainEvent
+} from "./canonical";
+
+export { ACTIVITY_UNITS, READINESS_UNITS, kjToKcal, kcalToKj } from "./canonical";
+
+export type {
   StravaSportType,
   StravaLegacyActivityType,
   StravaSummaryActivity,

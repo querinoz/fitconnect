@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * LOCAL_DEMO / UI-only gamification store.
+ * Canonical XP persistence is public.ascend_events + ascend_progress (P1-DATA).
+ * Production progression must go through lib/progression/* — not this Zustand store.
+ * Client dual consolidation is P4-ASCEND; do not treat this file as source of truth.
+ */
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import {

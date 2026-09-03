@@ -123,6 +123,8 @@ export async function applyProgressionEventInSupabase(
       user_id: userId,
       event_type: event.type,
       xp_awarded: awardedXp,
+      source_type: event.payload?.sessionId ? "activity" : event.type,
+      source_id: event.payload?.sessionId ?? event.eventId,
       payload: event.payload ?? {}
     });
     await client.from("ascend_progress").upsert({
@@ -134,9 +136,18 @@ export async function applyProgressionEventInSupabase(
     });
   } else {
     await pgQuery(
-      `insert into public.ascend_events (event_id, user_id, event_type, xp_awarded, payload)
-       values ($1, $2, $3, $4, $5::jsonb)`,
-      [event.eventId, userId, event.type, awardedXp, JSON.stringify(event.payload ?? {})]
+      `insert into public.ascend_events
+         (event_id, user_id, event_type, xp_awarded, source_type, source_id, payload)
+       values ($1, $2, $3, $4, $5, $6, $7::jsonb)`,
+      [
+        event.eventId,
+        userId,
+        event.type,
+        awardedXp,
+        event.payload?.sessionId ? "activity" : event.type,
+        event.payload?.sessionId ?? event.eventId,
+        JSON.stringify(event.payload ?? {})
+      ]
     );
     await pgQuery(
       `insert into public.ascend_progress (user_id, total_xp, streak_days, badges, updated_at)

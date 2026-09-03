@@ -4,6 +4,10 @@ out/
 build/
 dist/
 .env*.local
+.env.vercel
+**/.env.vercel
+.env.local.backup-*
+**/.env.local.backup-*
 .firebase/
 users.json
 .vercel
@@ -71,4 +75,7 @@ qa/reports/*-selftest.json
 # Binary packages accidentally dropped at repo root
 /*.apk
 /*.aab
+/fitconnectinstagramkit/
+/fitconnectinstagramkit.zip
+/fitconnectinstagram18posts.zip
 

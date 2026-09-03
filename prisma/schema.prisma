@@ -1,3 +1,10 @@
+// P1-DATA privilege boundary:
+// - Product identity / activities / ASCEND / social / squad: Supabase SQL + RLS
+//   (identity_profiles, activities, ascend_*, community_*, squad_*).
+// - Prisma models below are privileged server/admin mappers (cuid User, Strava*,
+//   coaching Session). They MUST NOT authorize mobile/web user-scoped reads.
+// - Do not invent a second User identity for Firebase — use identity_profiles.id.
+
 generator client {
   provider = "prisma-client-js"
 }

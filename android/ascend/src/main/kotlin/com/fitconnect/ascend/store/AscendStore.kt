@@ -14,6 +14,11 @@ interface AscendStore {
     fun drainQueue(userId: String): List<StoredEvent>
 }
 
+/**
+ * LOCAL_DEMO / in-process adapter. Canonical XP persistence is
+ * public.ascend_events + public.ascend_progress (Postgres).
+ * Pending removal as a write path after P4-ASCEND.
+ */
 class InMemoryAscendStore : AscendStore {
     private val log = LinkedHashMap<String, MutableList<StoredEvent>>()
     private val seen = HashSet<String>()

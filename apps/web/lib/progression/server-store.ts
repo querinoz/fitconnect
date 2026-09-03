@@ -1,5 +1,12 @@
 import { resolveCanonicalLevel } from "@/lib/ascend/canonical-levels";
 
+/**
+ * IN_MEMORY_DEMO adapter — process-local Map.
+ * Canonical activity-derived XP write/read path is
+ * `apps/web/lib/progression/supabase-repository.ts` → public.ascend_events / ascend_progress.
+ * Do not use this store as production SoT. Pending removal after P4-ASCEND.
+ */
+
 export type ProgressionEventType = "WORKOUT_COMPLETED" | "MISSION_COMPLETED";
 
 export type ProgressionEvent = {
@@ -10,6 +17,8 @@ export type ProgressionEvent = {
     distanceM?: number;
     durationMs?: number;
     elevationGainM?: number;
+    /** Canonical activities.id when awarding from a workout */
+    sessionId?: string;
   };
 };
 
