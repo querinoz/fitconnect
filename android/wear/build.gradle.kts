@@ -23,7 +23,7 @@ val wearReleaseSigningReady = keystorePropsFile.exists().also { exists ->
 
 android {
     namespace = "com.fitconnect.android.wear"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.fitconnect.android.wear"

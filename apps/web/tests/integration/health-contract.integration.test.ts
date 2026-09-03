@@ -32,12 +32,19 @@ describe("health API contract", () => {
     const report = buildHealthReport(
       buildProductionEnv({
         NEXT_PUBLIC_SUPABASE_URL: undefined,
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: undefined
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: undefined,
+        NEXT_PUBLIC_FIREBASE_API_KEY: "AIzaSyTest",
+        NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "fitconnect.firebaseapp.com",
+        NEXT_PUBLIC_FIREBASE_PROJECT_ID: "fitconnect",
+        NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "fitconnect.appspot.com",
+        NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "123",
+        NEXT_PUBLIC_FIREBASE_APP_ID: "1:123:web:abc"
       })
     );
     assertHealthContract(report);
     expect(report.status).toBe("degraded");
-    expect(report.dependencies.find((d) => d.name === "auth")?.status).toBe("degraded");
+    expect(report.dependencies.find((d) => d.name === "auth")?.status).toBe("ok");
+    expect(report.dependencies.find((d) => d.name === "supabase_data")?.status).toBe("degraded");
   });
 
   it("should_flag_placeholder_env_values_as_not_configured", () => {

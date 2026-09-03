@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.fitconnect.android.coach"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 26
