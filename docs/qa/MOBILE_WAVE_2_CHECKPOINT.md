@@ -1,10 +1,11 @@
 # Mobile Wave 2 Checkpoint
 
-**Status:** COMMITTED + PUSH PENDING (this file records post-commit state before push verification)
+**Status:** COMMITTED + PUSHED
 
 ## Commit
 
-`c96b956` — `feat(mobile): complete wave 1-2 functional implementation checkpoint`
+Feature commit: `c96b956` — `feat(mobile): complete wave 1-2 functional implementation checkpoint`  
+Docs commit (HEAD): `7ce5fce` — `docs(qa): record wave 2 release checkpoint`
 
 ## Branch
 
@@ -12,7 +13,8 @@
 
 ## Remote
 
-`origin` → `https://github.com/querinoz/fitconnect.git`
+`origin` → `https://github.com/querinoz/fitconnect.git`  
+Local HEAD = `origin/feat/elite-os-v2` = `7ce5fce`
 
 ## Working Tree
 
