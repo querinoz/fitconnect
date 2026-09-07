@@ -34,6 +34,7 @@
     "@fitconnect/utils": "workspace:*",
     "@gsap/react": "^2.1.2",
     "@livekit/components-react": "^2.9.21",
+    "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.8.0",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.2",

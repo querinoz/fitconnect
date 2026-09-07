@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { execSync } from "node:child_process";
 import path from "node:path";
+import pg from "pg";
 
 export type TestPrisma = PrismaClient;
 
@@ -29,11 +31,9 @@ const TRUNCATE_TABLES = [
 ] as const;
 
 export function createTestPrisma(databaseUrl: string): TestPrisma {
-  const previous = process.env.DATABASE_URL;
-  process.env.DATABASE_URL = databaseUrl;
-  const client = new PrismaClient();
-  if (previous) process.env.DATABASE_URL = previous;
-  return client;
+  const pool = new pg.Pool({ connectionString: databaseUrl });
+  const adapter = new PrismaPg(pool);
+  return new PrismaClient({ adapter });
 }
 
 export async function cleanDb(prisma: TestPrisma): Promise<void> {
