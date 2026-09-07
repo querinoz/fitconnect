@@ -15,7 +15,7 @@ export default defineConfig({
     environment: "node",
     globals: true,
     globalSetup: ["./vitest.setup.db.ts"],
-    setupFiles: ["./tests/setup/vitest.setup.ts"],
+    setupFiles: ["./tests/setup/vitest.setup.integration.ts"],
     include: ["tests/**/*.integration.test.ts", "tests/integration/**/*.integration.test.ts"],
     exclude: ["node_modules", ".next", "tests/e2e/**"],
     pool: "forks",

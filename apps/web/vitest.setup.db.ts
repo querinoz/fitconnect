@@ -27,6 +27,16 @@ async function startWithRetry(maxAttempts = 3): Promise<StartedPostgreSqlContain
 }
 
 export default async function globalSetup() {
+  // GitHub Actions already migrated the service Postgres — reuse it.
+  if (process.env.CI === "true" && process.env.DATABASE_URL?.trim()) {
+    const url = process.env.DATABASE_URL.trim();
+    const direct = process.env.DIRECT_URL?.trim() || url;
+    writeFileSync(ENV_FILE, JSON.stringify({ DATABASE_URL: url, DIRECT_URL: direct }));
+    return async () => {
+      if (existsSync(ENV_FILE)) unlinkSync(ENV_FILE);
+    };
+  }
+
   const container = await startWithRetry();
   const url = container.getConnectionUri();
 
