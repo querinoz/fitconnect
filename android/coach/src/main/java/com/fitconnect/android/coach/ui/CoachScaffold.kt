@@ -24,8 +24,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +46,7 @@ import com.fitconnect.android.designui.components.EliteFloatingNavBar
 import com.fitconnect.android.designui.components.EliteNavItem
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.toColor
+import kotlinx.coroutines.delay
 
 val LocalCoachContainer = staticCompositionLocalOf<CoachContainer> {
     error("CoachContainer not provided")
@@ -60,6 +65,17 @@ fun CoachOsApp(
     val backStack by navController.currentBackStackEntryAsState()
     val current = backStack?.destination?.route
     val online by container.platform.connectivity.online.collectAsState()
+    var pendingOffline by remember { mutableStateOf(0) }
+    LaunchedEffect(online) {
+        if (online) {
+            pendingOffline = 0
+        } else {
+            while (true) {
+                pendingOffline = container.platform.offline.pendingCount()
+                delay(2_000)
+            }
+        }
+    }
 
     CompositionLocalProvider(
         LocalCoachContainer provides container,
@@ -73,7 +89,7 @@ fun CoachOsApp(
             ),
             topBar = {
                 if (!online) {
-                    OfflineBanner()
+                    OfflineBanner(pendingCount = pendingOffline)
                 }
             },
             bottomBar = {
@@ -119,7 +135,8 @@ fun CoachOsApp(
 }
 
 @Composable
-private fun OfflineBanner() {
+private fun OfflineBanner(pendingCount: Int = 0) {
+    val pending = if (pendingCount > 0) " · $pendingCount queued" else ""
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -128,7 +145,7 @@ private fun OfflineBanner() {
         verticalAlignment = Alignment.CenterVertically,
         content = {
             EliteBadge(
-                text = "OFFLINE",
+                text = "OFFLINE$pending",
             containerColor = EliteSurfaceColors.RECOVERY.toColor(),
             contentColor = MaterialTheme.colorScheme.onPrimary,
             )

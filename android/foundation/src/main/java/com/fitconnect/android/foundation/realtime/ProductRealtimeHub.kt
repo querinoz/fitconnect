@@ -7,14 +7,23 @@ import com.fitconnect.android.foundation.session.SessionStore
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import java.util.concurrent.ConcurrentHashMap
+
+data class ProductRealtimeEvent(
+    val topic: String,
+    val payload: String,
+    val receivedAtEpochMs: Long = System.currentTimeMillis(),
+)
 
 /**
  * Minimal product realtime subscriber: connect → subscribe → receive → dedupe → disconnect.
@@ -30,6 +39,12 @@ class ProductRealtimeHub(
 
     private val _lastPayload = MutableStateFlow<String?>(null)
     val lastPayload: StateFlow<String?> = _lastPayload.asStateFlow()
+
+    private val _lastEvent = MutableStateFlow<ProductRealtimeEvent?>(null)
+    val lastEvent: StateFlow<ProductRealtimeEvent?> = _lastEvent.asStateFlow()
+
+    private val _events = MutableSharedFlow<ProductRealtimeEvent>(extraBufferCapacity = 64)
+    val events: SharedFlow<ProductRealtimeEvent> = _events.asSharedFlow()
 
     private val seen = ConcurrentHashMap.newKeySet<String>()
     private var jobs: List<Job> = emptyList()
@@ -63,7 +78,10 @@ class ProductRealtimeHub(
                             .collect { payload ->
                                 val key = "$topic:${payload.hashCode()}"
                                 if (seen.add(key)) {
+                                    val event = ProductRealtimeEvent(topic, payload)
                                     _lastPayload.value = payload
+                                    _lastEvent.value = event
+                                    _events.tryEmit(event)
                                     if (seen.size > 512) seen.clear()
                                 }
                             }

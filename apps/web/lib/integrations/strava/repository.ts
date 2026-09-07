@@ -22,19 +22,24 @@ export async function listStravaActivities(athleteExternalId: string, limit = 10
 }
 
 export async function connectionFromPrisma(athleteExternalId: string) {
-  const { getConnectionByAthlete } = await import("./service");
-  const { decryptToken } = await import("./token-crypto");
-  const row = await getConnectionByAthlete(athleteExternalId);
-  if (!row || row.deauthorizedAt) return null;
-  return {
-    provider: "strava" as const,
-    athleteId: athleteExternalId,
-    status: "connected" as const,
-    connectedAt: row.createdAt.toISOString(),
-    lastSyncAt: row.lastSyncAt?.toISOString() ?? null,
-    accessToken: decryptToken(row.accessToken),
-    refreshToken: decryptToken(row.refreshToken),
-    expiresAt: Math.floor(row.expiresAt.getTime() / 1000),
-    externalAthleteId: String(row.stravaAthleteId)
-  };
+  try {
+    const { getConnectionByAthlete } = await import("./service");
+    const { decryptToken } = await import("./token-crypto");
+    const row = await getConnectionByAthlete(athleteExternalId);
+    if (!row || row.deauthorizedAt) return null;
+    return {
+      provider: "strava" as const,
+      athleteId: athleteExternalId,
+      status: "connected" as const,
+      connectedAt: row.createdAt.toISOString(),
+      lastSyncAt: row.lastSyncAt?.toISOString() ?? null,
+      accessToken: decryptToken(row.accessToken),
+      refreshToken: decryptToken(row.refreshToken),
+      expiresAt: Math.floor(row.expiresAt.getTime() / 1000),
+      externalAthleteId: String(row.stravaAthleteId)
+    };
+  } catch {
+    // Fail closed when Prisma/DB is misconfigured — never throw through status API.
+    return null;
+  }
 }

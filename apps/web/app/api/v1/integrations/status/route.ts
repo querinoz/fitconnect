@@ -56,12 +56,21 @@ export async function GET(request: Request) {
 
   if (useDb) {
     const prismaConn = await connectionFromPrisma(athleteId);
-    const dbRow = await getConnectionByAthlete(athleteId);
+    let dbRow = null as Awaited<ReturnType<typeof getConnectionByAthlete>> | null;
+    try {
+      dbRow = await getConnectionByAthlete(athleteId);
+    } catch {
+      dbRow = null;
+    }
     if (prismaConn && !dbRow?.deauthorizedAt) {
       connected = true;
       lastSyncAt = prismaConn.lastSyncAt;
-      const dbActivities = await listStravaActivities(athleteId, 10);
-      activityCount = dbActivities.length;
+      try {
+        const dbActivities = await listStravaActivities(athleteId, 10);
+        activityCount = dbActivities.length;
+      } catch {
+        activityCount = 0;
+      }
     }
   } else {
     activityCount = (await import("@/lib/integrations/store")).getActivities(athleteId, 50).length;

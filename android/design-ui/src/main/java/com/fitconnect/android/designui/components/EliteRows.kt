@@ -90,6 +90,7 @@ fun EliteMetricTile(
 fun EliteOfflineBanner(
     cacheLabel: String,
     modifier: Modifier = Modifier,
+    pendingCount: Int = 0,
 ) {
     Row(
         modifier = modifier
@@ -98,8 +99,9 @@ fun EliteOfflineBanner(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
     ) {
+        val pending = if (pendingCount > 0) " · $pendingCount queued" else ""
         EliteBadge(
-            text = "NO CONNECTION · $cacheLabel",
+            text = "NO CONNECTION · $cacheLabel$pending",
             containerColor = EliteSurfaceColors.TELEMETRY.toColor().copy(alpha = 0.18f),
             contentColor = EliteSurfaceColors.TELEMETRY.toColor(),
         )

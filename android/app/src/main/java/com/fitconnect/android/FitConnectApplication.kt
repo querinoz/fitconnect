@@ -21,7 +21,8 @@ import com.fitconnect.android.firebase.FirebaseBootstrap
 import com.fitconnect.android.firebase.FirebaseCrashReporter
 import com.fitconnect.android.foundation.di.AppContainer
 import com.fitconnect.android.foundation.di.DefaultAppContainer
-import com.fitconnect.android.foundation.offline.OfflineWorkExecutor
+import com.fitconnect.android.foundation.offline.AthleteOfflineHandlers
+import com.fitconnect.android.foundation.offline.CoachOfflineHandlers
 import com.fitconnect.android.foundation.perf.StartupTracer
 import com.fitconnect.android.geo.di.DefaultGeoContainer
 import com.fitconnect.android.geo.di.GeoContainer
@@ -284,21 +285,17 @@ class FitConnectApplication : Application() {
     private fun shouldBootstrapDemoTelemetry(): Boolean = false
 
     private fun registerOfflineHandlers() {
-        val localAck = OfflineWorkExecutor { AppResult.Ok(Unit) }
-        // Local-optimistic mutations already applied in UI — ack on reconnect is idempotent.
-        listOf(
-            "athlete.task.toggle",
-            "athlete.program.enroll",
-            "coach.session.reschedule",
-            "coach.session.cancel",
-            "coach.booking.approve",
-            "coach.booking.decline",
-            "coach.booking.reject",
-            "coach.program.publish",
-            "coach.program.draft",
-        ).forEach { type ->
-            container.offlineExecutor.register(type, localAck)
-        }
+        // WAVE 3: HTTP flush on reconnect — never local-ack as if the server saw the mutation.
+        AthleteOfflineHandlers.register(
+            registry = container.offlineExecutor,
+            api = container.apiClient,
+            logger = container.logger,
+        )
+        CoachOfflineHandlers.register(
+            registry = container.offlineExecutor,
+            api = container.apiClient,
+            logger = container.logger,
+        )
         WorkoutSyncHandlers.register(
             registry = container.offlineExecutor,
             api = container.apiClient,

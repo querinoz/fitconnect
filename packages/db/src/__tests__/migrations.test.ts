@@ -1,22 +1,42 @@
 import { describe, expect, it, beforeAll, afterAll, beforeEach } from "vitest";
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { PrismaClient } from "@prisma/client";
-import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { cleanDb, createTestPrisma, runMigrateDeploy, seedMinimal } from "../test-utils/db-factory";
+import {
+  cleanDb,
+  createTestPrisma,
+  executeSqlScript,
+  runMigrateDeploy,
+  seedMinimal
+} from "../test-utils/db-factory";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "../../../..");
 const hasDocker = process.env.CI === "true" || process.env.RUN_DB_TESTS === "1";
+/**
+ * On GitHub Actions the workflow already starts Postgres + migrate deploy.
+ * Prefer that URL so we do not nest Testcontainers inside the job.
+ * Locally, ignore a stale DATABASE_URL and use Testcontainers when RUN_DB_TESTS=1.
+ */
+const externalDatabaseUrl =
+  process.env.CI === "true" ? process.env.DATABASE_URL?.trim() || "" : "";
 
 describe.skipIf(!hasDocker)("Prisma migrations", () => {
-  let container: StartedPostgreSqlContainer;
+  let container: StartedPostgreSqlContainer | undefined;
   let prisma: PrismaClient;
   let databaseUrl: string;
 
   beforeAll(async () => {
+    if (externalDatabaseUrl) {
+      databaseUrl = externalDatabaseUrl;
+      // Idempotent — CI already ran migrate deploy against this URL.
+      runMigrateDeploy(databaseUrl);
+      prisma = createTestPrisma(databaseUrl);
+      return;
+    }
+
     container = await new PostgreSqlContainer("postgres:15-alpine")
       .withDatabase("fitconnect_test")
       .withUsername("fitconnect")
@@ -29,6 +49,14 @@ describe.skipIf(!hasDocker)("Prisma migrations", () => {
   }, 120_000);
 
   afterAll(async () => {
+    // Restore schema if a down.sql test dropped tables (shared CI DATABASE_URL).
+    if (databaseUrl) {
+      try {
+        runMigrateDeploy(databaseUrl);
+      } catch {
+        /* best-effort restore for subsequent CI steps */
+      }
+    }
     await prisma?.$disconnect();
     await container?.stop();
   });
@@ -80,7 +108,7 @@ describe.skipIf(!hasDocker)("Prisma migrations", () => {
       path.join(REPO_ROOT, "prisma/migrations/20260907140000_init/down.sql"),
       "utf8"
     );
-    await prisma.$executeRawUnsafe(downSql);
+    await executeSqlScript(prisma, downSql);
 
     const stripeTable = await prisma.$queryRaw<Array<{ tablename: string }>>`
       SELECT tablename FROM pg_tables WHERE tablename = 'ProcessedStripeEvent'

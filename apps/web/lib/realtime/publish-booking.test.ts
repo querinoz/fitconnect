@@ -10,10 +10,12 @@ describe("publishSessionBooking", () => {
     resetBroadcastTransportForTests();
   });
 
-  it("broadcasts session-booking on coach channel", () => {
-    const received: unknown[] = [];
+  it("broadcasts session-booking on coach channel and fitconnect:booking", () => {
+    const coachReceived: unknown[] = [];
+    const productReceived: unknown[] = [];
     const transport = getBroadcastTransport();
-    transport.subscribe("coach:t-002:bookings", (msg) => received.push(msg));
+    transport.subscribe("coach:t-002:bookings", (msg) => coachReceived.push(msg));
+    transport.subscribe("fitconnect:booking", (msg) => productReceived.push(msg));
 
     const msg = publishSessionBooking({
       athleteId: "a-ines",
@@ -24,6 +26,7 @@ describe("publishSessionBooking", () => {
     });
 
     expect(msg.kind).toBe("session-booking");
-    expect(received).toHaveLength(1);
+    expect(coachReceived).toHaveLength(1);
+    expect(productReceived).toHaveLength(1);
   });
 });

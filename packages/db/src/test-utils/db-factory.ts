@@ -101,3 +101,21 @@ export function runMigrateDeploy(databaseUrl: string): void {
     stdio: "pipe"
   });
 }
+
+/**
+ * PrismaPg uses the extended query protocol (prepared statements), which rejects
+ * multi-statement SQL. Split on `;` and execute one statement at a time.
+ */
+export function splitSqlStatements(sql: string): string[] {
+  return sql
+    .replace(/^\uFEFF/, "")
+    .split(";")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
+
+export async function executeSqlScript(prisma: TestPrisma, sql: string): Promise<void> {
+  for (const statement of splitSqlStatements(sql)) {
+    await prisma.$executeRawUnsafe(statement);
+  }
+}

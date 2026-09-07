@@ -61,6 +61,7 @@ class DefaultCoachContainer(
     )
     override val payments: CoachPaymentsGateway = SessionAwareCoachPaymentsGateway(
         sessionStore = platform.sessionStore,
+        api = { platform.apiClient },
     )
     override val files: CoachFileStore = LocalCoachFileStore()
     override val ai: CoachAiPort = EngineCoachAiPort(aiEngine.engine)

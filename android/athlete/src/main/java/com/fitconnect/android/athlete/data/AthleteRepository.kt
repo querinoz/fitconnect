@@ -62,6 +62,9 @@ interface AthleteRepository {
         notes: String? = null,
         idempotencyKey: String? = null,
     ): AppResult<String>
+
+    /** Athlete → coach direct message (Discover). */
+    suspend fun sendMessage(coachId: String, preview: String): AppResult<String>
 }
 
 /**
@@ -366,6 +369,24 @@ class LocalAthleteRepository(
             is AppResult.Ok -> AppResult.Ok(created.value.id)
             is AppResult.Err -> created
         }
+    }
+
+    override suspend fun sendMessage(coachId: String, preview: String): AppResult<String> {
+        val trimmed = preview.trim()
+        if (trimmed.isEmpty()) {
+            return AppResult.Err(com.fitconnect.android.foundation.common.AppError.Unexpected("preview_required"))
+        }
+        if (!connectivity.online.value) {
+            offline.enqueue(
+                SyncWork(
+                    type = "athlete.message.send",
+                    payloadJson = """{"coachId":"$coachId","preview":${org.json.JSONObject.quote(trimmed)}}""",
+                    idempotencyKey = "athlete.message.send:$coachId:${System.currentTimeMillis() / 60_000}",
+                ),
+            )
+            return AppResult.Ok("queued-offline")
+        }
+        return AppResult.Ok("local-demo-msg-${System.currentTimeMillis()}")
     }
 
     companion object {

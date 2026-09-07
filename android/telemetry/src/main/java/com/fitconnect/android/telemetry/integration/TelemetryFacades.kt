@@ -85,6 +85,14 @@ class AthleteTelemetryFacade(
         return aggregation.aggregate(athleteId, metric, TimeRange(now.plusMs(-days * DAY_MS), now), bucket)
     }
 
+    /** Raw HR samples for LTHR zone engine (not daily averages). */
+    suspend fun heartRateSamples(athleteId: String, days: Int = 7, limit: Int = 2_000): List<Double> {
+        val now = TelemetryInstant.now(clock)
+        val range = TimeRange(now.plusMs(-days * DAY_MS), now)
+        val page = store.samples(athleteId, MetricType.HEART_RATE, range, offset = 0, limit = limit)
+        return page.items.map { it.value }
+    }
+
     suspend fun workouts(athleteId: String, days: Int): List<WorkoutSession> {
         val now = TelemetryInstant.now(clock)
         return store.workouts(athleteId, TimeRange(now.plusMs(-days * DAY_MS), now), limit = 100).items

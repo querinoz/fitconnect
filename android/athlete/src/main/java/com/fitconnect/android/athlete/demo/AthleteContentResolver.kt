@@ -11,6 +11,7 @@ import com.fitconnect.android.athlete.domain.TrainSurfaceUi
 import com.fitconnect.android.athlete.domain.VaultBadgeUi
 import com.fitconnect.android.athlete.domain.VaultProgressUi
 import com.fitconnect.android.designui.charts.EliteChartPoint
+import com.fitconnect.android.sports.zones.HeartRateZones
 import com.fitconnect.android.telemetry.domain.MetricType
 import com.fitconnect.android.telemetry.integration.AthleteTelemetryFacade
 import com.fitconnect.ascend.badges.BadgeProgressEngine
@@ -155,11 +156,20 @@ object AthleteContentResolver {
     ): AnalysisSurfaceUi {
         val loadTrend = telemetry.trend(athleteId, MetricType.TRAINING_LOAD, days = 7)
         val hrvTrend = telemetry.trend(athleteId, MetricType.HRV, days = 7)
-        val zoneProxy = telemetry.trend(athleteId, MetricType.HEART_RATE, days = 7)
+        val hrSamples = telemetry.heartRateSamples(athleteId, days = 7)
+        val vitals = telemetry.readinessVitals(athleteId)
+        // Prefer measured LTHR proxy: if resting HR known, estimate LTHR ≈ RHR + 90 (not a lab test).
+        // Label as CALCULATED. Fall back to DEFAULT_LTHR_BPM when no calibration.
+        val lthr = when {
+            vitals.restingHr != null && vitals.restingHr!! > 30 ->
+                (vitals.restingHr!! + 90.0).coerceIn(120.0, 200.0)
+            else -> HeartRateZones.DEFAULT_LTHR_BPM
+        }
 
         val hasLoad = loadTrend.points.isNotEmpty()
         val hasHrv = hrvTrend.points.isNotEmpty()
-        val hasZones = zoneProxy.points.isNotEmpty()
+        val zoneMinutesRaw = HeartRateZones.timeInZonesMinutes(hrSamples, lthr)
+        val hasZones = zoneMinutesRaw != null
 
         if (!hasLoad && !hasHrv && !hasZones) {
             return AnalysisSurfaceUi(
@@ -179,6 +189,7 @@ object AthleteContentResolver {
 
         val labels = listOf("D-6", "D-5", "D-4", "D-3", "D-2", "D-1", "Today")
         val measured = AthleteDataProvenance.MEASURED
+        val calculated = AthleteDataProvenance.CALCULATED
         val weeklyLoad = loadTrend.points.takeLast(7).map {
             Provenanced(it.avg.toFloat(), measured, TELEMETRY_SOURCE)
         }
@@ -186,14 +197,13 @@ object AthleteContentResolver {
             Provenanced(it.avg.toFloat(), measured, TELEMETRY_SOURCE)
         }
         val delta = hrvTrend.trendDelta()?.toFloat() ?: 0f
-        // Zone minutes approximated from HR sample density until zone engine is wired.
-        val zones = listOf(1, 2, 3, 4, 5).map { zone ->
-            val minutes = if (hasZones) {
-                (zoneProxy.points.size * zone / 5).coerceAtLeast(0)
-            } else {
-                0
-            }
-            Provenanced(minutes, if (hasZones) AthleteDataProvenance.CALCULATED else AthleteDataProvenance.INSUFFICIENT_DATA, TELEMETRY_SOURCE)
+        // LTHR 5-zone ladder (elite-core HEART_RATE_ZONES) — never HR density proxy.
+        val zones = (zoneMinutesRaw ?: listOf(0, 0, 0, 0, 0)).map { minutes ->
+            Provenanced(
+                minutes,
+                if (hasZones) calculated else AthleteDataProvenance.INSUFFICIENT_DATA,
+                "HR zones · LTHR",
+            )
         }
         return AnalysisSurfaceUi(
             weeklyLoad = weeklyLoad,

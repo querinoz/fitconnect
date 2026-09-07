@@ -65,6 +65,8 @@ class DefaultAthleteContainer(
         api = { platform.apiClient },
         sessionStore = platform.sessionStore,
         telemetry = telemetry.athleteFacade,
+        connectivity = platform.connectivity,
+        offline = platform.offline,
         localFallback = LocalAthleteRepository(
             connectivity = platform.connectivity,
             offline = platform.offline,

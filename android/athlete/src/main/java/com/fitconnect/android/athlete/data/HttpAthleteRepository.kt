@@ -19,6 +19,9 @@ import com.fitconnect.android.athlete.domain.WeatherBrief
 import com.fitconnect.android.foundation.common.AppError
 import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.foundation.network.ApiClient
+import com.fitconnect.android.foundation.network.ConnectivityMonitor
+import com.fitconnect.android.foundation.offline.OfflineCoordinator
+import com.fitconnect.android.foundation.offline.SyncWork
 import com.fitconnect.android.foundation.session.SessionStore
 import com.fitconnect.android.sports.domain.SportId
 import com.fitconnect.android.telemetry.integration.AthleteTelemetryFacade
@@ -36,6 +39,8 @@ class HttpAthleteRepository(
     private val sessionStore: SessionStore,
     private val telemetry: AthleteTelemetryFacade,
     private val localFallback: AthleteRepository? = null,
+    private val connectivity: ConnectivityMonitor? = null,
+    private val offline: OfflineCoordinator? = null,
 ) : AthleteRepository {
 
     private suspend fun athleteId(): String? = sessionStore.snapshot().userId
@@ -358,6 +363,50 @@ class HttpAthleteRepository(
                 val booking = root.optJSONObject("booking")
                     ?: return AppResult.Err(AppError.Unexpected("booking_create_failed"))
                 AppResult.Ok(booking.getString("id"))
+            }
+        }
+    }
+
+    override suspend fun sendMessage(coachId: String, preview: String): AppResult<String> {
+        if (useLocal()) return localFallback!!.sendMessage(coachId, preview)
+        val trimmed = preview.trim()
+        if (trimmed.isEmpty()) {
+            return AppResult.Err(AppError.Unexpected("preview_required"))
+        }
+        val body = JSONObject()
+            .put("coachId", coachId)
+            .put("preview", trimmed)
+            .toString()
+        if (connectivity?.online?.value == false && offline != null) {
+            offline.enqueue(
+                SyncWork(
+                    type = "athlete.message.send",
+                    payloadJson = body,
+                    idempotencyKey = "athlete.message.send:$coachId:${System.currentTimeMillis() / 60_000}",
+                ),
+            )
+            return AppResult.Ok("queued-offline")
+        }
+        return when (val raw = api().post("/api/v1/messages", body)) {
+            is AppResult.Err -> {
+                val network = raw.error as? AppError.Network
+                if (network != null && offline != null) {
+                    offline.enqueue(
+                        SyncWork(
+                            type = "athlete.message.send",
+                            payloadJson = body,
+                            idempotencyKey = "athlete.message.send:$coachId:${System.currentTimeMillis() / 60_000}",
+                        ),
+                    )
+                    AppResult.Ok("queued-offline")
+                } else {
+                    raw
+                }
+            }
+            is AppResult.Ok -> {
+                val root = JSONObject(raw.value)
+                val message = root.optJSONObject("message")
+                AppResult.Ok(message?.optString("id").orEmpty().ifBlank { "sent" })
             }
         }
     }

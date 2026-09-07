@@ -5,6 +5,7 @@ import {
   rejectCoachBooking
 } from "@/lib/db/repository";
 import { isAuthFailure, requireCoachId } from "@/lib/api/require-auth";
+import { publishSessionBooking } from "@/lib/realtime/publish-booking";
 
 export async function GET(req: Request) {
   const resolved = await requireCoachId(req);
@@ -41,6 +42,15 @@ export async function POST(req: Request) {
   if (!result.ok) {
     return NextResponse.json({ error: "booking_not_found" }, { status: 404 });
   }
+
+  publishSessionBooking({
+    id: body.bookingId,
+    athleteId: "athlete",
+    athleteName: "Athlete",
+    coachId: resolved.coachId,
+    coachName: "Coach",
+    mode: body.action === "approve" ? "standard" : "recovery"
+  });
 
   return NextResponse.json({ ok: true, source: result.source, action: body.action });
 }

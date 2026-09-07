@@ -18,9 +18,11 @@
 Defined in `ProductRealtimeTopics`:
 
 - `fitconnect:session`
-- `fitconnect:booking`
-- `fitconnect:message`
+- `fitconnect:booking` — also published from web `publishSessionBooking` (alongside `coach:{id}:bookings`)
+- `fitconnect:message` — also published from `publishDirectMessage`
 - `fitconnect:activity`
+
+Web may also use role-scoped channels (`coach:{id}:bookings`, `*:messages`) for dashboards. Android product hub subscribes to the `fitconnect:*` topics.
 
 ## Codec
 

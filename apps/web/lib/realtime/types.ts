@@ -103,6 +103,16 @@ export type SessionBookingMessage = {
   at: string;
 };
 
+export type DirectMessageEvent = {
+  kind: "direct-message";
+  id: string;
+  athleteId: string;
+  coachId: string;
+  from: "athlete" | "coach";
+  preview: string;
+  at: string;
+};
+
 export type RealtimeMessage =
   | PlanUpdate
   | LiveTick
@@ -114,7 +124,8 @@ export type RealtimeMessage =
   | AICoPilotAlert
   | VitalsUpdate
   | CommunityPostMessage
-  | SessionBookingMessage;
+  | SessionBookingMessage
+  | DirectMessageEvent;
 
 const KINDS = new Set<string>([
   "plan-update",
@@ -127,7 +138,8 @@ const KINDS = new Set<string>([
   "ai-alert",
   "vitals",
   "community-post",
-  "session-booking"
+  "session-booking",
+  "direct-message"
 ]);
 
 export function isRealtimeMessage(v: unknown): v is RealtimeMessage {

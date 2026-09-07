@@ -31,6 +31,7 @@ fun BookingsScreen() {
     val container = LocalCoachContainer.current
     val scope = rememberCoroutineScope()
     val bookingRevision by container.geo.booking.revisions().collectAsState(initial = 0L)
+    val realtimeEvent by container.platform.productRealtime.lastEvent.collectAsState()
     var result by remember { mutableStateOf<AppResult<List<BookingRequest>>?>(null) }
     var policy by remember { mutableStateOf<CancellationPolicy?>(null) }
     fun reload() {
@@ -42,6 +43,12 @@ fun BookingsScreen() {
     LaunchedEffect(bookingRevision) {
         container.platform.analytics.screen("coach_bookings")
         reload()
+    }
+    LaunchedEffect(realtimeEvent?.receivedAtEpochMs) {
+        val topic = realtimeEvent?.topic ?: return@LaunchedEffect
+        if (topic == com.fitconnect.android.foundation.realtime.ProductRealtimeTopics.BOOKING) {
+            reload()
+        }
     }
 
     CoachLoad(result, ::reload) { bookings ->

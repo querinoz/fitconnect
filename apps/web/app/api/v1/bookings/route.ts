@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAuthFailure, requireAthleteId } from "@/lib/api/require-auth";
 import { createAthleteBooking } from "@/lib/db/bookings";
+import { publishSessionBooking } from "@/lib/realtime/publish-booking";
 
 /**
  * Athlete create-booking — canonical Session row (pending).
@@ -62,6 +63,17 @@ export async function POST(req: Request) {
       { error: result.error ?? "create_failed" },
       { status: 500 }
     );
+  }
+
+  if (!result.idempotent) {
+    publishSessionBooking({
+      id: result.booking.id,
+      athleteId: result.booking.athleteId,
+      athleteName: "Athlete",
+      coachId: result.booking.coachId,
+      coachName: "Coach",
+      mode: "standard"
+    });
   }
 
   return NextResponse.json(

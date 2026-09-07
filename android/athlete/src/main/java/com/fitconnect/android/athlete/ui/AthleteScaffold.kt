@@ -158,6 +158,7 @@ fun AthleteOsApp(
     val onBottomTab = AthleteDest.bottomTabs.any { it.route == current }
     val showHeader = onBottomTab && !hideNav
     var cacheStamp by remember { mutableStateOf<String?>(null) }
+    var pendingOffline by remember { mutableStateOf(0) }
     var patentStatus by remember { mutableStateOf(PatentStatus.none()) }
     var headerName by remember { mutableStateOf("Athlete") }
     var headerAthleteId by remember { mutableStateOf("") }
@@ -189,7 +190,15 @@ fun AthleteOsApp(
         if (!online && cacheStamp == null) {
             cacheStamp = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
         }
-        if (online) cacheStamp = null
+        if (online) {
+            cacheStamp = null
+            pendingOffline = 0
+        } else {
+            while (true) {
+                pendingOffline = container.platform.offline.pendingCount()
+                kotlinx.coroutines.delay(2_000)
+            }
+        }
     }
     LaunchedEffect(wearEnvelope) {
         wearEnvelope?.let { container.liveCoordinator.onRemoteEnvelope(it) }
@@ -285,6 +294,7 @@ fun AthleteOsApp(
                         if (!online) {
                             EliteOfflineBanner(
                                 cacheLabel = cacheStamp?.let { "CACHE $it" } ?: "CACHE UNAVAILABLE",
+                                pendingCount = pendingOffline,
                                 modifier = Modifier.testTag("athlete_offline_banner"),
                             )
                         }

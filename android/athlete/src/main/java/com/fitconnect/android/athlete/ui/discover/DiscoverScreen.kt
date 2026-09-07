@@ -375,10 +375,25 @@ fun DiscoverScreen() {
                         onClose = { selectedCoach = null },
                         onBook = { bookingDraft = BookingDraft(coach) },
                         onMessage = {
-                            statusMessage = if (isLocalDemo) {
-                                "Message queued (LOCAL_DEMO) → ${coach.name}"
-                            } else {
-                                "NOT_IMPLEMENTED: athlete→coach DM from Discover"
+                            scope.launch {
+                                statusMessage = "Sending…"
+                                when (
+                                    val sent = container.athleteRepository.sendMessage(
+                                        coachId = coach.id,
+                                        preview = "Hi ${coach.name} — interested in coaching.",
+                                    )
+                                ) {
+                                    is AppResult.Ok -> {
+                                        statusMessage = if (sent.value == "queued-offline") {
+                                            "Message queued · will send when online → ${coach.name}"
+                                        } else {
+                                            "Message sent → ${coach.name}"
+                                        }
+                                    }
+                                    is AppResult.Err -> {
+                                        statusMessage = "Message failed · ${sent.error}"
+                                    }
+                                }
                             }
                         },
                     )
