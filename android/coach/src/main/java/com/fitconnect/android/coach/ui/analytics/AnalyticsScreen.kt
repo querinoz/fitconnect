@@ -35,15 +35,27 @@ fun AnalyticsScreen() {
     CoachLoad(result, ::reload) { analytics ->
         CoachScreenScaffold(
             title = "Analytics",
-            subtitle = "Evolution · recovery · attendance · retention · revenue",
+            subtitle = "Derived from roster + sessions · no fabricated revenue",
             testTag = "coach_analytics",
         ) {
             item {
+                val retentionUnavailable = analytics.customMetrics["retention_unavailable"] == 1.0
+                val conversionUnavailable = analytics.customMetrics["conversion_unavailable"] == 1.0
+                val revenueUnavailable = analytics.customMetrics["revenue_unavailable"] == 1.0
                 EliteMetricCard(label = "Attendance", value = "${analytics.attendancePercent}%")
                 EliteMetricCard(label = "Completion", value = "${analytics.programCompletionPercent}%")
-                EliteMetricCard(label = "Retention", value = "${analytics.retentionPercent}%")
-                EliteMetricCard(label = "Conversion", value = "${analytics.conversionPercent}%")
-                EliteMetricCard(label = "Revenue", value = "€${analytics.revenueCents / 100}")
+                EliteMetricCard(
+                    label = "Retention",
+                    value = if (retentionUnavailable) "Unavailable" else "${analytics.retentionPercent}%",
+                )
+                EliteMetricCard(
+                    label = "Conversion",
+                    value = if (conversionUnavailable) "Unavailable" else "${analytics.conversionPercent}%",
+                )
+                EliteMetricCard(
+                    label = "Revenue",
+                    value = if (revenueUnavailable) "Unavailable" else "€${analytics.revenueCents / 100}",
+                )
             }
             item {
                 Text("Athlete evolution", style = MaterialTheme.typography.titleMedium)

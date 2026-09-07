@@ -7,14 +7,16 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.data.canonicalAthleteId
 import com.fitconnect.android.athlete.demo.AthleteContentResolver
 import com.fitconnect.android.athlete.demo.AthleteDemoBanner
 import com.fitconnect.android.athlete.demo.AthleteDemoCatalog
@@ -41,7 +43,11 @@ fun PerformanceVaultScreen() {
     val container = LocalAthleteContainer.current
     val locale by container.platform.localeManager.observe().collectAsState(initial = AppLocale.EN)
     val lang = locale.bcp47
-    val snap = container.ascend.snapshot(LocalAthleteRepository.ATHLETE_ID)
+    var athleteId by remember { mutableStateOf("") }
+    LaunchedEffect(Unit) {
+        athleteId = container.platform.sessionStore.canonicalAthleteId()
+    }
+    val snap = container.ascend.snapshot(athleteId.ifBlank { "pending" })
     val vaultBadges = remember { AthleteContentResolver.vaultBadges() }
     val vaultProgress = remember { AthleteContentResolver.vaultProgress() }
     var tab by remember { mutableIntStateOf(0) }

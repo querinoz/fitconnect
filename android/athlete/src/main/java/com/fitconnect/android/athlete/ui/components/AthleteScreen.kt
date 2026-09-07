@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
+import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.LocalAthleteHeaderController
 import com.fitconnect.android.design.EliteSurfaceInstrument
 import com.fitconnect.android.designui.components.EliteBadge
@@ -37,8 +38,8 @@ import com.fitconnect.android.designui.motion.EliteEnter
 import com.fitconnect.android.designui.theme.EliteMetricTextStyle
 import com.fitconnect.android.designui.theme.EliteMonoTextStyle
 import com.fitconnect.android.designui.theme.EliteSpace
-import com.fitconnect.android.foundation.auth.DemoPersona
 import com.fitconnect.android.foundation.common.AppResult
+import com.fitconnect.android.foundation.navigation.identityBadgeLabel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -51,11 +52,21 @@ fun AthleteScreenScaffold(
     overline: String? = "ATHLETE OS",
     showTitle: Boolean = true,
     floating: (@Composable BoxScope.() -> Unit)? = null,
+    floatingAlignment: Alignment = Alignment.BottomEnd,
     content: LazyListScope.() -> Unit,
 ) {
     val listState = rememberLazyListState()
     val header = LocalAthleteHeaderController.current
     val scope = rememberCoroutineScope()
+    val platform = LocalAthleteContainer.current.platform
+    var identityBadge by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) {
+        val snap = platform.sessionStore.snapshot()
+        identityBadge = identityBadgeLabel(
+            isDebugBuild = platform.config.isDebuggable,
+            isLocalDemoSession = snap.isLocalDemo,
+        )
+    }
     DisposableEffect(listState, header) {
         header.onScrollToTop = { scope.launch { listState.animateScrollToItem(0) } }
         onDispose { header.onScrollToTop = {} }
@@ -89,10 +100,15 @@ fun AthleteScreenScaffold(
                                         modifier = Modifier.weight(1f, fill = false),
                                     )
                                 }
-                                EliteBadge(
-                                    text = DemoPersona.MODE_LABEL,
-                                    modifier = Modifier.testTag("athlete_local_demo_badge"),
-                                )
+                                identityBadge?.let { label ->
+                                    EliteBadge(
+                                        text = label,
+                                        modifier = Modifier.testTag(
+                                            if (label == "LOCAL_DEMO") "athlete_local_demo_badge"
+                                            else "athlete_identity_badge",
+                                        ),
+                                    )
+                                }
                             }
                             Text(
                                 title,
@@ -121,7 +137,7 @@ fun AthleteScreenScaffold(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(EliteSpace.Lg),
-                contentAlignment = Alignment.BottomEnd,
+                contentAlignment = floatingAlignment,
                 content = { floating() },
             )
         }

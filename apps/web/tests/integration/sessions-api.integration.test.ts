@@ -61,7 +61,10 @@ describe("GET /api/v1/sessions", () => {
     const sessions = [
       buildSessionSummary({ id: "sess-coach-001", athleteId: SEED_ATHLETE_ID })
     ];
-    vi.mocked(listCoachSessions).mockResolvedValue(sessions);
+    vi.mocked(listCoachSessions).mockResolvedValue({
+      sessions,
+      source: "postgres",
+    });
 
     const response = await GET(
       new Request(`http://localhost/api/v1/sessions?coachId=${SEED_COACH_ID}`)

@@ -17,7 +17,7 @@ import com.fitconnect.android.ai.domain.AiConversationResponse
 import com.fitconnect.android.ai.domain.AiRole
 import com.fitconnect.android.ai.domain.FeedbackLabel
 import com.fitconnect.android.ai.permissions.AiPrincipal
-import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.data.canonicalAthleteId
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.designui.components.AiInsightCard
@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 fun AthleteAiScreen() {
     val container = LocalAthleteContainer.current
     val scope = rememberCoroutineScope()
-    val athleteId = LocalAthleteRepository.ATHLETE_ID
+    var athleteId by remember { mutableStateOf("") }
     var brief by remember { mutableStateOf<MorningBrief?>(null) }
     var answer by remember { mutableStateOf<AiConversationResponse?>(null) }
     var question by remember { mutableStateOf("") }
@@ -38,7 +38,9 @@ fun AthleteAiScreen() {
 
     fun reload() {
         scope.launch {
-            runCatching { container.ai.engine.athleteMorningBrief(athleteId) }
+            val uid = container.platform.sessionStore.canonicalAthleteId()
+            athleteId = uid
+            runCatching { container.ai.engine.athleteMorningBrief(uid) }
                 .onSuccess { brief = it; error = null }
                 .onFailure { error = it.message }
         }

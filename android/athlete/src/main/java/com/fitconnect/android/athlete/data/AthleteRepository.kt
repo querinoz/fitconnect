@@ -55,11 +55,19 @@ interface AthleteRepository {
     suspend fun notifications(): AppResult<List<NotificationItem>>
     suspend fun toggleTask(taskId: String): AppResult<Unit>
     suspend fun enrollProgram(programId: String): AppResult<Unit>
+    suspend fun createBooking(
+        coachId: String,
+        scheduledAtEpochMs: Long,
+        durationMin: Int = 60,
+        notes: String? = null,
+        idempotencyKey: String? = null,
+    ): AppResult<String>
 }
 
 /**
- * Offline-first local OS data. Serves complete Athlete OS surfaces; sync work
- * is queued when mutations happen offline.
+ * LOCAL_DEMO athlete OS surfaces + in-memory cache.
+ * Production Firebase sessions must use [HttpAthleteRepository]; this class is
+ * only the explicit demo fallback (never a silent production primary).
  */
 class LocalAthleteRepository(
     private val connectivity: ConnectivityMonitor,
@@ -332,6 +340,32 @@ class LocalAthleteRepository(
             )
         }
         return AppResult.Ok(Unit)
+    }
+
+    override suspend fun createBooking(
+        coachId: String,
+        scheduledAtEpochMs: Long,
+        durationMin: Int,
+        notes: String?,
+        idempotencyKey: String?,
+    ): AppResult<String> {
+        val created = geo.booking.create(
+            com.fitconnect.android.geo.booking.BookingRequest(
+                targetKind = com.fitconnect.android.geo.domain.BookingTargetKind.COACH,
+                targetId = coachId,
+                clientId = ATHLETE_ID,
+                clientName = "LOCAL_DEMO",
+                startEpochMs = scheduledAtEpochMs,
+                durationMin = durationMin,
+                mode = com.fitconnect.android.geo.domain.SessionMode.PRIVATE,
+                notes = notes ?: "LOCAL_DEMO booking",
+                autoConfirm = true,
+            ),
+        )
+        return when (created) {
+            is AppResult.Ok -> AppResult.Ok(created.value.id)
+            is AppResult.Err -> created
+        }
     }
 
     companion object {

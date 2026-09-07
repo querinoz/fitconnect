@@ -33,6 +33,27 @@ interface CoachPaymentsGateway {
 class ArchitectureCoachPaymentsGateway : CoachPaymentsGateway {
     override fun rail(): PayoutRail = PayoutRail.UNSUPPORTED
 
+    /** Never invent revenue figures — Stripe Connect is PENDING_HUMAN. */
+    override suspend fun revenue(): AppResult<RevenueSnapshot> =
+        AppResult.Err(
+            AppError.Unexpected(
+                "NOT_IMPLEMENTED:earnings — Stripe Connect PENDING_HUMAN (no fake revenue)",
+            ),
+        )
+
+    override suspend fun createInvoice(draft: InvoiceDraft): AppResult<String> =
+        AppResult.Err(AppError.Unexpected("Stripe not configured — invoice not created"))
+
+    override suspend fun requestTransfer(request: TransferRequest): AppResult<String> =
+        AppResult.Err(AppError.Unexpected("Stripe Connect not configured"))
+}
+
+/**
+ * LOCAL_DEMO-only revenue snapshot. Never used for Firebase / production sessions.
+ */
+class LocalDemoCoachPaymentsGateway : CoachPaymentsGateway {
+    override fun rail(): PayoutRail = PayoutRail.UNSUPPORTED
+
     override suspend fun revenue(): AppResult<RevenueSnapshot> = AppResult.Ok(
         RevenueSnapshot(
             weekCents = 184_500,
@@ -42,13 +63,30 @@ class ArchitectureCoachPaymentsGateway : CoachPaymentsGateway {
             bookingsPaid = 12,
             invoicesOpen = 3,
             transfersPending = 1,
-            payoutStatus = "Architecture only — connect Stripe",
+            payoutStatus = "LOCAL_DEMO — not Stripe",
         ),
     )
 
     override suspend fun createInvoice(draft: InvoiceDraft): AppResult<String> =
-        AppResult.Err(AppError.Unexpected("Stripe not configured — invoice staged locally for ${draft.athleteId}"))
+        AppResult.Err(AppError.Unexpected("LOCAL_DEMO — Stripe not configured"))
 
     override suspend fun requestTransfer(request: TransferRequest): AppResult<String> =
-        AppResult.Err(AppError.Unexpected("Stripe Connect not configured"))
+        AppResult.Err(AppError.Unexpected("LOCAL_DEMO — Stripe Connect not configured"))
+}
+
+class SessionAwareCoachPaymentsGateway(
+    private val sessionStore: com.fitconnect.android.foundation.session.SessionStore,
+    private val localDemo: CoachPaymentsGateway = LocalDemoCoachPaymentsGateway(),
+    private val live: CoachPaymentsGateway = ArchitectureCoachPaymentsGateway(),
+) : CoachPaymentsGateway {
+    private suspend fun active(): CoachPaymentsGateway =
+        if (sessionStore.snapshot().isLocalDemo) localDemo else live
+
+    override fun rail(): PayoutRail = PayoutRail.UNSUPPORTED
+
+    override suspend fun revenue(): AppResult<RevenueSnapshot> = active().revenue()
+    override suspend fun createInvoice(draft: InvoiceDraft): AppResult<String> =
+        active().createInvoice(draft)
+    override suspend fun requestTransfer(request: TransferRequest): AppResult<String> =
+        active().requestTransfer(request)
 }

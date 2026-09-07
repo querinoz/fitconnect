@@ -34,6 +34,17 @@ object EosNeumorphicColors {
     val HighlightEdge = EliteSurfaceColors.NEU_HIGHLIGHT_EDGE.toColor()
     val ShadowDeep = EliteSurfaceColors.NEU_SHADOW_DEEP.toColor()
     val Rim = Color(0x80111827)
+    val RimConvex = Color(0xFF121A2D)
+    val RimConcave = Color(0xFF060A12)
+
+    // Aliases for premium shell docs / Figma parity
+    val EosFloor: Color get() = Floor
+    val EosSurface: Color get() = MoldSurface
+    val EosVoltline: Color get() = Voltline
+    val EosTextPrimary: Color get() = TextPrimary
+    val EosTextMuted: Color get() = TextMuted
+    val NeumorphicHighlight: Color get() = HighlightEdge
+    val NeumorphicShadow: Color get() = ShadowDeep
 }
 
 enum class EosNeumorphicStyle {

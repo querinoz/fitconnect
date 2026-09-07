@@ -6,6 +6,8 @@
     <!-- Runtime permissions for PermissionGateway — requested only when features need them. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -46,6 +48,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:enableOnBackInvokedCallback="true"
             android:theme="@style/Theme.FitConnect.Splash"
             android:windowSoftInputMode="adjustResize">
@@ -82,6 +85,10 @@
             </intent-filter>
         </activity-alias>
 
+        <service
+            android:name="com.fitconnect.android.capture.service.CaptureLocationService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
         <service
             android:name=".push.FitConnectMessagingService"
             android:exported="false">

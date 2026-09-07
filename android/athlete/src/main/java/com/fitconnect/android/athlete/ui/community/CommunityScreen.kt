@@ -14,7 +14,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.data.canonicalAthleteId
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.community.domain.Comment
@@ -54,6 +54,7 @@ import java.util.UUID
 fun CommunityScreen() {
     val container = LocalAthleteContainer.current
     val scope = rememberCoroutineScope()
+    var isLocalDemo by remember { mutableStateOf(false) }
     var posts by remember { mutableStateOf<List<CommunityPost>>(emptyList()) }
     var emptyReason by remember { mutableStateOf<String?>(null) }
     var kind by remember { mutableStateOf(FeedKind.FOLLOWING) }
@@ -67,39 +68,93 @@ fun CommunityScreen() {
     var profiles by remember { mutableStateOf<Map<String, UserProfile>>(emptyMap()) }
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
+    val remote = remember {
+        com.fitconnect.android.athlete.community.RemoteCommunityPosts(
+            api = { container.platform.apiClient },
+        )
+    }
+    val viewerId = remember {
+        mutableStateOf("")
+    }
 
     suspend fun reload() {
         loading = true
         error = null
         try {
-            container.community.seedIfNeeded()
-            val page = container.community.feed.feed(
-                FeedRequest(
-                    viewerId = LocalAthleteRepository.ATHLETE_ID,
-                    kind = kind,
-                    contextId = if (kind == FeedKind.SPORT) "running" else null,
-                    limit = 40,
-                ),
-            )
-            posts = page.items
-            emptyReason = if (page.items.isEmpty()) "No posts yet for ${kind.name.lowercase()}" else null
-            reactionCounts = page.items.associate { post ->
-                post.id to container.community.reactions.counts(ReactionTargetKind.POST, post.id)
-            }
-            myReactions = page.items.associate { post ->
-                post.id to container.community.reactions.of(
-                    LocalAthleteRepository.ATHLETE_ID,
-                    ReactionTargetKind.POST,
-                    post.id,
+            isLocalDemo = container.platform.sessionStore.snapshot().isLocalDemo
+            viewerId.value = container.platform.sessionStore.canonicalAthleteId()
+            if (isLocalDemo) {
+                container.community.seedIfNeeded()
+                val page = container.community.feed.feed(
+                    FeedRequest(
+                        viewerId = viewerId.value,
+                        kind = kind,
+                        contextId = if (kind == FeedKind.SPORT) "running" else null,
+                        limit = 40,
+                    ),
                 )
-            }
-            comments = page.items.associate { post ->
-                post.id to container.community.comments.forPost(post.id, limit = 3).items
-            }
-            val authorIds = page.items.map { it.authorId } +
-                comments.values.flatten().map { it.authorId }
-            profiles = authorIds.distinct().associateWith { id ->
-                container.community.profiles.get(id) ?: UserProfile(id, id, CommunityRole.ATHLETE)
+                posts = page.items
+                emptyReason = if (page.items.isEmpty()) "No posts yet for ${kind.name.lowercase()}" else null
+                reactionCounts = page.items.associate { post ->
+                    post.id to container.community.reactions.counts(ReactionTargetKind.POST, post.id)
+                }
+                myReactions = page.items.associate { post ->
+                    post.id to container.community.reactions.of(
+                        viewerId.value,
+                        ReactionTargetKind.POST,
+                        post.id,
+                    )
+                }
+                comments = page.items.associate { post ->
+                    post.id to container.community.comments.forPost(post.id, limit = 3).items
+                }
+                val authorIds = page.items.map { it.authorId } +
+                    comments.values.flatten().map { it.authorId }
+                profiles = authorIds.distinct().associateWith { id ->
+                    container.community.profiles.get(id) ?: UserProfile(id, id, CommunityRole.ATHLETE)
+                }
+            } else {
+                when (val result = remote.list()) {
+                    is com.fitconnect.android.foundation.common.AppResult.Ok -> {
+                        posts = result.value
+                        emptyReason = if (result.value.isEmpty()) {
+                            "No community posts yet"
+                        } else {
+                            null
+                        }
+                        val remoteComments = mutableMapOf<String, List<Comment>>()
+                        val remoteCounts = mutableMapOf<String, Map<ReactionType, Int>>()
+                        for (post in result.value.take(20)) {
+                            when (val c = remote.listComments(post.id)) {
+                                is com.fitconnect.android.foundation.common.AppResult.Ok ->
+                                    remoteComments[post.id] = c.value
+                                is com.fitconnect.android.foundation.common.AppResult.Err -> Unit
+                            }
+                            when (val r = remote.listReactions(post.id)) {
+                                is com.fitconnect.android.foundation.common.AppResult.Ok -> {
+                                    remoteCounts[post.id] = ReactionType.entries.associateWith { type ->
+                                        r.value[type.name] ?: 0
+                                    }
+                                }
+                                is com.fitconnect.android.foundation.common.AppResult.Err -> Unit
+                            }
+                        }
+                        comments = remoteComments
+                        reactionCounts = remoteCounts
+                        myReactions = emptyMap()
+                        profiles = result.value.associate { post ->
+                            post.authorId to UserProfile(
+                                post.authorId,
+                                post.authorId,
+                                CommunityRole.ATHLETE,
+                            )
+                        }
+                    }
+                    is com.fitconnect.android.foundation.common.AppResult.Err -> {
+                        error = result.error.toString()
+                        posts = emptyList()
+                    }
+                }
             }
         } catch (t: Throwable) {
             error = t.message ?: "Community feed failed"
@@ -115,7 +170,11 @@ fun CommunityScreen() {
 
     AthleteScreenScaffold(
         title = "Community",
-        subtitle = "Lived-in LOCAL_DEMO world · react · comment · ${DemoPersona.MODE_LABEL}",
+        subtitle = if (isLocalDemo) {
+            "LOCAL_DEMO community · seed feed"
+        } else {
+            "Canonical community posts"
+        },
         testTag = "athlete_community",
     ) {
         item {
@@ -153,24 +212,38 @@ fun CommunityScreen() {
                     enabled = draftText.isNotBlank(),
                     onClick = {
                         scope.launch {
-                            val result = container.community.posts.create(
-                                PostDraft(
-                                    idempotencyKey = UUID.randomUUID().toString(),
-                                    authorId = LocalAthleteRepository.ATHLETE_ID,
-                                    kind = draftKind,
-                                    text = draftText.trim(),
-                                ),
-                            )
-                            status = when (result) {
-                                is PostResult.Created -> "Published ${result.post.id}"
-                                is PostResult.Duplicate -> "Duplicate blocked"
-                                PostResult.RateLimited -> "Rate limited — wait a moment"
-                                PostResult.Invalid -> "Invalid post"
+                            if (isLocalDemo) {
+                                val result = container.community.posts.create(
+                                    PostDraft(
+                                        idempotencyKey = UUID.randomUUID().toString(),
+                                        authorId = viewerId.value,
+                                        kind = draftKind,
+                                        text = draftText.trim(),
+                                    ),
+                                )
+                                status = when (result) {
+                                    is PostResult.Created -> "Published ${result.post.id}"
+                                    is PostResult.Duplicate -> "Duplicate blocked"
+                                    PostResult.RateLimited -> "Rate limited — wait a moment"
+                                    PostResult.Invalid -> "Invalid post"
+                                }
+                            } else {
+                                when (
+                                    val result = remote.create(
+                                        text = draftText.trim(),
+                                        authorId = viewerId.value,
+                                    )
+                                ) {
+                                    is com.fitconnect.android.foundation.common.AppResult.Ok -> {
+                                        status = "Published ${result.value.id}"
+                                        draftText = ""
+                                    }
+                                    is com.fitconnect.android.foundation.common.AppResult.Err -> {
+                                        status = result.error.toString()
+                                    }
+                                }
                             }
-                            if (result is PostResult.Created) {
-                                draftText = ""
-                                reload()
-                            }
+                            reload()
                         }
                     },
                 )
@@ -230,14 +303,24 @@ fun CommunityScreen() {
                     )
                 },
                 onReact = { typeName ->
-                    val type = ReactionType.entries.first { it.name == typeName }
                     scope.launch {
-                        container.community.reactions.react(
-                            LocalAthleteRepository.ATHLETE_ID,
-                            ReactionTargetKind.POST,
-                            post.id,
-                            type,
-                        )
+                        val type = ReactionType.entries.first { it.name == typeName }
+                        if (isLocalDemo) {
+                            container.community.reactions.react(
+                                viewerId.value,
+                                ReactionTargetKind.POST,
+                                post.id,
+                                type,
+                            )
+                        } else {
+                            when (val r = remote.react(post.id, type.name)) {
+                                is com.fitconnect.android.foundation.common.AppResult.Ok -> Unit
+                                is com.fitconnect.android.foundation.common.AppResult.Err -> {
+                                    status = r.error.toString()
+                                    return@launch
+                                }
+                            }
+                        }
                         reload()
                     }
                 },
@@ -253,14 +336,29 @@ fun CommunityScreen() {
                     enabled = commentValue.isNotBlank(),
                     onClick = {
                         scope.launch {
-                            container.community.comments.add(
-                                postId = post.id,
-                                parentCommentId = null,
-                                authorId = LocalAthleteRepository.ATHLETE_ID,
-                                text = commentValue.trim(),
-                            )
-                            commentDrafts = commentDrafts - post.id
-                            status = "Comment added"
+                            if (isLocalDemo) {
+                                container.community.comments.add(
+                                    postId = post.id,
+                                    parentCommentId = null,
+                                    authorId = viewerId.value,
+                                    text = commentValue.trim(),
+                                )
+                                commentDrafts = commentDrafts - post.id
+                                status = "Comment added"
+                            } else {
+                                when (
+                                    val r = remote.addComment(post.id, commentValue.trim())
+                                ) {
+                                    is com.fitconnect.android.foundation.common.AppResult.Ok -> {
+                                        commentDrafts = commentDrafts - post.id
+                                        status = "Comment added"
+                                    }
+                                    is com.fitconnect.android.foundation.common.AppResult.Err -> {
+                                        status = r.error.toString()
+                                        return@launch
+                                    }
+                                }
+                            }
                             reload()
                         }
                     },

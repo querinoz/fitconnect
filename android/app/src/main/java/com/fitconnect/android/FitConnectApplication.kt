@@ -25,6 +25,14 @@ import com.fitconnect.android.foundation.offline.OfflineWorkExecutor
 import com.fitconnect.android.foundation.perf.StartupTracer
 import com.fitconnect.android.geo.di.DefaultGeoContainer
 import com.fitconnect.android.geo.di.GeoContainer
+import com.fitconnect.android.sports.guided.notifications.GatewayWorkoutNotificationPort
+import com.fitconnect.android.sports.guided.runtime.GuidedWorkoutRuntime
+import com.fitconnect.android.sports.guided.store.room.createRoomGuidedWorkoutStore
+import com.fitconnect.android.capture.store.GpsRouteStore
+import com.fitconnect.android.capture.store.RoomGpsRouteStore
+import com.fitconnect.android.capture.store.room.CaptureRoomDatabase
+import com.fitconnect.android.capture.sync.OutdoorSyncHandlers
+import com.fitconnect.android.sports.guided.sync.WorkoutSyncHandlers
 import com.fitconnect.android.sports.di.DefaultSportsContainer
 import com.fitconnect.android.sports.di.SportsContainer
 import com.fitconnect.android.sports.metrics.MetricSample
@@ -62,6 +70,7 @@ class FitConnectApplication : Application() {
     private val athleteLock = Any()
     private val coachLock = Any()
     private val ascendLock = Any()
+    private val guidedLock = Any()
 
     @Volatile private var sportsContainerRef: SportsContainer? = null
     @Volatile private var geoContainerRef: GeoContainer? = null
@@ -70,12 +79,28 @@ class FitConnectApplication : Application() {
     @Volatile private var athleteContainerRef: AthleteContainer? = null
     @Volatile private var coachContainerRef: CoachContainer? = null
     @Volatile private var ascendEngineRef: AscendEngine? = null
+    @Volatile private var guidedWorkoutRef: GuidedWorkoutRuntime? = null
 
     val sportsContainer: SportsContainer
         get() = sportsContainerRef ?: synchronized(sportsLock) {
             sportsContainerRef ?: DefaultSportsContainer().also {
                 sportsContainerRef = it
                 startupTracer.mark("sports_ready")
+            }
+        }
+
+    val guidedWorkout: GuidedWorkoutRuntime
+        get() = guidedWorkoutRef ?: synchronized(guidedLock) {
+            guidedWorkoutRef ?: GuidedWorkoutRuntime(
+                store = createRoomGuidedWorkoutStore(this),
+                logger = container.logger,
+                sessionStore = container.sessionStore,
+                offline = container.offline,
+                syncQueue = container.syncQueue,
+                notifications = GatewayWorkoutNotificationPort(container.notifications),
+            ).also {
+                guidedWorkoutRef = it
+                startupTracer.mark("guided_workout_ready")
             }
         }
 
@@ -128,6 +153,15 @@ class FitConnectApplication : Application() {
             }
         }
 
+    @Volatile private var gpsRouteStoreRef: GpsRouteStore? = null
+
+    val gpsRouteStore: GpsRouteStore
+        get() = gpsRouteStoreRef ?: synchronized(this) {
+            gpsRouteStoreRef ?: RoomGpsRouteStore(CaptureRoomDatabase.create(this)).also {
+                gpsRouteStoreRef = it
+            }
+        }
+
     val athleteContainer: AthleteContainer
         get() = athleteContainerRef ?: synchronized(athleteLock) {
             athleteContainerRef ?: DefaultAthleteContainer(
@@ -140,6 +174,9 @@ class FitConnectApplication : Application() {
                     com.fitconnect.android.athlete.data.LocalAthleteRepository.ATHLETE_ID
                 },
                 ascend = ascendEngine,
+                guidedWorkout = guidedWorkout,
+                gpsRouteStore = gpsRouteStore,
+                appContext = this,
             ).also {
                 athleteContainerRef = it
                 startupTracer.mark("athlete_ready")
@@ -185,6 +222,7 @@ class FitConnectApplication : Application() {
                     com.fitconnect.android.push.FcmNotificationGateway(
                         this@FitConnectApplication,
                         log,
+                        api = { container.apiClient },
                     )
                 } else {
                     null
@@ -261,6 +299,18 @@ class FitConnectApplication : Application() {
         ).forEach { type ->
             container.offlineExecutor.register(type, localAck)
         }
+        WorkoutSyncHandlers.register(
+            registry = container.offlineExecutor,
+            api = container.apiClient,
+            ascend = container.ascendRemote,
+            logger = container.logger,
+        )
+        OutdoorSyncHandlers.register(
+            registry = container.offlineExecutor,
+            api = container.apiClient,
+            ascend = container.ascendRemote,
+            logger = container.logger,
+        )
     }
 
     private suspend fun bootstrapDemoTelemetry() {

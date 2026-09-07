@@ -3,6 +3,7 @@ package com.fitconnect.android.athlete.ui.settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.data.canonicalAthleteId
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.LocalAthleteSignOut
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
@@ -49,9 +50,15 @@ fun SettingsScreen(
     val honeycomb by container.platform.themeSettings.observeHoneycomb()
         .collectAsState(initial = HoneycombIntensity.SUBTLE)
     val locale by container.platform.localeManager.observe().collectAsState(initial = AppLocale.EN)
-    var prefs by remember { mutableStateOf(container.ascend.snapshot(LocalAthleteRepository.ATHLETE_ID).prefs) }
+    var athleteId by remember { mutableStateOf("") }
+    var prefs by remember { mutableStateOf(AscendPrefs()) }
     var confirmDelete by remember { mutableStateOf(false) }
     var deleteMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        athleteId = container.platform.sessionStore.canonicalAthleteId()
+        prefs = container.ascend.snapshot(athleteId).prefs
+    }
 
     AthleteScreenScaffold(
         title = "Settings",
@@ -131,7 +138,7 @@ fun SettingsScreen(
                         checked = prefs.hapticsEnabled,
                         onCheckedChange = { enabled ->
                             val next = AscendPrefs(hapticsEnabled = enabled, progressionNotificationsEnabled = prefs.progressionNotificationsEnabled)
-                            container.ascend.setPrefs(LocalAthleteRepository.ATHLETE_ID, next)
+                            container.ascend.setPrefs(athleteId, next)
                             prefs = next
                         },
                     )
@@ -140,7 +147,7 @@ fun SettingsScreen(
                         checked = prefs.progressionNotificationsEnabled,
                         onCheckedChange = { enabled ->
                             val next = AscendPrefs(hapticsEnabled = prefs.hapticsEnabled, progressionNotificationsEnabled = enabled)
-                            container.ascend.setPrefs(LocalAthleteRepository.ATHLETE_ID, next)
+                            container.ascend.setPrefs(athleteId, next)
                             prefs = next
                         },
                     )

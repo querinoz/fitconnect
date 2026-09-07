@@ -1,10 +1,7 @@
-// Elite Capture — the recording engine (F4): Foreground Service, GPS
-// (FusedLocationProvider), barometer, BLE GATT sensor ingestion, and the
-// append-only Room write path. Empty-but-compiling in F0 so the module
-// boundary exists before any capture code does (ADR-005/007).
+// Elite Capture — Foreground Service, FusedLocationProvider, Room route points.
 plugins {
-    // AGP 9 built-in Kotlin: no kotlin.android plugin (see :app).
     alias(libs.plugins.android.library)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -25,8 +22,21 @@ android {
 
 dependencies {
     implementation(project(":shared"))
+    implementation(project(":foundation"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
-    testImplementation("junit:junit:4.13.2")
+    implementation(libs.play.services.location)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
 }

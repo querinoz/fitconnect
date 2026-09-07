@@ -17,10 +17,13 @@ export async function GET(req: Request) {
   const { page, limit } = parsePagination(searchParams);
 
   let sessions;
+  let source: "postgres" | "seed" | "empty" | "athlete" = "athlete";
   if (coachId) {
     const resolved = await requireCoachId(req, coachId);
     if (isAuthFailure(resolved)) return resolved.response;
-    sessions = await listCoachSessions(resolved.coachId);
+    const listed = await listCoachSessions(resolved.coachId);
+    sessions = listed.sessions;
+    source = listed.source;
   } else {
     const resolved = await requireAthleteId(req);
     if (isAuthFailure(resolved)) return resolved.response;
@@ -28,8 +31,8 @@ export async function GET(req: Request) {
   }
 
   if (wantsLegacy(req)) {
-    return NextResponse.json({ sessions });
+    return NextResponse.json({ sessions, source });
   }
 
-  return NextResponse.json(paginate(sessions, page, limit));
+  return NextResponse.json({ ...paginate(sessions, page, limit), source });
 }

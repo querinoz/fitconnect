@@ -44,6 +44,7 @@ class HttpAscendRemote(
         eventId: String,
         distanceM: Double,
         durationMs: Long = 0,
+        sessionId: String? = null,
     ): AppResult<RemoteProgressionSnapshot> {
         val body = JSONObject().apply {
             put("eventId", eventId)
@@ -51,14 +52,21 @@ class HttpAscendRemote(
             put("payload", JSONObject().apply {
                 put("distanceM", distanceM)
                 if (durationMs > 0) put("durationMs", durationMs)
+                if (!sessionId.isNullOrBlank()) put("sessionId", sessionId)
             })
         }
         return when (val result = api().post("/api/v1/ascend/progression", body.toString())) {
-            is AppResult.Err -> result
+            is AppResult.Err -> {
+                // Server may return DUPLICATE with HTTP 200; ApiClient only fails non-2xx.
+                result
+            }
             is AppResult.Ok -> runCatching {
                 val json = JSONObject(result.value)
-                val progression = json.getJSONObject("snapshot")
+                val progression = json.optJSONObject("snapshot") ?: json.getJSONObject("progression")
                 val level = progression.getJSONObject("level")
+                if (json.optString("status") == "DUPLICATE") {
+                    logger.i("AscendRemote", "xp_duplicate_prevented event=$eventId")
+                }
                 AppResult.Ok(
                     RemoteProgressionSnapshot(
                         userId = progression.getString("userId"),

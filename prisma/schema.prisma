@@ -36,6 +36,7 @@ enum SessionStatus {
   SCHEDULED
   LIVE
   COMPLETED
+  CANCELLED
 }
 
 enum WearableProvider {

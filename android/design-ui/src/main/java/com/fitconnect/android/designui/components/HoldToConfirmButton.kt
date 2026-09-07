@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.fitconnect.android.foundation.a11y.Accessibility
@@ -43,8 +44,14 @@ fun HoldToConfirmButton(
                 minWidth = Accessibility.PREFERRED_TOUCH_TARGET_DP.dp,
                 minHeight = Accessibility.PREFERRED_TOUCH_TARGET_DP.dp,
             )
-            .semantics { contentDescription = "Hold to $label" }
-            .testTag("hold_to_confirm")
+            .semantics {
+                contentDescription = "Hold to $label"
+                // TalkBack / instrumentation activate — hold remains the primary visual gesture.
+                onClick(label = label) {
+                    onConfirmed()
+                    true
+                }
+            }
             .pointerInput(holdMs) {
                 detectTapGestures(
                     onPress = {

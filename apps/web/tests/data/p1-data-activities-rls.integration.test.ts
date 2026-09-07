@@ -87,13 +87,24 @@ describe.skipIf(!DATABASE_URL || !LIVE_RLS)("P1-DATA activities RLS two-user IDO
 
     // 016 is idempotent (IF NOT EXISTS). Do not re-apply 014 — its CREATE TABLE
     // is not IF NOT EXISTS and already lives on the live project.
-    for (const file of ["016_p1_data_canonical.sql"]) {
+    for (const file of [
+      "016_p1_data_canonical.sql",
+      "017_strength_workout_engine.sql",
+      "018_workout_wave2.sql"
+    ]) {
       const sql = readFileSync(
         path.resolve(__dirname, `../../../../supabase/migrations/${file}`),
         "utf8"
       );
       for (const statement of statementsFromMigration(sql)) {
-        await client.query(statement);
+        try {
+          await client.query(statement);
+        } catch (err) {
+          const code = (err as { code?: string }).code;
+          // 017 CREATE POLICY / INDEX is not fully IF NOT EXISTS — tolerate re-apply.
+          if (code === "42710" || code === "42P07" || code === "42701") continue;
+          throw err;
+        }
       }
     }
 
@@ -106,6 +117,13 @@ describe.skipIf(!DATABASE_URL || !LIVE_RLS)("P1-DATA activities RLS two-user IDO
     }
 
     await asAdmin(async () => {
+      await client.query("delete from strength_sets where session_id in (select id from strength_sessions where user_id in ($1, $2))", [
+        USER_A,
+        USER_B
+      ]).catch(() => undefined);
+      await client.query("delete from strength_sessions where user_id in ($1, $2)", [USER_A, USER_B]).catch(
+        () => undefined
+      );
       await client.query(`delete from activity_route_points where activity_id in (
         select id from activities where user_id in ($1, $2))`, [USER_A, USER_B]);
       await client.query("delete from activities where user_id in ($1, $2)", [USER_A, USER_B]);
@@ -128,6 +146,13 @@ describe.skipIf(!DATABASE_URL || !LIVE_RLS)("P1-DATA activities RLS two-user IDO
     if (!client) return;
     try {
       await asAdmin(async () => {
+        await client.query("delete from strength_sets where session_id in (select id from strength_sessions where user_id in ($1, $2))", [
+          USER_A,
+          USER_B
+        ]).catch(() => undefined);
+        await client.query("delete from strength_sessions where user_id in ($1, $2)", [USER_A, USER_B]).catch(
+          () => undefined
+        );
         await client.query(`delete from activity_route_points where activity_id in (
           select id from activities where user_id in ($1, $2))`, [USER_A, USER_B]);
         await client.query("delete from activities where user_id in ($1, $2)", [USER_A, USER_B]);
@@ -150,7 +175,9 @@ describe.skipIf(!DATABASE_URL || !LIVE_RLS)("P1-DATA activities RLS two-user IDO
     await client.end().catch(() => undefined);
   });
 
-  it("A owns activity; B cannot read private A; Strava never social", async () => {
+  it(
+    "A owns activity; B cannot read private A; Strava never social",
+    async () => {
     let activityId = "";
 
     await asAuthenticated(USER_A, async () => {
@@ -200,7 +227,7 @@ describe.skipIf(!DATABASE_URL || !LIVE_RLS)("P1-DATA activities RLS two-user IDO
       );
       expect(strava.rows).toHaveLength(0);
     });
-  });
+  }, 30_000);
 
   it("ASCEND: one activity → one XP event (idempotent retry)", async () => {
     const eventId = "p1-data-xp-evt-1";
@@ -271,4 +298,104 @@ describe.skipIf(!DATABASE_URL || !LIVE_RLS)("P1-DATA activities RLS two-user IDO
       expect(other.rows).toHaveLength(0);
     });
   });
+
+  it("P2CORE-009 guided MANUAL activity + strength_sessions idempotency; B cannot read", async () => {
+    const sessionId = "10000000-0000-4000-8000-00000000b201";
+    const activityId = "10000000-0000-4000-8000-00000000b202";
+    const idem = `activity:${USER_A}:${sessionId}`;
+
+    await asAuthenticated(USER_A, async () => {
+      await client.query(
+        `insert into activities
+           (id, user_id, provider, external_id, sport, started_at, ended_at, duration_ms, visibility, demo_labeled)
+         values ($1::uuid, $2, 'MANUAL', $3, 'STRENGTH', now() - interval '1 hour', now(), 3600000, 'private', false)
+         on conflict (provider, external_id) do update set duration_ms = excluded.duration_ms`,
+        [activityId, USER_A, sessionId]
+      );
+      await client.query(
+        `insert into strength_sessions
+           (id, user_id, activity_id, status, started_at, completed_at, duration_ms, idempotency_key)
+         values ($1::uuid, $2, $3::uuid, 'COMPLETED', now() - interval '1 hour', now(), 3600000, $4)
+         on conflict (id) do update set idempotency_key = excluded.idempotency_key`,
+        [sessionId, USER_A, activityId, idem]
+      );
+
+      await client.query(
+        `insert into activities
+           (id, user_id, provider, external_id, sport, started_at, ended_at, duration_ms, visibility, demo_labeled)
+         values ($1::uuid, $2, 'MANUAL', $3, 'STRENGTH', now() - interval '1 hour', now(), 3600000, 'private', false)
+         on conflict (provider, external_id) do update set duration_ms = excluded.duration_ms`,
+        [activityId, USER_A, sessionId]
+      );
+
+      const count = await client.query(
+        `select count(*)::int as n from activities where provider = 'MANUAL' and external_id = $1`,
+        [sessionId]
+      );
+      expect(count.rows[0].n).toBe(1);
+
+      const meta018 = await client.query(
+        `select value from data_schema_meta where key = 'workout_wave2_schema_version'`
+      );
+      expect(meta018.rows[0]?.value).toBe("018");
+    });
+
+    await asAuthenticated(USER_B, async () => {
+      const other = await client.query(`select id from activities where id = $1::uuid`, [activityId]);
+      expect(other.rows).toHaveLength(0);
+      const ss = await client.query(`select id from strength_sessions where id = $1::uuid`, [
+        sessionId
+      ]);
+      expect(ss.rows).toHaveLength(0);
+    });
+  });
+
+  it("GPS-012 route points: A owns; B cannot read or insert onto A activity", async () => {
+    const sessionId = "20000000-0000-4000-8000-00000000c301";
+    const activityId = "20000000-0000-4000-8000-00000000c302";
+
+    await asAuthenticated(USER_A, async () => {
+      await client.query(
+        `insert into activities
+           (id, user_id, provider, external_id, sport, started_at, ended_at, duration_ms, distance_m, visibility, demo_labeled)
+         values ($1::uuid, $2, 'GPS', $3, 'RUN', now() - interval '30 minutes', now(), 1800000, 2100, 'private', false)
+         on conflict (provider, external_id) do update set distance_m = excluded.distance_m`,
+        [activityId, USER_A, sessionId]
+      );
+      await client.query(
+        `insert into activity_route_points
+           (activity_id, recorded_at, latitude, longitude, accuracy_m, speed_mps, seq)
+         values ($1::uuid, now(), 38.7223, -9.1393, 8.0, 3.1, 1)`,
+        [activityId]
+      );
+      const own = await client.query(
+        `select count(*)::int as n from activity_route_points where activity_id = $1::uuid`,
+        [activityId]
+      );
+      expect(own.rows[0].n).toBe(1);
+    });
+
+    await asAuthenticated(USER_B, async () => {
+      const read = await client.query(
+        `select id from activity_route_points where activity_id = $1::uuid`,
+        [activityId]
+      );
+      expect(read.rows).toHaveLength(0);
+
+      await client.query("savepoint before_route_idor");
+      let rejected = false;
+      try {
+        await client.query(
+          `insert into activity_route_points
+             (activity_id, recorded_at, latitude, longitude, accuracy_m, speed_mps, seq)
+           values ($1::uuid, now(), 38.73, -9.14, 5.0, 2.0, 99)`,
+          [activityId]
+        );
+      } catch {
+        rejected = true;
+        await client.query("rollback to savepoint before_route_idor");
+      }
+      expect(rejected).toBe(true);
+    });
+  }, 30_000);
 });

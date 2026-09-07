@@ -79,3 +79,10 @@ qa/reports/*-selftest.json
 /fitconnectinstagramkit.zip
 /fitconnectinstagram18posts.zip
 
+
+# Local IDE / agent (checkpoint excludes)
+.idea/
+.cursor/settings.json
+/reel01_hexatar.mp4
+content/instagram/publish-run.log
+

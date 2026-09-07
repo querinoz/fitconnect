@@ -13,11 +13,10 @@ import com.fitconnect.shared.workout.WorkoutSport
 object WearRuntime {
     @Volatile var engine: LiveActivityEngine? = null
     /**
-     * In-progress local id. On sync/complete this MUST reconcile to canonical
-     * `activities.id` (UUID). Local `wear-*` ids are not a second product truth
-     * (P1-DATA / P7-WATCH).
+     * In-progress session id. Minted as UUID at WearMainActivity start so it can
+     * reconcile to canonical `activities.id` without a parallel `wear-*` namespace.
      */
-    @Volatile var sessionId: String = "wear-local"
+    @Volatile var sessionId: String = ""
     @Volatile var deviceId: String = "wear"
     @Volatile var sequence: Long = 0L
     @Volatile var lease: SessionLease? = null

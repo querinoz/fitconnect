@@ -104,12 +104,13 @@ class LocalDemoMapProvider : MapProvider {
 }
 
 /**
- * MapLibre adapter slot. Controller is still in-memory until the SDK is wired.
- * Do not treat [kind] as a live tile server.
+ * MapLibre adapter. Live tile rendering is in design-ui [MapLibreRouteMap]
+ * (OpenFreeMap dark). This provider remains a scene-controller slot for
+ * discovery clustering — not a GPS simulator.
  */
 class MapLibreProvider : MapProvider {
     override val kind: MapProviderKind = MapProviderKind.MAPLIBRE
-    override val localDemo: Boolean = true
+    override val localDemo: Boolean = false
     override fun supportedStyles(): Set<MapStyleKind> =
         setOf(MapStyleKind.DARK, MapStyleKind.LIGHT, MapStyleKind.SATELLITE, MapStyleKind.TERRAIN)
     override fun createController(): MapController = InMemoryMapController(MapStyleKind.DARK)

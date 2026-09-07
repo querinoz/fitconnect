@@ -57,8 +57,8 @@ class AthleteDemoVisualTourInstrumentationTest {
         composeRule.onNodeWithTag("athlete_tab_home").performClick()
         waitForTag("athlete_home")
         composeRule.onNodeWithTag("athlete_train_fab").performClick()
-        waitForTag("athlete_activity")
-        pause("07_train_activity")
+        waitForTag("athlete_guided_workout")
+        pause("07_train_workout")
 
         composeRule.activityRule.scenario.onActivity { activity ->
             activity.onBackPressedDispatcher.onBackPressed()

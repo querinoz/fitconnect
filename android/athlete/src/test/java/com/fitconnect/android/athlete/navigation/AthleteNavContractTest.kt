@@ -11,6 +11,7 @@ class AthleteNavContractTest {
         val tabs = AthleteDest.bottomTabs.map { it.name }
         assertEquals(listOf("HOME", "DISCOVER", "VAULT", "PROFILE"), tabs)
         assertFalse(AthleteDest.ACTIVITY.bottom)
+        assertFalse(AthleteDest.WORKOUT.bottom)
         assertFalse(AthleteDest.COMMUNITY.bottom)
         assertTrue(AthleteDest.bottomTabs.size <= 4)
     }

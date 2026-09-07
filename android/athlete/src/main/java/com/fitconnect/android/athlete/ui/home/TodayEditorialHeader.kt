@@ -15,13 +15,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.neumorphic.EosGlassBadge
 import com.fitconnect.android.designui.theme.EliteSpace
-import com.fitconnect.android.foundation.auth.DemoPersona
+import com.fitconnect.android.foundation.navigation.identityBadgeLabel
 
 @Composable
 fun TodayEditorialHeader(
     greeting: String,
     modifier: Modifier = Modifier,
-    showDemoBadge: Boolean = true,
+    identityBadge: String? = null,
 ) {
     Column(
         modifier = modifier
@@ -35,10 +35,13 @@ fun TodayEditorialHeader(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             EliteSysLabel("ATHLETE OS · TODAY")
-            if (showDemoBadge) {
+            identityBadge?.let { label ->
                 EosGlassBadge(
-                    text = DemoPersona.MODE_LABEL,
-                    modifier = Modifier.testTag("athlete_local_demo_badge"),
+                    text = label,
+                    modifier = Modifier.testTag(
+                        if (label == "LOCAL_DEMO") "athlete_local_demo_badge"
+                        else "athlete_identity_badge",
+                    ),
                 )
             }
         }

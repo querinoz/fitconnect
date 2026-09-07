@@ -1,9 +1,9 @@
 package com.fitconnect.android.ui.onboarding
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.fitconnect.android.designui.components.EliteBadge
@@ -25,6 +26,7 @@ import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteChip
+import com.fitconnect.android.designui.components.EliteLoading
 import com.fitconnect.android.designui.components.EliteOnboardingProgress
 import com.fitconnect.android.designui.components.EliteTextField
 import com.fitconnect.android.designui.theme.EliteSpace
@@ -52,14 +54,19 @@ fun CoachOnboardingScreen(
     keyValueStore: KeyValueStore,
     onFinished: () -> Unit,
     identityRemote: IdentityRemote? = null,
+    isLocalDemoSession: Boolean = false,
 ) {
     val scope = rememberCoroutineScope()
     var step by remember { mutableIntStateOf(0) }
     var displayName by remember { mutableStateOf("Tomás Rivera") }
     var specialty by remember { mutableStateOf("Endurance") }
-    var documentState by remember { mutableStateOf("Uploaded (LOCAL_DEMO)") }
+    var documentState by remember {
+        mutableStateOf(if (isLocalDemoSession) "Uploaded (LOCAL_DEMO)" else "Skip for now")
+    }
     var hourly by remember { mutableStateOf("45") }
-    var stripeState by remember { mutableStateOf("Connect pending (LOCAL_DEMO)") }
+    var stripeState by remember {
+        mutableStateOf(if (isLocalDemoSession) "Connect pending (LOCAL_DEMO)" else "Connect pending")
+    }
     var hydrated by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -87,7 +94,14 @@ fun CoachOnboardingScreen(
     }
 
     if (!hydrated) {
-        Spacer(modifier = Modifier.fillMaxSize())
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag("screen_coach_onboarding_loading"),
+            contentAlignment = Alignment.Center,
+        ) {
+            EliteLoading(label = "SYS.ONBOARD")
+        }
         return
     }
 
@@ -99,7 +113,9 @@ fun CoachOnboardingScreen(
             .testTag("screen_coach_onboarding"),
         verticalArrangement = Arrangement.spacedBy(EliteSpace.Md),
     ) {
-        EliteBadge(text = DemoPersona.MODE_LABEL)
+        if (isLocalDemoSession) {
+            EliteBadge(text = DemoPersona.MODE_LABEL)
+        }
         EliteOnboardingProgress(step = step, total = COACH_STEPS.size)
         Text("Coach onboarding", style = MaterialTheme.typography.headlineSmall)
         Text(
@@ -139,10 +155,19 @@ fun CoachOnboardingScreen(
             2 -> {
                 Text("Documents", style = MaterialTheme.typography.titleMedium)
                 Text(
-                    "Certification / liability upload is simulated in LOCAL_DEMO.",
+                    if (isLocalDemoSession) {
+                        "Certification / liability upload is simulated in LOCAL_DEMO."
+                    } else {
+                        "Upload certification / liability documents when available."
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                listOf("Uploaded (LOCAL_DEMO)", "Skip for now").forEach { option ->
+                val docOptions = if (isLocalDemoSession) {
+                    listOf("Uploaded (LOCAL_DEMO)", "Skip for now")
+                } else {
+                    listOf("Skip for now")
+                }
+                docOptions.forEach { option ->
                     EliteChip(label = option, selected = documentState == option, onClick = { documentState = option })
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
@@ -170,11 +195,20 @@ fun CoachOnboardingScreen(
                 Text("Stripe Connect", style = MaterialTheme.typography.titleMedium)
                 EliteCard {
                     Text(
-                        "Production Stripe Connect remains HUMAN_PENDING. This step only records LOCAL_DEMO state.",
+                        if (isLocalDemoSession) {
+                            "Production Stripe Connect remains HUMAN_PENDING. This step only records LOCAL_DEMO state."
+                        } else {
+                            "Stripe Connect setup continues in Profile when production billing is enabled."
+                        },
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
-                listOf("Connect pending (LOCAL_DEMO)", "Simulated connected").forEach { option ->
+                val stripeOptions = if (isLocalDemoSession) {
+                    listOf("Connect pending (LOCAL_DEMO)", "Simulated connected")
+                } else {
+                    listOf("Connect pending")
+                }
+                stripeOptions.forEach { option ->
                     EliteChip(label = option, selected = stripeState == option, onClick = { stripeState = option })
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {

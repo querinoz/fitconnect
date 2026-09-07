@@ -65,6 +65,16 @@ fun NotificationsScreen() {
             testTag = "athlete_notifications",
         ) {
             item { Text("Alerts", style = MaterialTheme.typography.titleMedium) }
+            if (inbox.notifications.isEmpty()) {
+                item {
+                    EliteCard {
+                        Text(
+                            "No alerts yet. Push delivery needs FCM production credentials when available.",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
+            }
             items(inbox.notifications, key = { it.id }) { n ->
                 EliteCard {
                     Text(n.title, style = MaterialTheme.typography.titleMedium)
@@ -75,6 +85,16 @@ fun NotificationsScreen() {
                 }
             }
             item { Text("Coach messages", style = MaterialTheme.typography.titleMedium) }
+            if (inbox.messages.isEmpty()) {
+                item {
+                    EliteCard {
+                        Text(
+                            "No coach messages. Messages appear when your coach sends inbox items.",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
+            }
             items(inbox.messages, key = { it.id }) { msg ->
                 EliteCard {
                     Text(

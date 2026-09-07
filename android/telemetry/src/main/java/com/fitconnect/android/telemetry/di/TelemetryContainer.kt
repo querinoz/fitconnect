@@ -43,6 +43,8 @@ import com.fitconnect.android.telemetry.provider.WhoopProvider
 import com.fitconnect.android.telemetry.quality.DataQualityEngine
 import com.fitconnect.android.telemetry.store.InMemoryTelemetryStore
 import com.fitconnect.android.telemetry.store.TelemetryStore
+import com.fitconnect.android.telemetry.store.room.RoomTelemetryStore
+import com.fitconnect.android.telemetry.store.room.TelemetryRoomDatabase
 import com.fitconnect.android.telemetry.sync.BackgroundSyncPolicy
 import com.fitconnect.android.telemetry.sync.DeduplicationEngine
 import com.fitconnect.android.telemetry.sync.TelemetrySyncEngine
@@ -78,7 +80,12 @@ class DefaultTelemetryContainer(
     appContext: Context? = null,
 ) : TelemetryContainer {
 
-    override val store: TelemetryStore = InMemoryTelemetryStore()
+    override val store: TelemetryStore =
+        if (appContext != null) {
+            RoomTelemetryStore(TelemetryRoomDatabase.create(appContext))
+        } else {
+            InMemoryTelemetryStore()
+        }
     override val observability: TelemetryObservability = InMemoryTelemetryObservability()
     override val capabilities: CapabilityRegistry = DefaultCapabilityRegistry()
 
@@ -132,7 +139,11 @@ class DefaultTelemetryContainer(
     override val wearWorkout: WearWorkoutControlPort =
         if (appContext != null) GmsWearWorkoutControl(appContext) else NoWearWorkoutControl()
     override val healthData: HealthDataRepository =
-        if (appContext != null) AndroidHealthDataRepository(appContext) else UnavailableHealthDataRepository()
+        if (appContext != null) {
+            AndroidHealthDataRepository(appContext, store)
+        } else {
+            UnavailableHealthDataRepository()
+        }
     override val wearOsPlatform: WearablePlatformAdapter = WearOsPlatformAdapter(wearCompanion)
     override val xiaomiPlatform: WearablePlatformAdapter = XiaomiPlatformAdapter()
 }

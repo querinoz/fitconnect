@@ -9,10 +9,10 @@ Naming: **Elite OS** = product shell. **Elite Surface** = design tokens. **Elite
 
 ## Source of truth
 
-| Surface | Code | Tokens |
+| Surface | Code | Tokens / UI |
 |---|---|---|
 | Web app + landing | `apps/web` Next.js 14 | `apps/web/app/elite-os.css` + `packages/design-tokens` |
-| Android phone | `android/app` + `:athlete` | generated `EliteSurfaceTokens.kt` via `pnpm tokens:kotlin` |
+| Android phone | `android/app` + `:athlete` + `:design-ui` | generated `EliteSurfaceTokens.kt` via `pnpm tokens:kotlin`; neu-glass primitives in `:design-ui` |
 | Wear OS | `android/wear` | same Kotlin tokens; honeycomb static ≤3% or off in ambient |
 | Shared domain (JVM) | `android/shared` | no Android APIs |
 | Expo | `apps/mobile` | **frozen Path A** — do not revive as the reference app |
@@ -39,3 +39,15 @@ Naming: **Elite OS** = product shell. **Elite Surface** = design tokens. **Elite
 Athlete IA (2026-08-20, `AGENTS.md` §6): **Hoje · Análise · Conquistas · Perfil** plus **Treinar** as M3 Expressive FAB Menu — not a fifth tab. Compact = flexible/floating bar + FAB. ≥600dp collapsed rail; ≥1240dp expanded rail. Zero drawer. Community/squad are destinations inside Hoje/Análise, not peer tabs. Web sidebar mirrors the same four plus Settings. Wear stays one datum per screen, rotary crown, ambient B/W during session.
 
 The previous five-tab lock (HOME · DISCOVER · ACTIVITY · COMMUNITY · PROFILE) is **superseded**. Do not reintroduce Activity or Community as equal bottom destinations.
+
+## Neu-glass (Android athlete, 2026-09)
+
+Spec: `docs/design/ELITE_OS_NEU_GLASS.md`. Waves 0–6 **ENGINEERING COMPLETE** on athlete surfaces.
+
+- **Neumorphic** = anchored data (`EosNeumorphic`, `EosPremiumCard`, `#0D1321`, dual shadow).
+- **Glass** = floating chrome (`EosGlassSurface`, nav/FAB/badges; ≤2 blur layers/screen).
+- **Charts** = `CHART_TOKENS` / `EliteChartPalette` (Z1–Z5, not rainbow canonical hues).
+- **Typography** = `EliteTypography.kt` maps all Material3 slots to bundled fonts.
+- **Destructive** = plain text only on Profile sign-out.
+
+Coach OS and web dashboards are **not** neu-glass yet. Do not claim cross-surface visual parity.

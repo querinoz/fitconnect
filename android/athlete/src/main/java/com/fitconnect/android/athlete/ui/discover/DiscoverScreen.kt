@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.data.canonicalAthleteId
 import com.fitconnect.android.athlete.demo.AthleteContentResolver
 import com.fitconnect.android.athlete.demo.AthleteDemoBanner
 import com.fitconnect.android.athlete.demo.AthleteDemoCatalog
@@ -82,6 +82,7 @@ private data class BookingDraft(
 fun DiscoverScreen() {
     val container = LocalAthleteContainer.current
     val scope = rememberCoroutineScope()
+    var isLocalDemo by remember { mutableStateOf(false) }
     var specialty by remember { mutableStateOf("") }
     var language by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
@@ -104,9 +105,12 @@ fun DiscoverScreen() {
         }
     }
 
+    LaunchedEffect(Unit) {
+        isLocalDemo = container.platform.sessionStore.snapshot().isLocalDemo
+    }
+
     LaunchedEffect(specialty, language, verifiedOnly) {
         container.platform.analytics.screen("athlete_discover")
-        val anchor = PlacesCatalog.defaultDevAnchor()
         reload()
     }
 
@@ -144,75 +148,130 @@ fun DiscoverScreen() {
         val filtered = coaches.filter { coach ->
             city.isBlank() || coach.city.contains(city, ignoreCase = true)
         }
-        val analysis = remember { AthleteContentResolver.analysisSurface() }
+        var analysis by remember { mutableStateOf(AthleteContentResolver.analysisSurface()) }
+        var analysisLoading by remember { mutableStateOf(!isLocalDemo) }
+        LaunchedEffect(isLocalDemo) {
+            if (isLocalDemo) {
+                analysis = AthleteContentResolver.analysisSurface()
+                analysisLoading = false
+            } else {
+                analysisLoading = true
+                val uid = container.platform.sessionStore.canonicalAthleteId()
+                analysis = AthleteContentResolver.analysisFromTelemetry(
+                    athleteId = uid,
+                    telemetry = container.telemetry.athleteFacade,
+                )
+                analysisLoading = false
+            }
+        }
         AthleteScreenScaffold(
             title = "Analysis",
-            subtitle = "Load · HRV · zones · ${DemoPersona.MODE_LABEL}",
+            subtitle = if (isLocalDemo) {
+                "Load · HRV · zones · ${DemoPersona.MODE_LABEL}"
+            } else {
+                "Coach marketplace · telemetry when synced"
+            },
             overline = "ATHLETE OS · ANALYSIS",
             testTag = "athlete_discover",
         ) {
             item {
                 AthleteDemoBanner(
-                    visible = analysis.isAnyDemo,
+                    visible = isLocalDemo && analysis.isAnyDemo,
                     modifier = Modifier.testTag("discover_demo_banner"),
                 )
             }
             item {
-                EliteSectionHeader(title = "Performance signals", overline = AthleteDemoCatalog.MODE_LABEL)
+                EliteSectionHeader(
+                    title = "Performance signals",
+                    overline = if (isLocalDemo) AthleteDemoCatalog.MODE_LABEL else "LIVE TELEMETRY",
+                )
             }
-            item {
-                EosPremiumWell(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("analysis_weekly_load_chart"),
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
-                        EliteSysLabel("WEEKLY LOAD")
-                        EliteWeeklyLoadChart(
-                            bars = analysis.weeklyLoad.mapIndexed { index, load ->
-                                EliteWeeklyLoadBar(
-                                    label = analysis.weeklyLabels[index],
-                                    load = load.value,
-                                    isToday = index == analysis.todayIndex,
-                                )
-                            },
-                        )
+            when {
+                analysisLoading -> {
+                    item {
+                        EliteCard(modifier = Modifier.testTag("analysis_charts_loading")) {
+                            Text("Loading telemetry…", style = MaterialTheme.typography.bodyMedium)
+                        }
                     }
                 }
-            }
-            item {
-                EosPremiumWell(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("analysis_hrv_trend_chart"),
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
-                        EliteSysLabel("HRV TREND · 7D")
-                        EliteHrvTrendChart(
-                            points = analysis.hrvTrendMs.mapIndexed { index, point ->
-                                EliteChartPoint(index.toFloat(), point.value)
-                            },
-                            deltaPercent = analysis.hrvDeltaPercent.value,
-                        )
+                analysis.weeklyLoad.isEmpty() &&
+                    analysis.hrvTrendMs.isEmpty() &&
+                    analysis.zoneMinutes.all { it.value == 0 } -> {
+                    item {
+                        EliteCard(modifier = Modifier.testTag("analysis_charts_empty")) {
+                            Text(
+                                if (isLocalDemo) {
+                                    "No demo analysis samples."
+                                } else {
+                                    "No measured load / HRV / zone samples yet. Sync Health Connect or complete a workout."
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
                     }
                 }
-            }
-            item {
-                EosPremiumWell(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("analysis_zone_ring_chart"),
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
-                        EliteSysLabel("TRAINING ZONES")
-                        EliteZoneRingChart(
-                            segments = analysis.zoneMinutes.mapIndexed { index, minutes ->
-                                EliteZoneSegment(
-                                    zone = index + 1,
-                                    minutes = minutes.value,
-                                )
-                            },
-                        )
+                else -> {
+                    if (analysis.weeklyLoad.isNotEmpty()) {
+                        item {
+                            EosPremiumWell(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("analysis_weekly_load_chart"),
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                                    EliteSysLabel("WEEKLY LOAD")
+                                    EliteWeeklyLoadChart(
+                                        bars = analysis.weeklyLoad.mapIndexed { index, load ->
+                                            EliteWeeklyLoadBar(
+                                                label = analysis.weeklyLabels.getOrElse(index) { "D$index" },
+                                                load = load.value,
+                                                isToday = index == analysis.todayIndex,
+                                            )
+                                        },
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    if (analysis.hrvTrendMs.isNotEmpty()) {
+                        item {
+                            EosPremiumWell(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("analysis_hrv_trend_chart"),
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                                    EliteSysLabel("HRV TREND · 7D")
+                                    EliteHrvTrendChart(
+                                        points = analysis.hrvTrendMs.mapIndexed { index, point ->
+                                            EliteChartPoint(index.toFloat(), point.value)
+                                        },
+                                        deltaPercent = analysis.hrvDeltaPercent.value,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    if (analysis.zoneMinutes.any { it.value > 0 }) {
+                        item {
+                            EosPremiumWell(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("analysis_zone_ring_chart"),
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                                    EliteSysLabel("TRAINING ZONES")
+                                    EliteZoneRingChart(
+                                        segments = analysis.zoneMinutes.mapIndexed { index, minutes ->
+                                            EliteZoneSegment(
+                                                zone = index + 1,
+                                                minutes = minutes.value,
+                                            )
+                                        },
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -271,34 +330,37 @@ fun DiscoverScreen() {
                                     preferredHour = draft.hour,
                                     durationMin = draft.durationMin,
                                     isOpen = { id, epoch, dur ->
-                                        container.geo.availability.isOpen(id, epoch, dur, SessionMode.PRIVATE)
+                                        if (!isLocalDemo) {
+                                            true
+                                        } else {
+                                            container.geo.availability.isOpen(id, epoch, dur, SessionMode.PRIVATE)
+                                        }
                                     },
                                 )
-                                if (container.geo.booking.conflicts(draft.coach.id, start, draft.durationMin)) {
+                                if (isLocalDemo &&
+                                    container.geo.booking.conflicts(draft.coach.id, start, draft.durationMin)
+                                ) {
                                     statusMessage = "Slot conflict — pick another time"
                                     return@launch
                                 }
-                                val created = container.geo.booking.create(
-                                    BookingRequest(
-                                        targetKind = BookingTargetKind.COACH,
-                                        targetId = draft.coach.id,
-                                        clientId = LocalAthleteRepository.ATHLETE_ID,
-                                        clientName = AthleteDemoCatalog.DEMO_ATHLETE_DISPLAY_NAME,
-                                        startEpochMs = start,
+                                when (
+                                    val created = container.athleteRepository.createBooking(
+                                        coachId = draft.coach.id,
+                                        scheduledAtEpochMs = start,
                                         durationMin = draft.durationMin,
-                                        mode = SessionMode.PRIVATE,
-                                        notes = "LOCAL_DEMO booking",
-                                        autoConfirm = true,
-                                    ),
-                                )
-                                when (created) {
+                                        notes = if (isLocalDemo) "LOCAL_DEMO booking" else null,
+                                        idempotencyKey = java.util.UUID.randomUUID().toString(),
+                                    )
+                                ) {
                                     is AppResult.Ok -> {
-                                        lastBookingId = created.value.id
-                                        statusMessage = "Booked ${created.value.status} · ${created.value.id}"
+                                        lastBookingId = created.value
+                                        statusMessage = "Booked · ${created.value}"
                                         bookingDraft = null
                                         selectedCoach = null
                                     }
-                                    is AppResult.Err -> statusMessage = "Booking failed — try another slot"
+                                    is AppResult.Err -> {
+                                        statusMessage = "Booking failed · ${created.error}"
+                                    }
                                 }
                             }
                         },
@@ -313,7 +375,11 @@ fun DiscoverScreen() {
                         onClose = { selectedCoach = null },
                         onBook = { bookingDraft = BookingDraft(coach) },
                         onMessage = {
-                            statusMessage = "Message queued (LOCAL_DEMO) → ${coach.name}"
+                            statusMessage = if (isLocalDemo) {
+                                "Message queued (LOCAL_DEMO) → ${coach.name}"
+                            } else {
+                                "NOT_IMPLEMENTED: athlete→coach DM from Discover"
+                            }
                         },
                     )
                 }

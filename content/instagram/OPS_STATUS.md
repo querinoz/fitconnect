@@ -43,8 +43,8 @@
 2. **Token novo** após ligar Página → republicar post01
 3. **Editar/apagar post03** no Instagram (legenda viola playbook Strava)
 4. **Bio Instagram** (app móvel): link + nome + foto perfil
-5. **Stripe** — colar chaves completas `pk_test_51U9MOU...` / `sk_test_51U9MOU...` em `.env.local` + Vercel env
-6. **Supabase RLS** — 6 avisos críticos nas tabelas Strava (resolver antes de go-live)
+5. **Stripe** — paste full test publishable + secret keys into `.env.local` + Vercel env (never commit values; rotate if ever pasted into chat/docs)
+6. **Supabase RLS** — 6 critical warnings on Strava tables (resolve before go-live)
 
 ---
 

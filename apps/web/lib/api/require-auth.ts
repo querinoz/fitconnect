@@ -126,6 +126,43 @@ export async function requireCoachId(
   return { coachId: auth.user.id, accessToken: auth.accessToken };
 }
 
+/**
+ * Coach may only access athletes on their roster (anti-IDOR).
+ * Returns 403 when the athlete is not linked to this coach.
+ */
+export async function requireCoachOwnsAthlete(
+  request: Request,
+  athleteId: string
+): Promise<
+  | { coachId: string; athleteId: string; accessToken: string | null }
+  | AuthFailure
+> {
+  const resolved = await requireCoachId(request);
+  if (isAuthFailure(resolved)) return resolved;
+
+  if (!athleteId.trim()) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: "athleteId_required" }, { status: 400 })
+    };
+  }
+
+  const { coachOwnsAthlete } = await import("@/lib/db/repository");
+  const owned = await coachOwnsAthlete(resolved.coachId, athleteId);
+  if (!owned) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: "forbidden" }, { status: 403 })
+    };
+  }
+
+  return {
+    coachId: resolved.coachId,
+    athleteId,
+    accessToken: resolved.accessToken
+  };
+}
+
 export function isAuthFailure(
   result: { athleteId: string } | { coachId: string } | AuthFailure
 ): result is AuthFailure {

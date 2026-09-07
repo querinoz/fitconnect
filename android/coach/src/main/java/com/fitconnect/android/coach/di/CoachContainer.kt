@@ -4,11 +4,12 @@ import com.fitconnect.android.ai.di.AiContainer
 import com.fitconnect.android.coach.ai.CoachAiPort
 import com.fitconnect.android.coach.ai.EngineCoachAiPort
 import com.fitconnect.android.coach.data.CoachRepository
+import com.fitconnect.android.coach.data.HttpCoachRepository
 import com.fitconnect.android.coach.data.LocalCoachRepository
 import com.fitconnect.android.coach.files.CoachFileStore
 import com.fitconnect.android.coach.files.LocalCoachFileStore
-import com.fitconnect.android.coach.payments.ArchitectureCoachPaymentsGateway
 import com.fitconnect.android.coach.payments.CoachPaymentsGateway
+import com.fitconnect.android.coach.payments.SessionAwareCoachPaymentsGateway
 import com.fitconnect.android.foundation.di.AppContainer
 import com.fitconnect.android.geo.di.GeoContainer
 import com.fitconnect.android.sports.di.SportsContainer
@@ -45,13 +46,22 @@ class DefaultCoachContainer(
 ) : CoachContainer {
     override val coachSports: CoachSportsFacade = sports.coachFacade
     override val coachTelemetry: CoachTelemetryFacade = telemetry.coachFacade
-    override val coachRepository: CoachRepository = LocalCoachRepository(
+
+    private val localCoachRepository: CoachRepository = LocalCoachRepository(
         connectivity = platform.connectivity,
         offline = platform.offline,
         booking = geo.booking,
         availability = geo.availability,
     )
-    override val payments: CoachPaymentsGateway = ArchitectureCoachPaymentsGateway()
+
+    override val coachRepository: CoachRepository = HttpCoachRepository(
+        api = { platform.apiClient },
+        sessionStore = platform.sessionStore,
+        localFallback = localCoachRepository,
+    )
+    override val payments: CoachPaymentsGateway = SessionAwareCoachPaymentsGateway(
+        sessionStore = platform.sessionStore,
+    )
     override val files: CoachFileStore = LocalCoachFileStore()
     override val ai: CoachAiPort = EngineCoachAiPort(aiEngine.engine)
 

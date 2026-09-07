@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.health.connect.client.PermissionController
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.data.canonicalAthleteId
 import com.fitconnect.android.athlete.demo.AthleteContentResolver
 import com.fitconnect.android.athlete.demo.AthleteDemoBanner
 import com.fitconnect.android.athlete.domain.HomeSnapshot
@@ -33,6 +34,7 @@ import com.fitconnect.android.fitness.healthconnect.HealthConnectIntents
 import com.fitconnect.android.fitness.healthconnect.HealthConnectPermissionState
 import com.fitconnect.android.fitness.healthconnect.HealthConnectSdkMapper
 import com.fitconnect.android.foundation.common.AppResult
+import com.fitconnect.android.foundation.navigation.identityBadgeLabel
 import com.fitconnect.ascend.domain.StreakKind
 import kotlinx.coroutines.launch
 
@@ -59,10 +61,13 @@ fun HomeScreen(
     var todayUi by remember { mutableStateOf<TodayReadinessUi?>(null) }
     var athleteLabel by remember { mutableStateOf<String?>(null) }
     var sessionLocalDemo by remember { mutableStateOf(false) }
+    var athleteId by remember { mutableStateOf(LocalAthleteRepository.ATHLETE_ID) }
     var recentSessions by remember { mutableStateOf<List<TodaySessionCardUi>>(emptyList()) }
 
     suspend fun loadSessions(includeDemoFallback: Boolean) {
-        val workouts = container.fitness.workoutStore.listOwn(LocalAthleteRepository.ATHLETE_ID)
+        val uid = container.platform.sessionStore.canonicalAthleteId()
+        athleteId = uid
+        val workouts = container.fitness.workoutStore.listOwn(uid)
         recentSessions = TodaySessionResolver.resolve(
             workouts = workouts,
             includeDemoFallback = includeDemoFallback,
@@ -74,8 +79,10 @@ fun HomeScreen(
             val homeResult = container.athleteRepository.home()
             result = homeResult
             if (homeResult is AppResult.Ok) {
+                val uid = container.platform.sessionStore.canonicalAthleteId()
+                athleteId = uid
                 todayUi = AthleteContentResolver.todayReadiness(
-                    athleteId = LocalAthleteRepository.ATHLETE_ID,
+                    athleteId = uid,
                     home = homeResult.value,
                     telemetry = container.telemetry.athleteFacade,
                 )
@@ -87,15 +94,17 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         container.platform.analytics.screen("athlete_home")
         sessionLocalDemo = container.platform.sessionStore.snapshot().isLocalDemo
+        athleteId = container.platform.sessionStore.canonicalAthleteId()
         athleteLabel = (container.athleteRepository.profile() as? AppResult.Ok)
             ?.value
             ?.displayName
             ?.uppercase()
         reload()
+        container.platform.productRealtime.start()
     }
 
     AthleteLoad(result = result, onRetry = ::reload) { home ->
-        val ascend = container.ascend.snapshot(LocalAthleteRepository.ATHLETE_ID)
+        val ascend = container.ascend.snapshot(athleteId)
         val streak = ascend.streaks.firstOrNull { it.kind == StreakKind.PERFORMANCE }
         val context = LocalContext.current
         val hcScope = rememberCoroutineScope()
@@ -109,6 +118,12 @@ fun HomeScreen(
                 permissionState == HealthConnectPermissionState.GRANTED
             ) {
                 container.fitness.syncHealthConnect()
+                val uid = container.platform.sessionStore.canonicalAthleteId()
+                athleteId = uid
+                container.telemetry.healthData.syncSleepAndSteps(
+                    athleteId = uid,
+                    nowEpochMs = System.currentTimeMillis(),
+                )
                 loadSessions(sessionLocalDemo || todayUi?.isAnyDemo != false)
             }
         }
@@ -119,6 +134,12 @@ fun HomeScreen(
                 permissionState = container.fitness.healthConnectPermissions.permissionState()
                 if (permissionState == HealthConnectPermissionState.GRANTED) {
                     container.fitness.syncHealthConnect()
+                    val uid = container.platform.sessionStore.canonicalAthleteId()
+                    athleteId = uid
+                    container.telemetry.healthData.syncSleepAndSteps(
+                        athleteId = uid,
+                        nowEpochMs = System.currentTimeMillis(),
+                    )
                     loadSessions(sessionLocalDemo || todayUi?.isAnyDemo != false)
                 }
             }
@@ -155,7 +176,10 @@ fun HomeScreen(
             item {
                 TodayEditorialHeader(
                     greeting = home.greeting,
-                    showDemoBadge = sessionLocalDemo || readinessUi?.isAnyDemo == true,
+                    identityBadge = identityBadgeLabel(
+                        isDebugBuild = container.platform.config.isDebuggable,
+                        isLocalDemoSession = sessionLocalDemo,
+                    ),
                 )
             }
             streak?.let { active ->

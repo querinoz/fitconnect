@@ -99,6 +99,7 @@ interface AppContainer {
     val accountIsolation: AccountIsolationController
     val identityRemote: IdentityRemote
     val ascendRemote: HttpAscendRemote
+    val productRealtime: com.fitconnect.android.foundation.realtime.ProductRealtimeHub
 }
 
 class DefaultAppContainer(
@@ -239,6 +240,19 @@ class DefaultAppContainer(
             logger = logger,
             onForeground = { authRepository.restoreSession() },
             onReconnect = { offline.flush() },
+        )
+    }
+
+    private val productRealtimeScope =
+        kotlinx.coroutines.CoroutineScope(
+            kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default,
+        )
+
+    override val productRealtime: com.fitconnect.android.foundation.realtime.ProductRealtimeHub by lazy {
+        com.fitconnect.android.foundation.realtime.ProductRealtimeHub(
+            realtime = realtime,
+            sessionStore = sessionStore,
+            scope = productRealtimeScope,
         )
     }
 }

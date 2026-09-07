@@ -10,7 +10,7 @@ Naming per `docs/adr/ADR-007-naming-elite-os-surface.md`: **Elite OS** is the pr
 ## Source of truth
 
 - Web: `apps/web/app/elite-os.css` (canonical `--eos-*` vars), `packages/design-tokens/` (`COLOR_TOKENS`, web + mobile), `apps/web/lib/design-system/tokens.ts` (`EOS_COLORS`).
-- Kotlin/Compose: generated from the same `packages/design-tokens/` source via a Style Dictionary pipeline extension (ADR-005 consequence — build this pipeline in F0/F3 if it doesn't exist yet; check before assuming). Output objects are named `EliteSurfaceColor`, `EliteSurfaceType`, `EliteSurfaceSpacing` (ADR-007).
+- Kotlin/Compose: generated from `packages/design-tokens/` via `pnpm tokens:kotlin` → `EliteSurfaceTokens.kt`. UI primitives in `android/design-ui/` (`EosGlassSurface`, `EosNeumorphic`, `EliteChartPalette`, `EliteTypography`).
 - **Never hand-author a second copy of a color/spacing value in Kotlin.** If the generator doesn't cover something yet, that's a generator gap to fix, not a reason to hardcode.
 
 ## Palette (do not invent new hues — extend usage, not the palette)
@@ -28,7 +28,11 @@ Naming per `docs/adr/ADR-007-naming-elite-os-surface.md`: **Elite OS** is the pr
 
 ## Typography
 
-Syne (display/headlines) · Plus Jakarta Sans (body) · JetBrains Mono (metrics, `SYS.*` labels). On Android, map to the equivalent font families via the Compose `Typography` object generated alongside colors — don't ship a third font choice "because Android."
+Syne (display/headlines) · Plus Jakarta Sans (body) · JetBrains Mono (metrics, `SYS.*` labels). On Android, `EliteTypography.kt` maps **all** Material3 typography slots to bundled fonts — do not rely on unmapped slots (they fall back to Roboto and misalign metrics).
+
+## Neu-glass (Android athlete)
+
+See `docs/design/ELITE_OS_NEU_GLASS.md`. Neumorphic for data, glass for chrome, chart palette from `CHART_TOKENS`, ≤2 glass blur layers per screen.
 
 ## Rules (apply on every surface, not just web)
 

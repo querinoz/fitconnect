@@ -13,4 +13,13 @@ class EosNeumorphicColorsTest {
         assertEquals(0xFF020408L, EliteSurfaceColors.NEU_SHADOW_DEEP)
         assertEquals(0xFF8A99ADL, EliteSurfaceColors.NEU_MUTED)
     }
+
+    @Test
+    fun premiumColorAliasesMatchCanonicalTokens() {
+        assertEquals(EosNeumorphicColors.Floor, EosNeumorphicColors.EosFloor)
+        assertEquals(EosNeumorphicColors.MoldSurface, EosNeumorphicColors.EosSurface)
+        assertEquals(EosNeumorphicColors.Voltline, EosNeumorphicColors.EosVoltline)
+        assertEquals(EosNeumorphicColors.HighlightEdge, EosNeumorphicColors.NeumorphicHighlight)
+        assertEquals(EosNeumorphicColors.ShadowDeep, EosNeumorphicColors.NeumorphicShadow)
+    }
 }

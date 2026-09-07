@@ -4,6 +4,8 @@ One line each. Newest first.
 
 | Date | Decision |
 |---|---|
+| 2026-09-01 | **Health Connect read path (Android):** Jetpack `connect-client` **1.1.0**, `compileSdk` 36 on HC modules, `HealthConnectExerciseSessionReader`, permission contract on Today, `ViewPermissionUsageActivity` alias. Google Fit remains absent. Wear `ExerciseClient` still PLANNED. Spec: `docs/android/HEALTH_CONNECT.md`. |
+| 2026-09-01 | **Neu-glass Android athlete surfaces (waves 0–6):** neumorphic = anchored data (`#0D1321`, dual shadow); glass = floating chrome (`EosGlassSurface`, ≤2 blur layers/screen); chart palette via `CHART_TOKENS`; full `EliteTypography` Material3 mapping; responsive breakpoints in `EliteResponsive.kt`. Scope: Today · Analysis · Achievements · Profile · Train. Coach/web out of scope. Spec: `docs/design/ELITE_OS_NEU_GLASS.md`. Does not change PRODUCTION NO-GO. |
 | 2026-08-20 | Athlete IA: 4 destinations (Hoje · Análise · Conquistas · Perfil) + Treinar FAB. Supersedes 5-tab HOME/DISCOVER/ACTIVITY/COMMUNITY/PROFILE. Social is not a peer tab. `AGENTS.md` §6. |
 | 2026-08-18 | Removed HTML landing mockup (`docs/mockups/landing.html`). Production Next.js `/` is the only landing. |
 | 2026-08-18 | Dashboards HTML ported to `/insights` (not replacing the 5-item EliteAppShell). SessionOwnership lives in `:shared` + TS mirror; Transfer = offer+ACK, never a second START. |

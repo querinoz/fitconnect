@@ -1,0 +1,62 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--isolated",
+        "--headless",
+        "--caps",
+        "vision,pdf,devtools",
+        "--output-dir",
+        "./docs/qa/shots"
+      ]
+    },
+    "playwright-mobile": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--isolated",
+        "--headless",
+        "--device",
+        "Pixel 7",
+        "--output-dir",
+        "./docs/qa/shots"
+      ]
+    },
+    "playwright-webkit": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--isolated",
+        "--headless",
+        "--browser",
+        "webkit",
+        "--output-dir",
+        "./docs/qa/shots"
+      ]
+    },
+    "firecrawl": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "firecrawl-mcp"],
+      "env": {
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      }
+    },
+    "perplexity": {
+      "command": "npx",
+      "args": ["-yq", "@perplexity-ai/mcp-server"],
+      "env": {
+        "PERPLEXITY_API_KEY": "${PERPLEXITY_API_KEY}"
+      }
+    },
+    "chrome-mcp-server": {
+      "type": "http",
+      "url": "http://127.0.0.1:12306/mcp"
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
+    }
+  }
+}

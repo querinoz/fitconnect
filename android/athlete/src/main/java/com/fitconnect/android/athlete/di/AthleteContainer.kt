@@ -1,18 +1,24 @@
 package com.fitconnect.android.athlete.di
 
+import android.content.pm.ApplicationInfo
 import com.fitconnect.android.ai.di.AiContainer
 import com.fitconnect.android.athlete.data.AthleteRepository
+import com.fitconnect.android.athlete.data.HttpAthleteRepository
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
 import com.fitconnect.android.community.di.CommunityContainer
 import com.fitconnect.android.community.di.DefaultCommunityContainer
 import com.fitconnect.android.capture.LiveActivityEngine
 import com.fitconnect.android.capture.LiveSessionCoordinator
+import com.fitconnect.android.capture.runtime.OutdoorCaptureRuntime
+import com.fitconnect.android.capture.store.GpsRouteStore
+import com.fitconnect.android.capture.route.CanonicalRouteRepository
 import com.fitconnect.ascend.demo.AscendDemo
 import com.fitconnect.ascend.engine.AscendEngine
 import com.fitconnect.android.foundation.di.AppContainer
 import com.fitconnect.android.geo.di.GeoContainer
 import com.fitconnect.android.sports.di.SportsContainer
 import com.fitconnect.android.sports.registry.SportsEngine
+import com.fitconnect.android.sports.guided.runtime.GuidedWorkoutRuntime
 import com.fitconnect.android.telemetry.di.TelemetryContainer
 
 interface AthleteContainer {
@@ -27,7 +33,11 @@ interface AthleteContainer {
     val athleteRepository: AthleteRepository
     val liveActivity: LiveActivityEngine
     val liveCoordinator: LiveSessionCoordinator
+    val outdoorCapture: OutdoorCaptureRuntime
+    val gpsRouteStore: GpsRouteStore
+    val routeRepository: CanonicalRouteRepository
     val ascend: AscendEngine
+    val guidedWorkout: GuidedWorkoutRuntime
 }
 
 class DefaultAthleteContainer(
@@ -46,17 +56,37 @@ class DefaultAthleteContainer(
             AscendDemo.TOMAS,
         ),
     ),
+    override val guidedWorkout: GuidedWorkoutRuntime,
+    override val gpsRouteStore: GpsRouteStore,
+    appContext: android.content.Context,
 ) : AthleteContainer {
     override val sportsEngine: SportsEngine = sports.sportsEngine
-    override val athleteRepository: AthleteRepository = LocalAthleteRepository(
-        connectivity = platform.connectivity,
-        offline = platform.offline,
-        sports = sports,
-        geo = geo,
+    override val athleteRepository: AthleteRepository = HttpAthleteRepository(
+        api = { platform.apiClient },
+        sessionStore = platform.sessionStore,
         telemetry = telemetry.athleteFacade,
+        localFallback = LocalAthleteRepository(
+            connectivity = platform.connectivity,
+            offline = platform.offline,
+            sports = sports,
+            geo = geo,
+            telemetry = telemetry.athleteFacade,
+        ),
     )
-    override val liveActivity: LiveActivityEngine = LiveActivityEngine()
+    private val debuggable =
+        (appContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+    // Debug/emulator: allow simulated GPS fallback. Release: fused-only (never claim physical GPS).
+    override val liveActivity: LiveActivityEngine = LiveActivityEngine(allowSimulatedGps = debuggable)
     override val liveCoordinator: LiveSessionCoordinator = LiveSessionCoordinator(liveActivity)
+    override val outdoorCapture: OutdoorCaptureRuntime = OutdoorCaptureRuntime(
+        appContext = appContext,
+        engine = liveActivity,
+        store = gpsRouteStore,
+        offline = platform.offline,
+        sessionStore = platform.sessionStore,
+        logger = platform.logger,
+    )
+    override val routeRepository: CanonicalRouteRepository = CanonicalRouteRepository(gpsRouteStore)
 
     init {
         AscendDemo.seed(ascend, LocalAthleteRepository.ATHLETE_ID)

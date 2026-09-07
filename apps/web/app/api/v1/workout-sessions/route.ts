@@ -2,13 +2,22 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/require-auth";
 import { getPrisma, isDatabaseConfigured } from "@/lib/db/client";
 import { canSelectWorkoutSession } from "@/lib/fitness/workout-session-policy";
+import {
+  assertGuidedOwnership,
+  assertGuidedProvider,
+  upsertGuidedWorkoutCompletion,
+  type GuidedWorkoutCompletionBody
+} from "@/lib/fitness/complete-guided-workout";
+import {
+  assertOutdoorOwnership,
+  assertOutdoorProvider,
+  upsertOutdoorActivityCompletion,
+  type OutdoorActivityCompletionBody
+} from "@/lib/fitness/complete-outdoor-activity";
 
 /**
- * Direct API read of canonical activities (P1-DATA).
- * Table: public.activities (Firebase UID text). Legacy workout_sessions (uuid)
- * is deprecated and not queried here.
- * RLS is the database barrier; this route also applies the same predicate so a
- * missing policy still fails closed.
+ * Canonical activities read/write (P1-DATA).
+ * POST: MANUAL → guided strength; GPS → outdoor + route points.
  */
 export async function GET(request: Request) {
   const auth = await requireAuth(request);
@@ -44,5 +53,52 @@ export async function GET(request: Request) {
     return NextResponse.json({ items, source: "postgres", table: "activities" });
   } catch {
     return NextResponse.json({ items: [], source: "unavailable" });
+  }
+}
+
+export async function POST(request: Request) {
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth.response;
+
+  const body = (await request.json().catch(() => null)) as
+    | (GuidedWorkoutCompletionBody & OutdoorActivityCompletionBody)
+    | null;
+  if (!body?.sessionId || !body.userId || !body.idempotencyKey || !body.activityId) {
+    return NextResponse.json({ error: "invalid_body" }, { status: 400 });
+  }
+  if (!assertGuidedOwnership(auth.user.id, body.userId) || !assertOutdoorOwnership(auth.user.id, body.userId)) {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
+  if (!isDatabaseConfigured() || !getPrisma()) {
+    return NextResponse.json({ error: "persistence_not_configured" }, { status: 503 });
+  }
+
+  const provider = (body.provider ?? "MANUAL").toUpperCase();
+  try {
+    if (provider === "GPS") {
+      if (!assertOutdoorProvider(provider)) {
+        return NextResponse.json({ error: "invalid_provider" }, { status: 400 });
+      }
+      const result = await upsertOutdoorActivityCompletion(body);
+      return NextResponse.json({
+        ok: true,
+        activityId: result.activityId,
+        duplicate: result.duplicate,
+        pointsWritten: result.pointsWritten,
+        source: result.source
+      });
+    }
+    if (!assertGuidedProvider(provider)) {
+      return NextResponse.json({ error: "invalid_provider" }, { status: 400 });
+    }
+    const result = await upsertGuidedWorkoutCompletion(body);
+    return NextResponse.json({
+      ok: true,
+      activityId: result.activityId,
+      duplicate: result.duplicate,
+      source: result.source
+    });
+  } catch {
+    return NextResponse.json({ error: "upsert_failed" }, { status: 500 });
   }
 }

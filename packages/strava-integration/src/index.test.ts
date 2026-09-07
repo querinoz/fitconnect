@@ -110,4 +110,20 @@ describe("matchStravaEndpoint", () => {
     expect(matchStravaEndpoint("/activities/9/kudos", "GET")).toBeNull();
     expect(matchStravaEndpoint("/activities/9/comments", "GET")).toBeNull();
   });
+
+  it("client helpers throw on banned social paths before fetch", async () => {
+    const { StravaClient } = await import("./client");
+    const { StravaPathDeniedError } = await import("./endpoints");
+    const client = new StravaClient({
+      clientId: "test-client",
+      clientSecret: "test-secret",
+      getAccessToken: async () => "token",
+      refreshToken: async () => null,
+    });
+    await expect(client.exploreSegments({ bounds: [0, 0, 1, 1] })).rejects.toBeInstanceOf(
+      StravaPathDeniedError
+    );
+    await expect(client.getActivityKudos(9)).rejects.toBeInstanceOf(StravaPathDeniedError);
+    await expect(client.getActivityComments(9)).rejects.toBeInstanceOf(StravaPathDeniedError);
+  });
 });

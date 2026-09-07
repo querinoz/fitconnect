@@ -12,16 +12,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import com.fitconnect.android.coach.domain.AvailabilitySlot
 import com.fitconnect.android.coach.domain.CalendarEvent
 import com.fitconnect.android.coach.domain.CalendarViewMode
 import com.fitconnect.android.coach.ui.LocalCoachContainer
+import com.fitconnect.android.coach.ui.components.CoachLoad
 import com.fitconnect.android.coach.ui.components.CoachScreenScaffold
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteChip
+import com.fitconnect.android.designui.components.EliteEmptyState
 import com.fitconnect.android.designui.theme.EliteSpace
+import com.fitconnect.android.foundation.common.AppResult
 import kotlinx.coroutines.launch
 
 @Composable
@@ -32,92 +34,112 @@ fun CalendarScreen(
     val container = LocalCoachContainer.current
     val scope = rememberCoroutineScope()
     var mode by remember { mutableStateOf(CalendarViewMode.AGENDA) }
-    var events by remember { mutableStateOf<List<CalendarEvent>>(emptyList()) }
-    var availability by remember { mutableStateOf<List<AvailabilitySlot>>(emptyList()) }
+    var result by remember { mutableStateOf<AppResult<List<CalendarEvent>>?>(null) }
+    var rescheduleError by remember { mutableStateOf<String?>(null) }
+
+    fun reload() {
+        scope.launch {
+            result = container.coachRepository.calendarEvents()
+        }
+    }
 
     LaunchedEffect(Unit) {
         container.platform.analytics.screen("coach_calendar")
-        events = (container.coachRepository.calendarEvents() as? com.fitconnect.android.foundation.common.AppResult.Ok)?.value.orEmpty()
-        availability = (container.coachRepository.availability() as? com.fitconnect.android.foundation.common.AppResult.Ok)?.value.orEmpty()
+        reload()
     }
 
-    val filtered = when (mode) {
-        CalendarViewMode.DAY -> events.take(2)
-        CalendarViewMode.WEEK -> events
-        CalendarViewMode.MONTH -> events
-        CalendarViewMode.AGENDA -> events.sortedBy { it.startEpochMs }
-    }
+    CoachLoad(result, ::reload) { events ->
+        val filtered = when (mode) {
+            CalendarViewMode.DAY -> events.take(2)
+            CalendarViewMode.WEEK -> events
+            CalendarViewMode.MONTH -> events
+            CalendarViewMode.AGENDA -> events.sortedBy { it.startEpochMs }
+        }
 
-    CoachScreenScaffold(
-        title = "Calendar",
-        subtitle = "Day · week · month · agenda · conflicts · travel · TZ",
-        testTag = "coach_calendar",
-    ) {
-        item {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs),
-                content = {
+        CoachScreenScaffold(
+            title = "Calendar",
+            subtitle = "Sessions from canonical coach schedule",
+            testTag = "coach_calendar",
+        ) {
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
                     CalendarViewMode.entries.forEach { m ->
                         EliteChip(
                             label = m.name.lowercase().replaceFirstChar { it.uppercase() },
                             onClick = { mode = m },
                         )
                     }
-                },
-            )
-        }
-        item {
-            Text("View · ${mode.name} · Europe/Lisbon", style = MaterialTheme.typography.labelLarge)
-            Text(
-                "Drag-and-drop reschedule uses session actions (move +1h / cancel). Gesture DnD ships with platform pointer APIs.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        items(filtered, key = { it.id }) { event ->
-            EliteCard(onClick = { event.sessionId?.let(onOpenSession) }) {
-                Text(event.title, style = MaterialTheme.typography.titleMedium)
-                Text(
-                    buildString {
-                        append("TZ Europe/Lisbon")
-                        if (event.recurringRule != null) append(" · recurring ${event.recurringRule}")
-                        if (event.travelMinutes > 0) append(" · travel ${event.travelMinutes}m")
-                        if (event.conflict) append(" · CONFLICT")
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (event.conflict) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                if (event.sessionId != null) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
-                        content = {
-                            EliteButton(
-                                label = "Move +1h",
-                                variant = EliteButtonVariant.Secondary,
-                                onClick = {
-                                    scope.launch {
-                                        container.coachRepository.rescheduleSession(
-                                            event.sessionId,
-                                            event.startEpochMs + 3_600_000,
-                                        )
-                                        events = (container.coachRepository.calendarEvents() as? com.fitconnect.android.foundation.common.AppResult.Ok)?.value.orEmpty()
-                                    }
-                                },
-                            )
-                        },
+                }
+            }
+            rescheduleError?.let { err ->
+                item {
+                    Text(err, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+            if (filtered.isEmpty()) {
+                item {
+                    EliteEmptyState(
+                        title = "No sessions",
+                        body = "Scheduled sessions appear here when present.",
                     )
                 }
             }
-        }
-        item { Text("Availability", style = MaterialTheme.typography.titleMedium) }
-        items(availability) { slot ->
-            Text(
-                "${slot.dayLabel} · ${slot.startHour}:00–${slot.endHour}:00 · ${slot.timezone}",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-        }
-        item {
-            EliteButton("All sessions", onClick = onOpenSessions, variant = EliteButtonVariant.Ghost)
+            items(filtered, key = { it.id }) { event ->
+                EliteCard(onClick = { event.sessionId?.let(onOpenSession) }) {
+                    Text(event.title, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Session ${event.sessionId.orEmpty()}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (event.sessionId != null) {
+                        EliteButton(
+                            label = "Move +1h",
+                            variant = EliteButtonVariant.Secondary,
+                            onClick = {
+                                scope.launch {
+                                    when (
+                                        val r = container.coachRepository.rescheduleSession(
+                                            event.sessionId,
+                                            event.startEpochMs + 3_600_000,
+                                        )
+                                    ) {
+                                        is AppResult.Ok -> {
+                                            rescheduleError = null
+                                            reload()
+                                        }
+                                        is AppResult.Err -> {
+                                            rescheduleError = r.error.toString()
+                                        }
+                                    }
+                                }
+                            },
+                        )
+                        EliteButton(
+                            label = "Cancel",
+                            variant = EliteButtonVariant.Ghost,
+                            onClick = {
+                                scope.launch {
+                                    when (
+                                        val r = container.coachRepository.cancelSession(event.sessionId)
+                                    ) {
+                                        is AppResult.Ok -> {
+                                            rescheduleError = null
+                                            reload()
+                                        }
+                                        is AppResult.Err -> {
+                                            rescheduleError = r.error.toString()
+                                        }
+                                    }
+                                }
+                            },
+                        )
+                    }
+                }
+            }
+            item {
+                EliteButton("All sessions", onClick = onOpenSessions, variant = EliteButtonVariant.Ghost)
+            }
         }
     }
 }

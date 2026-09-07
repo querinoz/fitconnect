@@ -1,7 +1,7 @@
 # 12 — Security audit
 
-**Date:** 2026-08-20  
-**Phase lock:** `P0-DOCS`  
+**Date:** 2026-08-20
+**Phase lock:** `P0-DOCS`
 **Next code phase:** `P0-SEC`
 
 ## Production
@@ -28,7 +28,7 @@ Web `packages/strava-integration/src/endpoints.ts` and `client.ts` still **allow
 
 ### 3. Integration status fail-closed
 
-`GET /api/v1/integrations/status` must never default to `a-ines` for anonymous users.  
+`GET /api/v1/integrations/status` must never default to `a-ines` for anonymous users.
 Engineering already calls `requireAthleteId` — **P0-SEC must re-verify** (demo vs prod, no IDOR via query param, no activity leak in JSON).
 
 ### 4. Validate RLS
@@ -82,19 +82,19 @@ Treat as **unfinished P0**, not as production PASS:
 
 ## REMEDIATION STATUS (P0-SEC)
 
-**Date:** 2026-08-20  
+**Date:** 2026-08-29 (re-verification)
 **Do not treat this appendix as a rewrite of the findings above.** Historical P0 items remain listed as they were discovered.
 
 ### Status
 
 | Item | Code | Automated tests | Live evidence |
 | ---- | ---- | ---------------- | ------------- |
-| 1. Strava third-party block | Done | PASS | N/A (unit/API) |
-| 2. Web allowlist = Android bans | Done | PASS | N/A (unit/API) |
-| 3. Status route auth | Done | PASS | N/A (unit/API) |
-| 4. RLS / IDOR | SQL + API IDOR Done | API PASS; live Postgres **SKIPPED** | **BLOCKED** — no `DATABASE_URL`, Docker not installed |
+| 1. Strava third-party block | Done | PASS (2026-08-29) | N/A (unit/API) |
+| 2. Web allowlist = Android bans | Done | PASS (2026-08-29) | N/A (unit/API) |
+| 3. Status route auth | Done | PASS (2026-08-29) | N/A (unit/API) |
+| 4. RLS / IDOR | SQL + API IDOR Done | API PASS; live Postgres **PASS** (2026-08-29) | `authenticated` role · `DATABASE_ROLE_FOR_RLS_TEST=VALID` |
 | 5. Account deletion | Done (app data) | PASS | Firebase Auth delete **PENDING_HUMAN** |
-| 6. Terms / Privacy technical pages | Done | Build includes `/privacy` `/terms` | Legal copy **PENDING_HUMAN** |
+| 6. Terms / Privacy technical pages | Done | `/privacy` `/terms` present | Legal copy **PENDING_HUMAN** |
 | 7. Webhook fail-closed | Done | PASS | Strava POST has no HMAC (vendor) |
 | 8. Distributed rate limiting | Done (Upstash) | PASS (fail-closed without Redis in production) | Production env **PENDING_HUMAN** |
 
@@ -108,14 +108,15 @@ Treat as **unfinished P0**, not as production PASS:
 - `POST /api/v1/account/delete` + web Settings Privacy + Android Settings/Profile
 - Strava / ingestion / Stripe webhooks fail closed without secrets; QStash jobs require forwarded `INTEGRATION_AUTH_SECRET` (unsigned `upstash-signature` is rejected)
 - Upstash rate limits on auth, identity, leads, webhooks, ingestion, Strava, account delete, high-cost APIs
+- 2026-08-29: Android `HttpIdentityRemote` import fix; Strava client ban helper test; live RLS harness uses `pg` + `P0_SEC_LIVE_RLS=1` and refuses BYPASSRLS
 
 ### Test evidence
 
-See `docs/security/P0_SEC_TEST_EVIDENCE.md`.
+See `docs/security/P0_SEC_TEST_EVIDENCE.md` and `docs/security/P0_SEC_EXIT_GATE.md`.
 
 ### Remaining HUMAN items
 
-1. Apply `012` + `013` on hosted Supabase and run two-user Postgres IDOR (`DATABASE_URL` + non-superuser `authenticated` role)
+1. Apply `012` + `013` on hosted Supabase and run two-user Postgres IDOR with a **non-BYPASSRLS** role (`P0_SEC_LIVE_RLS=1`)
 2. Firebase Auth user deletion (Admin SDK / console)
 3. Counsel review of `/privacy` and `/terms` (technical pages only today)
 4. Production secrets: Upstash Redis, QStash, `INTEGRATION_AUTH_SECRET`, `STRAVA_WEBHOOK_VERIFY_TOKEN`, `INGESTION_WEBHOOK_SECRET`, `STRIPE_WEBHOOK_SECRET`
@@ -123,7 +124,8 @@ See `docs/security/P0_SEC_TEST_EVIDENCE.md`.
 
 ### Exit
 
-**Agent-fixable P0 blockers: closed.**  
-**Live RLS IDOR: BLOCKED on this machine.**  
-Production remains **NO-GO**. Do not treat this appendix as a production PASS.
+**`P0-SEC = PASS`** — see `docs/security/P0_SEC_EXIT_GATE.md` and `docs/security/P0_SEC_RLS_LIVE_CERTIFICATION.md`.
+Live RLS certified under `SET ROLE authenticated` (not BYPASSRLS login).
+**NEXT_PHASE = P1-DATA** (do not auto-start).
+Production remains **NO-GO** until HUMAN infra (real API keys, Firebase, legal, webhook secrets).
 

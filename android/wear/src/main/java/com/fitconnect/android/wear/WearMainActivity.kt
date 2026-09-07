@@ -42,7 +42,7 @@ class WearMainActivity : ComponentActivity() {
         sender = WearTelemetrySender(this)
         WearRuntime.engine = engine
         WearRuntime.deviceId = android.os.Build.MODEL
-        WearRuntime.sessionId = "wear-${System.currentTimeMillis()}"
+        WearRuntime.sessionId = java.util.UUID.randomUUID().toString()
         lifecycle.addObserver(ambientObserver)
         runCatching {
             Wearable.getCapabilityClient(this).addLocalCapability(WearPaths.CAPABILITY)

@@ -6,3 +6,5 @@ export { EliteChip } from "./elite-chip";
 export { LabelCaps, MetricDisplay, DisplayTitle, Headline, BodyText } from "./typography";
 export { BentoGrid, AiInsightCard, TelemetryShell } from "./layout-primitives";
 export { CornerTicks, CrosshairBg, EosLabel } from "./decorators";
+export { EliteReadinessNeumorphic } from "./elite-readiness-neumorphic";
+export type { EliteReadinessNeumorphicProps, ReadinessTelemetry } from "./elite-readiness-neumorphic";

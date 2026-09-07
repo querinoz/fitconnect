@@ -23,7 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.data.canonicalAthleteId
 import com.fitconnect.android.athlete.demo.AthleteContentResolver
 import com.fitconnect.android.athlete.demo.AthleteDemoBanner
 import com.fitconnect.android.athlete.demo.AthleteDemoCatalog
@@ -75,13 +75,15 @@ fun ProfileScreen(
     var body by remember { mutableStateOf<BodyMetrics?>(null) }
     var devices by remember { mutableStateOf<List<DeviceEntry>>(emptyList()) }
     var sessionCount by remember { mutableStateOf<Int?>(null) }
+    var athleteId by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         container.platform.analytics.screen("athlete_profile")
+        athleteId = container.platform.sessionStore.canonicalAthleteId()
         profile = (container.athleteRepository.profile() as? AppResult.Ok)?.value
         goals = (container.athleteRepository.goals() as? AppResult.Ok)?.value.orEmpty()
         body = (container.athleteRepository.bodyMetrics() as? AppResult.Ok)?.value
-        devices = container.telemetry.deviceCenter.devices(LocalAthleteRepository.ATHLETE_ID)
+        devices = container.telemetry.deviceCenter.devices(athleteId)
         val sessions = (container.athleteRepository.sessions() as? AppResult.Ok)?.value
         sessionCount = sessions?.size?.takeIf { it > 0 }
     }
@@ -100,7 +102,7 @@ fun ProfileScreen(
         }
         profile?.let { p ->
             item {
-                val ascend = container.ascend.snapshot(LocalAthleteRepository.ATHLETE_ID)
+                val ascend = container.ascend.snapshot(athleteId)
                 val locale by container.platform.localeManager.observe().collectAsState(
                     initial = com.fitconnect.android.foundation.i18n.AppLocale.EN,
                 )
@@ -112,7 +114,7 @@ fun ProfileScreen(
                 val patent = LocalAthletePatentStatus.current
                 EliteStack(spacing = EliteSpace.Md) {
                     ProfileHeroSection(
-                        userId = LocalAthleteRepository.ATHLETE_ID,
+                        userId = athleteId,
                         displayName = p.displayName,
                         level = ascend.level.level,
                         totalXp = ascend.totalXp,
@@ -286,13 +288,14 @@ fun ProfileScreen(
                         variant = EliteButtonVariant.Secondary,
                         onClick = {
                             scope.launch {
-                                val athleteId = LocalAthleteRepository.ATHLETE_ID
+                                val uid = container.platform.sessionStore.canonicalAthleteId()
+                                athleteId = uid
                                 if (connected) {
-                                    container.telemetry.deviceCenter.syncNow(athleteId, device.provider)
+                                    container.telemetry.deviceCenter.syncNow(uid, device.provider)
                                 } else {
-                                    container.telemetry.deviceCenter.connect(athleteId, device.provider)
+                                    container.telemetry.deviceCenter.connect(uid, device.provider)
                                 }
-                                devices = container.telemetry.deviceCenter.devices(athleteId)
+                                devices = container.telemetry.deviceCenter.devices(uid)
                             }
                         },
                     )

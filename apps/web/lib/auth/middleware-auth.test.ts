@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   isDemoModeEnv,
+  isFirebaseConfiguredEnv,
   isSupabaseConfiguredEnv,
+  shouldEnforceFirebaseAuth,
   shouldEnforceSupabaseAuth,
   resolveProtectedRouteGate,
   hasValidDemoSessionCookie,
@@ -35,6 +37,14 @@ describe("middleware auth policy", () => {
     expect(
       shouldEnforceSupabaseAuth({ demoMode: false, supabaseConfigured: false })
     ).toBe(false);
+    expect(
+      shouldEnforceFirebaseAuth({ demoMode: false, firebaseConfigured: true })
+    ).toBe(true);
+    expect(
+      shouldEnforceFirebaseAuth({ demoMode: true, firebaseConfigured: true })
+    ).toBe(false);
+    expect(isFirebaseConfiguredEnv(true)).toBe(true);
+    expect(isFirebaseConfiguredEnv(false)).toBe(false);
   });
 
   it("fail-closes HTML dashboards when Firebase is missing and demo is off", () => {

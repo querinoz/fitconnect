@@ -1,12 +1,14 @@
 # FitConnect documentation index
 
-**Current truth (2026-09-03):** [audit/RECONCILIATION_RESULT.md](audit/RECONCILIATION_RESULT.md) — history freeze. P1-AUTH engineering PASS. **Production remains NO-GO.**
+**Current truth (2026-09-04):** [audit/NEXT_PHASE_READINESS_FINAL.md](audit/NEXT_PHASE_READINESS_FINAL.md) · [audit/NEXT_PHASE_DECISION.md](audit/NEXT_PHASE_DECISION.md) — recommended next: **Physical GPS verification**. **Production remains NO-GO.** Implementation from audit: **NONE**.
+
+**History freeze:** [audit/RECONCILIATION_RESULT.md](audit/RECONCILIATION_RESULT.md). P1-AUTH engineering PASS. Outdoor P2-GPS/MAP/E2E hardening = engineering PASS (physical GPS still NOT_VERIFIED).
 
 **Canonical entry:** [README.md](../README.md)
 
 **Diagnostic snapshot:** [audit/FINAL_DIRECTION.md](audit/FINAL_DIRECTION.md)
 
-**Frozen master-plan “current phase: P0-SEC” is HISTORICAL** (P0-SEC stamped PASS 2026-08-29). Do not copy it into new work. Next authorized product phase: **WORKOUT-ENGINE WAVE 2** (not started).
+**Frozen master-plan “current phase: P0-SEC” is HISTORICAL** (P0-SEC stamped PASS 2026-08-29). Do not copy it into new work. Do not treat [audit/NEXT_IMPLEMENTATION_PLAN.md](audit/NEXT_IMPLEMENTATION_PLAN.md) “next = P2-GPS / Wave 2” as current — superseded by the 2026-09-04 decision pack.
 
 Prefer this index over archived reports. Status vocabulary: PASS · FAIL · BLOCKED · PENDING_HUMAN · UNVERIFIED · PLANNED · DEPRECATED · HISTORICAL.
 

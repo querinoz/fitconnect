@@ -10,7 +10,7 @@ class LiveActivityEngineTest {
     @Test
     fun startPauseResumeEndDiscard() {
         var now = 1_000_000L
-        val engine = LiveActivityEngine(clockMs = { now })
+        val engine = LiveActivityEngine(clockMs = { now }, allowSimulatedGps = true)
         engine.start("Run")
         assertEquals(LiveActivityPhase.RUNNING, engine.state.value.phase)
         assertEquals(
@@ -61,7 +61,7 @@ class LiveActivityEngineTest {
     @Test
     fun envelopeOmitsHrWhenHealthServicesUnavailable() {
         var now = 1_000_000L
-        val engine = LiveActivityEngine(clockMs = { now })
+        val engine = LiveActivityEngine(clockMs = { now }, allowSimulatedGps = true)
         engine.start("Run")
         now += 10_000L
         engine.tick()
@@ -91,7 +91,7 @@ class LiveActivityEngineTest {
     @Test
     fun simulatedOutdoorRouteRecordsPoints() {
         var now = 1_000_000L
-        val engine = LiveActivityEngine(clockMs = { now })
+        val engine = LiveActivityEngine(clockMs = { now }, allowSimulatedGps = true)
         engine.start("Run")
         now += 10_000L
         engine.tick()
@@ -103,7 +103,7 @@ class LiveActivityEngineTest {
     @Test
     fun indoorRunDoesNotClaimGps() {
         var now = 1_000_000L
-        val engine = LiveActivityEngine(clockMs = { now })
+        val engine = LiveActivityEngine(clockMs = { now }, allowSimulatedGps = true)
         engine.start("IndoorRun")
         now += 10_000L
         engine.tick()
@@ -115,7 +115,7 @@ class LiveActivityEngineTest {
     @Test
     fun emulatorInjectedPointsMeasureNearTwoKm() {
         var now = 1_000_000L
-        val engine = LiveActivityEngine(clockMs = { now })
+        val engine = LiveActivityEngine(clockMs = { now }, allowSimulatedGps = true)
         engine.start("Run")
         com.fitconnect.shared.geo.QaGpsRoute.POINTS.forEachIndexed { index, point ->
             now += 60_000L
@@ -141,7 +141,7 @@ class LiveActivityEngineTest {
     @Test
     fun countdownThenRunning() {
         var now = 1_000_000L
-        val engine = LiveActivityEngine(clockMs = { now })
+        val engine = LiveActivityEngine(clockMs = { now }, allowSimulatedGps = true)
         engine.arm("Walk")
         assertEquals(LiveActivityPhase.READY, engine.state.value.phase)
         engine.beginCountdown()

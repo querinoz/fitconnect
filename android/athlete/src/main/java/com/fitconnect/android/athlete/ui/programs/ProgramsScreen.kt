@@ -26,15 +26,57 @@ import com.fitconnect.android.designui.components.EliteProgress
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.common.AppResult
 import kotlinx.coroutines.launch
+import org.json.JSONArray
+import org.json.JSONObject
+
+private data class CatalogProgram(
+    val id: String,
+    val title: String,
+    val weeks: Int,
+    val sport: String,
+    val level: String,
+)
 
 @Composable
 fun ProgramsScreen() {
     val container = LocalAthleteContainer.current
     val scope = rememberCoroutineScope()
     var result by remember { mutableStateOf<AppResult<List<ProgramEnrollment>>?>(null) }
+    var catalog by remember { mutableStateOf<List<CatalogProgram>>(emptyList()) }
     var expandedId by remember { mutableStateOf<String?>(null) }
     var status by remember { mutableStateOf<String?>(null) }
-    fun reload() { scope.launch { result = container.athleteRepository.programs() } }
+
+    fun reload() {
+        scope.launch {
+            result = container.athleteRepository.programs()
+            if (!container.platform.sessionStore.snapshot().isLocalDemo) {
+                when (val raw = container.platform.apiClient.get("/api/v1/athletes/programs")) {
+                    is AppResult.Ok -> {
+                        val root = JSONObject(raw.value)
+                        val arr = root.optJSONArray("catalog") ?: JSONArray()
+                        catalog = buildList {
+                            for (i in 0 until arr.length()) {
+                                val o = arr.getJSONObject(i)
+                                add(
+                                    CatalogProgram(
+                                        id = o.getString("id"),
+                                        title = o.optString("title", "Program"),
+                                        weeks = o.optInt("weeks", 1),
+                                        sport = o.optString("sport", ""),
+                                        level = o.optString("level", ""),
+                                    ),
+                                )
+                            }
+                        }
+                    }
+                    is AppResult.Err -> catalog = emptyList()
+                }
+            } else {
+                catalog = emptyList()
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         container.platform.analytics.screen("athlete_programs")
         reload()
@@ -47,8 +89,37 @@ fun ProgramsScreen() {
             testTag = "athlete_programs",
         ) {
             status?.let { msg ->
-                item { Text(msg, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary) }
+                item {
+                    Text(msg, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                }
             }
+            if (catalog.isNotEmpty()) {
+                item { Text("Catalog", style = MaterialTheme.typography.titleMedium) }
+                items(catalog, key = { "cat_${it.id}" }) { prog ->
+                    EliteCard(modifier = Modifier.testTag("program_catalog_${prog.id}")) {
+                        Text(prog.title, style = MaterialTheme.typography.titleLarge)
+                        Text(
+                            "${prog.sport} · ${prog.level} · ${prog.weeks} weeks",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        EliteButton(
+                            label = "Enroll",
+                            onClick = {
+                                scope.launch {
+                                    when (val enroll = container.athleteRepository.enrollProgram(prog.id)) {
+                                        is AppResult.Ok -> {
+                                            status = "Enrolled · ${prog.title}"
+                                            reload()
+                                        }
+                                        is AppResult.Err -> status = enroll.error.toString()
+                                    }
+                                }
+                            },
+                        )
+                    }
+                }
+            }
+            item { Text("My enrollments", style = MaterialTheme.typography.titleMedium) }
             if (programs.isEmpty()) {
                 item {
                     EliteCard {
@@ -80,16 +151,18 @@ fun ProgramsScreen() {
                             program.milestones.forEach {
                                 Text("· $it", style = MaterialTheme.typography.bodyMedium)
                             }
-                            Text("Workout focus", style = MaterialTheme.typography.titleMedium)
-                            Text(program.nextWorkoutTitle, style = MaterialTheme.typography.bodyLarge)
                             Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
                                 EliteButton(
-                                    label = "Enroll / sync",
+                                    label = "Sync",
                                     onClick = {
                                         scope.launch {
-                                            container.athleteRepository.enrollProgram(program.id)
-                                            status = "Enrollment synced · ${program.id}"
-                                            reload()
+                                            when (val enroll = container.athleteRepository.enrollProgram(program.id)) {
+                                                is AppResult.Ok -> {
+                                                    status = "Enrollment synced · ${program.id}"
+                                                    reload()
+                                                }
+                                                is AppResult.Err -> status = enroll.error.toString()
+                                            }
                                         }
                                     },
                                 )
@@ -100,12 +173,6 @@ fun ProgramsScreen() {
                                 )
                             }
                         }
-                    } else {
-                        EliteButton(
-                            label = "Open detail",
-                            variant = EliteButtonVariant.Secondary,
-                            onClick = { expandedId = program.id },
-                        )
                     }
                 }
             }

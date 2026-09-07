@@ -27,6 +27,7 @@ android {
 dependencies {
     api(project(":design"))
     implementation(project(":foundation"))
+    implementation(project(":shared"))
     implementation(libs.androidx.core.ktx)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
@@ -40,6 +41,7 @@ dependencies {
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.maplibre.android)
 
     debugImplementation(libs.androidx.ui.tooling)
     testImplementation(libs.junit)

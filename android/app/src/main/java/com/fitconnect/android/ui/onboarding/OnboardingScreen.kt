@@ -25,11 +25,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
 import com.fitconnect.android.designui.components.EliteBadge
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteChip
+import com.fitconnect.android.designui.components.EliteLoading
 import com.fitconnect.android.designui.components.EliteOnboardingProgress
 import com.fitconnect.android.designui.components.EliteTextField
 import com.fitconnect.android.designui.theme.EliteSpace
@@ -64,6 +67,7 @@ fun OnboardingScreen(
     keyValueStore: KeyValueStore,
     onFinished: () -> Unit,
     identityRemote: IdentityRemote? = null,
+    isLocalDemoSession: Boolean = false,
 ) {
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
@@ -107,7 +111,14 @@ fun OnboardingScreen(
     }
 
     if (!hydrated) {
-        Spacer(modifier = Modifier.fillMaxSize())
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag("screen_onboarding_loading"),
+            contentAlignment = Alignment.Center,
+        ) {
+            EliteLoading(label = "SYS.ONBOARD")
+        }
         return
     }
 
@@ -119,7 +130,9 @@ fun OnboardingScreen(
             .testTag("screen_onboarding"),
         verticalArrangement = Arrangement.spacedBy(EliteSpace.Md),
     ) {
-        EliteBadge(text = DemoPersona.MODE_LABEL)
+        if (isLocalDemoSession) {
+            EliteBadge(text = DemoPersona.MODE_LABEL)
+        }
         EliteOnboardingProgress(
             step = step,
             total = ATHLETE_STEPS.size,
@@ -203,7 +216,11 @@ fun OnboardingScreen(
             3 -> {
                 Text("Wearables", style = MaterialTheme.typography.titleMedium)
                 Text(
-                    "Connect devices later from Profile → Telemetry. LOCAL_DEMO does not call production APIs.",
+                    if (isLocalDemoSession) {
+                        "Connect devices later from Profile → Telemetry. LOCAL_DEMO does not call production APIs."
+                    } else {
+                        "Connect devices later from Profile → Telemetry."
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 listOf("Apple Watch / Health", "Garmin", "Whoop", "Skip for now").forEach { option ->
@@ -231,12 +248,17 @@ fun OnboardingScreen(
             4 -> {
                 Text("Plan preview", style = MaterialTheme.typography.titleMedium)
                 EliteCard {
-                    Text("Athlete Pro (LOCAL_DEMO)", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        if (isLocalDemoSession) "Athlete Pro (LOCAL_DEMO)" else "Athlete Pro",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
                     Text(
                         "Recovery rings · AI directive · coach marketplace · telemetry cockpit",
                         style = MaterialTheme.typography.bodyMedium,
                     )
-                    Text("Billing is simulated — no Stripe charge.", style = MaterialTheme.typography.bodySmall)
+                    if (isLocalDemoSession) {
+                        Text("Billing is simulated — no Stripe charge.", style = MaterialTheme.typography.bodySmall)
+                    }
                 }
                 listOf("Athlete Pro preview", "Coach-led plan preview").forEach { option ->
                     EliteChip(label = option, selected = plan == option, onClick = { plan = option })

@@ -11,6 +11,7 @@ import com.fitconnect.android.athlete.domain.TrainSurfaceUi
 import com.fitconnect.android.athlete.domain.VaultBadgeUi
 import com.fitconnect.android.athlete.domain.VaultProgressUi
 import com.fitconnect.android.designui.charts.EliteChartPoint
+import com.fitconnect.android.telemetry.domain.MetricType
 import com.fitconnect.android.telemetry.integration.AthleteTelemetryFacade
 import com.fitconnect.ascend.badges.BadgeProgressEngine
 import kotlin.math.roundToInt
@@ -141,6 +142,67 @@ object AthleteContentResolver {
             ),
             zoneMinutes = zones,
             isAnyDemo = true,
+        )
+    }
+
+    /**
+     * Production Analysis charts from telemetry store.
+     * Returns empty series (not demo) when insufficient samples.
+     */
+    suspend fun analysisFromTelemetry(
+        athleteId: String,
+        telemetry: AthleteTelemetryFacade,
+    ): AnalysisSurfaceUi {
+        val loadTrend = telemetry.trend(athleteId, MetricType.TRAINING_LOAD, days = 7)
+        val hrvTrend = telemetry.trend(athleteId, MetricType.HRV, days = 7)
+        val zoneProxy = telemetry.trend(athleteId, MetricType.HEART_RATE, days = 7)
+
+        val hasLoad = loadTrend.points.isNotEmpty()
+        val hasHrv = hrvTrend.points.isNotEmpty()
+        val hasZones = zoneProxy.points.isNotEmpty()
+
+        if (!hasLoad && !hasHrv && !hasZones) {
+            return AnalysisSurfaceUi(
+                weeklyLoad = emptyList(),
+                weeklyLabels = emptyList(),
+                todayIndex = -1,
+                hrvTrendMs = emptyList(),
+                hrvDeltaPercent = Provenanced(
+                    0f,
+                    AthleteDataProvenance.INSUFFICIENT_DATA,
+                    TELEMETRY_SOURCE,
+                ),
+                zoneMinutes = emptyList(),
+                isAnyDemo = false,
+            )
+        }
+
+        val labels = listOf("D-6", "D-5", "D-4", "D-3", "D-2", "D-1", "Today")
+        val measured = AthleteDataProvenance.MEASURED
+        val weeklyLoad = loadTrend.points.takeLast(7).map {
+            Provenanced(it.avg.toFloat(), measured, TELEMETRY_SOURCE)
+        }
+        val hrvMs = hrvTrend.points.takeLast(7).map {
+            Provenanced(it.avg.toFloat(), measured, TELEMETRY_SOURCE)
+        }
+        val delta = hrvTrend.trendDelta()?.toFloat() ?: 0f
+        // Zone minutes approximated from HR sample density until zone engine is wired.
+        val zones = listOf(1, 2, 3, 4, 5).map { zone ->
+            val minutes = if (hasZones) {
+                (zoneProxy.points.size * zone / 5).coerceAtLeast(0)
+            } else {
+                0
+            }
+            Provenanced(minutes, if (hasZones) AthleteDataProvenance.CALCULATED else AthleteDataProvenance.INSUFFICIENT_DATA, TELEMETRY_SOURCE)
+        }
+        return AnalysisSurfaceUi(
+            weeklyLoad = weeklyLoad,
+            weeklyLabels = labels.takeLast(weeklyLoad.size.coerceAtLeast(1)),
+            todayIndex = (weeklyLoad.size - 1).coerceAtLeast(0),
+            hrvTrendMs = hrvMs,
+            hrvDeltaPercent = Provenanced(delta, measured, TELEMETRY_SOURCE),
+            zoneMinutes = zones,
+            isAnyDemo = false,
         )
     }
 

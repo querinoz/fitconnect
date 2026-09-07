@@ -1,0 +1,99 @@
+{
+  "version": 2,
+  "handle": "@fitconnectsports",
+  "dimensions": {
+    "feed": "1080x1440",
+    "reel": "1080x1920",
+    "safeZoneFeed": "1012x1350 centered"
+  },
+  "narrative": "Problema → Sistema → Produto → Wear → Coach → CTA",
+  "profileSetup": {
+    "name": "FitConnect | Treino Gamificado",
+    "bio": "O sistema de performance para atletas e treinadores.\nConnect. Train. Perform.\n↓ Lista de espera na bio",
+    "website": "https://fitconnect-phi.vercel.app"
+  },
+  "posts": [
+    {
+      "id": "v2_01",
+      "type": "reel",
+      "chapter": "Gancho",
+      "media": ["v2_01_hook_cover.png"],
+      "video": "v2_01_hook.mp4",
+      "cover": "v2_01_hook_cover.png",
+      "captionFile": "v2_01.txt",
+      "audio": "track_energy.mp3"
+    },
+    {
+      "id": "v2_02",
+      "type": "carousel",
+      "chapter": "Problema",
+      "media": ["v2_02_p1.png", "v2_02_p2.png", "v2_02_p3.png", "v2_02_p4.png"],
+      "captionFile": "v2_02.txt"
+    },
+    {
+      "id": "v2_03",
+      "type": "image",
+      "chapter": "Solução",
+      "media": ["v2_03_one_os.png"],
+      "captionFile": "v2_03.txt"
+    },
+    {
+      "id": "v2_04",
+      "type": "reel",
+      "chapter": "Produto",
+      "media": ["v2_04_app_cover.png"],
+      "video": "v2_04_app.mp4",
+      "cover": "v2_04_app_cover.png",
+      "captionFile": "v2_04.txt",
+      "audio": "track_pulse.mp3"
+    },
+    {
+      "id": "v2_05",
+      "type": "carousel",
+      "chapter": "Funcionalidades",
+      "media": ["v2_05_p1.png", "v2_05_p2.png", "v2_05_p3.png", "v2_05_p4.png", "v2_05_p5.png"],
+      "captionFile": "v2_05.txt"
+    },
+    {
+      "id": "v2_06",
+      "type": "reel",
+      "chapter": "Wear OS",
+      "media": ["v2_06_wear_cover.png"],
+      "video": "v2_06_wear.mp4",
+      "cover": "v2_06_wear_cover.png",
+      "captionFile": "v2_06.txt",
+      "audio": "track_drive.mp3"
+    },
+    {
+      "id": "v2_07",
+      "type": "image",
+      "chapter": "Coach OS",
+      "media": ["v2_07_coach.png"],
+      "captionFile": "v2_07.txt"
+    },
+    {
+      "id": "v2_08",
+      "type": "carousel",
+      "chapter": "Confiança",
+      "media": ["v2_08_p1.png", "v2_08_p2.png", "v2_08_p3.png", "v2_08_p4.png"],
+      "captionFile": "v2_08.txt"
+    },
+    {
+      "id": "v2_09",
+      "type": "reel",
+      "chapter": "CTA",
+      "media": ["v2_09_cta_cover.png"],
+      "video": "v2_09_cta.mp4",
+      "cover": "v2_09_cta_cover.png",
+      "captionFile": "v2_09.txt",
+      "audio": "track_anthem.mp3"
+    },
+    {
+      "id": "v2_10",
+      "type": "image",
+      "chapter": "Manifesto",
+      "media": ["v2_10_manifesto.png"],
+      "captionFile": "v2_10.txt"
+    }
+  ]
+}

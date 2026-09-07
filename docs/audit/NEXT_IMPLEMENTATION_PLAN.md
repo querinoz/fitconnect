@@ -1,11 +1,13 @@
 # Next Implementation Plan
 
-**Date:** 2026-09-02
-**Status:** `RECONCILE â†’ P1-AUTH` **executed** (engineering). See [P1_AUTH_EXECUTION_REPORT.md](P1_AUTH_EXECUTION_REPORT.md).
+**Date:** 2026-09-03
+**Status:** P2-CORE remainder **engineering PASS** — see [P2_CORE_RESULT.md](P2_CORE_RESULT.md).
 
-**NEXT AUTHORIZED PHASE (do not auto-start):** WORKOUT-ENGINE WAVE 2
+**NEXT AUTHORIZED PHASE (do not auto-start):** P2-GPS (outdoor activity → durable activities), after optional HC device smoke / coach bookings APIs if required for launch.
 
-This document remains the longer roadmap. Historical â€œrecommended next = RECONCILEâ€ below is **done**.
+This document remains the longer roadmap. Wave 2 + P2-CORE engineering are in place; production remains **NO-GO**.
+
+This document remains the longer roadmap. Historical “recommended next = RECONCILE” below is **done**.
 
 ---
 

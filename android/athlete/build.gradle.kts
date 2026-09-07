@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.androidx.adaptive)
     implementation(libs.androidx.adaptive.layout)
     implementation(libs.androidx.adaptive.navigation)
+    implementation(libs.androidx.activity.compose)
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)

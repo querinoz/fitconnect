@@ -1,6 +1,10 @@
 package com.fitconnect.android.athlete.ui.activity
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.Manifest
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
@@ -23,6 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.fitconnect.android.athlete.ascend.ActivityAscendBridge
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
@@ -34,6 +40,7 @@ import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.capture.GpsFeedStatus
 import com.fitconnect.android.capture.LiveActivityEngine
 import com.fitconnect.android.capture.LiveActivityPhase
+import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.design.EliteSurfaceInstrument
 import com.fitconnect.android.designui.charts.EliteChartPalette
 import com.fitconnect.android.designui.charts.EliteChartZoneStrip
@@ -53,8 +60,8 @@ import com.fitconnect.android.designui.components.PerformanceCompleteOverlay
 import com.fitconnect.android.designui.maps.EliteMapMode
 import com.fitconnect.android.designui.maps.EliteMapPhase
 import com.fitconnect.android.designui.maps.EliteMapPhaseLogic
-import com.fitconnect.android.designui.maps.EliteRouteMap
-import com.fitconnect.android.designui.maps.EliteRouteVertex
+import com.fitconnect.android.designui.maps.FitConnectRouteMap
+import com.fitconnect.android.capture.route.GpsQualityResolver
 import com.fitconnect.android.designui.neumorphic.EosPremiumCard
 import com.fitconnect.android.designui.neumorphic.EosPremiumWell
 import com.fitconnect.android.designui.theme.EliteMetricHeroTextStyle
@@ -67,10 +74,13 @@ import com.fitconnect.shared.telemetry.MetricAvailability
 import com.fitconnect.shared.telemetry.TelemetryEnvelope
 import com.fitconnect.shared.workout.WorkoutSport
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 @Composable
-fun ActivityScreen() {
+fun ActivityScreen(
+    onOpenRouteDetail: (activityId: String) -> Unit = {},
+) {
     val container = LocalAthleteContainer.current
     val engine = container.liveActivity
     val snap by engine.state.collectAsState()
@@ -83,6 +93,50 @@ fun ActivityScreen() {
     var completeDismissed by remember { mutableStateOf(false) }
     var processedSession by remember { mutableStateOf<String?>(null) }
     val locale by container.platform.localeManager.observe().collectAsState(initial = AppLocale.EN)
+
+    val outdoor = container.outdoorCapture
+    val outdoorState by outdoor.state.collectAsState()
+    var pendingOutdoorStart by remember { mutableStateOf(false) }
+    var followEnabled by remember { mutableStateOf(true) }
+    val roomRoute by remember(outdoorState.activityId) {
+        if (outdoorState.activityId.isBlank()) {
+            flowOf(emptyList())
+        } else {
+            container.routeRepository.observeAcceptedRoute(outdoorState.activityId)
+        }
+    }.collectAsState(initial = emptyList())
+    // Map consumes Room (canonical). Engine route is only a live hint before Room emits.
+    val mapPoints = if (roomRoute.isNotEmpty()) roomRoute else snap.route
+    val qualityLabel = GpsQualityResolver.label(
+        GpsQualityResolver.resolve(
+            phase = outdoorState.phase,
+            acceptedPoints = outdoorState.acceptedPoints.coerceAtLeast(mapPoints.size),
+            lastVerdict = outdoorState.lastVerdict,
+        ),
+    )
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted && pendingOutdoorStart) {
+            pendingOutdoorStart = false
+            scope.launch {
+                when (outdoor.prepare(sport.wireKey)) {
+                    is AppResult.Ok -> {
+                        outdoor.beginCountdownAndTrack()
+                        container.telemetry.wearWorkout.startWorkout(sport.wireKey)
+                    }
+                    is AppResult.Err -> Unit
+                }
+            }
+        } else {
+            pendingOutdoorStart = false
+            engine.ingestFixUnavailable(GpsFeedStatus.PERMISSION_DENIED)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        outdoor.recoverIfNeeded()
+    }
 
     LaunchedEffect(wearEnvelope) {
         wearEnvelope?.let { container.liveCoordinator.onRemoteEnvelope(it) }
@@ -121,9 +175,7 @@ fun ActivityScreen() {
         }
     }
 
-    val vertices = snap.route.map {
-        EliteRouteVertex(it.latitude, it.longitude, snap.paceSecPerKm, it.heartRateBpm, it.altitudeM)
-    }
+    val vertices = mapPoints
     val sessionWaiting = snap.phase != LiveActivityPhase.IDLE &&
         snap.phase != LiveActivityPhase.ENDED &&
         vertices.size < 2
@@ -132,7 +184,7 @@ fun ActivityScreen() {
         waitMs = 0L
         if (!sessionWaiting) return@LaunchedEffect
         while (waitMs < EliteSurfaceInstrument.LOAD_TIMEOUT_MS &&
-            engine.state.value.route.size < 2
+            mapPoints.size < 2
         ) {
             delay(250)
             waitMs += 250
@@ -144,11 +196,6 @@ fun ActivityScreen() {
         permissionDenied = snap.gps == GpsFeedStatus.PERMISSION_DENIED,
         elapsedMs = waitMs,
     )
-    val cursor = snap.replayCursor?.let { cursor ->
-        snap.route.indexOfFirst {
-            it.latitude == cursor.latitude && it.longitude == cursor.longitude
-        }.takeIf { it >= 0 }
-    }
     val liveSession = snap.phase != LiveActivityPhase.IDLE
     val trainUi = remember(snap.sourceLabel) { AthleteContentResolver.trainSurface(snap.sourceLabel) }
 
@@ -157,6 +204,199 @@ fun ActivityScreen() {
         subtitle = "Live cockpit · ${trainUi.sourceLabel}",
         overline = "ATHLETE OS · CAPTURE",
         testTag = "athlete_activity",
+        floatingAlignment = Alignment.BottomCenter,
+        floating = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("outdoor_controls"),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
+            ) {
+                if (outdoorState.phase != com.fitconnect.android.capture.runtime.OutdoorTrackingPhase.IDLE) {
+                    val statusLine =
+                        "Outdoor ${outdoorState.phase.name} · pts ${outdoorState.acceptedPoints}"
+                    Column(modifier = Modifier.testTag("outdoor_status")) {
+                        Text(
+                            statusLine,
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier
+                                .testTag("activity_outdoor_phase")
+                                .semantics { contentDescription = statusLine },
+                        )
+                        Text(
+                            outdoorState.phase.name,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier
+                                .testTag("outdoor_phase_value")
+                                .semantics { contentDescription = outdoorState.phase.name },
+                        )
+                        Text(
+                            outdoorState.acceptedPoints.toString(),
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier
+                                .testTag("outdoor_accepted_points")
+                                .semantics {
+                                    contentDescription = outdoorState.acceptedPoints.toString()
+                                },
+                        )
+                        Text(
+                            "dist ${"%.0f".format(snap.distanceM)} m",
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.testTag("route_distance"),
+                        )
+                        Text(
+                            "sync ${outdoorState.phase.name}",
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.testTag("route_sync"),
+                        )
+                    }
+                }
+                if (outdoorState.error == "permission_denied") {
+                    Text(
+                        "Location permission is required to record outdoor GPS. FitConnect does not invent coordinates.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.testTag("activity_gps_permission_rationale"),
+                    )
+                }
+                EliteFlowRow {
+                    when (snap.phase) {
+                        LiveActivityPhase.IDLE, LiveActivityPhase.ENDED -> {
+                            Box(modifier = Modifier.testTag("outdoor_start")) {
+                                EliteButton(
+                                    label = "Start",
+                                    onClick = {
+                                        if (!container.liveCoordinator.claimLocalStart(sport.wireKey)) return@EliteButton
+                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        if (sport.outdoorGps) {
+                                            if (!outdoor.hasLocationPermission()) {
+                                                pendingOutdoorStart = true
+                                                locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                                            } else {
+                                                scope.launch {
+                                                    when (outdoor.prepare(sport.wireKey)) {
+                                                        is AppResult.Ok -> {
+                                                            outdoor.beginCountdownAndTrack()
+                                                            container.telemetry.wearWorkout.startWorkout(sport.wireKey)
+                                                        }
+                                                        is AppResult.Err -> Unit
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            engine.allowSimulatedGps = true
+                                            engine.arm(sport.wireKey)
+                                            engine.beginCountdown()
+                                            scope.launch { container.telemetry.wearWorkout.startWorkout(sport.wireKey) }
+                                        }
+                                    },
+                                    modifier = Modifier.testTag("activity_start"),
+                                )
+                            }
+                            if (snap.phase == LiveActivityPhase.ENDED) {
+                                EliteButton(
+                                    label = "Discard",
+                                    variant = EliteButtonVariant.Ghost,
+                                    onClick = engine::discard,
+                                    modifier = Modifier.testTag("activity_discard"),
+                                )
+                            }
+                        }
+                        LiveActivityPhase.READY, LiveActivityPhase.COUNTDOWN -> {
+                            EliteButton(
+                                label = "Skip countdown",
+                                onClick = {
+                                    if (container.liveCoordinator.claimLocalStart(sport.wireKey)) {
+                                        engine.start(sport.wireKey)
+                                    }
+                                },
+                            )
+                        }
+                        LiveActivityPhase.RUNNING, LiveActivityPhase.RESUMING -> {
+                            Box(modifier = Modifier.testTag("outdoor_pause")) {
+                                EliteButton(
+                                    label = "Pause",
+                                    variant = EliteButtonVariant.Secondary,
+                                    onClick = {
+                                        if (sport.outdoorGps) outdoor.pause() else engine.pause()
+                                        scope.launch { container.telemetry.wearWorkout.pauseWorkout() }
+                                    },
+                                    modifier = Modifier.testTag("activity_pause"),
+                                )
+                            }
+                            EliteButton(
+                                label = "Lap",
+                                variant = EliteButtonVariant.Ghost,
+                                onClick = engine::addLap,
+                            )
+                            Box(modifier = Modifier.testTag("outdoor_finish")) {
+                                HoldToConfirmButton(
+                                    label = "Finish",
+                                    onConfirmed = {
+                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        scope.launch {
+                                            if (sport.outdoorGps) {
+                                                outdoor.finish()
+                                                val id = outdoor.state.value.activityId
+                                                // Skip route-detail under E2E canvas hook — Nav destroy races ActivityScenario.
+                                                if (id.isNotBlank() &&
+                                                    !com.fitconnect.android.designui.maps.MapRenderHooks.forceCanvasFallback
+                                                ) {
+                                                    onOpenRouteDetail(id)
+                                                }
+                                            } else {
+                                                engine.end()
+                                            }
+                                            container.telemetry.wearWorkout.endWorkout()
+                                        }
+                                    },
+                                    modifier = Modifier.testTag("activity_finish"),
+                                )
+                            }
+                        }
+                        LiveActivityPhase.PAUSED -> {
+                            Box(modifier = Modifier.testTag("outdoor_resume")) {
+                                EliteButton(
+                                    label = "Resume",
+                                    onClick = {
+                                        if (sport.outdoorGps) outdoor.resume() else engine.resume()
+                                        scope.launch { container.telemetry.wearWorkout.resumeWorkout() }
+                                    },
+                                    modifier = Modifier.testTag("activity_resume"),
+                                )
+                            }
+                            Box(modifier = Modifier.testTag("outdoor_finish")) {
+                                HoldToConfirmButton(
+                                    label = "Finish",
+                                    onConfirmed = {
+                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        scope.launch {
+                                            if (sport.outdoorGps) {
+                                                outdoor.finish()
+                                                val id = outdoor.state.value.activityId
+                                                // Skip route-detail under E2E canvas hook — Nav destroy races ActivityScenario.
+                                                if (id.isNotBlank() &&
+                                                    !com.fitconnect.android.designui.maps.MapRenderHooks.forceCanvasFallback
+                                                ) {
+                                                    onOpenRouteDetail(id)
+                                                }
+                                            } else {
+                                                engine.end()
+                                            }
+                                            container.telemetry.wearWorkout.endWorkout()
+                                        }
+                                    },
+                                    modifier = Modifier.testTag("activity_finish"),
+                                )
+                            }
+                        }
+                        LiveActivityPhase.FINISHING -> {
+                            Text("Finishing…", style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                }
+            }
+        },
     ) {
         item {
             AthleteDemoBanner(
@@ -222,30 +462,32 @@ fun ActivityScreen() {
                         }
                     }
                     EosPremiumWell(modifier = Modifier.fillMaxWidth()) {
-                        EliteRouteMap(
-                            points = vertices,
-                            mode = mapMode,
-                            cursorIndex = cursor,
-                            phase = mapPhase,
-                            onRetry = if (mapPhase == EliteMapPhase.Empty) {
-                                {
-                                    if (container.liveCoordinator.claimLocalStart(sport.wireKey)) {
-                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        engine.arm(sport.wireKey)
-                                        engine.beginCountdown()
-                                        scope.launch { container.telemetry.wearWorkout.startWorkout(sport.wireKey) }
+                        Box(modifier = Modifier.testTag("route_map")) {
+                            FitConnectRouteMap(
+                                points = mapPoints,
+                                mode = mapMode,
+                                phase = mapPhase,
+                                completed = snap.phase == LiveActivityPhase.ENDED,
+                                followEnabled = followEnabled,
+                                qualityLabel = qualityLabel,
+                                distanceM = snap.distanceM.takeIf { it > 0.0 },
+                                durationMs = snap.elapsedMs.takeIf { it > 0L },
+                                avgSpeedMps = snap.speedMps,
+                                onFollowChange = { followEnabled = it },
+                                onRetry = if (mapPhase == EliteMapPhase.Empty) {
+                                    {
+                                        if (container.liveCoordinator.claimLocalStart(sport.wireKey)) {
+                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            engine.arm(sport.wireKey)
+                                            engine.beginCountdown()
+                                            scope.launch { container.telemetry.wearWorkout.startWorkout(sport.wireKey) }
+                                        }
                                     }
-                                }
-                            } else {
-                                { waitMs = 0L }
-                            },
-                            contentDescription = when (mapPhase) {
-                                EliteMapPhase.Success -> "Activity route"
-                                EliteMapPhase.Empty -> "No GPS trace yet"
-                                EliteMapPhase.Loading -> "Waiting for GPS trace"
-                                EliteMapPhase.Error -> "Map failed to load"
-                            },
-                        )
+                                } else {
+                                    { waitMs = 0L }
+                                },
+                            )
+                        }
                     }
                 }
             }
@@ -288,91 +530,15 @@ fun ActivityScreen() {
                         "ELEV +" to "+${snap.elevationGainM.toInt()} m",
                         "BEST" to LiveActivityEngine.formatPace(snap.bestPaceSecPerKm),
                         "LOAD" to snap.sessionState.name,
-                        "GPS" to if (snap.gps == GpsFeedStatus.LIVE) "LIVE" else "DEMO",
+                        "GPS" to when (snap.gps) {
+                            GpsFeedStatus.LIVE -> "LIVE"
+                            GpsFeedStatus.EMULATOR_INJECTED -> "EMULATOR"
+                            GpsFeedStatus.PERMISSION_DENIED -> "DENIED"
+                            GpsFeedStatus.UNAVAILABLE -> "WAITING"
+                            GpsFeedStatus.SIMULATED -> "DEMO"
+                        },
                     ),
                 )
-            }
-        }
-        item {
-            EliteFlowRow {
-                when (snap.phase) {
-                    LiveActivityPhase.IDLE, LiveActivityPhase.ENDED -> {
-                        EliteButton(
-                            label = "Start",
-                            onClick = {
-                                if (container.liveCoordinator.claimLocalStart(sport.wireKey)) {
-                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    engine.arm(sport.wireKey)
-                                    engine.beginCountdown()
-                                    scope.launch { container.telemetry.wearWorkout.startWorkout(sport.wireKey) }
-                                }
-                            },
-                            modifier = Modifier.testTag("activity_start"),
-                        )
-                        if (snap.phase == LiveActivityPhase.ENDED) {
-                            EliteButton(
-                                label = "Discard",
-                                variant = EliteButtonVariant.Ghost,
-                                onClick = engine::discard,
-                                modifier = Modifier.testTag("activity_discard"),
-                            )
-                        }
-                    }
-                    LiveActivityPhase.READY, LiveActivityPhase.COUNTDOWN -> {
-                        EliteButton(
-                            label = "Skip countdown",
-                            onClick = {
-                                if (container.liveCoordinator.claimLocalStart(sport.wireKey)) {
-                                    engine.start(sport.wireKey)
-                                }
-                            },
-                        )
-                    }
-                    LiveActivityPhase.RUNNING, LiveActivityPhase.RESUMING -> {
-                        EliteButton(
-                            label = "Pause",
-                            variant = EliteButtonVariant.Secondary,
-                            onClick = {
-                                engine.pause()
-                                scope.launch { container.telemetry.wearWorkout.pauseWorkout() }
-                            },
-                            modifier = Modifier.testTag("activity_pause"),
-                        )
-                        EliteButton(
-                            label = "Lap",
-                            variant = EliteButtonVariant.Ghost,
-                            onClick = engine::addLap,
-                        )
-                        HoldToConfirmButton(
-                            label = "Finish",
-                            onConfirmed = {
-                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                engine.end()
-                                scope.launch { container.telemetry.wearWorkout.endWorkout() }
-                            },
-                        )
-                    }
-                    LiveActivityPhase.PAUSED -> {
-                        EliteButton(
-                            label = "Resume",
-                            onClick = {
-                                engine.resume()
-                                scope.launch { container.telemetry.wearWorkout.resumeWorkout() }
-                            },
-                            modifier = Modifier.testTag("activity_resume"),
-                        )
-                        HoldToConfirmButton(
-                            label = "Finish",
-                            onConfirmed = {
-                                engine.end()
-                                scope.launch { container.telemetry.wearWorkout.endWorkout() }
-                            },
-                        )
-                    }
-                    LiveActivityPhase.FINISHING -> {
-                        Text("Finishing…", style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
             }
         }
         if (snap.phase == LiveActivityPhase.ENDED) {
@@ -428,7 +594,15 @@ fun ActivityScreen() {
                             pace = LiveActivityEngine.formatPace(snap.paceSecPerKm),
                             hr = snap.avgHrBpm?.let { "$it bpm" } ?: "UNAVAILABLE",
                             score = snap.performanceScore?.toString() ?: "—",
-                            points = vertices,
+                            points = vertices.map {
+                                com.fitconnect.android.designui.maps.EliteRouteVertex(
+                                    it.latitude,
+                                    it.longitude,
+                                    snap.paceSecPerKm,
+                                    it.heartRateBpm,
+                                    it.altitudeM,
+                                )
+                            },
                         )
                         EliteChartZoneStrip(secondsInZone = snap.timeInZoneSec)
                         Text(

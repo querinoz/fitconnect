@@ -14,7 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.data.canonicalAthleteId
 import com.fitconnect.android.athlete.di.AthleteContainer
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
@@ -45,17 +45,19 @@ import kotlinx.coroutines.launch
 fun TelemetryScreen() {
     val container = LocalAthleteContainer.current
     val scope = rememberCoroutineScope()
-    val athleteId = LocalAthleteRepository.ATHLETE_ID
+    var athleteId by remember { mutableStateOf("") }
     var devices by remember { mutableStateOf<List<DeviceEntry>>(emptyList()) }
     var overview by remember { mutableStateOf<TelemetryOverview?>(null) }
     var hrvTrend by remember { mutableStateOf<AggregateSeries?>(null) }
     var sleepTrend by remember { mutableStateOf<AggregateSeries?>(null) }
 
     suspend fun reload() {
-        devices = container.telemetry.deviceCenter.devices(athleteId)
-        overview = container.telemetry.athleteFacade.overview(athleteId)
-        hrvTrend = container.telemetry.athleteFacade.trend(athleteId, MetricType.HRV, days = 14)
-        sleepTrend = container.telemetry.athleteFacade.trend(athleteId, MetricType.SLEEP, days = 14)
+        val uid = container.platform.sessionStore.canonicalAthleteId()
+        athleteId = uid
+        devices = container.telemetry.deviceCenter.devices(uid)
+        overview = container.telemetry.athleteFacade.overview(uid)
+        hrvTrend = container.telemetry.athleteFacade.trend(uid, MetricType.HRV, days = 14)
+        sleepTrend = container.telemetry.athleteFacade.trend(uid, MetricType.SLEEP, days = 14)
     }
 
     LaunchedEffect(Unit) {

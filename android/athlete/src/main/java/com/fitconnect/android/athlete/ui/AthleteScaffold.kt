@@ -30,6 +30,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,14 +47,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import android.content.Intent
+import androidx.activity.ComponentActivity
+import androidx.core.util.Consumer
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.fitconnect.android.athlete.R
-import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.data.canonicalAthleteId
 import com.fitconnect.android.athlete.di.AthleteContainer
 import com.fitconnect.android.athlete.domain.resolvePatentStatus
 import com.fitconnect.android.athlete.navigation.AthleteDest
@@ -108,6 +113,29 @@ fun AthleteOsApp(
     onSignedOut: () -> Unit = {},
 ) {
     val navController = rememberNavController()
+    val activity = LocalContext.current as ComponentActivity
+    // Consume pending nested athlete deep links (shell lands on HOME first).
+    LaunchedEffect(navController) {
+        fun tryHandle(uri: android.net.Uri?) {
+            if (uri == null) return
+            val path = uri.path.orEmpty()
+            if (!path.contains("athlete")) return
+            navController.handleDeepLink(Intent(Intent.ACTION_VIEW, uri))
+            com.fitconnect.android.foundation.navigation.DeepLinkInbox.clearIf(uri)
+        }
+        tryHandle(com.fitconnect.android.foundation.navigation.DeepLinkInbox.peek())
+        com.fitconnect.android.foundation.navigation.DeepLinkInbox.uris.collect { uri ->
+            tryHandle(uri)
+        }
+    }
+    DisposableEffect(navController, activity) {
+        val listener = Consumer<Intent> { intent ->
+            navController.handleDeepLink(intent)
+            intent.data?.let { com.fitconnect.android.foundation.navigation.DeepLinkInbox.clearIf(it) }
+        }
+        activity.addOnNewIntentListener(listener)
+        onDispose { activity.removeOnNewIntentListener(listener) }
+    }
     val backStack by navController.currentBackStackEntryAsState()
     val current = backStack?.destination?.route
     val online by container.platform.connectivity.online.collectAsState()
@@ -125,12 +153,14 @@ fun AthleteOsApp(
         1f
     }
     val hideNav = current?.startsWith("athlete/training/") == true ||
+        current == AthleteDest.WORKOUT.route ||
         (current == AthleteDest.ACTIVITY.route && live.phase != LiveActivityPhase.IDLE)
     val onBottomTab = AthleteDest.bottomTabs.any { it.route == current }
     val showHeader = onBottomTab && !hideNav
     var cacheStamp by remember { mutableStateOf<String?>(null) }
     var patentStatus by remember { mutableStateOf(PatentStatus.none()) }
     var headerName by remember { mutableStateOf("Athlete") }
+    var headerAthleteId by remember { mutableStateOf("") }
     var streakDays by remember { mutableStateOf<Int?>(null) }
     val headerController = remember { AthleteHeaderController() }
     val density = LocalDensity.current
@@ -166,7 +196,9 @@ fun AthleteOsApp(
     }
     LaunchedEffect(current) {
         val sessions = (container.athleteRepository.sessions() as? AppResult.Ok)?.value.orEmpty()
-        val snap = container.ascend.snapshot(LocalAthleteRepository.ATHLETE_ID)
+        val athleteId = container.platform.sessionStore.canonicalAthleteId()
+        headerAthleteId = athleteId
+        val snap = container.ascend.snapshot(athleteId)
         val streak = snap.streaks.firstOrNull { it.kind == StreakKind.PERFORMANCE }?.days ?: 0
         streakDays = streak.takeIf { it > 0 }
         val profile = (container.athleteRepository.profile() as? AppResult.Ok)?.value
@@ -280,7 +312,7 @@ fun AthleteOsApp(
                                     }
                                     Box {
                                         EliteHexatar(
-                                            userId = LocalAthleteRepository.ATHLETE_ID,
+                                            userId = headerAthleteId.ifBlank { headerName },
                                             contentDescription = headerName,
                                             diameter = EliteHexatarHeader,
                                         )
@@ -306,7 +338,7 @@ fun AthleteOsApp(
                     if (!hideNav) {
                         EosTrainActionFab(
                             onClick = {
-                                navController.navigate(AthleteDest.ACTIVITY.route)
+                                navController.navigate(AthleteDest.WORKOUT.route)
                             },
                         )
                     }

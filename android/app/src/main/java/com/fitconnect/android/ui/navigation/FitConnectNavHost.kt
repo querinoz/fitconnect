@@ -1,5 +1,8 @@
 package com.fitconnect.android.ui.navigation
 
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -26,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -34,41 +38,45 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.activity.compose.PredictiveBackHandler
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
-import com.fitconnect.android.R
-import com.fitconnect.android.foundation.common.AppResult
+import com.fitconnect.android.BuildConfig
 import com.fitconnect.android.FitConnectApplication
+import com.fitconnect.android.R
 import com.fitconnect.android.athlete.ui.AthleteOsApp
 import com.fitconnect.android.coach.ui.CoachOsApp
-import com.fitconnect.android.designui.catalog.DesignSystemCatalog
-import com.fitconnect.android.BuildConfig
 import com.fitconnect.android.designui.atmosphere.HoneycombAtmosphere
+import com.fitconnect.android.designui.catalog.DesignSystemCatalog
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteCardVariant
+import com.fitconnect.android.designui.components.EliteLoading
 import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.reduceMotionEnabled
 import com.fitconnect.android.foundation.authz.UserRole
-import com.fitconnect.android.foundation.navigation.CoreRoute
-import com.fitconnect.android.ui.auth.AuthScreen
-import com.fitconnect.android.ui.theme.LocalAppContainer
+import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.foundation.identity.hydrateLocalOnboarding
+import com.fitconnect.android.foundation.navigation.CoreRoute
 import com.fitconnect.android.foundation.storage.isCoachOnboardingDone
 import com.fitconnect.android.foundation.storage.isOnboardingDone
 import com.fitconnect.android.foundation.storage.needsIdentityRoleSelection
+import com.fitconnect.android.foundation.navigation.DeepLinkInbox
+import com.fitconnect.android.foundation.navigation.DeepLinkTarget
+import com.fitconnect.android.foundation.navigation.classifyDeepLink
+import com.fitconnect.android.foundation.navigation.identityBadgeLabel
+import com.fitconnect.android.ui.auth.AuthScreen
 import com.fitconnect.android.ui.onboarding.CoachOnboardingScreen
-import androidx.compose.ui.platform.LocalContext
-import kotlinx.coroutines.delay
+import com.fitconnect.android.ui.theme.LocalAppContainer
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 @Composable
 fun FitConnectNavHost(
     navController: NavHostController = rememberNavController(),
@@ -86,6 +94,9 @@ fun FitConnectNavHost(
             // Gesture cancelled — keep the current destination.
         }
     }
+
+    var bootComplete by remember { mutableStateOf(false) }
+    var pendingDeepLink by remember { mutableStateOf<Uri?>(DeepLinkInbox.peek()) }
 
     fun navigateGuarded(target: CoreRoute) {
         scope.launch {
@@ -105,14 +116,78 @@ fun FitConnectNavHost(
         }
     }
 
+    fun goShell(dest: AppDestination, clearBack: Boolean = true) {
+        navController.navigate(dest.route) {
+            if (clearBack) popUpTo(0) { inclusive = true }
+        }
+    }
+
+    /**
+     * Routes shell destinations immediately. Nested athlete URIs keep the Uri in
+     * [DeepLinkInbox] so [AthleteOsApp] can handleDeepLink after HOME mounts.
+     */
+    fun applyDeepLink(uri: Uri, loggedIn: Boolean) {
+        when (val target = classifyDeepLink(uri)) {
+            DeepLinkTarget.Guest -> {
+                DeepLinkInbox.clearIf(uri)
+                goShell(AppDestination.Guest)
+            }
+            DeepLinkTarget.Auth -> {
+                DeepLinkInbox.clearIf(uri)
+                goShell(AppDestination.Auth)
+            }
+            DeepLinkTarget.Catalog -> {
+                DeepLinkInbox.clearIf(uri)
+                if (BuildConfig.DEBUG) goShell(AppDestination.Catalog, clearBack = false)
+                else navigateGuarded(if (loggedIn) CoreRoute.HOME else CoreRoute.GUEST)
+            }
+            DeepLinkTarget.Home -> {
+                DeepLinkInbox.clearIf(uri)
+                if (loggedIn) goShell(AppDestination.LoggedHome)
+                else goShell(AppDestination.Auth)
+            }
+            is DeepLinkTarget.AthleteNested -> {
+                // Uri already in DeepLinkInbox.latest — do not re-offer (avoids collect loop).
+                if (loggedIn) goShell(AppDestination.LoggedHome)
+                else {
+                    DeepLinkInbox.clearIf(uri)
+                    goShell(AppDestination.Auth)
+                }
+            }
+            DeepLinkTarget.Unknown -> {
+                DeepLinkInbox.clearIf(uri)
+                navigateGuarded(if (loggedIn) CoreRoute.HOME else CoreRoute.GUEST)
+            }
+        }
+    }
+
+    LaunchedEffect(bootComplete) {
+        DeepLinkInbox.uris.collect { uri ->
+            if (!bootComplete) {
+                pendingDeepLink = uri
+            } else {
+                val loggedIn = container.sessionStore.snapshot().userId != null &&
+                    container.sessionStore.snapshot().role != UserRole.GUEST
+                applyDeepLink(uri, loggedIn)
+            }
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = AppDestination.Splash.route,
     ) {
         composable(AppDestination.Splash.route) {
             SplashRoute(
-                onFinished = { loggedIn ->
-                    navigateGuarded(if (loggedIn) CoreRoute.HOME else CoreRoute.GUEST)
+                onFinished = { loggedIn, _ ->
+                    bootComplete = true
+                    val uri = pendingDeepLink ?: DeepLinkInbox.peek()
+                    pendingDeepLink = null
+                    if (uri != null) {
+                        applyDeepLink(uri, loggedIn)
+                    } else {
+                        navigateGuarded(if (loggedIn) CoreRoute.HOME else CoreRoute.GUEST)
+                    }
                 },
                 restore = { container.authRepository.restoreSession() },
             )
@@ -132,7 +207,6 @@ fun FitConnectNavHost(
                 secondaryLabel = stringResource(R.string.nav_continue_anonymous),
                 onSecondary = {
                     scope.launch {
-                        // Anonymous explores guest surfaces only — never Athlete/Coach OS.
                         container.authRepository.signInAnonymously()
                         navigateGuarded(CoreRoute.AUTH)
                     }
@@ -163,22 +237,38 @@ fun FitConnectNavHost(
             val app = LocalContext.current.applicationContext as FitConnectApplication
             var allowed by remember { mutableStateOf<Boolean?>(null) }
             var role by remember { mutableStateOf<UserRole?>(null) }
+            var authError by remember { mutableStateOf<String?>(null) }
             LaunchedEffect(Unit) {
-                val decision = container.navGuard.authorize(CoreRoute.HOME)
-                allowed = decision.allowed
-                role = decision.role
-                if (!decision.allowed) {
-                    navController.navigate(AppDestination.fromCore(decision.redirectTo ?: CoreRoute.GUEST).route) {
-                        popUpTo(0) { inclusive = true }
+                runCatching {
+                    val decision = container.navGuard.authorize(CoreRoute.HOME)
+                    allowed = decision.allowed
+                    role = decision.role
+                    if (!decision.allowed) {
+                        navController.navigate(AppDestination.fromCore(decision.redirectTo ?: CoreRoute.GUEST).route) {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
+                }.onFailure { e ->
+                    authError = e.message ?: "authorize_failed"
+                    allowed = false
                 }
             }
             when {
-                allowed != true -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        content = {},
+                authError != null -> {
+                    FoundationScreen(
+                        title = stringResource(R.string.nav_error_title),
+                        body = authError ?: stringResource(R.string.nav_error_body),
+                        primaryLabel = stringResource(R.string.nav_continue_auth),
+                        onPrimary = { navigateGuarded(CoreRoute.AUTH) },
+                        testTag = "screen_home_auth_error",
                     )
+                }
+                allowed == null -> {
+                    BootLoadingSurface(label = "SYS.AUTH")
+                }
+                allowed != true -> {
+                    // Redirect in flight — keep loading, never an empty black Box.
+                    BootLoadingSurface(label = "SYS.REDIRECT")
                 }
                 else -> {
                     var needsRole by remember { mutableStateOf<Boolean?>(null) }
@@ -192,7 +282,7 @@ fun FitConnectNavHost(
                         )
                     }
                     when (needsRole) {
-                        null -> Spacer(modifier = Modifier.fillMaxSize())
+                        null -> BootLoadingSurface(label = "SYS.ROLE")
                         true -> com.fitconnect.android.ui.auth.RoleSelectScreen(
                             authRepository = container.authRepository,
                             onSelected = {
@@ -205,18 +295,21 @@ fun FitConnectNavHost(
                         false -> when (sessionRole) {
                             UserRole.COACH -> {
                                 var coachOnboardingDone by remember { mutableStateOf<Boolean?>(null) }
+                                var localDemoSession by remember { mutableStateOf(false) }
                                 LaunchedEffect(Unit) {
-                                    if (!container.sessionStore.snapshot().isLocalDemo) {
+                                    localDemoSession = container.sessionStore.snapshot().isLocalDemo
+                                    if (!localDemoSession) {
                                         container.identityRemote.hydrateLocalOnboarding(container.keyValueStore)
                                     }
                                     coachOnboardingDone = container.keyValueStore.isCoachOnboardingDone()
                                 }
                                 when (coachOnboardingDone) {
-                                    null -> Spacer(modifier = Modifier.fillMaxSize())
+                                    null -> BootLoadingSurface(label = "SYS.ONBOARD")
                                     false -> CoachOnboardingScreen(
                                         keyValueStore = container.keyValueStore,
                                         identityRemote = container.identityRemote,
                                         onFinished = { coachOnboardingDone = true },
+                                        isLocalDemoSession = localDemoSession,
                                     )
                                     true -> CoachOsApp(
                                         container = app.coachContainer,
@@ -232,18 +325,21 @@ fun FitConnectNavHost(
                             }
                             UserRole.ATHLETE -> {
                                 var onboardingDone by remember { mutableStateOf<Boolean?>(null) }
+                                var localDemoSession by remember { mutableStateOf(false) }
                                 LaunchedEffect(Unit) {
-                                    if (!container.sessionStore.snapshot().isLocalDemo) {
+                                    localDemoSession = container.sessionStore.snapshot().isLocalDemo
+                                    if (!localDemoSession) {
                                         container.identityRemote.hydrateLocalOnboarding(container.keyValueStore)
                                     }
                                     onboardingDone = container.keyValueStore.isOnboardingDone()
                                 }
                                 when (onboardingDone) {
-                                    null -> Spacer(modifier = Modifier.fillMaxSize())
+                                    null -> BootLoadingSurface(label = "SYS.ONBOARD")
                                     false -> com.fitconnect.android.ui.onboarding.OnboardingScreen(
                                         keyValueStore = container.keyValueStore,
                                         identityRemote = container.identityRemote,
                                         onFinished = { onboardingDone = true },
+                                        isLocalDemoSession = localDemoSession,
                                     )
                                     true -> AthleteOsApp(
                                         container = app.athleteContainer,
@@ -279,9 +375,6 @@ fun FitConnectNavHost(
                 }
             }
         }
-        // P1 (2026-08-18): the design-system catalog is an engineering surface, not a
-        // product screen. Registering it (and its deep link) only in debug keeps it out of
-        // the release graph entirely, and lets R8 strip DesignSystemCatalog from the APK.
         if (BuildConfig.DEBUG) {
             composable(
                 route = AppDestination.Catalog.route,
@@ -312,16 +405,30 @@ fun FitConnectNavHost(
 }
 
 @Composable
+private fun BootLoadingSurface(label: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .testTag("screen_boot_loading")
+            .semantics { contentDescription = "Loading $label" },
+        contentAlignment = Alignment.Center,
+    ) {
+        EliteLoading(label = label)
+    }
+}
+
+@Composable
 private fun SplashRoute(
     restore: suspend () -> AppResult<*>,
-    onFinished: (loggedIn: Boolean) -> Unit,
+    onFinished: (loggedIn: Boolean, isLocalDemo: Boolean) -> Unit,
 ) {
     val reduceMotion = reduceMotionEnabled()
     val markAlpha = remember { Animatable(if (reduceMotion) 1f else 0f) }
     val glowAlpha = remember { Animatable(if (reduceMotion) 0.35f else 0f) }
-    // Theme already maps FLOOR / VOLTLINE from EliteSurfaceTokens (landing parity).
     val floor = MaterialTheme.colorScheme.background
     val volt = MaterialTheme.colorScheme.primary
+    var badge by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         if (!reduceMotion) {
@@ -329,9 +436,16 @@ private fun SplashRoute(
             glowAlpha.animateTo(0.45f, tween(520))
         }
         val restored = restore()
-        // Cap brand beat; never invent long fake loaders.
+        val loggedIn = restored is AppResult.Ok<*>
+        val localDemo = (restored as? AppResult.Ok<*>)?.value.let { snap ->
+            (snap as? com.fitconnect.android.foundation.session.SessionSnapshot)?.isLocalDemo == true
+        }
+        badge = identityBadgeLabel(
+            isDebugBuild = BuildConfig.DEBUG,
+            isLocalDemoSession = localDemo,
+        )
         delay(if (reduceMotion) 0 else 180)
-        onFinished(restored is AppResult.Ok<*>)
+        onFinished(loggedIn, localDemo)
     }
 
     Box(
@@ -388,13 +502,15 @@ private fun SplashRoute(
                     .alpha(markAlpha.value)
                     .testTag("splash_sys_init"),
             )
-            if (com.fitconnect.android.BuildConfig.DEBUG) {
+            badge?.let { label ->
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "LOCAL_DEMO",
+                    text = label,
                     style = MaterialTheme.typography.labelLarge,
                     color = volt,
-                    modifier = Modifier.alpha(markAlpha.value),
+                    modifier = Modifier
+                        .alpha(markAlpha.value)
+                        .testTag("splash_identity_badge"),
                 )
             }
         }
@@ -407,22 +523,28 @@ private fun RoleGateRoute(
     authorize: suspend () -> com.fitconnect.android.foundation.navigation.NavDecision,
     onDenied: () -> Unit,
 ) {
-    var roleName by remember { mutableStateOf("…") }
+    var roleName by remember { mutableStateOf<String?>(null) }
+    var denied by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         val decision = authorize()
         if (!decision.allowed) {
+            denied = true
             onDenied()
             return@LaunchedEffect
         }
         roleName = loadRole().name
     }
-    FoundationScreen(
-        title = stringResource(R.string.nav_role_title),
-        body = stringResource(R.string.nav_role_body, roleName),
-        primaryLabel = null,
-        onPrimary = null,
-        testTag = "screen_role",
-    )
+    when {
+        denied -> BootLoadingSurface(label = "SYS.REDIRECT")
+        roleName == null -> BootLoadingSurface(label = "SYS.ROLE")
+        else -> FoundationScreen(
+            title = stringResource(R.string.nav_role_title),
+            body = stringResource(R.string.nav_role_body, roleName!!),
+            primaryLabel = null,
+            onPrimary = null,
+            testTag = "screen_role",
+        )
+    }
 }
 
 @Composable
@@ -435,11 +557,6 @@ private fun FoundationScreen(
     secondaryLabel: String? = null,
     onSecondary: (() -> Unit)? = null,
 ) {
-    // P0 (2026-08-18): this composable backs the GUEST / HOME-fallback / ERROR / ROLE
-    // routes — the first screens a clean install shows. It used to render stock Material 3
-    // on a flat background, which read as a different (unfinished) product. It now uses the
-    // Elite OS surface system: honeycomb atmosphere, glass card, Elite buttons.
-    // Signature, testTags and accessibility contract are unchanged on purpose.
     Box(
         modifier = Modifier
             .fillMaxSize()

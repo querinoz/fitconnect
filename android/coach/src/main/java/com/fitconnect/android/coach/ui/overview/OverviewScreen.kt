@@ -55,15 +55,20 @@ fun OverviewScreen(
     LaunchedEffect(Unit) {
         container.platform.analytics.screen("coach_overview")
         reload()
+        container.platform.productRealtime.start()
     }
 
     CoachLoad(result, ::reload) { home ->
         CoachScreenScaffold(
             title = home.greeting,
-            subtitle = "Squad command center · LOCAL_DEMO",
+            subtitle = "Squad command center · remote roster/sessions when authenticated",
             overline = "COACH OS · COMMAND",
             testTag = "coach_overview",
         ) {
+            item {
+                val link by container.platform.productRealtime.linkState.collectAsState()
+                EliteChip(label = "REALTIME · ${link.name}", onClick = {})
+            }
             item {
                 EliteBentoRow {
                     EliteBentoMetric(
@@ -271,13 +276,19 @@ private fun LiveSquadCard() {
     val envelope by container.telemetry.wearInbox.lastEnvelope.collectAsState()
     var companion by remember { mutableStateOf(com.fitconnect.android.telemetry.wear.WearCompanionState.NOT_PAIRED) }
     var locationAllowed by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
+    LaunchedEffect(envelope?.userId) {
         companion = container.telemetry.wearCompanion.state()
-        locationAllowed = container.telemetry.privacy.coachMayRead(
-            coachId = "coach-1",
-            athleteId = "ath-1",
-            metric = com.fitconnect.android.telemetry.domain.MetricType.LOCATION,
-        )
+        val coachId = container.platform.sessionStore.snapshot().userId
+        val athleteId = envelope?.userId
+        locationAllowed = if (!coachId.isNullOrBlank() && !athleteId.isNullOrBlank()) {
+            container.telemetry.privacy.coachMayRead(
+                coachId = coachId,
+                athleteId = athleteId,
+                metric = com.fitconnect.android.telemetry.domain.MetricType.LOCATION,
+            )
+        } else {
+            false
+        }
     }
     EliteCard(variant = EliteCardVariant.Glass, modifier = Modifier) {
         EliteStack(spacing = EliteSpace.Md) {

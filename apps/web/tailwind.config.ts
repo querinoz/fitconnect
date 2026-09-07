@@ -125,7 +125,10 @@ const config: Config = {
           "on-surface": "var(--eos-on-surface)",
           "on-surface-muted": "var(--eos-on-surface-muted)",
           "on-surface-subtle": "var(--eos-on-surface-subtle)",
-          outline: "var(--eos-outline)"
+          outline: "var(--eos-outline)",
+          mold: "var(--eos-mold-surface)",
+          "neu-muted": "var(--eos-neu-text-muted)",
+          "neu-primary": "var(--eos-neu-text-primary)"
         }
       },
       fontFamily: {
@@ -260,7 +263,9 @@ const config: Config = {
           "inset 0 0 0 1px var(--glass-border), 0 1px 0 var(--glass-edge)",
         "eos-volt": "0 0 15px var(--eos-voltline-glow)",
         "eos-chart": "0 0 20px rgba(60, 215, 255, 0.2)",
-        "eos-iris": "0 0 8px var(--eos-iris-glow)"
+        "eos-iris": "0 0 8px var(--eos-iris-glow)",
+        "eos-convex": "var(--eos-shadow-convex)",
+        "eos-concave": "var(--eos-shadow-concave)"
       },
       transitionTimingFunction: {
         "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",

@@ -9,7 +9,7 @@ import sharp from "sharp";
 const BRAND_DIR = path.resolve("apps/web/public/brand");
 const MARK_SVG = path.join(BRAND_DIR, "fitconnect-logo-mark.svg");
 const MASTER_SVG = path.join(BRAND_DIR, "fitconnect-logo.svg");
-const ASPECT = 340 / 320;
+const ASPECT = 1; // square viewBox 320×320
 
 async function renderSvg(svgPath, width) {
   const height = Math.round(width * ASPECT);

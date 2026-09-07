@@ -181,3 +181,32 @@ ACTION summary:
 ## Verification
 
 Commands run after cleanup: Markdown recount, relative-link check on current (non-archive, non-skill) docs, `git status`, `git diff --stat`, `git diff --check`. No commit. No push. No source/CI/Gradle/package.json edits in this pass except Markdown / LICENSE-adjacent docs.
+
+---
+
+## 2026-09-01 — Neu-glass documentation sync
+
+**Trigger:** Android athlete neu-glass waves 0–6 complete (`feat/elite-os-v2`, commits `4f6f3dd` … `93928e2`).
+
+**New canonical doc:** `docs/design/ELITE_OS_NEU_GLASS.md`
+
+**Updated (current / authoritative):**
+
+| Path | Change |
+|------|--------|
+| `README.md` | Neu-glass status rows, Android section links |
+| `docs/DESIGN_SYSTEM.md` | Chart palette, Android primitives, token pipeline |
+| `docs/README.md` | Index entries for neu-glass |
+| `docs/design/FITCONNECT_SURFACE_SYSTEM.md` | Neu-glass rules vs legacy glass ladder |
+| `docs/03-ux-m3-expressive.md` | Wave 6 checklist items |
+| `docs/DECISION-LOG.md` | 2026-09-01 decision row |
+| `CLAUDE.md` | Current status banner + neu-glass subsection |
+| `android/README.md` | `:design-ui` module, verification commands |
+| `docs/android/README.md` | Neu-glass section |
+| `android/docs/elite-os-neu-glass-wave6.md` | Final commit hash + link to canonical spec |
+| `.cursor/skills/elite-os-multiplatform/SKILL.md` | Neu-glass primitives |
+| `.cursor/skills/elite-surface/SKILL.md` | Typography + neu-glass |
+
+**Not updated:** `docs/master-plan/*` (frozen), `docs/archive/*` (HISTORICAL), QA evidence snapshots.
+
+**Production status unchanged:** NO-GO.

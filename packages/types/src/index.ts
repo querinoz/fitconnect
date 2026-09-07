@@ -38,6 +38,7 @@ export type {
   SetType,
   EffortScale,
   StrengthSessionStatus,
+  SetSide,
   CanonicalExercise,
   CanonicalWorkoutSet,
   CanonicalStrengthSession,
@@ -47,7 +48,7 @@ export type {
   OneRepMaxEstimate
 } from "./strength";
 
-export { STRENGTH_SCHEMA_VERSION, EXPORT_SCHEMA_VERSION } from "./strength";
+export { STRENGTH_SCHEMA_VERSION, EXPORT_SCHEMA_VERSION, RPE_SCALE, RIR_SCALE } from "./strength";
 
 export type {
   StravaSportType,

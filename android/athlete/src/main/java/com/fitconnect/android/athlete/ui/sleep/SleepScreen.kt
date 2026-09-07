@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import com.fitconnect.android.athlete.data.canonicalAthleteId
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.designui.components.EliteBadge
@@ -32,7 +33,7 @@ fun SleepScreen() {
     fun reload() {
         scope.launch {
             val overview = container.telemetry.athleteFacade.overview(
-                com.fitconnect.android.athlete.data.LocalAthleteRepository.ATHLETE_ID,
+                container.platform.sessionStore.canonicalAthleteId(),
             )
             val sleep = overview.latestSleep
             if (sleep == null) {

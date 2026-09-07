@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 340" width="320" height="340" fill="none" role="img" aria-label="FitConnect mark">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320" fill="none" role="img" aria-label="FitConnect mark">
   <title>FitConnect</title>
   <defs>
     <linearGradient id="ringGrad" x1="15%" y1="95%" x2="85%" y2="5%">
@@ -35,7 +35,7 @@
       </feMerge>
     </filter>
 
-    <filter id="ecgGlow" x="-5%" y="-300%" width="110%" height="700%">
+    <filter id="ecgGlow" x="-10%" y="-200%" width="120%" height="500%">
       <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
@@ -50,36 +50,78 @@
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
+
+    <filter id="tickGlow" x="-150%" y="-150%" width="400%" height="400%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="universalShadow" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+      <feMorphology operator="dilate" radius="1.25" in="SourceAlpha" result="stroke"/>
+      <feFlood flood-color="#000000" flood-opacity="0.9" result="strokeColor"/>
+      <feComposite in="strokeColor" in2="stroke" operator="in" result="outline"/>
+      <feGaussianBlur in="outline" stdDeviation="0.4" result="outlineSoft"/>
+      <feDropShadow dx="0" dy="2" stdDeviation="3.5" flood-color="#000000" flood-opacity="0.55" result="shadow"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#C8FF00" flood-opacity="0.24" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="outlineSoft"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
 
-  <circle cx="160" cy="162" r="124" fill="none" stroke="#C8FF00" stroke-width="22" stroke-opacity="0.05"/>
-  <circle cx="160" cy="162" r="120" fill="none" stroke="#39FF14" stroke-width="14" stroke-opacity="0.06"/>
-  <circle cx="160" cy="162" r="118" stroke="url(#ringGrad)" stroke-width="5.5" filter="url(#ringGlow)"/>
-  <circle cx="160" cy="162" r="110" stroke="url(#innerRingGrad)" stroke-width="1" stroke-dasharray="3 8" stroke-opacity="0.5"/>
-
-  <line x1="160" y1="32" x2="160" y2="46" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
-  <line x1="160" y1="278" x2="160" y2="292" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
-  <line x1="30" y1="162" x2="44" y2="162" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
-  <line x1="276" y1="162" x2="290" y2="162" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
-
-  <g filter="url(#fGlow)">
-    <rect x="126" y="122" width="16" height="82" rx="2.5" fill="url(#fGrad)"/>
-    <rect x="126" y="122" width="62" height="16" rx="2.5" fill="url(#fGrad)"/>
-    <rect x="126" y="156" width="22" height="14" rx="2.5" fill="#C8FF00"/>
-    <rect x="148" y="156" width="26" height="14" rx="2.5" fill="url(#fGrad)"/>
-  </g>
-
-  <g filter="url(#ecgGlow)">
+  <!-- Pointy-top hexagon, centered at 160,160 -->
+  <g filter="url(#universalShadow)">
     <path
-      d="M 14,312 L 92,312 L 104,296 L 118,334 L 132,284 L 146,326 L 160,312 L 258,312"
-      stroke="url(#ecgGrad)"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      d="M 160,48 L 256.9,96 L 256.9,224 L 160,272 L 63.1,224 L 63.1,96 Z"
+      fill="none" stroke="#C8FF00" stroke-width="22" stroke-opacity="0.05" stroke-linejoin="round"
     />
-    <circle cx="258" cy="312" r="3" fill="#C8FF00"/>
-    <circle cx="258" cy="312" r="5.5" fill="none" stroke="#C8FF00" stroke-width="1" stroke-opacity="0.45"/>
-    <circle cx="258" cy="312" r="9" fill="none" stroke="#C8FF00" stroke-width="0.6" stroke-opacity="0.18"/>
-    <line x1="258" y1="312" x2="306" y2="312" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" stroke-opacity="0.25"/>
+    <path
+      d="M 160,52 L 252.5,98.5 L 252.5,221.5 L 160,268 L 67.5,221.5 L 67.5,98.5 Z"
+      fill="none" stroke="#39FF14" stroke-width="14" stroke-opacity="0.06" stroke-linejoin="round"
+    />
+    <path
+      d="M 160,54 L 250.2,99.8 L 250.2,220.2 L 160,266 L 69.8,220.2 L 69.8,99.8 Z"
+      fill="none" stroke="url(#ringGrad)" stroke-width="5.5" stroke-linejoin="round" filter="url(#ringGlow)"
+    />
+    <path
+      d="M 160,62 L 243.4,104.2 L 243.4,215.8 L 160,258 L 76.6,215.8 L 76.6,104.2 Z"
+      fill="none" stroke="url(#innerRingGrad)" stroke-width="1" stroke-dasharray="3 8" stroke-opacity="0.5" stroke-linejoin="round"
+    />
+
+    <!-- Vertex ticks -->
+    <line x1="160" y1="48" x2="160" y2="38" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
+    <line x1="256.9" y1="96" x2="265.5" y2="91" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
+    <line x1="256.9" y1="224" x2="265.5" y2="229" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
+    <line x1="160" y1="272" x2="160" y2="282" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
+    <line x1="63.1" y1="224" x2="54.5" y2="229" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
+    <line x1="63.1" y1="96" x2="54.5" y2="91" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
+
+    <!-- F — centered in upper hex -->
+    <g filter="url(#fGlow)" transform="translate(-6, 6)">
+      <rect x="152" y="100" width="16" height="72" rx="2.5" fill="url(#fGrad)"/>
+      <rect x="152" y="100" width="56" height="15" rx="2.5" fill="url(#fGrad)"/>
+      <rect x="152" y="131" width="20" height="13" rx="2.5" fill="#C8FF00"/>
+      <rect x="172" y="131" width="24" height="13" rx="2.5" fill="url(#fGrad)"/>
+    </g>
+
+    <!-- ECG heartbeat — inside hex, below F -->
+    <g filter="url(#ecgGlow)">
+      <path
+        d="M 98,228 L 128,228 L 136,218 L 144,242 L 152,210 L 160,234 L 168,228 L 222,228"
+        stroke="url(#ecgGrad)"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <circle cx="222" cy="228" r="3" fill="#C8FF00"/>
+      <circle cx="222" cy="228" r="5.5" fill="none" stroke="#C8FF00" stroke-width="1" stroke-opacity="0.45"/>
+      <circle cx="222" cy="228" r="9" fill="none" stroke="#C8FF00" stroke-width="0.6" stroke-opacity="0.18"/>
+    </g>
   </g>
 </svg>

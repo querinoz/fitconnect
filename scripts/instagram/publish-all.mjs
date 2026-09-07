@@ -17,11 +17,16 @@ async function main() {
   const manifest = JSON.parse(
     fs.readFileSync(path.join(ROOT, "content/instagram/manifest.json"), "utf8")
   );
+  const fromArg = process.argv.find((a) => a.startsWith("--from="))?.split("=")[1]
+    ?? (process.argv.includes("--from") ? process.argv[process.argv.indexOf("--from") + 1] : null);
+  const posts = fromArg
+    ? manifest.posts.slice(manifest.posts.findIndex((p) => p.id === fromArg))
+    : manifest.posts;
   const results = [];
 
-  for (let i = 0; i < manifest.posts.length; i++) {
-    const post = manifest.posts[i];
-    console.log(`\n[${i + 1}/${manifest.posts.length}] publishing ${post.id}…`);
+  for (let i = 0; i < posts.length; i++) {
+    const post = posts[i];
+    console.log(`\n[${i + 1}/${posts.length}] publishing ${post.id}…`);
     const r = spawnSync(
       "node",
       ["scripts/instagram/publish.mjs", "--post", post.id],
@@ -32,7 +37,7 @@ async function main() {
       console.error(`STOP at ${post.id} — fix and rerun: pnpm instagram:publish -- --post ${post.id}`);
       break;
     }
-    if (i < manifest.posts.length - 1) {
+    if (i < posts.length - 1) {
       console.log(`waiting ${DELAY_MS / 1000}s…`);
       await sleep(DELAY_MS);
     }

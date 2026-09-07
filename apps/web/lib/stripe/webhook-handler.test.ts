@@ -19,7 +19,19 @@ vi.mock("./persistence", () => ({
   recordPaymentTransactionPg: vi.fn()
 }));
 
+vi.mock("./server", () => ({
+  syncConnectAccountFromStripe: vi.fn().mockResolvedValue(undefined)
+}));
+
 import { getPrisma } from "@/lib/db/client";
+import { syncConnectAccountFromStripe } from "./server";
+import {
+  isStripePgPersistenceAvailable,
+  claimStripeEventPg,
+  upsertSubscriptionPg,
+  updateSubscriptionByStripeIdPg,
+  recordPaymentTransactionPg
+} from "./persistence";
 
 describe("stripe webhook handler", () => {
   beforeEach(() => {
@@ -111,5 +123,153 @@ describe("stripe webhook handler", () => {
     } finally {
       vi.unstubAllEnvs();
     }
+  });
+
+  it("should_dispatch_subscription_lifecycle_and_invoice_events_via_prisma", async () => {
+    const updateMany = vi.fn().mockResolvedValue({ count: 1 });
+    const upsert = vi.fn().mockResolvedValue({});
+    const create = vi.fn().mockResolvedValue({});
+    vi.mocked(getPrisma).mockReturnValue({
+      processedStripeEvent: { create },
+      userSubscription: { updateMany, upsert }
+    } as never);
+
+    await dispatchStripeEvent({
+      id: "evt_sub_up",
+      type: "customer.subscription.updated",
+      data: {
+        object: {
+          id: "sub_1",
+          status: "active",
+          metadata: { planId: "pro" },
+          items: { data: [] }
+        }
+      }
+    } as never);
+    expect(updateMany).toHaveBeenCalled();
+
+    await dispatchStripeEvent({
+      id: "evt_sub_del",
+      type: "customer.subscription.deleted",
+      data: { object: { id: "sub_1" } }
+    } as never);
+
+    await dispatchStripeEvent({
+      id: "evt_inv_fail",
+      type: "invoice.payment_failed",
+      data: { object: { subscription: "sub_1" } }
+    } as never);
+
+    await dispatchStripeEvent({
+      id: "evt_inv_ok",
+      type: "invoice.payment_succeeded",
+      data: { object: { subscription: "sub_1" } }
+    } as never);
+
+    await dispatchStripeEvent({
+      id: "evt_acct",
+      type: "account.updated",
+      data: { object: { id: "acct_1" } }
+    } as never);
+    expect(syncConnectAccountFromStripe).toHaveBeenCalledWith("acct_1");
+
+    await dispatchStripeEvent({
+      id: "evt_co",
+      type: "checkout.session.completed",
+      data: {
+        object: {
+          id: "cs_1",
+          metadata: { kind: "subscription", userId: "u1", planId: "athlete" },
+          customer: "cus_1",
+          subscription: "sub_new"
+        }
+      }
+    } as never);
+    expect(upsert).toHaveBeenCalled();
+  });
+
+  it("should_use_pg_persistence_paths_when_available", async () => {
+    vi.mocked(isStripePgPersistenceAvailable).mockReturnValue(true);
+    vi.mocked(claimStripeEventPg).mockResolvedValue(true);
+    vi.mocked(upsertSubscriptionPg).mockResolvedValue(undefined as never);
+    vi.mocked(updateSubscriptionByStripeIdPg).mockResolvedValue(undefined as never);
+    vi.mocked(recordPaymentTransactionPg).mockResolvedValue(undefined as never);
+
+    expect(isStripePersistenceAvailable()).toBe(true);
+
+    const claimed = await claimStripeEvent({
+      id: "evt_pg",
+      type: "checkout.session.completed"
+    } as never);
+    expect(claimed).toBe(true);
+    expect(claimStripeEventPg).toHaveBeenCalledWith("evt_pg", "checkout.session.completed");
+
+    await dispatchStripeEvent({
+      id: "evt_pg_sub",
+      type: "checkout.session.completed",
+      data: {
+        object: {
+          id: "cs_pg",
+          metadata: { kind: "subscription", userId: "u_pg", planId: "athlete" },
+          customer: "cus_pg",
+          subscription: "sub_pg"
+        }
+      }
+    } as never);
+    expect(upsertSubscriptionPg).toHaveBeenCalled();
+
+    await dispatchStripeEvent({
+      id: "evt_pg_pay",
+      type: "checkout.session.completed",
+      data: {
+        object: {
+          id: "cs_pay",
+          amount_total: 1000,
+          metadata: {
+            kind: "session",
+            userId: "u_pay",
+            coachId: "c1",
+            coachShareCents: "850",
+            platformFeeCents: "150"
+          },
+          payment_intent: "pi_1"
+        }
+      }
+    } as never);
+    expect(recordPaymentTransactionPg).toHaveBeenCalled();
+
+    await dispatchStripeEvent({
+      id: "evt_pg_up",
+      type: "customer.subscription.updated",
+      data: {
+        object: {
+          id: "sub_pg",
+          status: "active",
+          metadata: {},
+          items: { data: [{ price: { id: "price_1" } }] }
+        }
+      }
+    } as never);
+    expect(updateSubscriptionByStripeIdPg).toHaveBeenCalled();
+
+    await dispatchStripeEvent({
+      id: "evt_pg_del",
+      type: "customer.subscription.deleted",
+      data: { object: { id: "sub_pg" } }
+    } as never);
+
+    await dispatchStripeEvent({
+      id: "evt_pg_fail",
+      type: "invoice.payment_failed",
+      data: { object: { subscription: "sub_pg" } }
+    } as never);
+
+    await dispatchStripeEvent({
+      id: "evt_pg_ok",
+      type: "invoice.payment_succeeded",
+      data: { object: { subscription: "sub_pg" } }
+    } as never);
+
+    vi.mocked(isStripePgPersistenceAvailable).mockReturnValue(false);
   });
 });

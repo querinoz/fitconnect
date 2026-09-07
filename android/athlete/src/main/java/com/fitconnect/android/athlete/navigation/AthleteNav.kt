@@ -8,6 +8,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.fitconnect.android.athlete.ui.activity.ActivityScreen
+import com.fitconnect.android.athlete.ui.activity.ActivityRouteDetailScreen
+import com.fitconnect.android.athlete.ui.workout.StrengthWorkoutScreen
 import com.fitconnect.android.athlete.ui.ai.AthleteAiScreen
 import com.fitconnect.android.athlete.ui.community.CommunityScreen
 import com.fitconnect.android.athlete.ui.daily.DailyActivityScreen
@@ -34,6 +36,8 @@ enum class AthleteDest(
     HOME("athlete/home", "Today", "H", bottom = true),
     DISCOVER("athlete/discover", "Analysis", "D", bottom = true),
     ACTIVITY("athlete/activity", "Train", "A", bottom = false),
+    ACTIVITY_ROUTE("athlete/activity/route/{activityId}", "Route", "M", bottom = false),
+    WORKOUT("athlete/workout", "Guided", "W", bottom = false),
     COMMUNITY("athlete/community", "Community", "C", bottom = false),
     PROFILE("athlete/profile", "Profile", "Y", bottom = true),
     TRAINING("athlete/training", "Sessions", "S"),
@@ -77,16 +81,35 @@ fun AthleteNavHost(
                 onOpenCommunity = { navController.navigate(AthleteDest.COMMUNITY.route) },
                 onOpenProfile = { navController.navigate(AthleteDest.PROFILE.route) },
                 onOpenDiscover = { navController.navigate(AthleteDest.DISCOVER.route) },
-                onOpenActivity = { navController.navigate(AthleteDest.ACTIVITY.route) },
+                onOpenActivity = { navController.navigate(AthleteDest.WORKOUT.route) },
                 onOpenSleep = { navController.navigate(AthleteDest.SLEEP.route) },
                 onOpenDaily = { navController.navigate(AthleteDest.DAILY.route) },
                 onOpenVault = { navController.navigate(AthleteDest.VAULT.route) },
             )
         }
         composable(
+            AthleteDest.WORKOUT.route,
+            deepLinks = listOf(navDeepLink { uriPattern = "fitconnect://app/athlete/workout" }),
+        ) { StrengthWorkoutScreen() }
+        composable(
             AthleteDest.ACTIVITY.route,
             deepLinks = listOf(navDeepLink { uriPattern = "fitconnect://app/athlete/activity" }),
-        ) { ActivityScreen() }
+        ) {
+            ActivityScreen(
+                onOpenRouteDetail = { id ->
+                    navController.navigate("athlete/activity/route/$id")
+                },
+            )
+        }
+        composable(
+            route = AthleteDest.ACTIVITY_ROUTE.route,
+            arguments = listOf(navArgument("activityId") { type = NavType.StringType }),
+            deepLinks = listOf(navDeepLink { uriPattern = "fitconnect://app/athlete/activity/route/{activityId}" }),
+        ) { entry ->
+            ActivityRouteDetailScreen(
+                activityId = entry.arguments?.getString("activityId").orEmpty(),
+            )
+        }
         composable(AthleteDest.RECOVERY.route, deepLinks = listOf(navDeepLink { uriPattern = "fitconnect://app/athlete/recovery" })) {
             RecoveryScreen()
         }

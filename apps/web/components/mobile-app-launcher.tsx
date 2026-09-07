@@ -37,6 +37,7 @@ export function MobileAppLauncher() {
   const router = useRouter();
   const entrance = useEntrance();
   const l = useLocale().mobileApp.launcher;
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
   const demos: DemoCard[] = [
     {
@@ -62,10 +63,18 @@ export function MobileAppLauncher() {
   ];
 
   function openDemo(username: string, password: string, href: string) {
+    if (!isDemoMode) {
+      router.push("/signin");
+      return;
+    }
     const user = validateCredentials(username, password);
     if (!user) return;
     persistClientAuthSession(user);
     navigateAfterLogin(href);
+  }
+
+  function openAuth(href = "/signin") {
+    router.push(href);
   }
 
   return (
@@ -85,18 +94,30 @@ export function MobileAppLauncher() {
         </div>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-          {demos.map((demo) => (
-            <EliteButton
-              key={demo.role}
-              type="button"
-              variant="primary"
-              onClick={() => openDemo(demo.username, demo.password, demo.href)}
-            >
-              {demo.cta}
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </EliteButton>
-          ))}
-          <EliteButton type="button" variant="ghost" onClick={() => router.push("/signin")}>
+          {isDemoMode ? (
+            demos.map((demo) => (
+              <EliteButton
+                key={demo.role}
+                type="button"
+                variant="primary"
+                onClick={() => openDemo(demo.username, demo.password, demo.href)}
+              >
+                {demo.cta}
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </EliteButton>
+            ))
+          ) : (
+            <>
+              <EliteButton type="button" variant="primary" onClick={() => openAuth("/signin")}>
+                Sign in
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </EliteButton>
+              <EliteButton type="button" variant="ghost" onClick={() => openAuth("/signup")}>
+                Create account
+              </EliteButton>
+            </>
+          )}
+          <EliteButton type="button" variant="ghost" onClick={() => openAuth("/signin")}>
             <Dumbbell className="h-4 w-4" aria-hidden />
             {l.useAnotherAccount}
           </EliteButton>
@@ -113,39 +134,62 @@ export function MobileAppLauncher() {
           <BodyText className="mt-3 text-sm leading-6">{l.subtitleMobile}</BodyText>
 
           <div className="mt-8 space-y-3">
-            {demos.map((demo) => {
-              const Icon = demo.icon;
-              return (
-                <BentoCard
-                  key={demo.role}
-                  interactive
-                  elevation="2"
-                  padding="md"
-                  className="w-full cursor-pointer text-left"
-                  onClick={() => openDemo(demo.username, demo.password, demo.href)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      openDemo(demo.username, demo.password, demo.href);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <span className="flex items-center gap-3">
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--eos-radius-nested)] bg-eos-voltline text-eos-floor">
-                      <Icon className="h-5 w-5" aria-hidden />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block font-semibold text-ink-50">{demo.title}</span>
-                      <span className="mt-1 block text-xs leading-5 text-ink-400">
-                        {demo.subtitle}
+            {isDemoMode ? (
+              demos.map((demo) => {
+                const Icon = demo.icon;
+                return (
+                  <BentoCard
+                    key={demo.role}
+                    interactive
+                    elevation="2"
+                    padding="md"
+                    className="w-full cursor-pointer text-left"
+                    onClick={() => openDemo(demo.username, demo.password, demo.href)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        openDemo(demo.username, demo.password, demo.href);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--eos-radius-nested)] bg-eos-voltline text-eos-floor">
+                        <Icon className="h-5 w-5" aria-hidden />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-semibold text-ink-50">{demo.title}</span>
+                        <span className="mt-1 block text-xs leading-5 text-ink-400">
+                          {demo.subtitle}
+                        </span>
                       </span>
                     </span>
-                  </span>
-                </BentoCard>
-              );
-            })}
+                  </BentoCard>
+                );
+              })
+            ) : (
+              <BentoCard
+                interactive
+                elevation="2"
+                padding="md"
+                className="w-full cursor-pointer text-left"
+                onClick={() => openAuth("/signin")}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    openAuth("/signin");
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+              >
+                <span className="block font-semibold text-ink-50">Sign in</span>
+                <span className="mt-1 block text-xs leading-5 text-ink-400">
+                  Use your FitConnect account. Demo personas are disabled outside demo mode.
+                </span>
+              </BentoCard>
+            )}
           </div>
         </section>
 

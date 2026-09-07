@@ -1,0 +1,75 @@
+import { NextResponse } from "next/server";
+import { isAuthFailure, requireAthleteId } from "@/lib/api/require-auth";
+import { createAthleteBooking } from "@/lib/db/bookings";
+
+/**
+ * Athlete create-booking — canonical Session row (pending).
+ * Identity always from auth subject; client cannot impersonate another athleteId.
+ */
+export async function POST(req: Request) {
+  const resolved = await requireAthleteId(req);
+  if (isAuthFailure(resolved)) return resolved.response;
+
+  const body = (await req.json().catch(() => null)) as {
+    coachId?: string;
+    scheduledAt?: string;
+    durationMin?: number;
+    type?: string;
+    mode?: "Online" | "In-person";
+    notes?: string | null;
+    athleteId?: string;
+    idempotencyKey?: string;
+  } | null;
+
+  if (body?.athleteId && body.athleteId !== resolved.athleteId) {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
+
+  if (!body?.coachId?.trim() || !body?.scheduledAt?.trim()) {
+    return NextResponse.json(
+      { error: "coachId_and_scheduledAt_required" },
+      { status: 400 }
+    );
+  }
+
+  const idempotencyKey =
+    body.idempotencyKey?.trim() ||
+    req.headers.get("idempotency-key")?.trim() ||
+    null;
+
+  const result = await createAthleteBooking({
+    athleteId: resolved.athleteId,
+    coachId: body.coachId,
+    scheduledAt: body.scheduledAt,
+    durationMin: body.durationMin,
+    type: body.type,
+    mode: body.mode,
+    notes: body.notes,
+    idempotencyKey
+  });
+
+  if (result.error === "persistence_not_configured") {
+    return NextResponse.json({ error: result.error }, { status: 503 });
+  }
+  if (result.error === "coachId_required" || result.error === "invalid_scheduledAt") {
+    return NextResponse.json({ error: result.error }, { status: 400 });
+  }
+  if (result.error === "scheduledAt_in_past") {
+    return NextResponse.json({ error: result.error }, { status: 422 });
+  }
+  if (result.error || !result.booking) {
+    return NextResponse.json(
+      { error: result.error ?? "create_failed" },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json(
+    {
+      booking: result.booking,
+      source: result.source,
+      idempotent: result.idempotent
+    },
+    { status: result.idempotent ? 200 : 201 }
+  );
+}

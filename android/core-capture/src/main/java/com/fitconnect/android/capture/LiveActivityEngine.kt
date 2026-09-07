@@ -93,15 +93,18 @@ data class LiveActivitySnapshot(
 /**
  * Activity recording engine.
  *
- * Default GPS is the deterministic [QaGpsRoute] labeled LOCAL_DEMO / TEST_FIXTURE.
- * [ingestFix] is the only path that can become LIVE, and only when the caller
- * marks [GpsFeedStatus.LIVE] (real LocationManager, not mock).
- *
- * Heart-rate sine wave is LOCAL_DEMO. It is never upgraded to REAL_SENSOR.
+ * Production outdoor path keeps [allowSimulatedGps]=false — [tick] never walks
+ * [QaGpsRoute]. Fixes enter only via [ingestFix] from FusedLocation (LIVE or
+ * EMULATOR_INJECTED). Heart-rate sine wave remains LOCAL_DEMO only.
  */
 class LiveActivityEngine(
     private val clockMs: () -> Long = { System.currentTimeMillis() },
     private val registry: WorkoutRegistry = WorkoutRegistry(),
+    /**
+     * When false (P2-GPS production outdoor path), [tick] never walks [QaGpsRoute].
+     * Unit tests may set true for LOCAL_DEMO fixtures.
+     */
+    var allowSimulatedGps: Boolean = false,
 ) {
     private val _state = MutableStateFlow(LiveActivitySnapshot())
     val state: StateFlow<LiveActivitySnapshot> = _state.asStateFlow()
@@ -121,11 +124,17 @@ class LiveActivityEngine(
         ) {
             return
         }
+        val gps = if (WorkoutSport.fromKey(sport).outdoorGps) {
+            if (allowSimulatedGps) GpsFeedStatus.SIMULATED else GpsFeedStatus.UNAVAILABLE
+        } else {
+            GpsFeedStatus.UNAVAILABLE
+        }
         _state.value = LiveActivitySnapshot(
             phase = LiveActivityPhase.READY,
             sport = WorkoutSport.fromKey(sport).wireKey,
-            gps = gpsFor(WorkoutSport.fromKey(sport), live = false),
-            sourceLabel = LiveActivitySnapshot.SOURCE_LABEL,
+            gps = gps,
+            sourceLabel = if (allowSimulatedGps) LiveActivitySnapshot.SOURCE_LABEL else "GPS.WAITING",
+            sourceKind = if (allowSimulatedGps) DataSourceKind.LOCAL_DEMO else DataSourceKind.REAL_SENSOR,
         )
     }
 
@@ -151,6 +160,10 @@ class LiveActivityEngine(
     }
 
     fun start(sport: String = "Run") {
+        startWithId(sessionId = "fc-session-${++sessionSeq}-${clockMs()}", sport = sport)
+    }
+
+    fun startWithId(sessionId: String, sport: String = "Run") {
         val now = clockMs()
         startedAt = now
         lastTickAt = now
@@ -159,17 +172,66 @@ class LiveActivityEngine(
         lastLapDistanceM = 0.0
         lastLapAt = now
         liveGpsBound = false
-        sessionSeq += 1
-        val sessionId = "fc-session-$sessionSeq-$now"
         registry.begin(sessionId)
         val kind = WorkoutSport.fromKey(sport)
+        val waitingGps = kind.outdoorGps && !allowSimulatedGps
         _state.value = LiveActivitySnapshot(
             phase = LiveActivityPhase.RUNNING,
             sport = kind.wireKey,
             sessionId = sessionId,
-            gps = gpsFor(kind, live = false),
-            sourceLabel = LiveActivitySnapshot.SOURCE_LABEL,
-            sourceKind = DataSourceKind.LOCAL_DEMO,
+            gps = when {
+                waitingGps -> GpsFeedStatus.UNAVAILABLE
+                kind.outdoorGps -> GpsFeedStatus.SIMULATED
+                else -> GpsFeedStatus.UNAVAILABLE
+            },
+            sourceLabel = if (waitingGps) "GPS.WAITING" else LiveActivitySnapshot.SOURCE_LABEL,
+            sourceKind = if (waitingGps) DataSourceKind.REAL_SENSOR else DataSourceKind.LOCAL_DEMO,
+        )
+    }
+
+    fun restoreSession(
+        sessionId: String,
+        sport: String,
+        route: List<RoutePoint>,
+        distanceM: Double,
+        movingMs: Long,
+        elapsedMs: Long,
+        phase: LiveActivityPhase,
+    ) {
+        val now = clockMs()
+        startedAt = now - elapsedMs
+        lastTickAt = now
+        liveGpsBound = route.isNotEmpty()
+        registry.begin(sessionId)
+        val summary = RouteMath.summary(route, movingMs, elapsedMs)
+        _state.value = LiveActivitySnapshot(
+            phase = phase,
+            sport = WorkoutSport.fromKey(sport).wireKey,
+            sessionId = sessionId,
+            elapsedMs = elapsedMs,
+            movingMs = movingMs,
+            distanceM = distanceM,
+            paceSecPerKm = summary.averagePaceSecPerKm,
+            bestPaceSecPerKm = summary.bestPaceSecPerKm,
+            speedMps = summary.averageSpeedMps,
+            elevationGainM = summary.elevationGainM,
+            elevationLossM = summary.elevationLossM,
+            gps = if (route.isNotEmpty()) GpsFeedStatus.LIVE else GpsFeedStatus.UNAVAILABLE,
+            sourceLabel = if (route.isNotEmpty()) "GPS.LIVE" else "GPS.WAITING",
+            sourceKind = DataSourceKind.REAL_SENSOR,
+            route = route,
+        )
+    }
+
+    fun ingestFixUnavailable(status: GpsFeedStatus) {
+        val current = _state.value
+        _state.value = current.copy(
+            gps = status,
+            sourceLabel = when (status) {
+                GpsFeedStatus.PERMISSION_DENIED -> "GPS.PERMISSION"
+                GpsFeedStatus.UNAVAILABLE -> "GPS.UNAVAILABLE"
+                else -> current.sourceLabel
+            },
         )
     }
 
@@ -345,7 +407,7 @@ class LiveActivityEngine(
         var bestPace = current.bestPaceSecPerKm
         var speed = current.speedMps
 
-        if (sport.outdoorGps && !liveGpsBound) {
+        if (sport.outdoorGps && !liveGpsBound && allowSimulatedGps) {
             distance = (SIM_SPEED_MPS * tSec).coerceAtMost(QaGpsRoute.lengthM)
             val template = QaGpsRoute.POINTS
             val along = RouteMath.pointAlong(template, distance, now)
@@ -359,6 +421,13 @@ class LiveActivityEngine(
             bestPace = summary.bestPaceSecPerKm
             speed = SIM_SPEED_MPS
             gps = GpsFeedStatus.SIMULATED
+        } else if (sport.outdoorGps && !liveGpsBound && !allowSimulatedGps) {
+            // Honest wait — no invented polyline.
+            gps = if (current.gps == GpsFeedStatus.PERMISSION_DENIED) {
+                GpsFeedStatus.PERMISSION_DENIED
+            } else {
+                GpsFeedStatus.UNAVAILABLE
+            }
         } else if (!sport.outdoorGps) {
             gps = GpsFeedStatus.UNAVAILABLE
             if (sport == WorkoutSport.INDOOR_RUN || sport == WorkoutSport.INDOOR_CYCLING) {

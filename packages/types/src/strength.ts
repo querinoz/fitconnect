@@ -30,9 +30,26 @@ export type StrengthSessionStatus =
   | "IDLE"
   | "PREP"
   | "ACTIVE"
+  | "REST"
   | "PAUSED"
+  | "COMPLETING"
+  | "COMPLETED"
+  | "FAILED"
+  | "RECOVERING"
+  | "SYNC_PENDING"
+  | "SYNCED"
   | "FINISHED"
   | "CANCELLED";
+
+/** Logged set laterality. BOTH is the default for bilateral work. */
+export type SetSide = "LEFT" | "RIGHT" | "BOTH" | "NONE";
+
+/**
+ * RPE: Borg CR-10 mapped to 1–10 (optional). Half-steps allowed.
+ * RIR: reps in reserve 0–5 (optional). Missing values stay null — never fabricated.
+ */
+export const RPE_SCALE = { min: 1, max: 10, step: 0.5 } as const;
+export const RIR_SCALE = { min: 0, max: 5, step: 1 } as const;
 
 export type CanonicalExercise = {
   id: string;
@@ -70,6 +87,7 @@ export type CanonicalWorkoutSet = {
   actualDistanceM: number | null;
   rpe: number | null;
   rir: number | null;
+  side: SetSide;
   effortScale: EffortScale | null;
   completedAt: string | null;
   isFailed: boolean;

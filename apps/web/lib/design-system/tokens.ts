@@ -20,6 +20,8 @@ export const EOS_COLORS = {
   alert: COLOR_TOKENS.alert,
   onSurface: COLOR_TOKENS.onSurface,
   onSurfaceMuted: COLOR_TOKENS.onSurfaceMuted,
+  moldSurface: COLOR_TOKENS.moldSurface,
+  neuMuted: COLOR_TOKENS.neuMuted,
   glassBg: "rgba(255,255,255,0.06)",
   glassBorder: "rgba(255,255,255,0.08)"
 } as const;
