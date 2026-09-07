@@ -77,7 +77,7 @@ describe.skipIf(!hasDocker)("Prisma migrations", () => {
   it("should_restore_previous_state_via_versioned_down_sql", async () => {
     await seedMinimal(prisma);
     const downSql = readFileSync(
-      path.join(REPO_ROOT, "prisma/migrations/20260518120000_production_indexes/down.sql"),
+      path.join(REPO_ROOT, "prisma/migrations/20260907140000_init/down.sql"),
       "utf8"
     );
     await prisma.$executeRawUnsafe(downSql);
