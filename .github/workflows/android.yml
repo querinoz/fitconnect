@@ -2,7 +2,7 @@ name: android (Kotlin)
 
 on:
   push:
-    branches: [main, master, feature/**, qa/**]
+    branches: [main, master, feature/**, feat/**, qa/**]
     paths: ["android/**", "packages/design-tokens/**", "scripts/generate-kotlin-tokens.mjs", ".github/workflows/android.yml"]
   pull_request:
     paths: ["android/**", "packages/design-tokens/**", "scripts/generate-kotlin-tokens.mjs", ".github/workflows/android.yml"]
@@ -16,6 +16,12 @@ jobs:
     name: lint · unit tests · assemble
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    # secrets cannot be referenced in step `if:` — map to env first (GitHub Actions).
+    env:
+      FITCONNECT_ANDROID_KEYSTORE_BASE64: ${{ secrets.FITCONNECT_ANDROID_KEYSTORE_BASE64 }}
+      FITCONNECT_SUPABASE_URL: ${{ secrets.FITCONNECT_SUPABASE_URL }}
+      FITCONNECT_SUPABASE_ANON_KEY: ${{ secrets.FITCONNECT_SUPABASE_ANON_KEY }}
+      FITCONNECT_GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.FITCONNECT_GOOGLE_SERVICES_JSON_BASE64 }}
     steps:
       - uses: actions/checkout@v4
 
@@ -46,17 +52,14 @@ jobs:
         run: ./gradlew build -x :app:assembleRelease -x :app:bundleRelease -x :app:assembleReleaseUnitTest -x :wear:assembleRelease -x :wear:bundleRelease
 
       - name: Signed release (only when secrets present)
-        if: ${{ secrets.FITCONNECT_ANDROID_KEYSTORE_BASE64 != '' && secrets.FITCONNECT_SUPABASE_URL != '' && secrets.FITCONNECT_GOOGLE_SERVICES_JSON_BASE64 != '' }}
+        if: ${{ env.FITCONNECT_ANDROID_KEYSTORE_BASE64 != '' && env.FITCONNECT_SUPABASE_URL != '' && env.FITCONNECT_GOOGLE_SERVICES_JSON_BASE64 != '' }}
         working-directory: android
-        env:
-          FITCONNECT_SUPABASE_URL: ${{ secrets.FITCONNECT_SUPABASE_URL }}
-          FITCONNECT_SUPABASE_ANON_KEY: ${{ secrets.FITCONNECT_SUPABASE_ANON_KEY }}
         run: |
           echo "::error::Signed release CI path is scaffolded but not fully wired (keystore decode + google-services.json injection). Keep fail-closed until human configures secrets + script."
           exit 1
 
       - name: Assert release remains fail-closed without secrets
-        if: ${{ secrets.FITCONNECT_ANDROID_KEYSTORE_BASE64 == '' }}
+        if: ${{ env.FITCONNECT_ANDROID_KEYSTORE_BASE64 == '' }}
         working-directory: android
         run: |
           set +e
