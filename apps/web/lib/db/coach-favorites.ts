@@ -1,5 +1,3 @@
-import { randomUUID } from "crypto";
-
 const favorites = new Map<string, Set<string>>();
 
 export function resetCoachFavoritesForTests() {

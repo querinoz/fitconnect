@@ -326,43 +326,43 @@ fun CommunityScreen() {
                 },
             )
             val commentValue = commentDrafts[post.id].orEmpty()
-                EliteTextField(
-                    value = commentValue,
-                    onValueChange = { commentDrafts = commentDrafts + (post.id to it) },
-                    label = "Reply",
-                )
-                EliteButton(
-                    label = "Comment",
-                    enabled = commentValue.isNotBlank(),
-                    onClick = {
-                        scope.launch {
-                            if (isLocalDemo) {
-                                container.community.comments.add(
-                                    postId = post.id,
-                                    parentCommentId = null,
-                                    authorId = viewerId.value,
-                                    text = commentValue.trim(),
-                                )
-                                commentDrafts = commentDrafts - post.id
-                                status = "Comment added"
-                            } else {
-                                when (
-                                    val r = remote.addComment(post.id, commentValue.trim())
-                                ) {
-                                    is com.fitconnect.android.foundation.common.AppResult.Ok -> {
-                                        commentDrafts = commentDrafts - post.id
-                                        status = "Comment added"
-                                    }
-                                    is com.fitconnect.android.foundation.common.AppResult.Err -> {
-                                        status = r.error.toString()
-                                        return@launch
-                                    }
+            EliteTextField(
+                value = commentValue,
+                onValueChange = { commentDrafts = commentDrafts + (post.id to it) },
+                label = "Reply",
+            )
+            EliteButton(
+                label = "Comment",
+                enabled = commentValue.isNotBlank(),
+                onClick = {
+                    scope.launch {
+                        if (isLocalDemo) {
+                            container.community.comments.add(
+                                postId = post.id,
+                                parentCommentId = null,
+                                authorId = viewerId.value,
+                                text = commentValue.trim(),
+                            )
+                            commentDrafts = commentDrafts - post.id
+                            status = "Comment added"
+                        } else {
+                            when (
+                                val r = remote.addComment(post.id, commentValue.trim())
+                            ) {
+                                is com.fitconnect.android.foundation.common.AppResult.Ok -> {
+                                    commentDrafts = commentDrafts - post.id
+                                    status = "Comment added"
+                                }
+                                is com.fitconnect.android.foundation.common.AppResult.Err -> {
+                                    status = r.error.toString()
+                                    return@launch
                                 }
                             }
-                            reload()
                         }
-                    },
-                )
+                        reload()
+                    }
+                },
+            )
             }
         }
     }

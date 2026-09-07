@@ -57,10 +57,26 @@
     <string name="auth_role_body">La autenticación prueba quién eres. El rol elige Athlete OS o Coach OS.</string>
     <string name="auth_role_athlete">Entrar a Athlete OS</string>
     <string name="auth_role_coach">Entrar a Coach OS</string>
+    <string name="nav_enter_demo_session">Entrar en la demo de atleta</string>
+    <string name="nav_enter_coach_demo">Entrar en la demo de entrenador</string>
     <string name="nav_auth_live_body">Inicia sesión con tu cuenta FitConnect.</string>
     <string name="nav_auth_unconfigured_body">La autenticación de producción no está configurada. Coloca google-services.json (gitignored) desde Firebase Console.</string>
     <string name="splash_tagline">Elite OS · Connect. Train. Perform.</string>
+    <string name="notification_channel_system">Sistema</string>
+    <string name="notification_channel_session">Sesiones</string>
+    <string name="notification_channel_training">Entrenamiento</string>
+    <string name="notification_channel_social">Social</string>
+    <string name="notification_channel_marketing">Marketing</string>
+    <string name="notification_channel_progression">Progresión de rendimiento</string>
+    <string name="nav_back">Atrás</string>
+    <string name="nav_home_title">Sesión iniciada</string>
+    <string name="nav_home_body">Elige Atleta o Entrenador en autenticación para entrar al sistema operativo.</string>
+    <string name="nav_role_gate">Ver rol</string>
+    <string name="nav_design_catalog">Sistema de diseño</string>
     <string name="nav_sign_out">Cerrar sesión</string>
+    <string name="nav_role_title">Control de rol</string>
+    <string name="nav_role_body">Rol activo: %1$s</string>
+    <string name="nav_role_unknown">desconocido</string>
     <string name="nav_error_title">Error</string>
     <string name="nav_error_body">Algo salió mal. Inténtalo de nuevo.</string>
 </resources>

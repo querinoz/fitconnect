@@ -37,7 +37,7 @@ export function EliteReadinessNeumorphic({
     >
       {athleteLabel ? (
         <p className="mb-4 text-[10px] uppercase tracking-widest text-eos-neu-muted">
-          // ATLETA_CONECTADO: {athleteLabel}
+          {`// ATLETA_CONECTADO: ${athleteLabel}`}
         </p>
       ) : null}
 
@@ -48,7 +48,7 @@ export function EliteReadinessNeumorphic({
         >
           <div>
             <p className="mb-1 text-[10px] uppercase tracking-widest text-eos-neu-muted">
-              // SYSTEM.PRONTIDÃO
+              {"// SYSTEM.PRONTIDÃO"}
             </p>
             <h2 className="text-xs font-bold tracking-wider text-eos-neu-primary">
               ÍNDICE_PRONTIDÃO
@@ -73,7 +73,7 @@ export function EliteReadinessNeumorphic({
         >
           <div>
             <p className="mb-1 text-[10px] uppercase tracking-widest text-eos-neu-muted">
-              // BIOMETRIC_LOG
+              {"// BIOMETRIC_LOG"}
             </p>
             <h2 className="text-xs font-bold tracking-wider text-eos-neu-primary">
               TELEMETRY_STREAM

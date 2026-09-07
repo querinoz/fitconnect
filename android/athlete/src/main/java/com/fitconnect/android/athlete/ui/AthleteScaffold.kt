@@ -47,12 +47,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import android.content.Intent
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.core.util.Consumer
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -113,7 +113,7 @@ fun AthleteOsApp(
     onSignedOut: () -> Unit = {},
 ) {
     val navController = rememberNavController()
-    val activity = LocalContext.current as ComponentActivity
+    val activity = checkNotNull(LocalActivity.current) as ComponentActivity
     // Consume pending nested athlete deep links (shell lands on HOME first).
     LaunchedEffect(navController) {
         fun tryHandle(uri: android.net.Uri?) {

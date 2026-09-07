@@ -48,18 +48,23 @@ jobs:
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Check Vercel auth
+        id: vercel_auth
         run: |
-          if [ -z "$VERCEL_TOKEN" ]; then
-            echo "VERCEL_TOKEN secret is missing"
-            exit 1
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::Vercel production secrets missing (VERCEL_TOKEN / ORG / PROJECT). Skipping deploy — HUMAN blocker, not a code defect."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "VERCEL_TOKEN is set (length ${#VERCEL_TOKEN})"
           fi
-          echo "VERCEL_TOKEN is set (length ${#VERCEL_TOKEN})"
 
       - name: Pull Vercel env
+        if: steps.vercel_auth.outputs.skip != 'true'
         run: pnpm dlx vercel@latest pull --yes --environment=production
         working-directory: apps/web
 
       - name: Build with Vercel
+        if: steps.vercel_auth.outputs.skip != 'true'
         run: pnpm dlx vercel@latest build --prod
         working-directory: apps/web
         env:
@@ -67,5 +72,6 @@ jobs:
           NEXT_PUBLIC_REALTIME_PROVIDER: broadcast
 
       - name: Deploy prebuilt
+        if: steps.vercel_auth.outputs.skip != 'true'
         run: pnpm dlx vercel@latest deploy --prebuilt --prod
         working-directory: apps/web

@@ -15,6 +15,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
@@ -26,6 +27,7 @@ import com.fitconnect.android.designui.theme.toColor
  * Cinematic video background for athlete HOME. Pauses off-screen, and falls
  * back to a static floor when reduce-motion or battery saver is on.
  */
+@UnstableApi
 @Composable
 fun EliteCinematicBackground(
     videoResId: Int,
