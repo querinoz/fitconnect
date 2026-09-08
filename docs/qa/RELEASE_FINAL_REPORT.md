@@ -1,85 +1,104 @@
 # FitConnect Zenith™ Production Release Report
 
-**Release timestamp:** 2026-09-08T23:15:00Z (local)  
-**Branch:** `feat/elite-os-v2` (tracks `origin/feat/elite-os-v2`)  
-**Default remote HEAD:** `main` (not the active delivery branch for this work)  
-**Repository:** `https://github.com/querinoz/fitconnect.git`  
-**Supabase project:** `beuiammeedpovdkmhluw`  
-**Migration applied:** `022_unified_identity_capabilities.sql` → **APPLIED_OK**
-
----
-
 ## Release Information
 
 | Field | Value |
 |---|---|
-| Intent | Unified Identity + Zenith Core + Elite OS Android sync |
-| Commit | *(filled after git commit)* |
-| Vercel | Pending push → auto deploy |
+| Release timestamp | 2026-09-08T22:25:00Z |
+| Commit SHA | `efec7943a35b923dc57c71d1964c9c9c90e0c57e` |
+| Branch | `feat/elite-os-v2` (delivery) |
+| Remote HEAD default | `main` (not updated by this release) |
+| Repository | https://github.com/querinoz/fitconnect.git |
+| Supabase project | `beuiammeedpovdkmhluw` |
+| Migration applied | `022_unified_identity_capabilities.sql` → **APPLIED_OK** |
+| Vercel preview deploy | `dpl_6a3P71u8DvaYpSkNh35kaGrnrydL` → **READY** |
+| Preview URL | https://fitconnect-a5ppz3fwh-querinoz.vercel.app |
+| Branch alias | https://fitconnect-git-feat-elite-os-v2-querinoz.vercel.app |
+| Production URL | https://fitconnect-phi.vercel.app |
+| Production deploy age | **~11 days** (not this commit) |
 
 ---
 
 ## GitHub
 
-**PARTIAL → PASS after push**
+**PASS**
 
-- Working branch is `feat/elite-os-v2`, not `main`.
-- Push target: `origin/feat/elite-os-v2` (no force).
-- Secrets excluded (`.env*`, service keys).
+- Pushed `251c62a..efec794` → `origin/feat/elite-os-v2` (no force, hooks honored).
+- Production branch for this workstream is **`feat/elite-os-v2`**, not `main`.
+- Secrets excluded (`.env*`, keys, keystores).
 
 ---
 
 ## Supabase
 
+**PASS (targeted) / BLOCKED (full chain)**
+
 | Check | Status |
 |---|---|
 | Connect via `DIRECT_URL` (prod) | PASS |
-| Detect applied migrations | PASS (001–016_p1 applied) |
-| Full chain `017+` auto-apply | **BLOCKED** — `017_strength_workout_engine.sql` fails (policy already exists / drift) |
-| Targeted apply `022_unified_identity_capabilities.sql` | **PASS** (transactional; 16/16; recorded in `schema_migrations`) |
-| `user_capabilities` exists | PASS |
-| Preserve users / subscriptions | PASS (no reset; counts: identity_profiles=1, user_roles=0, subscriptions=0) |
-| RLS policies for capabilities | PASS (created in 022) |
+| Applied history (001–016_p1) | PASS |
+| Full chain `017`–`021` auto-apply | **BLOCKED** — policy drift (`017_strength_workout_engine.sql`) |
+| Targeted apply `022` | **PASS** (transactional; recorded in `schema_migrations`) |
+| `user_capabilities` | PASS |
+| Preserve users / subscriptions / Firebase UID | PASS (no reset; no seed overwrite) |
+| RLS for capabilities | PASS (in 022) |
 
-**Never performed:** database reset, drop-all, seed overwrite.
+**Never performed:** database reset, drop-all, recreate, seed replace.
 
 ---
 
 ## Vercel
 
+**PARTIAL**
+
 | Check | Status |
 |---|---|
-| Local `next build` | **BLOCKED** — hung / prior EPERM on `.next/trace` |
+| Preview build for `efec794` | **PASS** — status READY |
+| Preview `/api/health` | **BLOCKED** — Deployment Protection SSO → HTTP 401 |
+| Production alias `fitconnect-phi.vercel.app` | **FAIL for this release** — still serving ~11d-old Production deploy |
+| Production `/api/health` | PASS (HTTP 200, `status=degraded`) — **old code**, not `efec794` |
+| Local `next build` | **BLOCKED** — Windows EPERM / hang on `.next/trace` |
 | Typecheck | PASS |
-| Lint | PASS (warnings only: `no-img-element`) |
-| Post-push deploy | Pending after GitHub push |
-| Production `/api/health` | Pending post-deploy |
+| Lint | PASS (img warnings only) |
+
+Production health sample (current Production, not this SHA):
+
+```json
+{"status":"degraded","dependencies":[{"name":"auth","status":"ok"},{"name":"database","status":"ok"},{"name":"firebase","status":"degraded","detail":"not configured"},{"name":"stripe","status":"degraded"}]}
+```
 
 ---
 
 ## Authentication
 
+**PASS (engineering) / NOT RUN (prod E2E)**
+
 | Check | Status |
 |---|---|
 | Firebase UID identity model | PASS (code) |
-| Admin role preserved (not overwritten by activeMode) | PASS (fix + tests) |
+| Admin role preserved vs `activeMode` | PASS (fix + tests) |
 | `require-auth.prod` suite | PASS (7/7) |
+| Live Firebase login on Production | NOT RUN |
 
 ---
 
 ## Unified Identity
 
+**PASS (code + DB schema) / NOT RUN (prod UX)**
+
 | Check | Status |
 |---|---|
-| Capabilities table | PASS (prod) |
-| `/api/v1/identity/me` | PASS (code) |
-| `/api/v1/identity/active-mode` | PASS (code) |
+| Capabilities table in prod | PASS |
+| `GET /api/v1/identity/me` | PASS (code) |
+| `PUT /api/v1/identity/active-mode` | PASS (code) |
 | Android session + Profile switcher | PASS (compile) |
 | LOCAL_DEMO dual persona Eduardo | PASS (code) |
 
 ---
 
 ## Entitlements
+
+**PARTIAL**
 
 | Check | Status |
 |---|---|
@@ -89,72 +108,102 @@
 
 ---
 
-## Athlete / Coach / Mode Switching
+## Athlete Experience
+
+**PASS (code/build) / NOT RUN (device)**
+
+---
+
+## Coach Experience
+
+**PASS (code/build) / NOT RUN (device)**
+
+---
+
+## Mode Switching
+
+**PARTIAL**
 
 | Check | Status |
 |---|---|
-| Code path no-logout switch | PASS |
-| Android assembleDebug | PASS |
-| Physical device smoke | NOT RUN |
+| No-logout switch code path | PASS |
+| Android `assembleDebug` | PASS |
+| Physical / emulator dual-mode smoke | NOT RUN |
 | Production web mode-switch E2E | NOT RUN |
 
 ---
 
 ## Security
 
+**PARTIAL**
+
 | Check | Status |
 |---|---|
 | Server denies missing coach capability | PASS (unit/helpers) |
-| Full prod privilege-escalation matrix | PARTIAL |
+| Full prod privilege-escalation matrix | NOT RUN |
 | Client cannot self-grant Coach | PASS (design + 403 path) |
 
 ---
 
 ## Android
 
+**PARTIAL**
+
 | Check | Status |
 |---|---|
 | `:app:assembleDebug` | PASS |
-| Install / cold start / mode switch on device | NOT RUN |
-| Android Watch | NOT AVAILABLE / NOT CLAIMED |
+| Install / cold start / mode switch | NOT RUN |
+| Android Watch | **NOT AVAILABLE** |
+
+---
+
+## Android Watch
+
+**NOT AVAILABLE**
 
 ---
 
 ## Regression
+
+**PARTIAL**
 
 | Check | Status |
 |---|---|
 | `pnpm typecheck` | PASS |
 | `pnpm lint` | PASS (warnings) |
 | Identity + Zenith unit tests | PASS |
-| Full `pnpm test` | PARTIAL — was 1 fail (admin IDOR); fixed; full suite not re-run end-to-end after fix |
-| `pnpm build` (web) | BLOCKED locally |
+| Full `pnpm test` | PARTIAL — admin IDOR fixed; full suite not re-run end-to-end after fix |
+| `pnpm build` (web local) | BLOCKED |
 
 ---
 
 ## Known Issues
 
-1. Migrations `017_strength` … `021_*` are **not** applied to prod — schema drift vs repo; must be repaired separately (idempotent policies / rename).
-2. Local Next build hangs / EPERM on Windows `.next`.
-3. `gh` / `vercel` / `supabase` CLIs not on PATH in this agent environment.
-4. Figma auth OK but FitConnect fileKey not linked.
+1. **Production Vercel is not on `efec794`** — Production last deployed ~11 days ago; this release is Preview-only on `feat/elite-os-v2`.
+2. Preview Deployment Protection blocks unauthenticated `/api/health` (401 SSO).
+3. Migrations `017`–`021` still drifting vs prod; only `022` was safely applied.
+4. Local Next build hangs / EPERM on Windows `.next`.
+5. Firebase marked `not configured` on current Production health.
+6. Device + full prod auth/mode-switch matrix not executed in this gate.
 
 ---
 
 ## Remaining Risks
 
-- Pushing a large dirty tree may include unrelated Elite OS WIP beyond identity.
-- Vercel env must already contain Firebase + Supabase vars (not re-validated here).
-- Empty `user_roles` in prod means few real dual-capability users yet.
+- Promoting Preview → Production without merge/promote policy review.
+- Empty / sparse `user_roles` / dual-capability users in prod.
+- Unrelated Elite OS WIP may have shipped in the large commit tree.
+- Stripe/entitlement expiration path incomplete.
 
 ---
 
 ## Recommended Improvements
 
-1. Repair `017`–`021` with `IF NOT EXISTS` / `DROP POLICY IF EXISTS` then apply.
-2. Add CI job for `022` identity smoke against staging.
-3. Wire Stripe webhook → `grantCapability`.
-4. Complete device QA for Eduardo dual persona.
+1. Promote or merge `feat/elite-os-v2` → Production branch after explicit approval.
+2. Repair `017`–`021` with idempotent SQL (`DROP POLICY IF EXISTS` / `IF NOT EXISTS`), then apply — never reset.
+3. Re-run full `pnpm test` + device smoke (Eduardo dual persona).
+4. Wire Stripe webhook → `grantCapability`; implement expiration fallback.
+5. Disable or bypass Deployment Protection for automated health checks on Preview, or use authenticated CLI probe.
 
 ---
 
@@ -162,11 +211,29 @@
 
 # BLOCKED
 
-Critical blockers remain for claiming full GitHub↔Supabase↔Vercel↔Android production sync:
+Not **PRODUCTION READY**.
 
-- Web production build not verified locally
-- Vercel READY not confirmed yet
-- Android device smoke not run
-- Older pending migrations still drifting
+| Gate | Result |
+|---|---|
+| GITHUB | PASS |
+| SUPABASE (`022`) | PASS |
+| SUPABASE (full migration chain) | BLOCKED |
+| VERCEL Preview | PASS (READY) |
+| VERCEL Production = this SHA | FAIL |
+| AUTH (live prod) | NOT RUN |
+| ENTITLEMENTS | PARTIAL |
+| ATHLETE / COACH (device) | NOT RUN |
+| MODE SWITCH (live) | NOT RUN |
+| SECURITY (live matrix) | PARTIAL |
+| ANDROID (install smoke) | NOT RUN |
+| REGRESSION (full) | PARTIAL |
 
-**What did succeed this gate:** typecheck, lint, identity tests, Android APK build, **safe prod apply of `022_unified_identity_capabilities.sql`** without reset.
+**What succeeded:** GitHub push of Unified Identity, safe prod apply of migration `022` without data loss, Preview Vercel build READY for `efec794`, typecheck/lint/identity tests, Android debug APK assemble.
+
+**What blocks RELEASE SUCCESS:** Production URL still on old deploy; no live mode-switch / auth / Android device proof; older migrations still drifting.
+
+Final architecture target (implemented in code + `022`, not fully live on Production):
+
+```
+ONE USER → ONE ACCOUNT → ONE SESSION → ENTITLEMENTS → CAPABILITIES → ACTIVE MODE → ATHLETE | COACH
+```
