@@ -4,7 +4,8 @@ Kotlin + Jetpack Compose application per **ADR-005**. This is the **production-t
 
 Status: **LOCAL DEMO** · Athlete **neu-glass UI ENGINEERING COMPLETE** (waves 0–6) · Watch sync **UNVERIFIED** · **PRODUCTION = NO-GO**
 
-`apps/mobile` (Expo) is **frozen legacy** and must not receive new features.
+`apps/mobile` (Expo) was **removed** from the working tree (ADR-005). Recover from git history if needed.  
+**Only this `android/` tree is the mobile product.**
 
 ## Modules
 

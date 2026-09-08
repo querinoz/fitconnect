@@ -308,20 +308,8 @@ export async function listCoachPrograms(coachId: string): Promise<{
     }
   }
 
-  return {
-    source: "seed",
-    programs: [
-      {
-        id: "prog-seed-1",
-        title: "VO2 Build (seed)",
-        weeks: 6,
-        sport: "running",
-        level: "intermediate",
-        state: "draft",
-        version: 1
-      }
-    ]
-  };
+  // Path A: never return seed fixtures as production coach programs.
+  return { source: "empty", programs: [] };
 }
 
 export type CoachBookingRow = {

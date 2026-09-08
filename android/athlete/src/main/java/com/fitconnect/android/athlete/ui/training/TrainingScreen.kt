@@ -1,10 +1,8 @@
 package com.fitconnect.android.athlete.ui.training
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,11 +22,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.fitconnect.android.athlete.domain.LiveSessionMachine
 import com.fitconnect.android.athlete.domain.LiveSessionPhase
-import com.fitconnect.android.athlete.domain.LiveSessionPreviewMachine
 import com.fitconnect.android.athlete.domain.LiveSessionUiState
 import com.fitconnect.android.athlete.domain.SessionStatus
 import com.fitconnect.android.athlete.domain.TrainingSession
+import com.fitconnect.android.athlete.live.LiveKitExternalKeys
+import com.fitconnect.android.athlete.live.LiveSessionJoinRequest
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteLoad
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
@@ -42,9 +43,8 @@ import com.fitconnect.android.designui.components.EliteTag
 import com.fitconnect.android.designui.theme.EliteMetricHeroTextStyle
 import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
-import com.fitconnect.android.foundation.auth.DemoPersona
+import com.fitconnect.android.foundation.common.AppError
 import com.fitconnect.android.foundation.common.AppResult
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -65,7 +65,7 @@ fun TrainingScreen(
         val completed = sessions.filter { it.status == SessionStatus.COMPLETED }
         AthleteScreenScaffold(
             title = "Training Center",
-            subtitle = "Upcoming · live preview · completed",
+            subtitle = "Upcoming · live session · completed",
             testTag = "athlete_training",
         ) {
             item { Text("Upcoming", style = MaterialTheme.typography.titleMedium) }
@@ -103,17 +103,16 @@ fun SessionDetailScreen(sessionId: String) {
     fun reload() { scope.launch { result = container.athleteRepository.session(sessionId) } }
     LaunchedEffect(sessionId) { reload() }
 
+    DisposableEffect(sessionId) {
+        onDispose {
+            scope.launch { container.liveSession.leave() }
+        }
+    }
+
     LaunchedEffect(live.phase) {
-        when (live.phase) {
-            LiveSessionPhase.CONNECTING -> {
-                delay(700)
-                live = LiveSessionPreviewMachine.onConnected(live)
-            }
-            LiveSessionPhase.ENDING -> {
-                delay(500)
-                live = LiveSessionPreviewMachine.onEnded(live)
-            }
-            else -> Unit
+        if (live.phase == LiveSessionPhase.ENDING) {
+            container.liveSession.leave()
+            live = LiveSessionMachine.onEnded(live)
         }
     }
 
@@ -149,18 +148,71 @@ fun SessionDetailScreen(sessionId: String) {
                             color = MaterialTheme.colorScheme.onBackground,
                         )
                     }
-                    EliteSysLabel("LIVEKIT · ${DemoPersona.MODE_LABEL}")
+                    EliteSysLabel(
+                        if (container.liveSession.isJoined) "LIVEKIT · CONNECTED" else "LIVEKIT · FAIL-CLOSED",
+                    )
                 }
             }
             item {
-                LiveSessionPreview(
+                LiveSessionPanel(
                     state = live,
-                    onJoin = { live = LiveSessionPreviewMachine.onJoin(live) },
-                    onMute = { live = LiveSessionPreviewMachine.onToggleMute(live) },
-                    onCamera = { live = LiveSessionPreviewMachine.onToggleCamera(live) },
-                    onEnd = { live = LiveSessionPreviewMachine.onEnd(live) },
-                    onError = { live = LiveSessionPreviewMachine.onError(live) },
-                    onReset = { live = LiveSessionPreviewMachine.onReset(live) },
+                    joined = container.liveSession.isJoined,
+                    onJoin = {
+                        live = LiveSessionMachine.onJoin(live)
+                        scope.launch {
+                            val snap = container.platform.sessionStore.snapshot()
+                            val uid = snap.userId
+                            if (uid.isNullOrBlank()) {
+                                live = LiveSessionMachine.onError(
+                                    live,
+                                    "EXTERNAL: authenticated participantId required for LiveKit token",
+                                )
+                                return@launch
+                            }
+                            val join = container.liveSession.join(
+                                LiveSessionJoinRequest(
+                                    roomName = "session-$sessionId",
+                                    participantName = uid,
+                                    participantId = uid,
+                                ),
+                            )
+                            live = when (join) {
+                                is AppResult.Ok -> LiveSessionMachine.onConnected(live)
+                                is AppResult.Err -> LiveSessionMachine.onError(
+                                    live,
+                                    joinErrorMessage(join.error),
+                                )
+                            }
+                        }
+                    },
+                    onMute = {
+                        val next = LiveSessionMachine.onToggleMute(live)
+                        live = next
+                        scope.launch {
+                            when (val r = container.liveSession.setMuted(next.muted)) {
+                                is AppResult.Ok -> Unit
+                                is AppResult.Err -> live = LiveSessionMachine.onError(
+                                    live,
+                                    joinErrorMessage(r.error),
+                                )
+                            }
+                        }
+                    },
+                    onCamera = {
+                        val next = LiveSessionMachine.onToggleCamera(live)
+                        live = next
+                        scope.launch {
+                            when (val r = container.liveSession.setCameraOff(next.cameraOff)) {
+                                is AppResult.Ok -> Unit
+                                is AppResult.Err -> live = LiveSessionMachine.onError(
+                                    live,
+                                    joinErrorMessage(r.error),
+                                )
+                            }
+                        }
+                    },
+                    onEnd = { live = LiveSessionMachine.onEnd(live) },
+                    onReset = { live = LiveSessionMachine.onReset(live) },
                 )
             }
             item { Text("Exercises", style = MaterialTheme.typography.titleMedium) }
@@ -200,22 +252,31 @@ fun SessionDetailScreen(sessionId: String) {
     }
 }
 
+private fun joinErrorMessage(error: AppError): String = when (error) {
+    is AppError.Unexpected -> error.message
+    is AppError.Api -> error.message ?: LiveKitExternalKeys.MESSAGE
+    is AppError.Auth -> "EXTERNAL: auth required for LiveKit token (${error.kind.name})"
+    is AppError.Network -> "Network unavailable (${error.kind.name})"
+    is AppError.Storage -> error.message
+}
+
 @Composable
-private fun LiveSessionPreview(
+private fun LiveSessionPanel(
     state: LiveSessionUiState,
+    joined: Boolean,
     onJoin: () -> Unit,
     onMute: () -> Unit,
     onCamera: () -> Unit,
     onEnd: () -> Unit,
-    onError: () -> Unit,
     onReset: () -> Unit,
 ) {
     val panel = MaterialTheme.colorScheme.surfaceVariant
     EliteCard(modifier = Modifier.testTag("live_session_preview")) {
-        EliteBadge(text = DemoPersona.MODE_LABEL)
-        Text("Live session preview", style = MaterialTheme.typography.titleLarge)
+        EliteBadge(text = if (joined) "LIVE" else "FAIL-CLOSED")
+        Text("Live session", style = MaterialTheme.typography.titleLarge)
         Text(
-            "Production LiveKit remains HUMAN_PENDING. This is a local UX state machine only.",
+            "Joins LiveKit only after POST /api/v1/video/token returns a real URL + JWT. " +
+                "Missing LIVEKIT_* server keys fail closed — no fake connected room.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -236,21 +297,31 @@ private fun LiveSessionPreview(
                     },
                     style = MaterialTheme.typography.bodySmall,
                 )
-                Text("Participants: You · Coach Tomás (demo)", style = MaterialTheme.typography.bodySmall)
+                if (state.phase == LiveSessionPhase.ERROR) {
+                    Text(
+                        state.errorMessage ?: LiveKitExternalKeys.MESSAGE,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                } else if (joined) {
+                    Text("Connected to LiveKit room", style = MaterialTheme.typography.bodySmall)
+                } else {
+                    Text("Not connected", style = MaterialTheme.typography.bodySmall)
+                }
             }
         }
         com.fitconnect.android.designui.components.EliteFlowRow {
             when (state.phase) {
                 LiveSessionPhase.IDLE, LiveSessionPhase.ENDED, LiveSessionPhase.ERROR -> {
-                    EliteButton(label = "Join (demo)", onClick = onJoin)
-                    if (state.phase == LiveSessionPhase.ERROR) {
+                    EliteButton(label = "Join live", onClick = onJoin)
+                    if (state.phase == LiveSessionPhase.ERROR || state.phase == LiveSessionPhase.ENDED) {
                         EliteButton(label = "Reset", variant = EliteButtonVariant.Ghost, onClick = onReset)
                     }
                 }
                 LiveSessionPhase.CONNECTING, LiveSessionPhase.ENDING -> {
                     Text("Please wait…", style = MaterialTheme.typography.bodyMedium)
                 }
-                LiveSessionPhase.CONNECTED_DEMO, LiveSessionPhase.MUTED, LiveSessionPhase.CAMERA_OFF -> {
+                LiveSessionPhase.CONNECTED, LiveSessionPhase.MUTED, LiveSessionPhase.CAMERA_OFF -> {
                     EliteButton(
                         label = if (state.muted) "Unmute" else "Mute",
                         variant = EliteButtonVariant.Secondary,
@@ -262,7 +333,6 @@ private fun LiveSessionPreview(
                         onClick = onCamera,
                     )
                     EliteButton(label = "End", onClick = onEnd)
-                    EliteButton(label = "Simulate error", variant = EliteButtonVariant.Ghost, onClick = onError)
                 }
             }
         }

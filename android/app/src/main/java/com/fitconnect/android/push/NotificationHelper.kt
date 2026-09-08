@@ -16,10 +16,15 @@ import com.fitconnect.android.MainActivity
 import com.fitconnect.android.R
 import com.fitconnect.android.foundation.notifications.LocalNotificationRequest
 import com.fitconnect.android.foundation.notifications.NotificationCategory
+import com.fitconnect.android.foundation.notifications.NotificationDeepLinkRouter
 
 /**
  * System notification channels + local posting. Safe when POST_NOTIFICATIONS is denied
  * (no crash — showLocal becomes a no-op).
+ *
+ * Tap always opens [MainActivity]; when a routable deep link exists it is attached as
+ * VIEW data so [com.fitconnect.android.foundation.navigation.DeepLinkInbox] can route
+ * booking / session / athlete / coach destinations.
  */
 class NotificationHelper(
     context: Context,
@@ -43,19 +48,7 @@ class NotificationHelper(
             .setStyle(NotificationCompat.BigTextStyle().bigText(request.body))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
-
-        request.deepLink?.takeIf { it.isNotBlank() }?.let { link ->
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link), appContext, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            }
-            val pending = PendingIntent.getActivity(
-                appContext,
-                request.id,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            )
-            builder.setContentIntent(pending)
-        }
+            .setContentIntent(contentPendingIntent(request))
 
         // Permission gated above; lint cannot always prove API 33 path.
         @Suppress("MissingPermission")
@@ -66,6 +59,23 @@ class NotificationHelper(
 
     fun cancel(id: Int) {
         runCatching { manager.cancel(id) }
+    }
+
+    private fun contentPendingIntent(request: LocalNotificationRequest): PendingIntent {
+        val routed = NotificationDeepLinkRouter.resolve(deepLink = request.deepLink)
+        val intent = if (routed != null) {
+            Intent(Intent.ACTION_VIEW, Uri.parse(routed), appContext, MainActivity::class.java)
+        } else {
+            Intent(appContext, MainActivity::class.java)
+        }.apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        return PendingIntent.getActivity(
+            appContext,
+            request.id,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
     }
 
     private fun canPostNotifications(): Boolean {

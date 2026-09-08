@@ -5,7 +5,12 @@ import com.fitconnect.android.ai.di.AiContainer
 import com.fitconnect.android.athlete.data.AthleteRepository
 import com.fitconnect.android.athlete.data.HttpAthleteRepository
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.live.AndroidLiveKitRoomFactory
+import com.fitconnect.android.athlete.live.HttpLiveKitTokenClient
+import com.fitconnect.android.athlete.live.LiveSessionPort
+import com.fitconnect.android.athlete.live.RealLiveKitSession
 import com.fitconnect.android.community.di.CommunityContainer
+import com.fitconnect.android.community.di.CommunityRuntimeMode
 import com.fitconnect.android.community.di.DefaultCommunityContainer
 import com.fitconnect.android.capture.LiveActivityEngine
 import com.fitconnect.android.capture.LiveSessionCoordinator
@@ -15,6 +20,8 @@ import com.fitconnect.android.capture.route.CanonicalRouteRepository
 import com.fitconnect.ascend.demo.AscendDemo
 import com.fitconnect.ascend.engine.AscendEngine
 import com.fitconnect.android.foundation.di.AppContainer
+import com.fitconnect.android.foundation.programs.EmptyProgramRemote
+import com.fitconnect.android.foundation.programs.HttpProgramRemote
 import com.fitconnect.android.geo.di.GeoContainer
 import com.fitconnect.android.sports.di.SportsContainer
 import com.fitconnect.android.sports.registry.SportsEngine
@@ -33,6 +40,8 @@ interface AthleteContainer {
     val athleteRepository: AthleteRepository
     val liveActivity: LiveActivityEngine
     val liveCoordinator: LiveSessionCoordinator
+    /** LiveKit video session — fail-closed without EXTERNAL server keys. */
+    val liveSession: LiveSessionPort
     val outdoorCapture: OutdoorCaptureRuntime
     val gpsRouteStore: GpsRouteStore
     val routeRepository: CanonicalRouteRepository
@@ -46,7 +55,7 @@ class DefaultAthleteContainer(
     override val geo: GeoContainer,
     override val telemetry: TelemetryContainer,
     override val ai: AiContainer,
-    override val community: CommunityContainer = DefaultCommunityContainer(),
+    communityOverride: CommunityContainer? = null,
     override val fitness: FitnessContainer,
     override val ascend: AscendEngine = AscendEngine(
         demoLabeledUsers = setOf(
@@ -60,6 +69,17 @@ class DefaultAthleteContainer(
     override val gpsRouteStore: GpsRouteStore,
     appContext: android.content.Context,
 ) : AthleteContainer {
+    override val community: CommunityContainer = communityOverride ?: DefaultCommunityContainer(
+        resolveMode = {
+            val snap = platform.sessionStore.snapshot()
+            when {
+                snap.isLocalDemo -> CommunityRuntimeMode.LOCAL_DEMO
+                platform.config.apiBaseUrl.isNotBlank() -> CommunityRuntimeMode.REMOTE
+                else -> CommunityRuntimeMode.FAIL_CLOSED
+            }
+        },
+        api = { platform.apiClient },
+    )
     override val sportsEngine: SportsEngine = sports.sportsEngine
     override val athleteRepository: AthleteRepository = HttpAthleteRepository(
         api = { platform.apiClient },
@@ -67,6 +87,12 @@ class DefaultAthleteContainer(
         telemetry = telemetry.athleteFacade,
         connectivity = platform.connectivity,
         offline = platform.offline,
+        bookingEngine = geo.booking,
+        programRemote = if (platform.config.apiBaseUrl.isNotBlank()) {
+            HttpProgramRemote({ platform.apiClient })
+        } else {
+            EmptyProgramRemote()
+        },
         localFallback = LocalAthleteRepository(
             connectivity = platform.connectivity,
             offline = platform.offline,
@@ -80,6 +106,11 @@ class DefaultAthleteContainer(
     // Debug/emulator: allow simulated GPS fallback. Release: fused-only (never claim physical GPS).
     override val liveActivity: LiveActivityEngine = LiveActivityEngine(allowSimulatedGps = debuggable)
     override val liveCoordinator: LiveSessionCoordinator = LiveSessionCoordinator(liveActivity)
+    override val liveSession: LiveSessionPort = RealLiveKitSession(
+        tokenClient = HttpLiveKitTokenClient { platform.apiClient },
+        roomFactory = AndroidLiveKitRoomFactory(appContext),
+        logger = platform.logger,
+    )
     override val outdoorCapture: OutdoorCaptureRuntime = OutdoorCaptureRuntime(
         appContext = appContext,
         engine = liveActivity,

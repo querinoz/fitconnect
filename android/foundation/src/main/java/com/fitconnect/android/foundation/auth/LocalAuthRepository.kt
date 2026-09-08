@@ -26,8 +26,8 @@ class LocalAuthRepository(
     private val logger: Logger,
     private val isolation: AccountIsolationController? = null,
     private val allowLocalCoachElevation: Boolean = false,
-    /** Release builds without IdP must set false — prevents forgeable sessions. */
-    private val allowLocalAuth: Boolean = true,
+    /** Fail-closed default. Debug wiring must pass true explicitly. */
+    private val allowLocalAuth: Boolean = false,
     private val keyValueStore: KeyValueStore? = null,
 ) : AuthRepository, TokenRefresher {
 
@@ -209,7 +209,16 @@ class LocalAuthRepository(
         val snap = sessionStore.snapshot()
         if (snap.tokens == null) return AuthErrorMapper.err(AppError.AuthKind.UNAUTHENTICATED)
         val uid = snap.userId ?: return AuthErrorMapper.err(AppError.AuthKind.UNAUTHENTICATED)
-        sessionStore.save(snap.copy(role = role))
+        val caps = (snap.capabilities + role).filter {
+            it == UserRole.ATHLETE || it == UserRole.COACH
+        }.toSet()
+        sessionStore.save(
+            snap.copy(
+                role = role,
+                activeMode = role,
+                capabilities = caps.ifEmpty { setOf(role) },
+            ),
+        )
         keyValueStore?.set(PreferenceKeys.identityRoleSelected(uid), "1")
         return currentUser()
     }
@@ -236,6 +245,10 @@ class LocalAuthRepository(
             refreshToken = "refresh-${UUID.randomUUID()}",
             expiresAtEpochMs = System.currentTimeMillis() + 3_600_000,
         )
+        val personaCaps = email?.let { DemoPersona.fromEmail(it)?.capabilities }
+        val caps = (personaCaps ?: setOf(role)).filter {
+            it == UserRole.ATHLETE || it == UserRole.COACH
+        }.toSet().ifEmpty { setOf(role) }
         val result = sessionStore.save(
             SessionSnapshot(
                 userId = id,
@@ -244,6 +257,8 @@ class LocalAuthRepository(
                 isAnonymous = anonymous,
                 biometricUnlockEnabled = false,
                 isLocalDemo = true,
+                capabilities = caps,
+                activeMode = role,
             ),
         )
         keyValueStore?.set(PreferenceKeys.identityRoleSelected(id), "1")

@@ -2,6 +2,10 @@ import { COACH_TAKE_HOME_RATE, PLATFORM_SUBSCRIPTION_EUR } from "./constants";
 
 export type CheckoutKind = "session" | "program" | "subscription";
 
+/** Honest demo checkout — never claims paid success without Stripe secrets. */
+export const DEMO_CHECKOUT_STATUS = "demo_preview" as const;
+export const DEMO_SUBSCRIPTION_STATUS = "demo_preview" as const;
+
 export type DemoCheckoutInput = {
   kind: CheckoutKind;
   amountCents: number;
@@ -12,11 +16,12 @@ export type DemoCheckoutInput = {
 
 export type DemoCheckoutResult = {
   id: string;
-  status: "succeeded";
+  status: typeof DEMO_CHECKOUT_STATUS;
   clientSecret: string;
   coachShareCents: number;
   platformFeeCents: number;
   url: string;
+  demo: true;
 };
 
 export function createDemoCheckout(input: DemoCheckoutInput): DemoCheckoutResult {
@@ -29,29 +34,37 @@ export function createDemoCheckout(input: DemoCheckoutInput): DemoCheckoutResult
 
   return {
     id,
-    status: "succeeded",
+    status: DEMO_CHECKOUT_STATUS,
     clientSecret: `${id}_secret_demo`,
     coachShareCents,
     platformFeeCents,
-    url: `https://checkout.stripe.com/demo/${id}`
+    url: `https://checkout.stripe.com/demo/${id}`,
+    demo: true
   };
 }
 
 export function createDemoSubscription(email: string) {
   return {
     id: `sub_demo_${Date.now()}`,
-    status: "active" as const,
+    status: DEMO_SUBSCRIPTION_STATUS,
     amountCents: PLATFORM_SUBSCRIPTION_EUR * 100,
     email,
-    interval: "month" as const
+    interval: "month" as const,
+    demo: true as const
   };
 }
 
+/**
+ * Demo Connect account — onboarding URL only.
+ * Never reports charges/payouts enabled (no fake paid / ready success).
+ */
 export function createDemoConnectAccount(coachId: string) {
   return {
     id: `acct_demo_${coachId}`,
     onboardingUrl: `https://connect.stripe.com/demo/onboard/${coachId}`,
-    chargesEnabled: true,
-    payoutsEnabled: true
+    chargesEnabled: false,
+    payoutsEnabled: false,
+    onboardingComplete: false,
+    demo: true as const
   };
 }

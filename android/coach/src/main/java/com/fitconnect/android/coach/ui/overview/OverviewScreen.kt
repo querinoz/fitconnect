@@ -30,8 +30,15 @@ import com.fitconnect.android.designui.components.EliteCardVariant
 import com.fitconnect.android.designui.components.EliteChip
 import com.fitconnect.android.designui.components.EliteFlowRow
 import com.fitconnect.android.designui.components.EliteMetricCard
+import com.fitconnect.android.designui.components.EliteWeekProgressHero
+import com.fitconnect.android.designui.components.EliteZenithHeader
+import com.fitconnect.android.designui.components.HexBadge
+import com.fitconnect.android.designui.components.HexBadgeTone
+import com.fitconnect.android.designui.components.HexMetric
+import com.fitconnect.android.designui.components.HexStatus
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.components.EliteStack
+import com.fitconnect.android.designui.neumorphic.EosPremiumCard
 import com.fitconnect.android.foundation.common.AppResult
 import kotlinx.coroutines.launch
 
@@ -64,31 +71,74 @@ fun OverviewScreen(
             subtitle = "Squad command center · remote roster/sessions when authenticated",
             overline = "COACH OS · COMMAND",
             testTag = "coach_overview",
+            showTitle = false,
         ) {
             item {
                 val link by container.platform.productRealtime.linkState.collectAsState()
-                EliteChip(label = "REALTIME · ${link.name}", onClick = {})
+                EosPremiumCard {
+                    EliteStack(spacing = EliteSpace.Md) {
+                        EliteZenithHeader(
+                            sysLabel = "COACH COMMAND CENTER",
+                            title = home.greeting,
+                            subtitle = "Schedule signals, roster risk, and live squad telemetry from one Zenith surface.",
+                            badge = {
+                                HexBadge(
+                                    text = home.pendingBookings.coerceAtMost(99).toString().padStart(2, '0'),
+                                    tone = HexBadgeTone.Volt,
+                                )
+                            },
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
+                        ) {
+                            HexStatus("REALTIME ${link.name}")
+                            HexStatus("${home.upcomingSessions.size} upcoming")
+                        }
+                    }
+                }
             }
             item {
-                EliteBentoRow {
-                    EliteBentoMetric(
-                        label = "ATTENTION",
-                        value = "${home.athletesNeedingAttention.size}",
-                        delta = "AT RISK",
-                        accentVolt = false,
-                        modifier = Modifier.weight(1f),
-                    )
-                    EliteBentoMetric(
-                        label = "BOOKINGS",
-                        value = "${home.pendingBookings}",
-                        modifier = Modifier.weight(1f),
-                    )
-                    EliteBentoMetric(
-                        label = "INBOX",
-                        value = "${home.unreadMessages}",
-                        accentVolt = false,
-                        modifier = Modifier.weight(1f),
-                    )
+                EliteWeekProgressHero(
+                    progressPercent = (100 - home.athletesNeedingAttention.size.coerceAtMost(8) * 8)
+                        .coerceIn(40, 100),
+                    title = "Squad command health",
+                    leftLabel = "BOOKINGS",
+                    leftValue = "${home.pendingBookings}",
+                    rightLabel = "INBOX",
+                    rightValue = "${home.unreadMessages}",
+                )
+            }
+            item {
+                EliteStack(spacing = EliteSpace.Sm) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        HexMetric(value = "${home.athletesNeedingAttention.size}", label = "Attention")
+                        HexMetric(value = "${home.pendingBookings}", label = "Bookings")
+                        HexMetric(value = "${home.unreadMessages}", label = "Inbox")
+                    }
+                    EliteBentoRow {
+                        EliteBentoMetric(
+                            label = "ATTENTION",
+                            value = "${home.athletesNeedingAttention.size}",
+                            delta = "AT RISK",
+                            accentVolt = false,
+                            modifier = Modifier.weight(1f),
+                        )
+                        EliteBentoMetric(
+                            label = "BOOKINGS",
+                            value = "${home.pendingBookings}",
+                            modifier = Modifier.weight(1f),
+                        )
+                        EliteBentoMetric(
+                            label = "INBOX",
+                            value = "${home.unreadMessages}",
+                            accentVolt = false,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                 }
             }
             item {
@@ -98,12 +148,13 @@ fun OverviewScreen(
                 SquadAscendCard()
             }
             item {
-                EliteCard(variant = EliteCardVariant.Glass) {
+                EosPremiumCard {
                     com.fitconnect.android.designui.components.EliteSectionHeader(
                         title = "AI command brief",
                         overline = "SYS.AI",
                     )
                     Text(home.aiSummary, style = MaterialTheme.typography.bodyLarge)
+                    HexStatus("BRIEFING READY")
                 }
             }
             item {
@@ -154,6 +205,7 @@ fun OverviewScreen(
             items(home.agenda, key = { it.id }) { event ->
                 EliteCard(onClick = { event.sessionId?.let(onOpenSession) }) {
                     Text(event.title, style = MaterialTheme.typography.titleMedium)
+                    HexStatus(if (event.conflict) "CONFLICT" else "ON SCHEDULE")
                     if (event.conflict) {
                         Text("Conflict · travel ${event.travelMinutes}m", color = MaterialTheme.colorScheme.error)
                     }
@@ -169,6 +221,7 @@ fun OverviewScreen(
                         "${session.athleteNames.joinToString()} · ${session.kind} · ${session.durationMin}m",
                         style = MaterialTheme.typography.bodyMedium,
                     )
+                    HexStatus("DEPLOY ${session.durationMin}m")
                 }
             }
             item {
@@ -181,6 +234,7 @@ fun OverviewScreen(
                 EliteCard(onClick = { onOpenAthlete(athlete.id) }) {
                     Text(athlete.displayName, style = MaterialTheme.typography.titleMedium)
                     Text("Recovery ${athlete.recovery} · ${athlete.status}", color = MaterialTheme.colorScheme.error)
+                    HexStatus("AT RISK")
                 }
             }
             item {
@@ -197,15 +251,19 @@ fun OverviewScreen(
             item {
                 EliteFlowRow {
                     home.quickActions.take(3).forEach { action ->
-                        EliteChip(label = action, onClick = {
-                            when {
-                                action.contains("program", true) -> onOpenPrograms()
-                                action.contains("booking", true) -> onOpenBookings()
-                                action.contains("calendar", true) -> onOpenCalendar()
-                                action.contains("message", true) -> onOpenInbox()
-                                else -> onOpenNotifications()
-                            }
-                        })
+                        EliteChip(
+                            label = action,
+                            contentDescription = "Coach action $action",
+                            onClick = {
+                                when {
+                                    action.contains("program", true) -> onOpenPrograms()
+                                    action.contains("booking", true) -> onOpenBookings()
+                                    action.contains("calendar", true) -> onOpenCalendar()
+                                    action.contains("message", true) -> onOpenInbox()
+                                    else -> onOpenNotifications()
+                                }
+                            },
+                        )
                     }
                 }
             }
@@ -215,13 +273,29 @@ fun OverviewScreen(
             items(home.liveFeed, key = { it.id }) { feed ->
                 EliteCard(variant = EliteCardVariant.Glass) {
                     Text(feed.text, style = MaterialTheme.typography.bodyLarge)
+                    HexStatus("LIVE")
                 }
             }
             item {
                 EliteFlowRow {
-                    EliteButton("Athletes", onClick = onOpenAthletes, variant = EliteButtonVariant.Secondary)
-                    EliteButton("Analytics", onClick = onOpenAnalytics, variant = EliteButtonVariant.Ghost)
-                    EliteButton("Revenue", onClick = onOpenRevenue, variant = EliteButtonVariant.Ghost)
+                    EliteButton(
+                        label = "Athletes",
+                        onClick = onOpenAthletes,
+                        variant = EliteButtonVariant.Secondary,
+                        contentDescription = "Open Athletes roster",
+                    )
+                    EliteButton(
+                        label = "Analytics",
+                        onClick = onOpenAnalytics,
+                        variant = EliteButtonVariant.Ghost,
+                        contentDescription = "Open Analytics",
+                    )
+                    EliteButton(
+                        label = "Revenue",
+                        onClick = onOpenRevenue,
+                        variant = EliteButtonVariant.Ghost,
+                        contentDescription = "Open Revenue",
+                    )
                 }
             }
         }

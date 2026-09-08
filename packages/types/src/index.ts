@@ -31,6 +31,22 @@ export type {
 export { ACTIVITY_UNITS, READINESS_UNITS, kjToKcal, kcalToKj } from "./canonical";
 
 export type {
+  AppCapability,
+  ActiveMode,
+  SubscriptionPlanId,
+  CapabilitySource,
+  UserCapabilities,
+  EntitlementSnapshot,
+  UnifiedIdentityMe
+} from "./identity";
+
+export {
+  capabilitiesFromPlan,
+  resolveActiveMode,
+  toUserCapabilities
+} from "./identity";
+
+export type {
   ExerciseMode,
   ProgressionRule,
   ProgressionState,

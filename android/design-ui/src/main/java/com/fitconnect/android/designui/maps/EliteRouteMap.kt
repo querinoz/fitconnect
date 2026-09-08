@@ -40,6 +40,20 @@ enum class EliteMapMode {
     ELEVATION,
 }
 
+/** Why [EliteMapPhase.Error] / empty surfaces — drives honest copy, never fake GPS. */
+enum class EliteMapFailureKind {
+    None,
+    PermissionDenied,
+    GpsUnavailable,
+    Timeout,
+    LoadFailed,
+}
+
+data class EliteMapStatusCopy(
+    val title: String,
+    val body: String,
+)
+
 /**
  * Race-detail / activity map state. Empty GPS is Empty, never a spinner or a fake path.
  * Loading may last at most [timeoutMs] while a session is waiting for a trace.
@@ -51,11 +65,56 @@ object EliteMapPhaseLogic {
         permissionDenied: Boolean,
         elapsedMs: Long,
         timeoutMs: Int = com.fitconnect.android.design.EliteSurfaceInstrument.LOAD_TIMEOUT_MS,
+        gpsUnavailable: Boolean = false,
     ): EliteMapPhase {
         if (pointCount >= 2) return EliteMapPhase.Success
         if (permissionDenied) return EliteMapPhase.Error
+        if (gpsUnavailable && !sessionWaitingForTrace) return EliteMapPhase.Empty
         if (!sessionWaitingForTrace) return EliteMapPhase.Empty
+        if (gpsUnavailable && elapsedMs >= timeoutMs) return EliteMapPhase.Error
         return if (elapsedMs >= timeoutMs) EliteMapPhase.Error else EliteMapPhase.Loading
+    }
+
+    fun failureKind(
+        pointCount: Int,
+        sessionWaitingForTrace: Boolean,
+        permissionDenied: Boolean,
+        elapsedMs: Long,
+        timeoutMs: Int = com.fitconnect.android.design.EliteSurfaceInstrument.LOAD_TIMEOUT_MS,
+        gpsUnavailable: Boolean = false,
+        loadFailed: Boolean = false,
+    ): EliteMapFailureKind {
+        if (pointCount >= 2) return EliteMapFailureKind.None
+        if (permissionDenied) return EliteMapFailureKind.PermissionDenied
+        if (loadFailed) return EliteMapFailureKind.LoadFailed
+        if (gpsUnavailable && !sessionWaitingForTrace) return EliteMapFailureKind.GpsUnavailable
+        if (sessionWaitingForTrace && elapsedMs >= timeoutMs) {
+            return if (gpsUnavailable) EliteMapFailureKind.GpsUnavailable else EliteMapFailureKind.Timeout
+        }
+        return EliteMapFailureKind.None
+    }
+
+    fun copy(kind: EliteMapFailureKind): EliteMapStatusCopy = when (kind) {
+        EliteMapFailureKind.None -> EliteMapStatusCopy(
+            title = "Map",
+            body = "Route visualization",
+        )
+        EliteMapFailureKind.PermissionDenied -> EliteMapStatusCopy(
+            title = "Location permission denied",
+            body = "Allow location to record outdoor GPS. FitConnect does not invent coordinates.",
+        )
+        EliteMapFailureKind.GpsUnavailable -> EliteMapStatusCopy(
+            title = "GPS unavailable",
+            body = "No location fix yet. Routes stay empty until a real fix arrives — never simulated in production.",
+        )
+        EliteMapFailureKind.Timeout -> EliteMapStatusCopy(
+            title = "Map unavailable",
+            body = "The trace did not load in time. Retry or continue without a map.",
+        )
+        EliteMapFailureKind.LoadFailed -> EliteMapStatusCopy(
+            title = "Map unavailable",
+            body = "The trace did not load. Retry or continue without a map.",
+        )
     }
 }
 
@@ -78,9 +137,11 @@ fun EliteRouteMap(
     modifier: Modifier = Modifier,
     cursorIndex: Int? = null,
     phase: EliteMapPhase = if (points.size >= 2) EliteMapPhase.Success else EliteMapPhase.Empty,
+    failureKind: EliteMapFailureKind = EliteMapFailureKind.None,
     onRetry: (() -> Unit)? = null,
     contentDescription: String = "Activity route",
 ) {
+    val statusCopy = EliteMapPhaseLogic.copy(failureKind)
     when (phase) {
         EliteMapPhase.Loading -> {
             EliteSkeleton(
@@ -93,9 +154,17 @@ fun EliteRouteMap(
             return
         }
         EliteMapPhase.Empty -> {
+            val emptyTitle = when (failureKind) {
+                EliteMapFailureKind.GpsUnavailable -> statusCopy.title
+                else -> "Your first session draws this map."
+            }
+            val emptyBody = when (failureKind) {
+                EliteMapFailureKind.GpsUnavailable -> statusCopy.body
+                else -> "A recorded GPS trace is required. Routes are never invented."
+            }
             EliteEmptyState(
-                title = "Your first session draws this map.",
-                body = "A recorded GPS trace is required. Routes are never invented.",
+                title = emptyTitle,
+                body = emptyBody,
                 actionLabel = "Start session",
                 onAction = onRetry,
                 modifier = modifier.testTag("elite_route_map_empty"),
@@ -104,11 +173,25 @@ fun EliteRouteMap(
         }
         EliteMapPhase.Error -> {
             EliteErrorView(
-                title = "Map unavailable",
-                body = "The trace did not load. Retry or continue without a map.",
+                title = if (failureKind == EliteMapFailureKind.None) {
+                    "Map unavailable"
+                } else {
+                    statusCopy.title
+                },
+                body = if (failureKind == EliteMapFailureKind.None) {
+                    "The trace did not load. Retry or continue without a map."
+                } else {
+                    statusCopy.body
+                },
                 retryLabel = "Try again",
                 onRetry = onRetry,
-                modifier = modifier.testTag("elite_route_map_error"),
+                modifier = modifier.testTag(
+                    when (failureKind) {
+                        EliteMapFailureKind.PermissionDenied -> "elite_route_map_permission_denied"
+                        EliteMapFailureKind.GpsUnavailable -> "elite_route_map_gps_unavailable"
+                        else -> "elite_route_map_error"
+                    },
+                ),
             )
             return
         }

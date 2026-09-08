@@ -1,5 +1,7 @@
 package com.fitconnect.android.athlete.ui.notifications
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,6 +18,12 @@ import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteLoad
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.designui.components.EliteCard
+import com.fitconnect.android.designui.components.EliteSysLabel
+import com.fitconnect.android.designui.components.EliteZenithHeader
+import com.fitconnect.android.designui.components.HexBadge
+import com.fitconnect.android.designui.components.HexStatus
+import com.fitconnect.android.designui.neumorphic.EosPremiumCard
+import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.common.AppResult
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -63,11 +71,27 @@ fun NotificationsScreen() {
             title = "Notifications",
             subtitle = "Push · coach messages · deep links",
             testTag = "athlete_notifications",
+            showTitle = false,
         ) {
-            item { Text("Alerts", style = MaterialTheme.typography.titleMedium) }
+            item {
+                EosPremiumCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+                        EliteZenithHeader(
+                            sysLabel = "ACTIVITY CENTER",
+                            title = "Notifications",
+                            subtitle = "Alerts, coach messages, and deep links stay truthful to device delivery state.",
+                            badge = {
+                                HexBadge(text = inbox.notifications.size.coerceAtMost(99).toString().padStart(2, '0'))
+                            },
+                        )
+                        HexStatus("${inbox.messages.count { it.unread }} unread messages")
+                    }
+                }
+            }
+            item { EliteSysLabel("ALERTS") }
             if (inbox.notifications.isEmpty()) {
                 item {
-                    EliteCard {
+                    EosPremiumCard {
                         Text(
                             "No alerts yet. Push delivery needs FCM production credentials when available.",
                             style = MaterialTheme.typography.bodyMedium,
@@ -76,18 +100,22 @@ fun NotificationsScreen() {
                 }
             }
             items(inbox.notifications, key = { it.id }) { n ->
-                EliteCard {
+                EosPremiumCard {
                     Text(n.title, style = MaterialTheme.typography.titleMedium)
                     Text(n.body, style = MaterialTheme.typography.bodyMedium)
                     n.deepLink?.let {
-                        Text(it, style = MaterialTheme.typography.labelSmall)
+                        Text(
+                            it,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             }
-            item { Text("Coach messages", style = MaterialTheme.typography.titleMedium) }
+            item { EliteSysLabel("COACH MESSAGES") }
             if (inbox.messages.isEmpty()) {
                 item {
-                    EliteCard {
+                    EosPremiumCard {
                         Text(
                             "No coach messages. Messages appear when your coach sends inbox items.",
                             style = MaterialTheme.typography.bodyMedium,
@@ -96,12 +124,10 @@ fun NotificationsScreen() {
                 }
             }
             items(inbox.messages, key = { it.id }) { msg ->
-                EliteCard {
-                    Text(
-                        if (msg.unread) "● ${msg.from}" else msg.from,
-                        style = MaterialTheme.typography.titleMedium,
-                    )
+                EliteCard(variant = if (msg.unread) com.fitconnect.android.designui.components.EliteCardVariant.Glass else com.fitconnect.android.designui.components.EliteCardVariant.Solid) {
+                    Text(msg.from, style = MaterialTheme.typography.titleMedium)
                     Text(msg.preview, style = MaterialTheme.typography.bodyLarge)
+                    HexStatus(if (msg.unread) "UNREAD" else "READ")
                 }
             }
         }

@@ -21,6 +21,10 @@ import com.fitconnect.android.coach.domain.SessionLifecycle
 import com.fitconnect.android.foundation.common.AppError
 import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.foundation.network.ApiClient
+import com.fitconnect.android.foundation.programs.CoachProgramRemoteAction
+import com.fitconnect.android.foundation.programs.HttpProgramRemote
+import com.fitconnect.android.foundation.programs.ProgramRemote
+import com.fitconnect.android.foundation.programs.RemoteCoachProgramRow
 import com.fitconnect.android.foundation.session.SessionStore
 import org.json.JSONArray
 import org.json.JSONObject
@@ -34,6 +38,9 @@ class HttpCoachRepository(
     private val api: () -> ApiClient,
     private val sessionStore: SessionStore,
     private val localFallback: CoachRepository? = null,
+    private val bookingEngine: com.fitconnect.android.geo.booking.BookingEngine? = null,
+    /** Path A programs remote — rejects seed; empty when API unavailable. */
+    private val programRemote: ProgramRemote = HttpProgramRemote(api),
 ) : CoachRepository {
 
     data class RemoteMeta(val source: String)
@@ -358,38 +365,9 @@ class HttpCoachRepository(
         if (sessionStore.snapshot().isLocalDemo && localFallback != null) {
             return localFallback.programs()
         }
-        return when (val raw = api().get("/api/v1/coaches/programs")) {
-            is AppResult.Err -> raw
-            is AppResult.Ok -> {
-                val root = JSONObject(raw.value)
-                val source = root.optString("source", "unknown")
-                if (source == "seed") {
-                    return AppResult.Err(AppError.Unexpected("coach_programs_seed_forbidden_in_remote_path"))
-                }
-                val arr = root.optJSONArray("programs") ?: JSONArray()
-                val mapped = buildList {
-                    for (i in 0 until arr.length()) {
-                        val o = arr.getJSONObject(i)
-                        add(
-                            CoachProgram(
-                                id = o.getString("id"),
-                                title = o.optString("title", "Program"),
-                                weeks = o.optInt("weeks", 4),
-                                cycles = 1,
-                                state = when (o.optString("state", "published")) {
-                                    "draft" -> com.fitconnect.android.coach.domain.ProgramPublishState.DRAFT
-                                    "archived" -> com.fitconnect.android.coach.domain.ProgramPublishState.ARCHIVED
-                                    else -> com.fitconnect.android.coach.domain.ProgramPublishState.PUBLISHED
-                                },
-                                version = o.optInt("version", 1),
-                                blocks = emptyList(),
-                                template = true,
-                            ),
-                        )
-                    }
-                }
-                AppResult.Ok(mapped)
-            }
+        return when (val snap = programRemote.listCoachPrograms()) {
+            is AppResult.Err -> snap
+            is AppResult.Ok -> AppResult.Ok(snap.value.programs.map { it.toDomain() })
         }
     }
 
@@ -404,29 +382,9 @@ class HttpCoachRepository(
         if (sessionStore.snapshot().isLocalDemo && localFallback != null) {
             return localFallback.cloneProgram(id)
         }
-        val body = JSONObject().put("action", "clone").put("programId", id).toString()
-        return when (val raw = api().post("/api/v1/coaches/programs", body)) {
-            is AppResult.Err -> raw
-            is AppResult.Ok -> {
-                val o = JSONObject(raw.value).optJSONObject("program")
-                    ?: return AppResult.Err(AppError.Unexpected("clone_failed"))
-                AppResult.Ok(
-                    CoachProgram(
-                        id = o.getString("id"),
-                        title = o.optString("title", "Program"),
-                        weeks = o.optInt("weeks", 1),
-                        cycles = 1,
-                        state = when (o.optString("state", "draft")) {
-                            "published" -> com.fitconnect.android.coach.domain.ProgramPublishState.PUBLISHED
-                            "archived" -> com.fitconnect.android.coach.domain.ProgramPublishState.ARCHIVED
-                            else -> com.fitconnect.android.coach.domain.ProgramPublishState.DRAFT
-                        },
-                        version = o.optInt("version", 1),
-                        blocks = emptyList(),
-                        template = true,
-                    ),
-                )
-            }
+        return when (val row = programRemote.coachAction(CoachProgramRemoteAction.CLONE, id)) {
+            is AppResult.Err -> row
+            is AppResult.Ok -> AppResult.Ok(row.value.toDomain())
         }
     }
 
@@ -434,9 +392,8 @@ class HttpCoachRepository(
         if (sessionStore.snapshot().isLocalDemo && localFallback != null) {
             return localFallback.publishProgram(id)
         }
-        val body = JSONObject().put("action", "publish").put("programId", id).toString()
-        return when (val raw = api().post("/api/v1/coaches/programs", body)) {
-            is AppResult.Err -> raw
+        return when (val row = programRemote.coachAction(CoachProgramRemoteAction.PUBLISH, id)) {
+            is AppResult.Err -> row
             is AppResult.Ok -> AppResult.Ok(Unit)
         }
     }
@@ -445,17 +402,33 @@ class HttpCoachRepository(
         if (sessionStore.snapshot().isLocalDemo && localFallback != null) {
             return localFallback.setProgramDraft(id)
         }
-        val body = JSONObject().put("action", "draft").put("programId", id).toString()
-        return when (val raw = api().post("/api/v1/coaches/programs", body)) {
-            is AppResult.Err -> raw
+        return when (val row = programRemote.coachAction(CoachProgramRemoteAction.DRAFT, id)) {
+            is AppResult.Err -> row
             is AppResult.Ok -> AppResult.Ok(Unit)
         }
     }
+
+    private fun RemoteCoachProgramRow.toDomain(): CoachProgram =
+        CoachProgram(
+            id = id,
+            title = title,
+            weeks = weeks,
+            cycles = 1,
+            state = when (state) {
+                "draft" -> com.fitconnect.android.coach.domain.ProgramPublishState.DRAFT
+                "archived" -> com.fitconnect.android.coach.domain.ProgramPublishState.ARCHIVED
+                else -> com.fitconnect.android.coach.domain.ProgramPublishState.PUBLISHED
+            },
+            version = version,
+            blocks = emptyList(),
+            template = true,
+        )
 
     override suspend fun bookings(): AppResult<List<BookingRequest>> {
         if (sessionStore.snapshot().isLocalDemo && localFallback != null) {
             return localFallback.bookings()
         }
+        bookingEngine?.pullRemote()
         return when (val raw = api().get("/api/v1/coaches/bookings")) {
             is AppResult.Err -> raw
             is AppResult.Ok -> {
@@ -496,6 +469,13 @@ class HttpCoachRepository(
         if (sessionStore.snapshot().isLocalDemo && localFallback != null) {
             return localFallback.approveBooking(id)
         }
+        val engine = bookingEngine
+        if (engine != null) {
+            return when (val result = engine.confirm(id)) {
+                is AppResult.Ok -> AppResult.Ok(Unit)
+                is AppResult.Err -> result
+            }
+        }
         val body = JSONObject().put("bookingId", id).put("action", "approve").toString()
         return when (val raw = api().post("/api/v1/coaches/bookings", body)) {
             is AppResult.Err -> raw
@@ -506,6 +486,13 @@ class HttpCoachRepository(
     override suspend fun rejectBooking(id: String): AppResult<Unit> {
         if (sessionStore.snapshot().isLocalDemo && localFallback != null) {
             return localFallback.rejectBooking(id)
+        }
+        val engine = bookingEngine
+        if (engine != null) {
+            return when (val result = engine.reject(id)) {
+                is AppResult.Ok -> AppResult.Ok(Unit)
+                is AppResult.Err -> result
+            }
         }
         val body = JSONObject().put("bookingId", id).put("action", "reject").toString()
         return when (val raw = api().post("/api/v1/coaches/bookings", body)) {

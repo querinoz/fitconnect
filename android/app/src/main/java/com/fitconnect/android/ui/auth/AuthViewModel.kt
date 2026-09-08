@@ -164,6 +164,7 @@ class AuthViewModel(
     private fun complete(user: AuthUser, fromEmail: Boolean) {
         analytics.identify(user.id)
         if (!user.isLocalDemo) {
+            // Token registration only — does not prove remote FCM delivery.
             viewModelScope.launch { notifications?.registerForPush() }
         }
         if (fromEmail && !user.isLocalDemo && !user.emailVerified) {

@@ -78,8 +78,12 @@ Prisma (`prisma/schema.prisma`) is **privileged server/admin only**:
 | Layer | Status |
 |-------|--------|
 | SQL `014` posts/reactions/squad | Canonical persistence |
-| Web `server-posts.ts` / `data.ts` | In-memory seed â€” **not wired** |
+| SQL `020` Strava-never-social | `provider_id` + generated `is_social_eligible` + CHECK + RLS on `community_posts` / reactions / comments |
+| Web `server-posts.ts` / `data.ts` | In-memory seed — **not wired** |
 | Stories/Reels | Not in scope |
+| Prisma | **No** `CommunityPost` model — do not add; dual-schema SoT stays Supabase SQL |
+
+**020 dual-schema rule:** Prefer additive Supabase SQL for community_* barriers. Prisma remains privileged server (Strava OAuth vault / coaching). Inventing a Prisma social model would fork identity and skip RLS.
 
 ### Notifications / Devices
 
@@ -106,6 +110,7 @@ Prisma (`prisma/schema.prisma`) is **privileged server/admin only**:
 | Sport enum | `sport text` | `CanonicalSport` | `Sport` enum |
 | Provider | `provider text` | policy helpers | `ProviderId` |
 | Shareable | GENERATED column | `workout-session-policy.ts` | `ProviderConstraints` |
+| Community social eligible | `020` `is_social_eligible` | `community-social-policy.ts` | N/A (SQL SoT) |
 
 **Gaps:** community/squad/payments TS types not yet in `canonical.ts` (extend in 017+).
 
@@ -130,9 +135,11 @@ Prisma (`prisma/schema.prisma`) is **privileged server/admin only**:
 | Path | Role |
 |------|------|
 | `supabase/migrations/016_p1_data_canonical.sql` | Canonical DDL |
+| `supabase/migrations/020_community_strava_never_social.sql` | Community Strava-never-social (additive) |
 | `packages/types/src/canonical.ts` | Cross-platform contracts |
 | `packages/types/src/domain.ts` | Legacy â€” deprecate importers |
 | `prisma/schema.prisma` | Privileged server |
 | `apps/web/lib/fitness/workout-session-policy.ts` | RLS mirror |
+| `apps/web/lib/community/community-social-policy.ts` | Community Strava barrier mirror |
 | `apps/web/lib/db/repository.ts` | **Conflict** â€” Prisma dashboard |
 | `android/core/fitness/.../Models.kt` | Android fitness domain |

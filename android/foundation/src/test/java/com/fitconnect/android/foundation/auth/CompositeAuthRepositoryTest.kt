@@ -41,7 +41,7 @@ class CompositeAuthRepositoryTest {
 
     @Test
     fun googleNeverUsesLocalFakeOauth() = runBlocking {
-        val local = LocalAuthRepository(SecureSessionStore(InMemorySecureStore()), logger)
+        val local = LocalAuthRepository(SecureSessionStore(InMemorySecureStore()), logger, allowLocalAuth = true)
         val composite = CompositeAuthRepository(local, live = null, allowLocalAuth = true)
         val result = composite.signIn(AuthProviderKind.GOOGLE, AuthCredentials(idToken = "anything"))
         assertTrue(result is AppResult.Err)
@@ -54,13 +54,13 @@ class CompositeAuthRepositoryTest {
 
     @Test
     fun appleCancellationDoesNotCreateSession() = runBlocking {
-        val live = object : AuthRepository by LocalAuthRepository(SecureSessionStore(InMemorySecureStore()), logger) {
+        val live = object : AuthRepository by LocalAuthRepository(SecureSessionStore(InMemorySecureStore()), logger, allowLocalAuth = true) {
             override suspend fun signIn(
                 provider: AuthProviderKind,
                 credentials: AuthCredentials,
             ): AppResult<AuthUser> = AuthErrorMapper.err(AppError.AuthKind.CANCELLED)
         }
-        val local = LocalAuthRepository(SecureSessionStore(InMemorySecureStore()), logger)
+        val local = LocalAuthRepository(SecureSessionStore(InMemorySecureStore()), logger, allowLocalAuth = true)
         val composite = CompositeAuthRepository(local, live, allowLocalAuth = true)
         val result = composite.signIn(AuthProviderKind.APPLE, AuthCredentials())
         assertEquals(
@@ -71,8 +71,8 @@ class CompositeAuthRepositoryTest {
 
     @Test
     fun offlineLiveSignInRequiresConnection() = runBlocking {
-        val live = LocalAuthRepository(SecureSessionStore(InMemorySecureStore()), logger)
-        val local = LocalAuthRepository(SecureSessionStore(InMemorySecureStore()), logger)
+        val live = LocalAuthRepository(SecureSessionStore(InMemorySecureStore()), logger, allowLocalAuth = true)
+        val local = LocalAuthRepository(SecureSessionStore(InMemorySecureStore()), logger, allowLocalAuth = true)
         val composite = CompositeAuthRepository(
             local,
             live,
@@ -110,7 +110,7 @@ class CompositeAuthRepositoryTest {
     @Test
     fun assignRoleAthleteAndCoach() = runBlocking {
         val session = SecureSessionStore(InMemorySecureStore())
-        val local = LocalAuthRepository(session, logger)
+        val local = LocalAuthRepository(session, logger, allowLocalAuth = true)
         local.signIn(
             AuthProviderKind.EMAIL_PASSWORD,
             AuthCredentials(email = "a@b.com", password = "password1"),

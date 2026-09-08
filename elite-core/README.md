@@ -8,6 +8,7 @@ Shared Rust domain engine for FitConnect v1 — FIT parse/write, metrics, physio
 elite-core/
 ├── core/   — elite-core: pure domain logic, zero binding dependencies
 ├── jni/    — Android + Wear OS binding (JNI)
+├── uniffi/ — minimal cross-language binding surface for Kotlin/Swift
 ├── wasm/   — browser binding (wasm-bindgen) → consumed by packages/elite-core-wasm
 └── napi/   — server binding (napi-rs) → consumed by Next.js route handlers/workers
 ```
@@ -16,6 +17,6 @@ elite-core/
 
 ## Status
 
-**PARTIAL** (not production-certified). `core` now contains streams, zones, metrics (including heart rate / pace), and physiology modules beyond the original F0 `version()` skeleton. Bindings and golden-file coverage remain incomplete. Canonical metrics spec: `docs/sports-metrics.md`. Production: **NO-GO**.
+**PARTIAL** (not production-certified). `core` now contains streams, zones, metrics (including heart rate / pace), and physiology modules beyond the original F0 `version()` skeleton. A minimal Wave 5 UniFFI surface now exists for `version()` plus one LTHR-based HR-zone helper, but bindings and golden-file coverage remain incomplete. Canonical metrics spec: `docs/sports-metrics.md`. Production: **NO-GO**.
 
 The `jni` crate export symbols and golden-file suite remain incomplete. Package id for JNI is `com.fitconnect.android` / debug `com.fitconnect.android.debug`. See `qa/HUMAN-QUEUE.md` for owner hardware steps. Per-module READMEs land as each domain file grows; this file is the crate entry point.

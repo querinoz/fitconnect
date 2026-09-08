@@ -17,10 +17,14 @@ class SessionAthleteIdTest {
         override suspend fun snapshot(): SessionSnapshot = snap
         override suspend fun isLoggedIn(): Boolean = snap.userId != null
         override suspend fun role(): UserRole = snap.role
+        override suspend fun activeMode(): UserRole = snap.activeMode
+        override suspend fun capabilities(): Set<UserRole> = snap.capabilities
         override suspend fun accessToken(): String? = snap.tokens?.accessToken
         override suspend fun refreshToken(): String? = snap.tokens?.refreshToken
         override suspend fun save(snapshot: SessionSnapshot): AppResult<Unit> = AppResult.Ok(Unit)
         override suspend fun updateTokens(tokens: AuthTokens): AppResult<Unit> = AppResult.Ok(Unit)
+        override suspend fun setActiveMode(mode: UserRole): AppResult<SessionSnapshot> =
+            AppResult.Ok(snap.copy(activeMode = mode, role = mode))
         override suspend fun clear(): AppResult<Unit> = AppResult.Ok(Unit)
     }
 

@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">FitConnect</string>
     <string name="nav_guest_title">Welcome</string>
-    <string name="nav_guest_body">FitConnect Elite OS — connect, train, and perform. Continue to LOCAL_DEMO or sign in.</string>
+    <string name="nav_guest_body">FitConnect Elite OS — connect, train, and perform. Sign in or continue to explore.</string>
     <string name="nav_continue_auth">Continue</string>
     <string name="nav_continue_anonymous">Continue anonymously</string>
     <string name="nav_auth_title">Sign in</string>
@@ -62,6 +62,8 @@
     <string name="nav_enter_demo_session">Enter athlete demo</string>
     <string name="nav_enter_coach_demo">Enter coach demo</string>
     <string name="splash_tagline">Elite OS · Connect. Train. Perform.</string>
+    <string name="splash_tagline_line1">YOUR TRAINING. CONNECTED.</string>
+    <string name="splash_tagline_line2">YOUR PERFORMANCE. ELEVATED.</string>
     <string name="notification_channel_system">System</string>
     <string name="notification_channel_session">Sessions</string>
     <string name="notification_channel_training">Training</string>

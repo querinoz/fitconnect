@@ -1,6 +1,7 @@
 package com.fitconnect.android.coach.ui.calendar
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +23,11 @@ import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteChip
 import com.fitconnect.android.designui.components.EliteEmptyState
+import com.fitconnect.android.designui.components.EliteZenithHeader
+import com.fitconnect.android.designui.components.HexBadge
+import com.fitconnect.android.designui.components.HexBadgeTone
+import com.fitconnect.android.designui.components.HexStatus
+import com.fitconnect.android.designui.neumorphic.EosPremiumCard
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.common.AppResult
 import kotlinx.coroutines.launch
@@ -60,14 +66,30 @@ fun CalendarScreen(
             title = "Calendar",
             subtitle = "Sessions from canonical coach schedule",
             testTag = "coach_calendar",
+            showTitle = false,
         ) {
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
-                    CalendarViewMode.entries.forEach { m ->
-                        EliteChip(
-                            label = m.name.lowercase().replaceFirstChar { it.uppercase() },
-                            onClick = { mode = m },
+                EosPremiumCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+                        EliteZenithHeader(
+                            sysLabel = "SCHEDULE COMMAND",
+                            title = "Calendar",
+                            subtitle = "Coach sessions stay anchored to the canonical schedule and explicit reschedule actions.",
+                            badge = {
+                                HexBadge(
+                                    text = filtered.size.coerceAtMost(99).toString().padStart(2, '0'),
+                                    tone = HexBadgeTone.Iris,
+                                )
+                            },
                         )
+                        Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
+                            CalendarViewMode.entries.forEach { m ->
+                                EliteChip(
+                                    label = m.name.lowercase().replaceFirstChar { it.uppercase() },
+                                    onClick = { mode = m },
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -85,13 +107,14 @@ fun CalendarScreen(
                 }
             }
             items(filtered, key = { it.id }) { event ->
-                EliteCard(onClick = { event.sessionId?.let(onOpenSession) }) {
+                EosPremiumCard(onClick = { event.sessionId?.let(onOpenSession) }) {
                     Text(event.title, style = MaterialTheme.typography.titleMedium)
                     Text(
                         "Session ${event.sessionId.orEmpty()}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    HexStatus(mode.name)
                     if (event.sessionId != null) {
                         EliteButton(
                             label = "Move +1h",

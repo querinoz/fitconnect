@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import com.fitconnect.android.designui.atmosphere.HoneycombAtmosphere
+import com.fitconnect.android.designui.atmosphere.HoneycombOverlay
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -48,6 +49,11 @@ import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteChip
+import com.fitconnect.android.designui.components.HexBadge
+import com.fitconnect.android.designui.components.HexBadgeTone
+import com.fitconnect.android.designui.components.HexMetric
+import com.fitconnect.android.designui.components.HexProgress
+import com.fitconnect.android.designui.components.HexStatus
 import com.fitconnect.android.designui.components.EliteHeader
 import com.fitconnect.android.designui.components.EliteHexatar
 import com.fitconnect.android.designui.components.EliteHexatarProfile
@@ -74,12 +80,17 @@ import com.fitconnect.android.designui.components.EliteSettingsRow
 import com.fitconnect.android.designui.components.EliteSkeleton
 import com.fitconnect.android.designui.components.EliteSlider
 import com.fitconnect.android.designui.components.EliteSwitch
+import com.fitconnect.android.designui.components.HoneycombDivider
 import com.fitconnect.android.designui.components.EliteTextField
 import com.fitconnect.android.designui.maps.EliteMapMode
 import com.fitconnect.android.designui.maps.EliteMapPhase
 import com.fitconnect.android.designui.maps.EliteRouteMap
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.components.EliteGlassCard
+import com.fitconnect.android.designui.components.HexBadge
+import com.fitconnect.android.designui.components.HexMetric
+import com.fitconnect.android.designui.components.HexProgress
+import com.fitconnect.android.designui.components.HexStatus
 import com.fitconnect.android.designui.theme.LocalHapticGenerator
 import com.fitconnect.android.foundation.haptics.HapticPreset
 import com.fitconnect.android.designui.atmosphere.LocalEnergyPulseTrigger
@@ -114,6 +125,33 @@ fun DesignSystemCatalog(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+        item {
+            Section("Zenith (Elite OS 2026)") {
+                Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+                    Text(
+                        "Hex telemetry + thin honeycomb wrappers for dense athlete surfaces.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    HexStatus(text = "COMMAND")
+                    HoneycombDivider()
+                    Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+                        HexMetric(value = "68", label = "HRV")
+                        HexProgress(progress = 59, label = "WEEK")
+                        HexBadge(text = "LIVE")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+                        HexMetric(value = "82", label = "Readiness")
+                        HexProgress(progress = 68, label = "Weekly load")
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+                        HexStatus(text = "Prime")
+                        HexBadge(text = "ON", tone = HexBadgeTone.Success)
+                        HexBadge(text = "HI", tone = HexBadgeTone.Telemetry)
+                    }
+                }
+            }
         }
         item {
             Section("Premium") {
@@ -157,6 +195,7 @@ fun DesignSystemCatalog(
                         .testTag("catalog_honeycomb"),
                 ) {
                     HoneycombAtmosphere(strokeColor = MaterialTheme.colorScheme.primary)
+                    HoneycombOverlay()
                 }
             }
         }

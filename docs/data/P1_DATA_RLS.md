@@ -18,6 +18,8 @@ Never claim PASS with `service_role` or login `postgres` BYPASSRLS as the eviden
 | --- | --- |
 | `activities` | Own CRUD; SELECT also public+shareable (STRAVA never shareable) |
 | `activity_route_points` | Via parent activity ownership / shareable |
+| `community_posts` (020) | SELECT/INSERT/UPDATE only when `is_social_eligible`; CHECK rejects `provider_id=STRAVA` even under service_role |
+| `post_reactions` / `post_comments` (020) | Parent must be `is_social_eligible` |
 | `readiness_snapshots` | Own only |
 | `badge_definitions` | SELECT all |
 | `user_badges` | Own select/insert |
@@ -37,10 +39,11 @@ User-facing: `authenticated`. Catalog: `anon` SELECT on `badge_definitions` only
 | --- | --- |
 | `tests/integration/identity-rls.integration.test.ts` | **5/5 PASS** (P0 regression) |
 | `tests/data/p1-data-activities-rls.integration.test.ts` | **3/3 PASS** |
+| `tests/data/community-strava-never-social.test.ts` | Static invariant always; live CHECK/RLS opt-in |
 
 Command:
 
 ```powershell
 $env:P0_SEC_LIVE_RLS='1'
-pnpm --filter @fitconnect/web exec vitest run tests/data/p1-data-activities-rls.integration.test.ts tests/integration/identity-rls.integration.test.ts --fileParallelism=false
+pnpm --filter @fitconnect/web exec vitest run tests/data/p1-data-activities-rls.integration.test.ts tests/data/community-strava-never-social.test.ts tests/integration/identity-rls.integration.test.ts --fileParallelism=false
 ```

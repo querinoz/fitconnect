@@ -192,11 +192,18 @@ export async function assignIdentityRole(
   accessToken: string,
   nextRole: Exclude<UserRole, "admin">
 ): Promise<{ role: UserRole | null; error: string | null; status: number }> {
+  const { ensureCapabilityFromRoleAssign } = await import("@/lib/identity/entitlements");
   const current = await lookupIdentityRole(uid, accessToken);
   if (current && current !== nextRole) {
-    return { role: current, error: "role_locked", status: 403 };
+    // Legacy clients tried to flip XOR role — grant second capability instead of lock.
+    const granted = await ensureCapabilityFromRoleAssign(uid, accessToken, nextRole);
+    if (!granted.ok) {
+      return { role: current, error: granted.error ?? "role_locked", status: granted.status };
+    }
+    return { role: nextRole, error: null, status: 200 };
   }
   if (current === nextRole) {
+    await ensureCapabilityFromRoleAssign(uid, accessToken, nextRole);
     return { role: current, error: null, status: 200 };
   }
   const client = createSupabaseRlsClient(accessToken);
@@ -207,6 +214,10 @@ export async function assignIdentityRole(
     .select("role")
     .single();
   if (error) return { role: null, error: error.message, status: 403 };
+  const ensured = await ensureCapabilityFromRoleAssign(uid, accessToken, nextRole);
+  if (!ensured.ok) {
+    return { role: parseAppRole((data as RoleRow).role), error: ensured.error, status: ensured.status };
+  }
   return { role: parseAppRole((data as RoleRow).role), error: null, status: 200 };
 }
 

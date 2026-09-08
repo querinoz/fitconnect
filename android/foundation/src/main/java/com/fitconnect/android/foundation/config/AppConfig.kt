@@ -17,6 +17,12 @@ data class AppConfig(
     val supabaseUrl: String? = null,
     val supabaseAnonKey: String? = null,
     val isDebuggable: Boolean,
+    /**
+     * Visual QA / release-preview: hide LOCAL_DEMO banners, identity chips, and
+     * other system noise so athlete surfaces match Phase 0 chrome diet.
+     * Debug tooling remains available via long-press splash / settings.
+     */
+    val visualQaChromeDiet: Boolean = true,
     /** When false, LocalAuth must refuse credential sign-in (release without IdP). */
     val allowLocalAuth: Boolean = false,
     val fcmConfigured: Boolean = false,

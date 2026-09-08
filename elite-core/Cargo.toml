@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["core", "jni", "wasm", "napi"]
+members = ["core", "jni", "wasm", "napi", "uniffi"]
 
 [workspace.package]
 version = "0.1.0"

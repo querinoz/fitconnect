@@ -12,6 +12,7 @@ import com.fitconnect.android.design.EliteSurfaceAtmosphere
 import com.fitconnect.android.design.EliteSurfaceBorder
 import com.fitconnect.android.design.EliteSurfaceElevation
 import com.fitconnect.android.design.EliteSurfaceGlass
+import com.fitconnect.android.design.EliteSurfaceInstrument
 import com.fitconnect.android.design.EliteSurfaceOpacity
 import com.fitconnect.android.design.EliteSurfaceRadius
 import com.fitconnect.android.design.EliteSurfaceSpacing
@@ -52,6 +53,10 @@ object EliteRadius {
     val Md: Dp get() = EliteSurfaceRadius.MD.dp
     val Lg: Dp get() = EliteSurfaceRadius.LG.dp
     val Xl: Dp get() = EliteSurfaceRadius.XL.dp
+    /** Gym-layout media / soft chrome — alias of XL (24). Prefer over raw Lg for hero cards. */
+    val Media: Dp get() = EliteSurfaceRadius.XL.dp
+    /** Soft floating chrome (nav wells) — honeycomb cell radius token. */
+    val SoftChrome: Dp get() = EliteSurfaceAtmosphere.HONEYCOMB_CELL_RADIUS.dp
     val Full: Dp get() = EliteSurfaceRadius.FULL.dp
 }
 
@@ -88,6 +93,15 @@ object EliteBorder {
     val Hairline: Dp get() = EliteSurfaceBorder.HAIRLINE.dp
     val Thin: Dp get() = EliteSurfaceBorder.THIN.dp
     val Thick: Dp get() = EliteSurfaceBorder.THICK.dp
+}
+
+object EliteNavChrome {
+    val Bar: Dp get() = EliteSurfaceInstrument.NAV_BAR_DP.dp
+    val Dock: Dp get() = EliteSurfaceInstrument.NAV_DOCK_DP.dp
+    val Fab: Dp get() = EliteSurfaceInstrument.TRAIN_FAB_DP.dp
+    val CradleRadius: Dp get() = EliteSurfaceInstrument.NAV_CRADLE_RADIUS_DP.dp
+    val ActiveIndicator: Dp get() = EliteSurfaceInstrument.NAV_ACTIVE_INDICATOR_DP.dp
+    val FabLift: Dp get() = EliteSurfaceInstrument.NAV_FAB_LIFT_DP.dp
 }
 
 @Composable

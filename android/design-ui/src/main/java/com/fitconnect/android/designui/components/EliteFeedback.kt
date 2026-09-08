@@ -106,7 +106,7 @@ fun EliteErrorView(
     ) {
         Icon(
             imageVector = Icons.Outlined.Sensors,
-            contentDescription = null,
+            contentDescription = "Error",
             tint = EliteSurfaceColors.TELEMETRY.toColor(),
             modifier = Modifier.size(36.dp),
         )
@@ -122,6 +122,7 @@ fun EliteErrorView(
                 label = retryLabel,
                 onClick = onRetry,
                 variant = EliteButtonVariant.Secondary,
+                contentDescription = "$retryLabel. $title",
             )
         }
     }

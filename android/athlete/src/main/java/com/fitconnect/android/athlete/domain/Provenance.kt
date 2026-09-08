@@ -1,5 +1,7 @@
 package com.fitconnect.android.athlete.domain
 
+import com.fitconnect.android.telemetry.domain.TelemetryUiLabel
+
 /**
  * How athlete-facing values were produced. UI must never present [LOCAL_DEMO] as measured.
  */
@@ -10,12 +12,21 @@ enum class AthleteDataProvenance {
     INSUFFICIENT_DATA,
 }
 
+/** Maps athlete field provenance onto telemetry UI labels (never demo → LIVE). */
+fun AthleteDataProvenance.toTelemetryUiLabel(): TelemetryUiLabel = when (this) {
+    AthleteDataProvenance.LOCAL_DEMO -> TelemetryUiLabel.TEST
+    AthleteDataProvenance.CALCULATED -> TelemetryUiLabel.DERIVED
+    AthleteDataProvenance.MEASURED -> TelemetryUiLabel.SYNCED
+    AthleteDataProvenance.INSUFFICIENT_DATA -> TelemetryUiLabel.UNAVAILABLE
+}
+
 data class Provenanced<T>(
     val value: T,
     val provenance: AthleteDataProvenance,
     val sourceLabel: String? = null,
 ) {
     val isDemo: Boolean get() = provenance == AthleteDataProvenance.LOCAL_DEMO
+    val uiLabel: TelemetryUiLabel get() = provenance.toTelemetryUiLabel()
 }
 
 data class TodayReadinessUi(

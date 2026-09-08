@@ -31,6 +31,7 @@ import com.fitconnect.android.athlete.domain.AthleteGoal
 import com.fitconnect.android.athlete.domain.AthleteProfile
 import com.fitconnect.android.athlete.domain.BodyMetrics
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
+import com.fitconnect.android.athlete.ui.LocalAthleteModeSwitch
 import com.fitconnect.android.athlete.ui.LocalAthletePatentStatus
 import com.fitconnect.android.athlete.ui.LocalAthleteSignOut
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
@@ -45,14 +46,21 @@ import com.fitconnect.android.designui.components.EliteSettingsRow
 import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.components.EliteTierProgress
+import com.fitconnect.android.designui.components.EliteZenithHeader
+import com.fitconnect.android.designui.components.HexBadge
+import com.fitconnect.android.designui.components.HexBadgeTone
+import com.fitconnect.android.designui.components.HexStatus
 import com.fitconnect.android.designui.components.fillColor
+import com.fitconnect.android.designui.identity.ActiveExperienceSwitcher
 import com.fitconnect.android.designui.identity.Patent
 import com.fitconnect.android.designui.neumorphic.EosPremiumCard
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.ascend.domain.AchievementCategory
-import com.fitconnect.android.foundation.auth.DemoPersona
+import com.fitconnect.android.foundation.authz.UserRole
+import com.fitconnect.android.foundation.analytics.AnalyticsEvent
 import com.fitconnect.android.foundation.common.AppResult
+import com.fitconnect.android.foundation.storage.PreferenceKeys
 import com.fitconnect.android.foundation.theme.HoneycombIntensity
 import com.fitconnect.android.telemetry.devices.DeviceEntry
 import com.fitconnect.android.telemetry.provider.ProviderConnectionState
@@ -67,6 +75,7 @@ fun ProfileScreen(
 ) {
     val container = LocalAthleteContainer.current
     val onSignedOut = LocalAthleteSignOut.current
+    val onModeSwitch = LocalAthleteModeSwitch.current
     val scope = rememberCoroutineScope()
     val honeycomb by container.platform.themeSettings.observeHoneycomb()
         .collectAsState(initial = HoneycombIntensity.SUBTLE)
@@ -76,10 +85,49 @@ fun ProfileScreen(
     var devices by remember { mutableStateOf<List<DeviceEntry>>(emptyList()) }
     var sessionCount by remember { mutableStateOf<Int?>(null) }
     var athleteId by remember { mutableStateOf("") }
+    var sessionEmail by remember { mutableStateOf<String?>(null) }
+    var capabilities by remember { mutableStateOf(setOf(UserRole.ATHLETE)) }
+    var activeMode by remember { mutableStateOf(UserRole.ATHLETE) }
+    var switchingMode by remember { mutableStateOf(false) }
+    val avatarPath by container.platform.keyValueStore
+        .observe(PreferenceKeys.PROFILE_AVATAR_PATH)
+        .collectAsState(initial = null)
+    val bannerPath by container.platform.keyValueStore
+        .observe(PreferenceKeys.PROFILE_BANNER_PATH)
+        .collectAsState(initial = null)
+    val chromeDiet = container.platform.config.visualQaChromeDiet
 
     LaunchedEffect(Unit) {
         container.platform.analytics.screen("athlete_profile")
         athleteId = container.platform.sessionStore.canonicalAthleteId()
+        sessionEmail = (container.platform.authRepository.currentUser() as? AppResult.Ok)
+            ?.value
+            ?.email
+            ?: "demo-athlete@fitconnect.local"
+        val snap = container.platform.sessionStore.snapshot()
+        capabilities = snap.capabilities.ifEmpty { setOf(snap.activeMode) }
+        activeMode = snap.activeMode
+        if (!snap.isLocalDemo) {
+            when (val me = container.platform.identityRemote.getMe()) {
+                is AppResult.Ok -> {
+                    val caps = me.value.capabilities.ifEmpty {
+                        listOfNotNull(me.value.role, me.value.activeMode).toSet()
+                    }
+                    if (caps.isNotEmpty()) {
+                        capabilities = caps
+                        activeMode = me.value.activeMode ?: me.value.role ?: activeMode
+                        container.platform.sessionStore.save(
+                            snap.copy(
+                                capabilities = caps,
+                                activeMode = activeMode,
+                                role = activeMode,
+                            ),
+                        )
+                    }
+                }
+                is AppResult.Err -> Unit
+            }
+        }
         profile = (container.athleteRepository.profile() as? AppResult.Ok)?.value
         goals = (container.athleteRepository.goals() as? AppResult.Ok)?.value.orEmpty()
         body = (container.athleteRepository.bodyMetrics() as? AppResult.Ok)?.value
@@ -92,12 +140,106 @@ fun ProfileScreen(
         title = profile?.displayName ?: "Profile",
         subtitle = "Identity · appearance · goals · devices",
         testTag = "athlete_profile",
+        showTitle = false,
     ) {
         val profileSurface = profile?.let { AthleteContentResolver.profileSurface(it.displayName) }
+        if (!chromeDiet) {
+            item {
+                AthleteDemoBanner(
+                    visible = profileSurface?.isAnyDemo == true,
+                    modifier = Modifier.testTag("profile_demo_banner"),
+                )
+            }
+        }
         item {
-            AthleteDemoBanner(
-                visible = profileSurface?.isAnyDemo == true,
-                modifier = Modifier.testTag("profile_demo_banner"),
+            EosPremiumCard(modifier = Modifier.fillMaxWidth()) {
+                EliteStack(spacing = EliteSpace.Md) {
+                    EliteZenithHeader(
+                        sysLabel = "PROFILE COMMAND",
+                        title = profile?.displayName ?: "Athlete profile",
+                        subtitle = "Identity, devices, privacy, and progression from one command surface.",
+                        badge = {
+                            HexBadge(
+                                text = (sessionCount ?: 0).coerceAtMost(99).toString().padStart(2, '0'),
+                                tone = HexBadgeTone.Iris,
+                            )
+                        },
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        HexStatus("ON-DEVICE PRIVACY")
+                        if (goals.isNotEmpty()) {
+                            HexStatus("${goals.size} goals")
+                        }
+                    }
+                }
+            }
+        }
+        item {
+            ActiveExperienceSwitcher(
+                capabilities = capabilities,
+                activeMode = activeMode,
+                switching = switchingMode,
+                onSelectMode = { next ->
+                    if (next == activeMode || switchingMode) return@ActiveExperienceSwitcher
+                    scope.launch {
+                        switchingMode = true
+                        container.platform.analytics.track(
+                            AnalyticsEvent("mode_switch_attempt", mapOf("to" to next.name)),
+                        )
+                        val snap = container.platform.sessionStore.snapshot()
+                        if (snap.isLocalDemo) {
+                            when (val local = container.platform.sessionStore.setActiveMode(next)) {
+                                is AppResult.Ok -> {
+                                    activeMode = next
+                                    container.platform.analytics.track(
+                                        AnalyticsEvent("mode_switch_success", mapOf("to" to next.name)),
+                                    )
+                                    onModeSwitch(next)
+                                }
+                                is AppResult.Err -> {
+                                    container.platform.analytics.track(
+                                        AnalyticsEvent("mode_switch_denied", mapOf("to" to next.name)),
+                                    )
+                                    switchingMode = false
+                                }
+                            }
+                        } else {
+                            when (val remote = container.platform.identityRemote.setActiveMode(next)) {
+                                is AppResult.Ok -> {
+                                    container.platform.sessionStore.save(
+                                        snap.copy(
+                                            activeMode = next,
+                                            role = next,
+                                            capabilities = remote.value.capabilities.ifEmpty { capabilities },
+                                        ),
+                                    )
+                                    activeMode = next
+                                    container.platform.analytics.track(
+                                        AnalyticsEvent("mode_switch_success", mapOf("to" to next.name)),
+                                    )
+                                    onModeSwitch(next)
+                                }
+                                is AppResult.Err -> {
+                                    container.platform.analytics.track(
+                                        AnalyticsEvent("mode_switch_denied", mapOf("to" to next.name)),
+                                    )
+                                    switchingMode = false
+                                }
+                            }
+                        }
+                    }
+                },
+                onUnlockCoach = if (!capabilities.contains(UserRole.COACH)) {
+                    {
+                        container.platform.analytics.track(AnalyticsEvent("coach_upgrade_clicked"))
+                    }
+                } else {
+                    null
+                },
             )
         }
         profile?.let { p ->
@@ -119,10 +261,26 @@ fun ProfileScreen(
                         level = ascend.level.level,
                         totalXp = ascend.totalXp,
                         rank = patent.rank,
-                        hexatarNote = profileSurface?.hexatarNote
-                            ?: AthleteDemoCatalog.HEXATAR_DETERMINISTIC_NOTE,
-                        streakLabel = streak?.let { "${it.days} DAY STREAK · ${DemoPersona.MODE_LABEL}" }
-                            ?: "NO CONSISTENCY DATA YET",
+                        email = sessionEmail,
+                        roleLabel = "ATHLETE",
+                        avatarPath = avatarPath,
+                        bannerPath = bannerPath,
+                        onAvatarPathChanged = { path ->
+                            scope.launch {
+                                container.platform.keyValueStore.set(
+                                    PreferenceKeys.PROFILE_AVATAR_PATH,
+                                    path,
+                                )
+                            }
+                        },
+                        onBannerPathChanged = { path ->
+                            scope.launch {
+                                container.platform.keyValueStore.set(
+                                    PreferenceKeys.PROFILE_BANNER_PATH,
+                                    path,
+                                )
+                            }
+                        },
                     )
                     EliteTierProgress(
                         title = patent.nextPatent?.name ?: Patent.INICIADO.name,
@@ -173,6 +331,11 @@ fun ProfileScreen(
                         trailing = "ON-DEVICE",
                         onClick = onOpenSettings,
                     )
+                    EliteSysLabel("CONNECTIONS · DEVICES & INTEGRATIONS")
+                    ConnectionCenterCard(
+                        onOpenSettings = onOpenSettings,
+                        onOpenTelemetry = onOpenTelemetry,
+                    )
                     if (titles.isNotEmpty()) {
                         EosPremiumCard(modifier = Modifier.fillMaxWidth()) {
                             EliteStack(spacing = EliteSpace.Sm) {
@@ -193,7 +356,9 @@ fun ProfileScreen(
                                 .testTag("profile_recent_badges"),
                         ) {
                             Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
-                                EliteSysLabel("RECENT BADGES · ${AthleteDemoCatalog.MODE_LABEL}")
+                                EliteSysLabel(
+                                    if (chromeDiet) "RECENT BADGES" else "RECENT BADGES · ${AthleteDemoCatalog.MODE_LABEL}",
+                                )
                                 achievementTiles.chunked(4).forEach { row ->
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
@@ -228,14 +393,14 @@ fun ProfileScreen(
         body?.let { metrics ->
             item {
                 EliteStack {
-                    EliteSysLabel("BODY METRICS · ${AthleteDemoCatalog.MODE_LABEL}")
+                    EliteSysLabel(if (chromeDiet) "BODY METRICS" else "BODY METRICS · ${AthleteDemoCatalog.MODE_LABEL}")
                     EliteMetricCard(label = "Weight", value = "${metrics.weightKg} kg")
                     EliteMetricCard(label = "Hydration", value = "${metrics.hydrationLiters} L")
                     EliteMetricCard(label = "Nutrition", value = "${metrics.nutritionKcal} kcal")
                 }
             }
         }
-        item { Text("Goals · ${AthleteDemoCatalog.MODE_LABEL}", style = MaterialTheme.typography.titleMedium) }
+        item { EliteSysLabel(if (chromeDiet) "GOALS" else "GOALS · ${AthleteDemoCatalog.MODE_LABEL}") }
         items(goals, key = { it.id }) { goal ->
             EliteCard {
                 EliteStack(spacing = EliteSpace.Sm) {
@@ -244,7 +409,7 @@ fun ProfileScreen(
                 }
             }
         }
-        item { Text("Performance Vault", style = MaterialTheme.typography.titleMedium) }
+        item { EliteSysLabel("PERFORMANCE VAULT") }
         item {
             EliteButton(
                 label = "Open Performance Vault",
@@ -252,7 +417,7 @@ fun ProfileScreen(
                 modifier = Modifier.testTag("profile_open_vault"),
             )
         }
-        item { Text("Connected devices / apps", style = MaterialTheme.typography.titleMedium) }
+        item { EliteSysLabel("CONNECTED DEVICES / APPS") }
         item {
             EliteStack {
                 EliteButton(

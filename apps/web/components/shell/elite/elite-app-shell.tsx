@@ -61,20 +61,7 @@ export function EliteAppShell({
   }, []);
 
   return (
-    <div className="eos-app-shell relative flex min-h-dvh w-full max-w-full overflow-x-clip bg-[#070B14] text-ink-100 pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:bg-[var(--eos-floor)] lg:premium-grid-none lg:pb-0 lg:text-inherit">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-[10%] top-[-10%] h-[50vw] w-[50vw] rounded-full bg-[#c8ff00]/5 blur-[120px] lg:hidden"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-[10%] bottom-[-10%] h-[40vw] w-[40vw] rounded-full bg-[#8781ff]/5 blur-[100px] lg:hidden"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 hidden h-52 bg-gradient-to-b from-eos-iris/10 via-eos-voltline/5 to-transparent lg:block"
-      />
-
+    <div className="eos-app-shell relative flex min-h-dvh w-full max-w-full overflow-x-clip bg-eos-floor text-eos-on-surface pb-[calc(6.75rem+env(safe-area-inset-bottom))] lg:bg-eos-floor lg:pb-0">
       <EliteSideRail items={items} roleHome={roleHome} />
 
       <div className="eos-app-shell__workspace relative flex min-w-0 flex-1 flex-col lg:min-h-dvh">
@@ -101,7 +88,12 @@ export function EliteAppShell({
           </ShellWorkspace>
         </ShellMain>
 
-        <EliteMobileDock items={items} active={pathname} />
+        <EliteMobileDock
+          items={items}
+          active={pathname}
+          trainHref={role === "athlete" ? "/sessions" : undefined}
+          trainLabel={mobileApp.nav.train}
+        />
       </div>
     </div>
   );

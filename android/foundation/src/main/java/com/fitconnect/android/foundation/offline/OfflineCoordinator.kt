@@ -56,11 +56,6 @@ class RegistryOfflineExecutor(
     }
 }
 
-/** Test / demo handler that applies local-only mutations already reflected in UI. */
-object AcknowledgingOfflineExecutor : OfflineWorkExecutor {
-    override suspend fun execute(work: SyncWork): AppResult<Unit> = AppResult.Ok(Unit)
-}
-
 class DefaultOfflineCoordinator(
     private val queue: SyncQueue,
     private val connectivity: ConnectivityMonitor,

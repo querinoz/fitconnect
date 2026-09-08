@@ -17,7 +17,8 @@ import com.google.common.util.concurrent.ListenableFuture
 
 /**
  * Elite Readiness tile. Timeline is chosen at request time: loading, empty,
- * error, default LOCAL_DEMO readiness, or session-active.
+ * error, readiness from [WearRuntime.resolveReadiness] (default Unavailable —
+ * never a silent LOCAL_DEMO 88), or session-active.
  */
 class WearTileService : TileService() {
     override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture<TileBuilders.Tile> {
@@ -40,7 +41,7 @@ class WearTileService : TileService() {
             phase == LiveActivityPhase.RUNNING || phase == LiveActivityPhase.PAUSED ->
                 sessionLayout(phase)
             WearRuntime.lastBlockCode != null -> errorLayout(WearRuntime.lastBlockCode ?: "ERROR")
-            else -> readinessLayout()
+            else -> readinessLayout(WearRuntime.resolveReadiness().toPresentation())
         }
         val freshness = if (phase == LiveActivityPhase.RUNNING) 15_000L else 3_600_000L
         return TileBuilders.Tile.Builder()
@@ -60,10 +61,10 @@ class WearTileService : TileService() {
             .build()
     }
 
-    private fun readinessLayout() = metricColumn(
+    private fun readinessLayout(presentation: ReadinessPresentation) = metricColumn(
         kicker = "READINESS",
-        value = "88",
-        footnote = "PRIMED · LOCAL_DEMO",
+        value = presentation.value,
+        footnote = presentation.footnote,
         kickerColor = EliteSurfaceColors.CONNECT,
         valueColor = EliteSurfaceColors.VOLTLINE,
     )

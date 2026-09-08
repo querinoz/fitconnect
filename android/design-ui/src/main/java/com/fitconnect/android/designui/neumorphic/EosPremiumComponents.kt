@@ -13,15 +13,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
 
 /**
  * Convex molded card — session, weather, coach channel.
+ * Default radius follows gym-layout media cards (EliteRadius.Media / XL).
  */
 @Composable
 fun EosPremiumCard(
     modifier: Modifier = Modifier,
-    cornerRadius: Dp = 16.dp,
+    cornerRadius: Dp = EliteRadius.Media,
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -47,7 +49,7 @@ fun EosPremiumCard(
 @Composable
 fun EosPremiumWell(
     modifier: Modifier = Modifier,
-    cornerRadius: Dp = 16.dp,
+    cornerRadius: Dp = EliteRadius.Media,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val shape = RoundedCornerShape(cornerRadius)

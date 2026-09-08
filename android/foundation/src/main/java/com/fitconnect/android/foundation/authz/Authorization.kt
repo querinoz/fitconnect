@@ -6,8 +6,8 @@ import com.fitconnect.android.foundation.session.SessionStore
  * Central authorization model. UI, routes, and API callers check [Authorizer]
  * — never hardcode role comparisons in screens.
  *
- * Local session role is a cache only. Production IdP must mint roles server-side;
- * client must never escalate to ADMIN.
+ * Local session role/activeMode is a cache only. Production IdP must mint
+ * capabilities server-side; client must never escalate to ADMIN.
  */
 enum class UserRole {
     GUEST,
@@ -38,11 +38,10 @@ object RolePermissionTable {
         AppPermission.VIEW_GUEST_SHELL,
         AppPermission.VIEW_AUTH,
     )
-    // Anonymous may explore guest surfaces only — never Athlete/Coach OS.
     private val anonymous = guest + setOf(
         AppPermission.MANAGE_SESSION,
     )
-    private val athlete = guest + setOf(
+    private val athleteShell = setOf(
         AppPermission.VIEW_LOGGED_SHELL,
         AppPermission.VIEW_ROLE_GATE,
         AppPermission.ACCESS_APP_SHELL,
@@ -53,7 +52,7 @@ object RolePermissionTable {
         AppPermission.MANAGE_SESSION,
         AppPermission.REQUEST_PUSH,
     )
-    private val coach = guest + setOf(
+    private val coachShell = setOf(
         AppPermission.VIEW_LOGGED_SHELL,
         AppPermission.VIEW_ROLE_GATE,
         AppPermission.ACCESS_APP_SHELL,
@@ -69,22 +68,42 @@ object RolePermissionTable {
     fun permissionsFor(role: UserRole): Set<AppPermission> = when (role) {
         UserRole.GUEST -> guest
         UserRole.ANONYMOUS -> anonymous
-        UserRole.ATHLETE -> athlete
-        UserRole.COACH -> coach
+        UserRole.ATHLETE -> guest + athleteShell
+        UserRole.COACH -> guest + coachShell
         UserRole.ADMIN -> admin
+    }
+
+    /** Dual-capability accounts may enter either OS; shell choice = activeMode. */
+    fun permissionsFor(capabilities: Set<UserRole>, activeMode: UserRole): Set<AppPermission> {
+        if (capabilities.contains(UserRole.ADMIN) || activeMode == UserRole.ADMIN) return admin
+        val base = guest.toMutableSet()
+        if (capabilities.contains(UserRole.ATHLETE)) base += athleteShell
+        if (capabilities.contains(UserRole.COACH)) base += coachShell
+        if (base.size == guest.size) {
+            return permissionsFor(activeMode)
+        }
+        return base
     }
 }
 
 interface Authorizer {
     suspend fun role(): UserRole
+    suspend fun activeMode(): UserRole
+    suspend fun capabilities(): Set<UserRole>
     suspend fun can(permission: AppPermission): Boolean
 }
 
 class SessionAuthorizer(
     private val sessionStore: SessionStore,
 ) : Authorizer {
-    override suspend fun role(): UserRole = sessionStore.role()
+    override suspend fun role(): UserRole = sessionStore.activeMode()
 
-    override suspend fun can(permission: AppPermission): Boolean =
-        RolePermissionTable.permissionsFor(role()).contains(permission)
+    override suspend fun activeMode(): UserRole = sessionStore.activeMode()
+
+    override suspend fun capabilities(): Set<UserRole> = sessionStore.capabilities()
+
+    override suspend fun can(permission: AppPermission): Boolean {
+        val snap = sessionStore.snapshot()
+        return RolePermissionTable.permissionsFor(snap.capabilities, snap.activeMode).contains(permission)
+    }
 }

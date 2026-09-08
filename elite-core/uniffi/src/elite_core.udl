@@ -1,0 +1,10 @@
+namespace elite_core {
+    string version();
+    HeartRateZone? heart_rate_zone_for_bpm(u16 bpm, u16 lthr_bpm);
+};
+
+dictionary HeartRateZone {
+    u8 index;
+    string label;
+    u16 lower_bpm;
+};

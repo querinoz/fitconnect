@@ -32,6 +32,8 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0"
+        // LocalDemo readiness is never silent-default; requires DEBUG + this flag.
+        buildConfigField("boolean", "ALLOW_LOCAL_DEMO_READINESS", "false")
     }
 
     signingConfigs {
@@ -47,9 +49,14 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Still false by default — flip explicitly for LOCAL_DEMO readiness fixtures.
+            buildConfigField("boolean", "ALLOW_LOCAL_DEMO_READINESS", "false")
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            buildConfigField("boolean", "ALLOW_LOCAL_DEMO_READINESS", "false")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             if (wearReleaseSigningReady) {
                 signingConfig = signingConfigs.getByName("release")
@@ -64,6 +71,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -96,6 +104,7 @@ dependencies {
     implementation(libs.androidx.wear.tiles.tooling.preview)
     implementation(libs.androidx.wear.tooling.preview)
     debugImplementation(libs.androidx.wear.tiles.tooling)
+    testImplementation(libs.junit)
 }
 
 val wearKeystoreReadyCaptured = wearReleaseSigningReady

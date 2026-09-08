@@ -21,7 +21,19 @@ object WearRuntime {
     @Volatile var sequence: Long = 0L
     @Volatile var lease: SessionLease? = null
     @Volatile var lastBlockCode: String? = null
+    /**
+     * Optional Health Services–derived readiness. Only set when a real computation
+     * produces a score — never a silent LOCAL_DEMO 88.
+     */
+    @Volatile var healthServicesReadiness: ReadinessSource.HealthServices? = null
+    var allowLocalDemoReadiness: Boolean = false
     val ascend: AscendEngine = AscendEngine(demoLabeledUsers = setOf(LocalDemoIdentity.ATHLETE_ID))
+
+    fun resolveReadiness(): ReadinessSource = WearReadinessSelector.select(
+        phoneSynced = WearReadinessInbox.lastSynced,
+        healthServices = healthServicesReadiness,
+        allowLocalDemo = allowLocalDemoReadiness,
+    )
 
     fun claimLocalStart(sportKey: String = WorkoutSport.RUN.wireKey): Boolean {
         val now = System.currentTimeMillis()

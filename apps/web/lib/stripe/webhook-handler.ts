@@ -1,6 +1,5 @@
 import type Stripe from "stripe";
 import { getPrisma } from "@/lib/db/client";
-import { isProductionSecurityMode } from "@/lib/security/runtime";
 import {
   claimStripeEventPg,
   isStripePgPersistenceAvailable,
@@ -19,13 +18,17 @@ export function isStripePersistenceAvailable(): boolean {
   return getPrisma() !== null;
 }
 
+/**
+ * Idempotency claim. Fail-closed without persistence — never return true when
+ * there is no store to record the event (silent replay would drop writes).
+ */
 export async function claimStripeEvent(event: Stripe.Event): Promise<boolean> {
   if (isStripePgPersistenceAvailable()) {
     return claimStripeEventPg(event.id, event.type);
   }
 
   const db = getPrisma();
-  if (!db) return true;
+  if (!db) return false;
 
   try {
     await db.processedStripeEvent.create({
@@ -241,7 +244,10 @@ export async function processStripeWebhookEvent(event: Stripe.Event) {
     return { received: true, processed: false, demo: false, eventType: event.type, eventId: event.id };
   }
 
-  if (isProductionSecurityMode() && !isStripePersistenceAvailable()) {
+  // Fail-closed whenever idempotency cannot be recorded — production or not.
+  // Previously only production gated this; claim-without-DB returned true and
+  // subscription writes were silently dropped while the route answered 200.
+  if (!isStripePersistenceAvailable()) {
     return {
       received: true,
       processed: false,

@@ -50,6 +50,7 @@ sealed class DeepLinkTarget {
     data object Home : DeepLinkTarget()
     data object Catalog : DeepLinkTarget()
     data class AthleteNested(val path: String) : DeepLinkTarget()
+    data class CoachNested(val path: String) : DeepLinkTarget()
     data object Unknown : DeepLinkTarget()
 }
 
@@ -62,9 +63,11 @@ fun classifyDeepLinkPath(path: String?): DeepLinkTarget {
     return when {
         path.isEmpty() || path == "guest" -> DeepLinkTarget.Guest
         path == "auth" -> DeepLinkTarget.Auth
-        path == "home" || path == "athlete/home" -> DeepLinkTarget.Home
+        path == "home" || path == "athlete/home" || path == "athlete/feed" ||
+            path == "coach/overview" || path == "coach/feed" || path == "coach/dashboard" -> DeepLinkTarget.Home
         path == "catalog" -> DeepLinkTarget.Catalog
         path.startsWith("athlete/") -> DeepLinkTarget.AthleteNested(path)
+        path.startsWith("coach/") -> DeepLinkTarget.CoachNested(path)
         else -> DeepLinkTarget.Unknown
     }
 }

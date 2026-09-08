@@ -6,6 +6,10 @@ import com.fitconnect.android.ai.adapters.DemoProgramAiAdapter
 import com.fitconnect.android.ai.adapters.DemoSessionAiAdapter
 import com.fitconnect.android.ai.adapters.DemoSportsAiAdapter
 import com.fitconnect.android.ai.adapters.TelemetryAiAdapter
+import com.fitconnect.android.ai.adapters.UnavailableCommunityAiAdapter
+import com.fitconnect.android.ai.adapters.UnavailableProgramAiAdapter
+import com.fitconnect.android.ai.adapters.UnavailableSessionAiAdapter
+import com.fitconnect.android.ai.adapters.UnavailableSportsAiAdapter
 import com.fitconnect.android.ai.di.AiContainer
 import com.fitconnect.android.ai.di.DefaultAiContainer
 import com.fitconnect.android.athlete.di.AthleteContainer
@@ -24,6 +28,10 @@ import com.fitconnect.android.foundation.di.DefaultAppContainer
 import com.fitconnect.android.foundation.offline.AthleteOfflineHandlers
 import com.fitconnect.android.foundation.offline.CoachOfflineHandlers
 import com.fitconnect.android.foundation.perf.StartupTracer
+import com.fitconnect.android.geo.booking.BookingStoreSyncHooks
+import com.fitconnect.android.geo.booking.DurableBookingStore
+import com.fitconnect.android.geo.booking.HttpBookingRemote
+import com.fitconnect.android.geo.booking.PrefsBookingBlobBackend
 import com.fitconnect.android.geo.di.DefaultGeoContainer
 import com.fitconnect.android.geo.di.GeoContainer
 import com.fitconnect.android.sports.guided.notifications.GatewayWorkoutNotificationPort
@@ -107,7 +115,15 @@ class FitConnectApplication : Application() {
 
     val geoContainer: GeoContainer
         get() = geoContainerRef ?: synchronized(geoLock) {
-            geoContainerRef ?: DefaultGeoContainer(allowMockLocation = BuildConfig.DEBUG).also {
+            geoContainerRef ?: DefaultGeoContainer(
+                allowMockLocation = BuildConfig.DEBUG,
+                bookingStore = DurableBookingStore(PrefsBookingBlobBackend(this@FitConnectApplication)),
+                bookingRemote = HttpBookingRemote({ container.apiClient }),
+                syncQueue = container.syncQueue,
+                connectivity = container.connectivity,
+                // Demo seeds only for local-auth debug builds; never invent remote bookings.
+                seedDemoBookings = BuildConfig.DEBUG && BuildConfig.ALLOW_LOCAL_AUTH,
+            ).also {
                 geoContainerRef = it
                 startupTracer.mark("geo_ready")
             }
@@ -126,13 +142,15 @@ class FitConnectApplication : Application() {
 
     val aiContainer: AiContainer
         get() = aiContainerRef ?: synchronized(aiLock) {
+            val demoAi = BuildConfig.DEBUG && BuildConfig.ALLOW_LOCAL_AUTH
+            // EXTERNAL: no /api/v1/ai/insights HTTP API — keep Unavailable* (never invent model responses).
             aiContainerRef ?: DefaultAiContainer(
                 connectivity = container.connectivity,
                 telemetryPort = TelemetryAiAdapter(telemetryContainer.athleteFacade),
-                programPort = DemoProgramAiAdapter(),
-                sportsPort = DemoSportsAiAdapter(),
-                sessionPort = DemoSessionAiAdapter(),
-                communityPort = DemoCommunityAiAdapter(),
+                programPort = if (demoAi) DemoProgramAiAdapter() else UnavailableProgramAiAdapter(),
+                sportsPort = if (demoAi) DemoSportsAiAdapter() else UnavailableSportsAiAdapter(),
+                sessionPort = if (demoAi) DemoSessionAiAdapter() else UnavailableSessionAiAdapter(),
+                communityPort = if (demoAi) DemoCommunityAiAdapter() else UnavailableCommunityAiAdapter(),
             ).also {
                 aiContainerRef = it
                 startupTracer.mark("ai_ready")
@@ -203,6 +221,7 @@ class FitConnectApplication : Application() {
             supabaseUrl = BuildConfig.SUPABASE_URL.takeIf { it.isNotBlank() },
             supabaseAnonKey = BuildConfig.SUPABASE_ANON_KEY.takeIf { it.isNotBlank() },
             isDebuggable = BuildConfig.DEBUG,
+            visualQaChromeDiet = true,
             allowLocalAuth = BuildConfig.ALLOW_LOCAL_AUTH,
             firebaseAuthConfigured = BuildConfig.FIREBASE_CONFIGURED,
             googleWebClientId = BuildConfig.GOOGLE_WEB_CLIENT_ID.takeIf { it.isNotBlank() },
@@ -286,15 +305,33 @@ class FitConnectApplication : Application() {
 
     private fun registerOfflineHandlers() {
         // WAVE 3: HTTP flush on reconnect — never local-ack as if the server saw the mutation.
+        // Touch geo early so durable booking store exists for sync ack hooks.
+        val geo = geoContainer
         AthleteOfflineHandlers.register(
             registry = container.offlineExecutor,
             api = container.apiClient,
             logger = container.logger,
+            onBookingCreateSynced = { work, responseJson ->
+                BookingStoreSyncHooks.onAthleteCreateSynced(
+                    store = geo.bookingStore,
+                    offline = geo.offline,
+                    work = work,
+                    responseJson = responseJson,
+                )
+            },
         )
         CoachOfflineHandlers.register(
             registry = container.offlineExecutor,
             api = container.apiClient,
             logger = container.logger,
+            onBookingActionSynced = { work, action ->
+                BookingStoreSyncHooks.onCoachActionSynced(
+                    store = geo.bookingStore,
+                    offline = geo.offline,
+                    work = work,
+                    action = action,
+                )
+            },
         )
         WorkoutSyncHandlers.register(
             registry = container.offlineExecutor,

@@ -162,6 +162,10 @@ class DefaultAppContainer(
             syncQueue = syncQueue,
             keyValueStore = keyValueStore,
             logger = logger,
+            // Best-effort FCM/dev token delete on logout — never claims delivery state.
+            extraWipers = listOf {
+                notifications.unregisterPush()
+            },
         )
     }
 

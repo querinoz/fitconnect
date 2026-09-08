@@ -1,0 +1,52 @@
+appId: com.fitconnect.android
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Continue"
+    timeout: 20000
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "demo_persona_tomas"
+    timeout: 20000
+- tapOn: "demo_persona_tomas"
+- repeat:
+    times: 16
+    commands:
+      - runFlow:
+          when:
+            visible: "Enter Coach OS"
+          commands:
+            - tapOn: "Enter Coach OS"
+      - runFlow:
+          when:
+            visible:
+              id: "coach_onboarding_finish"
+          commands:
+            - tapOn:
+                id: "coach_onboarding_finish"
+      - runFlow:
+          when:
+            visible: "Skip for now"
+          commands:
+            - tapOn: "Skip for now"
+      - runFlow:
+          when:
+            visible: "Continue"
+          commands:
+            - tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Feed"
+    timeout: 45000
+- assertVisible: "Feed"
+- assertVisible: "Ascend"
+- assertVisible: "Dashboard"
+- assertVisible: "Profile"
+- takeScreenshot: coach_feed
+- tapOn: "Dashboard"
+- takeScreenshot: coach_dashboard
+- tapOn: "Ascend"
+- takeScreenshot: coach_ascend
+- tapOn: "Profile"
+- takeScreenshot: coach_profile
+- tapOn: "Feed"
+- takeScreenshot: coach_feed_return

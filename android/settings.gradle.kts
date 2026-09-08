@@ -11,6 +11,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // LiveKit Android SDK transitive deps (webrtc / tooling).
+        maven(url = "https://jitpack.io")
     }
 }
 

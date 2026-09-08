@@ -112,7 +112,15 @@ class FeedEngine(
             }
             FeedKind.FOLLOWING -> {
                 val following = graph.following(request.viewerId)
-                all.filter { it.authorId in following }
+                if (following.isEmpty()) {
+                    // Cold-start / remote: public timeline until the social graph is populated.
+                    all.filter {
+                        it.authorId == request.viewerId ||
+                            it.visibility == com.fitconnect.android.community.domain.Visibility.PUBLIC
+                    }
+                } else {
+                    all.filter { it.authorId in following }
+                }
             }
             FeedKind.COACH -> {
                 val coaches = graph.coachOf(request.viewerId)

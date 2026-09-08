@@ -11,11 +11,49 @@ import org.json.JSONObject
  * Handlers are idempotent via SyncWork.idempotencyKey + server natural keys.
  */
 object AthleteOfflineHandlers {
-    fun register(registry: RegistryOfflineExecutor, api: ApiClient, logger: Logger) {
+    /** Canonical mutation types — keep OfflineKillMatrixTest in sync. */
+    val MUTATION_TYPES: List<String> = listOf(
+        "athlete.task.toggle",
+        "athlete.program.enroll",
+        "athlete.message.send",
+        "athlete.booking.create",
+    )
+
+    fun register(
+        registry: RegistryOfflineExecutor,
+        api: ApiClient,
+        logger: Logger,
+        onBookingCreateSynced: ((work: SyncWork, responseJson: String) -> Unit)? = null,
+    ) {
         registry.register("athlete.task.toggle", taskToggle(api, logger))
         registry.register("athlete.program.enroll", programEnroll(api, logger))
         registry.register("athlete.message.send", messageSend(api, logger))
+        registry.register("athlete.booking.create", bookingCreate(api, logger, onBookingCreateSynced))
     }
+
+    private fun bookingCreate(
+        api: ApiClient,
+        logger: Logger,
+        onSynced: ((work: SyncWork, responseJson: String) -> Unit)?,
+    ): OfflineWorkExecutor =
+        OfflineWorkExecutor { work ->
+            when (val result = api.post("/api/v1/bookings", work.payloadJson)) {
+                is AppResult.Ok -> {
+                    logger.i("AthleteOffline", "booking.create synced ${work.idempotencyKey}")
+                    onSynced?.invoke(work, result.value)
+                    AppResult.Ok(Unit)
+                }
+                is AppResult.Err -> {
+                    val apiErr = result.error as? AppError.Api
+                    if (apiErr?.statusCode == 409) {
+                        onSynced?.invoke(work, """{"idempotent":true}""")
+                        AppResult.Ok(Unit)
+                    } else {
+                        result
+                    }
+                }
+            }
+        }
 
     private fun taskToggle(api: ApiClient, logger: Logger): OfflineWorkExecutor =
         OfflineWorkExecutor { work ->

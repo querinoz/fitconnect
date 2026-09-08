@@ -22,5 +22,6 @@ class FailClosedNotificationGateway(
 
     override suspend fun cancel(id: Int) = Unit
 
-    override fun routeDeepLink(deepLink: String?): String? = deepLink
+    override fun routeDeepLink(deepLink: String?): String? =
+        NotificationDeepLinkRouter.routeDeepLink(deepLink)
 }

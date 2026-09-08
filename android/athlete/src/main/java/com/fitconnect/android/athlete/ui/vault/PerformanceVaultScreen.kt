@@ -2,8 +2,9 @@ package com.fitconnect.android.athlete.ui.vault
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,17 +22,18 @@ import com.fitconnect.android.athlete.demo.AthleteContentResolver
 import com.fitconnect.android.athlete.demo.AthleteDemoBanner
 import com.fitconnect.android.athlete.demo.AthleteDemoCatalog
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
+import com.fitconnect.android.athlete.ui.LocalAthleteHeaderController
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.designui.charts.EliteStreakTrendChart
 import com.fitconnect.android.designui.charts.EliteXpProgressChart
+import com.fitconnect.android.designui.components.AscendCinematicHeader
 import com.fitconnect.android.designui.components.AscendDnaCard
-import com.fitconnect.android.designui.components.EliteCard
+import com.fitconnect.android.designui.components.AscendXPBar
 import com.fitconnect.android.designui.components.EliteSegmentedControl
 import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.neumorphic.EosPremiumCard
 import com.fitconnect.android.designui.neumorphic.EosPremiumWell
-import com.fitconnect.android.designui.theme.EliteMetricTextStyle
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.i18n.AppLocale
 import com.fitconnect.ascend.copy.AscendCopy
@@ -52,26 +54,76 @@ fun PerformanceVaultScreen() {
     val vaultProgress = remember { AthleteContentResolver.vaultProgress() }
     var tab by remember { mutableIntStateOf(0) }
     val t = { key: String -> AscendCopy.t(lang, key) }
+    val chromeDiet = container.platform.config.visualQaChromeDiet
+    val header = LocalAthleteHeaderController.current
+    var displayName by remember { mutableStateOf("Athlete") }
+    var hexScore by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(athleteId) {
+        displayName = (container.athleteRepository.profile() as? com.fitconnect.android.foundation.common.AppResult.Ok)
+            ?.value?.displayName ?: "Athlete"
+        hexScore = (container.athleteRepository.home() as? com.fitconnect.android.foundation.common.AppResult.Ok)
+            ?.value?.readiness?.recoveryScore
+    }
+    val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+    val greetPart = when {
+        hour < 12 -> "Good morning"
+        hour < 18 -> "Good afternoon"
+        else -> "Good evening"
+    }
+    val firstName = displayName.substringBefore(' ')
+    val streakDays = snap.streaks.firstOrNull()?.days ?: vaultProgress.heroStreakDays.value
+    val telemetryLevel = (snap.level.level / 4).coerceAtLeast(1)
+    val xpLabel = "${container.platform.localeManager.formatNumber(snap.totalXp, locale)} XP"
+    val remainingLabel =
+        "${container.platform.localeManager.formatNumber(snap.level.xpToNext, locale)} XP TO LEVEL ${snap.level.level + 1}"
 
     AthleteScreenScaffold(
         title = t("ui.vault"),
-        subtitle = "Badges · records · milestones · identity",
-        overline = "ATHLETE OS · ACHIEVEMENTS",
+        subtitle = null,
+        overline = null,
         testTag = "ascend_vault",
+        showTitle = false,
     ) {
+        if (!chromeDiet) {
+            item {
+                AthleteDemoBanner(
+                    visible = vaultBadges.isDemo || vaultProgress.isAnyDemo,
+                    modifier = Modifier.testTag("vault_demo_banner"),
+                )
+            }
+        }
+        if (!chromeDiet) {
+            item {
+                AscendCinematicHeader(
+                    hexScore = hexScore,
+                    onMarkClick = { header.onGoHome() },
+                )
+            }
+        }
         item {
-            AthleteDemoBanner(
-                visible = vaultBadges.isDemo || vaultProgress.isAnyDemo,
-                modifier = Modifier.testTag("vault_demo_banner"),
+            AscendXPBar(
+                rankLabel = "",
+                level = snap.level.level,
+                xpLabel = xpLabel,
+                remainingLabel = remainingLabel,
+                progress = snap.level.progressPercent / 100f,
+                nextUnlock = null,
+                greetingPrefix = greetPart,
+                athleteName = firstName,
+                modifier = Modifier.fillMaxWidth().testTag("vault_xp_summary"),
             )
         }
         item {
-            EosPremiumCard(modifier = Modifier.fillMaxWidth()) {
-                EliteStack {
-                    EliteSysLabel("SHAREABLE BADGES · ${AthleteDemoCatalog.MODE_LABEL}")
-                    Text(vaultBadges.summary, style = MaterialTheme.typography.bodyMedium)
-                }
-            }
+            AscendProgressionRows(
+                streakDays = streakDays,
+                telemetryLevel = telemetryLevel,
+            )
+        }
+        item {
+            Spacer(modifier = Modifier.height(EliteSpace.Huge))
+        }
+        item {
+            EliteSysLabel("PERFORMANCE VAULT")
         }
         item {
             EosPremiumWell(
@@ -106,30 +158,6 @@ fun PerformanceVaultScreen() {
             }
         }
         item {
-            EosPremiumCard(modifier = Modifier.fillMaxWidth().testTag("vault_xp_summary")) {
-                EliteStack(spacing = EliteSpace.Sm) {
-                    EliteSysLabel("SYS / ASCEND · PERFORMANCE STATUS")
-                    Text(
-                        "${t(snap.level.rank.nameKey)}  ${snap.level.level.toString().padStart(2, '0')}",
-                        style = MaterialTheme.typography.headlineSmall,
-                    )
-                    LinearProgressIndicator(
-                        progress = { snap.level.progressPercent / 100f },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    Text("${snap.totalXp} XP", style = EliteMetricTextStyle)
-                    Text(
-                        "+${snap.level.xpToNext} XP TO NEXT LEVEL",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    snap.level.nextUnlock?.let {
-                        EliteSysLabel("NEXT UNLOCK")
-                        Text(t(it.nameKey), style = MaterialTheme.typography.bodyLarge)
-                    }
-                }
-            }
-        }
-        item {
             EliteSegmentedControl(
                 options = listOf("BADGES", "RECORDS", "MILESTONES", "LEGACY"),
                 selectedIndex = tab,
@@ -145,7 +173,9 @@ fun PerformanceVaultScreen() {
                             .testTag("vault_badge_list"),
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
-                            EliteSysLabel("BADGE VAULT · ${AthleteDemoCatalog.MODE_LABEL}")
+                            EliteSysLabel(
+                                if (chromeDiet) "BADGE VAULT" else "BADGE VAULT · ${AthleteDemoCatalog.MODE_LABEL}",
+                            )
                             snap.achievements.forEach { item ->
                                 VaultAchievementBadge(
                                     name = t(item.definition.nameKey),

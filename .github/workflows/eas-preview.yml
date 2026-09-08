@@ -1,41 +1,17 @@
-name: EAS Preview (manual)
+# DISABLED — Expo `apps/mobile` removed from the tree (ADR-005, 2026-09-08).
+# Production mobile is native Android Compose (`android/`). iOS is `iosApp/` (SwiftUI).
+name: EAS Preview (disabled)
 
 on:
   workflow_dispatch:
-    inputs:
-      profile:
-        description: EAS build profile
-        required: true
-        default: preview
-        type: choice
-        options:
-          - preview
-          - development
 
 jobs:
-  build:
-    name: Expo EAS build
+  notice:
+    name: Expo removed — use android/
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.15.9
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-
-      - name: EAS build
-        run: eas build --platform all --profile ${{ inputs.profile }} --non-interactive
-        working-directory: apps/mobile
+      - name: Fail with archive notice
+        run: |
+          echo "Expo apps/mobile was removed (ADR-005). Recover from git history if needed."
+          echo "Build native APK: cd android && ./gradlew :app:assembleDebug"
+          exit 1

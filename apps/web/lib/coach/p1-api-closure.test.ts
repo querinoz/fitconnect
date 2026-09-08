@@ -2,7 +2,7 @@
  * P1 API closure contracts — BOOK / SOCIAL / COACH-CALENDAR.
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { POST as createBooking } from "@/app/api/v1/bookings/route";
+import { GET as listBookings, POST as createBooking } from "@/app/api/v1/bookings/route";
 import { GET as listComments, POST as createComment } from "@/app/api/v1/community/posts/[id]/comments/route";
 import {
   DELETE as deleteReaction,
@@ -19,38 +19,20 @@ import { resetPostCommentsForTests } from "@/lib/community/post-comments";
 import { resetPostReactionsForTests } from "@/lib/community/post-reactions";
 import { createCommunityPost, resetCommunityPostsForTests } from "@/lib/community/server-posts";
 
+const requireAuthMock = vi.fn();
+
 vi.mock("@/lib/api/require-auth", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/api/require-auth")>();
   return {
     ...actual,
-    requireAuth: vi.fn(async (req?: Request) => {
-      const roleHeader = req?.headers.get("x-test-role") ?? "athlete";
-      const userId = req?.headers.get("x-test-user") ?? "athlete-a";
-      return {
-        ok: true as const,
-        user: {
-          id: userId,
-          role: roleHeader as "athlete" | "coach" | "admin",
-          email: `${userId}@fitconnect.app`
-        },
-        supabaseUserId: userId,
-        accessToken: "test-token",
-        demo: false
-      };
-    }),
+    requireAuth: (...args: unknown[]) => requireAuthMock(...args),
     requireAthleteId: vi.fn(async (req: Request) => {
-      const auth = await (
-        await import("@/lib/api/require-auth")
-      ).requireAuth(req);
+      const auth = await requireAuthMock(req);
       if (!auth.ok) return auth;
-      const bodyAthlete = undefined;
-      void bodyAthlete;
       return { athleteId: auth.user.id, accessToken: auth.accessToken };
     }),
     requireCoachId: vi.fn(async (req: Request) => {
-      const auth = await (
-        await import("@/lib/api/require-auth")
-      ).requireAuth(req);
+      const auth = await requireAuthMock(req);
       if (!auth.ok) return auth;
       if (auth.user.role !== "coach" && auth.user.role !== "admin") {
         const { NextResponse } = await import("next/server");
@@ -64,6 +46,28 @@ vi.mock("@/lib/api/require-auth", async (importOriginal) => {
   };
 });
 
+function mockAuth(
+  user = "athlete-a",
+  role: "athlete" | "coach" | "admin" = "athlete",
+  demo = false
+) {
+  requireAuthMock.mockImplementation(async (req?: Request) => {
+    const roleHeader = (req?.headers.get("x-test-role") as typeof role | null) ?? role;
+    const userId = req?.headers.get("x-test-user") ?? user;
+    return {
+      ok: true as const,
+      user: {
+        id: userId,
+        role: roleHeader,
+        email: `${userId}@fitconnect.app`
+      },
+      supabaseUserId: userId,
+      accessToken: "test-token",
+      demo
+    };
+  });
+}
+
 function athleteReq(body: unknown, user = "athlete-a") {
   return new Request("http://localhost/api/v1/bookings", {
     method: "POST",
@@ -76,6 +80,16 @@ function athleteReq(body: unknown, user = "athlete-a") {
   });
 }
 
+function athleteListReq(user = "athlete-a") {
+  return new Request("http://localhost/api/v1/bookings", {
+    method: "GET",
+    headers: {
+      "x-test-user": user,
+      "x-test-role": "athlete"
+    }
+  });
+}
+
 describe("P1 API closure", () => {
   beforeEach(() => {
     resetBookingsForTests();
@@ -83,6 +97,7 @@ describe("P1 API closure", () => {
     resetPostCommentsForTests();
     resetPostReactionsForTests();
     resetCommunityPostsForTests();
+    mockAuth();
   });
 
   it("BOOK-001 athlete creates booking", async () => {
@@ -135,6 +150,38 @@ describe("P1 API closure", () => {
       })
     );
     expect(res.status).toBe(422);
+  });
+
+  it("BOOK-005 athlete lists own bookings", async () => {
+    const when = new Date(Date.now() + 86_400_000).toISOString();
+    await createBooking(
+      athleteReq({ coachId: "coach-1", scheduledAt: when, durationMin: 45 })
+    );
+    await createBooking(
+      athleteReq(
+        {
+          coachId: "coach-2",
+          scheduledAt: new Date(Date.now() + 172_800_000).toISOString()
+        },
+        "athlete-b"
+      )
+    );
+
+    const res = await listBookings(athleteListReq("athlete-a"));
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.bookings).toHaveLength(1);
+    expect(body.bookings[0].athleteId).toBe("athlete-a");
+    expect(body.bookings[0].coachId).toBe("coach-1");
+    expect(body.source).toBe("memory");
+  });
+
+  it("BOOK-006 athlete list rejects demo mode", async () => {
+    mockAuth("athlete-a", "athlete", true);
+    const res = await listBookings(athleteListReq());
+    const body = await res.json();
+    expect(res.status).toBe(403);
+    expect(body.error).toBe("demo_forbidden");
   });
 
   it("SOCIAL-COMMENT-001 create + list comment", async () => {

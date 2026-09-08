@@ -2,6 +2,9 @@ package com.fitconnect.android.athlete.ui.telemetry
 
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -13,11 +16,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.fitconnect.android.athlete.data.canonicalAthleteId
 import com.fitconnect.android.athlete.di.AthleteContainer
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
+import com.fitconnect.android.designui.components.HoneycombDivider
 import com.fitconnect.android.designui.charts.EliteChart
 import com.fitconnect.android.designui.charts.EliteChartKind
 import com.fitconnect.android.designui.charts.EliteChartModel
@@ -27,10 +32,19 @@ import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteMetricCard
+import com.fitconnect.android.designui.components.HexBadge
+import com.fitconnect.android.designui.components.HexMetric
+import com.fitconnect.android.designui.components.HexProgress
+import com.fitconnect.android.designui.components.HexStatus
+import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.auth.DemoPersona
+import com.fitconnect.android.sports.zones.EliteCoreBridge
+import com.fitconnect.android.sports.zones.HeartRateZones
 import com.fitconnect.android.telemetry.aggregate.AggregateSeries
 import com.fitconnect.android.telemetry.devices.DeviceEntry
 import com.fitconnect.android.telemetry.domain.MetricType
+import com.fitconnect.android.telemetry.domain.TelemetryUiLabel
+import com.fitconnect.android.telemetry.domain.TelemetryUiProvenance
 import com.fitconnect.android.telemetry.healthconnect.HealthConnectAvailability
 import com.fitconnect.android.telemetry.integration.TelemetryOverview
 import com.fitconnect.android.telemetry.provider.ProviderConnectionState
@@ -50,10 +64,14 @@ fun TelemetryScreen() {
     var overview by remember { mutableStateOf<TelemetryOverview?>(null) }
     var hrvTrend by remember { mutableStateOf<AggregateSeries?>(null) }
     var sleepTrend by remember { mutableStateOf<AggregateSeries?>(null) }
+    var isLocalDemo by remember { mutableStateOf(false) }
+    var isOffline by remember { mutableStateOf(false) }
 
     suspend fun reload() {
         val uid = container.platform.sessionStore.canonicalAthleteId()
         athleteId = uid
+        isLocalDemo = container.platform.sessionStore.snapshot().isLocalDemo
+        isOffline = !container.platform.connectivity.online.value
         devices = container.telemetry.deviceCenter.devices(uid)
         overview = container.telemetry.athleteFacade.overview(uid)
         hrvTrend = container.telemetry.athleteFacade.trend(uid, MetricType.HRV, days = 14)
@@ -65,24 +83,29 @@ fun TelemetryScreen() {
         reload()
     }
 
-    val freshness = when {
-        overview == null || (overview?.sampleCount ?: 0) == 0 -> "NO DATA"
-        devices.any { it.state == ProviderConnectionState.CONNECTED } -> "LIVE"
-        else -> "STALE"
-    }
+    val freshness = resolveTelemetryScreenLabel(
+        isLocalDemo = isLocalDemo,
+        isOffline = isOffline,
+        overview = overview,
+        devices = devices,
+    )
 
     AthleteScreenScaffold(
-        title = "Device Center",
-        subtitle = "Watch · Health Connect · providers · ${DemoPersona.MODE_LABEL}",
+        title = "Telemetry Command",
+        subtitle = "HR · HRV · zones · devices · ${if (isLocalDemo) TelemetryUiLabel.TEST.name else DemoPersona.MODE_LABEL}",
         testTag = "athlete_telemetry",
     ) {
         item {
-            EliteBadge(text = freshness)
+            Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                HexBadge(text = freshness.name)
+                HexStatus(text = "STREAM · ${freshness.name}")
+            }
+            HoneycombDivider()
         }
-        if (freshness == "NO DATA") {
+        if (freshness == TelemetryUiLabel.UNAVAILABLE || freshness == TelemetryUiLabel.OFFLINE) {
             item {
                 EliteCard {
-                    Text("NO DATA", style = MaterialTheme.typography.titleMedium)
+                    Text(freshness.name, style = MaterialTheme.typography.titleMedium)
                     Text(
                         "Connect a device or sync LOCAL_DEMO fixtures to populate vitals.",
                         style = MaterialTheme.typography.bodyMedium,
@@ -91,6 +114,36 @@ fun TelemetryScreen() {
             }
         }
         overview?.let { o ->
+            item {
+                Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+                    HexMetric(value = "${o.sampleCount}", label = "Samples")
+                    o.latestHrv?.let { HexMetric(value = "${it.value.toInt()}", label = "HRV") }
+                    o.latestHeartRate?.let { HexMetric(value = "${it.value.toInt()}", label = "HR") }
+                    HexProgress(
+                        progress = (o.coveredMetrics.size * 12).coerceIn(0, 100),
+                        label = "COV",
+                    )
+                }
+            }
+            item {
+                val hr = o.latestHeartRate?.value
+                val lthr = HeartRateZones.DEFAULT_LTHR_BPM
+                val zone = hr?.let { EliteCoreBridge.heartRateZone(it, lthr) } ?: 0
+                EliteCard {
+                    Text(
+                        "LTHR zones · elite-core (${EliteCoreBridge.backend})",
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                    Text(
+                        if (zone > 0 && hr != null) {
+                            "HR ${hr.toInt()} bpm → Zone $zone / 5 · LTHR ${lthr.toInt()}"
+                        } else {
+                            "No HR sample for zone probe · engine wired via UniFFI-compatible bridge"
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
             item {
                 EliteMetricCard(label = "Samples", value = "${o.sampleCount}")
                 EliteMetricCard(label = "Coverage", value = "${o.coveredMetrics.size} metrics")
@@ -248,4 +301,28 @@ private fun WatchLinkCard(container: AthleteContainer) {
             EliteBadge(text = "XIAOMI BLOCKED")
         }
     }
+}
+
+internal fun resolveTelemetryScreenLabel(
+    isLocalDemo: Boolean,
+    isOffline: Boolean,
+    overview: TelemetryOverview?,
+    devices: List<DeviceEntry>,
+    nowMs: Long = System.currentTimeMillis(),
+): TelemetryUiLabel {
+    val sampleCount = overview?.sampleCount ?: 0
+    val latestAt = listOfNotNull(
+        overview?.latestHeartRate?.at?.epochMs,
+        overview?.latestHrv?.at?.epochMs,
+        overview?.latestSteps?.at?.epochMs,
+    ).maxOrNull()
+    val age = latestAt?.let { nowMs - it }
+    return TelemetryUiProvenance.resolve(
+        isLocalDemo = isLocalDemo,
+        isOffline = isOffline,
+        hasSamples = sampleCount > 0,
+        liveStreamConnected = devices.any { it.state == ProviderConnectionState.CONNECTED },
+        sampleAgeMs = age,
+        isDerived = false,
+    )
 }

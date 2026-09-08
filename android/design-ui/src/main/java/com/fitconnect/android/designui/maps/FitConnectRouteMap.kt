@@ -34,6 +34,7 @@ fun FitConnectRouteMap(
     mode: EliteMapMode,
     modifier: Modifier = Modifier,
     phase: EliteMapPhase = if (points.size >= 2) EliteMapPhase.Success else EliteMapPhase.Empty,
+    failureKind: EliteMapFailureKind = EliteMapFailureKind.None,
     completed: Boolean = false,
     followEnabled: Boolean = true,
     qualityLabel: String = "GPS",
@@ -123,6 +124,7 @@ fun FitConnectRouteMap(
                     points = vertices,
                     mode = mode,
                     phase = phase,
+                    failureKind = failureKind,
                     onRetry = onRetry,
                     contentDescription = a11y,
                     modifier = Modifier.testTag(

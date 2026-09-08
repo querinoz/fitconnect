@@ -11,6 +11,7 @@ import com.fitconnect.android.athlete.domain.TrainSurfaceUi
 import com.fitconnect.android.athlete.domain.VaultBadgeUi
 import com.fitconnect.android.athlete.domain.VaultProgressUi
 import com.fitconnect.android.designui.charts.EliteChartPoint
+import com.fitconnect.android.sports.zones.EliteCoreBridge
 import com.fitconnect.android.sports.zones.HeartRateZones
 import com.fitconnect.android.telemetry.domain.MetricType
 import com.fitconnect.android.telemetry.integration.AthleteTelemetryFacade
@@ -197,12 +198,12 @@ object AthleteContentResolver {
             Provenanced(it.avg.toFloat(), measured, TELEMETRY_SOURCE)
         }
         val delta = hrvTrend.trendDelta()?.toFloat() ?: 0f
-        // LTHR 5-zone ladder (elite-core HEART_RATE_ZONES) — never HR density proxy.
+        // LTHR 5-zone ladder via EliteCoreBridge (UniFFI/JNI-compatible elite-core) — never HR density proxy.
         val zones = (zoneMinutesRaw ?: listOf(0, 0, 0, 0, 0)).map { minutes ->
             Provenanced(
                 minutes,
                 if (hasZones) calculated else AthleteDataProvenance.INSUFFICIENT_DATA,
-                "HR zones · LTHR",
+                "HR zones · LTHR · ${EliteCoreBridge.backend}",
             )
         }
         return AnalysisSurfaceUi(

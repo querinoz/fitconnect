@@ -33,11 +33,18 @@ enum class Visibility { PUBLIC, FOLLOWERS, CONNECTIONS, GROUP, COACH_ONLY, PRIVA
 enum class PostKind {
     TEXT,
     WORKOUT,
+    /** Alias semantic for TRAINING posts in social UX copy. */
+    TRAINING,
     ACHIEVEMENT,
     PROGRESS,
     PHOTO,
     VIDEO,
     ROUTE,
+    LOCATION,
+    SPOT,
+    MUSIC,
+    PERFORMANCE,
+    MIXED,
     PROGRAM_UPDATE,
     CHALLENGE_UPDATE,
     COACH_EDUCATION,
@@ -45,6 +52,56 @@ enum class PostKind {
 }
 
 enum class MediaKind { IMAGE, VIDEO }
+
+/** Spotify / music metadata only — never copy or sync protected audio. */
+data class MusicMetadata(
+    val trackId: String,
+    val trackName: String,
+    val artist: String,
+    val album: String? = null,
+    val spotifyUrl: String,
+    val capturedAtEpochMs: Long,
+)
+
+/**
+ * Explicit per-field share consent. Defaults deny sensitive fields.
+ * Never infer consent — UI must present these before publish.
+ */
+data class ShareConsent(
+    val shareTraining: Boolean = true,
+    val shareSport: Boolean = true,
+    val shareExactLocation: Boolean = false,
+    val shareApproximateLocation: Boolean = false,
+    val shareMusic: Boolean = false,
+    val shareHrv: Boolean = false,
+    val shareAchievement: Boolean = true,
+    val shareRoute: Boolean = false,
+    val shareTelemetryFacts: Boolean = false,
+)
+
+enum class LocationPrivacy {
+    EXACT,
+    APPROXIMATE,
+    BLURRED_RADIUS,
+    CITY_ONLY,
+    PRIVATE,
+}
+
+data class LocationSnapshot(
+    val privacy: LocationPrivacy,
+    val label: String?,
+    val lat: Double? = null,
+    val lng: Double? = null,
+    val city: String? = null,
+    val blurRadiusMeters: Double? = null,
+)
+
+data class SpotRef(
+    val spotId: String,
+    val name: String,
+    val sportKey: String?,
+    val visibilityHint: String? = null,
+)
 
 /** Metadata only — binary media lives behind the media pipeline, never inline. */
 data class MediaAttachment(
@@ -86,6 +143,10 @@ data class CommunityPost(
     val programId: String? = null,
     val challengeId: String? = null,
     val eventId: String? = null,
+    val spot: SpotRef? = null,
+    val location: LocationSnapshot? = null,
+    val music: MusicMetadata? = null,
+    val consent: ShareConsent = ShareConsent(),
     val visibility: Visibility = Visibility.PUBLIC,
     val shareTelemetryFacts: Boolean = false,
     val edited: Boolean = false,

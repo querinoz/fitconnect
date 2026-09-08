@@ -1,0 +1,8 @@
+# Offline kill matrix — Maestro shell probe.
+# Persistence / flush / duplicate prevention: OfflineKillMatrixTest (Gradle unit).
+# Full airplane-mode kill/reopen on device remains PARTIAL without network toggle automation.
+appId: com.fitconnect.android
+---
+- launchApp
+- assertVisible: ".*"
+- takeScreenshot: offline_matrix_shell

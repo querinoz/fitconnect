@@ -1,5 +1,7 @@
 package com.fitconnect.android.coach.ui.settings
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,6 +14,12 @@ import com.fitconnect.android.coach.ui.components.CoachScreenScaffold
 import com.fitconnect.android.designui.components.EliteAppearancePicker
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteLanguagePicker
+import com.fitconnect.android.designui.components.EliteZenithHeader
+import com.fitconnect.android.designui.components.HexBadge
+import com.fitconnect.android.designui.components.HexBadgeTone
+import com.fitconnect.android.designui.components.HexStatus
+import com.fitconnect.android.designui.neumorphic.EosPremiumCard
+import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.i18n.AppLocale
 import com.fitconnect.android.foundation.i18n.LocaleApplier
 import com.fitconnect.android.foundation.theme.AccentPreset
@@ -33,7 +41,21 @@ fun CoachSettingsScreen() {
         subtitle = "Appearance · language",
         overline = "COACH OS · PREFS",
         testTag = "coach_settings",
+        showTitle = false,
     ) {
+        item {
+            EosPremiumCard {
+                Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+                    EliteZenithHeader(
+                        sysLabel = "SETTINGS COMMAND",
+                        title = "Settings",
+                        subtitle = "Appearance, language, and connected account controls for Coach OS.",
+                        badge = { HexBadge("SYS", tone = HexBadgeTone.Iris) },
+                    )
+                    HexStatus("PENDING_HUMAN for FCM prod")
+                }
+            }
+        }
         item {
             EliteCard {
                 EliteAppearancePicker(

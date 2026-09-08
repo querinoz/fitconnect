@@ -50,7 +50,8 @@ async function exportSizes() {
     path.resolve("apps/web/public/apple-touch-icon.png")
   );
 
-  const mobileDir = path.resolve("apps/mobile/assets/brand");
+  // Expo archived → _archive/apps-mobile-frozen-adr005 (ADR-005). Prefer android assets.
+  const mobileDir = path.resolve("_archive/apps-mobile-frozen-adr005/assets/brand");
   fs.mkdirSync(mobileDir, { recursive: true });
   await (await renderSvg(MARK_SVG, 512)).toFile(path.join(mobileDir, "logo.png"));
 

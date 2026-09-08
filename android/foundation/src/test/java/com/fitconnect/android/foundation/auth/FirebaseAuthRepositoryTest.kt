@@ -270,7 +270,12 @@ private class FakeIdentityRemote(
     override suspend fun getProfile(): AppResult<IdentityProfile> =
         bootstrap(null, null, null)
 
+    override suspend fun getMe(): AppResult<IdentityProfile> = getProfile()
+
     override suspend fun setRole(role: UserRole): AppResult<IdentityProfile> =
+        bootstrap(null, null, null)
+
+    override suspend fun setActiveMode(mode: UserRole): AppResult<IdentityProfile> =
         bootstrap(null, null, null)
 
     override suspend fun getOnboarding(): AppResult<IdentityOnboarding> =

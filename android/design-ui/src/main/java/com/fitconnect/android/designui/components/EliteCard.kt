@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import com.fitconnect.android.designui.theme.EliteBorder
@@ -58,35 +59,43 @@ fun EliteCard(
         )
         else -> null
     }
-    val colors = CardDefaults.cardColors(containerColor = container)
-    val elevation = CardDefaults.cardElevation(
-        defaultElevation = if (variant == EliteCardVariant.Solid) EliteElevation.Low else EliteElevation.None,
-    )
+    val colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+    val elevation = CardDefaults.cardElevation(defaultElevation = EliteElevation.None)
+    val glow = MaterialTheme.colorScheme.primary
+    val floating = variant == EliteCardVariant.Glass || variant == EliteCardVariant.Bento
     val body: @Composable () -> Unit = {
         Box {
-            if (variant == EliteCardVariant.Glass) {
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .clip(shape)
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.onSurface.copy(alpha = EliteGlass.Highlight),
-                                    Color.Transparent,
-                                ),
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(shape)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = EliteGlass.Highlight),
+                                container,
                             ),
                         ),
-                )
-            }
+                    ),
+            )
             Column(modifier = Modifier.padding(EliteSpace.Lg), content = content)
         }
+    }
+    val floatMod = if (floating) {
+        Modifier.shadow(
+            elevation = EliteElevation.High,
+            shape = shape,
+            ambientColor = Color.Black.copy(alpha = 0.55f),
+            spotColor = glow.copy(alpha = 0.18f),
+        )
+    } else {
+        Modifier
     }
 
     if (onClick != null) {
         Card(
             onClick = onClick,
-            modifier = cardModifier,
+            modifier = cardModifier.then(floatMod),
             shape = shape,
             colors = colors,
             elevation = elevation,
@@ -94,7 +103,7 @@ fun EliteCard(
         ) { body() }
     } else {
         Card(
-            modifier = cardModifier,
+            modifier = cardModifier.then(floatMod),
             shape = shape,
             colors = colors,
             elevation = elevation,

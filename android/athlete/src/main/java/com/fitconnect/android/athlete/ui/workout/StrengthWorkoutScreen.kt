@@ -1,12 +1,26 @@
 package com.fitconnect.android.athlete.ui.workout
 
-import android.view.WindowManager
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.LocalFireDepartment
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -23,24 +37,39 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.text.KeyboardOptions
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
+import com.fitconnect.android.design.EliteSurfaceColors
+import com.fitconnect.android.designui.brand.EosFitConnectLockup
 import com.fitconnect.android.designui.charts.EliteChartPalette
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteChip
 import com.fitconnect.android.designui.components.EliteFlowRow
+import com.fitconnect.android.designui.components.EliteLocalImage
+import com.fitconnect.android.designui.components.EliteLocalImageExists
 import com.fitconnect.android.designui.components.EliteSysLabel
+import com.fitconnect.android.designui.components.EliteZenithHeader
+import com.fitconnect.android.designui.components.EosMultiSportHero
+import com.fitconnect.android.designui.components.HexStatus
 import com.fitconnect.android.designui.neumorphic.EosPremiumCard
 import com.fitconnect.android.designui.theme.EliteMetricHeroTextStyle
+import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
+import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.android.foundation.a11y.Accessibility
 import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.sports.guided.domain.GuidedSessionSnapshot
@@ -54,6 +83,7 @@ import com.fitconnect.android.sports.guided.wakelock.WorkoutWakePolicy
 import com.fitconnect.android.sports.progression.ExerciseMode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import android.view.WindowManager
 
 @Composable
 fun StrengthWorkoutScreen() {
@@ -108,9 +138,32 @@ fun StrengthWorkoutScreen() {
         testTag = "athlete_guided_workout",
         overline = "TRAIN",
         subtitle = syncLabel(snap.syncStatus),
+        showTitle = false,
     ) {
-        item {
-            SyncChip(snap.syncStatus)
+        when (snap.phase) {
+            WorkoutPhase.IDLE, WorkoutPhase.PREP, WorkoutPhase.RECOVERING -> {
+                // Photo hero + START SESSION only (no duplicate command hero).
+            }
+            else -> {
+                item {
+                    WorkoutHeroSection(
+                        snap = snap,
+                        syncLabel = syncLabel(snap.syncStatus),
+                        onPrimaryAction = when (snap.phase) {
+                            WorkoutPhase.PAUSED -> ({ scope.launch { runtime.resume() } })
+                            else -> null
+                        },
+                    )
+                }
+            }
+        }
+        if (snap.phase != WorkoutPhase.IDLE &&
+            snap.phase != WorkoutPhase.PREP &&
+            snap.phase != WorkoutPhase.RECOVERING
+        ) {
+            item {
+                SyncChip(snap.syncStatus)
+            }
         }
         if (error != null || snap.lastError != null) {
             item {
@@ -197,6 +250,59 @@ fun StrengthWorkoutScreen() {
 }
 
 @Composable
+private fun WorkoutHeroSection(
+    snap: GuidedSessionSnapshot,
+    syncLabel: String,
+    onPrimaryAction: (() -> Unit)?,
+) {
+    EosPremiumCard(modifier = Modifier.testTag("workout_command_hero")) {
+        Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+            EliteZenithHeader(
+                sysLabel = "WORKOUT HERO",
+                title = snap.plan.name.ifBlank { "Guided workout" },
+                subtitle = workoutPhaseSubtitle(snap),
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
+            ) {
+                HexStatus("PHASE ${snap.phase.name}")
+                HexStatus(syncLabel)
+            }
+            Text(
+                text = "~${snap.plan.estimatedDurationMin} min · ${snap.plan.exercises.size} exercises",
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            snap.currentSlot?.let { slot ->
+                Text(
+                    text = "Current block · ${slot.exercise.name} · set ${slot.setNumber}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (onPrimaryAction != null) {
+                EliteButton(
+                    label = if (snap.phase == WorkoutPhase.PAUSED) "Resume workout" else "Start workout",
+                    onClick = onPrimaryAction,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = Accessibility.PREFERRED_TOUCH_TARGET_DP.dp)
+                        .testTag(
+                            if (snap.phase == WorkoutPhase.PAUSED) "workout_hero_resume"
+                            else "workout_hero_start",
+                        ),
+                    contentDescription = if (snap.phase == WorkoutPhase.PAUSED) {
+                        "Resume workout from command hero"
+                    } else {
+                        "Start workout from command hero"
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun SyncChip(status: SyncUiStatus) {
     val label = syncLabel(status)
     val zone = when (status) {
@@ -227,26 +333,187 @@ private fun syncLabel(status: SyncUiStatus): String = when (status) {
     SyncUiStatus.SYNC_ERROR -> "SYNC ERROR"
 }
 
+private fun workoutPhaseSubtitle(snap: GuidedSessionSnapshot): String = when (snap.phase) {
+    WorkoutPhase.IDLE,
+    WorkoutPhase.PREP,
+    WorkoutPhase.RECOVERING,
+    -> "Prep the next block before logging sets."
+    WorkoutPhase.ACTIVE -> "Live set logging preserves progression, timer, and sync state."
+    WorkoutPhase.REST -> "Rest timer is active. Extend or skip without leaving the session."
+    WorkoutPhase.PAUSED -> "Session paused locally. Resume when ready to continue."
+    WorkoutPhase.COMPLETING,
+    WorkoutPhase.COMPLETED,
+    WorkoutPhase.SYNC_PENDING,
+    WorkoutPhase.SYNCED,
+    -> "Workout complete. Review the summary and retry sync if needed."
+    WorkoutPhase.FAILED -> "Recovery failed. Start a fresh session without fabricating workout state."
+}
+
 @Composable
 private fun PrepPhase(snap: GuidedSessionSnapshot, onStart: () -> Unit) {
-    EosPremiumCard(modifier = Modifier.testTag("workout_prep")) {
-        Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
-            EliteSysLabel(text = "PREP")
-            Text(text = snap.plan.name, style = EliteMetricHeroTextStyle)
-            Text(text = "~${snap.plan.estimatedDurationMin} min · ${snap.plan.exercises.size} exercises")
-            snap.plan.exercises.take(4).forEach { ex ->
-                Text(text = "• ${ex.name}", style = MaterialTheme.typography.bodyMedium)
+    val volt = EliteSurfaceColors.VOLTLINE.toColor()
+    val minutes = snap.plan.estimatedDurationMin.coerceAtLeast(1)
+    val calories = (minutes * 11).coerceAtLeast(200)
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(EliteSpace.Md),
+    ) {
+        EosFitConnectLockup(markSize = 28.dp, wordmarkSize = 16.sp)
+        Text(
+            text = "TRAIN",
+            style = EliteMetricHeroTextStyle.copy(
+                fontStyle = FontStyle.Italic,
+                fontWeight = FontWeight.Black,
+            ),
+            color = volt,
+        )
+        Text(
+            text = "YOUR PERFORMANCE. CONNECTED.",
+            style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 2.sp),
+            color = Color.White.copy(alpha = 0.92f),
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(360.dp)
+                .clip(RoundedCornerShape(EliteRadius.Media))
+                .border(1.dp, volt.copy(alpha = 0.85f), RoundedCornerShape(EliteRadius.Media))
+                .testTag("workout_prep"),
+        ) {
+            if (EliteLocalImageExists("fc_train_multisport") || EliteLocalImageExists("fc_train_hero")) {
+                EosMultiSportHero(
+                    imageNames = listOf(
+                        "fc_train_multisport",
+                        "fc_train_hero",
+                        "fc_splash_multisport",
+                        "fc_feed_post_1",
+                        "fc_feed_post_2",
+                    ),
+                    contentDescription = "Multi-sport training",
+                    modifier = Modifier.fillMaxSize(),
+                    dwellMs = 4800L,
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(EliteSurfaceColors.FLOOR.toColor()),
+                )
             }
-            EliteButton(
-                label = "Start workout",
-                onClick = onStart,
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = Accessibility.PREFERRED_TOUCH_TARGET_DP.dp)
-                    .testTag("workout_start"),
-                contentDescription = "Start guided workout",
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.25f),
+                                Color.Black.copy(alpha = 0.85f),
+                            ),
+                        ),
+                    ),
             )
+            Column(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(EliteSpace.Md),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(Color.Black.copy(alpha = 0.55f))
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Bolt,
+                        contentDescription = null,
+                        tint = volt,
+                        modifier = Modifier.size(14.dp),
+                    )
+                    Text(
+                        "PERFORMANCE",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = volt,
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(EliteSpace.Lg),
+                verticalArrangement = Arrangement.spacedBy(EliteSpace.Xs),
+            ) {
+                Text(
+                    text = "WHAT\nWHY\nWHEN",
+                    style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Black),
+                    color = Color.White,
+                )
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = EliteSpace.Xs)
+                        .width(36.dp)
+                        .height(2.dp)
+                        .background(volt),
+                )
+                Text(
+                    text = "Push harder. Move smarter.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White.copy(alpha = 0.9f),
+                )
+                Spacer(modifier = Modifier.height(EliteSpace.Sm))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    PrepMetric(
+                        icon = Icons.Outlined.Schedule,
+                        value = "$minutes MIN",
+                        label = "DURATION",
+                    )
+                    PrepMetric(
+                        icon = Icons.Outlined.BarChart,
+                        value = "HIGH",
+                        label = "INTENSITY",
+                    )
+                    PrepMetric(
+                        icon = Icons.Outlined.LocalFireDepartment,
+                        value = "$calories",
+                        label = "CALORIES",
+                    )
+                }
+            }
         }
+        EliteButton(
+            label = "START SESSION",
+            onClick = onStart,
+            leadingIcon = Icons.Outlined.Bolt,
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = Accessibility.PREFERRED_TOUCH_TARGET_DP.dp)
+                .testTag("workout_start"),
+            contentDescription = "Start guided workout",
+        )
+    }
+}
+
+@Composable
+private fun PrepMetric(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    value: String,
+    label: String,
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(16.dp),
+        )
+        Text(value, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = Color.White)
+        Text(label, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.75f))
     }
 }
 

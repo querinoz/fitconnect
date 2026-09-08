@@ -187,5 +187,6 @@ fun EliteInstrumentRing(
 }
 
 val EliteRingHero: Dp get() = EliteSurfaceInstrument.HERO_DP.dp
+val EliteRingAscend: Dp get() = EliteSurfaceInstrument.ASCEND_HERO_DP.dp
 val EliteRingProfile: Dp get() = EliteSurfaceInstrument.PROFILE_DP.dp
 val EliteRingInline: Dp get() = EliteSurfaceInstrument.INLINE_DP.dp

@@ -70,6 +70,12 @@ fun WearInstrument(
     companionLabel: String,
 ) {
     val snap by engine.state.collectAsState()
+    val phoneSynced by WearReadinessInbox.lastSyncedFlow.collectAsState()
+    val readiness = WearReadinessSelector.select(
+        phoneSynced = phoneSynced,
+        healthServices = WearRuntime.healthServicesReadiness,
+        allowLocalDemo = WearRuntime.allowLocalDemoReadiness,
+    )
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val ambient = LocalWearAmbient.current
@@ -161,6 +167,7 @@ fun WearInstrument(
             hrText = hrText,
             hrCapability = hrCapability,
             snapHr = snap.hrBpm,
+            readiness = readiness,
             companionLabel = companionLabel,
             pendingCount = sender.pendingCount,
             blocked = WearRuntime.lastBlockCode,
@@ -183,6 +190,7 @@ private fun WearIdlePager(
     hrText: String,
     hrCapability: MetricAvailability,
     snapHr: Int?,
+    readiness: ReadinessSource,
     companionLabel: String,
     pendingCount: Int,
     blocked: String?,
@@ -190,6 +198,7 @@ private fun WearIdlePager(
     onOpenSettings: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val presentation = readiness.toPresentation()
     BackHandler(enabled = pagerState.currentPage > 0) {
         scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
     }
@@ -202,6 +211,7 @@ private fun WearIdlePager(
             AnimatedPage(pageIndex = page, pagerState = pagerState) {
                 when (pane) {
                     WearIdlePane.HOME -> WearHomePane(
+                        readiness = presentation,
                         hrText = hrText,
                         blocked = blocked,
                         onStart = onStart,
@@ -209,8 +219,8 @@ private fun WearIdlePager(
                     )
                     WearIdlePane.READINESS -> WearMetricPane(
                         title = "READINESS",
-                        value = "88",
-                        footnote = "CALCULATED · LOCAL_DEMO",
+                        value = presentation.value,
+                        footnote = presentation.footnote,
                     )
                     WearIdlePane.HEART_RATE -> WearMetricPane(
                         title = "HEART RATE",
@@ -236,7 +246,17 @@ private fun WearIdlePager(
                         footnote = "No Health Services sleep",
                     )
                     WearIdlePane.RECOVERY -> {
-                        val body = PerformanceIntelligence.bodyState(88, hrvAvailable = false, sleepAvailable = false)
+                        val readinessScore = when (readiness) {
+                            is ReadinessSource.SyncedFromPhone -> readiness.score
+                            is ReadinessSource.HealthServices -> readiness.score
+                            is ReadinessSource.LocalDemo -> readiness.score
+                            ReadinessSource.Unavailable -> null
+                        }
+                        val body = PerformanceIntelligence.bodyState(
+                            readinessScore,
+                            hrvAvailable = false,
+                            sleepAvailable = false,
+                        )
                         WearMetricPane(
                             title = "RECOVERY",
                             value = if (body == BodyState.DATA_SOURCE_REQUIRED) "NO SOURCE" else body.name,
@@ -261,6 +281,7 @@ private fun WearIdlePager(
 
 @Composable
 private fun WearHomePane(
+    readiness: ReadinessPresentation,
     hrText: String,
     blocked: String?,
     onStart: () -> Unit,
@@ -285,7 +306,7 @@ private fun WearHomePane(
         }
         item {
             Text(
-                "88",
+                readiness.value,
                 style = MaterialTheme.typography.displaySmall,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
@@ -294,7 +315,7 @@ private fun WearHomePane(
         }
         item {
             Text(
-                "READY · LOCAL_DEMO",
+                readiness.footnote,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -385,7 +406,7 @@ private fun WearActivePane(
         }
         if (!ambient) {
             item {
-                val zone = if (hrAvailable) "ZONE ${snapZone ?: "—"}" else "LOCAL_DEMO"
+                val zone = if (hrAvailable) "ZONE ${snapZone ?: "—"}" else "HR UNAVAILABLE"
                 Text(
                     zone,
                     style = MaterialTheme.typography.labelSmall,

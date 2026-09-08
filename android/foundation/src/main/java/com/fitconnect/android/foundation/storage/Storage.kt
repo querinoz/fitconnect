@@ -26,6 +26,10 @@ object PreferenceKeys {
     val ONBOARDING_COACH_DONE = stringPreferencesKey("onboarding_coach_done")
     val ONBOARDING_COACH_STEP = stringPreferencesKey("onboarding_coach_step")
     val PATENT_FLOOR = stringPreferencesKey("patent_floor")
+    /** Absolute path under app filesDir for profile avatar bitmap. */
+    val PROFILE_AVATAR_PATH = stringPreferencesKey("profile.avatar_path")
+    /** Absolute path under app filesDir for profile banner bitmap. */
+    val PROFILE_BANNER_PATH = stringPreferencesKey("profile.banner_path")
 
     fun flagKey(flag: String) = stringPreferencesKey("flag.$flag")
     fun identityRoleSelected(uid: String) = stringPreferencesKey("identity.role_selected.$uid")

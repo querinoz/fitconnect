@@ -34,7 +34,7 @@ class NavGuardTest {
     @Test
     fun homeAllowedAfterSignIn() = runBlocking {
         val session = SecureSessionStore(InMemorySecureStore())
-        val auth = LocalAuthRepository(session, logger)
+        val auth = LocalAuthRepository(session, logger, allowLocalAuth = true)
         auth.signIn(
             AuthProviderKind.EMAIL_PASSWORD,
             AuthCredentials(email = "a@b.com", password = "password1"),
@@ -61,7 +61,7 @@ class NavGuardTest {
     @Test
     fun anonymousDeniedFromAppShell() = runBlocking {
         val session = SecureSessionStore(InMemorySecureStore())
-        val auth = LocalAuthRepository(session, logger)
+        val auth = LocalAuthRepository(session, logger, allowLocalAuth = true)
         auth.signInAnonymously()
         val guard = NavGuard(session, SessionAuthorizer(session), NoOpAnalytics())
         val decision = guard.authorize(CoreRoute.HOME)

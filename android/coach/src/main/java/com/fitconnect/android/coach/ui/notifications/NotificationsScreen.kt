@@ -1,5 +1,7 @@
 package com.fitconnect.android.coach.ui.notifications
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -15,6 +17,12 @@ import com.fitconnect.android.coach.ui.LocalCoachContainer
 import com.fitconnect.android.coach.ui.components.CoachLoad
 import com.fitconnect.android.coach.ui.components.CoachScreenScaffold
 import com.fitconnect.android.designui.components.EliteCard
+import com.fitconnect.android.designui.components.EliteZenithHeader
+import com.fitconnect.android.designui.components.HexBadge
+import com.fitconnect.android.designui.components.HexBadgeTone
+import com.fitconnect.android.designui.components.HexStatus
+import com.fitconnect.android.designui.neumorphic.EosPremiumCard
+import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.common.AppResult
 import kotlinx.coroutines.launch
 
@@ -34,12 +42,32 @@ fun NotificationsScreen() {
             title = "Notifications",
             subtitle = "Push-ready inbox · deep links",
             testTag = "coach_notifications",
+            showTitle = false,
         ) {
+            item {
+                EosPremiumCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+                        EliteZenithHeader(
+                            sysLabel = "NOTIFICATIONS COMMAND",
+                            title = "Notifications",
+                            subtitle = "Coach alerts, pushes, and deep links stay explicit about transport readiness.",
+                            badge = {
+                                HexBadge(
+                                    text = items.size.coerceAtMost(99).toString().padStart(2, '0'),
+                                    tone = HexBadgeTone.Warning,
+                                )
+                            },
+                        )
+                        HexStatus("PUSH READY")
+                    }
+                }
+            }
             items(items, key = { it.id }) { n ->
-                EliteCard {
+                EosPremiumCard {
                     Text(n.title, style = MaterialTheme.typography.titleMedium)
                     Text(n.body, style = MaterialTheme.typography.bodyMedium)
                     Text(n.deepLink, style = MaterialTheme.typography.labelSmall)
+                    HexStatus("DEEP LINK")
                 }
             }
         }

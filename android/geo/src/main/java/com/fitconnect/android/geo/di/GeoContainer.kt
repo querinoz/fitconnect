@@ -1,9 +1,16 @@
 package com.fitconnect.android.geo.di
 
+import com.fitconnect.android.foundation.network.ApiClient
+import com.fitconnect.android.foundation.network.ConnectivityMonitor
+import com.fitconnect.android.foundation.offline.SyncQueue
 import com.fitconnect.android.geo.availability.AvailabilityEngine
 import com.fitconnect.android.geo.availability.DefaultAvailabilityEngine
 import com.fitconnect.android.geo.booking.BookingEngine
+import com.fitconnect.android.geo.booking.BookingRemote
+import com.fitconnect.android.geo.booking.BookingStore
 import com.fitconnect.android.geo.booking.DefaultBookingEngine
+import com.fitconnect.android.geo.booking.HttpBookingRemote
+import com.fitconnect.android.geo.booking.InMemoryBookingStore
 import com.fitconnect.android.geo.catalog.PlacesCatalog
 import com.fitconnect.android.geo.discovery.DefaultDiscoveryEngine
 import com.fitconnect.android.geo.discovery.DiscoveryEngine
@@ -34,20 +41,43 @@ interface GeoContainer {
     val events: EventEngine
     val reviews: ReviewsEngine
     val offline: GeoOfflineStore
+    val bookingStore: BookingStore
 }
 
 class DefaultGeoContainer(
     allowMockLocation: Boolean = true,
+    bookingStore: BookingStore = InMemoryBookingStore(),
+    bookingRemote: BookingRemote? = null,
+    syncQueue: SyncQueue? = null,
+    connectivity: ConnectivityMonitor? = null,
+    seedDemoBookings: Boolean = true,
+    api: (() -> ApiClient)? = null,
 ) : GeoContainer {
     override val offline: GeoOfflineStore = DefaultGeoOfflineStore()
+    override val bookingStore: BookingStore = bookingStore
     override val location: LocationEngine = DefaultLocationEngine(allowMock = allowMockLocation).also { engine ->
-        engine.reportPermission(LocationPermissionState.GRANTED)
-        engine.setMockLocation(PlacesCatalog.defaultDevAnchor())
+        // Debug/local only: seed a labeled mock fix. Release never claims fake GPS.
+        if (allowMockLocation) {
+            engine.reportPermission(LocationPermissionState.GRANTED)
+            engine.setMockLocation(PlacesCatalog.defaultDevAnchor())
+        } else {
+            engine.reportPermission(LocationPermissionState.UNKNOWN)
+        }
     }
     override val maps: MapsEngine = DefaultMapsEngine()
     override val discovery: DiscoveryEngine = DefaultDiscoveryEngine(offline)
     override val availability: AvailabilityEngine = DefaultAvailabilityEngine()
-    override val booking: BookingEngine = DefaultBookingEngine(availability, offline)
+    private val resolvedRemote: BookingRemote? = bookingRemote
+        ?: api?.let { HttpBookingRemote(it) }
+    override val booking: BookingEngine = DefaultBookingEngine(
+        availability = availability,
+        offline = offline,
+        store = bookingStore,
+        remote = resolvedRemote,
+        syncQueue = syncQueue,
+        connectivity = connectivity,
+        seedDemoBookings = seedDemoBookings,
+    )
     override val routes: RouteEngine = DefaultRouteEngine(offline)
     override val nearby: NearbyEngine = DefaultNearbyEngine(discovery)
     override val events: EventEngine = DefaultEventEngine()

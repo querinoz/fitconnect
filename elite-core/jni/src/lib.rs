@@ -1,18 +1,41 @@
-//! Android + Wear OS binding for elite-core (JNI).
+//! Android JNI exports for elite-core zone engine (UniFFI-compatible API).
 //!
-//! F0 status: skeleton — proves `elite-core` links against the `jni` crate
-//! and produces a cdylib. No `#[no_mangle] extern "system" fn Java_...`
-//! exports yet: JNI export symbol names are package-qualified
-//! (`Java_<reversed_applicationId>_...`), and the Android `applicationId`
-//! isn't decided yet (see `qa/HUMAN-QUEUE.md`). Real exports land once
-//! that's settled and `android/` exists — see ADR-006 for the intended
-//! shape (single `.so` per ABI, via UniFFI, with hand-written JNI as the
-//! documented fallback for the Wear hot path if UniFFI ergonomics block us).
+//! Same domain path as `elite-core-uniffi::heart_rate_zone` — single Rust source of truth.
+//! Package: `com.fitconnect.android.sports.zones.EliteCoreNative`
 
-/// Re-exported so this crate has something real to compile and test against
-/// before the actual JNI surface exists.
-pub fn version() -> &'static str {
-    elite_core::version()
+use elite_core::zones::{zone_for, HEART_RATE_ZONES};
+use jni::objects::JClass;
+use jni::sys::{jdouble, jint, jstring};
+use jni::JNIEnv;
+
+fn heart_rate_zone_u8(bpm: f64, lthr_bpm: f64) -> u8 {
+    if lthr_bpm <= 0.0 || !bpm.is_finite() {
+        return 0;
+    }
+    zone_for(bpm, lthr_bpm, &HEART_RATE_ZONES)
+        .map(|z| z.index)
+        .unwrap_or(0)
+}
+
+#[no_mangle]
+pub extern "system" fn Java_com_fitconnect_android_sports_zones_EliteCoreNative_nativeVersion<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+) -> jstring {
+    let s = elite_core::version();
+    env.new_string(s)
+        .expect("JNI string")
+        .into_raw()
+}
+
+#[no_mangle]
+pub extern "system" fn Java_com_fitconnect_android_sports_zones_EliteCoreNative_nativeHeartRateZone(
+    _env: JNIEnv,
+    _class: JClass,
+    bpm: jdouble,
+    lthr_bpm: jdouble,
+) -> jint {
+    heart_rate_zone_u8(bpm, lthr_bpm) as jint
 }
 
 #[cfg(test)]
@@ -20,7 +43,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn re_exports_core_version() {
-        assert_eq!(version(), elite_core::version());
+    fn mirrors_uniffi_boundaries_lthr_170() {
+        let lthr = 170.0;
+        assert_eq!(heart_rate_zone_u8(100.0, lthr), 1);
+        assert_eq!(heart_rate_zone_u8(137.0, lthr), 1);
+        assert_eq!(heart_rate_zone_u8(138.0, lthr), 2);
+        assert_eq!(heart_rate_zone_u8(153.0, lthr), 3);
+        assert_eq!(heart_rate_zone_u8(160.0, lthr), 4);
+        assert_eq!(heart_rate_zone_u8(170.0, lthr), 5);
+        assert_eq!(heart_rate_zone_u8(150.0, 0.0), 0);
     }
 }

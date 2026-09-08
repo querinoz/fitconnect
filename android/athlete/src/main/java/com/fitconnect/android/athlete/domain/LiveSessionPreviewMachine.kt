@@ -1,13 +1,14 @@
 package com.fitconnect.android.athlete.domain
 
 /**
- * LOCAL_DEMO live-session UX state machine (not LiveKit production).
- * Pure transitions — Compose observes and renders only.
+ * Live-session UX state machine.
+ * Transitions only — joining a real LiveKit room is owned by [com.fitconnect.android.athlete.live.LiveSessionPort].
+ * Never invents a connected phase without the port reporting success.
  */
 enum class LiveSessionPhase {
     IDLE,
     CONNECTING,
-    CONNECTED_DEMO,
+    CONNECTED,
     MUTED,
     CAMERA_OFF,
     ENDING,
@@ -19,9 +20,11 @@ data class LiveSessionUiState(
     val phase: LiveSessionPhase = LiveSessionPhase.IDLE,
     val muted: Boolean = false,
     val cameraOff: Boolean = false,
+    /** Last fail-closed / EXTERNAL message for the ERROR surface. */
+    val errorMessage: String? = null,
 )
 
-object LiveSessionPreviewMachine {
+object LiveSessionMachine {
     fun onJoin(current: LiveSessionUiState): LiveSessionUiState =
         when (current.phase) {
             LiveSessionPhase.IDLE, LiveSessionPhase.ENDED, LiveSessionPhase.ERROR ->
@@ -31,14 +34,14 @@ object LiveSessionPreviewMachine {
 
     fun onConnected(current: LiveSessionUiState): LiveSessionUiState =
         if (current.phase == LiveSessionPhase.CONNECTING) {
-            LiveSessionUiState(phase = LiveSessionPhase.CONNECTED_DEMO)
+            LiveSessionUiState(phase = LiveSessionPhase.CONNECTED)
         } else {
             current
         }
 
     fun onToggleMute(current: LiveSessionUiState): LiveSessionUiState {
         if (current.phase !in setOf(
-                LiveSessionPhase.CONNECTED_DEMO,
+                LiveSessionPhase.CONNECTED,
                 LiveSessionPhase.MUTED,
                 LiveSessionPhase.CAMERA_OFF,
             )
@@ -49,14 +52,14 @@ object LiveSessionPreviewMachine {
         val phase = when {
             muted -> LiveSessionPhase.MUTED
             current.cameraOff -> LiveSessionPhase.CAMERA_OFF
-            else -> LiveSessionPhase.CONNECTED_DEMO
+            else -> LiveSessionPhase.CONNECTED
         }
         return current.copy(muted = muted, phase = phase)
     }
 
     fun onToggleCamera(current: LiveSessionUiState): LiveSessionUiState {
         if (current.phase !in setOf(
-                LiveSessionPhase.CONNECTED_DEMO,
+                LiveSessionPhase.CONNECTED,
                 LiveSessionPhase.MUTED,
                 LiveSessionPhase.CAMERA_OFF,
             )
@@ -67,14 +70,14 @@ object LiveSessionPreviewMachine {
         val phase = when {
             cameraOff -> LiveSessionPhase.CAMERA_OFF
             current.muted -> LiveSessionPhase.MUTED
-            else -> LiveSessionPhase.CONNECTED_DEMO
+            else -> LiveSessionPhase.CONNECTED
         }
         return current.copy(cameraOff = cameraOff, phase = phase)
     }
 
     fun onEnd(current: LiveSessionUiState): LiveSessionUiState =
         if (current.phase in setOf(
-                LiveSessionPhase.CONNECTED_DEMO,
+                LiveSessionPhase.CONNECTED,
                 LiveSessionPhase.MUTED,
                 LiveSessionPhase.CAMERA_OFF,
             )
@@ -91,15 +94,15 @@ object LiveSessionPreviewMachine {
             current
         }
 
-    fun onError(current: LiveSessionUiState): LiveSessionUiState =
+    fun onError(current: LiveSessionUiState, message: String? = null): LiveSessionUiState =
         if (current.phase in setOf(
-                LiveSessionPhase.CONNECTED_DEMO,
+                LiveSessionPhase.CONNECTED,
                 LiveSessionPhase.MUTED,
                 LiveSessionPhase.CAMERA_OFF,
                 LiveSessionPhase.CONNECTING,
             )
         ) {
-            current.copy(phase = LiveSessionPhase.ERROR)
+            current.copy(phase = LiveSessionPhase.ERROR, errorMessage = message)
         } else {
             current
         }
@@ -111,3 +114,7 @@ object LiveSessionPreviewMachine {
             current
         }
 }
+
+/** @deprecated Use [LiveSessionMachine] — kept for transitional call sites. */
+@Deprecated("Use LiveSessionMachine", ReplaceWith("LiveSessionMachine"))
+typealias LiveSessionPreviewMachine = LiveSessionMachine

@@ -85,14 +85,14 @@ fun HoneycombAtmosphere(
     val alpha = if (emptyBoost) {
         EliteSurfaceAtmosphere.HONEYCOMB_EMPTY
     } else {
-        EliteSurfaceAtmosphere.HONEYCOMB_SUBTLE
+        EliteSurfaceAtmosphere.HONEYCOMB_SUBTLE + EliteSurfaceAtmosphere.HONEYCOMB_PULSE * 0.4f
     }
 
     val density = LocalDensity.current
     val radiusPx = with(density) { EliteAtmosphere.HoneycombCellRadius.toPx() }
     val strokePx = with(density) { EliteBorder.Hairline.toPx() }
     val tile = remember(radiusPx, strokeColor, strokePx) {
-        renderHexTile(radiusPx, strokeColor, strokePx)
+        renderMarkTile(radiusPx, strokeColor, strokePx)
     }
     val brush = remember(tile) {
         ShaderBrush(ImageShader(tile, TileMode.Repeated, TileMode.Repeated))
@@ -124,6 +124,26 @@ fun HoneycombAtmosphere(
                 translate(left = 0f, top = dy) {
                     drawRect(brush = brush, alpha = alpha)
                 }
+                val envStroke = strokePx * 1.4f
+                val envAlpha = alpha * 0.7f
+                drawCircle(
+                    color = strokeColor.copy(alpha = envAlpha),
+                    radius = size.minDimension * 0.46f,
+                    center = Offset(size.width * 0.06f, size.height * 0.16f),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = envStroke),
+                )
+                drawCircle(
+                    color = strokeColor.copy(alpha = envAlpha * 0.75f),
+                    radius = size.minDimension * 0.38f,
+                    center = Offset(size.width * 0.96f, size.height * 0.42f),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = envStroke),
+                )
+                drawCircle(
+                    color = strokeColor.copy(alpha = envAlpha * 0.55f),
+                    radius = size.minDimension * 0.28f,
+                    center = Offset(size.width * 0.78f, size.height * 0.88f),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = envStroke),
+                )
                 drawRect(
                     brush = Brush.verticalGradient(
                         0f to Color.Transparent,

@@ -6,6 +6,7 @@ import { Calendar, Video, X, Clock } from "lucide-react";
 import type { SessionSummary } from "@fitconnect/types";
 import { PremiumCard } from "@/components/ui-glass/premium-system";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useDashboardStore } from "@/lib/dashboard-store";
 
 export function SessionsList({
@@ -19,9 +20,14 @@ export function SessionsList({
   const rescheduleSession = useDashboardStore((s) => s.rescheduleSession);
   const [rescheduleId, setRescheduleId] = useState<string | null>(null);
   const [rescheduleWhen, setRescheduleWhen] = useState("");
+  const [mutatingId, setMutatingId] = useState<string | null>(null);
 
   if (loading) {
-    return <p className="text-sm text-ink-400">Loading sessions…</p>;
+    return (
+      <p className="text-sm text-[color:color-mix(in_srgb,var(--eos-on-surface)_55%,transparent)]" role="status">
+        Loading sessions…
+      </p>
+    );
   }
 
   const upcoming = sessions.filter((s) => s.status === "scheduled");
@@ -30,14 +36,26 @@ export function SessionsList({
   );
 
   if (!sessions.length) {
-    return <p className="text-sm text-ink-400">No sessions scheduled yet.</p>;
+    return (
+      <EmptyState
+        icon={Calendar}
+        title="No sessions yet"
+        description="Book a coach intro or accept a scheduled session — your upcoming and past sessions will appear here."
+        cta={{ label: "Find a coach", href: "/discover" }}
+      />
+    );
   }
 
   function submitReschedule(id: string) {
-    if (!rescheduleWhen.trim()) return;
-    rescheduleSession(id, rescheduleWhen.trim());
-    setRescheduleId(null);
-    setRescheduleWhen("");
+    if (!rescheduleWhen.trim() || mutatingId) return;
+    setMutatingId(id);
+    try {
+      rescheduleSession(id, rescheduleWhen.trim());
+      setRescheduleId(null);
+      setRescheduleWhen("");
+    } finally {
+      setMutatingId(null);
+    }
   }
 
   return (
@@ -64,7 +82,7 @@ export function SessionsList({
                       {s.mode === "Online" && (
                         <Link
                           href={`/sessions/${s.id}/room`}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-grad-pulse text-ink-950"
+                          className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-grad-pulse text-ink-950"
                           aria-label={`Join ${s.type}`}
                         >
                           <Video className="h-4 w-4" />
@@ -78,6 +96,7 @@ export function SessionsList({
                       type="button"
                       size="sm"
                       variant="outline"
+                      disabled={mutatingId !== null}
                       onClick={() => {
                         setRescheduleId(s.id);
                         setRescheduleWhen(s.when);
@@ -90,7 +109,16 @@ export function SessionsList({
                       type="button"
                       size="sm"
                       variant="ghost"
-                      onClick={() => cancelSession(s.id)}
+                      disabled={mutatingId !== null}
+                      onClick={() => {
+                        if (mutatingId) return;
+                        setMutatingId(s.id);
+                        try {
+                          cancelSession(s.id);
+                        } finally {
+                          setMutatingId(null);
+                        }
+                      }}
                     >
                       <X className="h-3.5 w-3.5" aria-hidden />
                       Cancel
@@ -105,7 +133,12 @@ export function SessionsList({
                         className="flex-1 min-w-[160px] rounded-xl border border-ink-800 bg-ink-950/60 px-3 py-2 text-sm"
                         aria-label="New session time"
                       />
-                      <Button type="button" size="sm" onClick={() => submitReschedule(s.id)}>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={mutatingId === s.id}
+                        onClick={() => submitReschedule(s.id)}
+                      >
                         Save
                       </Button>
                     </div>

@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fitconnect.android.design.EliteSurfaceColors
 import com.fitconnect.android.design.EliteSurfaceMotion
+import com.fitconnect.android.designui.brand.EosFitConnectLockup
 import com.fitconnect.android.designui.theme.EliteBorder
 import com.fitconnect.android.designui.theme.EliteMetricTextStyle
 import com.fitconnect.android.designui.theme.EliteMonoTextStyle
@@ -89,7 +90,6 @@ fun EliteWordmarkHeader(
     onAvatarClick: () -> Unit = {},
     onSensorsClick: () -> Unit = {},
 ) {
-    val volt = MaterialTheme.colorScheme.primary
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -107,22 +107,10 @@ fun EliteWordmarkHeader(
                 .semantics { contentDescription = "Profile" },
         )
         if (showWordmark) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "FITCONNECT",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = (-0.4).sp,
-                    ),
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-                Box(
-                    modifier = Modifier
-                        .padding(top = EliteSpace.Xxs)
-                        .size(width = EliteSpace.Xl, height = EliteBorder.Thin)
-                        .background(volt, RoundedCornerShape(EliteRadius.Full)),
-                )
-            }
+            EosFitConnectLockup(
+                markSize = 28.dp,
+                wordmarkSize = 18.sp,
+            )
         }
         EliteIconButton(onClick = onSensorsClick, contentDescription = "Wearable sync") {
             Icon(
@@ -541,6 +529,9 @@ fun EliteCommandPip(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
+            .semantics {
+                contentDescription = "Open athlete $name, recovery $recovery"
+            }
             .padding(vertical = EliteSpace.Xs),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,

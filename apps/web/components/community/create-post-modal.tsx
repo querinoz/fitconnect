@@ -51,14 +51,14 @@ export function CreatePostModal({ open, onOpenChange, onPublish }: CreatePostMod
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[60] bg-ink-950/85 backdrop-blur-sm"
+                className="fixed inset-0 z-[60] bg-eos-floor/85 backdrop-blur-sm"
               />
             </Dialog.Overlay>
             <Dialog.Content
               className={cn(
                 "fixed left-1/2 top-1/2 z-[61] w-[calc(100%-1.5rem)] max-w-lg",
                 "-translate-x-1/2 -translate-y-1/2 rounded-3xl",
-                "border border-ink-800 bg-ink-950 p-0 shadow-elevated focus:outline-none"
+                "border border-eos-voltline/15 bg-eos-mold/90 p-0 shadow-elevated focus:outline-none"
               )}
             >
               <motion.div
@@ -66,11 +66,11 @@ export function CreatePostModal({ open, onOpenChange, onPublish }: CreatePostMod
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: reduce ? 1 : 0.97 }}
               >
-                <div className="flex items-center justify-between border-b border-ink-800 px-5 py-4">
-                  <Dialog.Title className="font-display text-lg font-bold text-ink-50">
+                <div className="flex items-center justify-between border-b border-eos-on-surface/10 px-5 py-4">
+                  <Dialog.Title className="font-display text-lg font-bold text-eos-on-surface">
                     Share with community
                   </Dialog.Title>
-                  <Dialog.Close className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:bg-ink-900 hover:text-ink-100">
+                  <Dialog.Close className="grid h-8 w-8 place-items-center rounded-lg text-eos-on-surface-muted hover:bg-eos-carbon hover:text-eos-on-surface">
                     <X className="h-4 w-4" />
                   </Dialog.Close>
                 </div>
@@ -82,10 +82,10 @@ export function CreatePostModal({ open, onOpenChange, onPublish }: CreatePostMod
                         type="button"
                         onClick={() => setKind(k)}
                         className={cn(
-                          "rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase",
+                          "h-9 min-h-12 rounded-full border px-2.5 text-[10px] font-semibold uppercase",
                           kind === k
-                            ? "border-plasma-400/50 bg-plasma-500/15 text-plasma-200"
-                            : "border-ink-800 text-ink-500"
+                            ? "border-eos-voltline bg-eos-voltline text-eos-floor"
+                            : "border-eos-voltline/20 bg-eos-carbon text-eos-on-surface"
                         )}
                       >
                         {k}
@@ -97,9 +97,14 @@ export function CreatePostModal({ open, onOpenChange, onPublish }: CreatePostMod
                     onChange={(e) => setText(e.target.value)}
                     rows={4}
                     placeholder="Share a PR, check-in, or race report…"
-                    className="w-full rounded-xl border border-ink-800 bg-ink-950/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/60"
+                    className="w-full rounded-xl border border-eos-on-surface/10 bg-eos-floor px-3 py-2 text-sm text-eos-on-surface focus:outline-none focus:ring-2 focus:ring-eos-voltline/60"
                   />
-                  <Button type="button" className="w-full" disabled={!text.trim()} onClick={handlePublish}>
+                  <Button
+                    type="button"
+                    className="w-full bg-eos-voltline text-eos-floor hover:bg-eos-voltline"
+                    disabled={!text.trim()}
+                    onClick={handlePublish}
+                  >
                     Post to feed
                   </Button>
                 </div>

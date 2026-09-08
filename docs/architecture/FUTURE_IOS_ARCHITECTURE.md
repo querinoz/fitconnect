@@ -1,37 +1,54 @@
-# Future iOS architecture
+# iOS architecture — Path A (Zenith)
 
 ```
-IOS_TARGET_STATUS = ARCHITECTURALLY_READY / NOT_IMPLEMENTED
+IOS_TARGET_STATUS = PATH_A_IN_PROGRESS / SOURCE_COMPLETE_TARGET
+MAC_BUILD_STATUS = IOS_PHYSICAL_BUILD_BLOCKED_EXTERNAL  # Windows host; no Xcode
 ```
 
-Do **not** add an `ios()` Gradle target until the Android toolchain is proven stable with the multiplatform plugin.
+**Locked (ADR-005):** Production mobile = native Android Compose (`android/`) + future/now SwiftUI (`iosApp/`). Expo remains archived at `_archive/apps-mobile-frozen-adr005`.
 
-## Reuse later
+## Do not add
 
-`:shared` (kotlin-jvm today) contains no Android APIs:
+- Gradle `ios()` target until Android + multiplatform plugin is stable
+- Expo / React Native revival
+- Fake HealthKit PASS without entitlements
 
-- session state machine
-- telemetry envelope + units
-- outbox / sequence dedupe
-- Wear path **names** as protocol (iOS will map to WatchConnectivity paths)
-- `FitConnectRealtimeEvent`
+## Reuse
 
-elite-core physiology: **UniFFI**, not a Kotlin rewrite (ADR-005 / ADR-006).
+`:shared` (kotlin-jvm) — session SM, telemetry envelope, outbox, realtime events.  
+`elite-core` physiology — **UniFFI** (Kotlin + Swift), not a Kotlin rewrite.
 
-## Future tree (not created)
+## Tree (Path A Zenith)
 
 ```
-iosApp/          SwiftUI
-watchOS app      HealthKit + WatchConnectivity
-shared/          promoted to KMP commonMain when AGP allows
+iosApp/                 SwiftUI product shell (source-complete on Windows)
+  FitConnect/
+    Design/             EOS tokens, honeycomb, glass, motion
+    Navigation/         Athlete + Coach shells
+    Athlete/            Full IA mirror
+    Coach/
+    Auth/
+    SharedAdapters/
+    Telemetry/
+    Health/             HealthKit contracts — BLOCKED_EXTERNAL until Mac+entitlements
+    Maps/
+    Messaging/
+    Programs/
+    Bookings/
+    Settings/
+elite-core/swift/       UniFFI-generated / hand scaffold for Mac
+watchOS                 FUTURE_SCOPE (HealthKit + WatchConnectivity)
 ```
 
-## Do not implement now
+## Status vocabulary
 
-- HealthKit
-- WatchConnectivity
-- CoreBluetooth
-- SwiftUI
-- fake iOS stubs that compile but do nothing
+| Label | Meaning |
+|-------|---------|
+| SOURCE_COMPLETE | Swift sources present; contracts mirror Android |
+| SIMULATOR_CAPTURE | Verified on iOS Simulator (requires macOS) |
+| BLOCKED_EXTERNAL | Apple Developer / Xcode / entitlements |
+| FUTURE_SCOPE | watchOS pairing certification |
 
-Apple Watch pairing, HealthKit permissions, and App Store credentials are **HUMAN_REQUIRED** in a later cycle.
+## HealthKit / WatchConnectivity / CoreBluetooth
+
+Implement **contracts + honest stubs** only when Mac build unavailable. Never claim production PASS.

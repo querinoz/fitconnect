@@ -1,5 +1,8 @@
 package com.fitconnect.android.coach.ui
 
+import android.content.Intent
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -9,21 +12,21 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.automirrored.outlined.TrendingUp
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.DynamicFeed
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.DateRange
-import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.outlined.DynamicFeed
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +37,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.core.util.Consumer
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -44,6 +48,7 @@ import com.fitconnect.android.design.EliteSurfaceColors
 import com.fitconnect.android.designui.components.EliteBadge
 import com.fitconnect.android.designui.components.EliteFloatingNavBar
 import com.fitconnect.android.designui.components.EliteNavItem
+import com.fitconnect.android.designui.neumorphic.EosTrainActionFab
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.toColor
 import kotlinx.coroutines.delay
@@ -56,12 +61,40 @@ val LocalCoachSignOut = staticCompositionLocalOf<() -> Unit> {
     error("Sign-out handler not provided")
 }
 
+val LocalCoachModeSwitch = staticCompositionLocalOf<(com.fitconnect.android.foundation.authz.UserRole) -> Unit> {
+    error("Mode-switch handler not provided")
+}
+
 @Composable
 fun CoachOsApp(
     container: CoachContainer,
     onSignedOut: () -> Unit = {},
+    onActiveModeChange: (com.fitconnect.android.foundation.authz.UserRole) -> Unit = {},
 ) {
     val navController = rememberNavController()
+    val activity = checkNotNull(LocalActivity.current) as ComponentActivity
+    // Consume pending nested coach deep links (shell lands on HOME first).
+    LaunchedEffect(navController) {
+        fun tryHandle(uri: android.net.Uri?) {
+            if (uri == null) return
+            val path = uri.path.orEmpty()
+            if (!path.contains("coach")) return
+            navController.handleDeepLink(Intent(Intent.ACTION_VIEW, uri))
+            com.fitconnect.android.foundation.navigation.DeepLinkInbox.clearIf(uri)
+        }
+        tryHandle(com.fitconnect.android.foundation.navigation.DeepLinkInbox.peek())
+        com.fitconnect.android.foundation.navigation.DeepLinkInbox.uris.collect { uri ->
+            tryHandle(uri)
+        }
+    }
+    DisposableEffect(navController, activity) {
+        val listener = Consumer<Intent> { intent ->
+            navController.handleDeepLink(intent)
+            intent.data?.let { com.fitconnect.android.foundation.navigation.DeepLinkInbox.clearIf(it) }
+        }
+        activity.addOnNewIntentListener(listener)
+        onDispose { activity.removeOnNewIntentListener(listener) }
+    }
     val backStack by navController.currentBackStackEntryAsState()
     val current = backStack?.destination?.route
     val online by container.platform.connectivity.online.collectAsState()
@@ -77,9 +110,15 @@ fun CoachOsApp(
         }
     }
 
+    val onBottomTab = CoachDest.bottomTabs.any { it.route == current } ||
+        current == CoachDest.OVERVIEW.route ||
+        current == CoachDest.INBOX.route ||
+        current == CoachDest.ANALYTICS.route
+
     CompositionLocalProvider(
         LocalCoachContainer provides container,
         LocalCoachSignOut provides onSignedOut,
+        LocalCoachModeSwitch provides onActiveModeChange,
     ) {
         Scaffold(
             modifier = Modifier.testTag("coach_os"),
@@ -96,18 +135,23 @@ fun CoachOsApp(
                 EliteFloatingNavBar(
                     modifier = Modifier.testTag("coach_bottom_nav"),
                     items = CoachDest.bottomTabs.map { dest ->
-                        val selected = current?.startsWith(dest.route.substringBefore("/{")) == true ||
-                            current?.startsWith(dest.route) == true ||
-                            (dest == CoachDest.MORE && current == CoachDest.SETTINGS.route)
+                        val selected = current?.startsWith(dest.route) == true ||
+                            (dest == CoachDest.PROFILE && current == CoachDest.SETTINGS.route) ||
+                            (dest == CoachDest.DASHBOARD && current == CoachDest.OVERVIEW.route) ||
+                            (dest == CoachDest.ASCEND && current == CoachDest.ANALYTICS.route) ||
+                            (dest == CoachDest.FEED && current == CoachDest.INBOX.route)
                         EliteNavItem(
                             label = dest.label,
                             icon = when (dest) {
-                                CoachDest.OVERVIEW -> if (selected) Icons.Filled.Home else Icons.Outlined.Home
-                                CoachDest.ATHLETES -> if (selected) Icons.Filled.Person else Icons.Outlined.Person
-                                CoachDest.CALENDAR -> if (selected) Icons.Filled.DateRange else Icons.Outlined.DateRange
-                                CoachDest.INBOX -> if (selected) Icons.Filled.Email else Icons.Outlined.Email
-                                CoachDest.MORE -> if (selected) Icons.Filled.Settings else Icons.Outlined.Settings
-                                else -> Icons.Outlined.Home
+                                CoachDest.FEED -> if (selected) Icons.Filled.DynamicFeed else Icons.Outlined.DynamicFeed
+                                CoachDest.ASCEND -> if (selected) {
+                                    Icons.AutoMirrored.Filled.TrendingUp
+                                } else {
+                                    Icons.AutoMirrored.Outlined.TrendingUp
+                                }
+                                CoachDest.DASHBOARD -> if (selected) Icons.Filled.Dashboard else Icons.Outlined.Dashboard
+                                CoachDest.PROFILE -> if (selected) Icons.Filled.Person else Icons.Outlined.Person
+                                else -> Icons.Outlined.DynamicFeed
                             },
                             selected = selected,
                             onClick = {
@@ -124,6 +168,17 @@ fun CoachOsApp(
                     },
                 )
             },
+            floatingActionButton = {
+                if (onBottomTab) {
+                    EosTrainActionFab(
+                        onClick = {
+                            navController.navigate(CoachDest.SESSIONS.route)
+                        },
+                        modifier = Modifier.testTag("coach_train_fab"),
+                    )
+                }
+            },
+            floatingActionButtonPosition = FabPosition.Center,
             content = { padding ->
                 Box(
                     modifier = Modifier.padding(padding),

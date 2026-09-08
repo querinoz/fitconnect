@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.testTag
 import com.fitconnect.android.coach.domain.CoachFileRef
 import com.fitconnect.android.coach.domain.CoachProfile
 import com.fitconnect.android.coach.ui.LocalCoachContainer
+import com.fitconnect.android.coach.ui.LocalCoachModeSwitch
 import com.fitconnect.android.coach.ui.LocalCoachSignOut
 import com.fitconnect.android.coach.ui.components.CoachScreenScaffold
 import com.fitconnect.android.designui.components.EliteAppearancePicker
@@ -29,7 +30,15 @@ import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.designui.components.EliteSysLabel
+import com.fitconnect.android.designui.components.EliteZenithHeader
+import com.fitconnect.android.designui.components.HexBadge
+import com.fitconnect.android.designui.components.HexBadgeTone
+import com.fitconnect.android.designui.components.HexStatus
+import com.fitconnect.android.designui.identity.ActiveExperienceSwitcher
+import com.fitconnect.android.designui.neumorphic.EosPremiumCard
 import com.fitconnect.android.designui.theme.EliteSpace
+import com.fitconnect.android.foundation.analytics.AnalyticsEvent
+import com.fitconnect.android.foundation.authz.UserRole
 import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.foundation.theme.AccentPreset
 import com.fitconnect.android.foundation.theme.ThemeMode
@@ -48,6 +57,7 @@ fun ProfileScreen(
 ) {
     val container = LocalCoachContainer.current
     val onSignedOut = LocalCoachSignOut.current
+    val onModeSwitch = LocalCoachModeSwitch.current
     val scope = rememberCoroutineScope()
     val themeMode by container.platform.themeSettings.observe().collectAsState(initial = ThemeMode.SYSTEM)
     val accent by container.platform.themeSettings.observeAccent()
@@ -55,9 +65,15 @@ fun ProfileScreen(
     var profile by remember { mutableStateOf<CoachProfile?>(null) }
     var docs by remember { mutableStateOf<List<CoachFileRef>>(emptyList()) }
     var confirmDelete by remember { mutableStateOf(false) }
+    var capabilities by remember { mutableStateOf(setOf(UserRole.COACH)) }
+    var activeMode by remember { mutableStateOf(UserRole.COACH) }
+    var switchingMode by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         container.platform.analytics.screen("coach_profile")
+        val snap = container.platform.sessionStore.snapshot()
+        capabilities = snap.capabilities.ifEmpty { setOf(snap.activeMode) }
+        activeMode = snap.activeMode
         profile = (container.coachRepository.profile() as? AppResult.Ok)?.value
         docs = (container.coachRepository.documents() as? AppResult.Ok)?.value.orEmpty()
     }
@@ -66,10 +82,63 @@ fun ProfileScreen(
         title = profile?.displayName ?: "Coach",
         subtitle = "Identity · appearance · workspace",
         testTag = "coach_profile",
+        showTitle = false,
     ) {
+        item {
+            EosPremiumCard {
+                EliteStack(spacing = EliteSpace.Md) {
+                    EliteZenithHeader(
+                        sysLabel = "PROFILE COMMAND",
+                        title = profile?.displayName ?: "Coach",
+                        subtitle = "Identity, specialties, documents, and workspace actions from one command surface.",
+                        badge = {
+                            HexBadge(
+                                text = docs.size.coerceAtMost(99).toString().padStart(2, '0'),
+                                tone = HexBadgeTone.Iris,
+                            )
+                        },
+                    )
+                    HexStatus(if (profile?.verificationBadge == true) "VERIFIED COACH" else "COACH PROFILE")
+                }
+            }
+        }
+        item {
+            ActiveExperienceSwitcher(
+                capabilities = capabilities,
+                activeMode = activeMode,
+                switching = switchingMode,
+                onSelectMode = { next ->
+                    if (next == activeMode || switchingMode) return@ActiveExperienceSwitcher
+                    scope.launch {
+                        switchingMode = true
+                        container.platform.analytics.track(
+                            AnalyticsEvent("mode_switch_attempt", mapOf("to" to next.name)),
+                        )
+                        when (val local = container.platform.sessionStore.setActiveMode(next)) {
+                            is AppResult.Ok -> {
+                                if (!container.platform.sessionStore.snapshot().isLocalDemo) {
+                                    container.platform.identityRemote.setActiveMode(next)
+                                }
+                                activeMode = next
+                                container.platform.analytics.track(
+                                    AnalyticsEvent("mode_switch_success", mapOf("to" to next.name)),
+                                )
+                                onModeSwitch(next)
+                            }
+                            is AppResult.Err -> {
+                                container.platform.analytics.track(
+                                    AnalyticsEvent("mode_switch_denied", mapOf("to" to next.name)),
+                                )
+                                switchingMode = false
+                            }
+                        }
+                    }
+                },
+            )
+        }
         profile?.let { p ->
             item {
-                EliteCard {
+                EosPremiumCard {
                     EliteStack(spacing = EliteSpace.Md) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -98,7 +167,7 @@ fun ProfileScreen(
             }
         }
         item {
-            EliteCard {
+            EosPremiumCard {
                 EliteAppearancePicker(
                     mode = themeMode,
                     onModeChange = { next ->
@@ -116,7 +185,7 @@ fun ProfileScreen(
             container.coachSports.allSurfaces().take(4),
             key = { it.sport.id.value },
         ) { surface ->
-            EliteCard {
+            EosPremiumCard {
                 EliteStack(spacing = EliteSpace.Xs) {
                     Text(surface.sport.displayName, style = MaterialTheme.typography.titleMedium)
                     Text(surface.performanceSummary, style = MaterialTheme.typography.bodyMedium)
@@ -135,7 +204,7 @@ fun ProfileScreen(
         item {
             EliteStack {
                 EliteButton("Settings · language", onClick = onOpenSettings, variant = EliteButtonVariant.Secondary)
-                EliteButton("Programs & builder", onClick = onOpenPrograms, variant = EliteButtonVariant.Secondary)
+                EliteButton("Programs & builder", onClick = onOpenPrograms, variant = EliteButtonVariant.Primary)
                 EliteButton("Sessions", onClick = onOpenSessions, variant = EliteButtonVariant.Ghost)
                 EliteButton("Bookings", onClick = onOpenBookings, variant = EliteButtonVariant.Ghost)
                 EliteButton("Analytics", onClick = onOpenAnalytics, variant = EliteButtonVariant.Ghost)

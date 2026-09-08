@@ -22,6 +22,8 @@ import com.fitconnect.android.foundation.network.ApiClient
 import com.fitconnect.android.foundation.network.ConnectivityMonitor
 import com.fitconnect.android.foundation.offline.OfflineCoordinator
 import com.fitconnect.android.foundation.offline.SyncWork
+import com.fitconnect.android.foundation.programs.HttpProgramRemote
+import com.fitconnect.android.foundation.programs.ProgramRemote
 import com.fitconnect.android.foundation.session.SessionStore
 import com.fitconnect.android.sports.domain.SportId
 import com.fitconnect.android.telemetry.integration.AthleteTelemetryFacade
@@ -41,6 +43,10 @@ class HttpAthleteRepository(
     private val localFallback: AthleteRepository? = null,
     private val connectivity: ConnectivityMonitor? = null,
     private val offline: OfflineCoordinator? = null,
+    /** When set, createBooking uses durable BookingEngine (HTTP + outbox) as source of truth. */
+    private val bookingEngine: com.fitconnect.android.geo.booking.BookingEngine? = null,
+    /** Path A programs remote — rejects seed; empty when API unavailable. */
+    private val programRemote: ProgramRemote = HttpProgramRemote(api),
 ) : AthleteRepository {
 
     private suspend fun athleteId(): String? = sessionStore.snapshot().userId
@@ -128,35 +134,21 @@ class HttpAthleteRepository(
 
     override suspend fun programs(): AppResult<List<ProgramEnrollment>> {
         if (useLocal()) return localFallback!!.programs()
-        return when (val raw = api().get("/api/v1/athletes/programs")) {
-            is AppResult.Err -> raw
-            is AppResult.Ok -> {
-                val root = JSONObject(raw.value)
-                val arr = root.optJSONArray("enrollments") ?: JSONArray()
-                val mapped = buildList {
-                    for (i in 0 until arr.length()) {
-                        val o = arr.getJSONObject(i)
-                        val milestones = buildList {
-                            val m = o.optJSONArray("milestones")
-                            if (m != null) {
-                                for (j in 0 until m.length()) add(m.getString(j))
-                            }
-                        }
-                        add(
-                            ProgramEnrollment(
-                                id = o.optString("programId", o.getString("id")),
-                                title = o.optString("title", "Program"),
-                                currentWeek = o.optInt("currentWeek", 1),
-                                totalWeeks = o.optInt("totalWeeks", 1),
-                                progressPercent = o.optInt("progressPercent", 0),
-                                nextWorkoutTitle = o.optString("nextWorkoutTitle", "Next workout"),
-                                milestones = milestones,
-                            ),
-                        )
-                    }
-                }
-                AppResult.Ok(mapped)
-            }
+        return when (val snap = programRemote.listAthletePrograms()) {
+            is AppResult.Err -> snap
+            is AppResult.Ok -> AppResult.Ok(
+                snap.value.enrollments.map { row ->
+                    ProgramEnrollment(
+                        id = row.programId.ifBlank { row.id },
+                        title = row.title,
+                        currentWeek = row.currentWeek,
+                        totalWeeks = row.totalWeeks,
+                        progressPercent = row.progressPercent,
+                        nextWorkoutTitle = row.nextWorkoutTitle,
+                        milestones = row.milestones,
+                    )
+                },
+            )
         }
     }
 
@@ -325,9 +317,8 @@ class HttpAthleteRepository(
 
     override suspend fun enrollProgram(programId: String): AppResult<Unit> {
         if (useLocal()) return localFallback!!.enrollProgram(programId)
-        val body = JSONObject().put("programId", programId).toString()
-        return when (val raw = api().post("/api/v1/athletes/programs", body)) {
-            is AppResult.Err -> raw
+        return when (val enrolled = programRemote.enrollAthlete(programId)) {
+            is AppResult.Err -> enrolled
             is AppResult.Ok -> AppResult.Ok(Unit)
         }
     }
@@ -348,6 +339,30 @@ class HttpAthleteRepository(
                 idempotencyKey,
             )
         }
+        val engine = bookingEngine
+        if (engine != null) {
+            val clientId = athleteId() ?: return AppResult.Err(
+                AppError.Auth(AppError.AuthKind.UNAUTHENTICATED),
+            )
+            return when (
+                val created = engine.create(
+                    com.fitconnect.android.geo.booking.BookingRequest(
+                        targetKind = com.fitconnect.android.geo.domain.BookingTargetKind.COACH,
+                        targetId = coachId,
+                        clientId = clientId,
+                        clientName = "Athlete",
+                        startEpochMs = scheduledAtEpochMs,
+                        durationMin = durationMin,
+                        mode = com.fitconnect.android.geo.domain.SessionMode.PRIVATE,
+                        notes = notes,
+                        autoConfirm = false,
+                    ),
+                )
+            ) {
+                is AppResult.Ok -> AppResult.Ok(created.value.id)
+                is AppResult.Err -> created
+            }
+        }
         val body = JSONObject()
             .put("coachId", coachId)
             .put("scheduledAt", Instant.ofEpochMilli(scheduledAtEpochMs).toString())
@@ -356,8 +371,35 @@ class HttpAthleteRepository(
             .put("mode", "In-person")
         if (!notes.isNullOrBlank()) body.put("notes", notes)
         if (!idempotencyKey.isNullOrBlank()) body.put("idempotencyKey", idempotencyKey)
-        return when (val raw = api().post("/api/v1/bookings", body.toString())) {
-            is AppResult.Err -> raw
+        val bodyJson = body.toString()
+        if (connectivity?.online?.value == false && offline != null) {
+            offline.enqueue(
+                SyncWork(
+                    type = "athlete.booking.create",
+                    payloadJson = bodyJson,
+                    idempotencyKey = idempotencyKey
+                        ?: "athlete.booking.create:$coachId:${scheduledAtEpochMs / 60_000}",
+                ),
+            )
+            return AppResult.Ok("queued-offline")
+        }
+        return when (val raw = api().post("/api/v1/bookings", bodyJson)) {
+            is AppResult.Err -> {
+                val network = raw.error as? AppError.Network
+                if (network != null && offline != null) {
+                    offline.enqueue(
+                        SyncWork(
+                            type = "athlete.booking.create",
+                            payloadJson = bodyJson,
+                            idempotencyKey = idempotencyKey
+                                ?: "athlete.booking.create:$coachId:${scheduledAtEpochMs / 60_000}",
+                        ),
+                    )
+                    AppResult.Ok("queued-offline")
+                } else {
+                    raw
+                }
+            }
             is AppResult.Ok -> {
                 val root = JSONObject(raw.value)
                 val booking = root.optJSONObject("booking")

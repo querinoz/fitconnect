@@ -22,7 +22,14 @@ import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
+import com.fitconnect.android.designui.components.EliteEmptyState
 import com.fitconnect.android.designui.components.EliteProgress
+import com.fitconnect.android.designui.components.EliteSysLabel
+import com.fitconnect.android.designui.components.EliteZenithHeader
+import com.fitconnect.android.designui.components.HexBadge
+import com.fitconnect.android.designui.components.HexBadgeTone
+import com.fitconnect.android.designui.components.HexStatus
+import com.fitconnect.android.designui.neumorphic.EosPremiumCard
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.common.AppResult
 import kotlinx.coroutines.launch
@@ -87,14 +94,36 @@ fun ProgramsScreen() {
             title = "Programs",
             subtitle = "List · detail · week · enroll · progress",
             testTag = "athlete_programs",
+            showTitle = false,
         ) {
+            item {
+                EosPremiumCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+                        EliteZenithHeader(
+                            sysLabel = "LIBRARY COMMAND",
+                            title = "Programs",
+                            subtitle = "Training library, enrollments, and next workout progression in one command lane.",
+                            badge = {
+                                HexBadge(
+                                    text = programs.size.coerceAtMost(99).toString().padStart(2, '0'),
+                                    tone = HexBadgeTone.Volt,
+                                )
+                            },
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                            HexStatus("${catalog.size} catalog")
+                            HexStatus("${programs.size} enrolled")
+                        }
+                    }
+                }
+            }
             status?.let { msg ->
                 item {
                     Text(msg, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                 }
             }
             if (catalog.isNotEmpty()) {
-                item { Text("Catalog", style = MaterialTheme.typography.titleMedium) }
+                item { EliteSysLabel("TRAINING LIBRARY · CATALOG") }
                 items(catalog, key = { "cat_${it.id}" }) { prog ->
                     EliteCard(modifier = Modifier.testTag("program_catalog_${prog.id}")) {
                         Text(prog.title, style = MaterialTheme.typography.titleLarge)
@@ -111,7 +140,7 @@ fun ProgramsScreen() {
                                             status = "Enrolled · ${prog.title}"
                                             reload()
                                         }
-                                        is AppResult.Err -> status = enroll.error.toString()
+                                        is AppResult.Err -> status = "Enroll failed · try again"
                                     }
                                 }
                             },
@@ -119,12 +148,15 @@ fun ProgramsScreen() {
                     }
                 }
             }
-            item { Text("My enrollments", style = MaterialTheme.typography.titleMedium) }
+            item { EliteSysLabel("MY ENROLLMENTS") }
             if (programs.isEmpty()) {
                 item {
-                    EliteCard {
-                        Text("No programs enrolled yet", style = MaterialTheme.typography.bodyLarge)
-                    }
+                    EliteEmptyState(
+                        title = "No programs yet",
+                        body = "Enroll from the catalog to track weekly progress and your next workout.",
+                        actionLabel = "Refresh",
+                        onAction = ::reload,
+                    )
                 }
             }
             items(programs, key = { it.id }) { program ->

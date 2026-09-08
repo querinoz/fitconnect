@@ -2,8 +2,8 @@ package com.fitconnect.android.designui.components
 
 import android.net.Uri
 import android.widget.VideoView
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -22,7 +22,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,15 +39,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.fitconnect.android.design.EliteSurfaceColors
+import com.fitconnect.android.designui.neumorphic.EosPremiumCard
+import com.fitconnect.android.designui.theme.EliteOpacity
 import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.reduceMotionEnabled
+import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.android.foundation.a11y.Accessibility
 
 data class EliteFeedReaction(
@@ -77,28 +89,39 @@ fun EliteFeedPost(
     compact: Boolean = false,
     verified: Boolean = false,
     onClick: (() -> Unit)? = null,
+    onComment: (() -> Unit)? = null,
+    onShare: (() -> Unit)? = null,
 ) {
-    val mediaHeight = if (compact) 160.dp else 220.dp
-    EliteCard(modifier = modifier.testTag("elite_feed_post"), variant = EliteCardVariant.Glass, onClick = onClick) {
+    val mediaHeight = if (compact) EliteSpace.Huge * 3 + EliteSpace.Section else EliteSpace.Huge * 5
+    EosPremiumCard(
+        modifier = modifier.testTag("elite_feed_post"),
+        cornerRadius = EliteRadius.Lg,
+        onClick = onClick,
+    ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (authorId != null) {
-                EliteHexatar(
+            // Prefer photographic story/avatar assets when present (Phase 0 Feed twin).
+            val photoAvatar = !avatarName.isNullOrBlank() && EliteLocalImageExists(avatarName)
+            when {
+                photoAvatar -> EliteAvatar(
+                    initials = authorInitials,
+                    imageName = avatarName,
+                )
+                authorId != null -> EliteHexatar(
                     userId = authorId,
                     contentDescription = authorName,
                     diameter = EliteHexatarFeed,
                 )
-            } else {
-                EliteAvatar(initials = authorInitials, imageName = avatarName, size = 40)
+                else -> EliteAvatar(initials = authorInitials, imageName = avatarName)
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(authorName, style = MaterialTheme.typography.titleMedium)
                 Text(
                     listOf(kindLabel, timeLabel).filter { it.isNotBlank() }.joinToString(" · "),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = EliteSurfaceColors.INSTRUMENT_MUTED.toColor(),
                 )
             }
             if (verified) {
@@ -122,29 +145,101 @@ fun EliteFeedPost(
         if (body.isNotBlank()) {
             Text(body, style = MaterialTheme.typography.bodyLarge)
         }
-        if (!compact && reactions.isNotEmpty()) {
-            EliteFlowRow {
-                reactions.forEach { reaction ->
-                    EliteChip(
-                        label = if (reaction.count > 0) {
-                            "${reaction.label} ${reaction.count}"
-                        } else {
-                            reaction.label
-                        },
-                        selected = reaction.selected,
-                        onClick = { onReact(reaction.id) },
-                    )
-                }
-            }
-        }
+        EliteFeedActionRow(
+            likeCount = EliteFeedLogic.likeCount(reactions),
+            liked = EliteFeedLogic.liked(reactions),
+            commentCount = comments.size,
+            onLike = { onReact(EliteFeedLogic.LIKE_ID) },
+            onComment = onComment,
+            onShare = onShare,
+        )
         if (!compact) {
             comments.take(2).forEach { comment ->
                 Text(
                     "${comment.author}  ${comment.text}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = EliteSurfaceColors.INSTRUMENT_MUTED.toColor(),
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun EliteFeedActionRow(
+    likeCount: Int,
+    liked: Boolean,
+    commentCount: Int,
+    onLike: () -> Unit,
+    onComment: (() -> Unit)?,
+    onShare: (() -> Unit)?,
+) {
+    val muted = EliteSurfaceColors.INSTRUMENT_MUTED.toColor()
+    val volt = EliteSurfaceColors.VOLTLINE.toColor()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("elite_feed_actions"),
+        horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xl),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        EliteFeedAction(
+            icon = if (liked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+            count = likeCount,
+            selected = liked,
+            contentDescription = "Like $likeCount",
+            tint = if (liked) volt else muted,
+            onClick = onLike,
+        )
+        EliteFeedAction(
+            icon = Icons.Outlined.ChatBubbleOutline,
+            count = commentCount,
+            selected = false,
+            contentDescription = "Comments $commentCount",
+            tint = muted,
+            onClick = onComment,
+        )
+        EliteFeedAction(
+            icon = Icons.Outlined.Share,
+            count = null,
+            selected = false,
+            contentDescription = "Share",
+            tint = muted,
+            onClick = onShare,
+        )
+    }
+}
+
+@Composable
+private fun EliteFeedAction(
+    icon: ImageVector,
+    count: Int?,
+    selected: Boolean,
+    contentDescription: String,
+    tint: androidx.compose.ui.graphics.Color,
+    onClick: (() -> Unit)?,
+) {
+    Row(
+        modifier = Modifier
+            .height(Accessibility.MIN_TOUCH_TARGET_DP.dp)
+            .clickable(enabled = onClick != null, onClick = { onClick?.invoke() })
+            .semantics { this.contentDescription = contentDescription }
+            .padding(end = EliteSpace.Xs),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs),
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier.size(EliteSpace.Xl),
+        )
+        count?.let {
+            Text(
+                text = it.toString(),
+                style = MaterialTheme.typography.labelMedium,
+                color = if (selected) EliteSurfaceColors.VOLTLINE.toColor() else tint,
+            )
         }
     }
 }
@@ -168,7 +263,8 @@ private fun EliteFeedMedia(
         ),
         label = "kenburns",
     )
-    Box(modifier = modifier.background(MaterialTheme.colorScheme.surfaceVariant)) {
+    val floor = EliteSurfaceColors.FLOOR.toColor()
+    Box(modifier = modifier.background(EliteSurfaceColors.CARBON.toColor())) {
         if (playing && rawId != 0) {
             val context = LocalContext.current
             AndroidView(
@@ -202,8 +298,9 @@ private fun EliteFeedMedia(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            MaterialTheme.colorScheme.background.copy(alpha = 0f),
-                            MaterialTheme.colorScheme.background.copy(alpha = 0.72f),
+                            Color.Transparent,
+                            floor.copy(alpha = EliteOpacity.Scrim),
+                            floor.copy(alpha = EliteOpacity.Subtle),
                         ),
                     ),
                 ),
@@ -229,14 +326,14 @@ private fun EliteFeedMedia(
                     .align(Alignment.Center)
                     .size(Accessibility.MIN_TOUCH_TARGET_DP.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.55f))
+                    .background(floor.copy(alpha = EliteOpacity.Muted))
                     .clickable { playing = !playing },
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,
                     contentDescription = if (playing) "Pause motion" else "Play motion",
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = EliteSurfaceColors.VOLTLINE.toColor(),
                 )
             }
         }

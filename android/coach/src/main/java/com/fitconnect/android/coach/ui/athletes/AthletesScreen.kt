@@ -1,6 +1,7 @@
 package com.fitconnect.android.coach.ui.athletes
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +23,11 @@ import com.fitconnect.android.designui.components.EliteChip
 import com.fitconnect.android.designui.components.ElitePersonCard
 import com.fitconnect.android.designui.components.EliteSwitch
 import com.fitconnect.android.designui.components.EliteTextField
+import com.fitconnect.android.designui.components.EliteZenithHeader
+import com.fitconnect.android.designui.components.HexBadge
+import com.fitconnect.android.designui.components.HexBadgeTone
+import com.fitconnect.android.designui.components.HexStatus
+import com.fitconnect.android.designui.neumorphic.EosPremiumCard
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.common.AppResult
 import kotlinx.coroutines.launch
@@ -59,22 +65,35 @@ fun AthletesScreen(onOpenAthlete: (String) -> Unit) {
             title = "Athletes",
             subtitle = "Search · filters · tags · groups · teams · status",
             testTag = "coach_athletes",
+            showTitle = false,
         ) {
             item {
-                EliteTextField(value = query, onValueChange = { query = it }, label = "Search")
-                EliteTextField(value = tag, onValueChange = { tag = it }, label = "Tag")
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(EliteSpace.Md),
-                    content = {
-                        EliteSwitch(checked = favoritesOnly, onCheckedChange = { favoritesOnly = it })
-                        Text("Favorites", style = MaterialTheme.typography.bodyLarge)
-                        EliteSwitch(checked = atRiskOnly, onCheckedChange = { atRiskOnly = it })
-                        Text("At risk", style = MaterialTheme.typography.bodyLarge)
-                    },
-                )
+                EosPremiumCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+                        EliteZenithHeader(
+                            sysLabel = "ROSTER COMMAND",
+                            title = "Athletes",
+                            subtitle = "Filter roster health, favorites, and at-risk athletes without changing coach logic.",
+                            badge = {
+                                HexBadge(
+                                    text = athletes.size.coerceAtMost(99).toString().padStart(2, '0'),
+                                    tone = HexBadgeTone.Telemetry,
+                                )
+                            },
+                        )
+                        EliteTextField(value = query, onValueChange = { query = it }, label = "Search")
+                        EliteTextField(value = tag, onValueChange = { tag = it }, label = "Tag")
+                        Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+                            EliteSwitch(checked = favoritesOnly, onCheckedChange = { favoritesOnly = it })
+                            Text("Favorites", style = MaterialTheme.typography.bodyLarge)
+                            EliteSwitch(checked = atRiskOnly, onCheckedChange = { atRiskOnly = it })
+                            Text("At risk", style = MaterialTheme.typography.bodyLarge)
+                        }
+                    }
+                }
             }
             items(athletes, key = { it.id }) { athlete ->
-                EliteCard(onClick = { onOpenAthlete(athlete.id) }) {
+                EosPremiumCard(onClick = { onOpenAthlete(athlete.id) }) {
                     ElitePersonCard(
                         title = athlete.displayName + if (athlete.favorite) " ★" else "",
                         subtitle = buildString {
@@ -89,6 +108,7 @@ fun AthletesScreen(onOpenAthlete: (String) -> Unit) {
                             athlete.team?.let { append(" · $it") }
                         },
                     )
+                    HexStatus(athlete.status.name.replace('_', ' '))
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs),
                         content = {

@@ -28,4 +28,11 @@ describe("P0-SEC SQL policy snapshot", () => {
     expect(source).toContain("force row level security");
     expect(source).toMatch(/revoke all on table public.account_deletion_requests from anon/i);
   });
+
+  it("community posts reject STRAVA via generated is_social_eligible (020)", () => {
+    const source = sql("020_community_strava_never_social.sql");
+    expect(source).toMatch(/upper\(provider_id\) <> 'STRAVA'/i);
+    expect(source).toContain("is_social_eligible");
+    expect(source).toContain("community_posts_is_social_eligible_check");
+  });
 });

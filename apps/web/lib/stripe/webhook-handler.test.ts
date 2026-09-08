@@ -110,7 +110,7 @@ describe("stripe webhook handler", () => {
     }
   });
 
-  it("should_still_process_in_demo_without_a_database", async () => {
+  it("should_fail_closed_without_persistence_even_in_demo_mode", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("NEXT_PUBLIC_DEMO_MODE", "true");
     try {
@@ -119,10 +119,21 @@ describe("stripe webhook handler", () => {
         type: "checkout.session.completed",
         data: { object: {} }
       } as never);
-      expect(result.processed).toBe(true);
+      expect(result.processed).toBe(false);
+      expect("degraded" in result && result.degraded).toBe(true);
+      expect("reason" in result && result.reason).toBe("persistence_unavailable");
     } finally {
       vi.unstubAllEnvs();
     }
+  });
+
+  it("should_refuse_claim_when_no_database", async () => {
+    vi.mocked(getPrisma).mockReturnValue(null);
+    const claimed = await claimStripeEvent({
+      id: "evt_nodb",
+      type: "checkout.session.completed"
+    } as never);
+    expect(claimed).toBe(false);
   });
 
   it("should_dispatch_subscription_lifecycle_and_invoice_events_via_prisma", async () => {

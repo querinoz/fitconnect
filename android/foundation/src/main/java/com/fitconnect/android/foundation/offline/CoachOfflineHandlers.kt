@@ -8,21 +8,76 @@ import org.json.JSONObject
 
 /** HTTP-backed offline flush for coach calendar / booking / program mutations. */
 object CoachOfflineHandlers {
-    fun register(registry: RegistryOfflineExecutor, api: ApiClient, logger: Logger) {
-        registry.register("coach.booking.approve", bookingAction(api, logger, "approve"))
-        registry.register("coach.booking.decline", bookingAction(api, logger, "reject"))
-        registry.register("coach.booking.reject", bookingAction(api, logger, "reject"))
+    /** Canonical mutation types — keep OfflineKillMatrixTest in sync. */
+    val MUTATION_TYPES: List<String> = listOf(
+        "coach.booking.approve",
+        "coach.booking.decline",
+        "coach.booking.reject",
+        "coach.session.reschedule",
+        "coach.session.cancel",
+        "coach.program.publish",
+        "coach.program.draft",
+        "coach.program.clone",
+        "coach.athlete.favorite",
+        "coach.inbox.read",
+    )
+
+    fun register(
+        registry: RegistryOfflineExecutor,
+        api: ApiClient,
+        logger: Logger,
+        onBookingActionSynced: ((work: SyncWork, action: String) -> Unit)? = null,
+    ) {
+        registry.register("coach.booking.approve", bookingAction(api, logger, "approve", onBookingActionSynced))
+        registry.register("coach.booking.decline", bookingAction(api, logger, "reject", onBookingActionSynced))
+        registry.register("coach.booking.reject", bookingAction(api, logger, "reject", onBookingActionSynced))
         registry.register("coach.session.reschedule", sessionPatch(api, logger, "reschedule"))
         registry.register("coach.session.cancel", sessionPatch(api, logger, "cancel"))
         registry.register("coach.program.publish", programAction(api, logger, "publish"))
         registry.register("coach.program.draft", programAction(api, logger, "draft"))
         registry.register("coach.program.clone", programAction(api, logger, "clone"))
+        registry.register("coach.athlete.favorite", favoriteToggle(api, logger))
+        registry.register("coach.inbox.read", inboxRead(api, logger))
     }
+
+    private fun favoriteToggle(api: ApiClient, logger: Logger): OfflineWorkExecutor =
+        OfflineWorkExecutor { work ->
+            val athleteId = JSONObject(work.payloadJson).optString("athleteId")
+                .ifBlank { JSONObject(work.payloadJson).optString("id") }
+            if (athleteId.isBlank()) {
+                return@OfflineWorkExecutor AppResult.Err(AppError.Unexpected("athleteId_missing"))
+            }
+            val body = JSONObject().put("athleteId", athleteId).toString()
+            when (val result = api.post("/api/v1/coaches/favorites", body)) {
+                is AppResult.Ok -> {
+                    logger.i("CoachOffline", "athlete.favorite synced ${work.idempotencyKey}")
+                    AppResult.Ok(Unit)
+                }
+                is AppResult.Err -> result
+            }
+        }
+
+    private fun inboxRead(api: ApiClient, logger: Logger): OfflineWorkExecutor =
+        OfflineWorkExecutor { work ->
+            val id = JSONObject(work.payloadJson).optString("id")
+            if (id.isBlank()) {
+                return@OfflineWorkExecutor AppResult.Err(AppError.Unexpected("inbox_id_missing"))
+            }
+            val body = JSONObject().put("id", id).toString()
+            when (val result = api.put("/api/v1/notifications", body)) {
+                is AppResult.Ok -> {
+                    logger.i("CoachOffline", "inbox.read synced ${work.idempotencyKey}")
+                    AppResult.Ok(Unit)
+                }
+                is AppResult.Err -> result
+            }
+        }
 
     private fun bookingAction(
         api: ApiClient,
         logger: Logger,
         action: String,
+        onSynced: ((work: SyncWork, action: String) -> Unit)?,
     ): OfflineWorkExecutor = OfflineWorkExecutor { work ->
         val bookingId = JSONObject(work.payloadJson).optString("bookingId")
             .ifBlank { JSONObject(work.payloadJson).optString("id") }
@@ -33,6 +88,7 @@ object CoachOfflineHandlers {
         when (val result = api.post("/api/v1/coaches/bookings", body)) {
             is AppResult.Ok -> {
                 logger.i("CoachOffline", "booking.$action synced ${work.idempotencyKey}")
+                onSynced?.invoke(work, action)
                 AppResult.Ok(Unit)
             }
             is AppResult.Err -> result

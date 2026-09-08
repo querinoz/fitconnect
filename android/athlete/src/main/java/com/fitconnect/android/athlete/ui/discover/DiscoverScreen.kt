@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,13 +48,20 @@ import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteChip
+import com.fitconnect.android.designui.components.EliteEmptyState
+import com.fitconnect.android.designui.components.EliteErrorView
 import com.fitconnect.android.designui.components.EliteMarketplaceCard
 import com.fitconnect.android.designui.components.EliteSectionHeader
 import com.fitconnect.android.designui.components.EliteSwitch
 import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.components.EliteTextField
+import com.fitconnect.android.designui.components.EliteZenithHeader
+import com.fitconnect.android.designui.components.HexBadge
+import com.fitconnect.android.designui.components.HexBadgeTone
+import com.fitconnect.android.designui.components.HexStatus
 import com.fitconnect.android.designui.neumorphic.EosGlassBadge
 import com.fitconnect.android.designui.neumorphic.EosNeumorphicColors
+import com.fitconnect.android.designui.neumorphic.EosPremiumCard
 import com.fitconnect.android.designui.neumorphic.EosPremiumWell
 import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
@@ -61,11 +69,12 @@ import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.android.foundation.auth.DemoPersona
 import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.geo.booking.BookingRequest
-import com.fitconnect.android.geo.catalog.PlacesCatalog
 import com.fitconnect.android.geo.domain.BookingLifecycle
 import com.fitconnect.android.geo.domain.BookingTargetKind
 import com.fitconnect.android.geo.domain.MapStyleKind
 import com.fitconnect.android.geo.domain.SessionMode
+import com.fitconnect.android.geo.maps.DiscoverMapUiLogic
+import com.fitconnect.android.geo.maps.DiscoverMapUiState
 import com.fitconnect.android.geo.maps.MapCamera
 import com.fitconnect.android.geo.maps.MapMarker
 import com.fitconnect.android.geo.maps.MapScene
@@ -91,8 +100,12 @@ fun DiscoverScreen() {
     var markers by remember { mutableStateOf<List<MapMarker>>(emptyList()) }
     var selectedCoach by remember { mutableStateOf<CoachCard?>(null) }
     var bookingDraft by remember { mutableStateOf<BookingDraft?>(null) }
+    var bookingSubmitting by remember { mutableStateOf(false) }
+    var messageSending by remember { mutableStateOf(false) }
     var lastBookingId by remember { mutableStateOf<String?>(null) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
+    val locationPermission by container.geo.location.permission.collectAsState()
+    val locationFix by container.geo.location.current.collectAsState()
 
     fun reload() {
         scope.launch {
@@ -114,34 +127,41 @@ fun DiscoverScreen() {
         reload()
     }
 
-    LaunchedEffect(result) {
+    LaunchedEffect(result, locationFix, locationPermission, isLocalDemo) {
         val coaches = (result as? AppResult.Ok)?.value.orEmpty()
-        val anchor = PlacesCatalog.defaultDevAnchor()
+        val fix = locationFix ?: container.geo.location.lastKnown()
+        // Production: never invent a Lisbon self-pin. Demo may use catalog anchor when mocked.
+        val anchor = fix?.point
         val coachMarkers = buildList {
-            add(MapMarker("self", anchor, "You"))
-            coaches.take(5).forEachIndexed { i, coach ->
-                add(
-                    MapMarker(
-                        coach.id,
-                        anchor.copy(
-                            latitude = anchor.latitude + 0.008 * (i + 1),
-                            longitude = anchor.longitude + 0.006 * (i % 3),
+            if (anchor != null) {
+                add(MapMarker("self", anchor, "You"))
+                coaches.take(5).forEachIndexed { i, coach ->
+                    add(
+                        MapMarker(
+                            coach.id,
+                            anchor.copy(
+                                latitude = anchor.latitude + 0.008 * (i + 1),
+                                longitude = anchor.longitude + 0.006 * (i % 3),
+                            ),
+                            coach.name,
                         ),
-                        coach.name,
-                    ),
-                )
+                    )
+                }
             }
         }
         markers = coachMarkers
-        val controller = container.geo.maps.preferredProvider().createController()
-        controller.render(
-            MapScene(
-                style = MapStyleKind.DARK,
-                camera = MapCamera(anchor, 12.0),
-                markers = coachMarkers,
-                livePosition = anchor,
-            ),
-        )
+        if (anchor != null) {
+            val controller = container.geo.maps.preferredProvider().createController()
+            controller.render(
+                MapScene(
+                    style = MapStyleKind.DARK,
+                    camera = MapCamera(anchor, 12.0),
+                    markers = coachMarkers,
+                    livePosition = anchor,
+                    showUserLocation = !fix.mocked || isLocalDemo,
+                ),
+            )
+        }
     }
 
     AthleteLoad(result, ::reload) { coaches ->
@@ -173,12 +193,42 @@ fun DiscoverScreen() {
             },
             overline = "ATHLETE OS · ANALYSIS",
             testTag = "athlete_discover",
+            showTitle = false,
         ) {
             item {
                 AthleteDemoBanner(
-                    visible = isLocalDemo && analysis.isAnyDemo,
+                    visible = !container.platform.config.visualQaChromeDiet &&
+                        isLocalDemo &&
+                        analysis.isAnyDemo,
                     modifier = Modifier.testTag("discover_demo_banner"),
                 )
+            }
+            item {
+                EosPremiumCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+                        EliteZenithHeader(
+                            sysLabel = "ANALYSIS COMMAND",
+                            title = "Analysis + discover",
+                            subtitle = if (isLocalDemo) {
+                                "Telemetry samples and marketplace cards stay clearly labeled in local demo mode."
+                            } else {
+                                "Live telemetry, coach marketplace, and booking actions from one command surface."
+                            },
+                            badge = {
+                                HexBadge(
+                                    text = filtered.size.coerceAtMost(99).toString().padStart(2, '0'),
+                                    tone = HexBadgeTone.Telemetry,
+                                )
+                            },
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                            HexStatus(if (verifiedOnly) "verified only" else "all coaches")
+                            HexStatus(
+                                "${DiscoverMapUiLogic.placeMarkerCount(markers)} map markers",
+                            )
+                        }
+                    }
+                }
             }
             item {
                 EliteSectionHeader(
@@ -284,9 +334,18 @@ fun DiscoverScreen() {
                     routeDistanceKm = route?.distanceKm,
                     routeDurationMin = route?.estimatedMinutes,
                 )
+                val mapState = DiscoverMapUiLogic.resolve(
+                    permission = locationPermission,
+                    hasLocationFix = locationFix != null || container.geo.location.lastKnown() != null,
+                    markerCount = DiscoverMapUiLogic.placeMarkerCount(markers),
+                    loadFailed = result is AppResult.Err,
+                )
                 LocalMapPreview(
                     preview = mapUi,
-                    markerCount = markers.size.coerceAtLeast(2),
+                    markerCount = DiscoverMapUiLogic.placeMarkerCount(markers),
+                    mapState = mapState,
+                    isLocalDemo = isLocalDemo,
+                    onRetry = ::reload,
                 )
             }
             item {
@@ -319,48 +378,55 @@ fun DiscoverScreen() {
                 item {
                     BookingSheet(
                         draft = draft,
-                        onDay = { bookingDraft = draft.copy(dayOffset = it) },
-                        onHour = { bookingDraft = draft.copy(hour = it) },
-                        onDismiss = { bookingDraft = null },
+                        submitting = bookingSubmitting,
+                        onDay = { if (!bookingSubmitting) bookingDraft = draft.copy(dayOffset = it) },
+                        onHour = { if (!bookingSubmitting) bookingDraft = draft.copy(hour = it) },
+                        onDismiss = {
+                            if (!bookingSubmitting) bookingDraft = null
+                        },
                         onConfirm = {
+                            if (bookingSubmitting) return@BookingSheet
                             scope.launch {
-                                val start = nextOpenSlot(
-                                    coachId = draft.coach.id,
-                                    dayOffset = draft.dayOffset,
-                                    preferredHour = draft.hour,
-                                    durationMin = draft.durationMin,
-                                    isOpen = { id, epoch, dur ->
-                                        if (!isLocalDemo) {
-                                            true
-                                        } else {
-                                            container.geo.availability.isOpen(id, epoch, dur, SessionMode.PRIVATE)
-                                        }
-                                    },
-                                )
-                                if (isLocalDemo &&
-                                    container.geo.booking.conflicts(draft.coach.id, start, draft.durationMin)
-                                ) {
-                                    statusMessage = "Slot conflict — pick another time"
-                                    return@launch
-                                }
-                                when (
-                                    val created = container.athleteRepository.createBooking(
+                                bookingSubmitting = true
+                                try {
+                                    val start = nextOpenSlot(
                                         coachId = draft.coach.id,
-                                        scheduledAtEpochMs = start,
+                                        dayOffset = draft.dayOffset,
+                                        preferredHour = draft.hour,
                                         durationMin = draft.durationMin,
-                                        notes = if (isLocalDemo) "LOCAL_DEMO booking" else null,
-                                        idempotencyKey = java.util.UUID.randomUUID().toString(),
+                                        isOpen = { id, epoch, dur ->
+                                            container.geo.availability.isOpen(id, epoch, dur, SessionMode.PRIVATE)
+                                        },
                                     )
-                                ) {
-                                    is AppResult.Ok -> {
-                                        lastBookingId = created.value
-                                        statusMessage = "Booked · ${created.value}"
-                                        bookingDraft = null
-                                        selectedCoach = null
+                                    if (container.geo.booking.conflicts(draft.coach.id, start, draft.durationMin)) {
+                                        statusMessage = "Slot conflict — pick another time"
+                                        return@launch
                                     }
-                                    is AppResult.Err -> {
-                                        statusMessage = "Booking failed · ${created.error}"
+                                    when (
+                                        val created = container.athleteRepository.createBooking(
+                                            coachId = draft.coach.id,
+                                            scheduledAtEpochMs = start,
+                                            durationMin = draft.durationMin,
+                                            notes = if (isLocalDemo) "LOCAL_DEMO booking" else null,
+                                            idempotencyKey = java.util.UUID.randomUUID().toString(),
+                                        )
+                                    ) {
+                                        is AppResult.Ok -> {
+                                            lastBookingId = created.value
+                                            statusMessage = if (created.value == "queued-offline") {
+                                                "Booking queued · will sync when online"
+                                            } else {
+                                                "Booked · ${created.value}"
+                                            }
+                                            bookingDraft = null
+                                            selectedCoach = null
+                                        }
+                                        is AppResult.Err -> {
+                                            statusMessage = "Booking failed · ${created.error}"
+                                        }
                                     }
+                                } finally {
+                                    bookingSubmitting = false
                                 }
                             }
                         },
@@ -372,27 +438,34 @@ fun DiscoverScreen() {
                 item {
                     CoachProfileCard(
                         coach = coach,
-                        onClose = { selectedCoach = null },
+                        messageSending = messageSending,
+                        onClose = { if (!messageSending) selectedCoach = null },
                         onBook = { bookingDraft = BookingDraft(coach) },
                         onMessage = {
+                            if (messageSending) return@CoachProfileCard
                             scope.launch {
+                                messageSending = true
                                 statusMessage = "Sending…"
-                                when (
-                                    val sent = container.athleteRepository.sendMessage(
-                                        coachId = coach.id,
-                                        preview = "Hi ${coach.name} — interested in coaching.",
-                                    )
-                                ) {
-                                    is AppResult.Ok -> {
-                                        statusMessage = if (sent.value == "queued-offline") {
-                                            "Message queued · will send when online → ${coach.name}"
-                                        } else {
-                                            "Message sent → ${coach.name}"
+                                try {
+                                    when (
+                                        val sent = container.athleteRepository.sendMessage(
+                                            coachId = coach.id,
+                                            preview = "Hi ${coach.name} — interested in coaching.",
+                                        )
+                                    ) {
+                                        is AppResult.Ok -> {
+                                            statusMessage = if (sent.value == "queued-offline") {
+                                                "Message queued · will send when online → ${coach.name}"
+                                            } else {
+                                                "Message sent → ${coach.name}"
+                                            }
+                                        }
+                                        is AppResult.Err -> {
+                                            statusMessage = "Message failed · try again"
                                         }
                                     }
-                                    is AppResult.Err -> {
-                                        statusMessage = "Message failed · ${sent.error}"
-                                    }
+                                } finally {
+                                    messageSending = false
                                 }
                             }
                         },
@@ -402,13 +475,22 @@ fun DiscoverScreen() {
 
             if (filtered.isEmpty()) {
                 item {
-                    EliteCard {
-                        Text("No coaches match these filters", style = MaterialTheme.typography.bodyLarge)
-                    }
+                    EliteEmptyState(
+                        title = "No coaches match",
+                        body = "Clear filters or widen specialty, city, or language to see more coaches.",
+                        actionLabel = "Reset filters",
+                        onAction = {
+                            specialty = ""
+                            language = ""
+                            city = ""
+                            verifiedOnly = false
+                        },
+                    )
                 }
             } else {
                 items(filtered, key = { it.id }) { coach ->
-                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
+                    EosPremiumCard {
+                        Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
                         EliteMarketplaceCard(
                             name = coach.name,
                             sport = coach.specialties.firstOrNull().orEmpty(),
@@ -421,18 +503,28 @@ fun DiscoverScreen() {
                             coverImageName = coachCover(coach.id),
                             onClick = { selectedCoach = coach },
                         )
-                        Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                            HexStatus(if (coach.verified) "VERIFIED" else "OPEN PROFILE")
+                            HexStatus(if (coach.available) "AVAILABLE" else "BUSY")
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
                             EliteButton(
-                                label = "View profile",
-                                variant = EliteButtonVariant.Ghost,
-                                onClick = { selectedCoach = coach },
-                            )
-                            EliteButton(
-                                label = "Book intro",
-                                variant = EliteButtonVariant.Secondary,
+                                label = "Book",
+                                variant = EliteButtonVariant.Primary,
                                 enabled = coach.available,
                                 onClick = { bookingDraft = BookingDraft(coach) },
                             )
+                            EliteButton(
+                                label = "Message",
+                                variant = EliteButtonVariant.Secondary,
+                                onClick = { selectedCoach = coach },
+                            )
+                            EliteButton(
+                                label = "Profile",
+                                variant = EliteButtonVariant.Ghost,
+                                onClick = { selectedCoach = coach },
+                            )
+                        }
                         }
                     }
                 }
@@ -502,6 +594,7 @@ private fun CoachProfileCard(
     onClose: () -> Unit,
     onBook: () -> Unit,
     onMessage: () -> Unit,
+    messageSending: Boolean = false,
 ) {
     EliteCard(modifier = Modifier.testTag("coach_profile_sheet")) {
         Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Md), verticalAlignment = Alignment.CenterVertically) {
@@ -523,9 +616,15 @@ private fun CoachProfileCard(
             style = MaterialTheme.typography.bodyMedium,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
-            EliteButton(label = "Book intro", enabled = coach.available, onClick = onBook)
-            EliteButton(label = "Message", variant = EliteButtonVariant.Secondary, onClick = onMessage)
-            EliteButton(label = "Close", variant = EliteButtonVariant.Ghost, onClick = onClose)
+            EliteButton(label = "Book intro", enabled = coach.available && !messageSending, onClick = onBook)
+            EliteButton(
+                label = if (messageSending) "Sending…" else "Message",
+                variant = EliteButtonVariant.Secondary,
+                enabled = !messageSending,
+                loading = messageSending,
+                onClick = onMessage,
+            )
+            EliteButton(label = "Close", variant = EliteButtonVariant.Ghost, enabled = !messageSending, onClick = onClose)
         }
     }
 }
@@ -537,6 +636,7 @@ private fun BookingSheet(
     onHour: (Int) -> Unit,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
+    submitting: Boolean = false,
 ) {
     EliteCard(modifier = Modifier.testTag("booking_sheet")) {
         Text("Book intro · ${draft.coach.name}", style = MaterialTheme.typography.titleLarge)
@@ -557,8 +657,18 @@ private fun BookingSheet(
             style = MaterialTheme.typography.bodyMedium,
         )
         com.fitconnect.android.designui.components.EliteFlowRow {
-            EliteButton(label = "Confirm booking", onClick = onConfirm)
-            EliteButton(label = "Cancel", variant = EliteButtonVariant.Ghost, onClick = onDismiss)
+            EliteButton(
+                label = "Confirm booking",
+                onClick = onConfirm,
+                loading = submitting,
+                enabled = !submitting,
+            )
+            EliteButton(
+                label = "Cancel",
+                variant = EliteButtonVariant.Ghost,
+                onClick = onDismiss,
+                enabled = !submitting,
+            )
         }
     }
 }
@@ -567,9 +677,64 @@ private fun BookingSheet(
 private fun LocalMapPreview(
     preview: DiscoverMapPreviewUi,
     markerCount: Int,
+    mapState: DiscoverMapUiState,
+    isLocalDemo: Boolean,
+    onRetry: () -> Unit,
 ) {
-    val floor = EosNeumorphicColors.Floor
+    val copy = DiscoverMapUiLogic.copy(mapState)
     val elevated = EosNeumorphicColors.MoldSurface
+    when (mapState) {
+        DiscoverMapUiState.PermissionDenied -> {
+            EliteErrorView(
+                title = copy.title,
+                body = copy.body,
+                retryLabel = "Retry",
+                onRetry = onRetry,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("athlete_map_permission_denied"),
+            )
+            return
+        }
+        DiscoverMapUiState.GpsUnavailable -> {
+            EliteEmptyState(
+                title = copy.title,
+                body = copy.body,
+                actionLabel = "Retry",
+                onAction = onRetry,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("athlete_map_gps_unavailable"),
+            )
+            return
+        }
+        DiscoverMapUiState.EmptyMarkers -> {
+            EliteEmptyState(
+                title = copy.title,
+                body = copy.body,
+                actionLabel = "Retry search",
+                onAction = onRetry,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("athlete_map_empty_markers"),
+            )
+            return
+        }
+        DiscoverMapUiState.Error -> {
+            EliteErrorView(
+                title = copy.title,
+                body = copy.body,
+                retryLabel = "Try again",
+                onRetry = onRetry,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("athlete_map_error"),
+            )
+            return
+        }
+        DiscoverMapUiState.Ready -> Unit
+    }
+    val floor = EosNeumorphicColors.Floor
     val route = EliteChartPalette.Secondary
     Box(
         modifier = Modifier
@@ -578,41 +743,54 @@ private fun LocalMapPreview(
             .background(elevated, RoundedCornerShape(EliteRadius.Lg))
             .testTag("athlete_map_panel"),
     ) {
-        Canvas(modifier = Modifier.fillMaxWidth().height(200.dp)) {
-            drawRect(floor)
-            val step = size.width / 8f
-            for (i in 1 until 8) {
-                drawLine(
-                    EliteChartPalette.Axis.copy(alpha = 0.15f),
-                    Offset(step * i, 0f),
-                    Offset(step * i, size.height),
-                    2f,
+        // Decorative instrument only when Ready + local demo; never invent GPS for production.
+        if (isLocalDemo) {
+            Canvas(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+                drawRect(floor)
+                val step = size.width / 8f
+                for (i in 1 until 8) {
+                    drawLine(
+                        EliteChartPalette.Axis.copy(alpha = 0.15f),
+                        Offset(step * i, 0f),
+                        Offset(step * i, size.height),
+                        2f,
+                    )
+                    drawLine(
+                        EliteChartPalette.Axis.copy(alpha = 0.15f),
+                        Offset(0f, step * i * 0.5f),
+                        Offset(size.width, step * i * 0.5f),
+                        2f,
+                    )
+                }
+                val path = listOf(
+                    Offset(size.width * 0.18f, size.height * 0.72f),
+                    Offset(size.width * 0.32f, size.height * 0.55f),
+                    Offset(size.width * 0.48f, size.height * 0.58f),
+                    Offset(size.width * 0.62f, size.height * 0.42f),
+                    Offset(size.width * 0.78f, size.height * 0.38f),
                 )
-                drawLine(
-                    EliteChartPalette.Axis.copy(alpha = 0.15f),
-                    Offset(0f, step * i * 0.5f),
-                    Offset(size.width, step * i * 0.5f),
-                    2f,
-                )
+                for (i in 0 until path.lastIndex) {
+                    drawLine(route.copy(alpha = 0.85f), path[i], path[i + 1], strokeWidth = 5f)
+                }
+                drawCircle(EliteChartPalette.zone(4).copy(alpha = 0.25f), radius = 28f, center = path[2])
+                drawCircle(EliteChartPalette.zone(2).copy(alpha = 0.3f), radius = 22f, center = path[3])
+                drawCircle(EliteChartPalette.Muted, radius = 10f, center = path.last())
+                drawCircle(EliteChartPalette.Secondary, radius = 8f, center = path.first())
             }
-            val path = listOf(
-                Offset(size.width * 0.18f, size.height * 0.72f),
-                Offset(size.width * 0.32f, size.height * 0.55f),
-                Offset(size.width * 0.48f, size.height * 0.58f),
-                Offset(size.width * 0.62f, size.height * 0.42f),
-                Offset(size.width * 0.78f, size.height * 0.38f),
-            )
-            for (i in 0 until path.lastIndex) {
-                drawLine(route.copy(alpha = 0.85f), path[i], path[i + 1], strokeWidth = 5f)
+        } else {
+            Canvas(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+                drawRect(floor)
             }
-            drawCircle(EliteChartPalette.zone(4).copy(alpha = 0.25f), radius = 28f, center = path[2])
-            drawCircle(EliteChartPalette.zone(2).copy(alpha = 0.3f), radius = 22f, center = path[3])
-            drawCircle(EliteChartPalette.Muted, radius = 10f, center = path.last())
-            drawCircle(EliteChartPalette.Secondary, radius = 8f, center = path.first())
         }
         Column(modifier = Modifier.padding(EliteSpace.Md)) {
-            EosGlassBadge(text = "LOCAL MAP · ${AthleteDemoCatalog.MODE_LABEL}")
-            EliteSysLabel("GPS · DEMO INSTRUMENT")
+            EosGlassBadge(
+                text = if (isLocalDemo) {
+                    "LOCAL MAP · ${AthleteDemoCatalog.MODE_LABEL}"
+                } else {
+                    "MARKETPLACE MAP"
+                },
+            )
+            EliteSysLabel(copy.sysLabel)
             Text(
                 "Route · ${"%.1f".format(preview.distanceKm.value)} km · ${preview.durationMin.value} min",
                 style = MaterialTheme.typography.titleMedium,

@@ -10,6 +10,10 @@ class DemoPersonaTest {
         assertEquals(UserRole.ATHLETE, DemoPersona.INES.role)
         assertEquals(UserRole.ATHLETE, DemoPersona.MARINA.role)
         assertEquals(UserRole.COACH, DemoPersona.TOMAS.role)
+        assertEquals(
+            setOf(UserRole.ATHLETE, UserRole.COACH),
+            DemoPersona.EDUARDO.capabilities,
+        )
         assertEquals(UserRole.COACH, DemoPersona.resolveRole(DemoPersona.TOMAS.email, true))
         assertEquals(UserRole.ATHLETE, DemoPersona.resolveRole(DemoPersona.INES.email, true))
     }

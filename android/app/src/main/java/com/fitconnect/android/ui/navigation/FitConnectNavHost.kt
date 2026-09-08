@@ -5,16 +5,17 @@ import android.net.Uri
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,14 +30,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -49,6 +51,7 @@ import com.fitconnect.android.R
 import com.fitconnect.android.athlete.ui.AthleteOsApp
 import com.fitconnect.android.coach.ui.CoachOsApp
 import com.fitconnect.android.designui.atmosphere.HoneycombAtmosphere
+import com.fitconnect.android.designui.brand.EosFitConnectLockup
 import com.fitconnect.android.designui.catalog.DesignSystemCatalog
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
@@ -56,6 +59,7 @@ import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteCardVariant
 import com.fitconnect.android.designui.components.EliteLoading
 import com.fitconnect.android.designui.components.EliteSysLabel
+import com.fitconnect.android.designui.components.EosMultiSportHero
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.reduceMotionEnabled
 import com.fitconnect.android.foundation.authz.UserRole
@@ -154,6 +158,14 @@ fun FitConnectNavHost(
                     goShell(AppDestination.Auth)
                 }
             }
+            is DeepLinkTarget.CoachNested -> {
+                // Uri stays in DeepLinkInbox for CoachOsApp.handleDeepLink after HOME mounts.
+                if (loggedIn) goShell(AppDestination.LoggedHome)
+                else {
+                    DeepLinkInbox.clearIf(uri)
+                    goShell(AppDestination.Auth)
+                }
+            }
             DeepLinkTarget.Unknown -> {
                 DeepLinkInbox.clearIf(uri)
                 navigateGuarded(if (loggedIn) CoreRoute.HOME else CoreRoute.GUEST)
@@ -232,6 +244,8 @@ fun FitConnectNavHost(
                 navDeepLink { uriPattern = "fitconnect://app/home" },
                 navDeepLink { uriPattern = "https://fitconnect-phi.vercel.app/app/home" },
                 navDeepLink { uriPattern = "fitconnect://app/athlete/home" },
+                navDeepLink { uriPattern = "fitconnect://app/athlete/feed" },
+                navDeepLink { uriPattern = "fitconnect://app/coach/feed" },
             ),
         ) {
             val app = LocalContext.current.applicationContext as FitConnectApplication
@@ -246,6 +260,12 @@ fun FitConnectNavHost(
                     if (!decision.allowed) {
                         navController.navigate(AppDestination.fromCore(decision.redirectTo ?: CoreRoute.GUEST).route) {
                             popUpTo(0) { inclusive = true }
+                        }
+                    } else {
+                        // Cold-start / restore: re-register FCM or Dev token when not LOCAL_DEMO.
+                        val snap = container.sessionStore.snapshot()
+                        if (snap.userId != null && !snap.isLocalDemo) {
+                            container.notifications.registerForPush()
                         }
                     }
                 }.onFailure { e ->
@@ -275,7 +295,7 @@ fun FitConnectNavHost(
                     var sessionRole by remember { mutableStateOf(role) }
                     LaunchedEffect(role, needsRole) {
                         val snap = container.sessionStore.snapshot()
-                        sessionRole = snap.role
+                        sessionRole = snap.activeMode
                         needsRole = container.keyValueStore.needsIdentityRoleSelection(
                             snap.userId.orEmpty(),
                             snap.isLocalDemo,
@@ -287,12 +307,20 @@ fun FitConnectNavHost(
                             authRepository = container.authRepository,
                             onSelected = {
                                 scope.launch {
-                                    sessionRole = container.sessionStore.role()
+                                    sessionRole = container.sessionStore.activeMode()
                                     needsRole = false
                                 }
                             },
                         )
-                        false -> when (sessionRole) {
+                        false -> {
+                            var shellMode by remember { mutableStateOf(sessionRole) }
+                            LaunchedEffect(sessionRole) {
+                                shellMode = container.sessionStore.activeMode()
+                            }
+                            fun onModeChanged(next: UserRole) {
+                                shellMode = next
+                            }
+                            when (shellMode) {
                             UserRole.COACH -> {
                                 var coachOnboardingDone by remember { mutableStateOf<Boolean?>(null) }
                                 var localDemoSession by remember { mutableStateOf(false) }
@@ -320,6 +348,7 @@ fun FitConnectNavHost(
                                                 navigateGuarded(CoreRoute.GUEST)
                                             }
                                         },
+                                        onActiveModeChange = ::onModeChanged,
                                     )
                                 }
                             }
@@ -350,6 +379,7 @@ fun FitConnectNavHost(
                                                 navigateGuarded(CoreRoute.GUEST)
                                             }
                                         },
+                                        onActiveModeChange = ::onModeChanged,
                                     )
                                 }
                             }
@@ -369,6 +399,7 @@ fun FitConnectNavHost(
                                     },
                                     testTag = "screen_home",
                                 )
+                            }
                             }
                         }
                     }
@@ -425,15 +456,24 @@ private fun SplashRoute(
 ) {
     val reduceMotion = reduceMotionEnabled()
     val markAlpha = remember { Animatable(if (reduceMotion) 1f else 0f) }
-    val glowAlpha = remember { Animatable(if (reduceMotion) 0.35f else 0f) }
     val floor = MaterialTheme.colorScheme.background
     val volt = MaterialTheme.colorScheme.primary
     var badge by remember { mutableStateOf<String?>(null) }
+    var revealDebug by remember { mutableStateOf(false) }
+    var finishLoggedIn by remember { mutableStateOf<Boolean?>(null) }
+    var finishLocalDemo by remember { mutableStateOf(false) }
+    var completed by remember { mutableStateOf(false) }
+
+    fun complete() {
+        val loggedIn = finishLoggedIn ?: return
+        if (completed) return
+        completed = true
+        onFinished(loggedIn, finishLocalDemo)
+    }
 
     LaunchedEffect(Unit) {
         if (!reduceMotion) {
-            markAlpha.animateTo(1f, tween(420))
-            glowAlpha.animateTo(0.45f, tween(520))
+            markAlpha.animateTo(1f, tween(480))
         }
         val restored = restore()
         val loggedIn = restored is AppResult.Ok<*>
@@ -444,8 +484,13 @@ private fun SplashRoute(
             isDebugBuild = BuildConfig.DEBUG,
             isLocalDemoSession = localDemo,
         )
-        delay(if (reduceMotion) 0 else 180)
-        onFinished(loggedIn, localDemo)
+        finishLoggedIn = loggedIn
+        finishLocalDemo = localDemo
+        // Session restore → enter app. Cold guests wait for Get Started (cinematic first paint).
+        if (loggedIn) {
+            delay(if (reduceMotion) 0 else 720)
+            complete()
+        }
     }
 
     Box(
@@ -453,65 +498,86 @@ private fun SplashRoute(
             .fillMaxSize()
             .background(floor)
             .testTag("screen_splash")
-            .semantics { contentDescription = "FitConnect Elite OS" },
-        contentAlignment = Alignment.Center,
+            .semantics { contentDescription = "FitConnect Elite OS" }
+            .pointerInput(Unit) {
+                detectTapGestures(onLongPress = { revealDebug = true })
+            },
     ) {
+        EosMultiSportHero(
+            imageNames = listOf("fc_splash_multisport", "fc_splash_bg"),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            dwellMs = 5200L,
+        )
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .alpha(glowAlpha.value)
                 .background(
-                    Brush.radialGradient(
-                        colors = listOf(volt.copy(alpha = 0.18f), Color.Transparent),
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Black.copy(alpha = 0.55f),
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.72f),
+                            Color.Black.copy(alpha = 0.92f),
+                        ),
                     ),
                 ),
         )
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Image(
-                painter = painterResource(R.drawable.ic_fitconnect_brand),
-                contentDescription = stringResource(R.string.app_name),
-                modifier = Modifier
-                    .size(96.dp)
-                    .alpha(markAlpha.value),
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.alpha(markAlpha.value),
-            )
-            Text(
-                text = stringResource(R.string.splash_tagline),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.alpha(markAlpha.value),
-            )
-            Text(
-                text = "ELITE OS",
-                style = MaterialTheme.typography.labelLarge,
-                color = volt,
-                modifier = Modifier.alpha(markAlpha.value),
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 32.dp)
+                .alpha(markAlpha.value),
+        ) {
+            EosFitConnectLockup(
+                markSize = 96.dp,
+                assemble = true,
+                wordmarkSize = 28.sp,
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "BIOMETRIC · TELEMETRY · AI · CONNECT",
-                style = MaterialTheme.typography.labelLarge,
-                color = volt,
-                modifier = Modifier
-                    .alpha(markAlpha.value)
-                    .testTag("splash_sys_init"),
+                text = stringResource(R.string.splash_tagline_line1),
+                style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 2.sp),
+                color = Color.White.copy(alpha = 0.92f),
+                textAlign = TextAlign.Center,
             )
-            badge?.let { label ->
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = volt,
-                    modifier = Modifier
-                        .alpha(markAlpha.value)
-                        .testTag("splash_identity_badge"),
-                )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.splash_tagline_line2),
+                style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 2.sp),
+                color = Color.White.copy(alpha = 0.92f),
+                textAlign = TextAlign.Center,
+            )
+        }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 28.dp, vertical = 28.dp)
+                .alpha(markAlpha.value),
+        ) {
+            EliteButton(
+                label = "Get Started",
+                onClick = { complete() },
+                enabled = finishLoggedIn != null && !completed,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("splash_sys_init"),
+                contentDescription = "Get Started",
+            )
+            if (revealDebug) {
+                badge?.let { label ->
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = volt,
+                        modifier = Modifier.testTag("splash_identity_badge"),
+                    )
+                }
             }
         }
     }

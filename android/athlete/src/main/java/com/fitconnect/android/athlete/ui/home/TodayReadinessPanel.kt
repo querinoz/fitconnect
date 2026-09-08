@@ -11,7 +11,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.fitconnect.android.athlete.demo.AthleteDemoCatalog
 import com.fitconnect.android.athlete.domain.TodayReadinessUi
 import com.fitconnect.android.designui.neumorphic.EliteReadinessNeumorphicCard
 import com.fitconnect.android.designui.neumorphic.ReadinessTelemetry
@@ -39,9 +38,7 @@ fun TodayReadinessPanel(
                 .testTag("today_readiness_neumorphic")
                 .padding(horizontal = 0.dp),
         )
-        if (ui.isAnyDemo) {
-            TodayProvenanceFootnote(ui)
-        }
+        TodayProvenanceFootnote(ui)
     }
 }
 
@@ -67,6 +64,6 @@ private fun TodayProvenanceFootnote(ui: TodayReadinessUi) {
 }
 
 private fun <T> provenanceLine(label: String, field: com.fitconnect.android.athlete.domain.Provenanced<T>): String {
-    val tag = if (field.isDemo) AthleteDemoCatalog.MODE_LABEL else field.sourceLabel.orEmpty()
+    val tag = field.uiLabel.name
     return "$label:$tag"
 }

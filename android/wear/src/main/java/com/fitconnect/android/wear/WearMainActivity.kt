@@ -47,6 +47,10 @@ class WearMainActivity : ComponentActivity() {
         runCatching {
             Wearable.getCapabilityClient(this).addLocalCapability(WearPaths.CAPABILITY)
         }
+        WearRuntime.allowLocalDemoReadiness = WearReadinessSelector.allowLocalDemo(
+            debugBuild = BuildConfig.DEBUG,
+            explicitFlag = BuildConfig.ALLOW_LOCAL_DEMO_READINESS,
+        )
         val hrCapability = WearHealthServicesProbe.heartRate(this)
         setContent {
             val scheme = rememberEliteWearColorScheme(ambient = ambient)

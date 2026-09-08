@@ -5,39 +5,48 @@ import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.foundation.common.Logger
 import com.fitconnect.android.foundation.network.ApiClient
 import com.fitconnect.android.foundation.notifications.LocalNotificationRequest
+import com.fitconnect.android.foundation.notifications.NotificationDeepLinkRouter
 import com.fitconnect.android.foundation.notifications.NotificationGateway
 import com.fitconnect.android.foundation.notifications.PushRegistration
+import com.fitconnect.android.foundation.notifications.PushTokenRefreshSink
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
 import org.json.JSONObject
 
 /**
  * Real FCM registration gateway. Only selected when BuildConfig.FCM_CONFIGURED
- * and google-services.json is present. Device push receipt remains a separate
- * certification gate — this registers the token with the canonical API.
+ * and google-services.json is present. Device push **receipt** remains EXTERNAL
+ * (Firebase Console + Play credentials) — this never claims delivery success.
  */
 class FcmNotificationGateway(
     context: Context,
     private val logger: Logger,
     private val api: (() -> ApiClient)? = null,
-) : NotificationGateway {
+) : NotificationGateway, PushTokenRefreshSink {
     private val helper = NotificationHelper(context)
 
     override suspend fun registerForPush(): PushRegistration? {
         return runCatching {
             val token = FirebaseMessaging.getInstance().token.await()
             if (token.isNullOrBlank()) return@runCatching null
-            val registration = PushRegistration(token = token, provider = "fcm")
-            registerTokenWithBackend(token)
-            registration
+            onNewToken(token)
+            PushRegistration(token = token, provider = "fcm")
         }.onFailure {
             logger.w("FcmNotificationGateway", "token registration failed", it)
         }.getOrNull()
     }
 
-    /** Called from [FitConnectMessagingService.onNewToken]. */
+    /** FCM [onNewToken] / explicit refresh — posts to `/api/v1/push/register`. Never logs the token. */
+    override suspend fun onNewToken(token: String) {
+        if (token.isBlank()) return
+        registerTokenWithBackend(token)
+    }
+
     suspend fun registerTokenWithBackend(token: String) {
-        val client = api?.invoke() ?: return
+        val client = api?.invoke() ?: run {
+            logger.i("FcmNotificationGateway", "token obtained; API client unavailable — skip backend register")
+            return
+        }
         val body = JSONObject()
             .put("token", token)
             .put("platform", "android")
@@ -57,13 +66,18 @@ class FcmNotificationGateway(
     }
 
     override suspend fun showLocal(request: LocalNotificationRequest) {
-        helper.showLocal(request)
-        logger.i("FcmNotificationGateway", "local show id=${request.id} category=${request.category}")
+        val routed = request.copy(
+            deepLink = NotificationDeepLinkRouter.resolve(deepLink = request.deepLink)
+                ?: request.deepLink,
+        )
+        helper.showLocal(routed)
+        logger.i("FcmNotificationGateway", "local show id=${routed.id} category=${routed.category}")
     }
 
     override suspend fun cancel(id: Int) {
         helper.cancel(id)
     }
 
-    override fun routeDeepLink(deepLink: String?): String? = deepLink
+    override fun routeDeepLink(deepLink: String?): String? =
+        NotificationDeepLinkRouter.routeDeepLink(deepLink)
 }

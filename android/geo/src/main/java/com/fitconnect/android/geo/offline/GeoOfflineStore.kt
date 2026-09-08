@@ -38,6 +38,12 @@ interface GeoOfflineStore {
     fun routes(): List<RouteDefinition>
     fun enqueueBookingAction(action: String, bookingId: String)
     fun pendingBookingActions(): List<PendingBookingAction>
+    /** Acknowledge one action after SyncQueue / HTTP succeeded. */
+    fun acknowledgeBookingAction(action: String, bookingId: String): Boolean
+    /**
+     * Returns still-pending count. Does **not** clear the queue — that would fake success.
+     * Remote flush is owned by foundation SyncQueue + Athlete/Coach offline handlers.
+     */
     fun flushBookingQueue(): Int
     fun offlineSearch(text: String): List<Place>
 }
@@ -90,10 +96,12 @@ class DefaultGeoOfflineStore : GeoOfflineStore {
 
     override fun pendingBookingActions(): List<PendingBookingAction> = bookingQueue.toList()
 
+    override fun acknowledgeBookingAction(action: String, bookingId: String): Boolean =
+        bookingQueue.removeIf { it.action == action && it.bookingId == bookingId }
+
     override fun flushBookingQueue(): Int {
-        val n = bookingQueue.size
-        bookingQueue.clear()
-        return n
+        // Intentionally do not clear — callers must acknowledge after real remote sync.
+        return bookingQueue.size
     }
 
     override fun offlineSearch(text: String): List<Place> {

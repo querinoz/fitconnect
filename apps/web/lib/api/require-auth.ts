@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import type { ContextUser } from "@fitconnect/api-client";
+import type { AppCapability } from "@fitconnect/types";
 import { isDemoMode } from "@/lib/auth/supabase/client";
 import { isFirebaseWebConfigured } from "@/lib/firebase/config";
 import { verifyFirebaseIdToken } from "@/lib/auth/firebase-verify";
 import { readAccessToken } from "@/lib/auth/read-access-token";
 import { lookupIdentityRole } from "@/lib/identity/repository";
+import {
+  listCapabilities,
+  readPreferredActiveMode,
+  resolveActiveMode
+} from "@/lib/identity/entitlements";
 
 export type AuthSuccess = {
   ok: true;
@@ -12,6 +18,8 @@ export type AuthSuccess = {
   supabaseUserId: string;
   accessToken: string | null;
   demo: boolean;
+  capabilities: AppCapability[];
+  activeMode: "athlete" | "coach" | null;
 };
 
 export type AuthFailure = {
@@ -29,7 +37,9 @@ export async function requireAuth(request?: Request): Promise<AuthResult> {
       user: { id: "demo-user", role: "athlete", email: "demo@fitconnect.app" },
       supabaseUserId: "demo-user",
       accessToken: null,
-      demo: true
+      demo: true,
+      capabilities: ["athlete", "coach"],
+      activeMode: "athlete"
     };
   }
 
@@ -49,7 +59,39 @@ export async function requireAuth(request?: Request): Promise<AuthResult> {
     };
   }
 
-  const role = (await lookupIdentityRole(claims.sub, accessToken)) ?? "athlete";
+  const capabilities = await listCapabilities(claims.sub, accessToken);
+  const preferred = await readPreferredActiveMode(claims.sub, accessToken);
+  const legacy = (await lookupIdentityRole(claims.sub, accessToken)) ?? null;
+
+  // ADMIN is server-assigned only — never derived from client activeMode.
+  if (legacy === "admin") {
+    return {
+      ok: true,
+      user: {
+        id: claims.sub,
+        role: "admin",
+        email: claims.email
+      },
+      supabaseUserId: claims.sub,
+      accessToken,
+      demo: false,
+      capabilities: ["athlete", "coach"],
+      activeMode: preferred === "coach" ? "coach" : "athlete"
+    };
+  }
+
+  const effectiveCaps: AppCapability[] = capabilities.length
+    ? capabilities
+    : legacy === "coach" || legacy === "athlete"
+      ? [legacy]
+      : ["athlete"];
+  const activeMode = resolveActiveMode({
+    capabilities: effectiveCaps,
+    preferred,
+    legacyRole: legacy
+  });
+  const role = (activeMode ?? legacy ?? "athlete") as ContextUser["role"];
+
   return {
     ok: true,
     user: {
@@ -59,8 +101,48 @@ export async function requireAuth(request?: Request): Promise<AuthResult> {
     },
     supabaseUserId: claims.sub,
     accessToken,
-    demo: false
+    demo: false,
+    capabilities: effectiveCaps,
+    activeMode
   };
+}
+
+export async function requireAthleteCapability(
+  request: Request
+): Promise<AuthSuccess | AuthFailure> {
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth;
+  if (auth.demo) return auth;
+  if (auth.user.role === "admin") return auth;
+  if (!auth.capabilities.includes("athlete")) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: "forbidden", reason: "athlete_capability_required" },
+        { status: 403 }
+      )
+    };
+  }
+  return auth;
+}
+
+export async function requireCoachCapability(
+  request: Request
+): Promise<AuthSuccess | AuthFailure> {
+  const auth = await requireAuth(request);
+  if (!auth.ok) return auth;
+  if (auth.demo) return auth;
+  if (auth.user.role === "admin") return auth;
+  if (!auth.capabilities.includes("coach")) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: "forbidden", reason: "coach_capability_required" },
+        { status: 403 }
+      )
+    };
+  }
+  return auth;
 }
 
 /** Resolve athlete id — demo permissive; prod binds to authenticated subject (anti-IDOR). */
@@ -81,6 +163,16 @@ export async function requireAthleteId(
     return { athleteId: fromParam, accessToken: auth.accessToken };
   }
 
+  if (!auth.capabilities.includes("athlete") && auth.user.role !== "admin") {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: "forbidden", reason: "athlete_capability_required" },
+        { status: 403 }
+      )
+    };
+  }
+
   if (fromParam && fromParam !== auth.user.id) {
     return {
       ok: false,
@@ -91,7 +183,7 @@ export async function requireAthleteId(
   return { athleteId: auth.user.id, accessToken: auth.accessToken };
 }
 
-/** Resolve coach id — demo permissive; prod requires auth. */
+/** Resolve coach id — demo permissive; prod requires coach capability. */
 export async function requireCoachId(
   request: Request,
   paramId?: string | null
@@ -105,10 +197,17 @@ export async function requireCoachId(
     return { coachId: fromParam ?? "t-002", accessToken: null };
   }
 
-  if (auth.user.role !== "coach" && auth.user.role !== "admin") {
+  const hasCoach =
+    auth.capabilities.includes("coach") ||
+    auth.user.role === "coach" ||
+    auth.user.role === "admin";
+  if (!hasCoach) {
     return {
       ok: false,
-      response: NextResponse.json({ error: "forbidden" }, { status: 403 })
+      response: NextResponse.json(
+        { error: "forbidden", reason: "coach_capability_required" },
+        { status: 403 }
+      )
     };
   }
 
@@ -128,7 +227,6 @@ export async function requireCoachId(
 
 /**
  * Coach may only access athletes on their roster (anti-IDOR).
- * Returns 403 when the athlete is not linked to this coach.
  */
 export async function requireCoachOwnsAthlete(
   request: Request,

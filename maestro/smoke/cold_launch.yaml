@@ -1,0 +1,31 @@
+appId: com.fitconnect.android
+---
+- launchApp
+- extendedWaitUntil:
+    visible: ".*."
+    timeout: 12000
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - assertVisible: "Continue"
+      - takeScreenshot: smoke_welcome
+- runFlow:
+    when:
+      visible: "Feed"
+    commands:
+      - assertVisible: "Feed"
+      - takeScreenshot: smoke_athlete_feed
+- runFlow:
+    when:
+      visible: "Today"
+    commands:
+      - assertVisible: "Today"
+      - takeScreenshot: smoke_athlete_home_legacy
+- runFlow:
+    when:
+      visible: "Overview"
+    commands:
+      - assertVisible: "Overview"
+      - takeScreenshot: smoke_coach_overview
+- takeScreenshot: smoke_cold_launch

@@ -12,6 +12,7 @@ import {
 import { PremiumCard, RealtimeBadge, SectionHeader } from "@/components/ui-glass/premium-system";
 import { LiquidLoader } from "@/components/ui-glass/liquid-loader";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { expandMessageBody, messageSubject } from "@/lib/inbox/expand-message";
 import { useDashboardStore } from "@/lib/dashboard-store";
 import { cn } from "@/lib/utils";
@@ -199,9 +200,12 @@ export function MessageInbox({
       />
 
       {rows.length === 0 ? (
-        <PremiumCard className="p-6 text-center">
-          <p className="text-sm text-ink-400">No messages yet.</p>
-        </PremiumCard>
+        <EmptyState
+          icon={MessageCircle}
+          title="No messages yet"
+          description="When a coach or athlete writes you, threads land here. Pull to refresh or open Discover to start a conversation."
+          cta={{ label: "Open Discover", href: "/discover" }}
+        />
       ) : (
         <ul className="space-y-3">
           {rows.map((m) => {

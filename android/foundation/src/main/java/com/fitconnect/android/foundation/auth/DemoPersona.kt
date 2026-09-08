@@ -11,6 +11,8 @@ enum class DemoPersona(
     val email: String,
     val role: UserRole,
     val tagline: String,
+    /** LOCAL_DEMO capabilities — EDUARDO proves dual Athlete+Coach without second login. */
+    val capabilities: Set<UserRole> = setOf(role),
 ) {
     INES(
         displayName = "Inês",
@@ -29,6 +31,13 @@ enum class DemoPersona(
         email = "tomas@fitconnect.demo",
         role = UserRole.COACH,
         tagline = "Coach · endurance",
+    ),
+    EDUARDO(
+        displayName = "Eduardo",
+        email = "eduardo@fitconnect.demo",
+        role = UserRole.ATHLETE,
+        tagline = "Athlete + Coach · unified identity",
+        capabilities = setOf(UserRole.ATHLETE, UserRole.COACH),
     ),
     ADMIN(
         displayName = "Admin",

@@ -6,7 +6,6 @@
   "packageManager": "pnpm@9.15.9",
   "scripts": {
     "dev": "turbo dev --filter=@fitconnect/web",
-    "dev:mobile": "pnpm --filter @fitconnect/mobile start",
     "build": "turbo build",
     "postinstall": "prisma generate",
     "start": "pnpm --filter @fitconnect/web start",

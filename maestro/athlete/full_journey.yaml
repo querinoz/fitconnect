@@ -1,0 +1,68 @@
+appId: com.fitconnect.android
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Get Started"
+    timeout: 20000
+- tapOn: "Get Started"
+- extendedWaitUntil:
+    visible: "Continue"
+    timeout: 20000
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "demo_persona_ines"
+    timeout: 20000
+- tapOn: "demo_persona_ines"
+- repeat:
+    times: 8
+    commands:
+      - runFlow:
+          when:
+            visible: "Continue"
+          commands:
+            - tapOn: "Continue"
+      - runFlow:
+          when:
+            visible: "Skip for now"
+          commands:
+            - tapOn: "Skip for now"
+      - runFlow:
+          when:
+            visible:
+              id: "onboarding_finish"
+          commands:
+            - tapOn:
+                id: "onboarding_finish"
+      - runFlow:
+          when:
+            visible: "Enter Athlete OS"
+          commands:
+            - tapOn: "Enter Athlete OS"
+- extendedWaitUntil:
+    visible: "Feed"
+    timeout: 30000
+- assertVisible: "Feed"
+- assertVisible: "Ascend"
+- assertVisible: "Dashboard"
+- assertVisible: "Profile"
+- takeScreenshot: athlete_feed_home
+- swipe:
+    start: 8%, 45%
+    end: 55%, 45%
+    duration: 400
+- extendedWaitUntil:
+    visible: "Find a Coach"
+    timeout: 5000
+- assertVisible: "Find a Coach"
+- assertVisible: "Find a Specialist"
+- tapOn: "Find a Coach"
+- takeScreenshot: athlete_find_coach
+- back
+- tapOn: "Ascend"
+- takeScreenshot: athlete_ascend
+- tapOn: "Dashboard"
+- takeScreenshot: athlete_dashboard
+- tapOn: "Profile"
+- takeScreenshot: athlete_profile
+- tapOn: "Feed"
+- takeScreenshot: athlete_feed_return

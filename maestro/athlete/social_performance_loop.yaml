@@ -1,0 +1,40 @@
+appId: com.fitconnect.android
+---
+# Social Performance Network — core loop (code-owned)
+- launchApp
+- extendedWaitUntil:
+    visible: "Feed"
+    timeout: 45000
+- assertVisible: "Feed"
+- assertVisible: "Ascend"
+- assertVisible: "Dashboard"
+- assertVisible: "Profile"
+- swipe:
+    start: 8%, 45%
+    end: 55%, 45%
+    duration: 400
+- extendedWaitUntil:
+    visible: "Find a Coach"
+    timeout: 8000
+- back
+- tapOn: "Feed"
+- runFlow:
+    when:
+      visible: "Create"
+    commands:
+      - tapOn: "Create"
+- runFlow:
+    when:
+      visible: "CREATE"
+    commands:
+      - assertVisible: "Privacy"
+      - assertVisible: "Publish to"
+      - back
+- tapOn: "Profile"
+- extendedWaitUntil:
+    visible: "Connection Center"
+    timeout: 10000
+- assertVisible: "Spotify"
+- assertVisible: "Zapier"
+- assertVisible: "Strava"
+- takeScreenshot: spn_profile_connections

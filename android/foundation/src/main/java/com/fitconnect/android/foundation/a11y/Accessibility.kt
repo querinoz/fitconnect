@@ -3,6 +3,9 @@ package com.fitconnect.android.foundation.a11y
 /**
  * Accessibility foundation constants for Elite Surface / TalkBack readiness.
  * Compose screens should use these instead of magic numbers.
+ *
+ * [AccessibilityConstants] is the stable alias used by unit tests and call sites
+ * that prefer the longer name.
  */
 object Accessibility {
     /** Material / WCAG minimum touch target (dp). */
@@ -17,3 +20,6 @@ object Accessibility {
      */
     fun decorative(): String = ""
 }
+
+/** Stable alias for [Accessibility] — preferred name in a11y tests / docs. */
+typealias AccessibilityConstants = Accessibility

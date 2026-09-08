@@ -37,5 +37,6 @@ class FakeNotificationGateway(
         delivered.removeAll { it.id == id }
     }
 
-    override fun routeDeepLink(deepLink: String?): String? = deepLink
+    override fun routeDeepLink(deepLink: String?): String? =
+        NotificationDeepLinkRouter.routeDeepLink(deepLink)
 }

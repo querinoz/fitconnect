@@ -96,9 +96,13 @@ private class FakeSessionStore(
 
     override suspend fun isLoggedIn(): Boolean = userId != null
     override suspend fun role() = snapshot().role
+    override suspend fun activeMode() = snapshot().activeMode
+    override suspend fun capabilities() = snapshot().capabilities
     override suspend fun accessToken(): String? = null
     override suspend fun refreshToken(): String? = null
     override suspend fun save(snapshot: SessionSnapshot) = AppResult.Ok(Unit)
     override suspend fun updateTokens(tokens: AuthTokens) = AppResult.Ok(Unit)
+    override suspend fun setActiveMode(mode: com.fitconnect.android.foundation.authz.UserRole) =
+        AppResult.Ok(snapshot().copy(activeMode = mode, role = mode))
     override suspend fun clear() = AppResult.Ok(Unit)
 }

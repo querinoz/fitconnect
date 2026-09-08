@@ -67,6 +67,49 @@ data class Provenance(
 )
 
 /**
+ * Athlete-facing telemetry UI labels.
+ * Never upgrade [TEST] (demo / fixture) to [LIVE].
+ */
+enum class TelemetryUiLabel {
+    LIVE,
+    SYNCED,
+    DERIVED,
+    STALE,
+    OFFLINE,
+    UNAVAILABLE,
+    TEST,
+}
+
+/**
+ * Resolves the honest UI label for Home / Telemetry surfaces.
+ * Demo / fixture paths always return [TelemetryUiLabel.TEST].
+ */
+object TelemetryUiProvenance {
+    const val LIVE_WINDOW_MS: Long = 2 * 60_000L
+    const val STALE_AFTER_MS: Long = 30 * 60_000L
+
+    fun resolve(
+        isLocalDemo: Boolean = false,
+        isOffline: Boolean = false,
+        hasSamples: Boolean = false,
+        liveStreamConnected: Boolean = false,
+        sampleAgeMs: Long? = null,
+        isDerived: Boolean = false,
+    ): TelemetryUiLabel {
+        if (isLocalDemo) return TelemetryUiLabel.TEST
+        if (!hasSamples) {
+            return if (isOffline) TelemetryUiLabel.OFFLINE else TelemetryUiLabel.UNAVAILABLE
+        }
+        if (isDerived) return TelemetryUiLabel.DERIVED
+        if (isOffline) return TelemetryUiLabel.OFFLINE
+        val age = sampleAgeMs ?: return TelemetryUiLabel.UNAVAILABLE
+        if (liveStreamConnected && age <= LIVE_WINDOW_MS) return TelemetryUiLabel.LIVE
+        if (age <= STALE_AFTER_MS) return TelemetryUiLabel.SYNCED
+        return TelemetryUiLabel.STALE
+    }
+}
+
+/**
  * Canonical telemetry sample. Value is always stored in the canonical unit of
  * its [MetricType]; the original unit remains in [Provenance.originalUnit].
  */

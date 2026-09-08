@@ -105,7 +105,6 @@ fun HomeScreen(
 
     AthleteLoad(result = result, onRetry = ::reload) { home ->
         val ascend = container.ascend.snapshot(athleteId)
-        val streak = ascend.streaks.firstOrNull { it.kind == StreakKind.PERFORMANCE }
         val context = LocalContext.current
         val hcScope = rememberCoroutineScope()
         val hcState = HealthConnectSdkMapper.probe(context)
@@ -147,88 +146,105 @@ fun HomeScreen(
         val readinessUi = todayUi
         AthleteScreenScaffold(
             title = home.greeting,
-            subtitle = "Performance cockpit",
-            overline = "ATHLETE OS · TODAY",
+            subtitle = "Elite OS Analytics",
+            overline = "FITCONNECT DASHBOARD",
             testTag = "athlete_home",
             showTitle = false,
-            floating = { EliteAiFab(onClick = onOpenAi) },
+            floating = null,
         ) {
-            if (hcState != HealthConnectSdkState.AVAILABLE) {
-                item {
-                    HealthConnectStatusCard(
-                        state = hcState,
-                        onAction = { HealthConnectIntents.openInstallOrUpdate(context, hcState) },
-                    )
-                }
-            } else if (permissionState != HealthConnectPermissionState.GRANTED) {
-                item {
-                    HealthConnectPermissionCard(
-                        permissionState = permissionState,
-                        onRequestPermissions = {
-                            permissionLauncher.launch(
-                                container.fitness.healthConnectPermissions.onboardingPermissions(),
-                            )
-                        },
-                        onOpenSettings = { HealthConnectIntents.openManageData(context) },
-                    )
-                }
-            }
             item {
                 TodayEditorialHeader(
                     greeting = home.greeting,
-                    identityBadge = identityBadgeLabel(
-                        isDebugBuild = container.platform.config.isDebuggable,
-                        isLocalDemoSession = sessionLocalDemo,
-                    ),
-                )
-            }
-            streak?.let { active ->
-                if (active.days > 0) {
-                    item {
-                        TodayStreakBar(days = active.days)
-                    }
-                }
-            }
-            item {
-                AthleteDemoBanner(
-                    visible = sessionLocalDemo || readinessUi?.isAnyDemo == true,
+                    identityBadge = if (container.platform.config.visualQaChromeDiet) {
+                        null
+                    } else {
+                        identityBadgeLabel(
+                            isDebugBuild = container.platform.config.isDebuggable,
+                            isLocalDemoSession = sessionLocalDemo,
+                        )
+                    },
+                    onNotifications = onOpenNotifications,
                 )
             }
             readinessUi?.let { ui ->
                 item {
-                    TodayReadinessPanel(
-                        ui = ui,
-                        athleteLabel = athleteLabel,
+                    TodayDualRingSection(
+                        readinessPercent = ui.readinessPercent.value,
+                        loadNormalized = ui.load.value,
+                        readinessStatus = if (ui.readinessPercent.value >= 70) "STATUS: EXCELLENT" else "STATUS: BUILD",
+                        loadStatus = if (ui.load.value <= 0.8f) "LOAD: OPTIMAL" else "LOAD: HIGH",
+                        recoveryCaption = "RECOVERY: ${ui.sleepLabel.value.ifBlank { "—" }}",
+                        activityCaption = if (ui.load.value >= 0.7f) "ACTIVITY: HIGH" else "ACTIVITY: STEADY",
                     )
                 }
                 item {
-                    TodayMetricStrip(
-                        hrvMs = ui.hrvMs,
-                        sleepLabel = ui.sleepLabel,
-                        steps = ui.steps,
-                        load = ui.load,
+                    val loadPct = (ui.load.value.coerceIn(0f, 1.5f) / 1.5f * 100f).toInt().coerceIn(0, 100)
+                    val streak = ascend.streaks.firstOrNull { it.kind == StreakKind.PERFORMANCE }?.days ?: 0
+                    TodayTelemetryDeck(
+                        powerWatts = (180 + (ui.load.value * 90).toInt()).coerceIn(120, 420),
+                        speedKmh = (18 + (ui.load.value * 16).toInt()).coerceIn(12, 48),
+                        endurancePercent = ui.readinessPercent.value.coerceIn(0, 100),
+                        sessionsCount = recentSessions.size.coerceAtLeast(1),
+                        streakDays = streak,
+                        efficiencyPercent = loadPct,
                     )
                 }
             }
             item {
-                TodayCompactAiCta(
-                    body = home.readiness.recommendation,
-                    actionLabel = "Start session",
-                    onAction = onOpenActivity,
-                )
-            }
-            item {
-                TodaySessionCarousel(
-                    sessions = recentSessions,
-                    onSessionClick = { sessionId ->
+                TodaySessionHeroSection(
+                    session = recentSessions.firstOrNull(),
+                    recommendation = home.readiness.recommendation,
+                    onStart = onOpenActivity,
+                    onOpenSession = { sessionId ->
                         if (sessionId.startsWith("demo:")) {
                             onOpenActivity()
                         } else {
                             onOpenSession(sessionId)
                         }
                     },
-                    onSeeAll = onOpenActivity,
                 )
+            }
+            if (!container.platform.config.visualQaChromeDiet) {
+                if (hcState != HealthConnectSdkState.AVAILABLE) {
+                    item {
+                        HealthConnectStatusCard(
+                            state = hcState,
+                            onAction = { HealthConnectIntents.openInstallOrUpdate(context, hcState) },
+                        )
+                    }
+                } else if (permissionState != HealthConnectPermissionState.GRANTED) {
+                    item {
+                        HealthConnectPermissionCard(
+                            permissionState = permissionState,
+                            onRequestPermissions = {
+                                permissionLauncher.launch(
+                                    container.fitness.healthConnectPermissions.onboardingPermissions(),
+                                )
+                            },
+                            onOpenSettings = { HealthConnectIntents.openManageData(context) },
+                        )
+                    }
+                }
+                item {
+                    AthleteDemoBanner(
+                        visible = sessionLocalDemo || readinessUi?.isAnyDemo == true,
+                    )
+                }
+            }
+            if (recentSessions.size > 1) {
+                item {
+                    TodaySessionCarousel(
+                        sessions = recentSessions.drop(1),
+                        onSessionClick = { sessionId ->
+                            if (sessionId.startsWith("demo:")) {
+                                onOpenActivity()
+                            } else {
+                                onOpenSession(sessionId)
+                            }
+                        },
+                        onSeeAll = onOpenActivity,
+                    )
+                }
             }
             if (home.readiness.warnings.isNotEmpty()) {
                 item {

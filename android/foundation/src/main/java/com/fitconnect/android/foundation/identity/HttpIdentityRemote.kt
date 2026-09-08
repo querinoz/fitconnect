@@ -5,6 +5,7 @@ import com.fitconnect.android.foundation.common.AppError
 import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.foundation.common.Logger
 import com.fitconnect.android.foundation.network.ApiClient
+import org.json.JSONArray
 import org.json.JSONObject
 
 class HttpIdentityRemote(
@@ -28,6 +29,9 @@ class HttpIdentityRemote(
     override suspend fun getProfile(): AppResult<IdentityProfile> =
         parseProfile(api().get("/api/v1/identity/profile"))
 
+    override suspend fun getMe(): AppResult<IdentityProfile> =
+        parseProfile(api().get("/api/v1/identity/me"))
+
     override suspend fun setRole(role: UserRole): AppResult<IdentityProfile> {
         if (role != UserRole.ATHLETE && role != UserRole.COACH) {
             return AppResult.Err(AppError.Auth(AppError.AuthKind.FORBIDDEN))
@@ -35,8 +39,22 @@ class HttpIdentityRemote(
         val body = JSONObject().put("role", role.name.lowercase())
         return when (val result = api().put("/api/v1/identity/role", body.toString())) {
             is AppResult.Err -> result
-            is AppResult.Ok -> getProfile().let { profile ->
+            is AppResult.Ok -> getMe().let { profile ->
                 if (profile is AppResult.Ok) profile
+                else parseRoleOnly(result.value)
+            }
+        }
+    }
+
+    override suspend fun setActiveMode(mode: UserRole): AppResult<IdentityProfile> {
+        if (mode != UserRole.ATHLETE && mode != UserRole.COACH) {
+            return AppResult.Err(AppError.Auth(AppError.AuthKind.FORBIDDEN))
+        }
+        val body = JSONObject().put("activeMode", mode.name.lowercase())
+        return when (val result = api().put("/api/v1/identity/active-mode", body.toString())) {
+            is AppResult.Err -> result
+            is AppResult.Ok -> getMe().let { me ->
+                if (me is AppResult.Ok) me
                 else parseRoleOnly(result.value)
             }
         }
@@ -66,6 +84,8 @@ class HttpIdentityRemote(
         is AppResult.Err -> result
         is AppResult.Ok -> runCatching {
             val json = JSONObject(result.value)
+            val role = parseRole(json.optString("role"))
+            val active = parseRole(json.optString("activeMode")) ?: role
             AppResult.Ok(
                 IdentityProfile(
                     uid = json.optString("uid").ifBlank { json.optString("id") },
@@ -75,9 +95,11 @@ class HttpIdentityRemote(
                     locale = json.optString("locale").takeIf { it.isNotBlank() },
                     timezone = json.optString("timezone").takeIf { it.isNotBlank() },
                     accent = json.optString("accent").takeIf { it.isNotBlank() },
-                    role = parseRole(json.optString("role")),
+                    role = role,
                     onboardingCompleted = json.optBoolean("onboardingCompleted"),
                     onboardingStep = json.optInt("onboardingStep"),
+                    capabilities = parseCapabilities(json.optJSONArray("capabilities"), role),
+                    activeMode = active,
                 ),
             )
         }.getOrElse {
@@ -86,8 +108,23 @@ class HttpIdentityRemote(
         }
     }
 
+    private fun parseCapabilities(arr: JSONArray?, fallback: UserRole?): Set<UserRole> {
+        if (arr == null || arr.length() == 0) {
+            return when (fallback) {
+                UserRole.ATHLETE, UserRole.COACH -> setOf(fallback)
+                else -> emptySet()
+            }
+        }
+        val out = mutableSetOf<UserRole>()
+        for (i in 0 until arr.length()) {
+            parseRole(arr.optString(i))?.let { out.add(it) }
+        }
+        return out.filter { it == UserRole.ATHLETE || it == UserRole.COACH }.toSet()
+    }
+
     private fun parseRoleOnly(raw: String): AppResult<IdentityProfile> = runCatching {
         val json = JSONObject(raw)
+        val role = parseRole(json.optString("role")) ?: parseRole(json.optString("activeMode"))
         AppResult.Ok(
             IdentityProfile(
                 uid = json.optString("uid"),
@@ -97,9 +134,11 @@ class HttpIdentityRemote(
                 locale = null,
                 timezone = null,
                 accent = null,
-                role = parseRole(json.optString("role")),
+                role = role,
                 onboardingCompleted = false,
                 onboardingStep = 0,
+                capabilities = parseCapabilities(json.optJSONArray("capabilities"), role),
+                activeMode = parseRole(json.optString("activeMode")) ?: role,
             ),
         )
     }.getOrElse {

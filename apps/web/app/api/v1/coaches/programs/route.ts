@@ -8,16 +8,18 @@ import {
 } from "@/lib/db/coach-program-mutations";
 import { listCoachPrograms } from "@/lib/db/repository";
 
+/** Path A: postgres or empty/memory mutations — never expose seed fixtures. */
 export async function GET(req: Request) {
   const resolved = await requireCoachId(req);
   if (isAuthFailure(resolved)) return resolved.response;
   const remote = await listCoachPrograms(resolved.coachId);
-  if (remote.source === "postgres" && remote.programs.length > 0) {
+  if (remote.source === "postgres") {
     return NextResponse.json({ programs: remote.programs, source: remote.source });
   }
+  const mutable = listMutableCoachPrograms(resolved.coachId);
   return NextResponse.json({
-    programs: listMutableCoachPrograms(resolved.coachId),
-    source: "memory"
+    programs: mutable,
+    source: mutable.length > 0 ? "memory" : "empty"
   });
 }
 

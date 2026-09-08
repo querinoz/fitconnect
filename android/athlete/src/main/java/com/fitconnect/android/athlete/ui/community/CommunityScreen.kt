@@ -17,6 +17,10 @@ import androidx.compose.ui.platform.testTag
 import com.fitconnect.android.athlete.data.canonicalAthleteId
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
+import com.fitconnect.android.community.distribution.DistributionPlatform
+import com.fitconnect.android.community.distribution.InMemoryDistributionEngine
+import com.fitconnect.android.community.domain.ShareConsent
+import com.fitconnect.android.community.di.CommunityRuntimeMode
 import com.fitconnect.android.community.domain.Comment
 import com.fitconnect.android.community.domain.CommunityPost
 import com.fitconnect.android.community.domain.CommunityRole
@@ -30,31 +34,32 @@ import com.fitconnect.android.community.feed.FeedRequest
 import com.fitconnect.android.community.posts.PostDraft
 import com.fitconnect.android.community.posts.PostResult
 import com.fitconnect.android.designui.components.EliteButton
-import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteCardVariant
 import com.fitconnect.android.designui.components.EliteChip
 import com.fitconnect.android.designui.components.EliteEmptyState
-import com.fitconnect.android.designui.components.EliteErrorView
 import com.fitconnect.android.designui.components.EliteFeedComment
 import com.fitconnect.android.designui.components.EliteFeedPost
 import com.fitconnect.android.designui.components.EliteFeedReaction
+import com.fitconnect.android.designui.components.EliteFilterChip
 import com.fitconnect.android.designui.components.EliteFlowRow
 import com.fitconnect.android.designui.components.EliteLoading
 import com.fitconnect.android.designui.components.EliteTextField
 import com.fitconnect.android.designui.theme.EliteSpace
-import com.fitconnect.android.foundation.auth.DemoPersona
 import kotlinx.coroutines.launch
 import java.util.UUID
 
 /**
- * Athlete community feed backed by :community engines + cinematic LOCAL_DEMO seed.
+ * Athlete community feed via :community engines.
+ * LOCAL_DEMO → seeded in-memory; REMOTE → API; else fail-closed empty.
  */
 @Composable
-fun CommunityScreen() {
+fun CommunityScreen(
+    embeddedInFeed: Boolean = false,
+) {
     val container = LocalAthleteContainer.current
     val scope = rememberCoroutineScope()
-    var isLocalDemo by remember { mutableStateOf(false) }
+    var mode by remember { mutableStateOf(CommunityRuntimeMode.FAIL_CLOSED) }
     var posts by remember { mutableStateOf<List<CommunityPost>>(emptyList()) }
     var emptyReason by remember { mutableStateOf<String?>(null) }
     var kind by remember { mutableStateOf(FeedKind.FOLLOWING) }
@@ -67,97 +72,55 @@ fun CommunityScreen() {
     var comments by remember { mutableStateOf<Map<String, List<Comment>>>(emptyMap()) }
     var profiles by remember { mutableStateOf<Map<String, UserProfile>>(emptyMap()) }
     var loading by remember { mutableStateOf(true) }
-    var error by remember { mutableStateOf<String?>(null) }
-    val remote = remember {
-        com.fitconnect.android.athlete.community.RemoteCommunityPosts(
-            api = { container.platform.apiClient },
-        )
-    }
-    val viewerId = remember {
-        mutableStateOf("")
-    }
+    var createOpen by remember { mutableStateOf(false) }
+    val distribution = remember { InMemoryDistributionEngine() }
+    val viewerId = remember { mutableStateOf("") }
 
     suspend fun reload() {
         loading = true
-        error = null
         try {
-            isLocalDemo = container.platform.sessionStore.snapshot().isLocalDemo
+            mode = container.community.runtimeMode()
             viewerId.value = container.platform.sessionStore.canonicalAthleteId()
-            if (isLocalDemo) {
-                container.community.seedIfNeeded()
-                val page = container.community.feed.feed(
-                    FeedRequest(
-                        viewerId = viewerId.value,
-                        kind = kind,
-                        contextId = if (kind == FeedKind.SPORT) "running" else null,
-                        limit = 40,
-                    ),
+            container.community.seedIfNeeded()
+            val page = container.community.feed.feed(
+                FeedRequest(
+                    viewerId = viewerId.value,
+                    kind = kind,
+                    contextId = if (kind == FeedKind.SPORT) "running" else null,
+                    limit = 40,
+                ),
+            )
+            posts = page.items
+            emptyReason = when {
+                page.items.isNotEmpty() -> null
+                mode == CommunityRuntimeMode.LOCAL_DEMO ->
+                    "No posts yet for ${kind.name.lowercase()}"
+                mode == CommunityRuntimeMode.REMOTE ->
+                    "No community posts yet (remote empty or API unavailable)"
+                else ->
+                    "Community unavailable — API / Supabase not configured"
+            }
+            reactionCounts = page.items.associate { post ->
+                post.id to container.community.reactions.counts(ReactionTargetKind.POST, post.id)
+            }
+            myReactions = page.items.associate { post ->
+                post.id to container.community.reactions.of(
+                    viewerId.value,
+                    ReactionTargetKind.POST,
+                    post.id,
                 )
-                posts = page.items
-                emptyReason = if (page.items.isEmpty()) "No posts yet for ${kind.name.lowercase()}" else null
-                reactionCounts = page.items.associate { post ->
-                    post.id to container.community.reactions.counts(ReactionTargetKind.POST, post.id)
-                }
-                myReactions = page.items.associate { post ->
-                    post.id to container.community.reactions.of(
-                        viewerId.value,
-                        ReactionTargetKind.POST,
-                        post.id,
-                    )
-                }
-                comments = page.items.associate { post ->
-                    post.id to container.community.comments.forPost(post.id, limit = 3).items
-                }
-                val authorIds = page.items.map { it.authorId } +
-                    comments.values.flatten().map { it.authorId }
-                profiles = authorIds.distinct().associateWith { id ->
-                    container.community.profiles.get(id) ?: UserProfile(id, id, CommunityRole.ATHLETE)
-                }
-            } else {
-                when (val result = remote.list()) {
-                    is com.fitconnect.android.foundation.common.AppResult.Ok -> {
-                        posts = result.value
-                        emptyReason = if (result.value.isEmpty()) {
-                            "No community posts yet"
-                        } else {
-                            null
-                        }
-                        val remoteComments = mutableMapOf<String, List<Comment>>()
-                        val remoteCounts = mutableMapOf<String, Map<ReactionType, Int>>()
-                        for (post in result.value.take(20)) {
-                            when (val c = remote.listComments(post.id)) {
-                                is com.fitconnect.android.foundation.common.AppResult.Ok ->
-                                    remoteComments[post.id] = c.value
-                                is com.fitconnect.android.foundation.common.AppResult.Err -> Unit
-                            }
-                            when (val r = remote.listReactions(post.id)) {
-                                is com.fitconnect.android.foundation.common.AppResult.Ok -> {
-                                    remoteCounts[post.id] = ReactionType.entries.associateWith { type ->
-                                        r.value[type.name] ?: 0
-                                    }
-                                }
-                                is com.fitconnect.android.foundation.common.AppResult.Err -> Unit
-                            }
-                        }
-                        comments = remoteComments
-                        reactionCounts = remoteCounts
-                        myReactions = emptyMap()
-                        profiles = result.value.associate { post ->
-                            post.authorId to UserProfile(
-                                post.authorId,
-                                post.authorId,
-                                CommunityRole.ATHLETE,
-                            )
-                        }
-                    }
-                    is com.fitconnect.android.foundation.common.AppResult.Err -> {
-                        error = result.error.toString()
-                        posts = emptyList()
-                    }
-                }
+            }
+            comments = page.items.associate { post ->
+                post.id to container.community.comments.forPost(post.id, limit = 3).items
+            }
+            val authorIds = page.items.map { it.authorId } +
+                comments.values.flatten().map { it.authorId }
+            profiles = authorIds.distinct().associateWith { id ->
+                container.community.profiles.get(id) ?: UserProfile(id, id, CommunityRole.ATHLETE)
             }
         } catch (t: Throwable) {
-            error = t.message ?: "Community feed failed"
+            emptyReason = t.message ?: "Community feed failed"
+            posts = emptyList()
         } finally {
             loading = false
         }
@@ -169,50 +132,69 @@ fun CommunityScreen() {
     }
 
     AthleteScreenScaffold(
-        title = "Community",
-        subtitle = if (isLocalDemo) {
-            "LOCAL_DEMO community · seed feed"
-        } else {
-            "Canonical community posts"
+        title = if (embeddedInFeed) "" else "Community",
+        subtitle = when {
+            embeddedInFeed -> null
+            container.platform.config.visualQaChromeDiet -> "Squad · media feed"
+            mode == CommunityRuntimeMode.LOCAL_DEMO -> "LOCAL_DEMO community · seed feed"
+            mode == CommunityRuntimeMode.REMOTE -> "Remote community · /api/v1/community"
+            else -> "Community fail-closed"
         },
+        showTitle = !embeddedInFeed,
+        overline = if (embeddedInFeed) null else "ATHLETE OS",
         testTag = "athlete_community",
     ) {
         item {
+            // Media-first Feed: keep filters soft; Create stays primary.
             EliteFlowRow {
-                EliteChip(label = "Following", selected = kind == FeedKind.FOLLOWING, onClick = { kind = FeedKind.FOLLOWING })
-                EliteChip(label = "Official", selected = kind == FeedKind.OFFICIAL, onClick = { kind = FeedKind.OFFICIAL })
-                EliteChip(label = "Sport", selected = kind == FeedKind.SPORT, onClick = { kind = FeedKind.SPORT })
-                EliteButton(
-                    label = "Refresh",
-                    variant = EliteButtonVariant.Ghost,
-                    onClick = { scope.launch { reload() } },
+                if (!embeddedInFeed) {
+                    EliteFilterChip(label = "Following", selected = kind == FeedKind.FOLLOWING, onClick = { kind = FeedKind.FOLLOWING })
+                    EliteFilterChip(label = "Official", selected = kind == FeedKind.OFFICIAL, onClick = { kind = FeedKind.OFFICIAL })
+                    EliteFilterChip(label = "Sport", selected = kind == FeedKind.SPORT, onClick = { kind = FeedKind.SPORT })
+                } else {
+                    EliteFilterChip(
+                        label = "For you",
+                        selected = kind == FeedKind.FOLLOWING,
+                        onClick = { kind = FeedKind.FOLLOWING },
+                    )
+                    EliteFilterChip(
+                        label = "Sport",
+                        selected = kind == FeedKind.SPORT,
+                        onClick = { kind = FeedKind.SPORT },
+                    )
+                }
+                EliteFilterChip(
+                    label = "Create",
+                    selected = true,
+                    onClick = { createOpen = true },
+                    modifier = Modifier.testTag("community_create_open"),
                 )
             }
         }
-        item {
-            EliteCard(modifier = Modifier.testTag("community_composer"), variant = EliteCardVariant.Glass) {
-                Text("What happened today?", style = MaterialTheme.typography.titleMedium)
-                EliteFlowRow {
-                    composerKinds.forEach { option ->
-                        EliteChip(
-                            label = option.name,
-                            selected = draftKind == option,
-                            onClick = { draftKind = option },
-                        )
+        if (!embeddedInFeed) {
+            item {
+                EliteCard(modifier = Modifier.testTag("community_composer"), variant = EliteCardVariant.Glass) {
+                    Text("What happened today?", style = MaterialTheme.typography.titleMedium)
+                    EliteFlowRow {
+                        composerKinds.forEach { option ->
+                            EliteChip(
+                                label = option.name,
+                                selected = draftKind == option,
+                                onClick = { draftKind = option },
+                            )
+                        }
                     }
-                }
-                EliteTextField(
-                    value = draftText,
-                    onValueChange = { draftText = it },
-                    label = "Training, recovery, mindset…",
-                    modifier = Modifier.testTag("community_post_input"),
-                )
-                EliteButton(
-                    label = "Publish",
-                    enabled = draftText.isNotBlank(),
-                    onClick = {
-                        scope.launch {
-                            if (isLocalDemo) {
+                    EliteTextField(
+                        value = draftText,
+                        onValueChange = { draftText = it },
+                        label = "Training, recovery, mindset…",
+                        modifier = Modifier.testTag("community_post_input"),
+                    )
+                    EliteButton(
+                        label = "Publish",
+                        enabled = draftText.isNotBlank(),
+                        onClick = {
+                            scope.launch {
                                 val result = container.community.posts.create(
                                     PostDraft(
                                         idempotencyKey = UUID.randomUUID().toString(),
@@ -222,45 +204,30 @@ fun CommunityScreen() {
                                     ),
                                 )
                                 status = when (result) {
-                                    is PostResult.Created -> "Published ${result.post.id}"
+                                    is PostResult.Created -> {
+                                        draftText = ""
+                                        "Published ${result.post.id}"
+                                    }
                                     is PostResult.Duplicate -> "Duplicate blocked"
                                     PostResult.RateLimited -> "Rate limited — wait a moment"
-                                    PostResult.Invalid -> "Invalid post"
-                                }
-                            } else {
-                                when (
-                                    val result = remote.create(
-                                        text = draftText.trim(),
-                                        authorId = viewerId.value,
-                                    )
-                                ) {
-                                    is com.fitconnect.android.foundation.common.AppResult.Ok -> {
-                                        status = "Published ${result.value.id}"
-                                        draftText = ""
-                                    }
-                                    is com.fitconnect.android.foundation.common.AppResult.Err -> {
-                                        status = result.error.toString()
+                                    PostResult.Invalid -> when (mode) {
+                                        CommunityRuntimeMode.FAIL_CLOSED ->
+                                            "Publish refused — community not configured"
+                                        CommunityRuntimeMode.REMOTE ->
+                                            "Publish failed — check API / auth"
+                                        CommunityRuntimeMode.LOCAL_DEMO -> "Invalid post"
                                     }
                                 }
+                                reload()
                             }
-                            reload()
-                        }
-                    },
-                )
-                status?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+                        },
+                    )
+                    status?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+                }
             }
         }
         if (loading) {
             item { EliteLoading(label = "SYS.FEED") }
-        }
-        error?.let { reason ->
-            item {
-                EliteErrorView(
-                    title = "Feed unavailable",
-                    body = reason,
-                    onRetry = { scope.launch { reload() } },
-                )
-            }
         }
         emptyReason?.let { reason ->
             item {
@@ -277,102 +244,127 @@ fun CommunityScreen() {
             val media = post.media.firstOrNull()
             Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
                 EliteFeedPost(
-                authorId = post.authorId,
-                authorName = author?.displayName ?: post.authorId,
-                authorInitials = initialsOf(author?.displayName ?: post.authorId),
-                avatarName = author?.avatarUri,
-                kindLabel = post.kind.name,
-                timeLabel = relativeTime(post.audit.createdAtEpochMs),
-                body = post.text,
-                imageName = media?.thumbnailUrl ?: media?.localUri,
-                videoRawName = media?.takeIf { it.kind == MediaKind.VIDEO }?.localUri,
-                facts = workoutFactPairs(post),
-                verified = author?.verifiedCoach == true,
-                reactions = ReactionType.entries.map { type ->
-                    EliteFeedReaction(
-                        id = type.name,
-                        label = type.chipLabel,
-                        count = reactionCounts[post.id]?.get(type) ?: 0,
-                        selected = myReactions[post.id] == type,
-                    )
-                },
-                comments = comments[post.id].orEmpty().map { comment ->
-                    EliteFeedComment(
-                        author = profiles[comment.authorId]?.displayName ?: comment.authorId,
-                        text = comment.text,
-                    )
-                },
-                onReact = { typeName ->
-                    scope.launch {
-                        val type = ReactionType.entries.first { it.name == typeName }
-                        if (isLocalDemo) {
-                            container.community.reactions.react(
+                    authorId = post.authorId,
+                    authorName = author?.displayName ?: post.authorId,
+                    authorInitials = initialsOf(author?.displayName ?: post.authorId),
+                    avatarName = author?.avatarUri,
+                    kindLabel = post.kind.name,
+                    timeLabel = relativeTime(post.audit.createdAtEpochMs),
+                    body = post.text,
+                    imageName = media?.thumbnailUrl ?: media?.localUri,
+                    videoRawName = media?.takeIf { it.kind == MediaKind.VIDEO }?.localUri,
+                    facts = workoutFactPairs(post),
+                    verified = author?.verifiedCoach == true,
+                    reactions = ReactionType.entries.map { type ->
+                        EliteFeedReaction(
+                            id = type.name,
+                            label = type.chipLabel,
+                            count = reactionCounts[post.id]?.get(type) ?: 0,
+                            selected = myReactions[post.id] == type,
+                        )
+                    },
+                    comments = comments[post.id].orEmpty().map { comment ->
+                        EliteFeedComment(
+                            author = profiles[comment.authorId]?.displayName ?: comment.authorId,
+                            text = comment.text,
+                        )
+                    },
+                    onReact = { typeName ->
+                        scope.launch {
+                            val type = ReactionType.entries.first { it.name == typeName }
+                            val ok = container.community.reactions.react(
                                 viewerId.value,
                                 ReactionTargetKind.POST,
                                 post.id,
                                 type,
                             )
-                        } else {
-                            when (val r = remote.react(post.id, type.name)) {
-                                is com.fitconnect.android.foundation.common.AppResult.Ok -> Unit
-                                is com.fitconnect.android.foundation.common.AppResult.Err -> {
-                                    status = r.error.toString()
-                                    return@launch
-                                }
+                            if (!ok && mode != CommunityRuntimeMode.LOCAL_DEMO) {
+                                status = "Reaction failed"
                             }
+                            reload()
                         }
-                        reload()
-                    }
-                },
-            )
-            val commentValue = commentDrafts[post.id].orEmpty()
-            EliteTextField(
-                value = commentValue,
-                onValueChange = { commentDrafts = commentDrafts + (post.id to it) },
-                label = "Reply",
-            )
-            EliteButton(
-                label = "Comment",
-                enabled = commentValue.isNotBlank(),
-                onClick = {
-                    scope.launch {
-                        if (isLocalDemo) {
-                            container.community.comments.add(
-                                postId = post.id,
-                                parentCommentId = null,
-                                authorId = viewerId.value,
-                                text = commentValue.trim(),
-                            )
-                            commentDrafts = commentDrafts - post.id
-                            status = "Comment added"
-                        } else {
-                            when (
-                                val r = remote.addComment(post.id, commentValue.trim())
-                            ) {
-                                is com.fitconnect.android.foundation.common.AppResult.Ok -> {
+                    },
+                )
+                if (!embeddedInFeed) {
+                    val commentValue = commentDrafts[post.id].orEmpty()
+                    EliteTextField(
+                        value = commentValue,
+                        onValueChange = { commentDrafts = commentDrafts + (post.id to it) },
+                        label = "Reply",
+                    )
+                    EliteButton(
+                        label = "Comment",
+                        enabled = commentValue.isNotBlank(),
+                        onClick = {
+                            scope.launch {
+                                val added = container.community.comments.add(
+                                    postId = post.id,
+                                    parentCommentId = null,
+                                    authorId = viewerId.value,
+                                    text = commentValue.trim(),
+                                )
+                                if (added != null) {
                                     commentDrafts = commentDrafts - post.id
                                     status = "Comment added"
+                                } else {
+                                    status = "Comment failed"
                                 }
-                                is com.fitconnect.android.foundation.common.AppResult.Err -> {
-                                    status = r.error.toString()
-                                    return@launch
-                                }
+                                reload()
                             }
-                        }
-                        reload()
-                    }
-                },
-            )
+                        },
+                    )
+                }
             }
         }
     }
+
+    CreatePostSheet(
+        open = createOpen,
+        onDismiss = { createOpen = false },
+        onPublish = { kindSel, textSel, consent, platforms ->
+            scope.launch {
+                val result = container.community.posts.create(
+                    PostDraft(
+                        idempotencyKey = UUID.randomUUID().toString(),
+                        authorId = viewerId.value,
+                        kind = kindSel,
+                        text = textSel.trim(),
+                        consent = consent,
+                        shareTelemetryFacts = consent.shareTelemetryFacts,
+                        distributionTargets = platforms.map { it.name },
+                    ),
+                )
+                when (result) {
+                    is PostResult.Created -> {
+                        distribution.enqueue(
+                            postId = result.post.id,
+                            authorId = viewerId.value,
+                            platforms = platforms.ifEmpty { listOf(DistributionPlatform.FITCONNECT) },
+                            idempotencyKey = result.post.id,
+                        )
+                        distribution.processNext(10)
+                        status = "Published ${result.post.id}"
+                        reload()
+                    }
+                    is PostResult.Duplicate -> status = "Duplicate blocked"
+                    PostResult.RateLimited -> status = "Rate limited"
+                    PostResult.Invalid -> status = "Invalid post"
+                }
+            }
+        },
+    )
 }
 
 private val composerKinds = listOf(
     PostKind.TEXT,
     PostKind.WORKOUT,
+    PostKind.TRAINING,
     PostKind.PROGRESS,
     PostKind.ACHIEVEMENT,
+    PostKind.PHOTO,
+    PostKind.SPOT,
+    PostKind.MUSIC,
+    PostKind.PERFORMANCE,
 )
 
 private val ReactionType.chipLabel: String

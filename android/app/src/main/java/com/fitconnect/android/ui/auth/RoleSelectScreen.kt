@@ -14,7 +14,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.fitconnect.android.R
+import com.fitconnect.android.designui.brand.EosFitConnectLockup
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteStack
@@ -40,9 +43,10 @@ fun RoleSelectScreen(
     ) {
         EliteStack(spacing = EliteSpace.Md) {
             EliteSysLabel(stringResource(R.string.auth_role_overline))
-            Text(
-                text = "FITCONNECT",
-                style = MaterialTheme.typography.displayMedium,
+            EosFitConnectLockup(
+                markSize = 40.dp,
+                assemble = true,
+                wordmarkSize = 22.sp,
             )
             Text(
                 text = stringResource(R.string.auth_role_title),

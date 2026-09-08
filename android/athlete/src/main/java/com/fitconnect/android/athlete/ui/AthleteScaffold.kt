@@ -14,15 +14,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Analytics
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.DynamicFeed
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.Analytics
-import androidx.compose.material.icons.outlined.EmojiEvents
-import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.filled.TripOrigin
+import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.outlined.DynamicFeed
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.TripOrigin
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -85,6 +86,7 @@ import com.fitconnect.android.designui.identity.PatentSignals
 import com.fitconnect.android.designui.identity.PatentStatus
 import com.fitconnect.android.designui.theme.LocalHoneycombIntensity
 import com.fitconnect.android.designui.theme.toColor
+import com.fitconnect.android.foundation.authz.UserRole
 import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.foundation.theme.HoneycombIntensity
 import com.fitconnect.ascend.domain.StreakKind
@@ -99,8 +101,13 @@ val LocalAthleteSignOut = staticCompositionLocalOf<() -> Unit> {
     error("Sign-out handler not provided")
 }
 
+val LocalAthleteModeSwitch = staticCompositionLocalOf<(UserRole) -> Unit> {
+    error("Mode-switch handler not provided")
+}
+
 class AthleteHeaderController {
     var onScrollToTop: () -> Unit = {}
+    var onGoHome: () -> Unit = {}
 }
 
 val LocalAthleteHeaderController = staticCompositionLocalOf { AthleteHeaderController() }
@@ -111,6 +118,7 @@ val LocalAthletePatentStatus = staticCompositionLocalOf { PatentStatus.none() }
 fun AthleteOsApp(
     container: AthleteContainer,
     onSignedOut: () -> Unit = {},
+    onActiveModeChange: (UserRole) -> Unit = {},
 ) {
     val navController = rememberNavController()
     val activity = checkNotNull(LocalActivity.current) as ComponentActivity
@@ -153,10 +161,22 @@ fun AthleteOsApp(
         1f
     }
     val hideNav = current?.startsWith("athlete/training/") == true ||
-        current == AthleteDest.WORKOUT.route ||
         (current == AthleteDest.ACTIVITY.route && live.phase != LiveActivityPhase.IDLE)
-    val onBottomTab = AthleteDest.bottomTabs.any { it.route == current }
-    val showHeader = onBottomTab && !hideNav
+    val onBottomTab = AthleteDest.bottomTabs.any { it.route == current } ||
+        current == AthleteDest.HOME.route ||
+        current == AthleteDest.VAULT.route ||
+        current == AthleteDest.COMMUNITY.route
+    val showHeader = onBottomTab && !hideNav &&
+        current != AthleteDest.FEED.route &&
+        current != AthleteDest.COMMUNITY.route &&
+        current != AthleteDest.DASHBOARD.route &&
+        current != AthleteDest.HOME.route &&
+        current != AthleteDest.ASCEND.route &&
+        current != AthleteDest.VAULT.route
+    val hideHoneycomb = current == AthleteDest.ASCEND.route ||
+        current == AthleteDest.VAULT.route ||
+        current == AthleteDest.FEED.route ||
+        current == AthleteDest.COMMUNITY.route
     var cacheStamp by remember { mutableStateOf<String?>(null) }
     var pendingOffline by remember { mutableStateOf(0) }
     var patentStatus by remember { mutableStateOf(PatentStatus.none()) }
@@ -219,12 +239,13 @@ fun AthleteOsApp(
     }
 
     fun goHome() {
-        navController.navigate(AthleteDest.HOME.route) {
+        navController.navigate(AthleteDest.FEED.route) {
             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
             launchSingleTop = true
             restoreState = true
         }
     }
+    headerController.onGoHome = { goHome() }
 
     val widthDp = LocalConfiguration.current.screenWidthDp
     val compact = widthDp < 600
@@ -232,15 +253,18 @@ fun AthleteOsApp(
     val useRail = !compact
     val navItems = AthleteDest.bottomTabs.map { dest ->
         val selected = current?.startsWith(dest.route) == true ||
-            (dest == AthleteDest.PROFILE && current == AthleteDest.SETTINGS.route)
+            (dest == AthleteDest.PROFILE && current == AthleteDest.SETTINGS.route) ||
+            (dest == AthleteDest.DASHBOARD && current == AthleteDest.HOME.route) ||
+            (dest == AthleteDest.ASCEND && current == AthleteDest.VAULT.route) ||
+            (dest == AthleteDest.FEED && current == AthleteDest.COMMUNITY.route)
         EliteNavItem(
             label = dest.label,
             icon = when (dest) {
-                AthleteDest.HOME -> if (selected) Icons.Filled.Home else Icons.Outlined.Home
-                AthleteDest.DISCOVER -> if (selected) Icons.Filled.Analytics else Icons.Outlined.Analytics
-                AthleteDest.VAULT -> if (selected) Icons.Filled.EmojiEvents else Icons.Outlined.EmojiEvents
+                AthleteDest.FEED -> if (selected) Icons.Filled.DynamicFeed else Icons.Outlined.DynamicFeed
+                AthleteDest.ASCEND -> if (selected) Icons.Filled.TripOrigin else Icons.Outlined.TripOrigin
+                AthleteDest.DASHBOARD -> if (selected) Icons.Filled.Dashboard else Icons.Outlined.Dashboard
                 AthleteDest.PROFILE -> if (selected) Icons.Filled.Person else Icons.Outlined.Person
-                else -> Icons.Outlined.Home
+                else -> Icons.Outlined.DynamicFeed
             },
             selected = selected,
             onClick = {
@@ -259,7 +283,8 @@ fun AthleteOsApp(
     CompositionLocalProvider(
         LocalAthleteContainer provides container,
         LocalAthleteSignOut provides onSignedOut,
-        LocalHoneycombIntensity provides honeycomb,
+        LocalAthleteModeSwitch provides onActiveModeChange,
+        LocalHoneycombIntensity provides if (hideHoneycomb) HoneycombIntensity.OFF else honeycomb,
         LocalHoneycombEmptyBoost provides emptyBoost,
         LocalAtmosphereMotionScale provides motionScale,
         LocalAthleteHeaderController provides headerController,
@@ -270,10 +295,12 @@ fun AthleteOsApp(
                 .fillMaxSize()
                 .background(EliteSurfaceColors.FLOOR.toColor()),
         ) {
-            if (current == AthleteDest.HOME.route) {
+            if (current == AthleteDest.DASHBOARD.route || current == AthleteDest.HOME.route) {
                 EliteCinematicBackground(videoResId = R.raw.demo_motion_clip, alpha = 0.28f)
             }
-            HoneycombAtmosphere(strokeColor = MaterialTheme.colorScheme.primary)
+            if (!hideHoneycomb) {
+                HoneycombAtmosphere(strokeColor = MaterialTheme.colorScheme.primary)
+            }
             Scaffold(
                 modifier = Modifier
                     .fillMaxSize()
@@ -301,7 +328,7 @@ fun AthleteOsApp(
                         if (showHeader) {
                             EosPremiumHeader(
                                 onLogoTap = {
-                                    if (current == AthleteDest.HOME.route) {
+                                    if (current == AthleteDest.FEED.route) {
                                         headerController.onScrollToTop()
                                     } else {
                                         goHome()
@@ -341,18 +368,24 @@ fun AthleteOsApp(
                         EosPremiumBottomNavigation(
                             modifier = Modifier.testTag("athlete_bottom_nav"),
                             items = navItems,
+                            onTrainClick = {
+                                navController.navigate(AthleteDest.WORKOUT.route)
+                            },
+                            trainSelected = current == AthleteDest.WORKOUT.route,
                         )
                     }
                 },
                 floatingActionButton = {
-                    if (!hideNav) {
+                    if (!hideNav && useRail) {
                         EosTrainActionFab(
                             onClick = {
                                 navController.navigate(AthleteDest.WORKOUT.route)
                             },
+                            selected = current == AthleteDest.WORKOUT.route,
                         )
                     }
                 },
+                floatingActionButtonPosition = FabPosition.Center,
                 content = { padding ->
                     Row(
                         modifier = Modifier

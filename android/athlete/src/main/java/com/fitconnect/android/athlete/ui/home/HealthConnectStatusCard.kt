@@ -34,7 +34,7 @@ fun HealthConnectStatusCard(
             EliteSysLabel("HEALTH CONNECT")
             Text(title)
             Text(body)
-            EliteButton(label = cta, onClick = onAction)
+            EliteButton(label = cta, onClick = onAction, contentDescription = cta)
         }
     }
 }
@@ -72,6 +72,11 @@ fun HealthConnectPermissionCard(
                     onOpenSettings
                 } else {
                     onRequestPermissions
+                },
+                contentDescription = if (permissionState == HealthConnectPermissionState.PARTIAL) {
+                    "Open Health Connect settings"
+                } else {
+                    "Grant Health Connect access"
                 },
             )
         }

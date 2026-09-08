@@ -61,6 +61,15 @@ class ProductionConfigGateTest {
     }
 
     @Test
+    fun enforceFailsOnAllowLocalAuth() {
+        val findings = ProductionConfigGate.validate(
+            base(allowLocal = true),
+            enforce = true,
+        )
+        assertTrue(findings.any { it.code == "LOCAL_AUTH" })
+    }
+
+    @Test
     fun enforcePassesValidProduction() {
         val findings = ProductionConfigGate.validate(base(), enforce = true)
         assertEquals(emptyList<ProductionConfigGate.Finding>(), findings)

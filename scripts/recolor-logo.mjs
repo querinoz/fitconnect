@@ -89,22 +89,6 @@ async function exportSizes(inputPath, outDir) {
     path.join(outDir, "..", "apple-touch-icon.png")
   );
 
-  // Expo / React Native — transparent PNG
-  const mobileDir = path.resolve("apps/mobile/assets/brand");
-  fs.mkdirSync(mobileDir, { recursive: true });
-  await sharp(master)
-    .resize(512, 512, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .png({ compressionLevel: 9 })
-    .toFile(path.join(mobileDir, "logo.png"));
-  await sharp(master)
-    .resize(256, 256, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .png({ compressionLevel: 9 })
-    .toFile(path.join(mobileDir, "logo@2x.png"));
-  await sharp(master)
-    .resize(128, 128, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .png({ compressionLevel: 9 })
-    .toFile(path.join(mobileDir, "logo@3x.png"));
-
   console.log("Exported:", outDir);
 }
 

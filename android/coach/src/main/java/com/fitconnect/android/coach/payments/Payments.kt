@@ -85,6 +85,7 @@ class HttpCoachPaymentsGateway(
 
 /**
  * LOCAL_DEMO-only revenue snapshot. Never used for Firebase / production sessions.
+ * Invoice/transfer stay fail-closed — no fake paid success.
  */
 class LocalDemoCoachPaymentsGateway : CoachPaymentsGateway {
     override fun rail(): PayoutRail = PayoutRail.UNSUPPORTED
@@ -115,10 +116,17 @@ class SessionAwareCoachPaymentsGateway(
     private val localDemo: CoachPaymentsGateway = LocalDemoCoachPaymentsGateway(),
     private val live: CoachPaymentsGateway = HttpCoachPaymentsGateway(api),
 ) : CoachPaymentsGateway {
-    private suspend fun active(): CoachPaymentsGateway =
-        if (sessionStore.snapshot().isLocalDemo) localDemo else live
+    @Volatile
+    private var lastRail: PayoutRail = PayoutRail.STRIPE_CONNECT
 
-    override fun rail(): PayoutRail = PayoutRail.STRIPE_CONNECT
+    private suspend fun active(): CoachPaymentsGateway {
+        val gateway = if (sessionStore.snapshot().isLocalDemo) localDemo else live
+        lastRail = gateway.rail()
+        return gateway
+    }
+
+    /** Last rail observed after a suspend call; defaults to STRIPE_CONNECT. */
+    override fun rail(): PayoutRail = lastRail
 
     override suspend fun revenue(): AppResult<RevenueSnapshot> = active().revenue()
     override suspend fun createInvoice(draft: InvoiceDraft): AppResult<String> =

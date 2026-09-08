@@ -16,13 +16,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.fitconnect.android.design.EliteSurfaceColors
 import com.fitconnect.android.design.EliteSurfaceGlass
-import com.fitconnect.android.design.EliteSurfaceRadius
+import com.fitconnect.android.designui.theme.EliteElevation
+import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.toColor
 
@@ -44,13 +47,14 @@ object EosGlassColors {
 /**
  * Standardized floating glass surface (neu-glass spec).
  *
+ * Default radius = SoftChrome (28) for floating chrome wells per Zenith visual contract.
  * Children are composed in the same box as the glass plate so hit-testing reaches tabs/buttons.
  * Optional blur applies to the whole chrome (max 2 glass layers per screen).
  */
 @Composable
 fun EosGlassSurface(
     modifier: Modifier = Modifier,
-    cornerRadius: Dp = EliteSurfaceRadius.NEUMORPHIC.dp,
+    cornerRadius: Dp = EliteRadius.SoftChrome,
     blurRadius: Dp = EliteSurfaceGlass.BLUR_STANDARD.dp,
     enableBlur: Boolean = true,
     onClick: (() -> Unit)? = null,
@@ -71,9 +75,23 @@ fun EosGlassSurface(
     Box(
         modifier = modifier
             .then(clickModifier)
+            .shadow(
+                elevation = EliteElevation.High,
+                shape = shape,
+                ambientColor = Color.Black.copy(alpha = 0.55f),
+                spotColor = EliteSurfaceColors.VOLTLINE.toColor().copy(alpha = 0.16f),
+            )
             .clip(shape)
             .then(if (supportsBlur) Modifier.blur(blurRadius) else Modifier)
-            .background(EosGlassColors.Fill, shape)
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        Color.White.copy(alpha = 0.10f),
+                        EosGlassColors.Fill,
+                    ),
+                ),
+                shape,
+            )
             .border(1.dp, EosGlassColors.Border, shape),
         content = content,
     )

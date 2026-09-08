@@ -20,10 +20,14 @@ object AscendDemo {
     /** 2024-07-01T00:00:00Z-ish, stable for tests. */
     const val DAY0 = 1_719_792_000_000L
 
+    /**
+     * Maps persona email → stable demo user id. Never returns an email string —
+     * emails are not identity ids (P1-AUTH / email-as-id ban).
+     */
     fun userIdForPersona(email: String?): String = when (email?.lowercase()) {
-        INES -> INES
-        MARINA -> MARINA
-        TOMAS -> TOMAS
+        INES -> "demo-ines"
+        MARINA -> "demo-marina"
+        TOMAS -> "demo-tomas"
         else -> ATHLETE_LOCAL
     }
 

@@ -22,6 +22,8 @@ class DeepLinkClassifyTest {
         assertEquals(DeepLinkTarget.Auth, classifyDeepLinkPath(deepLinkAppPathString("fitconnect://app/auth")))
         assertEquals(DeepLinkTarget.Home, classifyDeepLinkPath(deepLinkAppPathString("fitconnect://app/home")))
         assertEquals(DeepLinkTarget.Home, classifyDeepLinkPath(deepLinkAppPathString("fitconnect://app/athlete/home")))
+        assertEquals(DeepLinkTarget.Home, classifyDeepLinkPath(deepLinkAppPathString("fitconnect://app/athlete/feed")))
+        assertEquals(DeepLinkTarget.Home, classifyDeepLinkPath(deepLinkAppPathString("fitconnect://app/coach/feed")))
     }
 
     @Test
@@ -49,7 +51,29 @@ class DeepLinkClassifyTest {
         assertNull(deepLinkAppPathString("fitconnect://other/x"))
         assertNull(deepLinkAppPathString("https://example.com/app/home"))
         assertEquals(DeepLinkTarget.Unknown, classifyDeepLinkPath(null))
-        assertEquals(DeepLinkTarget.Unknown, classifyDeepLinkPath("coach/foo"))
+        assertEquals(DeepLinkTarget.Unknown, classifyDeepLinkPath("nope"))
+    }
+
+    @Test
+    fun booking_coach_nested() {
+        val path = deepLinkAppPathString("fitconnect://app/coach/bookings")
+        val t = classifyDeepLinkPath(path)
+        assertTrue(t is DeepLinkTarget.CoachNested)
+        assertEquals("coach/bookings", (t as DeepLinkTarget.CoachNested).path)
+        assertEquals(
+            DeepLinkTarget.Home,
+            classifyDeepLinkPath(deepLinkAppPathString("fitconnect://app/coach/overview")),
+        )
+        val athletePath = deepLinkAppPathString("fitconnect://app/coach/athletes/a2")
+        assertTrue(classifyDeepLinkPath(athletePath) is DeepLinkTarget.CoachNested)
+        assertEquals(
+            DeepLinkTarget.CoachNested("coach/sessions/s1"),
+            classifyDeepLinkPath(deepLinkAppPathString("fitconnect://app/coach/sessions/s1")),
+        )
+        assertEquals(
+            DeepLinkTarget.AthleteNested("athlete/discover"),
+            classifyDeepLinkPath(deepLinkAppPathString("fitconnect://app/athlete/discover")),
+        )
     }
 
     @Test
@@ -69,6 +93,8 @@ class DeepLinkClassifyTest {
             Case("fitconnect://app/guest", DeepLinkTarget.Guest, "already running guest"),
             Case("fitconnect://app/athlete/activity", DeepLinkTarget.AthleteNested("athlete/activity"), "background nested"),
             Case("fitconnect://app/athlete/sports", DeepLinkTarget.AthleteNested("athlete/sports"), "repeated nested"),
+            Case("fitconnect://app/coach/bookings", DeepLinkTarget.CoachNested("coach/bookings"), "coach nested bookings"),
+            Case("fitconnect://app/coach/athletes/a2", DeepLinkTarget.CoachNested("coach/athletes/a2"), "coach nested athlete"),
             Case("fitconnect://app/catalog", DeepLinkTarget.Catalog, "catalog"),
             Case("fitconnect://app/nope", DeepLinkTarget.Unknown, "invalid path"),
             Case("fitconnect://evil/home", DeepLinkTarget.Unknown, "unknown host → path null → Unknown via classify null"),

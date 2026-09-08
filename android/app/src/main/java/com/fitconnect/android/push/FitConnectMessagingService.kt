@@ -2,6 +2,7 @@ package com.fitconnect.android.push
 
 import com.fitconnect.android.FitConnectApplication
 import com.fitconnect.android.R
+import com.fitconnect.android.foundation.notifications.PushTokenRefreshSink
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.CoroutineScope
@@ -10,8 +11,11 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 /**
- * FCM entry point. Token persistence posts to `/api/v1/push/register` after login
- * and on [onNewToken]. Never logs the token value.
+ * FCM entry point. Token refresh posts to `/api/v1/push/register` via
+ * [PushTokenRefreshSink.onNewToken]. Never logs the token value.
+ *
+ * Foreground data messages map through [FcmRemoteMapper] → local notification with
+ * deep-link PendingIntent. Does not claim background delivery certification.
  */
 open class FitConnectMessagingService : FirebaseMessagingService() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -19,9 +23,9 @@ open class FitConnectMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         android.util.Log.i("FitConnectFCM", "onNewToken received")
         val app = applicationContext as? FitConnectApplication ?: return
-        val gateway = app.container.notifications as? FcmNotificationGateway ?: return
+        val sink = app.container.notifications as? PushTokenRefreshSink ?: return
         scope.launch {
-            runCatching { gateway.registerTokenWithBackend(token) }
+            runCatching { sink.onNewToken(token) }
         }
     }
 

@@ -127,33 +127,36 @@ fun EliteTierProgress(
     fill: Color,
     modifier: Modifier = Modifier,
 ) {
-    Column(
+    Row(
         modifier = modifier
             .fillMaxWidth()
             .testTag("elite_tier_progress"),
-        verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
+        horizontalArrangement = Arrangement.spacedBy(EliteSpace.Lg),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        EliteSysLabel(title)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(6.dp)
-                .background(
-                    EliteSurfaceColors.INSTRUMENT_TRACK.toColor(),
-                    RoundedCornerShape(EliteRadius.Full),
-                ),
+        EliteInstrumentRing(
+            progress = progress.coerceIn(0f, 1f),
+            diameter = 96.dp,
+            contentDescription = remaining,
+            trackColor = fill,
+            pulsing = progress in 0.01f..0.99f,
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(progress.coerceIn(0f, 1f))
-                    .height(6.dp)
-                    .background(fill, RoundedCornerShape(EliteRadius.Full)),
+            Text(
+                text = "${(progress.coerceIn(0f, 1f) * 100).toInt()}%",
+                style = MaterialTheme.typography.labelLarge,
+                color = fill,
             )
         }
-        Text(
-            remaining,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(EliteSpace.Xs),
+        ) {
+            EliteSysLabel(title)
+            Text(
+                remaining,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }

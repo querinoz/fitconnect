@@ -1,7 +1,24 @@
 import { NextResponse } from "next/server";
-import { isAuthFailure, requireAthleteId } from "@/lib/api/require-auth";
-import { createAthleteBooking } from "@/lib/db/bookings";
+import { isAuthFailure, requireAthleteId, requireAuth } from "@/lib/api/require-auth";
+import { createAthleteBooking, listAthleteBookings } from "@/lib/db/bookings";
 import { publishSessionBooking } from "@/lib/realtime/publish-booking";
+
+/**
+ * Athlete list-own-bookings — auth subject only; demo mode forbidden (Path A).
+ */
+export async function GET(req: Request) {
+  const auth = await requireAuth(req);
+  if (!auth.ok) return auth.response;
+  if (auth.demo) {
+    return NextResponse.json({ error: "demo_forbidden" }, { status: 403 });
+  }
+
+  const resolved = await requireAthleteId(req);
+  if (isAuthFailure(resolved)) return resolved.response;
+
+  const { bookings, source } = await listAthleteBookings(resolved.athleteId);
+  return NextResponse.json({ bookings, source });
+}
 
 /**
  * Athlete create-booking — canonical Session row (pending).

@@ -234,3 +234,50 @@ export function listMemoryBookingsForCoach(coachId: string): AthleteBookingRow[]
     (b) => b.coachId === coachId && b.status === "pending"
   );
 }
+
+export function listMemoryBookingsForAthlete(athleteId: string): AthleteBookingRow[] {
+  return [...memoryBookings.values()]
+    .filter((b) => b.athleteId === athleteId)
+    .sort(
+      (a, b) =>
+        new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
+    );
+}
+
+/**
+ * Athlete lists own bookings only (caller must pass auth subject id).
+ * Path A: postgres or memory — never seed/demo fixtures.
+ */
+export async function listAthleteBookings(athleteId: string): Promise<{
+  bookings: AthleteBookingRow[];
+  source: "postgres" | "memory" | "empty";
+}> {
+  const memory = listMemoryBookingsForAthlete(athleteId);
+
+  if (isMemoryPersistence() || !getPrisma()) {
+    if (!isMemoryPersistence() && !getPrisma()) {
+      return { bookings: [], source: "empty" };
+    }
+    return { bookings: memory, source: memory.length > 0 ? "memory" : "empty" };
+  }
+
+  const db = getPrisma()!;
+  try {
+    const rows = await db.session.findMany({
+      where: { athleteExternalId: athleteId },
+      orderBy: { scheduledAt: "asc" }
+    });
+    const fromDb = rows.map((r) => mapPrismaSession(r, 60));
+    const memoryIds = new Set(memory.map((b) => b.id));
+    const merged = [
+      ...fromDb.filter((b) => !memoryIds.has(b.id)),
+      ...memory
+    ].sort(
+      (a, b) =>
+        new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
+    );
+    return { bookings: merged, source: "postgres" };
+  } catch {
+    return { bookings: memory, source: memory.length > 0 ? "memory" : "empty" };
+  }
+}

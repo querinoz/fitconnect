@@ -1,61 +1,12 @@
 package com.fitconnect.android.designui.components
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import com.fitconnect.android.designui.motion.EliteMotionPreset
-import com.fitconnect.android.designui.motion.eliteMotionSpec
 import com.fitconnect.android.designui.theme.EliteMetricTextStyle
 import com.fitconnect.android.designui.theme.EliteSpace
-import com.fitconnect.android.designui.theme.reduceMotionEnabled
-
-@Composable
-fun AscendXPBar(
-    rankLabel: String,
-    level: Int,
-    xpLabel: String,
-    remainingLabel: String,
-    progress: Float,
-    nextUnlock: String?,
-    modifier: Modifier = Modifier,
-) {
-    val reduce = reduceMotionEnabled()
-    val animated by animateFloatAsState(
-        targetValue = progress.coerceIn(0f, 1f),
-        animationSpec = eliteMotionSpec(EliteMotionPreset.SUCCESS),
-        label = "ascend-xp",
-    )
-    val shown = if (reduce) progress.coerceIn(0f, 1f) else animated
-    EliteCard(variant = EliteCardVariant.Glass, modifier = modifier.testTag("ascend_xp_bar")) {
-        EliteStack(spacing = EliteSpace.Sm) {
-            EliteSysLabel("SYS / ASCEND · PERFORMANCE STATUS")
-            Text(
-                "$rankLabel  ${level.toString().padStart(2, '0')}",
-                style = MaterialTheme.typography.headlineSmall,
-            )
-            LinearProgressIndicator(
-                progress = { shown },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .semantics { contentDescription = remainingLabel },
-            )
-            Text(xpLabel, style = EliteMetricTextStyle, color = MaterialTheme.colorScheme.primary)
-            Text(remainingLabel, style = MaterialTheme.typography.bodyMedium)
-            nextUnlock?.let {
-                EliteSysLabel("NEXT UNLOCK")
-                Text(it, style = MaterialTheme.typography.bodyLarge)
-            }
-        }
-    }
-}
 
 @Composable
 fun AscendStreakCard(

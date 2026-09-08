@@ -25,6 +25,11 @@ data class PostDraft(
     val workoutFacts: com.fitconnect.android.community.domain.WorkoutFacts? = null,
     val mediaIds: List<String> = emptyList(),
     val media: List<com.fitconnect.android.community.domain.MediaAttachment> = emptyList(),
+    val spot: com.fitconnect.android.community.domain.SpotRef? = null,
+    val location: com.fitconnect.android.community.domain.LocationSnapshot? = null,
+    val music: com.fitconnect.android.community.domain.MusicMetadata? = null,
+    val consent: com.fitconnect.android.community.domain.ShareConsent = com.fitconnect.android.community.domain.ShareConsent(),
+    val distributionTargets: List<String> = listOf("fitconnect"),
     /** Seed / replay only — never set from the live composer. */
     val skipRateLimit: Boolean = false,
     val createdAtEpochMs: Long? = null,
@@ -76,7 +81,18 @@ class InMemoryPostEngine(
     private var sequence = 0L
 
     override suspend fun create(draft: PostDraft): PostResult = mutex.withLock {
-        if (draft.text.isBlank() && draft.workoutFacts == null && draft.mediaIds.isEmpty() && draft.media.isEmpty()) {
+        val hasBody = draft.text.isNotBlank() ||
+            draft.workoutFacts != null ||
+            draft.mediaIds.isNotEmpty() ||
+            draft.media.isNotEmpty() ||
+            draft.music != null ||
+            draft.spot != null ||
+            draft.location != null
+        if (!hasBody) {
+            return@withLock PostResult.Invalid
+        }
+        // Strava-originated workout facts are never social-eligible (AGENTS.md §1).
+        if (draft.workoutFacts?.providerId.equals("STRAVA", ignoreCase = true)) {
             return@withLock PostResult.Invalid
         }
         // Idempotency: same key → same post, no duplicate.
@@ -95,21 +111,37 @@ class InMemoryPostEngine(
         }
 
         val createdAt = draft.createdAtEpochMs ?: now
+        val consent = draft.consent.copy(
+            shareTelemetryFacts = draft.shareTelemetryFacts || draft.consent.shareTelemetryFacts,
+        )
+        val location = draft.location?.takeIf {
+            when (it.privacy) {
+                com.fitconnect.android.community.domain.LocationPrivacy.EXACT -> consent.shareExactLocation
+                com.fitconnect.android.community.domain.LocationPrivacy.PRIVATE -> false
+                else -> consent.shareApproximateLocation || consent.shareExactLocation
+            }
+        }
+        val music = draft.music?.takeIf { consent.shareMusic }
+        val facts = draft.workoutFacts?.takeIf { consent.shareTraining }
         val post = CommunityPost(
             id = "post-${++sequence}",
             authorId = draft.authorId,
             kind = draft.kind,
             text = draft.text.trim(),
-            sportKey = draft.sportKey,
-            workoutFacts = draft.workoutFacts,
+            sportKey = draft.sportKey?.takeIf { consent.shareSport },
+            workoutFacts = facts,
             media = draft.media,
             hashtags = extractTags(draft.text, '#'),
             mentions = extractTags(draft.text, '@'),
             groupId = draft.groupId,
             programId = draft.programId,
             challengeId = draft.challengeId,
+            spot = draft.spot,
+            location = location,
+            music = music,
+            consent = consent,
             visibility = draft.visibility,
-            shareTelemetryFacts = draft.shareTelemetryFacts,
+            shareTelemetryFacts = consent.shareTelemetryFacts,
             audit = Audit(createdAt, createdAt),
         )
         posts[post.id] = post

@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.androidx.adaptive.navigation)
     implementation(libs.androidx.activity.compose)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.livekit.android)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

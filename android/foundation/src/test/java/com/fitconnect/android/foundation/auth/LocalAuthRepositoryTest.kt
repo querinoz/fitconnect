@@ -44,7 +44,7 @@ class LocalAuthRepositoryTest {
     @Test
     fun emailSignInPersistsSessionAndRefreshRotates() = runBlocking {
         val session = SecureSessionStore(InMemorySecureStore())
-        val auth = LocalAuthRepository(session, logger)
+        val auth = LocalAuthRepository(session, logger, allowLocalAuth = true)
 
         val user = auth.signIn(
             AuthProviderKind.EMAIL_PASSWORD,
@@ -63,7 +63,7 @@ class LocalAuthRepositoryTest {
     @Test
     fun guestAndAnonymousModes() = runBlocking {
         val session = SecureSessionStore(InMemorySecureStore())
-        val auth = LocalAuthRepository(session, logger)
+        val auth = LocalAuthRepository(session, logger, allowLocalAuth = true)
 
         auth.continueAsGuest()
         assertEquals(UserRole.GUEST, session.role())
@@ -77,7 +77,7 @@ class LocalAuthRepositoryTest {
     @Test
     fun adminCannotBeGrantedFromEmail() = runBlocking {
         val session = SecureSessionStore(InMemorySecureStore())
-        val auth = LocalAuthRepository(session, logger, allowLocalCoachElevation = true)
+        val auth = LocalAuthRepository(session, logger, allowLocalCoachElevation = true, allowLocalAuth = true)
         val user = auth.signIn(
             AuthProviderKind.EMAIL_PASSWORD,
             AuthCredentials(email = "admin@fitconnect.app", password = "password1"),
@@ -88,7 +88,7 @@ class LocalAuthRepositoryTest {
     @Test
     fun coachElevationDisabledInReleaseMode() = runBlocking {
         val session = SecureSessionStore(InMemorySecureStore())
-        val auth = LocalAuthRepository(session, logger, allowLocalCoachElevation = false)
+        val auth = LocalAuthRepository(session, logger, allowLocalCoachElevation = false, allowLocalAuth = true)
         val user = auth.signIn(
             AuthProviderKind.EMAIL_PASSWORD,
             AuthCredentials(email = "coach@fitconnect.app", password = "password1"),
@@ -99,7 +99,7 @@ class LocalAuthRepositoryTest {
     @Test
     fun coachElevationAllowedOnlyWhenDebugFlagSet() = runBlocking {
         val session = SecureSessionStore(InMemorySecureStore())
-        val auth = LocalAuthRepository(session, logger, allowLocalCoachElevation = true)
+        val auth = LocalAuthRepository(session, logger, allowLocalCoachElevation = true, allowLocalAuth = true)
         val user = auth.signIn(
             AuthProviderKind.EMAIL_PASSWORD,
             AuthCredentials(email = "coach@fitconnect.app", password = "password1"),
@@ -110,7 +110,7 @@ class LocalAuthRepositoryTest {
     @Test
     fun logoutClearsSession() = runBlocking {
         val session = SecureSessionStore(InMemorySecureStore())
-        val auth = LocalAuthRepository(session, logger)
+        val auth = LocalAuthRepository(session, logger, allowLocalAuth = true)
         auth.signIn(
             AuthProviderKind.EMAIL_PASSWORD,
             AuthCredentials(email = "a@b.com", password = "password1"),
@@ -123,7 +123,7 @@ class LocalAuthRepositoryTest {
     @Test
     fun restoreSessionAfterSignIn() = runBlocking {
         val session = SecureSessionStore(InMemorySecureStore())
-        val auth = LocalAuthRepository(session, logger)
+        val auth = LocalAuthRepository(session, logger, allowLocalAuth = true)
         val signedIn = auth.signIn(
             AuthProviderKind.EMAIL_PASSWORD,
             AuthCredentials(email = "a@b.com", password = "password1"),
@@ -132,6 +132,31 @@ class LocalAuthRepositoryTest {
         assertTrue(restored is AppResult.Ok)
         assertEquals(signedIn.value.id, (restored as AppResult.Ok).value.userId)
         assertEquals(signedIn.value.role, restored.value.role)
+    }
+
+    @Test
+    fun defaultAllowLocalAuthIsFailClosed() = runBlocking {
+        val session = SecureSessionStore(InMemorySecureStore())
+        val auth = LocalAuthRepository(session, logger) // default allowLocalAuth=false
+        val user = auth.signIn(
+            AuthProviderKind.EMAIL_PASSWORD,
+            AuthCredentials(email = "a@b.com", password = "password1"),
+        )
+        assertTrue(user is AppResult.Err)
+        assertFalse(session.isLoggedIn())
+    }
+
+    @Test
+    fun emailSignInMintsUuidId_notEmail() = runBlocking {
+        val session = SecureSessionStore(InMemorySecureStore())
+        val auth = LocalAuthRepository(session, logger, allowLocalAuth = true)
+        val user = auth.signIn(
+            AuthProviderKind.EMAIL_PASSWORD,
+            AuthCredentials(email = "athlete@fitconnect.demo", password = "password1"),
+        ) as AppResult.Ok
+        assertFalse(user.value.id.contains("@"))
+        assertTrue(user.value.id.length >= 32)
+        assertEquals("athlete@fitconnect.demo", user.value.email)
     }
 
     @Test
@@ -149,7 +174,7 @@ class LocalAuthRepositoryTest {
     @Test
     fun coachElevationEmailWorksWhenAllowLocalCoachElevation() = runBlocking {
         val session = SecureSessionStore(InMemorySecureStore())
-        val auth = LocalAuthRepository(session, logger, allowLocalCoachElevation = true)
+        val auth = LocalAuthRepository(session, logger, allowLocalCoachElevation = true, allowLocalAuth = true)
         val user = auth.signIn(
             AuthProviderKind.EMAIL_PASSWORD,
             AuthCredentials(email = "coach@fitconnect.app", password = "password1"),
@@ -171,7 +196,7 @@ class LocalAuthRepositoryTest {
         )
         assertEquals(1, queue.size())
         val isolation = AccountIsolationController(session, queue, MemKv(), logger)
-        val auth = LocalAuthRepository(session, logger, isolation = isolation)
+        val auth = LocalAuthRepository(session, logger, isolation = isolation, allowLocalAuth = true)
         auth.signIn(
             AuthProviderKind.EMAIL_PASSWORD,
             AuthCredentials(email = "a@b.com", password = "password1"),
@@ -196,7 +221,7 @@ class LocalAuthRepositoryTest {
     @Test
     fun googleAndAppleAreNotFakedLocally() = runBlocking {
         val session = SecureSessionStore(InMemorySecureStore())
-        val auth = LocalAuthRepository(session, logger)
+        val auth = LocalAuthRepository(session, logger, allowLocalAuth = true)
         val google = auth.signIn(AuthProviderKind.GOOGLE, AuthCredentials(idToken = "token"))
         assertTrue(google is AppResult.Err)
         assertEquals(
@@ -209,7 +234,7 @@ class LocalAuthRepositoryTest {
     @Test
     fun localDemoRefusesAccountDeletion() = runBlocking {
         val session = SecureSessionStore(InMemorySecureStore())
-        val auth = LocalAuthRepository(session, logger)
+        val auth = LocalAuthRepository(session, logger, allowLocalAuth = true)
         auth.signIn(
             AuthProviderKind.EMAIL_PASSWORD,
             AuthCredentials(email = "a@b.com", password = "password1"),

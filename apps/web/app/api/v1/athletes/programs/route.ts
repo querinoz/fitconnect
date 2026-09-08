@@ -6,7 +6,7 @@ import {
   listProgramCatalog
 } from "@/lib/db/program-enrollments";
 
-/** Athlete program enrollments + enroll mutation. */
+/** Athlete program enrollments + enroll mutation. Path A: never source=seed. */
 export async function GET(req: Request) {
   const resolved = await requireAthleteId(req);
   if (isAuthFailure(resolved)) return resolved.response;
@@ -15,7 +15,7 @@ export async function GET(req: Request) {
   return NextResponse.json({
     enrollments,
     catalog,
-    source: "memory"
+    source: enrollments.length > 0 ? "memory" : "empty"
   });
 }
 

@@ -1,8 +1,12 @@
 package com.fitconnect.android.designui.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +19,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
@@ -23,10 +28,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -36,10 +45,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.fitconnect.android.designui.theme.EliteBorder
+import com.fitconnect.android.designui.theme.EliteElevation
 import com.fitconnect.android.designui.theme.EliteMonoTextStyle
+import com.fitconnect.android.designui.theme.EliteNavChrome
 import com.fitconnect.android.designui.theme.EliteOpacity
 import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
+import com.fitconnect.android.designui.theme.reduceMotionEnabled
 import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.android.foundation.a11y.Accessibility
 
@@ -132,7 +144,24 @@ private fun EliteNavRailTab(item: EliteNavItem, expanded: Boolean) {
                 onClick = item.onClick,
                 role = Role.Tab,
             )
+            .then(
+                if (item.selected) {
+                    Modifier.background(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                        RoundedCornerShape(EliteRadius.Lg),
+                    )
+                } else {
+                    Modifier
+                },
+            )
             .padding(vertical = EliteSpace.Xs)
+            .semantics {
+                contentDescription = if (item.selected) {
+                    "${item.label}, selected"
+                } else {
+                    item.label
+                }
+            }
             .testTag(item.testTag),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(EliteSpace.Xxs),
@@ -146,7 +175,7 @@ private fun EliteNavRailTab(item: EliteNavItem, expanded: Boolean) {
         ) {
             Icon(
                 imageVector = item.icon,
-                contentDescription = item.label,
+                contentDescription = null,
                 tint = if (item.selected) onSelected else idleColor,
                 modifier = Modifier.size(22.dp),
             )
@@ -168,20 +197,42 @@ private fun EliteNavRailTab(item: EliteNavItem, expanded: Boolean) {
 fun RowScope.EliteNavTab(
     item: EliteNavItem,
     selectedColor: Color = MaterialTheme.colorScheme.primary,
+    docked: Boolean = false,
 ) {
     val idleColor = MaterialTheme.colorScheme.onSurfaceVariant
-    val onSelected = MaterialTheme.colorScheme.onPrimary
+    val onSelected = if (docked) selectedColor else MaterialTheme.colorScheme.onPrimary
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val reduceMotion = reduceMotionEnabled()
+    val scale by animateFloatAsState(
+        targetValue = if (!reduceMotion && pressed) 0.92f else 1f,
+        animationSpec = spring(dampingRatio = 0.72f, stiffness = 500f),
+        label = "nav_tab_scale",
+    )
     Column(
         modifier = Modifier
             .weight(1f)
             .heightIn(min = Accessibility.MIN_TOUCH_TARGET_DP.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
             .clip(RoundedCornerShape(EliteRadius.Lg))
             .selectable(
                 selected = item.selected,
                 onClick = item.onClick,
                 role = Role.Tab,
+                interactionSource = interaction,
+                indication = null,
             )
             .padding(vertical = EliteSpace.Xs)
+            .semantics {
+                contentDescription = if (item.selected) {
+                    "${item.label}, selected"
+                } else {
+                    item.label
+                }
+            }
             .testTag(item.testTag),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(EliteSpace.Xxs),
@@ -189,17 +240,42 @@ fun RowScope.EliteNavTab(
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(width = 48.dp, height = 32.dp)
-                .clip(RoundedCornerShape(EliteRadius.Full))
-                .background(if (item.selected) selectedColor else Color.Transparent),
+                .size(
+                    width = Accessibility.MIN_TOUCH_TARGET_DP.dp,
+                    height = EliteSpace.Xxl,
+                )
+                .then(
+                    if (docked) {
+                        Modifier
+                    } else {
+                        Modifier
+                            .shadow(
+                                elevation = if (item.selected) EliteElevation.Mid else EliteElevation.None,
+                                shape = RoundedCornerShape(EliteRadius.Full),
+                                ambientColor = selectedColor.copy(alpha = EliteOpacity.Muted),
+                                spotColor = selectedColor.copy(alpha = EliteOpacity.Subtle),
+                            )
+                            .clip(RoundedCornerShape(EliteRadius.Full))
+                            .background(if (item.selected) selectedColor else Color.Transparent)
+                    },
+                ),
         ) {
             Icon(
                 imageVector = item.icon,
-                contentDescription = item.label,
+                contentDescription = null,
                 tint = if (item.selected) onSelected else idleColor,
-                modifier = Modifier.size(22.dp),
+                modifier = Modifier.size(EliteSpace.Xl),
             )
         }
+        Box(
+            modifier = Modifier
+                .width(EliteSpace.Xl)
+                .height(EliteNavChrome.ActiveIndicator)
+                .background(
+                    if (item.selected) selectedColor else Color.Transparent,
+                    RoundedCornerShape(EliteRadius.Full),
+                ),
+        )
         Text(
             text = item.label,
             style = MaterialTheme.typography.labelSmall,

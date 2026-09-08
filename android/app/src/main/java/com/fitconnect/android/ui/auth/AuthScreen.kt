@@ -2,8 +2,8 @@ package com.fitconnect.android.ui.auth
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,15 +29,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fitconnect.android.R
 import com.fitconnect.android.auth.AndroidFederatedAuthHost
+import com.fitconnect.android.designui.atmosphere.HoneycombAtmosphere
+import com.fitconnect.android.designui.brand.EosFitConnectLockup
 import com.fitconnect.android.auth.GoogleWebClientIds
 import com.fitconnect.android.foundation.auth.FederatedAuthHost
 import com.fitconnect.android.foundation.auth.UnavailableFederatedAuthHost
@@ -102,32 +105,30 @@ fun AuthScreen(
         if (state.phase == AuthPhase.SUCCESS) onSignedIn()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .statusBarsPadding()
-            .padding(EliteSpace.Xl)
-            .testTag("screen_auth")
-            .semantics { contentDescription = "Identity verification" },
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Image(
-            painter = painterResource(R.drawable.ic_fitconnect_brand),
-            contentDescription = stringResource(R.string.app_name),
+    Box(modifier = Modifier.fillMaxSize()) {
+        HoneycombAtmosphere(
+            modifier = Modifier.fillMaxSize(),
+            strokeColor = MaterialTheme.colorScheme.primary,
+        )
+        Column(
             modifier = Modifier
-                .height(EliteSpace.Huge)
-                .testTag("auth_brand_mark"),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .statusBarsPadding()
+                .padding(EliteSpace.Xl)
+                .testTag("screen_auth")
+                .semantics { contentDescription = "Identity verification" },
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+        EosFitConnectLockup(
+            markSize = 56.dp,
+            assemble = true,
+            wordmarkSize = 22.sp,
+            modifier = Modifier.testTag("auth_brand_mark"),
         )
         Spacer(modifier = Modifier.height(EliteSpace.Md))
         EliteSysLabel(stringResource(R.string.auth_sys_identity))
-        Spacer(modifier = Modifier.height(EliteSpace.Sm))
-        Text(
-            text = stringResource(R.string.app_name),
-            style = MaterialTheme.typography.displayMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
         Text(
             text = stringResource(R.string.splash_tagline),
             style = MaterialTheme.typography.bodyMedium,
@@ -208,6 +209,7 @@ fun AuthScreen(
                     },
                 )
             }
+        }
         }
     }
 }
@@ -398,6 +400,7 @@ private fun DemoPersonaButton(
         onClick = onClick,
         variant = variant,
         enabled = enabled,
+        contentDescription = "demo_persona_${persona.name.lowercase()}",
         modifier = Modifier
             .fillMaxWidth()
             .testTag(testTag),

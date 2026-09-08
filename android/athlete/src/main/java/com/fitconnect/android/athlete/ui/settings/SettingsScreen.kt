@@ -1,5 +1,7 @@
 package com.fitconnect.android.athlete.ui.settings
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +28,12 @@ import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteLanguagePicker
 import com.fitconnect.android.designui.components.EliteSwitch
 import com.fitconnect.android.designui.components.EliteStack
+import com.fitconnect.android.designui.components.EliteZenithHeader
+import com.fitconnect.android.designui.components.HexBadge
+import com.fitconnect.android.designui.components.HexBadgeTone
+import com.fitconnect.android.designui.components.HexStatus
+import com.fitconnect.android.designui.neumorphic.EosPremiumCard
+import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.i18n.AppLocale
 import com.fitconnect.android.foundation.i18n.LocaleApplier
 import com.fitconnect.android.foundation.theme.AccentPreset
@@ -65,7 +73,21 @@ fun SettingsScreen(
         subtitle = "Appearance · language · account",
         overline = "ATHLETE OS · PREFS",
         testTag = "athlete_settings",
+        showTitle = false,
     ) {
+        item {
+            EosPremiumCard {
+                Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+                    EliteZenithHeader(
+                        sysLabel = "SETTINGS COMMAND",
+                        title = "Settings",
+                        subtitle = "Appearance, language, notifications, and account controls.",
+                        badge = { HexBadge("SYS", tone = HexBadgeTone.Iris) },
+                    )
+                    HexStatus("PENDING_HUMAN for FCM prod")
+                }
+            }
+        }
         item {
             EliteCard {
                 EliteStack {
@@ -133,6 +155,7 @@ fun SettingsScreen(
                         variant = EliteButtonVariant.Secondary,
                         onClick = onOpenNotifications,
                     )
+                    HexStatus("PENDING_HUMAN")
                     Text("ASCEND haptics", style = MaterialTheme.typography.titleSmall)
                     EliteSwitch(
                         checked = prefs.hapticsEnabled,

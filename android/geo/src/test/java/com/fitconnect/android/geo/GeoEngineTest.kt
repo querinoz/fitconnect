@@ -25,6 +25,7 @@ import com.fitconnect.android.sports.domain.SportId
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -175,6 +176,23 @@ class GeoEngineTest {
         val hits = geo.discovery.search(DiscoveryQuery(sportId = SportId.PADEL))
         assertTrue(hits.all { SportId.PADEL in it.place.sportIds })
         assertFalse(hits.isEmpty())
+    }
+
+    @Test
+    fun releaseGeoContainerNeverSeedsFakeGps() {
+        val release = DefaultGeoContainer(allowMockLocation = false)
+        assertNull(release.location.lastKnown())
+        assertNull(release.location.current.value)
+        assertEquals(
+            com.fitconnect.android.geo.location.LocationPermissionState.UNKNOWN,
+            release.location.permission.value,
+        )
+        try {
+            release.location.setMockLocation(PlacesCatalog.defaultDevAnchor())
+            throw AssertionError("expected mock locations disabled")
+        } catch (e: IllegalStateException) {
+            assertTrue(e.message!!.contains("Mock locations disabled"))
+        }
     }
 
     private fun nextOpenSlot(): Long {

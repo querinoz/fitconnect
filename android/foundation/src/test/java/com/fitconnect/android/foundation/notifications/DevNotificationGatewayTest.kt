@@ -25,4 +25,13 @@ class DevNotificationGatewayTest {
         assertEquals(1, gateway.delivered().size)
         assertEquals(7, gateway.delivered().first().id)
     }
+
+    @Test
+    fun routesBookingDeepLink() {
+        val gateway = DevNotificationGateway()
+        assertEquals(
+            "fitconnect://app/coach/bookings",
+            gateway.routeDeepLink("fitconnect://app/coach/booking"),
+        )
+    }
 }

@@ -1,6 +1,7 @@
 package com.fitconnect.android.coach.ui.programs
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +20,11 @@ import com.fitconnect.android.coach.ui.components.CoachScreenScaffold
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
+import com.fitconnect.android.designui.components.EliteZenithHeader
+import com.fitconnect.android.designui.components.HexBadge
+import com.fitconnect.android.designui.components.HexBadgeTone
+import com.fitconnect.android.designui.components.HexStatus
+import com.fitconnect.android.designui.neumorphic.EosPremiumCard
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.common.AppResult
 import kotlinx.coroutines.launch
@@ -39,15 +45,35 @@ fun ProgramsScreen(onOpenBuilder: (String) -> Unit) {
             title = "Programs & plans",
             subtitle = "Templates · drafts · publish · clone · builder",
             testTag = "coach_programs",
+            showTitle = false,
         ) {
+            item {
+                EosPremiumCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+                        EliteZenithHeader(
+                            sysLabel = "PROGRAMS COMMAND",
+                            title = "Programs & plans",
+                            subtitle = "Template management, publishing, and builder access without rewriting coach flows.",
+                            badge = {
+                                HexBadge(
+                                    text = programs.size.coerceAtMost(99).toString().padStart(2, '0'),
+                                    tone = HexBadgeTone.Iris,
+                                )
+                            },
+                        )
+                        HexStatus("BUILDER READY")
+                    }
+                }
+            }
             items(programs, key = { it.id }) { program ->
-                EliteCard(onClick = { onOpenBuilder(program.id) }) {
+                EosPremiumCard(onClick = { onOpenBuilder(program.id) }) {
                     Text(program.title, style = MaterialTheme.typography.titleLarge)
                     Text(
                         "${program.state} · v${program.version} · ${program.weeks}w · ${program.cycles} cycles" +
                             if (program.template) " · template" else "",
                         style = MaterialTheme.typography.bodyMedium,
                     )
+                    HexStatus(program.state.toString())
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
                         content = {
@@ -90,15 +116,28 @@ fun ProgramBuilderScreen(programId: String) {
             title = program.title,
             subtitle = "Weeks · cycles · warmup · exercises · supersets · intervals · media",
             testTag = "coach_program_builder",
+            showTitle = false,
         ) {
             item {
-                Text(
-                    "State ${program.state} · version ${program.version}",
-                    style = MaterialTheme.typography.titleMedium,
-                )
+                EosPremiumCard {
+                    Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
+                        EliteZenithHeader(
+                            sysLabel = "BUILDER COMMAND",
+                            title = program.title,
+                            subtitle = "Weeks, blocks, warmups, cooldowns, and media stay in the existing builder flow.",
+                            badge = {
+                                HexBadge(
+                                    text = program.version.toString().padStart(2, '0'),
+                                    tone = HexBadgeTone.Telemetry,
+                                )
+                            },
+                        )
+                        HexStatus(program.state.toString())
+                    }
+                }
             }
             items(program.blocks, key = { it.id }) { block ->
-                EliteCard {
+                EosPremiumCard {
                     Text("Week ${block.week} · ${block.dayLabel} · ${block.title}", style = MaterialTheme.typography.titleMedium)
                     Text("Warmup", style = MaterialTheme.typography.labelLarge)
                     block.warmup.forEach { Text("· $it", style = MaterialTheme.typography.bodyMedium) }

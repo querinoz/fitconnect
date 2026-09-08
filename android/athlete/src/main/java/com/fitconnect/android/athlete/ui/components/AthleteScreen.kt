@@ -37,6 +37,7 @@ import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.motion.EliteEnter
 import com.fitconnect.android.designui.theme.EliteMetricTextStyle
 import com.fitconnect.android.designui.theme.EliteMonoTextStyle
+import com.fitconnect.android.designui.theme.EliteNavChrome
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.foundation.navigation.identityBadgeLabel
@@ -61,6 +62,11 @@ fun AthleteScreenScaffold(
     val platform = LocalAthleteContainer.current.platform
     var identityBadge by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(Unit) {
+        // Visual QA / release-preview: hide LOCAL_DEMO chrome noise (Phase 0 twin).
+        if (platform.config.visualQaChromeDiet) {
+            identityBadge = null
+            return@LaunchedEffect
+        }
         val snap = platform.sessionStore.snapshot()
         identityBadge = identityBadgeLabel(
             isDebugBuild = platform.config.isDebuggable,
@@ -81,7 +87,12 @@ fun AthleteScreenScaffold(
                 start = EliteSpace.Lg,
                 end = EliteSpace.Lg,
                 top = EliteSpace.Lg,
-                bottom = if (floating != null) EliteSpace.Huge + EliteSpace.Section else EliteSpace.Xl,
+                // Cradle TRAIN FAB lifts into content; keep CTAs (Start Session) clear of overlap.
+                bottom = if (floating != null) {
+                    EliteSpace.Huge + EliteSpace.Section + EliteNavChrome.FabLift
+                } else {
+                    EliteSpace.Xl + EliteNavChrome.FabLift
+                },
             ),
             verticalArrangement = Arrangement.spacedBy(EliteSpace.Md),
         ) {

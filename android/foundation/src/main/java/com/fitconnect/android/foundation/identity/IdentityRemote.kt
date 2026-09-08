@@ -23,6 +23,8 @@ data class IdentityProfile(
     val role: UserRole?,
     val onboardingCompleted: Boolean,
     val onboardingStep: Int,
+    val capabilities: Set<UserRole> = emptySet(),
+    val activeMode: UserRole? = null,
 )
 
 data class IdentityOnboarding(
@@ -42,7 +44,13 @@ interface IdentityRemote {
 
     suspend fun getProfile(): AppResult<IdentityProfile>
 
+    /** Aggregated /me — capabilities + activeMode + entitlements. */
+    suspend fun getMe(): AppResult<IdentityProfile>
+
     suspend fun setRole(role: UserRole): AppResult<IdentityProfile>
+
+    /** Persist activeMode when the account owns the capability (server-validated). */
+    suspend fun setActiveMode(mode: UserRole): AppResult<IdentityProfile>
 
     suspend fun getOnboarding(): AppResult<IdentityOnboarding>
 

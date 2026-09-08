@@ -10,7 +10,11 @@ import com.fitconnect.android.coach.files.CoachFileStore
 import com.fitconnect.android.coach.files.LocalCoachFileStore
 import com.fitconnect.android.coach.payments.CoachPaymentsGateway
 import com.fitconnect.android.coach.payments.SessionAwareCoachPaymentsGateway
+import com.fitconnect.android.coach.payments.SessionAwareStripeConnectStatusPort
+import com.fitconnect.android.coach.payments.StripeConnectStatusPort
 import com.fitconnect.android.foundation.di.AppContainer
+import com.fitconnect.android.foundation.programs.EmptyProgramRemote
+import com.fitconnect.android.foundation.programs.HttpProgramRemote
 import com.fitconnect.android.geo.di.GeoContainer
 import com.fitconnect.android.sports.di.SportsContainer
 import com.fitconnect.android.sports.integration.CoachSportsFacade
@@ -29,6 +33,7 @@ interface CoachContainer {
     val coachTelemetry: CoachTelemetryFacade
     val coachRepository: CoachRepository
     val payments: CoachPaymentsGateway
+    val connectStatus: StripeConnectStatusPort
     val files: CoachFileStore
     val ai: CoachAiPort
     val ascend: AscendEngine
@@ -58,8 +63,18 @@ class DefaultCoachContainer(
         api = { platform.apiClient },
         sessionStore = platform.sessionStore,
         localFallback = localCoachRepository,
+        bookingEngine = geo.booking,
+        programRemote = if (platform.config.apiBaseUrl.isNotBlank()) {
+            HttpProgramRemote({ platform.apiClient })
+        } else {
+            EmptyProgramRemote()
+        },
     )
     override val payments: CoachPaymentsGateway = SessionAwareCoachPaymentsGateway(
+        sessionStore = platform.sessionStore,
+        api = { platform.apiClient },
+    )
+    override val connectStatus: StripeConnectStatusPort = SessionAwareStripeConnectStatusPort(
         sessionStore = platform.sessionStore,
         api = { platform.apiClient },
     )

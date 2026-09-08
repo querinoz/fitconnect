@@ -37,7 +37,7 @@ class NavGuard(
 ) {
     suspend fun authorize(route: CoreRoute): NavDecision {
         val loggedIn = sessionStore.isLoggedIn()
-        val role = sessionStore.role()
+        val role = sessionStore.activeMode()
         analytics.screen("nav_${route.path}", mapOf("role" to role.name))
 
         val permission = route.permission

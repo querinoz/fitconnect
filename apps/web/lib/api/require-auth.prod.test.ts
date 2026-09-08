@@ -15,6 +15,17 @@ vi.mock("@/lib/identity/repository", () => ({
   lookupIdentityRole: vi.fn()
 }));
 
+vi.mock("@/lib/identity/entitlements", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/identity/entitlements")>(
+    "@/lib/identity/entitlements"
+  );
+  return {
+    ...actual,
+    listCapabilities: vi.fn(async () => [] as const),
+    readPreferredActiveMode: vi.fn(async () => null)
+  };
+});
+
 vi.mock("next/headers", () => ({
   cookies: async () => ({ get: () => undefined }),
   headers: async () => new Headers()

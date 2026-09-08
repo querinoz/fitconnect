@@ -50,9 +50,10 @@ jobs:
         # SIGN-02: assembleRelease is fail-closed (requires keystore + Supabase + FCM).
         # CI without secrets must not claim a production release artifact.
         # Windows checkouts may drop the executable bit; ensure gradlew is runnable on Linux runners.
+        # :wear:assembleDebug is listed explicitly so Wear stays a hard gate (not only via `build`).
         run: |
           chmod +x ./gradlew
-          ./gradlew build -x :app:assembleRelease -x :app:bundleRelease -x :wear:assembleRelease -x :wear:bundleRelease
+          ./gradlew build :wear:assembleDebug -x :app:assembleRelease -x :app:bundleRelease -x :wear:assembleRelease -x :wear:bundleRelease
 
       - name: Signed release (only when secrets present)
         if: ${{ env.FITCONNECT_ANDROID_KEYSTORE_BASE64 != '' && env.FITCONNECT_SUPABASE_URL != '' && env.FITCONNECT_GOOGLE_SERVICES_JSON_BASE64 != '' }}

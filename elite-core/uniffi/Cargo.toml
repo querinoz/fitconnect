@@ -1,0 +1,17 @@
+[package]
+name = "elite-core-uniffi"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+crate-type = ["cdylib", "staticlib", "lib"]
+name = "elite_core_uniffi"
+
+[dependencies]
+elite-core = { path = "../core" }
+uniffi = { version = "0.28" }
+
+[build-dependencies]
+uniffi = { version = "0.28", features = ["build"] }

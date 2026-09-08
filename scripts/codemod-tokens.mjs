@@ -21,9 +21,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SCAN_DIRS = [
   "apps/web/components",
-  "apps/web/app",
-  "apps/mobile/components",
-  "apps/mobile/app"
+  "apps/web/app"
 ];
 
 const EXEMPT_FILES = [

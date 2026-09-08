@@ -287,7 +287,91 @@ object DefaultSportsCatalog {
             training = setOf(TrainingType.ENDURANCE, TrainingType.INTERVAL),
             competition = setOf(CompetitionType.RACE, CompetitionType.TIME_TRIAL),
         ),
-    )
+    ) + stravaCoverageSports()
+
+    /**
+     * Canonical Strava activity types not already covered by the rich seeds above.
+     * Keeps marketplace / Sports Hub IDs aligned with provider activity names.
+     */
+    private fun stravaCoverageSports(): List<SportDefinition> {
+        data class Spec(
+            val id: String,
+            val name: String,
+            val strava: String,
+            val category: SportCategory,
+            val env: EnvironmentKind = EnvironmentKind.BOTH,
+            val olympic: OlympicStatus = OlympicStatus.NON_OLYMPIC,
+            val wearables: Set<WearableCapability> = setOf(
+                WearableCapability.HEART_RATE,
+                WearableCapability.HEALTH_CONNECT,
+            ),
+        )
+        val specs = listOf(
+            Spec("trail_run", "Trail Run", "TrailRun", SportCategory.ENDURANCE, EnvironmentKind.OUTDOOR, OlympicStatus.NON_OLYMPIC, setOf(WearableCapability.GPS, WearableCapability.HEART_RATE, WearableCapability.HEALTH_CONNECT)),
+            Spec("walk", "Walk", "Walk", SportCategory.ENDURANCE, EnvironmentKind.BOTH, wearables = setOf(WearableCapability.STEPS, WearableCapability.GPS, WearableCapability.HEALTH_CONNECT)),
+            Spec("hike", "Hike", "Hike", SportCategory.ENDURANCE, EnvironmentKind.OUTDOOR, wearables = setOf(WearableCapability.GPS, WearableCapability.HEART_RATE, WearableCapability.STEPS)),
+            Spec("virtual_run", "Virtual Run", "VirtualRun", SportCategory.ENDURANCE, EnvironmentKind.INDOOR),
+            Spec("virtual_ride", "Virtual Ride", "VirtualRide", SportCategory.ENDURANCE, EnvironmentKind.INDOOR, wearables = setOf(WearableCapability.POWER, WearableCapability.HEART_RATE)),
+            Spec("e_bike_ride", "E-Bike Ride", "EBikeRide", SportCategory.ENDURANCE, EnvironmentKind.OUTDOOR, wearables = setOf(WearableCapability.GPS, WearableCapability.HEART_RATE)),
+            Spec("gravel_ride", "Gravel Ride", "GravelRide", SportCategory.ENDURANCE, EnvironmentKind.OUTDOOR, wearables = setOf(WearableCapability.GPS, WearableCapability.POWER, WearableCapability.HEART_RATE)),
+            Spec("mountain_bike_ride", "Mountain Bike", "MountainBikeRide", SportCategory.ENDURANCE, EnvironmentKind.OUTDOOR, wearables = setOf(WearableCapability.GPS, WearableCapability.HEART_RATE)),
+            Spec("e_mountain_bike_ride", "E-Mountain Bike", "EMountainBikeRide", SportCategory.ENDURANCE, EnvironmentKind.OUTDOOR),
+            Spec("handcycle", "Handcycle", "Handcycle", SportCategory.ENDURANCE, EnvironmentKind.OUTDOOR, OlympicStatus.PARALYMPIC),
+            Spec("velomobile", "Velomobile", "Velomobile", SportCategory.ENDURANCE, EnvironmentKind.OUTDOOR),
+            Spec("elliptical", "Elliptical", "Elliptical", SportCategory.ENDURANCE, EnvironmentKind.INDOOR),
+            Spec("stair_stepper", "Stair Stepper", "StairStepper", SportCategory.ENDURANCE, EnvironmentKind.INDOOR),
+            Spec("hiit", "HIIT", "HighIntensityIntervalTraining", SportCategory.HYBRID, EnvironmentKind.INDOOR),
+            Spec("pilates", "Pilates", "Pilates", SportCategory.MIND_BODY, EnvironmentKind.INDOOR),
+            Spec("workout", "Workout", "Workout", SportCategory.OTHER, EnvironmentKind.BOTH),
+            Spec("weight_training", "Weight Training", "WeightTraining", SportCategory.STRENGTH, EnvironmentKind.INDOOR),
+            Spec("alpine_ski", "Alpine Ski", "AlpineSki", SportCategory.WINTER, EnvironmentKind.OUTDOOR, OlympicStatus.OLYMPIC, setOf(WearableCapability.GPS, WearableCapability.HEART_RATE)),
+            Spec("backcountry_ski", "Backcountry Ski", "BackcountrySki", SportCategory.WINTER, EnvironmentKind.OUTDOOR),
+            Spec("nordic_ski", "Nordic Ski", "NordicSki", SportCategory.WINTER, EnvironmentKind.OUTDOOR, OlympicStatus.OLYMPIC),
+            Spec("snowboard", "Snowboard", "Snowboard", SportCategory.WINTER, EnvironmentKind.OUTDOOR, OlympicStatus.OLYMPIC),
+            Spec("snowshoe", "Snowshoe", "Snowshoe", SportCategory.WINTER, EnvironmentKind.OUTDOOR),
+            Spec("ice_skate", "Ice Skate", "IceSkate", SportCategory.WINTER, EnvironmentKind.BOTH, OlympicStatus.OLYMPIC),
+            Spec("inline_skate", "Inline Skate", "InlineSkate", SportCategory.OTHER, EnvironmentKind.OUTDOOR),
+            Spec("roller_ski", "Roller Ski", "RollerSki", SportCategory.ENDURANCE, EnvironmentKind.OUTDOOR),
+            Spec("skateboard", "Skateboard", "Skateboard", SportCategory.OTHER, EnvironmentKind.OUTDOOR),
+            Spec("canoeing", "Canoeing", "Canoeing", SportCategory.WATER, EnvironmentKind.OUTDOOR, OlympicStatus.OLYMPIC),
+            Spec("kayaking", "Kayaking", "Kayaking", SportCategory.WATER, EnvironmentKind.OUTDOOR, OlympicStatus.OLYMPIC),
+            Spec("kitesurf", "Kitesurf", "Kitesurf", SportCategory.WATER, EnvironmentKind.OUTDOOR),
+            Spec("sail", "Sail", "Sail", SportCategory.WATER, EnvironmentKind.OUTDOOR, OlympicStatus.OLYMPIC),
+            Spec("stand_up_paddling", "Stand Up Paddling", "StandUpPaddling", SportCategory.WATER, EnvironmentKind.OUTDOOR),
+            Spec("surfing", "Surfing", "Surfing", SportCategory.WATER, EnvironmentKind.OUTDOOR),
+            Spec("windsurf", "Windsurf", "Windsurf", SportCategory.WATER, EnvironmentKind.OUTDOOR),
+            Spec("virtual_row", "Virtual Row", "VirtualRow", SportCategory.ENDURANCE, EnvironmentKind.INDOOR, wearables = setOf(WearableCapability.HEART_RATE, WearableCapability.POWER)),
+            Spec("golf", "Golf", "Golf", SportCategory.OTHER, EnvironmentKind.OUTDOOR, OlympicStatus.OLYMPIC),
+            Spec("rock_climbing", "Rock Climbing", "RockClimbing", SportCategory.OTHER, EnvironmentKind.BOTH, OlympicStatus.OLYMPIC),
+            Spec("badminton", "Badminton", "Badminton", SportCategory.RACKET, EnvironmentKind.INDOOR, OlympicStatus.OLYMPIC),
+            Spec("table_tennis", "Table Tennis", "TableTennis", SportCategory.RACKET, EnvironmentKind.INDOOR, OlympicStatus.OLYMPIC),
+            Spec("squash", "Squash", "Squash", SportCategory.RACKET, EnvironmentKind.INDOOR),
+            Spec("racquetball", "Racquetball", "Racquetball", SportCategory.RACKET, EnvironmentKind.INDOOR),
+            Spec("pickleball", "Pickleball", "Pickleball", SportCategory.RACKET, EnvironmentKind.BOTH, OlympicStatus.EMERGING),
+            Spec("wheelchair", "Wheelchair", "Wheelchair", SportCategory.OTHER, EnvironmentKind.BOTH, OlympicStatus.PARALYMPIC),
+        )
+        return specs.map { s ->
+            sport(
+                id = SportId.of(s.id),
+                name = s.name,
+                category = s.category,
+                olympic = s.olympic,
+                env = s.env,
+                part = ParticipationKind.INDIVIDUAL,
+                strava = s.strava,
+                equipment = emptyList(),
+                required = listOf(m("duration", "Duration", "min", MetricValueType.DURATION)),
+                optional = listOf(m("hr_avg", "Avg HR", "bpm"), m("distance", "Distance", "km", MetricValueType.DISTANCE)),
+                performance = listOf("duration"),
+                recovery = listOf("hrv"),
+                risk = listOf("fatigue"),
+                wearables = s.wearables,
+                training = setOf(TrainingType.MIXED, TrainingType.ENDURANCE),
+                competition = setOf(CompetitionType.PERSONAL_CHALLENGE),
+                capabilities = setOf("metrics", "strava_coverage"),
+            )
+        }
+    }
 
     private fun m(
         key: String,

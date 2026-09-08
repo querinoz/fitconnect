@@ -195,6 +195,14 @@ fun ActivityScreen(
         sessionWaitingForTrace = sessionWaiting,
         permissionDenied = snap.gps == GpsFeedStatus.PERMISSION_DENIED,
         elapsedMs = waitMs,
+        gpsUnavailable = snap.gps == GpsFeedStatus.UNAVAILABLE,
+    )
+    val mapFailureKind = EliteMapPhaseLogic.failureKind(
+        pointCount = vertices.size,
+        sessionWaitingForTrace = sessionWaiting,
+        permissionDenied = snap.gps == GpsFeedStatus.PERMISSION_DENIED,
+        elapsedMs = waitMs,
+        gpsUnavailable = snap.gps == GpsFeedStatus.UNAVAILABLE,
     )
     val liveSession = snap.phase != LiveActivityPhase.IDLE
     val trainUi = remember(snap.sourceLabel) { AthleteContentResolver.trainSurface(snap.sourceLabel) }
@@ -400,7 +408,7 @@ fun ActivityScreen(
     ) {
         item {
             AthleteDemoBanner(
-                visible = trainUi.isDemoCapture,
+                visible = !container.platform.config.visualQaChromeDiet && trainUi.isDemoCapture,
                 modifier = Modifier.testTag("activity_demo_banner"),
             )
         }
@@ -467,6 +475,7 @@ fun ActivityScreen(
                                 points = mapPoints,
                                 mode = mapMode,
                                 phase = mapPhase,
+                                failureKind = mapFailureKind,
                                 completed = snap.phase == LiveActivityPhase.ENDED,
                                 followEnabled = followEnabled,
                                 qualityLabel = qualityLabel,

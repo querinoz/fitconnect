@@ -3,8 +3,10 @@ package com.fitconnect.android.sports.zones
 import kotlin.math.roundToInt
 
 /**
- * Heart-rate training zones — port of elite-core `HEART_RATE_ZONES` (LTHR-based, 5 zones).
- * Spec: docs/sports-metrics §2.2. Floor boundaries are rounded absolute bpm (not raw %).
+ * Heart-rate training zones — **delegates to elite-core** via [EliteCoreBridge]
+ * (UniFFI-compatible JNI, or golden-locked reference on JVM).
+ *
+ * Spec: docs/sports-metrics §2.2. Ladder fractions match `HEART_RATE_ZONES` in Rust.
  */
 object HeartRateZones {
     data class ZoneDef(val index: Int, val label: String, val lowerFraction: Double)
@@ -20,14 +22,10 @@ object HeartRateZones {
     fun zoneFloorBpm(lthrBpm: Double, zone: ZoneDef): Int =
         (lthrBpm * zone.lowerFraction).roundToInt()
 
-    /** Inclusive lower bound; higher zone wins on exact floor. */
+    /** Inclusive lower bound; higher zone wins on exact floor. Null if LTHR invalid. */
     fun zoneFor(hrBpm: Double, lthrBpm: Double): Int? {
-        if (lthrBpm <= 0.0 || hrBpm < 0.0) return null
-        var found = 1
-        for (z in LADDER) {
-            if (hrBpm >= zoneFloorBpm(lthrBpm, z).toDouble()) found = z.index
-        }
-        return found
+        val z = EliteCoreBridge.heartRateZone(hrBpm, lthrBpm)
+        return if (z == 0) null else z
     }
 
     /**

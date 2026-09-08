@@ -4,23 +4,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fitconnect.android.athlete.domain.Provenanced
+import com.fitconnect.android.designui.components.HoneycombDivider
+import com.fitconnect.android.designui.components.HexMetric
+import com.fitconnect.android.designui.components.HexStatus
 import com.fitconnect.android.designui.neumorphic.EosNeumorphicColors
-import com.fitconnect.android.designui.neumorphic.EosPremiumWell
-import com.fitconnect.android.designui.theme.EliteMetricTextStyle
 import com.fitconnect.android.designui.theme.EliteMonoTextStyle
 import com.fitconnect.android.designui.theme.EliteSpace
+import com.fitconnect.android.telemetry.domain.TelemetryUiLabel
 import java.util.Locale
 
 @Composable
@@ -31,85 +28,65 @@ fun TodayMetricStrip(
     load: Provenanced<Float>,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    val railLabel = dominantTelemetryLabel(hrvMs.uiLabel, sleepLabel.uiLabel, steps.uiLabel, load.uiLabel)
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .testTag("today_metric_strip"),
-        horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
+        verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
     ) {
-        TodayMetricWell(
-            label = "HRV",
-            value = "${hrvMs.value}",
-            unit = "ms",
-            modifier = Modifier.weight(1f),
-            testTag = "today_metric_hrv",
-        )
-        TodayMetricWell(
-            label = "SLEEP",
-            value = sleepLabel.value,
-            unit = null,
-            modifier = Modifier.weight(1f),
-            testTag = "today_metric_sleep",
-        )
-        TodayMetricWell(
-            label = "STEPS",
-            value = formatSteps(steps.value),
-            unit = null,
-            modifier = Modifier.weight(1f),
-            testTag = "today_metric_steps",
-        )
-        TodayMetricWell(
-            label = "LOAD",
-            value = "%.0f".format(load.value),
-            unit = null,
-            modifier = Modifier.weight(1f),
-            testTag = "today_metric_load",
-        )
-    }
-}
-
-@Composable
-private fun TodayMetricWell(
-    label: String,
-    value: String,
-    unit: String?,
-    modifier: Modifier = Modifier,
-    testTag: String = "today_metric_well",
-) {
-    EosPremiumWell(
-        modifier = modifier.testTag(testTag),
-        cornerRadius = 14.dp,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = EliteSpace.Xs),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+        HoneycombDivider()
+        HexStatus(text = "TELEMETRY · $railLabel")
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = label,
-                style = EliteMonoTextStyle.copy(fontSize = 9.sp),
-                color = EosNeumorphicColors.TextMuted,
-                maxLines = 1,
-            )
-            Text(
-                text = value,
-                style = EliteMetricTextStyle.copy(fontSize = 18.sp),
-                color = EosNeumorphicColors.TextPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
-            )
-            unit?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = EosNeumorphicColors.TextMuted,
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                HexMetric(
+                    value = "${hrvMs.value}",
+                    label = "HRV",
+                    modifier = Modifier.testTag("today_metric_hrv"),
                 )
+                Text(hrvMs.uiLabel.name, style = EliteMonoTextStyle.copy(fontSize = 9.sp), color = EosNeumorphicColors.TextMuted)
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                HexMetric(
+                    value = sleepLabel.value.take(4),
+                    label = "SLEEP",
+                    modifier = Modifier.testTag("today_metric_sleep"),
+                )
+                Text(sleepLabel.uiLabel.name, style = EliteMonoTextStyle.copy(fontSize = 9.sp), color = EosNeumorphicColors.TextMuted)
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                HexMetric(
+                    value = formatSteps(steps.value),
+                    label = "STEPS",
+                    modifier = Modifier.testTag("today_metric_steps"),
+                )
+                Text(steps.uiLabel.name, style = EliteMonoTextStyle.copy(fontSize = 9.sp), color = EosNeumorphicColors.TextMuted)
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                HexMetric(
+                    value = "%.0f".format(load.value),
+                    label = "LOAD",
+                    modifier = Modifier.testTag("today_metric_load"),
+                )
+                Text(load.uiLabel.name, style = EliteMonoTextStyle.copy(fontSize = 9.sp), color = EosNeumorphicColors.TextMuted)
             }
         }
     }
+}
+
+/** Prefer TEST over LIVE when any field is demo — never silent demo-as-live. */
+internal fun dominantTelemetryLabel(vararg labels: TelemetryUiLabel): String {
+    if (labels.any { it == TelemetryUiLabel.TEST }) return TelemetryUiLabel.TEST.name
+    if (labels.any { it == TelemetryUiLabel.UNAVAILABLE }) return TelemetryUiLabel.UNAVAILABLE.name
+    if (labels.any { it == TelemetryUiLabel.OFFLINE }) return TelemetryUiLabel.OFFLINE.name
+    if (labels.any { it == TelemetryUiLabel.STALE }) return TelemetryUiLabel.STALE.name
+    if (labels.any { it == TelemetryUiLabel.DERIVED }) return TelemetryUiLabel.DERIVED.name
+    if (labels.any { it == TelemetryUiLabel.LIVE }) return TelemetryUiLabel.LIVE.name
+    return TelemetryUiLabel.SYNCED.name
 }
 
 internal fun formatSteps(count: Int): String =
