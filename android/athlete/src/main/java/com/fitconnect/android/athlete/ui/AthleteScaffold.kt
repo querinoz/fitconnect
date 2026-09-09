@@ -382,6 +382,7 @@ fun AthleteOsApp(
                                 navController.navigate(AthleteDest.WORKOUT.route)
                             },
                             selected = current == AthleteDest.WORKOUT.route,
+                            modifier = Modifier.testTag("athlete_train_fab"),
                         )
                     }
                 },

@@ -18,6 +18,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.testTag
 import com.fitconnect.android.design.EliteSurfaceColors
 import com.fitconnect.android.designui.components.EliteNavItem
 import com.fitconnect.android.designui.components.EliteNavTab
@@ -36,6 +37,8 @@ fun EosPremiumBottomNavigation(
     modifier: Modifier = Modifier,
     onTrainClick: (() -> Unit)? = null,
     trainSelected: Boolean = false,
+    trainTestTag: String = "athlete_train_fab",
+    trainContentDescription: String = "Train",
 ) {
     val volt = EliteSurfaceColors.VOLTLINE.toColor()
     val mold = EliteSurfaceColors.MOLD_SURFACE.toColor()
@@ -113,9 +116,11 @@ fun EosPremiumBottomNavigation(
             EosTrainActionFab(
                 onClick = onTrainClick,
                 selected = trainSelected,
+                contentDescription = trainContentDescription,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(y = -EliteNavChrome.FabLift),
+                    .offset(y = -EliteNavChrome.FabLift)
+                    .testTag(trainTestTag),
             )
         }
     }

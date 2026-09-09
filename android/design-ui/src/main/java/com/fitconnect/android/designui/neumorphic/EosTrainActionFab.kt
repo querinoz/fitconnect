@@ -33,7 +33,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -56,6 +55,7 @@ fun EosTrainActionFab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     selected: Boolean = false,
+    contentDescription: String = "Train",
 ) {
     val volt = EliteSurfaceColors.VOLTLINE.toColor()
     val floor = EliteSurfaceColors.FLOOR.toColor()
@@ -103,8 +103,7 @@ fun EosTrainActionFab(
                     onClick()
                 },
             )
-            .testTag("athlete_train_fab")
-            .semantics { contentDescription = "Train" },
+            .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center,
     ) {
         Box(
