@@ -21,8 +21,6 @@ import com.fitconnect.android.coach.ui.LocalCoachContainer
 import com.fitconnect.android.coach.ui.components.CoachLoad
 import com.fitconnect.android.coach.ui.components.CoachScreenScaffold
 import com.fitconnect.android.designui.components.EliteBadge
-import com.fitconnect.android.designui.components.EliteBentoMetric
-import com.fitconnect.android.designui.components.EliteBentoRow
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
@@ -30,11 +28,9 @@ import com.fitconnect.android.designui.components.EliteCardVariant
 import com.fitconnect.android.designui.components.EliteChip
 import com.fitconnect.android.designui.components.EliteFlowRow
 import com.fitconnect.android.designui.components.EliteMetricCard
-import com.fitconnect.android.designui.components.EliteWeekProgressHero
 import com.fitconnect.android.designui.components.EliteZenithHeader
 import com.fitconnect.android.designui.components.HexBadge
 import com.fitconnect.android.designui.components.HexBadgeTone
-import com.fitconnect.android.designui.components.HexMetric
 import com.fitconnect.android.designui.components.HexStatus
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.components.EliteStack
@@ -66,10 +62,11 @@ fun OverviewScreen(
     }
 
     CoachLoad(result, ::reload) { home ->
+        val attentionCount = home.athletesNeedingAttention.size
         CoachScreenScaffold(
             title = home.greeting,
-            subtitle = "Squad command center · remote roster/sessions when authenticated",
-            overline = "COACH OS · COMMAND",
+            subtitle = "Squad command center",
+            overline = "COACH OS",
             testTag = "coach_overview",
             showTitle = false,
         ) {
@@ -78,9 +75,9 @@ fun OverviewScreen(
                 EosPremiumCard {
                     EliteStack(spacing = EliteSpace.Md) {
                         EliteZenithHeader(
-                            sysLabel = "COACH COMMAND CENTER",
+                            sysLabel = "CURRENT EXPERIENCE · COACH",
                             title = home.greeting,
-                            subtitle = "Schedule signals, roster risk, and live squad telemetry from one Zenith surface.",
+                            subtitle = "What needs you now — then today's sessions.",
                             badge = {
                                 HexBadge(
                                     text = home.pendingBookings.coerceAtMost(99).toString().padStart(2, '0'),
@@ -99,53 +96,71 @@ fun OverviewScreen(
                 }
             }
             item {
-                EliteWeekProgressHero(
-                    progressPercent = (100 - home.athletesNeedingAttention.size.coerceAtMost(8) * 8)
-                        .coerceIn(40, 100),
-                    title = "Squad command health",
-                    leftLabel = "BOOKINGS",
-                    leftValue = "${home.pendingBookings}",
-                    rightLabel = "INBOX",
-                    rightValue = "${home.unreadMessages}",
-                )
-            }
-            item {
-                EliteStack(spacing = EliteSpace.Sm) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        HexMetric(value = "${home.athletesNeedingAttention.size}", label = "Attention")
-                        HexMetric(value = "${home.pendingBookings}", label = "Bookings")
-                        HexMetric(value = "${home.unreadMessages}", label = "Inbox")
-                    }
-                    EliteBentoRow {
-                        EliteBentoMetric(
-                            label = "ATTENTION",
-                            value = "${home.athletesNeedingAttention.size}",
-                            delta = "AT RISK",
-                            accentVolt = false,
-                            modifier = Modifier.weight(1f),
+                EosPremiumCard(modifier = Modifier.testTag("coach_what_now")) {
+                    EliteStack(spacing = EliteSpace.Sm) {
+                        com.fitconnect.android.designui.components.EliteSysLabel("WHAT NOW")
+                        Text(
+                            text = when {
+                                attentionCount > 0 ->
+                                    "$attentionCount athlete${if (attentionCount == 1) "" else "s"} need attention"
+                                home.pendingBookings > 0 ->
+                                    "${home.pendingBookings} booking${if (home.pendingBookings == 1) "" else "s"} pending"
+                                home.unreadMessages > 0 ->
+                                    "${home.unreadMessages} unread message${if (home.unreadMessages == 1) "" else "s"}"
+                                else -> "Squad stable — no urgent flags"
+                            },
+                            style = MaterialTheme.typography.headlineSmall,
                         )
-                        EliteBentoMetric(
-                            label = "BOOKINGS",
-                            value = "${home.pendingBookings}",
-                            modifier = Modifier.weight(1f),
+                        Text(
+                            text = when {
+                                attentionCount > 0 -> "Review recovery risk before today's sessions."
+                                home.pendingBookings > 0 -> "Confirm or reschedule pending bookings."
+                                home.unreadMessages > 0 -> "Clear inbox signals so athletes stay unblocked."
+                                else -> "Use the agenda below to stay ahead of the day."
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                        EliteBentoMetric(
-                            label = "INBOX",
-                            value = "${home.unreadMessages}",
-                            accentVolt = false,
-                            modifier = Modifier.weight(1f),
-                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                            EliteButton(
+                                label = when {
+                                    attentionCount > 0 -> "REVIEW ATHLETES"
+                                    home.pendingBookings > 0 -> "OPEN BOOKINGS"
+                                    home.unreadMessages > 0 -> "OPEN INBOX"
+                                    else -> "OPEN CALENDAR"
+                                },
+                                onClick = {
+                                    when {
+                                        attentionCount > 0 -> onOpenAthletes()
+                                        home.pendingBookings > 0 -> onOpenBookings()
+                                        home.unreadMessages > 0 -> onOpenInbox()
+                                        else -> onOpenCalendar()
+                                    }
+                                },
+                                variant = EliteButtonVariant.Primary,
+                                modifier = Modifier.weight(1f),
+                            )
+                            EliteButton(
+                                label = "SESSIONS",
+                                onClick = onOpenCalendar,
+                                variant = EliteButtonVariant.Secondary,
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
                     }
                 }
             }
             item {
-                LiveSquadCard()
-            }
-            item {
-                SquadAscendCard()
+                EliteStack(spacing = EliteSpace.Sm) {
+                    com.fitconnect.android.designui.components.EliteSectionHeader(
+                        title = "Squad KPIs",
+                        overline = "SIGNAL",
+                    )
+                    EliteMetricCard(label = "Attention", value = "$attentionCount")
+                    EliteMetricCard(label = "Bookings", value = "${home.pendingBookings}")
+                    EliteMetricCard(label = "Inbox", value = "${home.unreadMessages}")
+                    EliteMetricCard(label = "Revenue", value = "€${home.revenueSummaryCents / 100}")
+                }
             }
             item {
                 EosPremiumCard {
@@ -155,48 +170,6 @@ fun OverviewScreen(
                     )
                     Text(home.aiSummary, style = MaterialTheme.typography.bodyLarge)
                     HexStatus("BRIEFING READY")
-                }
-            }
-            item {
-                EliteStack {
-                    com.fitconnect.android.designui.components.EliteSectionHeader(
-                        title = "Squad signals",
-                        overline = "KPI",
-                    )
-                    EliteMetricCard(label = "Unread", value = "${home.unreadMessages}")
-                    EliteMetricCard(label = "Bookings", value = "${home.pendingBookings}")
-                    EliteMetricCard(label = "Revenue", value = "€${home.revenueSummaryCents / 100}")
-                }
-            }
-            item {
-                EliteStack {
-                com.fitconnect.android.designui.components.EliteSectionHeader(
-                    title = "Readiness heatmap",
-                    overline = "ROSTER",
-                )
-                EliteCard(variant = EliteCardVariant.Metric) {
-                    home.athletesNeedingAttention.take(6).forEach { athlete ->
-                        com.fitconnect.android.designui.components.EliteCommandPip(
-                            name = athlete.displayName,
-                            recovery = athlete.recovery,
-                            onClick = { onOpenAthlete(athlete.id) },
-                        )
-                    }
-                    if (home.athletesNeedingAttention.isEmpty()) {
-                        Text("Squad stable — no attention flags", style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
-                }
-            }
-            item {
-                EliteStack {
-                    home.weeklyMetrics.forEach { (k, v) ->
-                        Text(
-                            "$k · ${v.toInt()}",
-                            style = com.fitconnect.android.designui.theme.EliteMonoTextStyle,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
                 }
             }
             item {
@@ -298,6 +271,8 @@ fun OverviewScreen(
                     )
                 }
             }
+            item { LiveSquadCard() }
+            item { SquadAscendCard() }
         }
     }
 }

@@ -3,6 +3,7 @@ package com.fitconnect.android.athlete.ui.home
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,10 +25,12 @@ import com.fitconnect.android.athlete.domain.TodayReadinessUi
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteLoad
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
-import com.fitconnect.android.designui.components.EliteAiFab
+import com.fitconnect.android.designui.components.EliteButton
+import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
 import com.fitconnect.android.designui.components.EliteCardVariant
 import com.fitconnect.android.designui.components.EliteSysLabel
+import com.fitconnect.android.designui.components.EliteTelemetryInsight
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.fitness.domain.HealthConnectSdkState
 import com.fitconnect.android.fitness.healthconnect.HealthConnectIntents
@@ -35,7 +38,6 @@ import com.fitconnect.android.fitness.healthconnect.HealthConnectPermissionState
 import com.fitconnect.android.fitness.healthconnect.HealthConnectSdkMapper
 import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.foundation.navigation.identityBadgeLabel
-import com.fitconnect.ascend.domain.StreakKind
 import kotlinx.coroutines.launch
 
 @Composable
@@ -104,7 +106,6 @@ fun HomeScreen(
     }
 
     AthleteLoad(result = result, onRetry = ::reload) { home ->
-        val ascend = container.ascend.snapshot(athleteId)
         val context = LocalContext.current
         val hcScope = rememberCoroutineScope()
         val hcState = HealthConnectSdkMapper.probe(context)
@@ -146,8 +147,8 @@ fun HomeScreen(
         val readinessUi = todayUi
         AthleteScreenScaffold(
             title = home.greeting,
-            subtitle = "Elite OS Analytics",
-            overline = "FITCONNECT DASHBOARD",
+            subtitle = "How you are · what to do · what changed",
+            overline = "TODAY",
             testTag = "athlete_home",
             showTitle = false,
             floating = null,
@@ -167,6 +168,18 @@ fun HomeScreen(
                 )
             }
             readinessUi?.let { ui ->
+                if (home.readiness.warnings.isNotEmpty()) {
+                    item {
+                        EliteCard(variant = EliteCardVariant.Metric) {
+                            Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
+                                EliteSysLabel("NEEDS ATTENTION")
+                                home.readiness.warnings.forEach { warning ->
+                                    Text(warning, color = MaterialTheme.colorScheme.error)
+                                }
+                            }
+                        }
+                    }
+                }
                 item {
                     TodayDualRingSection(
                         readinessPercent = ui.readinessPercent.value,
@@ -178,15 +191,21 @@ fun HomeScreen(
                     )
                 }
                 item {
-                    val loadPct = (ui.load.value.coerceIn(0f, 1.5f) / 1.5f * 100f).toInt().coerceIn(0, 100)
-                    val streak = ascend.streaks.firstOrNull { it.kind == StreakKind.PERFORMANCE }?.days ?: 0
-                    TodayTelemetryDeck(
-                        powerWatts = (180 + (ui.load.value * 90).toInt()).coerceIn(120, 420),
-                        speedKmh = (18 + (ui.load.value * 16).toInt()).coerceIn(12, 48),
-                        endurancePercent = ui.readinessPercent.value.coerceIn(0, 100),
-                        sessionsCount = recentSessions.size.coerceAtLeast(1),
-                        streakDays = streak,
-                        efficiencyPercent = loadPct,
+                    val readiness = ui.readinessPercent.value.coerceIn(0, 100)
+                    EliteTelemetryInsight(
+                        label = "READINESS",
+                        value = "$readiness",
+                        unit = "/100",
+                        trend = home.readiness.recommendation.takeIf { it.isNotBlank() },
+                        context = "Sleep ${ui.sleepLabel.value.ifBlank { "—" }} · load ${(ui.load.value * 100).toInt()}%",
+                        insight = when {
+                            readiness >= 70 -> "Recovery supports high-intensity training today."
+                            readiness >= 45 -> "Keep intensity moderate; prioritize quality over volume."
+                            else -> "Favor recovery and mobility before hard sessions."
+                        },
+                        demo = ui.isAnyDemo,
+                        actionLabel = "Open recovery",
+                        onAction = onOpenRecovery,
                     )
                 }
             }
@@ -203,6 +222,22 @@ fun HomeScreen(
                         }
                     },
                 )
+            }
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                    EliteButton(
+                        label = "TRAIN",
+                        onClick = onOpenActivity,
+                        variant = EliteButtonVariant.Primary,
+                        modifier = Modifier.weight(1f),
+                    )
+                    EliteButton(
+                        label = "PROGRAMS",
+                        onClick = onOpenPrograms,
+                        variant = EliteButtonVariant.Secondary,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
             }
             if (!container.platform.config.visualQaChromeDiet) {
                 if (hcState != HealthConnectSdkState.AVAILABLE) {
@@ -244,18 +279,6 @@ fun HomeScreen(
                         },
                         onSeeAll = onOpenActivity,
                     )
-                }
-            }
-            if (home.readiness.warnings.isNotEmpty()) {
-                item {
-                    EliteCard(variant = EliteCardVariant.Metric) {
-                        Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
-                            EliteSysLabel("ALERTS")
-                            home.readiness.warnings.forEach { warning ->
-                                Text(warning, color = MaterialTheme.colorScheme.error)
-                            }
-                        }
-                    }
                 }
             }
         }

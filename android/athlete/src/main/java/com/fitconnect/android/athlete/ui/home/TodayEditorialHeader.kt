@@ -14,24 +14,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.fitconnect.android.design.EliteSurfaceColors
+import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.neumorphic.EosGlassBadge
-import com.fitconnect.android.designui.theme.EliteMonoTextStyle
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.android.foundation.a11y.Accessibility
 
 /**
- * Dashboard masthead — photo: FitConnect DASHBOARD / Elite OS Analytics.
+ * Dashboard masthead — greeting first, then context. Brand chrome lives in shell header.
  */
 @Composable
 fun TodayEditorialHeader(
@@ -52,19 +46,7 @@ fun TodayEditorialHeader(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
-                        append("FitConnect ")
-                    }
-                    withStyle(SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
-                        append("DASHBOARD")
-                    }
-                },
-                style = MaterialTheme.typography.headlineSmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            EliteSysLabel("TODAY")
             Row(
                 horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs),
                 verticalAlignment = Alignment.CenterVertically,
@@ -93,12 +75,14 @@ fun TodayEditorialHeader(
             }
         }
         Text(
-            text = "Elite OS Analytics",
-            style = EliteMonoTextStyle.copy(fontSize = 12.sp, letterSpacing = 1.sp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            text = greeting,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
         )
         Text(
-            text = greeting,
+            text = "How you are · what to do · what changed",
             style = MaterialTheme.typography.bodyMedium,
             color = volt,
             maxLines = 1,

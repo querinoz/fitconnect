@@ -91,9 +91,10 @@ fun TelemetryScreen() {
     )
 
     AthleteScreenScaffold(
-        title = "Telemetry Command",
-        subtitle = "HR · HRV · zones · devices · ${if (isLocalDemo) TelemetryUiLabel.TEST.name else DemoPersona.MODE_LABEL}",
+        title = "Telemetry",
+        subtitle = "Primary vitals · trends · devices",
         testTag = "athlete_telemetry",
+        showTitle = true,
     ) {
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
@@ -104,20 +105,35 @@ fun TelemetryScreen() {
         }
         if (freshness == TelemetryUiLabel.UNAVAILABLE || freshness == TelemetryUiLabel.OFFLINE) {
             item {
-                EliteCard {
-                    Text(freshness.name, style = MaterialTheme.typography.titleMedium)
-                    Text(
-                        "Connect a device or sync LOCAL_DEMO fixtures to populate vitals.",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
+                com.fitconnect.android.designui.components.EliteEmptyState(
+                    title = "No live vitals",
+                    body = "Connect a device or sync DEMO fixtures to populate HR, HRV, and sleep.",
+                    actionLabel = "Refresh",
+                    onAction = { scope.launch { reload() } },
+                )
             }
         }
         overview?.let { o ->
+            o.latestHrv?.let { hrv ->
+                item {
+                    com.fitconnect.android.designui.components.EliteTelemetryInsight(
+                        label = "HRV",
+                        value = "${hrv.value.toInt()}",
+                        unit = hrv.unit.symbol,
+                        trend = if (isLocalDemo) "DEMO stream" else null,
+                        context = "Samples ${o.sampleCount} · coverage ${o.coveredMetrics.size} metrics",
+                        insight = when {
+                            hrv.value >= 70 -> "Recovery capacity looks strong."
+                            hrv.value >= 45 -> "Steady recovery — keep load intentional."
+                            else -> "Prioritize sleep and easy volume before intensity."
+                        },
+                        demo = isLocalDemo || freshness == TelemetryUiLabel.TEST,
+                    )
+                }
+            }
             item {
                 Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
                     HexMetric(value = "${o.sampleCount}", label = "Samples")
-                    o.latestHrv?.let { HexMetric(value = "${it.value.toInt()}", label = "HRV") }
                     o.latestHeartRate?.let { HexMetric(value = "${it.value.toInt()}", label = "HR") }
                     HexProgress(
                         progress = (o.coveredMetrics.size * 12).coerceIn(0, 100),
@@ -144,13 +160,18 @@ fun TelemetryScreen() {
                     )
                 }
             }
-            item {
-                EliteMetricCard(label = "Samples", value = "${o.sampleCount}")
-                EliteMetricCard(label = "Coverage", value = "${o.coveredMetrics.size} metrics")
-                o.latestHrv?.let { EliteMetricCard(label = "HRV", value = "${it.value} ${it.unit.symbol}") }
-                o.latestHeartRate?.let { EliteMetricCard(label = "Heart rate", value = "${it.value} ${it.unit.symbol}") }
-                o.latestSleep?.let { EliteMetricCard(label = "Sleep", value = "${(it.value / 60).toInt()}h ${(it.value % 60).toInt()}m") }
-                o.latestWeight?.let { EliteMetricCard(label = "Weight", value = "${it.value} ${it.unit.symbol}") }
+            o.latestSleep?.let { sleep ->
+                item {
+                    EliteMetricCard(
+                        label = "Sleep",
+                        value = "${(sleep.value / 60).toInt()}h ${(sleep.value % 60).toInt()}m",
+                    )
+                }
+            }
+            o.latestWeight?.let { weight ->
+                item {
+                    EliteMetricCard(label = "Weight", value = "${weight.value} ${weight.unit.symbol}")
+                }
             }
         }
         hrvTrend?.takeIf { it.points.isNotEmpty() }?.let { series ->
