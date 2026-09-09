@@ -31,6 +31,17 @@ val googleServicesFile = file("google-services.json")
 val fcmConfigured = googleServicesFile.exists()
 val firebaseConfigured = fcmConfigured
 val enforceProd = (project.findProperty("fitconnect.enforceProdConfig") as String?) == "true"
+// Physical-device / sideload QA: override emulator-loopback API without a release keystore.
+// Prefer -Pfitconnect.apiBaseUrl=... or android/local.properties physical.apiBaseUrl=
+val physicalApiBaseUrl = (
+    (project.findProperty("fitconnect.apiBaseUrl") as String?)
+        ?: secretProps.getProperty("physical.apiBaseUrl")
+)?.trim().orEmpty()
+val debugApiBaseUrl = if (physicalApiBaseUrl.isNotEmpty()) {
+    physicalApiBaseUrl
+} else {
+    "http://10.0.2.2:3001"
+}
 
 // SIGN-02: release signing is mandatory — never silently unsigned.
 val releaseSigningReady = keystorePropsFile.exists().also { exists ->
@@ -86,7 +97,7 @@ android {
             if (!fcmConfigured) {
                 applicationIdSuffix = ".debug"
             }
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3001\"")
+            buildConfigField("String", "API_BASE_URL", "\"$debugApiBaseUrl\"")
             buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
             buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseAnon\"")
             buildConfigField("String", "RELEASE_CHANNEL", "\"debug\"")
