@@ -71,7 +71,7 @@ fun EliteEmptyState(
                 style = Stroke(width = 2.dp.toPx()),
             )
         }
-        EliteSysLabel("NO DATA YET")
+        EliteSysLabel("EMPTY")
         Text(title, style = MaterialTheme.typography.headlineMedium)
         Text(
             body,
@@ -139,6 +139,9 @@ fun EliteDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = EliteSurfaceColors.CARBON.toColor(),
+        titleContentColor = MaterialTheme.colorScheme.onSurface,
+        textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         title = { Text(title, style = MaterialTheme.typography.headlineSmall) },
         text = { Text(body, style = MaterialTheme.typography.bodyMedium) },
         confirmButton = {

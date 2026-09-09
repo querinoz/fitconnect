@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.fitconnect.android.design.EliteSurfaceColors
 import com.fitconnect.shared.geo.RoutePoint
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -162,6 +163,9 @@ fun MapLibreRouteMap(
 }
 
 private fun ensureLayers(style: Style) {
+    val volt = (EliteSurfaceColors.VOLTLINE and 0xFFFFFFFFL).toInt()
+    val connect = (EliteSurfaceColors.CONNECT and 0xFFFFFFFFL).toInt()
+    val telemetry = (EliteSurfaceColors.TELEMETRY and 0xFFFFFFFFL).toInt()
     if (style.getSource(SOURCE_ROUTE) == null) {
         style.addSource(GeoJsonSource(SOURCE_ROUTE, emptyLine()))
         style.addSource(GeoJsonSource(SOURCE_START, emptyPoints()))
@@ -169,7 +173,7 @@ private fun ensureLayers(style: Style) {
         style.addSource(GeoJsonSource(SOURCE_CURRENT, emptyPoints()))
         style.addLayer(
             LineLayer(LAYER_ROUTE_GLOW, SOURCE_ROUTE).withProperties(
-                PropertyFactory.lineColor(AndroidColor.parseColor("#C8FF00")),
+                PropertyFactory.lineColor(volt),
                 PropertyFactory.lineWidth(10f),
                 PropertyFactory.lineOpacity(0.25f),
                 PropertyFactory.lineCap("round"),
@@ -178,7 +182,7 @@ private fun ensureLayers(style: Style) {
         )
         style.addLayer(
             LineLayer(LAYER_ROUTE, SOURCE_ROUTE).withProperties(
-                PropertyFactory.lineColor(AndroidColor.parseColor("#C8FF00")),
+                PropertyFactory.lineColor(volt),
                 PropertyFactory.lineWidth(4f),
                 PropertyFactory.lineOpacity(0.95f),
                 PropertyFactory.lineCap("round"),
@@ -189,14 +193,14 @@ private fun ensureLayers(style: Style) {
             CircleLayer(LAYER_START, SOURCE_START).withProperties(
                 PropertyFactory.circleRadius(6f),
                 PropertyFactory.circleColor(AndroidColor.WHITE),
-                PropertyFactory.circleStrokeColor(AndroidColor.parseColor("#C8FF00")),
+                PropertyFactory.circleStrokeColor(volt),
                 PropertyFactory.circleStrokeWidth(2f),
             ),
         )
         style.addLayer(
             CircleLayer(LAYER_FINISH, SOURCE_FINISH).withProperties(
                 PropertyFactory.circleRadius(7f),
-                PropertyFactory.circleColor(AndroidColor.parseColor("#00DDB4")),
+                PropertyFactory.circleColor(connect),
                 PropertyFactory.circleStrokeColor(AndroidColor.WHITE),
                 PropertyFactory.circleStrokeWidth(2f),
             ),
@@ -204,7 +208,7 @@ private fun ensureLayers(style: Style) {
         style.addLayer(
             CircleLayer(LAYER_CURRENT, SOURCE_CURRENT).withProperties(
                 PropertyFactory.circleRadius(8f),
-                PropertyFactory.circleColor(AndroidColor.parseColor("#3CD7FF")),
+                PropertyFactory.circleColor(telemetry),
                 PropertyFactory.circleStrokeColor(AndroidColor.WHITE),
                 PropertyFactory.circleStrokeWidth(2f),
             ),

@@ -4,16 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,13 +20,18 @@ import androidx.compose.ui.platform.testTag
 import com.fitconnect.android.community.distribution.DistributionPlatform
 import com.fitconnect.android.community.domain.PostKind
 import com.fitconnect.android.community.domain.ShareConsent
+import com.fitconnect.android.designui.components.EliteBottomSheet
+import com.fitconnect.android.designui.components.EliteButton
+import com.fitconnect.android.designui.components.EliteButtonVariant
+import com.fitconnect.android.designui.components.EliteChip
+import com.fitconnect.android.designui.components.EliteFlowRow
+import com.fitconnect.android.designui.components.EliteTextField
 import com.fitconnect.android.designui.theme.EliteSpace
 
 /**
  * First-class CREATE sheet: post types + privacy consent + distribution targets.
  * Does not auto-enable sensitive fields.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreatePostSheet(
     open: Boolean,
@@ -39,7 +39,6 @@ fun CreatePostSheet(
     onPublish: (kind: PostKind, text: String, consent: ShareConsent, platforms: List<DistributionPlatform>) -> Unit,
 ) {
     if (!open) return
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var kind by remember { mutableStateOf(PostKind.TEXT) }
     var text by remember { mutableStateOf("") }
     var consent by remember { mutableStateOf(ShareConsent()) }
@@ -47,23 +46,24 @@ fun CreatePostSheet(
         mutableStateOf(setOf(DistributionPlatform.FITCONNECT))
     }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        modifier = Modifier.testTag("create_post_sheet"),
+    EliteBottomSheet(
+        title = "Create post",
+        onDismiss = onDismiss,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(EliteSpace.Lg),
+                .testTag("create_post_sheet"),
             verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
         ) {
-            Text("CREATE", style = MaterialTheme.typography.headlineSmall)
-            Text("Share people, training, places, music — not a metric wall.", style = MaterialTheme.typography.bodySmall)
+            Text(
+                "Share people, training, places, music — not a metric wall.",
+                style = MaterialTheme.typography.bodySmall,
+            )
 
             Text("Type", style = MaterialTheme.typography.labelMedium)
-            Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Xs)) {
+            EliteFlowRow {
                 listOf(
                     PostKind.TEXT,
                     PostKind.TRAINING,
@@ -72,19 +72,21 @@ fun CreatePostSheet(
                     PostKind.MUSIC,
                     PostKind.PERFORMANCE,
                 ).forEach { k ->
-                    TextButton(onClick = { kind = k }) {
-                        Text(if (kind == k) "[${k.name}]" else k.name)
-                    }
+                    EliteChip(
+                        label = if (kind == k) "[${k.name}]" else k.name,
+                        contentDescription = "Post type ${k.name}",
+                        onClick = { kind = k },
+                    )
                 }
             }
 
-            androidx.compose.material3.OutlinedTextField(
+            EliteTextField(
                 value = text,
                 onValueChange = { text = it },
+                label = "What happened?",
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("create_post_text"),
-                label = { Text("What happened?") },
             )
 
             Text("Privacy", style = MaterialTheme.typography.labelMedium)
@@ -113,17 +115,22 @@ fun CreatePostSheet(
                 }
             }
 
-            TextButton(
+            EliteButton(
+                label = "PUBLISH",
                 onClick = {
-                    onPublish(kind, text, consent, platforms.toList().ifEmpty { listOf(DistributionPlatform.FITCONNECT) })
+                    onPublish(
+                        kind,
+                        text,
+                        consent,
+                        platforms.toList().ifEmpty { listOf(DistributionPlatform.FITCONNECT) },
+                    )
                     onDismiss()
                 },
+                variant = EliteButtonVariant.Primary,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("create_post_publish"),
-            ) {
-                Text("PUBLISH")
-            }
+            )
         }
     }
 }
