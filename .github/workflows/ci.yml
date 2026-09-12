@@ -35,6 +35,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: node scripts/ci-gate-lint.mjs
+      - run: node --test scripts/lighthouse-mobile.test.mjs
       - run: pnpm lint
       # Expo @fitconnect/mobile archived (ADR-005 / Path A). Turbo 2.x hard-fails if a
       # --filter references a package that is not in the workspace — do not negate it.
@@ -325,17 +326,34 @@ jobs:
       - run: pnpm build
         env:
           NEXT_PUBLIC_DEMO_MODE: "true"
-      - run: pnpm --filter @fitconnect/web start &
-        env:
-          NEXT_PUBLIC_DEMO_MODE: "true"
-      - run: npx wait-on http://localhost:3001/api/health --timeout 120000
-      - run: node scripts/lighthouse-mobile.mjs http://localhost:3001
+      # Keep the production server in the same step as Lighthouse so the process
+      # is not reaped between GitHub Actions steps, and so scores land in the
+      # same log as the gate.
+      - name: Lighthouse mobile gate
         env:
           CI: "true"
+          NEXT_PUBLIC_DEMO_MODE: "true"
+          HOSTNAME: "127.0.0.1"
           LIGHTHOUSE_MIN_PERF: "84"
           LIGHTHOUSE_MIN_A11Y: "90"
           LIGHTHOUSE_MIN_BP: "95"
           LIGHTHOUSE_MIN_SEO: "95"
+          LIGHTHOUSE_JSON: lighthouse-mobile-report.json
+        run: |
+          set -euo pipefail
+          pnpm --filter @fitconnect/web start &
+          server_pid=$!
+          cleanup() { kill "$server_pid" 2>/dev/null || true; }
+          trap cleanup EXIT
+          npx wait-on http://127.0.0.1:3001/api/health --timeout 120000
+          node scripts/lighthouse-mobile.mjs http://127.0.0.1:3001
+      - name: Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-mobile-report
+          path: lighthouse-mobile-report.json
+          if-no-files-found: warn
 
   test-perf:
     name: k6 smoke

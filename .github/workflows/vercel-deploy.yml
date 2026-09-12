@@ -48,23 +48,18 @@ jobs:
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
       - name: Check Vercel auth
-        id: vercel_auth
         run: |
           if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "::warning::Vercel production secrets missing (VERCEL_TOKEN / ORG / PROJECT). Skipping deploy — HUMAN blocker, not a code defect."
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-            echo "VERCEL_TOKEN is set (length ${#VERCEL_TOKEN})"
+            echo "::error::Vercel production secrets missing (VERCEL_TOKEN / VERCEL_ORG_ID / VERCEL_PROJECT_ID). Run 34710860100 reported SUCCESS while skipping Pull/Build/Deploy, so https://fitconnect-phi.vercel.app stayed on a pre-Session-6 artifact (~96 KiB page chunk with GSAP, ~755 KiB transfer, Performance ~65)."
+            exit 1
           fi
+          echo "VERCEL_TOKEN is set (length ${#VERCEL_TOKEN})"
 
       - name: Pull Vercel env
-        if: steps.vercel_auth.outputs.skip != 'true'
         run: pnpm dlx vercel@latest pull --yes --environment=production
         working-directory: apps/web
 
       - name: Build with Vercel
-        if: steps.vercel_auth.outputs.skip != 'true'
         run: pnpm dlx vercel@latest build --prod
         working-directory: apps/web
         env:
@@ -72,6 +67,5 @@ jobs:
           NEXT_PUBLIC_REALTIME_PROVIDER: broadcast
 
       - name: Deploy prebuilt
-        if: steps.vercel_auth.outputs.skip != 'true'
         run: pnpm dlx vercel@latest deploy --prebuilt --prod
         working-directory: apps/web
