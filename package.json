@@ -92,7 +92,7 @@
     "lighthouse": "^12.6.0",
     "pg": "^8.13.1",
     "prisma": "^7.8.0",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.4",
     "tsx": "^4.22.2",
     "turbo": "^2.5.4",
     "typescript": "^5.6.3",
@@ -107,7 +107,17 @@
       "react": "^19.0.0",
       "react-dom": "^19.0.0",
       "@types/react": "19.2.18",
-      "@types/react-dom": "19.2.4"
+      "@types/react-dom": "19.2.4",
+      "protobufjs@>=7 <8": "^7.6.5",
+      "ws@>=8 <9": "^8.21.0",
+      "dompurify@>=3 <4": "^3.4.13",
+      "fflate@>=0.4.8 <0.5": "^0.4.9",
+      "fast-uri@>=3 <4": "^3.1.6",
+      "brace-expansion@>=5 <6": "^5.0.9",
+      "nanoid@>=3 <4": "^3.3.18",
+      "browserslist@>=4 <5": "^4.28.7",
+      "baseline-browser-mapping@>=2 <3": "^2.11.15",
+      "@babel/core@>=7 <8": "^7.29.6"
     },
     "peerDependencyRules": {
       "allowedVersions": {
