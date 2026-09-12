@@ -15,6 +15,14 @@
  *   4. gate-exists      a release gate exists and aggregates the required jobs
  *   5. gate-honest      the gate inspects each result and fails on anything but success
  *   6. gate-complete    every job the gate needs exists, and every required job is needed
+ *   7. gate-coverage    every job in the workflow is either aggregated by the gate or
+ *                       explicitly acknowledged as ungated, with a reason. Added after
+ *                       CI #39 on 1780b09: the run's conclusion was FAILURE because
+ *                       `lighthouse-mobile` failed, while `Release gate` reported
+ *                       SUCCESS — the gate was honest about the nine jobs it aggregates
+ *                       and silent about the one it does not. A forgotten job is the
+ *                       same lie as a soft gate, reached by omission instead of by
+ *                       `continue-on-error`.
  *
  * Read-only. Exits non-zero on any ERROR.
  *
@@ -47,8 +55,28 @@ const REQUIRED_JOBS = [
   "auth-prod-like",
   "android-wear",
   "build",
-  "test-e2e"
+  "test-e2e",
+  // Aggregated since 2026-09-12. Branch-conditional, so the gate accepts success OR skipped
+  // for it -- but never failure. See the release-gate step.
+  "lighthouse-mobile"
 ];
+
+/**
+ * Jobs deliberately left outside the gate, each with the reason it is acceptable.
+ * A job that is neither required nor listed here is an ERROR: it can fail the
+ * workflow while the gate still reports PASS, and nobody decided that.
+ *
+ * `lighthouse-mobile` used to be listed here. It is now aggregated by the gate instead:
+ * commit a727bc2 widened its `if:` to feat/**, so it runs -- and can fail -- on the working
+ * branch, and CI #39 duly ended in FAILURE while the gate reported SUCCESS. The gate accepts
+ * `skipped` for it (correct when the branch filter excludes it) but never `failure`.
+ */
+const ACKNOWLEDGED_UNGATED = {
+  "test-perf":
+    "k6 smoke is main/master-only, so requiring it would make the gate unsatisfiable on a feature branch",
+  "deploy-staging":
+    "main/master-only deploy step, and it smokes a deployed environment rather than this commit"
+};
 
 const GATE_JOB = "release-gate";
 
@@ -127,7 +155,8 @@ for (const req of REQUIRED_JOBS) {
   const deps = [...closure(jobs, req)].filter((d) => d !== req);
   const upstreamRequired = deps.filter((d) => REQUIRED_JOBS.includes(d));
   if (upstreamRequired.length > 0) {
-    const severity = req === "build" || req === "test-e2e" ? "INFO" : "ERROR";
+    const severity =
+      req === "build" || req === "test-e2e" || req === "lighthouse-mobile" ? "INFO" : "ERROR";
     add(
       severity,
       "cascade",
@@ -188,6 +217,26 @@ if (!gate) {
   for (const req of REQUIRED_JOBS) {
     if (jobs[req] && !needs.includes(req)) {
       add("ERROR", "gate-complete", `required job "${req}" exists but "${GATE_JOB}" does not aggregate it`);
+    }
+  }
+}
+
+// 7. gate-coverage — no job may be silently outside the gate
+if (gate) {
+  const needs = Array.isArray(gate.needs) ? gate.needs : gate.needs ? [gate.needs] : [];
+  for (const name of jobNames) {
+    if (name === GATE_JOB || needs.includes(name)) continue;
+    const reason = ACKNOWLEDGED_UNGATED[name];
+    if (reason) {
+      add("INFO", "gate-coverage", `"${name}" is outside the gate by decision: ${reason}`);
+    } else {
+      add(
+        "ERROR",
+        "gate-coverage",
+        `job "${name}" is neither aggregated by "${GATE_JOB}" nor listed in ACKNOWLEDGED_UNGATED. ` +
+          `It can fail the workflow while the gate still reports PASS. Either add it to the gate, ` +
+          `or record why it is exempt.`
+      );
     }
   }
 }

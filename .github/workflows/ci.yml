@@ -164,6 +164,47 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:migrate:deploy
+
+      # The supabase/migrations chain (001 -> 031) is applied to production by hand and had
+      # never been executed as a chain anywhere. It is a second, independent source of schema
+      # truth next to prisma/migrations, and nothing was proving the two agree -- or that a
+      # rebuild from it even works. Measured 2026-09-12 on a fresh PostgreSQL 16: it applies
+      # clean, but coach_profiles and reviews came out NOT anonymously readable, because they
+      # relied on Supabase default privileges that 024 deliberately revoked. Production worked;
+      # a rebuild silently lost the public coach directory. Migration 031 fixes it. This step
+      # is what stops that class of bug coming back.
+      #
+      # A SEPARATE DATABASE on the same service, so this never interacts with the Prisma-built
+      # schema the integration tests below run against.
+      - name: Supabase migration chain from scratch + schema reconciliation
+        env:
+          CHAIN_URL: postgresql://fitconnect:fitconnect_test@localhost:5433/fitconnect_chain
+        run: |
+          set -euo pipefail
+          psql "$DIRECT_URL" -v ON_ERROR_STOP=1 -c 'create database fitconnect_chain'
+
+          # Supabase supplies these; a plain postgres:15-alpine service does not. Without them
+          # every guarded GRANT/REVOKE in the chain is skipped and the grant invariants would be
+          # checked against nothing -- a green run proving less than it appears to.
+          psql "$CHAIN_URL" -v ON_ERROR_STOP=1 <<'PREREQ'
+          do $roles$
+          begin
+            if not exists (select 1 from pg_roles where rolname = 'anon') then create role anon nologin; end if;
+            if not exists (select 1 from pg_roles where rolname = 'authenticated') then create role authenticated nologin; end if;
+            if not exists (select 1 from pg_roles where rolname = 'service_role') then create role service_role nologin bypassrls; end if;
+          end
+          $roles$;
+          create extension if not exists pgcrypto;
+          create schema if not exists auth;
+          create table if not exists auth.users (id uuid primary key default gen_random_uuid(), email text);
+          create or replace function auth.uid() returns uuid language sql stable as $fn$
+            select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
+          $fn$;
+          PREREQ
+
+          DIRECT_URL="$CHAIN_URL" pnpm db:supabase:migrate
+          DIRECT_URL="$CHAIN_URL" node scripts/db-reconcile-schema.mjs
+
       - run: pnpm --filter @fitconnect/db test:integration
       - run: pnpm test:integration
       - run: pnpm --filter @fitconnect/api-client exec vitest run src/pacts/consumer.contracts.pact.test.ts
@@ -186,17 +227,18 @@ jobs:
       # BLOCKING. Critical advisories in the dependencies that actually ship.
       # This step previously ran with `continue-on-error: true`, which made the
       # job report success while `release-gate` counted it as a required PASS --
-      # a green light with nothing behind it. Measured on the current lockfile
-      # (2026-09-10, pnpm 9.15.9): 125 advisories total, 44 high and 5 critical;
-      # production-only: 71 advisories, 25 high and 3 critical.
+      # a green light with nothing behind it.
       #
-      # The three production criticals are real and must be fixed, not silenced:
-      #   next@15.5.23        -> >=15.5.24  unauthenticated RCE (CVE-2026-75604)
-      #   next@15.5.23        -> >=15.5.24  unauthenticated RCE in the Image
-      #                                     Optimization API (GHSA-2xp9-vwfh-vxw4)
-      #   maplibre-gl@5.24.0  -> >=6.4.1    XSS sanitizer bypass (CVE-2026-85061)
+      # The three production criticals that justified making it blocking are FIXED
+      # and this step now passes (CI #39 on 1780b09, Security audit SUCCESS):
+      #   next@15.5.23       -> 15.5.25  unauthenticated RCE (CVE-2026-75604) and
+      #                                  Image Optimization RCE (GHSA-2xp9-vwfh-vxw4)
+      #   maplibre-gl@5.24.0 -> 6.9.0    XSS sanitizer bypass (CVE-2026-85061)
       #
-      # Expect this job to be RED until those land. That is the correct state.
+      # An earlier revision of this comment said "expect this job to be RED until
+      # those land". They landed. A red security-audit is now a regression, not the
+      # expected state -- do not accept one by citing a stale comment.
+      # Production criticals measured on the branch lockfile: 0.
       # Do not re-add continue-on-error and do not lower --audit-level to pass.
       - name: Dependency audit (critical, production tree) — BLOCKING
         run: pnpm audit --audit-level critical --prod
@@ -352,18 +394,64 @@ jobs:
       - android-wear
       - build
       - test-e2e
+      # Aggregated as of 2026-09-12. It was deliberately left out while its `if:` was
+      # main/master/feature-only; commit a727bc2 widened that to feat/** so it runs, and can
+      # fail, on this branch -- and CI #39 then ended in FAILURE while this gate reported
+      # SUCCESS. A job that can fail the workflow must be visible to the gate.
+      - lighthouse-mobile
     steps:
       - name: Require green required jobs
         env:
-          RESULTS: ${{ join(needs.*.result, ',') }}
+          # Unconditional jobs: only `success` is acceptable.
+          R_LINT: ${{ needs.lint-typecheck.result }}
+          R_UNIT: ${{ needs.test-unit.result }}
+          R_COVERAGE: ${{ needs.test-coverage-gate.result }}
+          R_INTEGRATION: ${{ needs.test-integration.result }}
+          R_SECURITY: ${{ needs.security-audit.result }}
+          R_AUTH: ${{ needs.auth-prod-like.result }}
+          R_ANDROID: ${{ needs.android-wear.result }}
+          R_BUILD: ${{ needs.build.result }}
+          R_E2E: ${{ needs.test-e2e.result }}
+          # Branch-conditional: `success` OR `skipped`. Never `failure`/`cancelled`.
+          R_LIGHTHOUSE: ${{ needs.lighthouse-mobile.result }}
         run: |
           set -euo pipefail
-          echo "needs results: $RESULTS"
-          IFS=',' read -r -a ARR <<< "$RESULTS"
-          for r in "${ARR[@]}"; do
-            if [ "$r" != "success" ]; then
-              echo "Release gate BLOCKED — required job result=$r"
-              exit 1
+          fail=0
+
+          echo "Required jobs (must be success):"
+          for pair in \
+            "lint-typecheck=$R_LINT" "test-unit=$R_UNIT" "test-coverage-gate=$R_COVERAGE" \
+            "test-integration=$R_INTEGRATION" "security-audit=$R_SECURITY" \
+            "auth-prod-like=$R_AUTH" "android-wear=$R_ANDROID" "build=$R_BUILD" \
+            "test-e2e=$R_E2E"; do
+            name="${pair%%=*}"; res="${pair#*=}"
+            printf '  %-20s %s\n' "$name" "$res"
+            if [ "$res" != "success" ]; then
+              echo "    ^ BLOCKING: not success"
+              fail=1
             fi
           done
-          echo "Release gate PASS — all required jobs success"
+
+          # lighthouse-mobile is branch-conditional (main/master/feature/**/feat/**). When the
+          # branch filter excludes it the job is skipped and that is correct, so skipped is
+          # accepted -- but a job that RAN and failed blocks the release. This is the only
+          # tolerance in the gate and it tolerates absence, never failure.
+          echo "Branch-conditional jobs (success or skipped):"
+          printf '  %-20s %s\n' "lighthouse-mobile" "$R_LIGHTHOUSE"
+          case "$R_LIGHTHOUSE" in
+            success|skipped) ;;
+            *) echo "    ^ BLOCKING: lighthouse-mobile ran and did not succeed"; fail=1 ;;
+          esac
+
+          echo
+          echo "NOT covered by this gate: test-perf, deploy-staging (both main/master-only,"
+          echo "and deploy-staging smokes a deployed environment rather than this commit)."
+          echo "scripts/ci-gate-lint.mjs enforces that every other job is aggregated here."
+
+          if [ "$fail" -ne 0 ]; then
+            echo
+            echo "Release gate BLOCKED."
+            exit 1
+          fi
+          echo
+          echo "Release gate PASS — every required job succeeded."
