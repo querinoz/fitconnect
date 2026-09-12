@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import { useAuthStore } from "@/lib/auth-store";
-import { authBackend, signOutSession } from "@/lib/auth/supabase-browser-auth";
+import { authBackend } from "@/lib/auth/auth-backend";
+import { signOutSession } from "@/lib/auth/supabase-browser-auth";
 import { clearDemoSessionCookie } from "@/lib/auth/demo-session";
 import { applyIdentityToAuthUser, bootstrapProfile } from "@/lib/identity/client";
 import { initFirebaseClient } from "@/lib/firebase/client";

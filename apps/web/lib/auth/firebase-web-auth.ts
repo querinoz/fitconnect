@@ -14,14 +14,13 @@ import {
   type Auth,
   type User
 } from "firebase/auth";
-import { isDemoMode } from "@/lib/auth/supabase/client";
-import { isFirebaseWebConfigured } from "@/lib/firebase/config";
 import { initFirebaseClient } from "@/lib/firebase/client";
 import type { UserRole } from "@/lib/auth";
 import type { AuthUser } from "@/lib/auth";
 import { FIREBASE_ID_COOKIE } from "@/lib/auth/session-cookie";
+import { authBackend, type AuthBackend } from "./auth-backend";
 
-export type AuthBackend = "demo" | "firebase" | "unconfigured";
+export { authBackend, type AuthBackend };
 
 export type AuthResult =
   | { ok: true; mode: AuthBackend; user?: AuthUser }
@@ -33,12 +32,6 @@ export type GoogleAuthFailure =
   | "network"
   | "configuration"
   | "provider";
-
-export function authBackend(): AuthBackend {
-  if (isDemoMode()) return "demo";
-  if (isFirebaseWebConfigured()) return "firebase";
-  return "unconfigured";
-}
 
 async function firebaseAuth(): Promise<Auth | null> {
   const app = await initFirebaseClient();

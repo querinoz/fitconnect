@@ -1,19 +1,23 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
+import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/lib/auth-store";
-import { useSupabaseAuthSync } from "@/lib/auth/use-supabase-auth-sync";
 import { persistClientAuthSession } from "@/lib/auth/complete-login";
-import { authBackend } from "@/lib/auth/supabase-browser-auth";
+import { authBackend } from "@/lib/auth/auth-backend";
 import { isAllowedDemoSessionId } from "@/lib/auth/demo-session";
+
+const AuthStoreFirebaseSync = dynamic(
+  () => import("@/components/auth-store-firebase-sync").then((m) => m.AuthStoreFirebaseSync),
+  { ssr: false }
+);
 
 /**
  * Rehydrates the persisted auth store once on the client.
  * Required with `skipHydration` to avoid SSR mismatch and rehydration races.
  */
-export function AuthStoreProvider({ children }: { children: ReactNode }) {
-  useSupabaseAuthSync();
-
+function AuthStoreRehydrate({ children }: { children: ReactNode }) {
   useEffect(() => {
     void Promise.resolve(useAuthStore.persist.rehydrate()).then(() => {
       const user = useAuthStore.getState().user;
@@ -40,5 +44,15 @@ export function AuthStoreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  return children;
+  return <>{children}</>;
+}
+
+export function AuthStoreProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  return (
+    <AuthStoreRehydrate>
+      {pathname !== "/" ? <AuthStoreFirebaseSync /> : null}
+      {children}
+    </AuthStoreRehydrate>
+  );
 }

@@ -20,4 +20,28 @@ describe("HeroGate", () => {
     await waitFor(() => expect(onComplete).toHaveBeenCalled());
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
+
+  it("skips the boot overlay on compact viewports", async () => {
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      value: (query: string) => ({
+        matches: query.includes("max-width: 767px"),
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false
+      })
+    });
+    const onComplete = vi.fn();
+    render(
+      <LanguageProvider initialLang="en">
+        <HeroGate onComplete={onComplete} />
+      </LanguageProvider>
+    );
+    await waitFor(() => expect(onComplete).toHaveBeenCalled());
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
 });

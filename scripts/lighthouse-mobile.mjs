@@ -61,6 +61,28 @@ try {
       console.log(`${flag} ${key}: ${pct}${min ? ` (min ${min})` : ""}`);
       if (!ok) failed = true;
     }
+    const audits = result?.lhr?.audits ?? {};
+    const num = (id) => {
+      const v = audits[id]?.numericValue;
+      return typeof v === "number" && Number.isFinite(v) ? v : null;
+    };
+    const fmtMs = (v) => (v == null ? "n/a" : `${Math.round(v)} ms`);
+    const fmtKb = (v) => (v == null ? "n/a" : `${Math.round(v / 1024)} KiB`);
+    console.log(`LCP: ${fmtMs(num("largest-contentful-paint"))}`);
+    console.log(`CLS: ${num("cumulative-layout-shift") == null ? "n/a" : num("cumulative-layout-shift").toFixed(3)}`);
+    console.log(`TBT: ${fmtMs(num("total-blocking-time"))}`);
+    console.log(`INP: ${fmtMs(num("interaction-to-next-paint"))}`);
+    console.log(`Transfer: ${fmtKb(num("total-byte-weight"))}`);
+    console.log(`JS execution: ${fmtMs(num("bootup-time"))}`);
+    const unusedJs = audits["unused-javascript"]?.numericValue;
+    const unusedCss = audits["unused-css-rules"]?.numericValue;
+    console.log(`Unused JS: ${fmtKb(unusedJs)}`);
+    console.log(`Unused CSS: ${fmtKb(unusedCss)}`);
+    const blocking = audits["render-blocking-insight"] ?? audits["render-blocking-resources"];
+    if (blocking?.numericValue != null) {
+      console.log(`Render-blocking: ${fmtMs(blocking.numericValue)}`);
+    }
+
     if (failed && isCI) {
       console.error("\nLighthouse gate failed. See docs/VOLTLINE_OS_V2.md for targets.");
       process.exitCode = 1;

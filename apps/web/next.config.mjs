@@ -17,7 +17,12 @@ const nextConfig = {
       "lucide-react",
       "motion",
       "recharts",
-      "@radix-ui/react-tabs"
+      "@radix-ui/react-tabs",
+      "date-fns",
+      "zod",
+      "firebase",
+      "posthog-js",
+      "convex"
     ]
   },
   transpilePackages: [

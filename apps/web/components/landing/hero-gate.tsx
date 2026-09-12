@@ -28,6 +28,12 @@ export function HeroGate({ onComplete }: HeroGateProps) {
       /* private mode */
     }
 
+    const compact = window.matchMedia("(max-width: 767px)").matches;
+    if (compact) {
+      onComplete();
+      return;
+    }
+
     if (shouldReduceMotion()) {
       try {
         sessionStorage.setItem(LANDING_BOOT_KEY, "1");
