@@ -39,13 +39,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fitconnect.android.R
 import com.fitconnect.android.auth.AndroidFederatedAuthHost
+import com.fitconnect.android.auth.GoogleWebClientIds
 import com.fitconnect.android.designui.atmosphere.HoneycombAtmosphere
 import com.fitconnect.android.designui.brand.EosFitConnectLockup
-import com.fitconnect.android.auth.GoogleWebClientIds
-import com.fitconnect.android.foundation.auth.FederatedAuthHost
-import com.fitconnect.android.foundation.auth.UnavailableFederatedAuthHost
 import com.fitconnect.android.designui.components.EliteAppearancePicker
-import com.fitconnect.android.designui.components.EliteBadge
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteCard
@@ -54,7 +51,8 @@ import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.components.EliteTextField
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.reduceMotionEnabled
-import com.fitconnect.android.foundation.auth.DemoPersona
+import com.fitconnect.android.foundation.auth.FederatedAuthHost
+import com.fitconnect.android.foundation.auth.UnavailableFederatedAuthHost
 import com.fitconnect.android.foundation.config.AppConfig
 import com.fitconnect.android.foundation.theme.AccentPreset
 import com.fitconnect.android.foundation.theme.ThemeMode
@@ -62,6 +60,12 @@ import com.fitconnect.android.ui.theme.LocalAppContainer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * Unified FitConnect login — one account, one session.
+ *
+ * Athlete / Coach is NEVER chosen here. Capabilities come from entitlements after
+ * authentication; Active Mode is switched from Profile.
+ */
 @Composable
 fun AuthScreen(
     config: AppConfig,
@@ -117,99 +121,88 @@ fun AuthScreen(
                 .statusBarsPadding()
                 .padding(EliteSpace.Xl)
                 .testTag("screen_auth")
-                .semantics { contentDescription = "Identity verification" },
+                .semantics { contentDescription = "Sign in to FitConnect" },
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-        EosFitConnectLockup(
-            markSize = 56.dp,
-            assemble = true,
-            wordmarkSize = 22.sp,
-            modifier = Modifier.testTag("auth_brand_mark"),
-        )
-        Spacer(modifier = Modifier.height(EliteSpace.Md))
-        EliteSysLabel(stringResource(R.string.auth_sys_identity))
-        Text(
-            text = stringResource(R.string.splash_tagline),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        if (introStep >= 1) {
+            EosFitConnectLockup(
+                markSize = 56.dp,
+                assemble = true,
+                wordmarkSize = 22.sp,
+                modifier = Modifier.testTag("auth_brand_mark"),
+            )
+            Spacer(modifier = Modifier.height(EliteSpace.Md))
             Text(
-                text = stringResource(R.string.auth_sys_init),
+                text = stringResource(R.string.auth_welcome_title),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.testTag("auth_welcome_title"),
+            )
+            Spacer(modifier = Modifier.height(EliteSpace.Sm))
+            Text(
+                text = stringResource(R.string.auth_welcome_body),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-        }
-        if (introStep >= 2) {
-            EliteSysLabel(stringResource(R.string.auth_sys_core))
-        }
-        Spacer(modifier = Modifier.height(EliteSpace.Sm))
-        Text(
-            text = stringResource(R.string.auth_identity_verification),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        Spacer(modifier = Modifier.height(EliteSpace.Lg))
-
-        if (busy) {
-            EliteSysLabel(stringResource(AuthMessages.phaseLabel(state.phase)))
-            Spacer(modifier = Modifier.height(EliteSpace.Md))
-        }
-
-        state.errorKind?.let { kind ->
-            Text(
-                text = stringResource(AuthMessages.title(kind)),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.testTag("auth_error"),
-            )
-            Spacer(modifier = Modifier.height(EliteSpace.Sm))
-            Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
-                EliteButton(
-                    label = stringResource(R.string.auth_retry),
-                    variant = EliteButtonVariant.Secondary,
-                    onClick = { viewModel.clearError() },
-                    modifier = Modifier.testTag("auth_retry"),
-                )
-                EliteButton(
-                    label = stringResource(R.string.nav_back),
-                    variant = EliteButtonVariant.Ghost,
-                    onClick = { viewModel.setMode(AuthFormMode.PROVIDERS) },
-                )
-                EliteButton(
-                    label = stringResource(R.string.auth_help),
-                    variant = EliteButtonVariant.Ghost,
-                    onClick = { },
-                )
+            if (introStep >= 1) {
+                Spacer(modifier = Modifier.height(EliteSpace.Sm))
+                EliteSysLabel(stringResource(R.string.auth_sys_secure))
             }
-            Spacer(modifier = Modifier.height(EliteSpace.Md))
-        }
+            Spacer(modifier = Modifier.height(EliteSpace.Lg))
 
-        if (introStep >= 3) {
-            EliteCard(variant = EliteCardVariant.Glass) {
-                IdentityBody(
-                    config = config,
-                    state = state,
-                    busy = busy,
-                    viewModel = viewModel,
-                    host = host,
-                )
+            if (busy) {
+                EliteSysLabel(stringResource(AuthMessages.phaseLabel(state.phase)))
+                Spacer(modifier = Modifier.height(EliteSpace.Md))
             }
-            Spacer(modifier = Modifier.height(EliteSpace.Xl))
-            EliteCard(variant = EliteCardVariant.Glass) {
-                EliteAppearancePicker(
-                    mode = themeMode,
-                    onModeChange = { next ->
-                        scope.launch { container.themeSettings.setMode(next) }
-                    },
-                    accent = accent,
-                    onAccentChange = { next ->
-                        scope.launch { container.themeSettings.setAccent(next) }
-                    },
+
+            state.errorKind?.let { kind ->
+                Text(
+                    text = stringResource(AuthMessages.title(kind)),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.testTag("auth_error"),
                 )
+                Spacer(modifier = Modifier.height(EliteSpace.Sm))
+                Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                    EliteButton(
+                        label = stringResource(R.string.auth_retry),
+                        variant = EliteButtonVariant.Secondary,
+                        onClick = { viewModel.clearError() },
+                        modifier = Modifier.testTag("auth_retry"),
+                    )
+                    EliteButton(
+                        label = stringResource(R.string.nav_back),
+                        variant = EliteButtonVariant.Ghost,
+                        onClick = { viewModel.setMode(AuthFormMode.EMAIL_SIGN_IN) },
+                    )
+                }
+                Spacer(modifier = Modifier.height(EliteSpace.Md))
             }
-        }
+
+            if (introStep >= 3) {
+                EliteCard(variant = EliteCardVariant.Glass) {
+                    IdentityBody(
+                        config = config,
+                        state = state,
+                        busy = busy,
+                        viewModel = viewModel,
+                        host = host,
+                    )
+                }
+                Spacer(modifier = Modifier.height(EliteSpace.Xl))
+                EliteCard(variant = EliteCardVariant.Glass) {
+                    EliteAppearancePicker(
+                        mode = themeMode,
+                        onModeChange = { next ->
+                            scope.launch { container.themeSettings.setMode(next) }
+                        },
+                        accent = accent,
+                        onAccentChange = { next ->
+                            scope.launch { container.themeSettings.setAccent(next) }
+                        },
+                    )
+                }
+            }
         }
     }
 }
@@ -223,8 +216,8 @@ private fun IdentityBody(
     host: FederatedAuthHost,
 ) {
     val showIdentityCore = config.usesIdentityCore
-    val showDemo = config.allowLocalAuth && config.isDebuggable
-    val failClosed = !showIdentityCore && !showDemo
+    val showLocalAuth = config.allowLocalAuth && config.isDebuggable
+    val failClosed = !showIdentityCore && !showLocalAuth
 
     if (failClosed) {
         Text(
@@ -236,87 +229,80 @@ private fun IdentityBody(
     }
 
     when (state.mode) {
-        AuthFormMode.PROVIDERS -> {
-            EliteSysLabel(stringResource(R.string.auth_sys_secure))
+        AuthFormMode.PROVIDERS,
+        AuthFormMode.EMAIL_SIGN_IN,
+        -> {
+            // ONE login surface: email/password first. No Athlete/Coach chooser.
+            EmailForm(
+                body = stringResource(R.string.nav_auth_live_body),
+                submitLabel = stringResource(R.string.auth_submit),
+                confirm = false,
+                busy = busy,
+                onSubmit = { email, password, _ -> viewModel.signInEmail(email, password) },
+            )
             Spacer(modifier = Modifier.height(EliteSpace.Md))
-            EliteButton(
-                label = stringResource(R.string.auth_continue_google),
-                onClick = { viewModel.continueWithGoogle(host) },
-                loading = busy,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("auth_google"),
-            )
-            Spacer(modifier = Modifier.height(EliteSpace.Sm))
-            EliteButton(
-                label = stringResource(R.string.auth_continue_apple),
-                variant = EliteButtonVariant.Secondary,
-                onClick = { viewModel.continueWithApple(host) },
-                loading = busy,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("auth_apple"),
-            )
-            Spacer(modifier = Modifier.height(EliteSpace.Sm))
-            EliteButton(
-                label = stringResource(R.string.auth_continue_email),
-                variant = EliteButtonVariant.Ghost,
-                onClick = { viewModel.setMode(AuthFormMode.EMAIL_SIGN_IN) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("auth_continue_email"),
-            )
-            Spacer(modifier = Modifier.height(EliteSpace.Lg))
-            if (showDemo) {
-                EliteBadge(text = DemoPersona.MODE_LABEL)
-                Spacer(modifier = Modifier.height(EliteSpace.Md))
-                Text(
-                    text = stringResource(R.string.nav_auth_body),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+            Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                EliteButton(
+                    label = stringResource(R.string.auth_forgot_link),
+                    variant = EliteButtonVariant.Ghost,
+                    onClick = { viewModel.setMode(AuthFormMode.FORGOT) },
+                    modifier = Modifier.testTag("auth_forgot_link"),
                 )
-                Spacer(modifier = Modifier.height(EliteSpace.Md))
-                DemoPersonaButton(
-                    persona = DemoPersona.INES,
-                    testTag = "screen_auth_primary",
-                    variant = EliteButtonVariant.Primary,
-                    enabled = !busy,
-                    onClick = { viewModel.demoPersona(DemoPersona.INES) },
+                EliteButton(
+                    label = stringResource(R.string.auth_signup_link),
+                    variant = EliteButtonVariant.Ghost,
+                    onClick = { viewModel.setMode(AuthFormMode.EMAIL_REGISTER) },
+                    modifier = Modifier.testTag("auth_signup_link"),
+                )
+            }
+            if (showIdentityCore) {
+                Spacer(modifier = Modifier.height(EliteSpace.Lg))
+                EliteSysLabel(stringResource(R.string.auth_or_continue_with))
+                Spacer(modifier = Modifier.height(EliteSpace.Sm))
+                EliteButton(
+                    label = stringResource(R.string.auth_continue_google),
+                    variant = EliteButtonVariant.Secondary,
+                    onClick = { viewModel.continueWithGoogle(host) },
+                    loading = busy,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("auth_google"),
                 )
                 Spacer(modifier = Modifier.height(EliteSpace.Sm))
-                DemoPersonaButton(
-                    persona = DemoPersona.MARINA,
-                    testTag = "screen_auth_marina",
-                    variant = EliteButtonVariant.Secondary,
-                    enabled = !busy,
-                    onClick = { viewModel.demoPersona(DemoPersona.MARINA) },
-                )
-                Spacer(modifier = Modifier.height(EliteSpace.Sm))
-                DemoPersonaButton(
-                    persona = DemoPersona.TOMAS,
-                    testTag = "screen_auth_secondary",
-                    variant = EliteButtonVariant.Secondary,
-                    enabled = !busy,
-                    onClick = { viewModel.demoPersona(DemoPersona.TOMAS) },
+                EliteButton(
+                    label = stringResource(R.string.auth_continue_apple),
+                    variant = EliteButtonVariant.Ghost,
+                    onClick = { viewModel.continueWithApple(host) },
+                    loading = busy,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("auth_apple"),
                 )
             }
         }
-        AuthFormMode.EMAIL_SIGN_IN -> EmailForm(
-            body = stringResource(R.string.nav_auth_live_body),
-            submitLabel = stringResource(R.string.auth_submit),
-            confirm = false,
-            busy = busy,
-            onSubmit = { email, password, _ -> viewModel.signInEmail(email, password) },
-        )
-        AuthFormMode.EMAIL_REGISTER -> EmailForm(
-            body = stringResource(R.string.auth_signup_body),
-            submitLabel = stringResource(R.string.auth_signup_submit),
-            confirm = true,
-            busy = busy,
-            onSubmit = { email, password, confirmPw -> viewModel.register(email, password, confirmPw) },
-        )
-        AuthFormMode.FORGOT -> ForgotForm(busy = busy) { email ->
-            viewModel.sendPasswordReset(email)
+        AuthFormMode.EMAIL_REGISTER -> {
+            EmailForm(
+                body = stringResource(R.string.auth_signup_body),
+                submitLabel = stringResource(R.string.auth_signup_submit),
+                confirm = true,
+                busy = busy,
+                onSubmit = { email, password, confirmPw -> viewModel.register(email, password, confirmPw) },
+            )
+            Spacer(modifier = Modifier.height(EliteSpace.Md))
+            EliteButton(
+                label = stringResource(R.string.nav_back),
+                variant = EliteButtonVariant.Ghost,
+                onClick = { viewModel.setMode(AuthFormMode.EMAIL_SIGN_IN) },
+            )
+        }
+        AuthFormMode.FORGOT -> {
+            ForgotForm(busy = busy) { email -> viewModel.sendPasswordReset(email) }
+            Spacer(modifier = Modifier.height(EliteSpace.Md))
+            EliteButton(
+                label = stringResource(R.string.nav_back),
+                variant = EliteButtonVariant.Ghost,
+                onClick = { viewModel.setMode(AuthFormMode.EMAIL_SIGN_IN) },
+            )
         }
         AuthFormMode.VERIFY_EMAIL -> {
             Text(
@@ -342,31 +328,6 @@ private fun IdentityBody(
         }
     }
 
-    if (state.mode != AuthFormMode.PROVIDERS) {
-        Spacer(modifier = Modifier.height(EliteSpace.Md))
-        Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
-            if (state.mode != AuthFormMode.EMAIL_REGISTER) {
-                EliteButton(
-                    label = stringResource(R.string.auth_signup_link),
-                    variant = EliteButtonVariant.Ghost,
-                    onClick = { viewModel.setMode(AuthFormMode.EMAIL_REGISTER) },
-                )
-            }
-            if (state.mode != AuthFormMode.FORGOT) {
-                EliteButton(
-                    label = stringResource(R.string.auth_forgot_link),
-                    variant = EliteButtonVariant.Ghost,
-                    onClick = { viewModel.setMode(AuthFormMode.FORGOT) },
-                )
-            }
-            EliteButton(
-                label = stringResource(R.string.nav_back),
-                variant = EliteButtonVariant.Ghost,
-                onClick = { viewModel.setMode(AuthFormMode.PROVIDERS) },
-            )
-        }
-    }
-
     when (state.status) {
         "RESET_QUEUED" -> {
             Spacer(modifier = Modifier.height(EliteSpace.Md))
@@ -385,26 +346,6 @@ private fun IdentityBody(
             )
         }
     }
-}
-
-@Composable
-private fun DemoPersonaButton(
-    persona: DemoPersona,
-    testTag: String,
-    variant: EliteButtonVariant,
-    enabled: Boolean,
-    onClick: () -> Unit,
-) {
-    EliteButton(
-        label = "${persona.displayName} · ${persona.tagline}",
-        onClick = onClick,
-        variant = variant,
-        enabled = enabled,
-        contentDescription = "demo_persona_${persona.name.lowercase()}",
-        modifier = Modifier
-            .fillMaxWidth()
-            .testTag(testTag),
-    )
 }
 
 @Composable
@@ -478,6 +419,7 @@ private fun ForgotForm(busy: Boolean, onSubmit: (email: String) -> Unit) {
         onValueChange = { email = it },
         label = stringResource(R.string.auth_email_label),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        modifier = Modifier.testTag("auth_forgot_email"),
     )
     Spacer(modifier = Modifier.height(EliteSpace.Md))
     EliteButton(
@@ -485,6 +427,8 @@ private fun ForgotForm(busy: Boolean, onSubmit: (email: String) -> Unit) {
         onClick = { onSubmit(email.trim()) },
         enabled = !busy && email.isNotBlank(),
         loading = busy,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("auth_forgot_submit"),
     )
 }

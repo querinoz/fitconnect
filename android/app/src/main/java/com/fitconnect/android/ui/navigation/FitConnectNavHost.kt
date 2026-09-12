@@ -50,6 +50,7 @@ import com.fitconnect.android.FitConnectApplication
 import com.fitconnect.android.R
 import com.fitconnect.android.athlete.ui.AthleteOsApp
 import com.fitconnect.android.coach.ui.CoachOsApp
+import com.fitconnect.android.design.EliteSurfaceInstrument
 import com.fitconnect.android.designui.atmosphere.HoneycombAtmosphere
 import com.fitconnect.android.designui.brand.EosFitConnectLockup
 import com.fitconnect.android.designui.catalog.DesignSystemCatalog
@@ -60,6 +61,7 @@ import com.fitconnect.android.designui.components.EliteCardVariant
 import com.fitconnect.android.designui.components.EliteLoading
 import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.components.EosMultiSportHero
+import com.fitconnect.android.designui.theme.EliteOpacity
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.reduceMotionEnabled
 import com.fitconnect.android.foundation.authz.UserRole
@@ -68,7 +70,6 @@ import com.fitconnect.android.foundation.identity.hydrateLocalOnboarding
 import com.fitconnect.android.foundation.navigation.CoreRoute
 import com.fitconnect.android.foundation.storage.isCoachOnboardingDone
 import com.fitconnect.android.foundation.storage.isOnboardingDone
-import com.fitconnect.android.foundation.storage.needsIdentityRoleSelection
 import com.fitconnect.android.foundation.navigation.DeepLinkInbox
 import com.fitconnect.android.foundation.navigation.DeepLinkTarget
 import com.fitconnect.android.foundation.navigation.classifyDeepLink
@@ -291,36 +292,20 @@ fun FitConnectNavHost(
                     BootLoadingSurface(label = "SYS.REDIRECT")
                 }
                 else -> {
-                    var needsRole by remember { mutableStateOf<Boolean?>(null) }
+                    // Unified identity: never ask Athlete vs Coach at login.
+                    // Active mode comes from entitlements + preference; switch in Profile.
                     var sessionRole by remember { mutableStateOf(role) }
-                    LaunchedEffect(role, needsRole) {
-                        val snap = container.sessionStore.snapshot()
-                        sessionRole = snap.activeMode
-                        needsRole = container.keyValueStore.needsIdentityRoleSelection(
-                            snap.userId.orEmpty(),
-                            snap.isLocalDemo,
-                        )
+                    LaunchedEffect(role) {
+                        sessionRole = container.sessionStore.activeMode()
                     }
-                    when (needsRole) {
-                        null -> BootLoadingSurface(label = "SYS.ROLE")
-                        true -> com.fitconnect.android.ui.auth.RoleSelectScreen(
-                            authRepository = container.authRepository,
-                            onSelected = {
-                                scope.launch {
-                                    sessionRole = container.sessionStore.activeMode()
-                                    needsRole = false
-                                }
-                            },
-                        )
-                        false -> {
-                            var shellMode by remember { mutableStateOf(sessionRole) }
-                            LaunchedEffect(sessionRole) {
-                                shellMode = container.sessionStore.activeMode()
-                            }
-                            fun onModeChanged(next: UserRole) {
-                                shellMode = next
-                            }
-                            when (shellMode) {
+                    var shellMode by remember { mutableStateOf(sessionRole) }
+                    LaunchedEffect(sessionRole) {
+                        shellMode = container.sessionStore.activeMode()
+                    }
+                    fun onModeChanged(next: UserRole) {
+                        shellMode = next
+                    }
+                    when (shellMode) {
                             UserRole.COACH -> {
                                 var coachOnboardingDone by remember { mutableStateOf<Boolean?>(null) }
                                 var localDemoSession by remember { mutableStateOf(false) }
@@ -400,8 +385,6 @@ fun FitConnectNavHost(
                                     testTag = "screen_home",
                                 )
                             }
-                            }
-                        }
                     }
                 }
             }
@@ -515,10 +498,10 @@ private fun SplashRoute(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color.Black.copy(alpha = 0.55f),
+                            Color.Black.copy(alpha = EliteOpacity.Scrim),
                             Color.Transparent,
                             Color.Black.copy(alpha = 0.72f),
-                            Color.Black.copy(alpha = 0.92f),
+                            Color.Black.copy(alpha = EliteOpacity.Scrim.coerceAtLeast(0.85f)),
                         ),
                     ),
                 ),
@@ -527,26 +510,26 @@ private fun SplashRoute(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(horizontal = 32.dp)
+                .padding(horizontal = EliteSpace.Xl)
                 .alpha(markAlpha.value),
         ) {
             EosFitConnectLockup(
-                markSize = 96.dp,
+                markSize = (EliteSurfaceInstrument.LOGO_MARK_DP * 4).dp,
                 assemble = true,
                 wordmarkSize = 28.sp,
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(EliteSpace.Md))
             Text(
                 text = stringResource(R.string.splash_tagline_line1),
                 style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 2.sp),
-                color = Color.White.copy(alpha = 0.92f),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.92f),
                 textAlign = TextAlign.Center,
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(EliteSpace.Xxs))
             Text(
                 text = stringResource(R.string.splash_tagline_line2),
                 style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 2.sp),
-                color = Color.White.copy(alpha = 0.92f),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.92f),
                 textAlign = TextAlign.Center,
             )
         }
@@ -556,21 +539,22 @@ private fun SplashRoute(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(horizontal = 28.dp, vertical = 28.dp)
+                .padding(horizontal = EliteSpace.Inset, vertical = EliteSpace.Inset)
                 .alpha(markAlpha.value),
         ) {
+            val getStarted = stringResource(R.string.splash_get_started)
             EliteButton(
-                label = "Get Started",
+                label = getStarted,
                 onClick = { complete() },
                 enabled = finishLoggedIn != null && !completed,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("splash_sys_init"),
-                contentDescription = "Get Started",
+                contentDescription = getStarted,
             )
             if (revealDebug) {
                 badge?.let { label ->
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(EliteSpace.Sm))
                     Text(
                         text = label,
                         style = MaterialTheme.typography.labelLarge,

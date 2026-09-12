@@ -11,10 +11,7 @@ appId: com.fitconnect.android
     timeout: 20000
 - takeScreenshot: compare_01b_welcome
 - tapOn: "Continue"
-- extendedWaitUntil:
-    visible: "demo_persona_ines"
-    timeout: 20000
-- tapOn: "demo_persona_ines"
+- runFlow: ../_unified_email_login_athlete.yaml
 - repeat:
     times: 8
     commands:

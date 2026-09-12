@@ -47,7 +47,7 @@ enum class AuthFormMode {
 
 data class AuthUiState(
     val phase: AuthPhase = AuthPhase.IDLE,
-    val mode: AuthFormMode = AuthFormMode.PROVIDERS,
+    val mode: AuthFormMode = AuthFormMode.EMAIL_SIGN_IN,
     val errorKind: AppError.AuthKind? = null,
     val status: String? = null,
     val pendingEmail: String? = null,
@@ -137,6 +137,10 @@ class AuthViewModel(
         }
     }
 
+    /**
+     * LOCAL_DEMO seed sign-in via email/password only — never exposed as Athlete/Coach
+     * login chooser buttons. Capabilities come from [DemoPersona] entitlement map.
+     */
     fun demoPersona(persona: DemoPersona) {
         launchProvider(
             AuthProviderKind.EMAIL_PASSWORD,

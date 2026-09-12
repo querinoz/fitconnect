@@ -1,0 +1,14 @@
+# Shared: unified email login as coach-capable seed (Tomás) — still one login, not "login as coach"
+appId: com.fitconnect.android
+---
+- extendedWaitUntil:
+    visible: "Welcome back"
+    timeout: 20000
+- tapOn:
+    id: "auth_email"
+- inputText: "tomas@fitconnect.demo"
+- tapOn:
+    id: "auth_password"
+- inputText: "password1"
+- tapOn:
+    id: "auth_submit"

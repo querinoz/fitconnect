@@ -3,7 +3,10 @@ package com.fitconnect.android.foundation.auth
 import com.fitconnect.android.foundation.authz.UserRole
 
 /**
- * Deterministic LOCAL_DEMO personas. Never production credentials.
+ * Deterministic LOCAL_DEMO seed identities for local auth emails.
+ *
+ * Never shown as "login as Athlete / Coach" UI. Capabilities are entitlements
+ * resolved after email/password authentication (same path as any user).
  * Password for all: password1
  */
 enum class DemoPersona(

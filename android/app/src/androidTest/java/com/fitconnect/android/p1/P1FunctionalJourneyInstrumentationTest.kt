@@ -58,7 +58,13 @@ class P1FunctionalJourneyInstrumentationTest {
         waitForTag("screen_guest", 45_000)
         composeRule.onNodeWithTag("screen_guest_primary").performClick()
         waitForTag("screen_auth", 20_000)
-        composeRule.onNodeWithTag("screen_auth_primary").performClick()
+        composeRule.onNodeWithTag("auth_email").performTextInput(
+            com.fitconnect.android.foundation.auth.DemoPersona.INES.email,
+        )
+        composeRule.onNodeWithTag("auth_password").performTextInput(
+            com.fitconnect.android.foundation.auth.DemoPersona.DEMO_PASSWORD,
+        )
+        composeRule.onNodeWithTag("auth_submit").performClick()
         dismissRoleSelectIfPresent()
         waitForOnboardingOrAthleteOs(30_000)
         completeOnboardingIfPresent()

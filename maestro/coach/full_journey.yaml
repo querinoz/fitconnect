@@ -5,18 +5,15 @@ appId: com.fitconnect.android
     visible: "Continue"
     timeout: 20000
 - tapOn: "Continue"
-- extendedWaitUntil:
-    visible: "demo_persona_tomas"
-    timeout: 20000
-- tapOn: "demo_persona_tomas"
+- runFlow: ../_unified_email_login_coach.yaml
 - repeat:
     times: 16
     commands:
       - runFlow:
           when:
-            visible: "Enter Coach OS"
+            visible: "ACTIVE EXPERIENCE"
           commands:
-            - tapOn: "Enter Coach OS"
+            - tapOn: "Coach"
       - runFlow:
           when:
             visible:

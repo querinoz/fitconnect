@@ -272,11 +272,8 @@ class FirebaseAuthRepository(
             val identity = result.value
             isolation?.wipeForAccountSwitch(identity.uid)
             val existingRole = sessionStore.snapshot().takeIf { it.userId == identity.uid }?.role
-            val selected = keyValueStore?.get(PreferenceKeys.identityRoleSelected(identity.uid))
-            var needsRole = selected != "1"
-            if (needsRole && selected == null) {
-                keyValueStore?.set(PreferenceKeys.identityRoleSelected(identity.uid), "0")
-            }
+            // Unified identity: never gate on "choose Athlete/Coach" after Firebase auth.
+            keyValueStore?.set(PreferenceKeys.identityRoleSelected(identity.uid), "1")
             var role = existingRole?.takeIf { it == UserRole.ATHLETE || it == UserRole.COACH }
                 ?: UserRole.ATHLETE
             val tokens = AuthTokens(
@@ -289,6 +286,8 @@ class FirebaseAuthRepository(
                 SessionSnapshot(
                     userId = identity.uid,
                     role = role,
+                    activeMode = role,
+                    capabilities = setOf(role),
                     tokens = tokens,
                     isAnonymous = false,
                     biometricUnlockEnabled = false,
@@ -303,11 +302,17 @@ class FirebaseAuthRepository(
                 is AppResult.Ok -> {
                     remote.value.role?.takeIf { it == UserRole.ATHLETE || it == UserRole.COACH }?.let {
                         role = it
-                        needsRole = false
-                        keyValueStore?.set(PreferenceKeys.identityRoleSelected(identity.uid), "1")
                     }
+                    val caps = remote.value.capabilities.ifEmpty {
+                        setOf(role)
+                    }
+                    val mode = remote.value.activeMode?.takeIf { caps.contains(it) } ?: role
                     sessionStore.save(
-                        sessionStore.snapshot().copy(role = role),
+                        sessionStore.snapshot().copy(
+                            role = mode,
+                            activeMode = mode,
+                            capabilities = caps,
+                        ),
                     )
                 }
                 is AppResult.Err -> logger.w("FirebaseAuth", "profile bootstrap failed")
@@ -320,7 +325,7 @@ class FirebaseAuthRepository(
                 emailVerified = identity.emailVerified,
                 providers = identity.providers,
                 isLocalDemo = false,
-                needsRoleSelection = needsRole,
+                needsRoleSelection = false,
             )
             authState.value = user
             if (fromSignUp) logger.i("FirebaseAuth", "account created uid_len=${identity.uid.length}")
@@ -337,7 +342,7 @@ class FirebaseAuthRepository(
             role = role,
             providers = parseProviders(stored),
             isLocalDemo = false,
-            needsRoleSelection = selected == "0",
+            needsRoleSelection = false,
         )
     }
 

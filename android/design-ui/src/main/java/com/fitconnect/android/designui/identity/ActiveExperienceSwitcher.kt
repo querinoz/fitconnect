@@ -21,17 +21,18 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
 import com.fitconnect.android.designui.components.EliteStack
 import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.neumorphic.EosPremiumCard
+import com.fitconnect.android.designui.theme.EliteBorder
+import com.fitconnect.android.designui.theme.EliteRadius
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.authz.UserRole
 
 /**
- * Profile ACTIVE EXPERIENCE switcher — capability-gated, not a second login.
+ * Profile CURRENT EXPERIENCE switcher — capability-gated, not a second login.
  */
 @Composable
 fun ActiveExperienceSwitcher(
@@ -48,7 +49,12 @@ fun ActiveExperienceSwitcher(
 
     EosPremiumCard(modifier = modifier.testTag("active_experience_switcher")) {
         EliteStack(spacing = EliteSpace.Md) {
-            EliteSysLabel(text = "ACTIVE EXPERIENCE")
+            EliteSysLabel(text = "CURRENT EXPERIENCE")
+            Text(
+                text = "Same account · same session · switch context only",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             if (hasAthlete) {
                 ModeOption(
                     title = "Athlete",
@@ -56,7 +62,11 @@ fun ActiveExperienceSwitcher(
                     selected = activeMode == UserRole.ATHLETE,
                     enabled = !switching,
                     testTag = "mode_option_athlete",
-                    announcement = if (activeMode == UserRole.ATHLETE) "Athlete mode selected" else "Switch to Athlete mode",
+                    announcement = if (activeMode == UserRole.ATHLETE) {
+                        "Athlete experience selected"
+                    } else {
+                        "Switch to Athlete experience"
+                    },
                     onClick = { onSelectMode(UserRole.ATHLETE) },
                 )
             }
@@ -67,18 +77,22 @@ fun ActiveExperienceSwitcher(
                     selected = activeMode == UserRole.COACH,
                     enabled = !switching,
                     testTag = "mode_option_coach",
-                    announcement = if (activeMode == UserRole.COACH) "Coach mode selected" else "Switch to Coach mode",
+                    announcement = if (activeMode == UserRole.COACH) {
+                        "Coach experience selected"
+                    } else {
+                        "Switch to Coach experience"
+                    },
                     onClick = { onSelectMode(UserRole.COACH) },
                 )
             } else if (onUnlockCoach != null) {
                 EliteStack(spacing = EliteSpace.Sm) {
                     Text(
-                        text = "Coach mode unavailable",
+                        text = "Coach experience unavailable",
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        text = "Upgrade your plan to unlock the Coach experience.",
+                        text = "Upgrade your plan to unlock Coach — no second login.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -116,7 +130,7 @@ private fun ModeOption(
     announcement: String,
     onClick: () -> Unit,
 ) {
-    val shape = RoundedCornerShape(16.dp)
+    val shape = RoundedCornerShape(EliteRadius.Md)
     val borderColor = if (selected) {
         MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
     } else {
@@ -125,7 +139,7 @@ private fun ModeOption(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, borderColor, shape)
+            .border(EliteBorder.Thin, borderColor, shape)
             .clickable(enabled = enabled && !selected, onClick = onClick)
             .padding(EliteSpace.Md)
             .testTag(testTag)

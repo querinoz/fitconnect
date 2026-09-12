@@ -1,4 +1,4 @@
-# 01 — Authentication: guest → auth → athlete demo session
+# 01 — Authentication: guest → unified email login → athlete session
 appId: com.fitconnect.android.debug
 ---
 - launchApp
@@ -10,8 +10,15 @@ appId: com.fitconnect.android.debug
     id: "screen_guest_primary"
 - assertVisible:
     id: "screen_auth"
+- assertVisible: "Welcome back"
 - tapOn:
-    id: "screen_auth_primary"
+    id: "auth_email"
+- inputText: "ines@fitconnect.demo"
+- tapOn:
+    id: "auth_password"
+- inputText: "password1"
+- tapOn:
+    id: "auth_submit"
 - runFlow: _complete_onboarding.yaml
 - extendedWaitUntil:
     visible:
