@@ -36,8 +36,8 @@ Be factual. Labels below are the only status language that should be copied.
 | Android athlete/coach data flows | LOCAL DEMO (many flows) |
 | Web landing + dashboards | LOCAL DEMO / PARTIAL (CI keeps an explicit demo job; **auth-prod-like** job uses DEMO_MODE=false) |
 | Firebase + identity APIs | ENGINEERING PASS / PRODUCTION_AUTH PENDING_HUMAN |
-| Postgres RLS identity SQL | ENGINEERING PASS (live IDOR 2026-09-02); hosted JWT trust PENDING_HUMAN |
-| Strava own-athlete OAuth | PARTIAL (P0-SEC engineering PASS 2026-08-29; policy ops remain) |
+| Postgres RLS identity SQL | ENGINEERING PASS (live IDOR 2026-09-02); live ownership + deny probes re-run 2026-09-10 on `training_spots` / `user_capabilities`; hosted JWT trust PENDING_HUMAN |
+| Strava own-athlete OAuth | PARTIAL — token table exposure closed 2026-09-10 (`024`); **client secret rotation PENDING_HUMAN**; policy ops remain |
 | GPS / live capture | PLANNED / placeholder (`EliteCapture`) |
 | Realtime production default | UNVERIFIED (Broadcast still CI/demo default) |
 | Watch phone sync | UNVERIFIED |
@@ -46,7 +46,19 @@ Be factual. Labels below are the only status language that should be copied.
 | Human production infra | PENDING_HUMAN |
 | **Release** | **PRODUCTION NO-GO** |
 
-P0-SEC is **historical PASS** (2026-08-29). P1-DATA is **reconciled** (`016`/`017` on this branch). P1-AUTH **engineering** is PASS. Production remains **NO-GO**. Next authorized **product** phase: **WORKOUT-ENGINE WAVE 2** (not started).
+P0-SEC was **RE-OPENED on 2026-09-10** and is now **partially re-closed**. Do not copy the
+old "historical PASS" line: on that date the live database had eight PostgREST-exposed
+tables with row level security **off**, including `public."StravaConnection"` and its
+`accessToken` / `refreshToken` columns, readable by the `anon` role. That exposure is
+closed (`supabase/migrations/024`) and verified — Supabase security-linter ERROR count
+went 8 → 0. Still open under P0-SEC: three critical dependency advisories, two of them
+unauthenticated RCE in `next@15.5.23`. See
+[docs/automation/AUTONOMOUS_MASTER_TODO.md](docs/automation/AUTONOMOUS_MASTER_TODO.md).
+
+P1-DATA is **reconciled** (`016`/`017` on this branch). The `017`–`021` migration chain was
+unrecorded in production until 2026-09-10 and is now applied and recorded. P1-AUTH
+**engineering** is PASS. Production remains **NO-GO**. Next authorized **product** phase:
+**WORKOUT-ENGINE WAVE 2** (not started).
 
 ## 4. Current Roadmap
 
@@ -219,7 +231,9 @@ Production-like intent: `NEXT_PUBLIC_DEMO_MODE=false`. CI still uses demo-on tod
 
 Why (see [docs/master-plan/23_GO_NO_GO.md](docs/master-plan/23_GO_NO_GO.md)):
 
-- P0 security themes open (Strava allowlist drift, webhook/job fail-closed, account deletion, legal URLs, unproven live RLS, rate limiting)
+- P0 security themes open (Strava allowlist drift, webhook/job fail-closed, account deletion, legal URLs, rate limiting)
+- Three critical dependency advisories in the production tree, two of them unauthenticated RCE (`next@15.5.23` → `>=15.5.24`, `maplibre-gl@5.24.0` → `>=6.4.1`)
+- Strava OAuth tokens must be treated as leaked until the client secret is rotated (`docs/automation/HUMAN_HANDOFF.md`)
 - Production Firebase / Supabase / signing / FCM / Play: PENDING_HUMAN
 - CI E2E still trained on demo mode
 - GPS, Watch Data Layer, and production realtime defaults: UNVERIFIED

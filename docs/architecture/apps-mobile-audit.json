@@ -1,0 +1,160 @@
+{
+  "target": "apps/mobile",
+  "status": "audited",
+  "auditedAt": "2026-09-10",
+  "branch": "feat/elite-os-v2",
+  "head": "c5bba4ce93002e9c65d50405a9f20c96641d0077",
+  "historicalSnapshotCommit": "251c62a902f65d3ae53739a4bc0406587bb884e2",
+  "deletionCommit": "efec7943a35b923dc57c71d1964c9c9c90e0c57e",
+  "deletionPerformed": false,
+  "decision": "ARCHIVE",
+  "confidence": "HIGH",
+  "productionUsage": false,
+  "ciUsage": false,
+  "workspaceUsage": false,
+  "runtimeUsage": false,
+  "sharedDependencyUsage": false,
+  "testUsage": false,
+  "assetUsage": false,
+  "migrationGapsBlocking": false,
+  "deletionSafe": "YES",
+  "deletionSafeConfidence": "HIGH",
+  "deletionSafeScope": "remaining_stub_assets_and_empty_tree_only; full_expo_source_already_absent",
+  "notes": [
+    "apps/mobile absent on disk; HEAD still tracks 3 orphan brand PNGs (deleted in working tree).",
+    "Full Expo tree deleted in efec794 (not git-mv'd). Recover from 251c62a (66 files).",
+    "_archive/apps-mobile-frozen-adr005 is incomplete (untracked leftover logo only).",
+    "Root scripts named smoke:mobile/audit:mobile/lighthouse:mobile target web PWA, not Expo.",
+    "Do not reintroduce Expo under apps/* (workspace glob would revive @fitconnect/mobile)."
+  ],
+  "dependencyFlags": {
+    "production": "NO",
+    "runtime": "NO",
+    "ci": "NO",
+    "workspace": "NO",
+    "test": "NO",
+    "sharedPackage": "NO",
+    "asset": "NO",
+    "migrationGaps": "NO"
+  },
+  "buildGraph": {
+    "web": "apps/web",
+    "android": "android/",
+    "wear": "android/wear",
+    "legacyExpo": "apps/mobile (stub) + git history"
+  },
+  "items": [
+    {
+      "path": "apps/mobile",
+      "classification": "ARCHIVE",
+      "confidence": "HIGH",
+      "reason": "Expo Path A removed from operational tree; production mobile is android/ Compose per ADR-005.",
+      "references": [
+        "docs/adr/ADR-005-expo-to-native-android.md",
+        "_archive/README.md",
+        "android/README.md",
+        "efec794"
+      ],
+      "migrationTarget": null
+    },
+    {
+      "path": "apps/mobile/assets/brand/logo.png",
+      "classification": "REMOVE",
+      "confidence": "HIGH",
+      "reason": "Orphan tracked asset; no code references; brand lives in brand-sources and web/android assets.",
+      "references": [],
+      "migrationTarget": "brand-sources/ / apps/web/public/brand/ / android drawables"
+    },
+    {
+      "path": "apps/mobile/assets/brand/logo@2x.png",
+      "classification": "REMOVE",
+      "confidence": "HIGH",
+      "reason": "Orphan tracked asset; no code references.",
+      "references": [],
+      "migrationTarget": "brand-sources/ / apps/web/public/brand/"
+    },
+    {
+      "path": "apps/mobile/assets/brand/logo@3x.png",
+      "classification": "REMOVE",
+      "confidence": "HIGH",
+      "reason": "Orphan tracked asset; no code references.",
+      "references": [],
+      "migrationTarget": "brand-sources/ / apps/web/public/brand/"
+    },
+    {
+      "path": "_archive/README.md",
+      "classification": "KEEP",
+      "confidence": "HIGH",
+      "reason": "Documents removal policy and recovery via git history; prevents Expo reintroduction.",
+      "references": ["_archive/README.md"],
+      "migrationTarget": null
+    },
+    {
+      "path": "_archive/apps-mobile-frozen-adr005",
+      "classification": "ARCHIVE",
+      "confidence": "MEDIUM",
+      "reason": "Intended archive location is incomplete (untracked empty shell + one logo). Source of truth is git history at 251c62a.",
+      "references": ["docs/qa/MOBILE_DUPLICATE_APP_RESOLUTION.md"],
+      "migrationTarget": null
+    },
+    {
+      "path": "historical:apps/mobile/package.json (@fitconnect/mobile)",
+      "classification": "ARCHIVE",
+      "confidence": "HIGH",
+      "reason": "Package deleted in efec794; not in pnpm workspace; Expo 52 preview only.",
+      "references": ["251c62a:apps/mobile/package.json"],
+      "migrationTarget": null
+    },
+    {
+      "path": "historical:apps/mobile/lib/readiness.ts",
+      "classification": "ARCHIVE",
+      "confidence": "HIGH",
+      "reason": "Was re-export of @fitconnect/utils; logic already migrated.",
+      "references": ["packages/utils/src/readiness.ts"],
+      "migrationTarget": "packages/utils"
+    },
+    {
+      "path": ".github/workflows/eas-preview.yml",
+      "classification": "ARCHIVE",
+      "confidence": "HIGH",
+      "reason": "Disabled tombstone; intentionally fails; optional delete in authorized cleanup.",
+      "references": [".github/workflows/eas-preview.yml"],
+      "migrationTarget": null
+    },
+    {
+      "path": ".github/workflows/ci.yml#comments",
+      "classification": "KEEP",
+      "confidence": "HIGH",
+      "reason": "Comments document why not to filter !@fitconnect/mobile; behavior is correct without Expo package.",
+      "references": [".github/workflows/ci.yml"],
+      "migrationTarget": null
+    },
+    {
+      "path": "package.json#smoke:mobile",
+      "classification": "KEEP",
+      "confidence": "HIGH",
+      "reason": "Web PWA smoke script, not Expo. Naming is historical collision only.",
+      "references": ["scripts/mobile-pwa-check.mjs"],
+      "migrationTarget": null
+    },
+    {
+      "path": "README.md#apps/mobile frozen listing",
+      "classification": "MIGRATE",
+      "confidence": "HIGH",
+      "reason": "Documentation incorrectly implies Expo tree still present as frozen sibling; update to removed/history-only.",
+      "references": ["README.md"],
+      "migrationTarget": "docs wording only"
+    }
+  ],
+  "counts": {
+    "filesAnalyzedCurrentHead": 3,
+    "filesAnalyzedHistoricalSnapshot": 66,
+    "keep": 3,
+    "migrate": 1,
+    "remove": 3,
+    "archive": 5,
+    "unknown": 0
+  },
+  "report": "docs/architecture/APPS_MOBILE_DEPENDENCY_AUDIT.md",
+  "json": "docs/architecture/apps-mobile-audit.json"
+}

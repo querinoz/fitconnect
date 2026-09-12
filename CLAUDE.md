@@ -1,6 +1,8 @@
 # CLAUDE.md — FitConnect · Memória Persistente do Projeto
 
-> **CURRENT STATUS (2026-09-03):** Production = **NO-GO**. P0-SEC = PASS. P1-DATA reconciled. P1-AUTH engineering = PASS. Next authorized product phase = **WORKOUT-ENGINE WAVE 2** (not started). Entry point = [`README.md`](README.md).
+> **CURRENT STATUS (2026-09-10):** Production = **NO-GO**. **P0-SEC = RE-OPENED, partially re-closed** — the live database had eight PostgREST-exposed tables with RLS off, including `StravaConnection` (`accessToken`, `refreshToken`) readable by `anon`; closed by `supabase/migrations/024`, linter ERROR 8 → 0. Still open: three critical dependency advisories (two unauthenticated RCE in `next@15.5.23`) and Strava client-secret rotation. P1-DATA reconciled; `017`–`021` applied and recorded in production 2026-09-10. P1-AUTH engineering = PASS. Next authorized product phase = **WORKOUT-ENGINE WAVE 2** (not started).
+>
+> Current queue and evidence: [`docs/automation/AUTONOMOUS_MASTER_TODO.md`](docs/automation/AUTONOMOUS_MASTER_TODO.md) · [`docs/automation/HUMAN_HANDOFF.md`](docs/automation/HUMAN_HANDOFF.md) · [`docs/qa/AUTONOMOUS_FINAL_REPORT.md`](docs/qa/AUTONOMOUS_FINAL_REPORT.md). Entry point = [`README.md`](README.md).
 >
 > **Android athlete neu-glass:** ENGINEERING COMPLETE (waves 0–6) — see [`docs/design/ELITE_OS_NEU_GLASS.md`](docs/design/ELITE_OS_NEU_GLASS.md).
 >
@@ -18,7 +20,7 @@
 | **Nome**             | FitConnect                                   |
 | **Tagline**          | Connect. Train. Perform.                     |
 | **Tipo**             | Coaching platform SaaS + Marketplace         |
-| **Stack**            | Next.js 14 · Expo 52 · Turbo Monorepo · pnpm |
+| **Stack**            | Next.js 15 (`15.5.23` in the lockfile — **upgrade to `>=15.5.24`, two RCE advisories**) · Turbo Monorepo · pnpm |
 | **Prod URL**         | https://fitconnect-phi.vercel.app            |
 | **Branch principal** | `feature/fitconnect`                         |
 | **Repositório**      | Monorepo `fitconnect`                        |

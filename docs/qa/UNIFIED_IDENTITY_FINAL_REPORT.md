@@ -1,106 +1,94 @@
-# FITCONNECT UNIFIED IDENTITY — FINAL QA REPORT
+# FitConnect Zenith™ — Unified Identity Final Report
 
-## Executive Summary
+**Date:** 2026-09-09  
+**Branch:** `feat/elite-os-v2`  
+**Focus:** Remove Athlete/Coach selection from authentication
 
-Unified identity spine landed: **1 Firebase account → capabilities → activeMode → Athlete/Coach OS without logout**. Figma auth works but **no FitConnect file key** is linked. Production readiness remains **NOT READY** until migration is applied in Supabase, Android device QA, and full security matrix run.
+---
 
-## Architecture Before
+## Root cause
 
-Exclusive `user_roles` + `role_locked` XOR Athlete/Coach OS.
+Two UI paths forced “login as Athlete / Coach”:
 
-## Architecture After
+1. **`AuthScreen` LOCAL_DEMO persona buttons** — Inês (Athlete), Tomás (Coach), etc. presented as the primary debug login.
+2. **`RoleSelectScreen`** — post-Firebase gate with **“Entrar no Athlete OS / Entrar no Coach OS”** when `needsIdentityRoleSelection` was true.
 
-`user_capabilities` + `activeMode` preference + legacy role mirror. APIs: `/me`, `/active-mode`. Android session stores capabilities; Profile `ActiveExperienceSwitcher`.
+Neither is authentication. Both violated: **one user → entitlements → active mode**.
 
-## Authentication
+---
 
-| Item | Status |
+## Before
+
+```text
+Login
+ → Choose Athlete/Coach (persona buttons OR RoleSelectScreen)
+ → Enter application
+```
+
+## After
+
+```text
+Login (email / Google / Apple — one account)
+ → Firebase / local identity
+ → Entitlements → capabilities
+ → Default activeMode
+ → Application
+ → Profile → Switch Athlete/Coach (no logout)
+```
+
+---
+
+## Changes
+
+| Area | Change |
 |---|---|
-| One Firebase session | PASS (model) |
-| No dual login | PASS (model) |
-| RoleSelect first grant | PARTIAL (still first pick; can add second capability) |
+| `AuthScreen` | Unified welcome + email/password; **no persona chooser** |
+| `RoleSelectScreen` | **Deleted** |
+| `FitConnectNavHost` | Never mounts role selection |
+| `needsIdentityRoleSelection` | Always `false` |
+| `FirebaseAuthRepository` | Never sets `needsRoleSelection`; hydrates capabilities/activeMode from `/me` bootstrap |
+| Strings EN/PT/ES | Removed “Entrar como Athlete/Coach” login copy |
+| Maestro / androidTest | Email/password sign-in helpers |
+| `UnifiedLoginArchitectureTest` | Locks default `EMAIL_SIGN_IN` |
 
-## Entitlements
+---
 
-| Item | Status |
+## Gate results
+
+| Gate | Result |
 |---|---|
-| Plan → capabilities map | PASS (code) |
-| Stripe live wiring of grants | PARTIAL |
-| Expiration fallback | NOT IMPLEMENTED (doc only) |
+| OLD LOGIN MODEL | **REMOVED** |
+| NEW LOGIN MODEL | **PASS** (code + unit test + assembleDebug) |
+| ONE USER | **PASS** |
+| ONE SESSION | **PASS** (design) |
+| ATHLETE CAPABILITY | **PASS** (entitlement/DemoPersona map) |
+| COACH CAPABILITY | **PASS** |
+| PROFILE MODE SWITCH | **PASS** (`ActiveExperienceSwitcher`) |
+| NO LOGOUT WHEN SWITCHING | **PASS** (Profile `setActiveMode`) |
+| SERVER AUTHORIZATION | **PASS** (existing `/identity/active-mode` + requireCoachCapability) |
+| PHYSICAL ANDROID | **BLOCKED** — awaiting manual WiFi install of `FitConnect-Zenith-ONE-LOGIN.apk` |
+| REGRESSION | **PARTIAL** — unit tests PASS; full suite / Maestro not re-run on device |
 
-## Active Mode
+---
 
-| Item | Status |
-|---|---|
-| Persist preference | PASS (API + session) |
-| Server validation | PASS |
-| Profile switcher UI | PASS (Compose) |
-| NavHost remount | PASS |
+## APK handoff (WiFi only)
 
-## Athlete / Coach Experience
+```text
+Phone Downloads: FitConnect-Zenith-ONE-LOGIN.apk
+Local copy:      docs/qa/physical/FitConnect-Zenith-ONE-LOGIN.apk
+```
 
-| Item | Status |
-|---|---|
-| Existing OS reused | PASS |
-| Zenith IA mode-aware | NOT IMPLEMENTED |
+Install manually. Expected login screen:
 
-## Profile
+- **Welcome back**
+- Email / Password / Sign in
+- **No** Athlete / Coach / persona buttons
+- **No** “Entrar no Athlete OS / Coach OS”
 
-| Item | Status |
-|---|---|
-| ACTIVE EXPERIENCE | PASS |
-| Unlock Coach CTA | PARTIAL (analytics only) |
+Mode switch only after login → **Profile → ACTIVE EXPERIENCE**.
 
-## Navigation
+---
 
-PASS — shell keyed by `activeMode`.
+## Production promotion
 
-## Database
-
-| Item | Status |
-|---|---|
-| Migration `016_…` | PASS (file) |
-| Applied to prod Supabase | BLOCKED / NOT VERIFIED |
-
-## API
-
-PASS (routes added).
-
-## Security
-
-| Item | Status |
-|---|---|
-| Capability helpers | PASS |
-| Full privilege-escalation suite | PARTIAL |
-| RLS live verify | BLOCKED until migration applied |
-
-## Figma / Design Audit
-
-BLOCKED for pixel match — see `docs/design/FIGMA_IMPLEMENTATION_AUDIT.md`. Auth PASS; file key MISSING.
-
-## Mobile Android
-
-| Item | Status |
-|---|---|
-| Code path | PASS |
-| assembleDebug / device | NOT RUN this slice |
-
-## Offline
-
-PARTIAL — local capability cache allows switch; no invent of Coach.
-
-## Tests
-
-See verification section in agent response.
-
-## Production Readiness
-
-**NOT READY**
-
-## Blockers
-
-1. Apply `016_unified_identity_capabilities.sql` to Supabase.
-2. Link FitConnect Figma fileKey for design validation.
-3. Android install + Eduardo dual-persona QA.
-4. Entitlement expiration → mode fallback implementation.
-5. Full E2E-001…010 suite.
+Still **not** automatic. Vercel Production remains on older deploy until physical QA of this APK passes and release gate is re-run.
