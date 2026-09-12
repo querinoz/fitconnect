@@ -22,7 +22,7 @@ export default defineConfig({
     { name: "desktop-chrome", use: { ...devices["Desktop Chrome"] } }
   ],
   webServer: {
-    command: "pnpm dev",
+    command: process.env.CI ? "pnpm --filter @fitconnect/web start" : "pnpm dev",
     cwd: repoRoot,
     url: "http://localhost:3001/api/health",
     reuseExistingServer: !process.env.CI,
