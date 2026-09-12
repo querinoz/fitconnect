@@ -2,6 +2,11 @@
 -- Spots / Secret Spots + outbound distribution jobs.
 -- FitConnect remains SoT; Zapier/social are distribution only.
 -- Strava-originated content remains non-social (see 020).
+--
+-- Identity: rows are owned by a Firebase UID (text). RLS therefore uses
+-- public.firebase_uid() -- never auth.uid() -- per 012_firebase_identity.sql.
+-- Re-runnable: policies are dropped-if-exists first; grants are guarded by
+-- role existence so the file also applies on a vanilla Postgres.
 
 CREATE TABLE IF NOT EXISTS public.training_spots (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -85,25 +90,65 @@ CREATE TABLE IF NOT EXISTS public.user_automation_rules (
 CREATE INDEX IF NOT EXISTS user_automation_user_idx ON public.user_automation_rules (user_id);
 
 ALTER TABLE public.training_spots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.training_spots FORCE ROW LEVEL SECURITY;
 ALTER TABLE public.training_spot_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.training_spot_reports FORCE ROW LEVEL SECURITY;
 ALTER TABLE public.training_spot_audit ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.training_spot_audit FORCE ROW LEVEL SECURITY;
 ALTER TABLE public.post_distribution_jobs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.post_distribution_jobs FORCE ROW LEVEL SECURITY;
 ALTER TABLE public.user_automation_rules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_automation_rules FORCE ROW LEVEL SECURITY;
 
--- Exact coordinates: never select for anonymous; app layer redacts further.
+-- Row visibility. NOTE: exact_lat/exact_lng are still returned to every reader of a
+-- PUBLIC/APPROXIMATE row -- redaction currently lives in the app layer only.
+-- AGENTS.md treats app-layer-only privacy as a defect; the DB-level barrier
+-- (owner-only base table + redacted view) is tracked in AUTONOMOUS_MASTER_TODO.md.
+DROP POLICY IF EXISTS training_spots_read_approx ON public.training_spots;
+
 CREATE POLICY training_spots_read_approx ON public.training_spots
   FOR SELECT USING (
     visibility IN ('PUBLIC','APPROXIMATE')
-    OR creator_id = auth.uid()::text
+    OR creator_id = public.firebase_uid()
   );
 
+DROP POLICY IF EXISTS training_spots_insert_own ON public.training_spots;
+
 CREATE POLICY training_spots_insert_own ON public.training_spots
-  FOR INSERT WITH CHECK (creator_id = auth.uid()::text);
+  FOR INSERT WITH CHECK (creator_id = public.firebase_uid());
+
+DROP POLICY IF EXISTS distribution_jobs_own ON public.post_distribution_jobs;
 
 CREATE POLICY distribution_jobs_own ON public.post_distribution_jobs
-  FOR ALL USING (author_id = auth.uid()::text)
-  WITH CHECK (author_id = auth.uid()::text);
+  FOR ALL USING (author_id = public.firebase_uid())
+  WITH CHECK (author_id = public.firebase_uid());
+
+DROP POLICY IF EXISTS automation_rules_own ON public.user_automation_rules;
 
 CREATE POLICY automation_rules_own ON public.user_automation_rules
-  FOR ALL USING (user_id = auth.uid()::text)
-  WITH CHECK (user_id = auth.uid()::text);
+  FOR ALL USING (user_id = public.firebase_uid())
+  WITH CHECK (user_id = public.firebase_uid());
+
+-- training_spot_reports and training_spot_audit intentionally carry NO client
+-- policy: RLS is enabled with zero policies, which denies every non-superuser
+-- role. They are writable only through the privileged server path. If a client
+-- report flow is ever exposed, add an explicit insert-own policy here -- do not
+-- disable RLS.
+
+-- Privileges. Without these, RLS is irrelevant: the role cannot reach the table.
+DO $grants$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+    GRANT SELECT, INSERT ON TABLE public.training_spots TO authenticated;
+    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.post_distribution_jobs TO authenticated;
+    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.user_automation_rules TO authenticated;
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+    REVOKE ALL ON TABLE public.training_spots FROM anon;
+    REVOKE ALL ON TABLE public.training_spot_reports FROM anon;
+    REVOKE ALL ON TABLE public.training_spot_audit FROM anon;
+    REVOKE ALL ON TABLE public.post_distribution_jobs FROM anon;
+    REVOKE ALL ON TABLE public.user_automation_rules FROM anon;
+  END IF;
+END
+$grants$;

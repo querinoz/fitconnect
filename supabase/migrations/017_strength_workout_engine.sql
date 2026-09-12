@@ -2,6 +2,8 @@
 -- Strength training domain: plans, execution, body weight, progression state.
 -- Does NOT modify migrations 001–016.
 -- Links completed sessions to public.activities via activity_id.
+-- Re-runnable: every policy is dropped-if-exists first and grants are guarded by
+-- role existence, so a partial prior apply no longer blocks the 017-021 chain.
 
 --;;
 insert into public.data_schema_meta (key, value, updated_at)
@@ -183,22 +185,34 @@ alter table public.progression_states enable row level security;
 alter table public.progression_states force row level security;
 
 --;;
+drop policy if exists exercises_select on public.exercises;
+
 create policy exercises_select on public.exercises for select using (
   is_custom = false or user_id = firebase_uid()
 );
+
+drop policy if exists exercises_insert on public.exercises;
+
 create policy exercises_insert on public.exercises for insert with check (
   is_custom = true and user_id = firebase_uid()
 );
+
+drop policy if exists exercises_update on public.exercises;
+
 create policy exercises_update on public.exercises for update using (
   is_custom = true and user_id = firebase_uid()
 );
 
 --;;
+drop policy if exists training_plans_own on public.training_plans;
+
 create policy training_plans_own on public.training_plans for all using (
   user_id = firebase_uid()
 ) with check (user_id = firebase_uid());
 
 --;;
+drop policy if exists training_routines_via_plan on public.training_routines;
+
 create policy training_routines_via_plan on public.training_routines for all using (
   exists (
     select 1 from public.training_plans p
@@ -207,6 +221,8 @@ create policy training_routines_via_plan on public.training_routines for all usi
 );
 
 --;;
+drop policy if exists routine_exercises_via_plan on public.routine_exercises;
+
 create policy routine_exercises_via_plan on public.routine_exercises for all using (
   exists (
     select 1 from public.training_routines r
@@ -216,6 +232,8 @@ create policy routine_exercises_via_plan on public.routine_exercises for all usi
 );
 
 --;;
+drop policy if exists workout_occurrences_via_plan on public.workout_occurrences;
+
 create policy workout_occurrences_via_plan on public.workout_occurrences for all using (
   exists (
     select 1 from public.training_plans p
@@ -224,11 +242,15 @@ create policy workout_occurrences_via_plan on public.workout_occurrences for all
 );
 
 --;;
+drop policy if exists strength_sessions_own on public.strength_sessions;
+
 create policy strength_sessions_own on public.strength_sessions for all using (
   user_id = firebase_uid()
 ) with check (user_id = firebase_uid());
 
 --;;
+drop policy if exists strength_sets_via_session on public.strength_sets;
+
 create policy strength_sets_via_session on public.strength_sets for all using (
   exists (
     select 1 from public.strength_sessions s
@@ -237,22 +259,35 @@ create policy strength_sets_via_session on public.strength_sets for all using (
 );
 
 --;;
+drop policy if exists body_weight_own on public.body_weight_entries;
+
 create policy body_weight_own on public.body_weight_entries for all using (
   user_id = firebase_uid()
 ) with check (user_id = firebase_uid());
 
 --;;
+drop policy if exists progression_states_own on public.progression_states;
+
 create policy progression_states_own on public.progression_states for all using (
   user_id = firebase_uid()
 ) with check (user_id = firebase_uid());
 
 --;;
-grant select on public.exercises to authenticated, anon;
-grant all on public.training_plans to authenticated;
-grant all on public.training_routines to authenticated;
-grant all on public.routine_exercises to authenticated;
-grant all on public.workout_occurrences to authenticated;
-grant all on public.strength_sessions to authenticated;
-grant all on public.strength_sets to authenticated;
-grant all on public.body_weight_entries to authenticated;
-grant all on public.progression_states to authenticated;
+do $grants$
+begin
+  if exists (select 1 from pg_roles where rolname = 'authenticated') then
+    grant select on public.exercises to authenticated;
+    grant all on public.training_plans to authenticated;
+    grant all on public.training_routines to authenticated;
+    grant all on public.routine_exercises to authenticated;
+    grant all on public.workout_occurrences to authenticated;
+    grant all on public.strength_sessions to authenticated;
+    grant all on public.strength_sets to authenticated;
+    grant all on public.body_weight_entries to authenticated;
+    grant all on public.progression_states to authenticated;
+  end if;
+  if exists (select 1 from pg_roles where rolname = 'anon') then
+    grant select on public.exercises to anon;
+  end if;
+end
+$grants$;

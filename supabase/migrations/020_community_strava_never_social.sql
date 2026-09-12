@@ -71,6 +71,25 @@ create index if not exists community_posts_social_eligible_created_at_idx
   where is_social_eligible;
 
 --;;
+-- RLS must actually be ON for the policies below to mean anything. Production was
+-- observed with relrowsecurity=false and zero policies on both tables while
+-- `forced` was still true -- FORCE has no effect while RLS is disabled, so the
+-- barrier this file's header promises was not in force. Enable it here, in the
+-- same file that defines the policies, so the two can never drift apart again.
+alter table public.community_posts enable row level security;
+alter table public.community_posts force row level security;
+
+--;;
+do $reactions_rls$
+begin
+  if to_regclass('public.post_reactions') is not null then
+    execute 'alter table public.post_reactions enable row level security';
+    execute 'alter table public.post_reactions force row level security';
+  end if;
+end
+$reactions_rls$;
+
+--;;
 drop policy if exists community_posts_select_all on public.community_posts;
 
 --;;
