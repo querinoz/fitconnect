@@ -232,21 +232,26 @@ function writeGithubSurfaces(diag) {
   if (summary) {
     writeFileSync(summary, formatGithubSummary(diag), { flag: "a" });
   }
+  const msg = [
+    diag.exitReason,
+    `performance ${diag.performance ?? "n/a"} (min ${diag.thresholds.performance})`,
+    `a11y ${diag.accessibility ?? "n/a"}`,
+    `bp ${diag["best-practices"] ?? "n/a"}`,
+    `seo ${diag.seo ?? "n/a"}`,
+    `LCP ${fmtMs(diag.lcp)}`,
+    `TBT ${fmtMs(diag.tbt)}`,
+    `CLS ${diag.cls == null ? "n/a" : Number(diag.cls).toFixed(3)}`,
+    `TTFB ${fmtMs(diag.ttfb)}`,
+    `transfer ${fmtKb(diag.transfer)}`,
+    diag.lcpElement ? `LCP element ${diag.lcpElement}` : null,
+    diag.failedAudits.length ? `audits ${diag.failedAudits.slice(0, 8).join(",")}` : null
+  ]
+    .filter(Boolean)
+    .join("; ");
   if (diag.failed || diag.exitReason !== "ok") {
-    const msg = [
-      diag.exitReason,
-      `performance ${diag.performance ?? "n/a"} (min ${diag.thresholds.performance})`,
-      `LCP ${fmtMs(diag.lcp)}`,
-      `TBT ${fmtMs(diag.tbt)}`,
-      `CLS ${diag.cls == null ? "n/a" : Number(diag.cls).toFixed(3)}`,
-      `TTFB ${fmtMs(diag.ttfb)}`,
-      `transfer ${fmtKb(diag.transfer)}`,
-      diag.lcpElement ? `LCP element ${diag.lcpElement}` : null,
-      diag.failedAudits.length ? `audits ${diag.failedAudits.slice(0, 8).join(",")}` : null
-    ]
-      .filter(Boolean)
-      .join("; ");
     console.error(`::error title=Lighthouse gate failed::${msg}`);
+  } else {
+    console.log(`::notice title=Lighthouse mobile::${msg}`);
   }
 }
 
