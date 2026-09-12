@@ -18,11 +18,13 @@ export default defineConfig({
     extraHTTPHeaders: { "Accept-Language": "en-US" },
     trace: "on-first-retry",
   },
-  projects: [
-    { name: "mobile-chrome", use: { ...devices["Pixel 7"] } },
-    { name: "mobile-safari", use: { ...devices["iPhone 13"] } },
-    { name: "desktop-chrome", use: { ...devices["Desktop Chrome"] } }
-  ],
+  projects: process.env.CI
+    ? [{ name: "mobile-chrome", use: { ...devices["Pixel 7"] } }]
+    : [
+        { name: "mobile-chrome", use: { ...devices["Pixel 7"] } },
+        { name: "mobile-safari", use: { ...devices["iPhone 13"] } },
+        { name: "desktop-chrome", use: { ...devices["Desktop Chrome"] } }
+      ],
   webServer: {
     command: process.env.CI ? "pnpm --filter @fitconnect/web start" : "pnpm dev",
     cwd: repoRoot,

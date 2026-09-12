@@ -15,8 +15,13 @@
 >
 > Local re-run after rebuild (`NEXT_PUBLIC_DEMO_MODE=true`, `CI=true`, mobile-chrome):
 > **17/17 PASS**. Pixel screenshot baselines remain OS-specific (win32 vs ubuntu) and are
-> **not** asserted under `CI=true`. Do not call GitHub green until the next Actions run
-> on the E2E fix SHA succeeds including `release-gate`.
+> **not** asserted under `CI=true`.
+>
+> **Follow-up — run `34681954066` @ `2ae34de`:** landing fixes held on Chromium; the job
+> still launched **mobile-safari** because `pnpm test:e2e -- --project=...` does not
+> forward Playwright flags through the nested filter script, and CI only installs
+> Chromium → `webkit-2287/pw_run.sh` missing. Fix: `pnpm exec playwright test
+> --project=mobile-chrome` from `apps/web`, and CI-only Playwright projects list.
 
 > **CURSOR UPDATE — 2026-09-12.** The corrected workflow is now in the local working tree
 > (applied from the validated `ci-1.yml` artifact, then linted). `node scripts/ci-gate-lint.mjs`

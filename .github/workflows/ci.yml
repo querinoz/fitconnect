@@ -259,14 +259,8 @@ jobs:
           NEXT_PUBLIC_DEMO_MODE: "true"
       - run: pnpm exec playwright install chromium --with-deps
         working-directory: apps/web
-      - run: >
-          pnpm test:e2e --
-          --project=mobile-chrome
-          --workers=4
-          tests/e2e/landing-motion.spec.ts
-          tests/e2e/visual-regression.spec.ts
-          tests/e2e/smoke.spec.ts
-          tests/e2e/phase9-auth.spec.ts
+      - run: pnpm exec playwright test --project=mobile-chrome --workers=4 tests/e2e/landing-motion.spec.ts tests/e2e/visual-regression.spec.ts tests/e2e/smoke.spec.ts tests/e2e/phase9-auth.spec.ts
+        working-directory: apps/web
         env:
           CI: true
 
