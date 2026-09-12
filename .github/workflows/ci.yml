@@ -9,6 +9,12 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
 
+# Workflow default. NOTE: this makes Playwright E2E run against demo auth, so a
+# green E2E is evidence about the demo path, not about production auth. The
+# `auth-prod-like` job below is the only place DEMO_MODE=false is exercised.
+# Migrating E2E onto real auth fixtures is tracked in
+# docs/automation/AUTONOMOUS_MASTER_TODO.md (P1) -- do not read E2E green as
+# production auth evidence until then.
 env:
   NEXT_PUBLIC_DEMO_MODE: "true"
   NEXT_PUBLIC_REALTIME_PROVIDER: broadcast
@@ -28,15 +34,17 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: node scripts/ci-gate-lint.mjs
       - run: pnpm lint
-      # Expo mobile archived (ADR-005) — filter kept harmless if package absent
-      - run: pnpm exec turbo typecheck --filter=!@fitconnect/mobile
+      # Expo @fitconnect/mobile archived (ADR-005 / Path A). Turbo 2.x hard-fails if a
+      # --filter references a package that is not in the workspace — do not negate it.
+      - run: pnpm typecheck
       - run: pnpm tokens:kotlin:check
 
   test-unit:
     name: Unit tests (web)
     runs-on: ubuntu-latest
-    needs: lint-typecheck
+    # Independent of lint-typecheck so a typecheck regression does not SKIP unit evidence.
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
@@ -60,7 +68,6 @@ jobs:
   auth-prod-like:
     name: Auth · DEMO_MODE=false
     runs-on: ubuntu-latest
-    needs: lint-typecheck
     timeout-minutes: 8
     env:
       NEXT_PUBLIC_DEMO_MODE: "false"
@@ -99,7 +106,9 @@ jobs:
   test-coverage-gate:
     name: Coverage gate
     runs-on: ubuntu-latest
-    needs: test-unit
+    # No `needs`: this job runs `pnpm test:coverage`, which re-runs the suite itself and
+    # consumes nothing from test-unit. Chaining it only meant a unit failure ALSO destroyed
+    # the coverage evidence. release-gate still requires both to succeed.
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
@@ -116,7 +125,6 @@ jobs:
   test-integration:
     name: Integration · DB · Pact
     runs-on: ubuntu-latest
-    needs: lint-typecheck
     timeout-minutes: 12
     services:
       postgres:
@@ -163,7 +171,6 @@ jobs:
   security-audit:
     name: Security audit
     runs-on: ubuntu-latest
-    needs: lint-typecheck
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
@@ -175,15 +182,43 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm audit --audit-level high
-        continue-on-error: true
-      - run: pnpm dlx semgrep --config p/typescript --error --quiet .
-        continue-on-error: true
+
+      # BLOCKING. Critical advisories in the dependencies that actually ship.
+      # This step previously ran with `continue-on-error: true`, which made the
+      # job report success while `release-gate` counted it as a required PASS --
+      # a green light with nothing behind it. Measured on the current lockfile
+      # (2026-09-10, pnpm 9.15.9): 125 advisories total, 44 high and 5 critical;
+      # production-only: 71 advisories, 25 high and 3 critical.
+      #
+      # The three production criticals are real and must be fixed, not silenced:
+      #   next@15.5.23        -> >=15.5.24  unauthenticated RCE (CVE-2026-75604)
+      #   next@15.5.23        -> >=15.5.24  unauthenticated RCE in the Image
+      #                                     Optimization API (GHSA-2xp9-vwfh-vxw4)
+      #   maplibre-gl@5.24.0  -> >=6.4.1    XSS sanitizer bypass (CVE-2026-85061)
+      #
+      # Expect this job to be RED until those land. That is the correct state.
+      # Do not re-add continue-on-error and do not lower --audit-level to pass.
+      - name: Dependency audit (critical, production tree) — BLOCKING
+        run: pnpm audit --audit-level critical --prod
+
+      # Reported, not blocking. The high/moderate surface is large and needs
+      # triage rather than a single switch; printing it keeps it visible instead
+      # of hidden. Tracked in docs/automation/AUTONOMOUS_MASTER_TODO.md (P1).
+      - name: Dependency audit (high, full tree) — report only
+        run: pnpm audit --audit-level high || true
+
+      # BLOCKING. sast.yml already runs semgrep as a hard gate on pull_request and
+      # on main; running it soft here meant feature branches had no SAST gate at all.
+      - name: Semgrep — BLOCKING
+        run: pnpm dlx semgrep --config p/typescript --error --quiet .
 
   build:
     name: Production build
     runs-on: ubuntu-latest
-    needs: [test-unit, test-coverage-gate, test-integration, security-audit, auth-prod-like, android-wear]
+    # No `needs`: "does it compile?" is independent of "do the tests pass?". Chaining this
+    # behind seven jobs is why run 34331702738 ended with no build evidence at all. The
+    # release gate below still refuses to pass unless build AND every other required job
+    # actually succeeded — independence widens the evidence, it does not lower the bar.
     timeout-minutes: 12
     env:
       NEXT_PUBLIC_DEMO_MODE: "false"
@@ -231,7 +266,7 @@ jobs:
     name: Lighthouse mobile gate
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/feature/')
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/feature/') || startsWith(github.ref, 'refs/heads/feat/')
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
@@ -295,3 +330,35 @@ jobs:
       - uses: actions/checkout@v4
       - name: Smoke health endpoint
         run: curl -fsS "${{ secrets.STAGING_URL || 'https://fitconnect-phi.vercel.app' }}/api/health" | grep -q '"status"'
+
+  # Final release gate — independent validation jobs run in parallel above; this job
+  # fails the workflow if any required check did not succeed (never treats SKIPPED as PASS).
+  release-gate:
+    name: Release gate
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - lint-typecheck
+      - test-unit
+      - test-coverage-gate
+      - test-integration
+      - security-audit
+      - auth-prod-like
+      - android-wear
+      - build
+      - test-e2e
+    steps:
+      - name: Require green required jobs
+        env:
+          RESULTS: ${{ join(needs.*.result, ',') }}
+        run: |
+          set -euo pipefail
+          echo "needs results: $RESULTS"
+          IFS=',' read -r -a ARR <<< "$RESULTS"
+          for r in "${ARR[@]}"; do
+            if [ "$r" != "success" ]; then
+              echo "Release gate BLOCKED — required job result=$r"
+              exit 1
+            fi
+          done
+          echo "Release gate PASS — all required jobs success"
