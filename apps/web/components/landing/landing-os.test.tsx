@@ -39,7 +39,9 @@ describe("landing OS narrative", () => {
     wrap(<HeroEliteOs />);
     const heading = screen.getByRole("heading", { name: /elite human performance os/i });
     expect(heading).toBeVisible();
+    expect(heading).toHaveAttribute("id", "fc-hero-title");
     expect(heading).not.toHaveStyle({ opacity: "0" });
+    expect(screen.getByText(/SYS\.STATUS/i)).toBeVisible();
     expect(screen.getByRole("link", { name: /enter elite os/i })).toBeVisible();
     expect(screen.getByRole("link", { name: /explore system/i })).toBeVisible();
     expect(screen.getAllByText(/local demo/i).length).toBeGreaterThan(0);

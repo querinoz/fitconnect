@@ -1,5 +1,23 @@
 # CI Root Cause Analysis
 
+> **CURSOR UPDATE — 2026-09-12 (E2E loop).** GitHub run
+> [`34680853231`](https://github.com/querinoz/fitconnect/actions/runs/34680853231) on
+> `7ef4373` proved the corrected workflow: **lint, typecheck, unit, coverage, integration,
+> auth, security, production build, Android/Wear assembleDebug all SUCCESS**. Required
+> **Playwright E2E FAILED** (release-gate red). Lighthouse FAILED on score gates (not a
+> required job). k6/deploy SKIPPED on `feat/**` (correct).
+>
+> Local reproduction of the four CI specs, then product fixes:
+> - Two `<h1>` on `/` (sr-only placeholder + Elite OS hero) → Playwright strict-mode fail.
+> - `#demo` was `sr-only` and behind `LazyInView` → not in the DOM.
+> - `#pricing` behind IntersectionObserver → wheel scroll never mounted the section.
+> - Missing `SYS.STATUS` chrome; CTA assertions collided with Final CTA + hero.
+>
+> Local re-run after rebuild (`NEXT_PUBLIC_DEMO_MODE=true`, `CI=true`, mobile-chrome):
+> **17/17 PASS**. Pixel screenshot baselines remain OS-specific (win32 vs ubuntu) and are
+> **not** asserted under `CI=true`. Do not call GitHub green until the next Actions run
+> on the E2E fix SHA succeeds including `release-gate`.
+
 > **CURSOR UPDATE — 2026-09-12.** The corrected workflow is now in the local working tree
 > (applied from the validated `ci-1.yml` artifact, then linted). `node scripts/ci-gate-lint.mjs`
 > reports **0 errors**, 1 legitimate note. Local typecheck/lint/unit/security/build all PASS.

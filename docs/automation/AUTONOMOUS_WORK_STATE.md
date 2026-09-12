@@ -1,18 +1,18 @@
 # Autonomous Work State
 
-**Last updated:** 2026-09-12, Cursor session (commit → push → CI recovery)
+**Last updated:** 2026-09-12, Cursor E2E recovery after run `34680853231`
 **Supabase project:** `beuiammeedpovdkmhluw` (eu-west-1, Postgres 17.6)
 **Branch on disk:** `feat/elite-os-v2`
 
 ## Current Phase
 
-Cursor execution is active on `D:\fitconnect`. Local web/backend gates have **PASSED**.
-The remaining product of this phase is: commit the validated working tree, push to
-`feat/elite-os-v2`, read the real GitHub Actions run, and loop on any red job.
+GitHub CI on `7ef4373` (`34680853231`) proved independent jobs: all required gates except
+Playwright E2E were SUCCESS. E2E was reproduced locally, product-fixed, and **17/17 PASS**
+on the CI spec set. Next: commit/push the E2E fix and read the new Actions run.
 
 ## Current Task
 
-Push the local commits and monitor GitHub CI. Do not stop at "CI started".
+Push the landing/a11y/E2E fix and loop until `release-gate` is success.
 
 ## Local gates — 2026-09-12 (Cursor)
 
@@ -22,7 +22,8 @@ Push the local commits and monitor GitHub CI. Do not stop at "CI started".
 | CI validator | `node scripts/ci-gate-lint.mjs` | **0 errors**, 1 legitimate note (`test-e2e` needs `build`) |
 | Typecheck | `pnpm typecheck` | PASS — 6/6 tasks |
 | Lint | `pnpm lint` | PASS — warnings only (`no-img-element`) |
-| Unit | `pnpm test` | PASS — 7/7 tasks; web **524 passed**, 11 skipped |
+| Unit | `pnpm --filter @fitconnect/web test` | PASS — **527 passed**, 11 skipped |
+| E2E (CI spec set) | Playwright mobile-chrome 4 files | **17/17 PASS** after landing h1/demo/pricing fixes |
 | Auth DEMO_MODE=false | `pnpm --filter @fitconnect/web test:auth-prod` | **76/76 PASS** |
 | Security (prod critical) | `pnpm audit --audit-level critical --prod` | **0 production critical** (25 high remain, triaged not gated) |
 | Build | `pnpm build` | PASS — **Next.js 15.5.25**, compiled successfully |

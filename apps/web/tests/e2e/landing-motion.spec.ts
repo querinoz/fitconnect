@@ -16,9 +16,13 @@ test.describe("Landing motion @elite-os", () => {
       document.documentElement.dataset.motion = "full";
     });
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole("heading", { name: /elite human performance os/i })).toBeVisible({
+      timeout: 15_000
+    });
     await expect(page.getByText(/SYS\.STATUS/i)).toBeVisible();
-    await expect(page.getByRole("link", { name: /INITIALIZE SESSION/i })).toBeVisible();
+    await expect(
+      page.getByLabel("FitConnect Elite OS").getByRole("link", { name: /enter elite os/i })
+    ).toBeVisible();
   });
 
   test("should_show_hero_when_os_reduced_motion_emulated", async ({ page }) => {
@@ -27,7 +31,9 @@ test.describe("Landing motion @elite-os", () => {
       localStorage.removeItem("fitconnect:motion");
     });
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole("heading", { name: /elite human performance os/i })).toBeVisible({
+      timeout: 15_000
+    });
     const duration = await page.evaluate(() =>
       getComputedStyle(document.documentElement).getPropertyValue("--motion-duration").trim()
     );
@@ -76,6 +82,6 @@ test.describe("Elite OS landing sections", () => {
     await expect(page.locator("#demo")).toBeVisible({ timeout: 20_000 });
     await scrollUntilSelector(page, "#pricing");
     await expect(page.locator("#pricing")).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByText(/ACTIVATE ATHLETE OS/i)).toBeVisible();
+    await expect(page.getByText(/ACTIVATE ATHLETE OS/i)).toBeVisible({ timeout: 20_000 });
   });
 });

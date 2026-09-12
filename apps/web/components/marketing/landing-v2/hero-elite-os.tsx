@@ -11,7 +11,9 @@ import { useLiveDemoTelemetry } from "@/lib/demo/live-telemetry";
 import { CornerTicks, CrosshairBg, EliteButton, LabelCaps } from "@/components/elite-os";
 
 export function HeroEliteOs() {
-  const e = useLocale().landingEditorial.heroElite;
+  const locale = useLocale();
+  const e = locale.landingEditorial.heroElite;
+  const immersive = locale.hero.immersive;
   const live = useLiveDemoTelemetry();
   const rootRef = useRef<HTMLElement>(null);
   const [showVideo, setShowVideo] = useState(false);
@@ -106,13 +108,19 @@ export function HeroEliteOs() {
         <div className="flex min-w-0 flex-col gap-8">
           <div className="flex flex-wrap items-center gap-3 eos-label-caps tracking-[0.2em] text-eos-on-surface-muted">
             <span className="h-1.5 w-1.5 rounded-sm bg-eos-voltline" />
+            <span className="font-mono text-[10px] tracking-[0.28em] text-eos-telemetry">
+              {immersive.statusLabel}
+            </span>
             {e.osLabel}
             <span className="rounded-full border border-eos-voltline/30 px-3 py-1 font-mono text-[10px] text-eos-voltline">
               {e.demoBadge}
             </span>
           </div>
 
-          <h1 className="max-w-full font-display text-[clamp(2.1rem,5.4vw,3.4rem)] font-extrabold uppercase leading-[0.92] tracking-tight text-eos-on-surface">
+          <h1
+            id="fc-hero-title"
+            className="max-w-full font-display text-[clamp(2.1rem,5.4vw,3.4rem)] font-extrabold uppercase leading-[0.92] tracking-tight text-eos-on-surface"
+          >
             <span className="block">{e.headlineLine1}</span>
             <span className="block">{e.headlineLine2}</span>
           </h1>

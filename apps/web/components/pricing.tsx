@@ -38,7 +38,7 @@ export function Pricing() {
   ];
 
   return (
-    <section id="pricing" className="mx-auto max-w-5xl px-4 py-20 sm:px-6 sm:py-24">
+    <section className="mx-auto max-w-5xl px-4 py-20 sm:px-6 sm:py-24">
       <div className="mx-auto max-w-2xl text-center">
         <span className="inline-block rounded-full border border-eos-voltline/20 bg-eos-voltline/10 px-4 py-1 eos-label-caps text-eos-voltline">
           PRO LEVEL UNLOCKED

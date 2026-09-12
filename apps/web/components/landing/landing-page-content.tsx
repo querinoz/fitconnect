@@ -79,9 +79,11 @@ export function LandingPageContent() {
       {/* Act IV: TRAIN SMARTER */}
       <CinematicBreak lineOne={sb.train} lineTwo={sb.smarter} />
 
-      <Defer minHeight={720}>
-        <AppDemoSection />
-      </Defer>
+      <div id="demo">
+        <Defer minHeight={720}>
+          <AppDemoSection />
+        </Defer>
+      </div>
 
       <ScrollStory />
 
@@ -112,9 +114,9 @@ export function LandingPageContent() {
       {/* Act IV: BOOK YOUR COACH */}
       <CinematicBreak lineOne={sb.book} lineTwo={sb.yourCoach} />
 
-      <Defer minHeight={480}>
+      <div id="pricing">
         <Pricing />
-      </Defer>
+      </div>
 
       {/* Act IX: Final CTA aurora */}
       <LandingEcosystemAct />

@@ -14,6 +14,8 @@ export default defineConfig({
   reporter: process.env.CI ? "github" : "list",
   use: {
     baseURL: "http://localhost:3001",
+    locale: "en-US",
+    extraHTTPHeaders: { "Accept-Language": "en-US" },
     trace: "on-first-retry",
   },
   projects: [

@@ -73,7 +73,6 @@ export function AppDemoSection() {
       className="landing-v2-section relative isolate overflow-x-clip px-4 py-24 sm:px-6 sm:py-32"
       aria-labelledby="preview-title"
     >
-      <div id="demo" className="sr-only" />
       <div className="absolute inset-0 -z-20 bg-[var(--eos-floor)]" />
       <video
         aria-hidden="true"

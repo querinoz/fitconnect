@@ -33,7 +33,7 @@ Categories never mix. **VERIFIED** means a command ran. **NOT RUN** means it did
 | Auth | `pnpm --filter @fitconnect/web test:auth-prod` | **PASS** — 76/76 |
 | Build | `pnpm build` | **PASS** — Next.js **15.5.25** |
 | Tokens | `pnpm tokens:kotlin:check` | **PASS** |
-| E2E Playwright | `pnpm test:e2e` | **NOT RUN** locally — CI job after push |
+| E2E Playwright | CI spec set, `CI=true`, mobile-chrome | **PASS — 17/17** (local, DEMO_MODE baked in build) |
 | Lighthouse | CI job | **NOT RUN** locally |
 | k6 | main-only | **SKIPPED** on `feat/**` (correct) |
 | Android | `./gradlew :app:assembleDebug` | **PASS** — BUILD SUCCESSFUL, 1m 5s |
@@ -89,7 +89,8 @@ Runtime physical confirmation: **HUMAN REQUIRED**.
 | Old remote workflow @ `5b685cb` | dead Turbo filter, soft security, no release-gate; run `34331702738` Failure + 10 SKIPPED |
 | Corrected local workflow | independent jobs, blocking critical audit + Semgrep, `release-gate`, Lighthouse on `feat/**` |
 | Validator | 0 errors |
-| GitHub run on this push | **NOT YET RUN** until push completes |
+| GitHub run `34680853231` @ `7ef4373` | **Failure** — E2E red; other required jobs SUCCESS |
+| Local E2E after landing fix | **17/17 PASS** — awaiting next GitHub run on the fix SHA |
 
 ---
 

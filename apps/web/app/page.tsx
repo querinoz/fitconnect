@@ -4,8 +4,7 @@ import { LandingPageContent } from "@/components/landing/landing-page-content";
 // Minimal server-rendered hero placeholder for SEO and smoke-tests.
 function HeroPlaceholder() {
   return (
-    <header aria-labelledby="fc-hero-title" className="sr-only">
-      <h1 id="fc-hero-title">Elite human performance OS</h1>
+    <header className="sr-only">
       <div id="fc-kinetic" />
       <div className="fc-headline-line">Elite human performance OS</div>
     </header>
