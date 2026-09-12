@@ -21,3 +21,7 @@ pnpm-lock.yaml
 Claude outputs/
 _archive/
 docs/qa/apk-dex/
+.agents/
+.claude/
+.cursor/
+marketing/

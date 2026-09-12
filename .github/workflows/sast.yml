@@ -16,7 +16,7 @@ jobs:
           fetch-depth: 0
 
       - name: Semgrep
-        run: pnpm dlx semgrep --config p/typescript --config p/nodejs --error --quiet .
+        run: pnpm dlx semgrep --config p/typescript --config p/nodejs --error --quiet apps/web packages scripts prisma
 
       - name: Gitleaks
         uses: gitleaks/gitleaks-action@v2

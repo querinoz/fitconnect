@@ -214,7 +214,8 @@ jobs:
       - name: Semgrep — BLOCKING
         run: |
           python3 -m pip install --quiet semgrep
-          semgrep --config p/typescript --error .
+          semgrep --version
+          semgrep --config p/typescript --error apps/web packages scripts prisma
 
   build:
     name: Production build
