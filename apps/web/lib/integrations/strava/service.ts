@@ -9,7 +9,8 @@ import {
 } from "@fitconnect/strava-integration";
 import type { StravaDetailedActivity, StravaSummaryActivity } from "@fitconnect/types";
 import { getPrisma, isDatabaseConfigured } from "@/lib/db/client";
-import { decryptToken, encryptToken } from "./token-crypto";
+import { decryptToken, encryptToken, isTokenEncryptionConfigured } from "./token-crypto";
+import { isProductionSecurityMode } from "@/lib/security/runtime";
 import { setStravaRateLimit } from "./rate-limit-cache";
 
 export async function getConnectionByAthlete(athleteExternalId: string) {
@@ -34,6 +35,18 @@ export async function saveConnection(input: {
 }) {
   const prisma = getPrisma();
   if (!prisma) return null;
+
+  // Fail closed: never persist a Strava token that cannot be encrypted at rest.
+  // AGENTS.md 3. .env.example ships STRAVA_TOKEN_ENCRYPTION_KEY empty, so without
+  // this guard a production deploy that skipped `pnpm env:setup-prod` would write
+  // live access/refresh tokens in the clear and say nothing.
+  if (isProductionSecurityMode() && !isTokenEncryptionConfigured()) {
+    console.error(
+      "[strava] saveConnection refused: STRAVA_TOKEN_ENCRYPTION_KEY is not set",
+      { athleteExternalId: input.athleteExternalId }
+    );
+    return null;
+  }
 
   try {
     await prisma.stravaConnection.deleteMany({
@@ -65,7 +78,14 @@ export async function saveConnection(input: {
     }
   });
   } catch (err) {
-    console.error("[strava] saveConnection failed:", err);
+    // Do not log `err` itself. This write carries accessToken/refreshToken, and a
+    // driver error can echo the failing statement and its parameters into the log.
+    // Name plus error code is enough to route the failure; the values are not.
+    console.error("[strava] saveConnection failed", {
+      athleteExternalId: input.athleteExternalId,
+      error: err instanceof Error ? err.name : typeof err,
+      code: typeof err === "object" && err !== null && "code" in err ? String((err as { code: unknown }).code) : undefined
+    });
     return null;
   }
 }

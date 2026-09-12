@@ -32,9 +32,18 @@ export function getPrisma(): PrismaClient | null {
     try {
       globalForPrisma.prisma = createClient();
     } catch (err) {
-      // Don't throw during dev/demo — log and fall back to null
+      // Don't throw during dev/demo — log and fall back to null.
+      // Do NOT log `err` itself: createClient() builds a Pool from DATABASE_URL, and a
+      // construction error can carry the connection string — which contains the database
+      // password — into the log. Name plus code is enough to diagnose.
       // eslint-disable-next-line no-console
-      console.warn("Prisma client construction failed, continuing in demo mode:", err);
+      console.warn("Prisma client construction failed, continuing in demo mode", {
+        error: err instanceof Error ? err.name : typeof err,
+        code:
+          typeof err === "object" && err !== null && "code" in err
+            ? String((err as { code: unknown }).code)
+            : undefined
+      });
       return null;
     }
   }
