@@ -6,6 +6,8 @@ import {
   collectDiagnostics,
   formatDiagnosticLines,
   isGateEnabled,
+  pickMedianRun,
+  resolveRunCount,
   resolveThresholds,
   scoreCategories,
   shouldFailProcess
@@ -107,5 +109,18 @@ describe("lighthouse-mobile gate contract", () => {
     assert.ok(flags.includes("--headless=new"));
     assert.ok(flags.includes("--no-sandbox"));
     assert.ok(flags.includes("--disable-dev-shm-usage"));
+    assert.equal(flags.includes("--disable-gpu"), false);
+  });
+
+  it("uses three CI runs and gates the median score, not the worst", () => {
+    assert.equal(resolveRunCount({ CI: "true" }), 3);
+    assert.equal(resolveRunCount({}), 1);
+    const median = pickMedianRun([
+      { performance: 72, failed: true, rows: [{ ok: false }] },
+      { performance: 86, failed: false, exitReason: "ok", rows: [{ ok: true }] },
+      { performance: 88, failed: false, exitReason: "ok", rows: [{ ok: true }] }
+    ]);
+    assert.equal(median.performance, 86);
+    assert.equal(shouldFailProcess(median, true), false);
   });
 });

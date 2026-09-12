@@ -74,11 +74,36 @@ function numericAudit(audits, id) {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
 
+export function medianNumber(values) {
+  const nums = values.filter((v) => typeof v === "number" && Number.isFinite(v)).sort((a, b) => a - b);
+  if (nums.length === 0) return null;
+  return nums[Math.floor(nums.length / 2)];
+}
+
+/** Pick the run whose performance is the median. Ties break to the middle index after sort. */
+export function pickMedianRun(diags) {
+  if (!diags.length) return null;
+  const sorted = [...diags].sort((a, b) => (a.performance ?? -1) - (b.performance ?? -1));
+  return sorted[Math.floor(sorted.length / 2)];
+}
+
+export function resolveRunCount(env = process.env) {
+  const raw = env.LIGHTHOUSE_RUNS;
+  if (raw != null && raw !== "") {
+    const n = Number(raw);
+    return Number.isFinite(n) && n >= 1 ? Math.min(5, Math.floor(n)) : 1;
+  }
+  return env.CI === "true" || env.GITHUB_ACTIONS === "true" ? 3 : 1;
+}
+
 function lcpElementLabel(audits) {
-  const lcpEl = audits?.["largest-contentful-paint-element"];
-  const lcpNode = lcpEl?.details?.items?.[0]?.node ?? lcpEl?.details?.items?.[0];
-  if (!lcpNode) return null;
-  return lcpNode.nodeLabel ?? lcpNode.snippet ?? lcpNode.selector ?? JSON.stringify(lcpNode).slice(0, 240);
+  const items = audits?.["largest-contentful-paint-element"]?.details?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  let node = items[0]?.node;
+  if (!node && Array.isArray(items[0]?.items)) node = items[0].items[0]?.node;
+  if (!node) return null;
+  if (typeof node === "string") return node;
+  return node.nodeLabel ?? node.snippet ?? node.selector ?? null;
 }
 
 function lcpPhases(audits) {
@@ -258,7 +283,7 @@ function writeGithubSurfaces(diag) {
 export function chromeFlagsForEnv(env = process.env) {
   const flags = ["--headless=new"];
   if (env.CI === "true" || env.LIGHTHOUSE_CHROME_SANDBOX === "0") {
-    flags.push("--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu");
+    flags.push("--no-sandbox", "--disable-dev-shm-usage");
   }
   return flags;
 }
@@ -269,10 +294,24 @@ function isExecutedDirectly() {
   return path.normalize(self) === path.normalize(invoked);
 }
 
+const LH_SETTINGS = {
+  formFactor: "mobile",
+  throttlingMethod: "simulate",
+  throttling: MOBILE_THROTTLING,
+  screenEmulation: {
+    mobile: true,
+    width: 390,
+    height: 844,
+    deviceScaleFactor: 2,
+    disabled: false
+  }
+};
+
 async function main() {
   const url = process.argv[2] ?? "http://localhost:3001";
   const gated = isGateEnabled();
   const thresholds = resolveThresholds();
+  const runs = resolveRunCount();
   const dumpPath = process.env.LIGHTHOUSE_JSON ?? (process.env.GITHUB_ACTIONS === "true" ? "lighthouse-mobile-report.json" : "");
 
   let chrome;
@@ -291,43 +330,48 @@ async function main() {
   }
 
   try {
-    const result = await lighthouse(url, {
-      logLevel: "error",
-      port: chrome.port,
-      output: "json",
-      onlyCategories: ["performance", "accessibility", "best-practices", "seo"],
-      settings: {
-        formFactor: "mobile",
-        throttlingMethod: "simulate",
-        throttling: MOBILE_THROTTLING,
-        screenEmulation: {
-          mobile: true,
-          width: 390,
-          height: 844,
-          deviceScaleFactor: 2,
-          disabled: false
-        }
+    const diags = [];
+    for (let i = 1; i <= runs; i += 1) {
+      console.log(`\n=== Lighthouse run ${i}/${runs} ===`);
+      const result = await lighthouse(url, {
+        logLevel: "error",
+        port: chrome.port,
+        output: "json",
+        onlyCategories: ["performance", "accessibility", "best-practices", "seo"],
+        settings: { ...LH_SETTINGS, throttling: { ...MOBILE_THROTTLING } }
+      });
+      if (!result?.lhr) {
+        console.error("Lighthouse produced no LHR.");
+        console.error("::error title=Lighthouse produced no LHR::exit 1");
+        process.exitCode = 1;
+        return;
       }
-    });
+      const diag = collectDiagnostics(result.lhr, thresholds);
+      diags.push(diag);
+      for (const line of formatDiagnosticLines(diag)) console.log(line);
+    }
 
-    if (!result?.lhr) {
-      console.error("Lighthouse produced no LHR.");
-      console.error("::error title=Lighthouse produced no LHR::exit 1");
+    const median = pickMedianRun(diags);
+    if (!median) {
+      console.error("Lighthouse produced no usable runs.");
       process.exitCode = 1;
       return;
     }
-
-    if (dumpPath) {
-      writeFileSync(dumpPath, JSON.stringify(result.lhr, null, 0));
-      console.log(`LHR written: ${dumpPath}`);
+    if (runs > 1) {
+      console.log(`\n=== Median of ${runs} (performance ${diags.map((d) => d.performance).join(", ")}) ===`);
+      console.log(
+        `TBT by run: ${diags.map((d) => (d.tbt == null ? "n/a" : `${Math.round(d.tbt)}ms`)).join(", ")}`
+      );
+      for (const line of formatDiagnosticLines(median)) console.log(line);
     }
+    if (dumpPath) {
+      writeFileSync(dumpPath, JSON.stringify({ median, runs: diags }, null, 0));
+      console.log(`LHR summary written: ${dumpPath}`);
+    }
+    writeGithubSurfaces(median);
 
-    const diag = collectDiagnostics(result.lhr, thresholds);
-    for (const line of formatDiagnosticLines(diag)) console.log(line);
-    writeGithubSurfaces(diag);
-
-    if (shouldFailProcess(diag, gated)) {
-      console.error(`\nLighthouse gate failed: ${diag.exitReason}`);
+    if (shouldFailProcess(median, gated)) {
+      console.error(`\nLighthouse gate failed: ${median.exitReason}`);
       process.exitCode = 1;
     }
   } catch (err) {

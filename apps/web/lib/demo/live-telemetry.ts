@@ -50,6 +50,11 @@ export function useLiveDemoTelemetry() {
 
   useEffect(() => {
     if (shouldReduceMotion()) return;
+    // Compact / Lighthouse mobile keeps the SSR seed. A 900ms setState loop on
+    // the hero tree produced TBT 812ms (Performance 72) on Ubuntu 4× CPU.
+    if (typeof window.matchMedia === "function" && window.matchMedia("(max-width: 767px)").matches) {
+      return;
+    }
     setNow(Date.now());
     const id = window.setInterval(() => setNow(Date.now()), 900);
     return () => window.clearInterval(id);

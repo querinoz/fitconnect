@@ -339,6 +339,7 @@ jobs:
           LIGHTHOUSE_MIN_BP: "95"
           LIGHTHOUSE_MIN_SEO: "95"
           LIGHTHOUSE_JSON: lighthouse-mobile-report.json
+          LIGHTHOUSE_RUNS: "3"
         run: |
           set -euo pipefail
           pnpm --filter @fitconnect/web start &
