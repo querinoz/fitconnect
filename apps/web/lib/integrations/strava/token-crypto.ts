@@ -3,6 +3,7 @@ import { isProductionSecurityMode } from "@/lib/security/runtime";
 
 const ALGO = "aes-256-gcm";
 const IV_LEN = 12;
+const AUTH_TAG_LEN = 16;
 
 /**
  * Raised instead of silently falling back to plaintext.
@@ -49,7 +50,7 @@ export function encryptToken(plain: string): string {
   }
 
   const iv = randomBytes(IV_LEN);
-  const cipher = createCipheriv(ALGO, key, iv);
+  const cipher = createCipheriv(ALGO, key, iv, { authTagLength: AUTH_TAG_LEN });
   const enc = Buffer.concat([cipher.update(plain, "utf8"), cipher.final()]);
   const tag = cipher.getAuthTag();
   return `enc:${iv.toString("hex")}:${tag.toString("hex")}:${enc.toString("hex")}`;
@@ -70,9 +71,11 @@ export function decryptToken(stored: string): string {
   }
 
   const [, ivHex, tagHex, dataHex] = stored.split(":");
-  if (!ivHex || !tagHex || !dataHex) return stored;
+  if (!ivHex || !tagHex || !dataHex || tagHex.length !== AUTH_TAG_LEN * 2) return stored;
 
-  const decipher = createDecipheriv(ALGO, key, Buffer.from(ivHex, "hex"));
+  const decipher = createDecipheriv(ALGO, key, Buffer.from(ivHex, "hex"), {
+    authTagLength: AUTH_TAG_LEN
+  });
   decipher.setAuthTag(Buffer.from(tagHex, "hex"));
   const dec = Buffer.concat([
     decipher.update(Buffer.from(dataHex, "hex")),

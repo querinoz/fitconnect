@@ -1,4 +1,5 @@
 import pg from "pg";
+import { postgresSslOption } from "./pg-ssl";
 
 let pool: pg.Pool | null = null;
 
@@ -8,7 +9,7 @@ export function getPgPool(): pg.Pool | null {
   if (!pool) {
     pool = new pg.Pool({
       connectionString: url,
-      ssl: { rejectUnauthorized: false },
+      ssl: postgresSslOption(url),
       max: 4
     });
   }

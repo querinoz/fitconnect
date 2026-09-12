@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
+import { postgresSslOption } from "./lib/pg-ssl.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 for (const rel of [".env.local"]) {
@@ -23,7 +24,7 @@ for (const rel of [".env.local"]) {
 
 const client = new pg.Client({
   connectionString: process.env.DIRECT_URL,
-  ssl: { rejectUnauthorized: false }
+  ssl: postgresSslOption(process.env.DIRECT_URL)
 });
 await client.connect();
 

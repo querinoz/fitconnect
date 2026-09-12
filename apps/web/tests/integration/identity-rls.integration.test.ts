@@ -11,6 +11,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import pg from "pg";
+import { postgresSslOption } from "@/lib/db/pg-ssl";
 
 const DATABASE_URL = (process.env.DIRECT_URL || process.env.DATABASE_URL)?.trim();
 const LIVE_RLS = process.env.P0_SEC_LIVE_RLS === "1";
@@ -96,7 +97,7 @@ describe.skipIf(!DATABASE_URL || !LIVE_RLS)("identity RLS two-user IDOR (authent
     if (!DATABASE_URL || !LIVE_RLS) return;
     client = new pg.Client({
       connectionString: DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
+      ssl: postgresSslOption(DATABASE_URL)
     });
     await client.connect();
 

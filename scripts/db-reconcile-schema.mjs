@@ -31,6 +31,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
+import { postgresSslOption } from "./lib/pg-ssl.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const asJson = process.argv.includes("--json");
@@ -146,12 +147,9 @@ async function main() {
     process.exit(2);
   }
 
-  // Supabase requires TLS; a local Postgres (CI's integration service, or a scratch
-  // replica) does not offer it and refuses the connection outright.
-  const isLocal = /@(localhost|127\.0\.0\.1|\[::1\])[:/]/.test(url);
   const client = new pg.Client({
     connectionString: url,
-    ssl: isLocal ? false : { rejectUnauthorized: false }
+    ssl: postgresSslOption(url)
   });
   await client.connect();
 

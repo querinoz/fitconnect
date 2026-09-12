@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import pg from "pg";
+import { postgresSslOption } from "./lib/pg-ssl.mjs";
 
 function load(rel) {
   const p = path.resolve(rel);
@@ -29,7 +30,7 @@ delete process.env.DATABASE_URL;
 
 const client = new pg.Client({
   connectionString: process.env.DIRECT_URL,
-  ssl: { rejectUnauthorized: false },
+  ssl: postgresSslOption(process.env.DIRECT_URL),
 });
 await client.connect();
 const r = await client.query(`

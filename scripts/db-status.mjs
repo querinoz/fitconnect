@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
+import { postgresSslOption } from "./lib/pg-ssl.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -30,7 +31,7 @@ function loadEnvFiles() {
 
 loadEnvFiles();
 const url = process.env.DIRECT_URL || process.env.DATABASE_URL;
-const client = new pg.Client({ connectionString: url, ssl: { rejectUnauthorized: false } });
+const client = new pg.Client({ connectionString: url, ssl: postgresSslOption(url) });
 await client.connect();
 const m = await client.query("select filename from public.schema_migrations order by filename");
 console.log("applied:", m.rows.map((r) => r.filename).join(", ") || "(none)");

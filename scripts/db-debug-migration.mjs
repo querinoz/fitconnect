@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
+import { postgresSslOption } from "./lib/pg-ssl.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -42,7 +43,7 @@ const stmts = raw
 
 const client = new pg.Client({
   connectionString: process.env.DIRECT_URL || process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  ssl: postgresSslOption(process.env.DIRECT_URL || process.env.DATABASE_URL)
 });
 await client.connect();
 

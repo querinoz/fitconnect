@@ -3,6 +3,7 @@
  * Usage: node --env-file=apps/web/.env.local scripts/p1-data-schema-inventory.mjs
  */
 import pg from "pg";
+import { postgresSslOption } from "./lib/pg-ssl.mjs";
 
 const url = process.env.DIRECT_URL || process.env.DATABASE_URL;
 if (!url) {
@@ -12,7 +13,7 @@ if (!url) {
 
 const client = new pg.Client({
   connectionString: url,
-  ssl: { rejectUnauthorized: false },
+  ssl: postgresSslOption(url),
 });
 
 await client.connect();

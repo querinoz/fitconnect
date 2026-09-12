@@ -1,0 +1,23 @@
+# Semgrep must not scan third-party or generated trees. The security-audit job
+# runs `pnpm install` first, so node_modules is present on the runner.
+node_modules/
+.next/
+out/
+dist/
+build/
+coverage/
+.turbo/
+.vercel/
+playwright-report/
+test-results/
+android/**/build/
+android/.gradle/
+elite-core/target/
+apps/web/public/sw.js
+apps/web/public/workbox-*.js
+pnpm-lock.yaml
+**/*.min.js
+**/*.map
+Claude outputs/
+_archive/
+docs/qa/apk-dex/
