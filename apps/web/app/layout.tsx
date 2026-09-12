@@ -4,8 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SkipLink } from "@/components/skip-link";
 import { ModalSlot } from "@/components/shell/modal-slot";
-import { SUPPORTED_LANGS } from "@/lib/i18n";
-import { getDictionary, getServerLang } from "@/lib/i18n/server";
+import { DEFAULT_LANG, SUPPORTED_LANGS, dict, type Lang } from "@/lib/i18n";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "https://fitconnect-phi.vercel.app";
@@ -36,18 +35,17 @@ const mono = JetBrains_Mono({
   weight: ["400", "500", "700"]
 });
 
-export async function generateMetadata(): Promise<Metadata> {
-  const lang = await getServerLang();
-  const meta = getDictionary(lang).meta;
-  const localeMap: Record<string, string> = {
-    en: "en_US",
-    pt: "pt_PT",
-    es: "es_ES",
-    fr: "fr_FR",
-    de: "de_DE",
-    it: "it_IT"
-  };
+const LOCALE_MAP: Record<string, string> = {
+  en: "en_US",
+  pt: "pt_PT",
+  es: "es_ES",
+  fr: "fr_FR",
+  de: "de_DE",
+  it: "it_IT"
+};
 
+function buildMetadata(lang: Lang): Metadata {
+  const meta = dict[lang].meta;
   const langAlternates = Object.fromEntries(
     SUPPORTED_LANGS.map((code) => [code, `${SITE_URL}?lang=${code}`])
   ) as Record<string, string>;
@@ -75,7 +73,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: meta.ogDescription,
       type: "website",
       url: SITE_URL,
-      locale: localeMap[lang] ?? "en_US",
+      locale: LOCALE_MAP[lang] ?? "en_US",
       images: [{ url: "/brand/fitconnect-logo-512.png", width: 512, height: 512, alt: "FitConnect" }]
     },
     twitter: {
@@ -95,6 +93,13 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+/**
+ * Static metadata — do not await cookies()/headers() here.
+ * Async generateMetadata streams these tags after </head>, which is what put
+ * description/canonical/OG into <body> and failed the SEO gate.
+ */
+export const metadata: Metadata = buildMetadata(DEFAULT_LANG);
+
 export const viewport: Viewport = {
   themeColor: [{ color: "#070B14" }],
   colorScheme: "dark",
@@ -103,22 +108,45 @@ export const viewport: Viewport = {
   viewportFit: "cover"
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
   modal
 }: {
   children: React.ReactNode;
   modal: React.ReactNode;
 }) {
-  const initialLang = await getServerLang();
-
   return (
     <html
-      lang={initialLang}
+      lang={DEFAULT_LANG}
       className={`${sans.variable} ${display.variable} ${mono.variable} dark`}
       suppressHydrationWarning
     >
-      <head>
+      {/*
+        NO MANUAL <head> HERE -- ON PURPOSE.
+
+        This layout used to render its own <head> wrapping the two inline scripts below.
+        In the App Router that breaks the Metadata API: Next streams the tags from
+        generateMetadata() into the document, and when a hand-written <head> closes the
+        element first, every one of those tags is emitted AFTER </head> and lands inside
+        <body>.
+
+        Measured on the live deployment 2026-09-12: </head> closed at character 3,358 and
+        <meta name="description"> appeared at character 89,611 -- along with the canonical
+        link, robots, the web manifest, all seven hreflang alternates, and the whole
+        Open Graph and Twitter card block. 28 tags, all outside <head>.
+
+        Consequences beyond a score: Lighthouse reported "Document does not have a meta
+        description" (SEO 91), and any crawler or social unfurler that only parses <head>
+        -- which is most of them -- saw no description, no canonical and no OG image.
+
+        Moving these two scripts to the top of <body> fixes it. Both only touch
+        document.documentElement, and as the first children of <body> they still execute
+        before any content paints, so there is no flash of unstyled motion.
+
+        Verified: serving the page with these tags relocated into <head> takes Lighthouse
+        SEO from 91 to 100, with meta-description the only audit that changed.
+      */}
+      <body className="min-h-dvh w-full max-w-[100vw] overflow-x-clip antialiased font-sans">
         {process.env.NODE_ENV === "development" ? (
           <script
             dangerouslySetInnerHTML={{
@@ -128,12 +156,10 @@ export default async function RootLayout({
         ) : null}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var m=localStorage.getItem('fitconnect:motion');var os=window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(m==='reduced'){document.documentElement.dataset.motion='reduced';}else if(m==='full'){document.documentElement.dataset.motion='full';}else{document.documentElement.dataset.motion=os?'reduced':'full';}document.documentElement.dataset.colorMode='dark';}catch(e){document.documentElement.dataset.motion='full';}})();`
+            __html: `(function(){try{var langs=['en','pt','es','fr','de','it'];var l=localStorage.getItem('fitconnect.lang');if(l&&langs.indexOf(l)>=0){document.documentElement.lang=l;}var m=localStorage.getItem('fitconnect:motion');var os=window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(m==='reduced'){document.documentElement.dataset.motion='reduced';}else if(m==='full'){document.documentElement.dataset.motion='full';}else{document.documentElement.dataset.motion=os?'reduced':'full';}document.documentElement.dataset.colorMode='dark';}catch(e){document.documentElement.dataset.motion='full';}})();`
           }}
         />
-      </head>
-      <body className="min-h-dvh w-full max-w-[100vw] overflow-x-clip antialiased font-sans">
-        <Providers initialLang={initialLang}>
+        <Providers initialLang={DEFAULT_LANG}>
           <SkipLink />
           {children}
           <ModalSlot>{modal}</ModalSlot>

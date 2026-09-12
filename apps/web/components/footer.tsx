@@ -72,10 +72,17 @@ export function Footer() {
           </div>
         </div>
 
+        {/*
+          h3, not h4. These four footer column titles follow an <h2> in document order, so
+          <h4> skipped a level and failed Lighthouse's heading-order audit (weight 3) — the
+          reason mobile accessibility sat at 89 against a threshold of 90. The heading level
+          is the semantic outline; the visual size comes from the classes, which are
+          unchanged, so nothing moves on screen.
+        */}
         <div className="md:col-span-2">
-          <h4 className="font-semibold mb-3 text-ink-100 text-sm">
+          <h3 className="font-semibold mb-3 text-ink-100 text-sm">
             {t("footer", "productHeading")}
-          </h4>
+          </h3>
           <ul className="space-y-2 text-sm text-ink-400">
             {product.map((l) => (
               <li key={l.href}>
@@ -88,9 +95,9 @@ export function Footer() {
         </div>
 
         <div className="md:col-span-2">
-          <h4 className="font-semibold mb-3 text-ink-100 text-sm">
+          <h3 className="font-semibold mb-3 text-ink-100 text-sm">
             {t("footer", "companyHeading")}
-          </h4>
+          </h3>
           <ul className="space-y-2 text-sm text-ink-400">
             {company.map((l) => (
               <li key={l.label}>
@@ -103,9 +110,9 @@ export function Footer() {
         </div>
 
         <div className="md:col-span-2">
-          <h4 className="font-semibold mb-3 text-ink-100 text-sm">
+          <h3 className="font-semibold mb-3 text-ink-100 text-sm">
             {t("footer", "legalHeading")}
-          </h4>
+          </h3>
           <ul className="space-y-2 text-sm text-ink-400">
             {legal.map((l) => (
               <li key={l.label}>
@@ -118,9 +125,9 @@ export function Footer() {
         </div>
 
         <div className="md:col-span-2">
-          <h4 className="font-semibold mb-3 text-ink-100 text-sm">
+          <h3 className="font-semibold mb-3 text-ink-100 text-sm">
             {t("footer", "buildHeading")}
-          </h4>
+          </h3>
           <p className="text-sm text-ink-400 leading-relaxed">
             {t("footer", "buildBody")}
           </p>
