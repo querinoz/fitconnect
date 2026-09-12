@@ -21,7 +21,7 @@ const sans = Plus_Jakarta_Sans({
 const display = Syne({
   subsets: ["latin"],
   variable: "--font-display",
-  display: "swap",
+  display: "optional",
   preload: true,
   adjustFontFallback: true,
   weight: ["600", "700", "800"]

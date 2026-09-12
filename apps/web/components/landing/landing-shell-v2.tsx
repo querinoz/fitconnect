@@ -5,7 +5,6 @@ import { CrosshairBg } from "@/components/elite-os";
 import { LandingOsNav } from "@/components/landing/landing-os-nav";
 import { HeroGate } from "@/components/landing/hero-gate";
 import { LandingGateContext } from "@/components/landing/landing-gate-context";
-import { ScrollTrigger } from "@/lib/motion/gsap-register";
 
 type LandingShellV2Props = {
   children: ReactNode;
@@ -23,10 +22,6 @@ export function LandingShellV2({ children, withBootGate = false }: LandingShellV
 
   const handleGateComplete = useCallback(() => {
     setGateDone(true);
-    // Recalculate all scroll-trigger positions now that the gate overlay is gone.
-    if (typeof window !== "undefined") {
-      ScrollTrigger.refresh(true);
-    }
   }, []);
 
   return (

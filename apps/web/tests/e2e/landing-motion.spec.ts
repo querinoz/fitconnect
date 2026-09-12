@@ -16,13 +16,12 @@ test.describe("Landing motion @elite-os", () => {
       document.documentElement.dataset.motion = "full";
     });
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: /elite human performance os/i })).toBeVisible({
+    const hero = page.getByLabel("FitConnect Elite OS");
+    await expect(hero.getByRole("heading")).toBeVisible({
       timeout: 15_000
     });
     await expect(page.getByText(/SYS\.STATUS/i)).toBeVisible();
-    await expect(
-      page.getByLabel("FitConnect Elite OS").getByRole("link", { name: /enter elite os/i })
-    ).toBeVisible();
+    await expect(hero.locator('a[href="/signup"]')).toBeVisible();
   });
 
   test("should_show_hero_when_os_reduced_motion_emulated", async ({ page }) => {
@@ -31,7 +30,7 @@ test.describe("Landing motion @elite-os", () => {
       localStorage.removeItem("fitconnect:motion");
     });
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: /elite human performance os/i })).toBeVisible({
+    await expect(page.getByLabel("FitConnect Elite OS").getByRole("heading")).toBeVisible({
       timeout: 15_000
     });
     const duration = await page.evaluate(() =>
@@ -68,7 +67,7 @@ test.describe("Landing motion @elite-os", () => {
   test("should_reflect_app_toggle_on_dataset_motion", async ({ page }) => {
     await signInDemo(page, "ines@fitconnect.local", "Athlete");
     await page.goto("/settings/appearance");
-    const toggle = page.getByRole("checkbox", { name: /reduce motion/i });
+    const toggle = page.getByRole("checkbox", { name: /reduce motion|reduzir movimento/i });
     await expect(toggle).toBeVisible({ timeout: 20_000 });
     await toggle.check();
     const motion = await page.evaluate(() => document.documentElement.dataset.motion);
@@ -79,6 +78,7 @@ test.describe("Landing motion @elite-os", () => {
 test.describe("Elite OS landing sections", () => {
   test("should_render_pricing_and_demo_sections", async ({ page }) => {
     await page.goto("/");
+    await scrollUntilSelector(page, "#demo");
     await expect(page.locator("#demo")).toBeVisible({ timeout: 20_000 });
     await scrollUntilSelector(page, "#pricing");
     await expect(page.locator("#pricing")).toBeVisible({ timeout: 20_000 });

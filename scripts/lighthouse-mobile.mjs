@@ -69,11 +69,34 @@ try {
     const fmtMs = (v) => (v == null ? "n/a" : `${Math.round(v)} ms`);
     const fmtKb = (v) => (v == null ? "n/a" : `${Math.round(v / 1024)} KiB`);
     console.log(`LCP: ${fmtMs(num("largest-contentful-paint"))}`);
+    console.log(`FCP: ${fmtMs(num("first-contentful-paint"))}`);
+    const ttfb = num("server-response-time") ?? num("time-to-first-byte");
+    console.log(`TTFB: ${fmtMs(ttfb)}`);
     console.log(`CLS: ${num("cumulative-layout-shift") == null ? "n/a" : num("cumulative-layout-shift").toFixed(3)}`);
     console.log(`TBT: ${fmtMs(num("total-blocking-time"))}`);
     console.log(`INP: ${fmtMs(num("interaction-to-next-paint"))}`);
     console.log(`Transfer: ${fmtKb(num("total-byte-weight"))}`);
     console.log(`JS execution: ${fmtMs(num("bootup-time"))}`);
+    const lcpEl = audits["largest-contentful-paint-element"];
+    const lcpNode = lcpEl?.details?.items?.[0]?.node ?? lcpEl?.details?.items?.[0];
+    if (lcpNode) {
+      const snippet =
+        lcpNode.nodeLabel ?? lcpNode.snippet ?? lcpNode.selector ?? JSON.stringify(lcpNode).slice(0, 240);
+      console.log(`LCP element: ${snippet}`);
+    }
+    const items = lcpEl?.details?.items;
+    if (Array.isArray(items) && items[0]?.items) {
+      const phase = items[0].items
+        .map((row) => `${row.phase ?? row.label ?? "?"}:${Math.round(row.timing ?? row.duration ?? 0)}ms`)
+        .join(" ");
+      if (phase) console.log(`LCP phases: ${phase}`);
+    }
+    const dumpPath = process.env.LIGHTHOUSE_JSON;
+    if (dumpPath) {
+      const { writeFileSync } = await import("node:fs");
+      writeFileSync(dumpPath, JSON.stringify(result.lhr, null, 0));
+      console.log(`LHR written: ${dumpPath}`);
+    }
     const unusedJs = audits["unused-javascript"]?.numericValue;
     const unusedCss = audits["unused-css-rules"]?.numericValue;
     console.log(`Unused JS: ${fmtKb(unusedJs)}`);

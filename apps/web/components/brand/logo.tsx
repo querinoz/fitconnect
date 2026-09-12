@@ -16,7 +16,6 @@ export function Logo({ className, animated, title = "FitConnect", size }: LogoPr
       size={size ?? OFFICIAL_LOGO_SIZE}
       variant="carbon3d"
       animated={animated}
-      priority
       className={cn("h-11 w-auto max-w-[2.75rem]", className)}
     />
   );

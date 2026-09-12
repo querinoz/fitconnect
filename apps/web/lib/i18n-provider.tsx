@@ -9,8 +9,7 @@ import {
   useState,
   type ReactNode
 } from "react";
-import { DEFAULT_LANG, dict, SUPPORTED_LANGS, type Dict, type Lang } from "./i18n";
-import { useMounted } from "./use-mounted";
+import { DEFAULT_LANG, dict, loadLocale, SUPPORTED_LANGS, type Dict, type Lang } from "./i18n";
 
 interface LanguageContextValue {
   lang: Lang;
@@ -28,17 +27,6 @@ function isLang(value: string | null): value is Lang {
   return value !== null && (SUPPORTED_LANGS as string[]).includes(value);
 }
 
-function detectBrowserLang(): Lang {
-  if (typeof navigator === "undefined") return DEFAULT_LANG;
-  const nav = (navigator.language || "").toLowerCase();
-  if (nav.startsWith("pt")) return "pt";
-  if (nav.startsWith("es")) return "es";
-  if (nav.startsWith("fr")) return "fr";
-  if (nav.startsWith("de")) return "de";
-  if (nav.startsWith("it")) return "it";
-  return "en";
-}
-
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({
@@ -48,36 +36,33 @@ export function LanguageProvider({
   children: ReactNode;
   initialLang?: Lang;
 }) {
-  const mounted = useMounted();
   const [lang, setLangState] = useState<Lang>(initialLang ?? DEFAULT_LANG);
 
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);
-      if (isLang(saved)) {
+      if (!isLang(saved)) return;
+      void loadLocale(saved).then(() => {
         setLangState(saved);
         document.documentElement.lang = saved;
-        return;
-      }
-      const detected = detectBrowserLang();
-      setLangState(detected);
-      document.documentElement.lang = detected;
+      });
     } catch {
       /* localStorage may be blocked */
     }
   }, []);
 
-  /** Match SSR until mounted — use server-resolved lang to avoid flash. */
-  const activeLang = mounted ? lang : (initialLang ?? DEFAULT_LANG);
+  const activeLang = lang;
 
   const setLang = useCallback((l: Lang) => {
-    setLangState(l);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, l);
-      document.documentElement.lang = l;
-    } catch {
-      /* ignore */
-    }
+    void loadLocale(l).then(() => {
+      setLangState(l);
+      try {
+        window.localStorage.setItem(STORAGE_KEY, l);
+        document.documentElement.lang = l;
+      } catch {
+        /* ignore */
+      }
+    });
   }, []);
 
   const locale = dict[activeLang];

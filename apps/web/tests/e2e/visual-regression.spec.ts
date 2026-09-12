@@ -12,7 +12,7 @@ test.describe("Elite OS visual regression @elite-os", () => {
   test("landing_hero_matches_baseline", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByText(/SYS\.STATUS/i)).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByRole("heading", { name: /elite human performance os/i })).toBeVisible();
+    await expect(page.getByLabel("FitConnect Elite OS").getByRole("heading")).toBeVisible();
     // Pixel baselines are OS/font specific (win32 vs ubuntu). Gate on semantics until a linux snapshot job exists.
     if (!process.env.CI) {
       await expect(page).toHaveScreenshot("landing-hero.png", {
@@ -66,7 +66,7 @@ test.describe("Elite OS a11y contrast @elite-os", () => {
   test("volt_accent_meets_contrast_on_floor", async ({ page }) => {
     await page.goto("/");
     await expect(
-      page.getByLabel("FitConnect Elite OS").getByRole("link", { name: /enter elite os/i })
+      page.getByLabel("FitConnect Elite OS").locator('a[href="/signup"]')
     ).toBeVisible({
       timeout: 15_000
     });

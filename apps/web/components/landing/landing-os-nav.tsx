@@ -56,7 +56,9 @@ export function LandingOsNav() {
         <div className="flex items-center gap-2">
           <LangPicker compact />
           <EliteButton asChild size="sm" className="hidden rounded-full sm:inline-flex">
-            <Link href="/signup">{e.navInitialize}</Link>
+            <Link href="/signup" prefetch={false}>
+              {e.navInitialize}
+            </Link>
           </EliteButton>
           <EliteButton
             type="button"
@@ -92,7 +94,7 @@ export function LandingOsNav() {
             ))}
             <li>
               <EliteButton asChild className="mt-2 w-full rounded-full">
-                <Link href="/signup" onClick={() => setOpen(false)}>
+                <Link href="/signup" prefetch={false} onClick={() => setOpen(false)}>
                   {e.navInitialize}
                 </Link>
               </EliteButton>

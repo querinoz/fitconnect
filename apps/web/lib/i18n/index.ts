@@ -2,10 +2,6 @@ import type { Dict, Lang } from "./types";
 import { DEFAULT_LANG, LANGS, SUPPORTED_LANGS } from "./types";
 import { en } from "./locales/en";
 import { pt } from "./locales/pt";
-import { es } from "./locales/es";
-import { fr } from "./locales/fr";
-import { de } from "./locales/de";
-import { it } from "./locales/it";
 
 export type { Dict, Lang };
 export { DEFAULT_LANG, LANGS, SUPPORTED_LANGS };
@@ -42,11 +38,37 @@ function locale(overlay: Record<string, unknown>): Dict {
   ) as Dict;
 }
 
-export const dict: Record<Lang, Dict> = {
+const ptMerged = locale(pt as unknown as Record<string, unknown>);
+
+/**
+ * Eager languages are the SSR default (pt) plus English fallback.
+ * es/fr/de/it overlays load on demand so `/` does not parse six full dictionaries.
+ */
+const cache: Record<Lang, Dict> = {
   en,
-  pt: locale(pt),
-  es: locale(es),
-  fr: locale(fr),
-  de: locale(de),
-  it: locale(it)
+  pt: ptMerged,
+  es: en,
+  fr: en,
+  de: en,
+  it: en
 };
+
+export const dict: Record<Lang, Dict> = cache;
+
+const overlayLoaders: Record<Exclude<Lang, "en">, () => Promise<Record<string, unknown>>> = {
+  pt: () => Promise.resolve(pt as unknown as Record<string, unknown>),
+  es: () => import("./locales/es").then((m) => m.es as Record<string, unknown>),
+  fr: () => import("./locales/fr").then((m) => m.fr as Record<string, unknown>),
+  de: () => import("./locales/de").then((m) => m.de as Record<string, unknown>),
+  it: () => import("./locales/it").then((m) => m.it as Record<string, unknown>)
+};
+
+export async function loadLocale(lang: Lang): Promise<Dict> {
+  if (lang === "en") return en;
+  if (lang === "pt") return ptMerged;
+  if (cache[lang] !== en) return cache[lang];
+  const overlay = await overlayLoaders[lang]();
+  const merged = locale(overlay);
+  cache[lang] = merged;
+  return merged;
+}

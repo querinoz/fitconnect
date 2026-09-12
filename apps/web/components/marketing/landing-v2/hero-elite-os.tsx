@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { Activity, ArrowRight, Play, Radio, ShieldCheck } from "lucide-react";
 import { useRef, useEffect, useState } from "react";
-import { useGSAP } from "@gsap/react";
-import { gsap, registerGsapPlugins } from "@/lib/motion/gsap-register";
 import { shouldReduceMotion } from "@/lib/motion/should-reduce-motion";
 import { useLocale } from "@/lib/i18n-provider";
 import { useLiveDemoTelemetry } from "@/lib/demo/live-telemetry";
@@ -34,39 +32,48 @@ export function HeroEliteOs() {
     }
   }, []);
 
-  // Copy stays CSS-visible. Motion only enhances meters / float — never hides headlines.
-  useGSAP(
-    () => {
-      registerGsapPlugins();
-      if (shouldReduceMotion()) {
-        gsap.set(".hero-eos-meter", { scaleX: 1 });
-        return;
-      }
-
-      gsap.fromTo(
-        ".hero-eos-meter",
-        { scaleX: 0 },
-        {
-          scaleX: 1,
-          transformOrigin: "left center",
-          duration: 1.1,
-          stagger: 0.08,
-          ease: "power3.out",
-          delay: 0.2
-        }
-      );
-
-      gsap.to(".hero-eos-float", {
-        y: -8,
-        duration: 4.8,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        stagger: { each: 0.5, from: "random" }
+  // Copy stays CSS-visible. Motion only enhances float — never hides headlines.
+  // GSAP stays off the LCP path; meters use CSS width from the first paint.
+  // Mobile: never tween in-viewport cards (y: -8 is CLS under Lighthouse).
+  useEffect(() => {
+    if (shouldReduceMotion()) return;
+    if (window.matchMedia("(max-width: 767px)").matches) return;
+    let cancelled = false;
+    let revert: (() => void) | undefined;
+    let started = false;
+    const loadOnce = () => {
+      if (started) return;
+      started = true;
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("pointerdown", loadOnce);
+      void import("@/lib/motion/gsap-register").then(({ gsap, registerGsapPlugins }) => {
+        if (cancelled || !rootRef.current) return;
+        registerGsapPlugins();
+        const ctx = gsap.context(() => {
+          gsap.to(".hero-eos-float", {
+            y: -8,
+            duration: 4.8,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            stagger: { each: 0.5, from: "random" }
+          });
+        }, rootRef);
+        revert = () => ctx.revert();
       });
-    },
-    { scope: rootRef }
-  );
+    };
+    const onScroll = () => {
+      if (window.scrollY >= 8) loadOnce();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("pointerdown", loadOnce, { passive: true });
+    return () => {
+      cancelled = true;
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("pointerdown", loadOnce);
+      revert?.();
+    };
+  }, []);
 
   return (
     <section
@@ -125,13 +132,13 @@ export function HeroEliteOs() {
             <span className="block">{e.headlineLine2}</span>
           </h1>
 
-          <p className="max-w-2xl text-lg font-light leading-relaxed text-eos-on-surface-muted sm:text-xl">
+          <p className="max-w-2xl text-lg font-normal leading-relaxed text-eos-on-surface-muted sm:text-xl">
             {e.subtitle}
           </p>
 
           <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-center">
             <EliteButton asChild size="lg" className="rounded-full">
-              <Link href="/signup">
+              <Link href="/signup" prefetch={false}>
                 {e.ctaPrimary}
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
