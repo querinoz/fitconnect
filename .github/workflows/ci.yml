@@ -209,8 +209,12 @@ jobs:
 
       # BLOCKING. sast.yml already runs semgrep as a hard gate on pull_request and
       # on main; running it soft here meant feature branches had no SAST gate at all.
+      # Install via pip: `pnpm dlx semgrep` has no bin on some runners, and --quiet
+      # hid findings from the job log.
       - name: Semgrep — BLOCKING
-        run: pnpm dlx semgrep --config p/typescript --error --quiet .
+        run: |
+          python3 -m pip install --quiet semgrep
+          semgrep --config p/typescript --error .
 
   build:
     name: Production build

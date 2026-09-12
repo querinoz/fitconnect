@@ -47,4 +47,23 @@ class SecureSessionStoreActiveModeTest {
         )
         assertTrue(store.setActiveMode(UserRole.COACH) is AppResult.Err)
     }
+
+    @Test
+    fun anonymousSessionDoesNotEscalateToAthleteMode() = runBlocking {
+        val store = SecureSessionStore(InMemorySecureStore())
+        store.save(
+            SessionSnapshot(
+                userId = "anon-1",
+                role = UserRole.ANONYMOUS,
+                tokens = AuthTokens("a", "r"),
+                isAnonymous = true,
+                biometricUnlockEnabled = false,
+                capabilities = setOf(UserRole.ANONYMOUS),
+                activeMode = UserRole.ANONYMOUS,
+            ),
+        )
+        assertEquals(UserRole.ANONYMOUS, store.activeMode())
+        assertEquals(UserRole.ANONYMOUS, store.role())
+        assertTrue(store.isLoggedIn())
+    }
 }

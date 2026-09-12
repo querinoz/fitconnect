@@ -76,10 +76,12 @@ class SecureSessionStore(
             capabilities = if (effectiveRole == UserRole.GUEST) emptySet() else caps,
             activeMode = when {
                 effectiveRole == UserRole.GUEST -> UserRole.GUEST
+                anonymous || effectiveRole == UserRole.ANONYMOUS -> UserRole.ANONYMOUS
                 active == UserRole.COACH && caps.contains(UserRole.COACH) -> UserRole.COACH
                 active == UserRole.ATHLETE && caps.contains(UserRole.ATHLETE) -> UserRole.ATHLETE
                 caps.contains(UserRole.COACH) && !caps.contains(UserRole.ATHLETE) -> UserRole.COACH
-                else -> UserRole.ATHLETE
+                caps.contains(UserRole.ATHLETE) -> UserRole.ATHLETE
+                else -> effectiveRole
             },
         )
     }
