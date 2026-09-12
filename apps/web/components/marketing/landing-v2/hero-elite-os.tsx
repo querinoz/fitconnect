@@ -112,7 +112,7 @@ export function HeroEliteOs() {
       </div>
 
       <div className="relative z-10 mx-auto grid max-w-[1440px] grid-cols-1 items-start gap-10 px-4 sm:px-8 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,32rem)] xl:gap-16">
-        <div className="flex min-w-0 flex-col gap-8">
+        <div className="flex min-w-0 flex-col gap-8 xl:col-start-1 xl:row-start-1">
           <div className="flex flex-wrap items-center gap-3 eos-label-caps tracking-[0.2em] text-eos-on-surface-muted">
             <span className="h-1.5 w-1.5 rounded-sm bg-eos-voltline" />
             <span className="font-mono text-[10px] tracking-[0.28em] text-eos-telemetry">
@@ -150,22 +150,9 @@ export function HeroEliteOs() {
               </Link>
             </EliteButton>
           </div>
-
-          <dl className="grid max-w-2xl grid-cols-1 gap-3 pt-6 sm:grid-cols-3">
-            {[
-              { value: e.statCoaches, label: e.statCoachesLabel },
-              { value: e.statRating, label: e.statRatingLabel },
-              { value: e.statRejected, label: e.statRejectedLabel }
-            ].map((stat) => (
-              <div key={stat.label} className="border-t border-white/12 pt-4">
-                <dt className="eos-label-caps text-eos-on-surface-subtle">{stat.label}</dt>
-                <dd className="mt-2 font-mono text-2xl text-eos-on-surface">{stat.value}</dd>
-              </div>
-            ))}
-          </dl>
         </div>
 
-        <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:col-start-2 xl:row-start-1">
           <article className="hero-eos-float rounded-2xl border border-white/10 eos-glass p-5 shadow-2xl">
             <CornerTicks />
             <div className="mb-4 flex items-start justify-between">
@@ -258,6 +245,19 @@ export function HeroEliteOs() {
             </div>
           </article>
         </div>
+
+        <dl className="grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3 xl:col-start-1 xl:row-start-2">
+          {[
+            { value: e.statCoaches, label: e.statCoachesLabel },
+            { value: e.statRating, label: e.statRatingLabel },
+            { value: e.statRejected, label: e.statRejectedLabel }
+          ].map((stat) => (
+            <div key={stat.label} className="border-t border-white/12 pt-4">
+              <dt className="eos-label-caps text-eos-on-surface-subtle">{stat.label}</dt>
+              <dd className="mt-2 font-mono text-2xl text-eos-on-surface">{stat.value}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );
