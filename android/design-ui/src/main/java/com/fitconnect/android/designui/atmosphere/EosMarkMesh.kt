@@ -5,11 +5,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.PaintingStyle
-import com.fitconnect.android.designui.brand.EosBoltGeometry
+import com.fitconnect.android.designui.brand.EosMarkGeometry
 import kotlin.math.ceil
 
 /**
- * Sparse FitConnect bolt / S geometry for premium Floor atmosphere.
+ * Sparse FitConnect circular-mark geometry for premium Floor atmosphere.
  */
 object EosMarkMesh {
     fun tilePeriod(cellRadius: Float): Pair<Float, Float> {
@@ -35,8 +35,7 @@ internal fun renderMarkTile(cellRadius: Float, color: Color, strokePx: Float): I
     }
     canvas.save()
     canvas.translate(left, top)
-    canvas.drawPath(EosBoltGeometry.topPath(dim), paint)
-    canvas.drawPath(EosBoltGeometry.bottomPath(dim), paint)
+    EosMarkGeometry.meshPaths(dim).forEach { canvas.drawPath(it, paint) }
     canvas.restore()
     return bitmap
 }

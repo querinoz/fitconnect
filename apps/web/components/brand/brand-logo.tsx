@@ -1,8 +1,8 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-/** Official mark aspect — 320×340 master (LogoBase). */
-export const OFFICIAL_LOGO_ASPECT = 340 / 320;
+/** Official mark aspect — square 320×320 circular reticle master. */
+export const OFFICIAL_LOGO_ASPECT = 1;
 
 /** Transparent PNG — single source for all in-app surfaces. */
 export const OFFICIAL_LOGO_SRC = "/brand/fitconnect-logo.png";

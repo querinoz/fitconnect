@@ -94,11 +94,11 @@ fun CommunityScreen(
             emptyReason = when {
                 page.items.isNotEmpty() -> null
                 mode == CommunityRuntimeMode.LOCAL_DEMO ->
-                    "No posts yet for ${kind.name.lowercase()}"
+                    "Create the first post for ${kind.name.lowercase()} — your squad will see it here."
                 mode == CommunityRuntimeMode.REMOTE ->
-                    "No community posts yet (remote empty or API unavailable)"
+                    "When teammates share sessions and wins, they appear here. Pull to refresh anytime."
                 else ->
-                    "Community unavailable — API / Supabase not configured"
+                    "Connect community services to unlock the live feed."
             }
             reactionCounts = page.items.associate { post ->
                 post.id to container.community.reactions.counts(ReactionTargetKind.POST, post.id)
@@ -232,7 +232,7 @@ fun CommunityScreen(
         emptyReason?.let { reason ->
             item {
                 EliteEmptyState(
-                    title = "No signal yet",
+                    title = "No posts yet",
                     body = reason,
                     actionLabel = "Refresh",
                     onAction = { scope.launch { reload() } },

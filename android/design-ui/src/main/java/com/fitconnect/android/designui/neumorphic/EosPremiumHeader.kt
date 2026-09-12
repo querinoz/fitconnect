@@ -11,24 +11,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.ui.text.style.TextOverflow
-import com.fitconnect.android.designui.R
-import com.fitconnect.android.designui.theme.isCompactAthleteHeader
+import com.fitconnect.android.designui.brand.EosFitConnectLockup
 import com.fitconnect.android.designui.theme.EliteMonoTextStyle
 import com.fitconnect.android.designui.theme.EliteSpace
+import com.fitconnect.android.designui.theme.isCompactAthleteHeader
 
 @Composable
 fun EosPremiumHeader(
@@ -55,22 +52,9 @@ fun EosPremiumHeader(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_fitconnect_logo),
-                contentDescription = "FitConnect logo",
-                modifier = Modifier.size(28.dp),
-                tint = androidx.compose.ui.graphics.Color.Unspecified,
-            )
-            Text(
-                text = "FITCONNECT",
-                color = EosNeumorphicColors.TextPrimary,
-                style = EliteMonoTextStyle.copy(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp,
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+            EosFitConnectLockup(
+                markSize = 28.dp,
+                wordmarkSize = 16.sp,
             )
         }
         if (!compact) {

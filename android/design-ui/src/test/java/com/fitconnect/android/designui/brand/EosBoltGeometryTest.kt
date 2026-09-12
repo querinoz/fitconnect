@@ -1,5 +1,6 @@
 package com.fitconnect.android.designui.brand
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -17,5 +18,14 @@ class EosBoltGeometryTest {
         assertTrue(bottomW > 8f)
         assertTrue(bottomH > 8f)
         assertTrue("top sits above bottom", top[1] < bottom[1])
+    }
+
+    @Test
+    fun markGeometryMatchesCanonicalViewBox() {
+        assertEquals(320f, EosMarkGeometry.VIEW)
+        assertEquals(160f, EosMarkGeometry.CX)
+        assertEquals(142f, EosMarkGeometry.CY)
+        assertTrue(EosMarkGeometry.OUTER_R > EosMarkGeometry.INNER_R)
+        assertEquals(3, EosMarkGeometry.meshPaths(320f).size)
     }
 }

@@ -178,7 +178,6 @@ object EliteSurfaceInstrument {
     const val HALO_ALPHA: Float = 0.18f
     const val SPECULAR_ALPHA: Float = 0.05f
     const val HERO_DP: Int = 224
-    const val ASCEND_HERO_DP: Int = 256
     const val PROFILE_DP: Int = 160
     const val INLINE_DP: Int = 88
     const val LOAD_TIMEOUT_MS: Int = 8000
@@ -188,12 +187,13 @@ object EliteSurfaceInstrument {
     const val HEXATAR_FEED_DP: Int = 26
     const val HEXATAR_BADGE_DP: Int = 14
     const val LOGO_MARK_DP: Int = 24
-    const val TRAIN_FAB_DP: Int = 80
-    const val NAV_BAR_DP: Int = 68
-    const val NAV_DOCK_DP: Int = 108
-    const val NAV_CRADLE_RADIUS_DP: Int = 42
+    const val NAV_BAR_DP: Int = 80
+    const val NAV_DOCK_DP: Int = 96
+    const val TRAIN_FAB_DP: Int = 64
+    const val NAV_CRADLE_RADIUS_DP: Int = 40
     const val NAV_ACTIVE_INDICATOR_DP: Int = 3
-    const val NAV_FAB_LIFT_DP: Int = 40
+    const val NAV_FAB_LIFT_DP: Int = 28
+    const val ASCEND_HERO_DP: Int = 224
 }
 
 object EliteSurfaceMotion {

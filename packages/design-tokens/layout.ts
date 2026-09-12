@@ -111,4 +111,18 @@ export const INSTRUMENT_TOKENS = {
   hexatarFeedDp: 26,
   hexatarBadgeDp: 14,
   logoMarkDp: 24,
+  /** Zenith athlete flexible bar height (dp). */
+  navBarDp: 80,
+  /** Docked chrome / cradle host height (dp). */
+  navDockDp: 96,
+  /** TRAIN FAB diameter (dp). */
+  trainFabDp: 64,
+  /** FAB cradle corner radius (dp). */
+  navCradleRadiusDp: 40,
+  /** Active tab indicator thickness (dp). */
+  navActiveIndicatorDp: 3,
+  /** FAB lift above bar baseline (dp). */
+  navFabLiftDp: 28,
+  /** Ascend hero instrument ring (dp) — alias of heroDp for Compose call sites. */
+  ascendHeroDp: 224,
 } as const;

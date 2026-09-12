@@ -18,16 +18,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -39,8 +36,8 @@ import com.fitconnect.android.designui.theme.reduceMotionEnabled
 import com.fitconnect.android.designui.theme.toColor
 
 /**
- * Two-piece bolt / S. When [assemble] is true the halves slide in and lock,
- * then the Voltline piece pulses a soft glow (skipped under reduced motion).
+ * Canonical circular FitConnect mark (reticle + F + ECG).
+ * When [assemble] is true the mark scales in, then Voltline rings pulse softly.
  */
 @Composable
 fun EosBoltMark(
@@ -64,7 +61,7 @@ fun EosBoltMark(
             )
         }
     }
-    val glow = rememberInfiniteTransition(label = "boltGlow")
+    val glow = rememberInfiniteTransition(label = "markGlow")
     val glowAlpha by glow.animateFloat(
         initialValue = 0.35f,
         targetValue = if (reduceMotion || !assemble) 0.45f else 0.85f,
@@ -72,12 +69,17 @@ fun EosBoltMark(
             animation = tween(1100),
             repeatMode = RepeatMode.Reverse,
         ),
-        label = "boltGlowA",
+        label = "markGlowA",
     )
     val t = progress.value
     Canvas(
         modifier = modifier
             .size(size)
+            .graphicsLayer {
+                scaleX = 0.82f + 0.18f * t
+                scaleY = 0.82f + 0.18f * t
+                alpha = 0.25f + 0.75f * t
+            }
             .testTag("eos_bolt_mark")
             .semantics {
                 if (contentDescription != null) {
@@ -85,30 +87,13 @@ fun EosBoltMark(
                 }
             },
     ) {
-        val dim = size.toPx()
-        val top = EosBoltGeometry.topPath(dim)
-        val bottom = EosBoltGeometry.bottomPath(dim)
-        val slide = dim * 0.22f * (1f - t)
-        translate(left = -slide, top = -slide * 0.7f) {
-            if (t > 0.55f) {
-                drawPath(
-                    path = top,
-                    color = volt.copy(alpha = glowAlpha * t),
-                    style = Fill,
-                )
-            }
-            drawPath(path = top, color = volt.copy(alpha = 0.35f + 0.65f * t), style = Fill)
-        }
-        translate(left = slide, top = slide * 0.85f) {
-            drawPath(path = bottom, color = white.copy(alpha = 0.35f + 0.65f * t), style = Fill)
-        }
-        if (t > 0.92f) {
-            drawCircle(
-                color = volt.copy(alpha = 0.12f * glowAlpha),
-                radius = dim * 0.42f,
-                center = Offset(dim * 0.48f, dim * 0.38f),
-            )
-        }
+        drawFitConnectMark(
+            sizePx = size.toPx(),
+            volt = volt,
+            white = white,
+            alpha = 1f,
+            glowAlpha = glowAlpha * t,
+        )
     }
 }
 
@@ -124,19 +109,17 @@ fun EosFitConnectWordmark(
                 SpanStyle(
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
-                    fontStyle = FontStyle.Italic,
                 ),
-            ) { append("Fit") }
+            ) { append("FIT") }
             withStyle(
                 SpanStyle(
                     color = volt,
                     fontWeight = FontWeight.Bold,
-                    fontStyle = FontStyle.Italic,
                 ),
-            ) { append("Connect") }
+            ) { append("CONNECT") }
         },
         fontSize = fontSize,
-        letterSpacing = 0.2.sp,
+        letterSpacing = 2.2.sp,
         modifier = modifier,
         maxLines = 1,
     )

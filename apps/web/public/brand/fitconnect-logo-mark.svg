@@ -1,127 +1,51 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320" fill="none" role="img" aria-label="FitConnect mark">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320" fill="none" role="img" aria-label="FitConnect">
   <title>FitConnect</title>
+  <!--
+    Canonical FitConnect mark — circular reticle + block F + ECG.
+    Source of truth: brand-sources/fitconnect-logo-mark.svg
+    Photoref: brand-sources/fitconnect-logo-source.png
+    Colors: Voltline #C8FF00 · White #FFFFFF · transparent BG
+  -->
   <defs>
-    <linearGradient id="ringGrad" x1="15%" y1="95%" x2="85%" y2="5%">
-      <stop offset="0%" stop-color="#7AB800"/>
-      <stop offset="28%" stop-color="#C8FF00"/>
-      <stop offset="52%" stop-color="#39FF14"/>
-      <stop offset="78%" stop-color="#B8F000"/>
-      <stop offset="100%" stop-color="#D6FF33"/>
-    </linearGradient>
-
-    <linearGradient id="ecgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#A3D400" stop-opacity="0"/>
-      <stop offset="14%" stop-color="#C8FF00" stop-opacity="0.85"/>
-      <stop offset="45%" stop-color="#39FF14" stop-opacity="0.95"/>
-      <stop offset="72%" stop-color="#B8F000"/>
-      <stop offset="100%" stop-color="#C8FF00" stop-opacity="0.45"/>
-    </linearGradient>
-
-    <linearGradient id="innerRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#C8FF00" stop-opacity="0.32"/>
-      <stop offset="100%" stop-color="#39FF14" stop-opacity="0.18"/>
-    </linearGradient>
-
-    <linearGradient id="fGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#FFFFFF"/>
-    </linearGradient>
-
-    <filter id="ringGlow" x="-25%" y="-25%" width="150%" height="150%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-
-    <filter id="ecgGlow" x="-10%" y="-200%" width="120%" height="500%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-
-    <filter id="fGlow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-
-    <filter id="tickGlow" x="-150%" y="-150%" width="400%" height="400%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-
-    <filter id="universalShadow" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
-      <feMorphology operator="dilate" radius="1.25" in="SourceAlpha" result="stroke"/>
-      <feFlood flood-color="#000000" flood-opacity="0.9" result="strokeColor"/>
-      <feComposite in="strokeColor" in2="stroke" operator="in" result="outline"/>
-      <feGaussianBlur in="outline" stdDeviation="0.4" result="outlineSoft"/>
-      <feDropShadow dx="0" dy="2" stdDeviation="3.5" flood-color="#000000" flood-opacity="0.55" result="shadow"/>
-      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#C8FF00" flood-opacity="0.24" result="glow"/>
-      <feMerge>
-        <feMergeNode in="glow"/>
-        <feMergeNode in="shadow"/>
-        <feMergeNode in="outlineSoft"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+    <filter id="fcMarkGlow" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#C8FF00" flood-opacity="0.34"/>
+      <feDropShadow dx="0" dy="2" stdDeviation="2.8" flood-color="#000000" flood-opacity="0.55"/>
     </filter>
   </defs>
 
-  <!-- Pointy-top hexagon, centered at 160,160 -->
-  <g filter="url(#universalShadow)">
-    <path
-      d="M 160,48 L 256.9,96 L 256.9,224 L 160,272 L 63.1,224 L 63.1,96 Z"
-      fill="none" stroke="#C8FF00" stroke-width="22" stroke-opacity="0.05" stroke-linejoin="round"
-    />
-    <path
-      d="M 160,52 L 252.5,98.5 L 252.5,221.5 L 160,268 L 67.5,221.5 L 67.5,98.5 Z"
-      fill="none" stroke="#39FF14" stroke-width="14" stroke-opacity="0.06" stroke-linejoin="round"
-    />
-    <path
-      d="M 160,54 L 250.2,99.8 L 250.2,220.2 L 160,266 L 69.8,220.2 L 69.8,99.8 Z"
-      fill="none" stroke="url(#ringGrad)" stroke-width="5.5" stroke-linejoin="round" filter="url(#ringGlow)"
-    />
-    <path
-      d="M 160,62 L 243.4,104.2 L 243.4,215.8 L 160,258 L 76.6,215.8 L 76.6,104.2 Z"
-      fill="none" stroke="url(#innerRingGrad)" stroke-width="1" stroke-dasharray="3 8" stroke-opacity="0.5" stroke-linejoin="round"
-    />
+  <g filter="url(#fcMarkGlow)">
+    <circle cx="160" cy="142" r="108" stroke="#C8FF00" stroke-width="3.5" fill="none"/>
+    <circle cx="160" cy="142" r="96" stroke="#C8FF00" stroke-width="1.75" fill="none"/>
 
-    <!-- Vertex ticks -->
-    <line x1="160" y1="48" x2="160" y2="38" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
-    <line x1="256.9" y1="96" x2="265.5" y2="91" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
-    <line x1="256.9" y1="224" x2="265.5" y2="229" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
-    <line x1="160" y1="272" x2="160" y2="282" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
-    <line x1="63.1" y1="224" x2="54.5" y2="229" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
-    <line x1="63.1" y1="96" x2="54.5" y2="91" stroke="#C8FF00" stroke-width="2" stroke-linecap="round" filter="url(#tickGlow)"/>
-
-    <!-- F — centered in upper hex -->
-    <g filter="url(#fGlow)" transform="translate(-6, 6)">
-      <rect x="152" y="100" width="16" height="72" rx="2.5" fill="url(#fGrad)"/>
-      <rect x="152" y="100" width="56" height="15" rx="2.5" fill="url(#fGrad)"/>
-      <rect x="152" y="131" width="20" height="13" rx="2.5" fill="#C8FF00"/>
-      <rect x="172" y="131" width="24" height="13" rx="2.5" fill="url(#fGrad)"/>
+    <g stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="square">
+      <line x1="160" y1="26" x2="160" y2="44"/>
+      <line x1="160" y1="240" x2="160" y2="258"/>
+      <line x1="44" y1="142" x2="62" y2="142"/>
+      <line x1="258" y1="142" x2="276" y2="142"/>
     </g>
 
-    <!-- ECG heartbeat — inside hex, below F -->
-    <g filter="url(#ecgGlow)">
-      <path
-        d="M 98,228 L 128,228 L 136,218 L 144,242 L 152,210 L 160,234 L 168,228 L 222,228"
-        stroke="url(#ecgGrad)"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-      <circle cx="222" cy="228" r="3" fill="#C8FF00"/>
-      <circle cx="222" cy="228" r="5.5" fill="none" stroke="#C8FF00" stroke-width="1" stroke-opacity="0.45"/>
-      <circle cx="222" cy="228" r="9" fill="none" stroke="#C8FF00" stroke-width="0.6" stroke-opacity="0.18"/>
-    </g>
+    <!--
+      White F: top bar (with underside notch near right) + stem.
+      Foot cut slopes ↗ (left lower → right higher).
+    -->
+    <path
+      fill="#FFFFFF"
+      d="M118 68 H216 V94 H205 L200 88 L195 94 H146 V208 L118 238 Z"
+    />
+    <!-- Voltline mid-bar — parallelogram; left edge // foot cut -->
+    <path
+      fill="#C8FF00"
+      d="M146 122 H200 V146 H124 Z"
+    />
+
+    <!-- ECG: baseline → up spike → deep valley → recover -->
+    <path
+      d="M70 248 H122 L138 248 L148 214 L158 278 L170 248 H250"
+      stroke="#C8FF00"
+      stroke-width="3.5"
+      stroke-linecap="square"
+      stroke-linejoin="miter"
+      fill="none"
+    />
   </g>
 </svg>

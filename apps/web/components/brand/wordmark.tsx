@@ -10,8 +10,8 @@ type WordmarkProps = {
 };
 
 /**
- * FitConnect wordmark — brand sheet lockup.
- * Fit: bold silver · Connect: Volt accent, lighter weight.
+ * FitConnect wordmark — all-caps lockup from brand sheet.
+ * FIT: white · CONNECT: Voltline.
  */
 export function Wordmark({
   className,
@@ -24,11 +24,11 @@ export function Wordmark({
     <span
       role="img"
       aria-label={title}
-      className="inline-flex items-baseline whitespace-nowrap font-display tracking-[-0.04em]"
+      className="inline-flex items-baseline whitespace-nowrap font-display uppercase tracking-[0.18em]"
       style={{ fontSize: size, lineHeight: 1 }}
     >
-      <span className="font-extrabold text-eos-on-surface">Fit</span>
-      <span className="font-semibold text-volt-400">Connect</span>
+      <span className="font-extrabold text-eos-on-surface">FIT</span>
+      <span className="font-extrabold text-eos-voltline">CONNECT</span>
     </span>
   );
 
