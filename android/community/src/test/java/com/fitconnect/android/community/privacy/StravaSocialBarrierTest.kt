@@ -36,7 +36,8 @@ class StravaSocialBarrierTest {
                 skipRateLimit = true,
             ),
         )
-        assertTrue(hidden is com.fitconnect.android.community.posts.PostResult.Created)
+        // Fail-closed at write: STRAVA workout facts must never enter the social store.
+        assertTrue(hidden is com.fitconnect.android.community.posts.PostResult.Invalid)
         val following = container.feed.feed(
             FeedRequest(viewerId = "ath-1", kind = FeedKind.FOLLOWING, limit = 80),
         )
