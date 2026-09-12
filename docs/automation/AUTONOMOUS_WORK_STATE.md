@@ -1,18 +1,21 @@
 # Autonomous Work State
 
-**Last updated:** 2026-09-12, Cursor E2E recovery after run `34680853231`
+**Last updated:** 2026-09-12, Cursor — release-gate green on `14827a3`
 **Supabase project:** `beuiammeedpovdkmhluw` (eu-west-1, Postgres 17.6)
 **Branch on disk:** `feat/elite-os-v2`
 
 ## Current Phase
 
-GitHub CI on `7ef4373` (`34680853231`) proved independent jobs: all required gates except
-Playwright E2E were SUCCESS. E2E was reproduced locally, product-fixed, and **17/17 PASS**
-on the CI spec set. Next: commit/push the E2E fix and read the new Actions run.
+**Required GitHub CI is green.** Run
+[`34682319883`](https://github.com/querinoz/fitconnect/actions/runs/34682319883) on
+`14827a3eef35e3b6c8d58d2f04adc45446246e85`: **Release gate SUCCESS**. Playwright E2E
+SUCCESS. Lighthouse remains FAIL (not a required job). k6/deploy SKIPPED on `feat/**`
+(correct). GitHub workflow conclusion is still **failure** because Lighthouse exits 1.
 
 ## Current Task
 
-Push the landing/a11y/E2E fix and loop until `release-gate` is success.
+Document the proven SHA. Remaining work is Human Required plus optional landing Lighthouse
+score work (local mobile: perf 58 / a11y 89 / bp 100 / seo 92 vs mins 84/90/95/95).
 
 ## Local gates — 2026-09-12 (Cursor)
 
@@ -39,19 +42,28 @@ Push the landing/a11y/E2E fix and loop until `release-gate` is success.
 | `maplibre-gl` | **6.9.0** |
 | `react-map-gl` | **8.1.3** |
 
-## CI workflow (local, not yet proven by GitHub)
+## CI workflow (proven on GitHub)
 
-Applied from the validated `ci-1.yml` artifact, plus two Cursor decisions:
+Run [`34682319883`](https://github.com/querinoz/fitconnect/actions/runs/34682319883)
+@ `14827a3`:
 
-1. No dead `--filter=!@fitconnect/mobile`.
-2. Independent jobs: `test-unit`, `auth-prod-like`, `test-integration`, `security-audit`,
-   `test-coverage-gate`, and `build` have no blocking `needs` on each other.
-3. Security is **blocking**: `pnpm audit --audit-level critical --prod` and Semgrep.
-4. `release-gate` with `if: always()` fails on any non-`success` result.
-5. Lighthouse `if:` now includes `feat/**` (was only `feature/**`, which skipped this branch).
-6. `lint-typecheck` runs `node scripts/ci-gate-lint.mjs` after install.
+| Job | Result |
+|---|---|
+| Lint · typecheck | SUCCESS |
+| Unit tests (web) | SUCCESS |
+| Coverage gate | SUCCESS |
+| Integration · DB · Pact | SUCCESS |
+| Auth · DEMO_MODE=false | SUCCESS |
+| Security audit | SUCCESS |
+| Production build | SUCCESS |
+| Android · Wear assembleDebug | SUCCESS |
+| Playwright E2E | SUCCESS |
+| Lighthouse mobile | **FAIL** (optional; not in release-gate) |
+| k6 / deploy-staging | SKIPPED (`feat/**`) |
+| **Release gate** | **SUCCESS** |
 
-GitHub CI result for this commit: **NOT YET RUN** until push.
+GitHub workflow conclusion = failure because Lighthouse failed. That is **not** a required
+gate. Do not treat workflow-level failure as release-gate failure.
 
 ## Production database — verified this session
 
@@ -71,11 +83,9 @@ client secret remains **precautionary hygiene, not incident response**.
 
 ## Next
 
-1. Commit + push `feat/elite-os-v2`.
-2. Read the real GitHub Actions run (not the summary chip).
-3. Fix any red job locally, commit, push, repeat.
-4. Android/Wear assembleDebug (in flight locally).
-5. Map visual smoke and physical Android remain Human Required for runtime.
+1. Human Required items in [HUMAN_HANDOFF.md](HUMAN_HANDOFF.md).
+2. Optional: landing Lighthouse (perf/a11y/seo) — product work, not a release-gate blocker.
+3. Do not promote Vercel production until a human accepts Lighthouse FAIL or scores improve.
 
 ## Human Required
 

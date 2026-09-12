@@ -27,8 +27,10 @@ The previous claim that "no git, in any session" is **obsolete**.
    OpenFreeMap attribution).
 4. **Physical Android** — install the new debug APK; ONE LOGIN, Feed, Profile, Athlete,
    Coach, mode switch. If MIUI blocks taps, that step stays human.
-5. **Vercel production promotion** — only after GitHub CI is green on this branch. Do
-   not promote automatically if the SHA is not the intended release.
+5. **Vercel production promotion** — required GitHub **release-gate is green** on
+   `14827a3` (run `34682319883`). Lighthouse mobile is still FAIL. A human must accept
+   that optional miss or wait for landing perf/a11y/seo work before promoting. Do not
+   promote automatically if the SHA is not the intended release.
 6. **Triage 22 production high advisories** when convenient (`fast-uri`, `sharp`, …) —
    not release-blocking (criticals are 0).
 

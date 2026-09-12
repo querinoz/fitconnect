@@ -3,9 +3,9 @@
 **Date:** 2026-09-12 · **Database:** `beuiammeedpovdkmhluw`
 **Repository:** https://github.com/querinoz/fitconnect.git
 **Branch:** `feat/elite-os-v2`
-**Verdict: 🟡 HUMAN ACTIONS REMAIN** — local technical gates PASS; GitHub CI on the
-pushed SHA is the remaining automated proof. Do not read this as release-ready until
-that run is green.
+**Verdict: 🟡 HUMAN ACTIONS REMAIN** — required GitHub **release-gate SUCCESS** on
+`14827a3` (run `34682319883`). Lighthouse mobile is still FAIL (optional job). Do not
+read this as full-workflow green or as production-promoted.
 
 Categories never mix. **VERIFIED** means a command ran. **NOT RUN** means it did not.
 **ENVIRONMENT BLOCKED** / **HUMAN REQUIRED** are named.
@@ -26,7 +26,7 @@ Categories never mix. **VERIFIED** means a command ran. **NOT RUN** means it did
 | Typecheck | `pnpm typecheck` | **PASS** (6/6) |
 | Lint | `pnpm lint` | **PASS** (warnings only: `@next/next/no-img-element`) |
 | Unit | `pnpm test` | **PASS** — web 524 passed / 11 skipped; 7 turbo tasks |
-| Coverage | `pnpm test:coverage` | **NOT RUN** this session (CI job will) |
+| Coverage | CI coverage-gate job | **PASS** (GitHub `34682319883`) |
 | Security | `pnpm audit --audit-level critical --prod` | **PASS** — 0 production critical |
 | CI validator | `node scripts/ci-gate-lint.mjs` | **PASS** — 0 errors, 1 note |
 | DB / schema | `node scripts/db-reconcile-schema.mjs` | **PASS** — 0 errors, 6 legacy warnings |
@@ -34,12 +34,12 @@ Categories never mix. **VERIFIED** means a command ran. **NOT RUN** means it did
 | Build | `pnpm build` | **PASS** — Next.js **15.5.25** |
 | Tokens | `pnpm tokens:kotlin:check` | **PASS** |
 | E2E Playwright | CI spec set, `CI=true`, mobile-chrome | **PASS — 17/17** (local, DEMO_MODE baked in build) |
-| Lighthouse | CI job | **NOT RUN** locally |
+| Lighthouse | local `scripts/lighthouse-mobile.mjs` + CI job | **FAIL** — local 58/89/100/92 vs 84/90/95/95; CI job failed (not in release-gate) |
 | k6 | main-only | **SKIPPED** on `feat/**` (correct) |
 | Android | `./gradlew :app:assembleDebug` | **PASS** — BUILD SUCCESSFUL, 1m 5s |
 | Wear | `./gradlew :wear:assembleDebug` | **PASS** — real assemble, not android.yml no-op |
 | Vercel | promote | **NOT RUN** — wait for CI green |
-| Semgrep | CI blocking step | **NOT RUN** locally |
+| Semgrep | CI security-audit job | **PASS** (GitHub `34682319883`) |
 
 ---
 
@@ -87,10 +87,13 @@ Runtime physical confirmation: **HUMAN REQUIRED**.
 | Item | State |
 |---|---|
 | Old remote workflow @ `5b685cb` | dead Turbo filter, soft security, no release-gate; run `34331702738` Failure + 10 SKIPPED |
-| Corrected local workflow | independent jobs, blocking critical audit + Semgrep, `release-gate`, Lighthouse on `feat/**` |
+| Run `34680853231` @ `7ef4373` | required jobs SUCCESS except Playwright E2E |
+| Run `34681954066` @ `2ae34de` | landing a11y fixed; E2E failed launching **mobile-safari** without WebKit |
+| Run `34682319883` @ `14827a3` | **Release gate SUCCESS**. Playwright E2E SUCCESS. Lighthouse FAIL. k6/deploy SKIPPED |
 | Validator | 0 errors |
-| GitHub run `34680853231` @ `7ef4373` | **Failure** — E2E red; other required jobs SUCCESS |
-| Local E2E after landing fix | **17/17 PASS** — awaiting next GitHub run on the fix SHA |
+| Workflow conclusion @ `14827a3` | **failure** because Lighthouse failed — **not** because release-gate failed |
+
+URL: https://github.com/querinoz/fitconnect/actions/runs/34682319883
 
 ---
 
@@ -124,12 +127,16 @@ delete of the Expo tree.
 
 ## Remaining blockers (technical)
 
-None that are executable without GitHub CI results or human secrets/devices.
-After push: any red CI job is Cursor's job to fix.
+None on the **required** CI graph. Optional Lighthouse mobile scores are below gate
+(local 58/89/100/92). That is product performance work, not a missing commit.
 
 ---
 
 ## Commits / push / remote SHA
 
-Filled after git operations in this session. See the terminal report and
-`git log` on `feat/elite-os-v2`.
+| Ref | SHA |
+|---|---|
+| Landing a11y / E2E product fix | `2ae34defa285e866b070b5fd21cc70d48fc20c57` |
+| Playwright CI Chromium-only | `14827a3eef35e3b6c8d58d2f04adc45446246e85` |
+| Remote `feat/elite-os-v2` | **`14827a3eef35e3b6c8d58d2f04adc45446246e85`** (matches `git ls-remote`) |
+| Proven CI run | [`34682319883`](https://github.com/querinoz/fitconnect/actions/runs/34682319883) |

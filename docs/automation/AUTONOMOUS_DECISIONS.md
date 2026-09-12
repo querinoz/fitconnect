@@ -646,3 +646,28 @@ are no committed linux baselines and win32 PNGs will not match ubuntu runners. S
 visual checks (heading, SYS.STATUS, pricing copy, contrast) remain required.
 
 **Validation:** `CI=true` Playwright mobile-chrome on the four CI files: **17/17 PASS**.
+GitHub run `34682319883` Playwright E2E SUCCESS after invoking Playwright from `apps/web`
+with `--project=mobile-chrome` (nested `pnpm test:e2e -- --project` dropped the flag and
+launched WebKit without installing it).
+
+---
+
+## Decision 22 — Lighthouse stays a reported FAIL, not a required gate
+
+**Date:** 2026-09-12 · **Area:** CI / performance
+
+**Problem:** After required jobs went green, the GitHub **workflow** still concluded
+failure because Lighthouse exits 1. Local mobile Lighthouse against the DEMO_MODE
+production build: performance **58**, accessibility **89**, best-practices **100**,
+seo **92** versus mins 84 / 90 / 95 / 95.
+
+**Options considered:**
+1. `continue-on-error` so the workflow paints green.
+2. Lower thresholds to the measured scores.
+3. Keep Lighthouse failing and keep it **out** of `release-gate`.
+
+**Selected:** 3.
+
+**Why:** (1) hides a real score miss. (2) is weakening a stated gate without a landing
+perf program. Release-gate already encodes which jobs are required. Workflow-level red
+must be read as "optional Lighthouse failed", not "CI blocked".

@@ -17,11 +17,10 @@
 > **17/17 PASS**. Pixel screenshot baselines remain OS-specific (win32 vs ubuntu) and are
 > **not** asserted under `CI=true`.
 >
-> **Follow-up — run `34681954066` @ `2ae34de`:** landing fixes held on Chromium; the job
-> still launched **mobile-safari** because `pnpm test:e2e -- --project=...` does not
-> forward Playwright flags through the nested filter script, and CI only installs
-> Chromium → `webkit-2287/pw_run.sh` missing. Fix: `pnpm exec playwright test
-> --project=mobile-chrome` from `apps/web`, and CI-only Playwright projects list.
+> **Proven — 2026-09-12.** Required graph is green on
+> [`34682319883`](https://github.com/querinoz/fitconnect/actions/runs/34682319883)
+> @ `14827a3`. **Release gate SUCCESS. Playwright E2E SUCCESS.** Lighthouse still FAIL
+> (optional). Do not equate GitHub's workflow-level failure with a blocked release-gate.
 
 > **CURSOR UPDATE — 2026-09-12.** The corrected workflow is now in the local working tree
 > (applied from the validated `ci-1.yml` artifact, then linted). `node scripts/ci-gate-lint.mjs`

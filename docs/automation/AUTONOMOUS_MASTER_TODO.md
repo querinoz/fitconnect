@@ -24,9 +24,9 @@ Anonymous write surface: **0**.
 - [x] ~~**CI workflow corrected locally**~~ — 2026-09-12 Cursor: applied validated `ci-1.yml`,
       dropped dead `@fitconnect/mobile` filter, made security blocking, added `release-gate`,
       decoupled independent jobs, included `feat/**` in Lighthouse, wired
-      `scripts/ci-gate-lint.mjs`. Validator: **0 errors**. Run `34680853231` proved those
-      jobs SUCCESS. **Playwright E2E was the remaining required red** — fixed locally
-      (17/17); GitHub `release-gate` on the fix SHA is the remaining proof.
+      `scripts/ci-gate-lint.mjs`. Validator: **0 errors**. GitHub run `34682319883` on
+      `14827a3`: **release-gate SUCCESS**, Playwright E2E SUCCESS. Lighthouse still FAIL
+      (optional). Workflow conclusion remains failure solely because of Lighthouse.
 - [ ] **`Android · Wear assembleDebug` result is UNKNOWN.** The run page says Failed, the
       commit checks page says Succeeded; GitHub needs sign-in for the logs. Someone signed in
       should read that job. `CI_ROOT_CAUSE_ANALYSIS.md`'s claim that it "PASSes independently"
