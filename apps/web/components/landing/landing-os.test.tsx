@@ -40,6 +40,8 @@ describe("landing OS narrative", () => {
     const heading = screen.getByRole("heading", { name: /elite human performance os/i });
     expect(heading).toBeVisible();
     expect(heading).toHaveAttribute("id", "fc-hero-title");
+    expect(heading.className).toMatch(/break-words/);
+    expect(heading.className).toMatch(/clamp\(1\.7rem/);
     expect(heading).not.toHaveStyle({ opacity: "0" });
     expect(screen.getByText(/SYS\.STATUS/i)).toBeVisible();
     expect(screen.getByRole("link", { name: /enter elite os/i })).toBeVisible();

@@ -126,10 +126,10 @@ export function HeroEliteOs() {
 
           <h1
             id="fc-hero-title"
-            className="max-w-full font-display text-[clamp(2.1rem,5.4vw,3.4rem)] font-extrabold uppercase leading-[0.92] tracking-tight text-eos-on-surface"
+            className="max-w-full break-words font-display text-[clamp(1.7rem,6.5vw,3.4rem)] font-extrabold uppercase leading-[0.92] tracking-tight text-eos-on-surface"
           >
             <span className="block">{e.headlineLine1}</span>
-            <span className="block">{e.headlineLine2}</span>
+            <span className="block max-w-full break-words">{e.headlineLine2}</span>
           </h1>
 
           <p className="max-w-2xl text-lg font-normal leading-relaxed text-eos-on-surface-muted sm:text-xl">
