@@ -52,6 +52,18 @@ describe("marketing landing runtime isolation", () => {
     expect(lenis).toMatch(/import\("lenis"\)/);
   });
 
+  it("does not construct ConvexReactClient unless the public URL is absolute http(s)", () => {
+    const provider = source("components/convex-client-provider.tsx");
+    const convex = source("lib/convex/client.ts");
+    expect(convex).toMatch(/isAbsoluteHttpUrl/);
+    expect(provider).toMatch(/readConvexUrl\(\)/);
+    expect(provider).toMatch(/try \{/);
+    const constructIndex = provider.indexOf("new ConvexReactClient");
+    const guardIndex = provider.indexOf("readConvexUrl");
+    expect(guardIndex).toBeGreaterThanOrEqual(0);
+    expect(constructIndex).toBeGreaterThan(guardIndex);
+  });
+
   it("exports static metadata so tags land in <head>", () => {
     const text = source("app/layout.tsx");
     expect(text).toMatch(/export const metadata/);
