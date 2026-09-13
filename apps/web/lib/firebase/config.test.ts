@@ -54,4 +54,10 @@ describe("readFirebaseWebOptions", () => {
     });
     expect(options.app).toBeNull();
   });
+
+  it("does not leak build-time Firebase into an explicit diagnostic env bag", () => {
+    const snapshot = { NEXT_PUBLIC_DEMO_MODE: "false" } as unknown as NodeJS.ProcessEnv;
+    expect(readFirebaseWebOptions(snapshot).app).toBeNull();
+    expect(isFirebaseWebConfigured(snapshot)).toBe(false);
+  });
 });

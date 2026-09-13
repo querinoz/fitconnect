@@ -43,29 +43,38 @@ const BUILD_TIME_FIREBASE_WEB = {
   NEXT_PUBLIC_FIREBASE_APPCHECK_DEBUG_TOKEN: process.env.NEXT_PUBLIC_FIREBASE_APPCHECK_DEBUG_TOKEN
 };
 
-function pick(env: NodeJS.ProcessEnv, key: keyof typeof BUILD_TIME_FIREBASE_WEB): string | null {
+function pick(
+  env: NodeJS.ProcessEnv,
+  key: keyof typeof BUILD_TIME_FIREBASE_WEB,
+  allowBuildInline: boolean
+): string | null {
   if (Object.prototype.hasOwnProperty.call(env, key)) {
     return sanitize(env[key]);
   }
-  return sanitize(BUILD_TIME_FIREBASE_WEB[key]);
+  if (allowBuildInline) {
+    return sanitize(BUILD_TIME_FIREBASE_WEB[key]);
+  }
+  return sanitize(env[key]);
 }
 
 export function readFirebaseWebOptions(
   env: NodeJS.ProcessEnv = process.env
 ): FirebaseWebOptions {
-  const apiKey = pick(env, "NEXT_PUBLIC_FIREBASE_API_KEY");
-  const authDomain = pick(env, "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN");
-  const projectId = pick(env, "NEXT_PUBLIC_FIREBASE_PROJECT_ID");
-  const storageBucket = pick(env, "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET");
-  const messagingSenderId = pick(env, "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID");
-  const appId = pick(env, "NEXT_PUBLIC_FIREBASE_APP_ID");
-  const measurementId = pick(env, "NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID") ?? undefined;
+  // Explicit env bags (tests/diagnostics) are snapshots — do not leak build inlining.
+  const allowBuildInline = env === process.env;
+  const apiKey = pick(env, "NEXT_PUBLIC_FIREBASE_API_KEY", allowBuildInline);
+  const authDomain = pick(env, "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN", allowBuildInline);
+  const projectId = pick(env, "NEXT_PUBLIC_FIREBASE_PROJECT_ID", allowBuildInline);
+  const storageBucket = pick(env, "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET", allowBuildInline);
+  const messagingSenderId = pick(env, "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID", allowBuildInline);
+  const appId = pick(env, "NEXT_PUBLIC_FIREBASE_APP_ID", allowBuildInline);
+  const measurementId = pick(env, "NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID", allowBuildInline) ?? undefined;
 
   const complete =
     Boolean(apiKey && authDomain && projectId && storageBucket && messagingSenderId && appId);
 
-  const debugRaw = pick(env, "NEXT_PUBLIC_FIREBASE_APPCHECK_DEBUG_TOKEN");
-  const providerRaw = pick(env, "NEXT_PUBLIC_FIREBASE_APPCHECK_PROVIDER");
+  const debugRaw = pick(env, "NEXT_PUBLIC_FIREBASE_APPCHECK_DEBUG_TOKEN", allowBuildInline);
+  const providerRaw = pick(env, "NEXT_PUBLIC_FIREBASE_APPCHECK_PROVIDER", allowBuildInline);
 
   return {
     app: complete
@@ -79,8 +88,8 @@ export function readFirebaseWebOptions(
           measurementId
         }
       : null,
-    vapidKey: pick(env, "NEXT_PUBLIC_FIREBASE_VAPID_KEY"),
-    appCheckSiteKey: pick(env, "NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY"),
+    vapidKey: pick(env, "NEXT_PUBLIC_FIREBASE_VAPID_KEY", allowBuildInline),
+    appCheckSiteKey: pick(env, "NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY", allowBuildInline),
     appCheckProvider: providerRaw === "enterprise" ? "enterprise" : "recaptcha",
     appCheckDebugToken: debugRaw === "true" ? true : debugRaw
   };
