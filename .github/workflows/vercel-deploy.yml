@@ -13,6 +13,12 @@ env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+  NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
 
 jobs:
   deploy:
@@ -54,6 +60,11 @@ jobs:
             exit 1
           fi
           echo "VERCEL_TOKEN is set (length ${#VERCEL_TOKEN})"
+          if [ -z "$NEXT_PUBLIC_FIREBASE_API_KEY" ] || [ -z "$NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN" ] || [ -z "$NEXT_PUBLIC_FIREBASE_PROJECT_ID" ] || [ -z "$NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET" ] || [ -z "$NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID" ] || [ -z "$NEXT_PUBLIC_FIREBASE_APP_ID" ]; then
+            echo "::error::Firebase web config missing in the GitHub production environment (NEXT_PUBLIC_FIREBASE_*). Production /api/health reported AUTH_UNAVAILABLE while DEMO_MODE=false."
+            exit 1
+          fi
+          echo "Firebase web config is set (apiKey length ${#NEXT_PUBLIC_FIREBASE_API_KEY})"
 
       # Run from repo root. The Vercel project Root Directory is apps/web;
       # running these steps inside apps/web makes deploy look for apps/web/apps/web
@@ -61,11 +72,53 @@ jobs:
       - name: Pull Vercel env
         run: pnpm dlx vercel@latest pull --yes --environment=production
 
+      # vercel pull does not include GitHub environment secrets. Bake the public
+      # Firebase web config into the pulled env files so `vercel build --prod`
+      # inlines it (production /api/health was AUTH_UNAVAILABLE without this).
+      - name: Inject Firebase web config
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          keys = [
+              "NEXT_PUBLIC_FIREBASE_API_KEY",
+              "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
+              "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
+              "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
+              "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
+              "NEXT_PUBLIC_FIREBASE_APP_ID",
+          ]
+          paths = [
+              Path(".vercel/.env.production.local"),
+              Path("apps/web/.vercel/.env.production.local"),
+          ]
+          for path in paths:
+              text = path.read_text(encoding="utf-8") if path.exists() else ""
+              lines = [
+                  ln for ln in text.splitlines()
+                  if not any(ln.startswith(f"{k}=") for k in keys)
+              ]
+              for key in keys:
+                  value = os.environ.get(key, "").strip()
+                  if not value:
+                      raise SystemExit(f"missing {key}")
+                  lines.append(f"{key}={value}")
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+          print(f"injected {len(keys)} NEXT_PUBLIC_FIREBASE keys into {len(paths)} env files")
+          PY
+
       - name: Build with Vercel
         run: pnpm dlx vercel@latest build --prod
         env:
           NEXT_PUBLIC_DEMO_MODE: "false"
           NEXT_PUBLIC_REALTIME_PROVIDER: broadcast
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+          NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
 
       - name: Deploy prebuilt
         run: pnpm dlx vercel@latest deploy --prebuilt --prod

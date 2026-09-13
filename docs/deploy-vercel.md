@@ -86,6 +86,7 @@ For `.github/workflows/vercel-deploy.yml`:
 | `VERCEL_TOKEN` | Vercel → Account Settings → Tokens |
 | `VERCEL_ORG_ID` | `.vercel/project.json` → `orgId` |
 | `VERCEL_PROJECT_ID` | `.vercel/project.json` → `projectId` |
+| `NEXT_PUBLIC_FIREBASE_*` | Firebase web app public config (required when `NEXT_PUBLIC_DEMO_MODE=false`) |
 
 Create GitHub **environment** named `production` and add the secrets.
 
