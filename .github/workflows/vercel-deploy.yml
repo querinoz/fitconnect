@@ -55,17 +55,17 @@ jobs:
           fi
           echo "VERCEL_TOKEN is set (length ${#VERCEL_TOKEN})"
 
+      # Run from repo root. The Vercel project Root Directory is apps/web;
+      # running these steps inside apps/web makes deploy look for apps/web/apps/web
+      # (run 34773470298 attempt 1: path does not exist).
       - name: Pull Vercel env
         run: pnpm dlx vercel@latest pull --yes --environment=production
-        working-directory: apps/web
 
       - name: Build with Vercel
         run: pnpm dlx vercel@latest build --prod
-        working-directory: apps/web
         env:
           NEXT_PUBLIC_DEMO_MODE: "false"
           NEXT_PUBLIC_REALTIME_PROVIDER: broadcast
 
       - name: Deploy prebuilt
         run: pnpm dlx vercel@latest deploy --prebuilt --prod
-        working-directory: apps/web
