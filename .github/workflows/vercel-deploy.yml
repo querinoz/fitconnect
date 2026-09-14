@@ -88,7 +88,10 @@ jobs:
       # running these steps inside apps/web makes deploy look for apps/web/apps/web
       # (run 34773470298 attempt 1: path does not exist).
       - name: Pull Vercel env
-        run: pnpm dlx vercel@latest pull --yes --environment=production
+        run: |
+          mkdir -p .vercel
+          printf '{"orgId":"%s","projectId":"%s"}\n' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
+          pnpm dlx vercel@48.12.1 pull --yes --environment=production --scope "$VERCEL_ORG_ID"
 
       # vercel pull does not include GitHub environment secrets. Bake the public
       # Firebase web config into the pulled env files so `vercel build --prod`
@@ -159,7 +162,7 @@ jobs:
           PY
 
       - name: Build with Vercel
-        run: pnpm dlx vercel@latest build --prod
+        run: pnpm dlx vercel@48.12.1 build --prod
         env:
           NEXT_PUBLIC_DEMO_MODE: "false"
           NEXT_PUBLIC_REALTIME_PROVIDER: broadcast
@@ -183,4 +186,4 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Deploy prebuilt
-        run: pnpm dlx vercel@latest deploy --prebuilt --prod
+        run: pnpm dlx vercel@48.12.1 deploy --prebuilt --prod
