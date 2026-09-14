@@ -10,7 +10,8 @@ import {
   selectAthlete,
   selectPlanForAthlete
 } from "@/lib/dashboard-store";
-import { DEMO_ATHLETE_ID, getTrainerById } from "@/lib/dashboard/seed";
+import { getTrainerById } from "@/lib/dashboard/seed";
+import { isLocalDemo, resolveDashboardAthleteId } from "@/lib/dashboard/resolve-scope";
 import type { LiveSessionIntent } from "@/lib/dashboard/types";
 import type { PlanBlock } from "@/lib/dashboard/types";
 import { PlanUpdateBanner } from "@/components/loops/morning-handshake/plan-update-banner";
@@ -34,7 +35,7 @@ import { AthleteOsDashboard } from "@/components/dashboard/os/athlete-os-dashboa
 import { StitchTodayScreen } from "@/components/mobile/stitch-screens";
 import { useStitchMobile } from "@/lib/hooks/use-media-query";
 import { useAthleteSessions } from "@/lib/api/hooks/use-athlete-sessions";
-import { computeReadiness } from "@/lib/readiness/compute";
+import { computeReadiness, hasCompleteReadinessInputs } from "@/lib/readiness/compute";
 import { RpeFeedbackModal } from "@/components/loops/live-session/rpe-feedback-modal";
 import { recommendationFromRpe } from "@/lib/ai/rules";
 import { useLiveHrvSync } from "@/lib/hooks/use-live-hrv-sync";
@@ -63,7 +64,7 @@ function coachFirstName(coachId: string | undefined): string {
 function AthleteDashboardBody() {
   const user = useAuthStore((s) => s.user);
   const resetDemo = useDashboardStore((s) => s.resetDemo);
-  const athleteId = user?.athleteId ?? DEMO_ATHLETE_ID;
+  const athleteId = resolveDashboardAthleteId(user);
   const athlete = useDashboardStore((s) => selectAthlete(s, athleteId));
   const plan = useDashboardStore((s) => selectPlanForAthlete(s, athleteId));
   const apply = useDashboardStore((s) => s.applyPlanDiff);
@@ -79,25 +80,27 @@ function AthleteDashboardBody() {
     setDemoPanel(window.location.search.includes("demo=1"));
   }, []);
 
-  const baselineHrv = athlete ? Math.max(58, athlete.hrv - 4) : 58;
-  const readiness = useMemo(
-    () =>
-      athlete
-        ? computeReadiness({
-            hrvMs: athlete.hrv,
-            baselineHrvMs: baselineHrv,
-            sleepHours: Number.parseFloat(athlete.sleepHours) || 7.5,
-            sleepEfficiency: athlete.sleepEfficiency,
-            strainScore:
-              athlete.recoveryStatus === "red"
-                ? 72
-                : athlete.recoveryStatus === "amber"
-                  ? 48
-                  : 28
-          })
-        : null,
-    [athlete, baselineHrv]
-  );
+  const baselineHrv = athlete?.hrv;
+  const readiness = useMemo(() => {
+    if (!athlete || baselineHrv == null) return null;
+    const sleepHours = Number.parseFloat(athlete.sleepHours);
+    const strainScore = isLocalDemo()
+      ? athlete.recoveryStatus === "red"
+        ? 72
+        : athlete.recoveryStatus === "amber"
+          ? 48
+          : 28
+      : Number.NaN;
+    const input = {
+      hrvMs: athlete.hrv,
+      baselineHrvMs: baselineHrv,
+      sleepHours,
+      sleepEfficiency: athlete.sleepEfficiency,
+      strainScore
+    };
+    if (!hasCompleteReadinessInputs(input)) return null;
+    return computeReadiness(input);
+  }, [athlete, baselineHrv]);
 
   const intent = plan ? intentFromPlan(plan.blocks) : "z2";
   const listener = useAthleteListener(athleteId);
@@ -297,7 +300,7 @@ function AthleteDashboardBody() {
           <StitchTodayScreen
             readinessScore={readiness.score}
             hrvMs={athlete.hrv}
-            baselineHrvMs={baselineHrv}
+            baselineHrvMs={athlete.hrv}
             streakDays={athlete.streakWeeks * 7}
             sleepHours={athlete.sleepHours}
             sleepEfficiency={athlete.sleepEfficiency}
@@ -327,9 +330,8 @@ function AthleteDashboardBody() {
           sports={athlete.sports}
           readiness={readiness.score}
           hrv={athlete.hrv}
-          baselineHrv={baselineHrv}
+          baselineHrv={athlete.hrv}
           sleepHours={athlete.sleepHours}
-          hrvSeed={athlete.id.length}
           sessions={sessions}
           sessionsLoading={sessionsLoading}
           coachName={coachName}

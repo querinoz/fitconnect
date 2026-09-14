@@ -28,7 +28,24 @@ export type {
   CanonicalDomainEvent
 } from "./canonical";
 
-export { ACTIVITY_UNITS, READINESS_UNITS, kjToKcal, kcalToKj } from "./canonical";
+export { ACTIVITY_UNITS, CANONICAL_SPORTS, READINESS_UNITS, kjToKcal, kcalToKj } from "./canonical";
+
+export type {
+  ProviderId,
+  MetricProvenance,
+  ProviderTier,
+  ProviderConstraints,
+  Provenanced,
+  NormalizedSample,
+  FitnessProvider
+} from "./fitness";
+
+export {
+  DISABLED_AGGREGATORS,
+  constraintsFor,
+  missingMetric,
+  reconcileSamples
+} from "./fitness";
 
 export type {
   AppCapability,
@@ -43,7 +60,9 @@ export type {
 export {
   capabilitiesFromPlan,
   resolveActiveMode,
-  toUserCapabilities
+  toUserCapabilities,
+  isEntitlementLive,
+  effectiveCapabilities
 } from "./identity";
 
 export type {

@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Activity,
   BadgeCheck,
@@ -9,41 +7,45 @@ import {
 } from "lucide-react";
 import { EliteStatTile } from "@/components/dashboard/elite";
 import { BentoGrid, EliteChip } from "@/components/elite-os";
-import { getAdminKpis } from "@/lib/admin/kpis";
+import { loadAdminKpis } from "@/lib/admin/kpis";
 import { formatPrice } from "@/lib/utils";
 import { EliteAppPage } from "@/components/shell/elite";
 
-export default function AdminOverviewPage() {
-  const kpis = getAdminKpis();
+export default async function AdminOverviewPage() {
+  const kpis = await loadAdminKpis();
 
   return (
     <EliteAppPage
       eyebrow="Admin"
       title="Overview"
-      subtitle="Live KPIs · demo data"
-      action={<EliteChip as="span" tone="telemetry">Realtime sync</EliteChip>}
+      subtitle={
+        kpis.source === "database"
+          ? "Live database counts — never seeded"
+          : "Database unavailable — showing zeros, not demo KPIs"
+      }
+      action={
+        <EliteChip as="span" tone="telemetry">
+          {kpis.source}
+        </EliteChip>
+      }
     >
       <BentoGrid cols={3}>
-        <EliteStatTile
-          icon={Users}
-          label="Paid athletes"
-          value={kpis.paidAthletes.toLocaleString()}
-        />
+        <EliteStatTile icon={Users} label="Paid athletes" value={String(kpis.paidAthletes)} />
         <EliteStatTile
           icon={BadgeCheck}
-          label="Verified coaches"
-          value={kpis.verifiedCoaches.toLocaleString()}
+          label="Coach capabilities"
+          value={String(kpis.verifiedCoaches)}
           tone="performance"
         />
         <EliteStatTile
           icon={CreditCard}
-          label="MRR"
+          label="Recorded subscription volume"
           value={formatPrice(kpis.mrrEur)}
           tone="volt"
         />
         <EliteStatTile
           icon={Calendar}
-          label="Sessions this week"
+          label="Paid sessions (7d)"
           value={String(kpis.sessionsThisWeek)}
         />
         <EliteStatTile

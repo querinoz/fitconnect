@@ -29,11 +29,10 @@ export async function POST(req: Request) {
   }
 
   if (!isLiveKitConfigured()) {
-    return NextResponse.json({
-      demo: true,
-      roomName,
-      message: "LiveKit not configured — demo room placeholder"
-    });
+    return NextResponse.json(
+      { error: "livekit_not_configured" },
+      { status: 503 }
+    );
   }
 
   const result = await createLiveKitToken({ roomName, participantName, participantId });

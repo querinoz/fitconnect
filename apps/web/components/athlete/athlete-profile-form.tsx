@@ -8,13 +8,13 @@ import {
   selectAthlete,
   useDashboardStore
 } from "@/lib/dashboard-store";
-import { DEMO_ATHLETE_ID } from "@/lib/dashboard/seed";
+import { resolveDashboardAthleteId } from "@/lib/dashboard/resolve-scope";
 import type { Sport } from "@/lib/data";
 import { SPORTS } from "@/lib/data";
 
 export function AthleteProfileForm() {
   const user = useAuthStore((s) => s.user);
-  const athleteId = user?.athleteId ?? DEMO_ATHLETE_ID;
+  const athleteId = resolveDashboardAthleteId(user);
   const athlete = useDashboardStore((s) => selectAthlete(s, athleteId));
   const update = useDashboardStore((s) => s.updateAthleteProfile);
 

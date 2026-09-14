@@ -1,7 +1,6 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
-import { isProductionSecurityMode } from "./runtime";
 
 export type RateLimitBucket =
   | "auth"
@@ -27,11 +26,20 @@ export const RATE_LIMIT_POLICY: Record<
   highcost: { limit: 20, window: "1 m", scope: "ip+user" }
 };
 
+export type RateLimitBackend = "upstash" | "memory" | "skipped";
+
 function redisFromEnv(env: NodeJS.ProcessEnv = process.env): Redis | null {
   const url = env.UPSTASH_REDIS_REST_URL?.trim();
   const token = env.UPSTASH_REDIS_REST_TOKEN?.trim();
-  if (!url || !token) return null;
+  if (!url || !token || url.includes("PASTE_") || token.includes("PASTE_")) {
+    return null;
+  }
   return new Redis({ url, token });
+}
+
+export function resolveRateLimitBackend(env: NodeJS.ProcessEnv = process.env): RateLimitBackend {
+  if (env.NEXT_PUBLIC_DEMO_MODE === "true") return "skipped";
+  return redisFromEnv(env) ? "upstash" : "memory";
 }
 
 const limiters = new Map<RateLimitBucket, Ratelimit>();
@@ -51,6 +59,40 @@ function limiterFor(bucket: RateLimitBucket, env: NodeJS.ProcessEnv): Ratelimit 
   return created;
 }
 
+function parseWindowMs(window: `${number} ${"s" | "m" | "h"}`): number {
+  const [raw, unit] = window.split(" ") as [string, "s" | "m" | "h"];
+  const n = Number(raw);
+  if (unit === "s") return n * 1000;
+  if (unit === "h") return n * 3_600_000;
+  return n * 60_000;
+}
+
+const memoryHits = new Map<string, number[]>();
+
+export function resetMemoryRateLimitForTests() {
+  memoryHits.clear();
+}
+
+function enforceMemoryLimit(
+  key: string,
+  limit: number,
+  windowMs: number,
+  now = Date.now()
+): { success: boolean; reset: number } {
+  const prior = memoryHits.get(key) ?? [];
+  const recent = prior.filter((t) => now - t < windowMs);
+  if (recent.length >= limit) {
+    memoryHits.set(key, recent);
+    return { success: false, reset: (recent[0] ?? now) + windowMs };
+  }
+  recent.push(now);
+  if (memoryHits.size > 20_000) {
+    memoryHits.clear();
+  }
+  memoryHits.set(key, recent);
+  return { success: true, reset: now + windowMs };
+}
+
 function clientKey(request: Request, bucket: RateLimitBucket): string {
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
@@ -64,6 +106,12 @@ function clientKey(request: Request, bucket: RateLimitBucket): string {
   return scope.includes("user") ? `${ip}:${user}` : ip;
 }
 
+/**
+ * Enforce a sliding-window limit.
+ * Demo skips. Production uses Upstash when configured, otherwise an in-process
+ * window (real limit, not distributed). Never 503s identity/auth because Redis
+ * is unset — health reports the backend honestly.
+ */
 export async function enforceRateLimit(
   request: Request,
   bucket: RateLimitBucket,
@@ -71,20 +119,16 @@ export async function enforceRateLimit(
 ): Promise<NextResponse | null> {
   if (env.NEXT_PUBLIC_DEMO_MODE === "true") return null;
 
+  const key = clientKey(request, bucket);
+  const policy = RATE_LIMIT_POLICY[bucket];
   const limiter = limiterFor(bucket, env);
-  if (!limiter) {
-    if (isProductionSecurityMode(env)) {
-      return NextResponse.json(
-        { error: "rate_limit_not_configured" },
-        { status: 503 }
-      );
-    }
-    return null;
-  }
 
-  const { success, reset } = await limiter.limit(clientKey(request, bucket));
-  if (success) return null;
-  const retryAfter = Math.max(1, Math.ceil((reset - Date.now()) / 1000));
+  const result = limiter
+    ? await limiter.limit(key)
+    : enforceMemoryLimit(`${bucket}:${key}`, policy.limit, parseWindowMs(policy.window));
+
+  if (result.success) return null;
+  const retryAfter = Math.max(1, Math.ceil((result.reset - Date.now()) / 1000));
   return NextResponse.json(
     { error: "rate_limited", bucket, retryAfter },
     { status: 429, headers: { "Retry-After": String(retryAfter) } }

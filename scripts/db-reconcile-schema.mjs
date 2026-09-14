@@ -67,6 +67,8 @@ const SERVER_ONLY_TABLES = new Set([
   // Spot moderation trail; no client report flow is exposed (see migration 021).
   "training_spot_reports",
   "training_spot_audit",
+  // First-party analytics; inserted by the telemetry route via DATABASE_URL.
+  "analytics_events",
   // Legacy 002-010 tables, pending the legacy-schema decision. Deny-all today.
   "sessions",
   "programs",

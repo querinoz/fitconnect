@@ -16,7 +16,9 @@ vi.mock("./persistence", () => ({
   claimStripeEventPg: vi.fn(),
   upsertSubscriptionPg: vi.fn(),
   updateSubscriptionByStripeIdPg: vi.fn(),
-  recordPaymentTransactionPg: vi.fn()
+  recordPaymentTransactionPg: vi.fn(),
+  grantPlanCapabilitiesPg: vi.fn(),
+  revokePlanCoachCapabilityPg: vi.fn()
 }));
 
 vi.mock("./server", () => ({
@@ -30,7 +32,8 @@ import {
   claimStripeEventPg,
   upsertSubscriptionPg,
   updateSubscriptionByStripeIdPg,
-  recordPaymentTransactionPg
+  recordPaymentTransactionPg,
+  grantPlanCapabilitiesPg
 } from "./persistence";
 
 describe("stripe webhook handler", () => {
@@ -228,6 +231,7 @@ describe("stripe webhook handler", () => {
       }
     } as never);
     expect(upsertSubscriptionPg).toHaveBeenCalled();
+    expect(grantPlanCapabilitiesPg).toHaveBeenCalled();
 
     await dispatchStripeEvent({
       id: "evt_pg_pay",

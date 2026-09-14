@@ -32,6 +32,17 @@ function redirectToCheckout(url: string | null | undefined) {
   }
 }
 
+async function parseStripeError(res: Response, fallback: string): Promise<Error> {
+  const body = (await res.json().catch(() => ({}))) as { error?: string };
+  if (body.error === "stripe_not_configured") {
+    return new Error("stripe_not_configured");
+  }
+  if (body.error === "unauthorized") {
+    return new Error("unauthorized");
+  }
+  return new Error(typeof body.error === "string" ? body.error : fallback);
+}
+
 export async function startStripeCheckout(input: {
   kind: CheckoutKind;
   amountCents: number;
@@ -44,7 +55,7 @@ export async function startStripeCheckout(input: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input)
   });
-  if (!res.ok) throw new Error("Checkout failed");
+  if (!res.ok) throw await parseStripeError(res, "Checkout failed");
   const result = (await res.json()) as CheckoutResult;
   redirectToCheckout(result.url);
   return result;
@@ -60,7 +71,7 @@ export async function startSubscription(input: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input)
   });
-  if (!res.ok) throw new Error("Subscribe failed");
+  if (!res.ok) throw await parseStripeError(res, "Subscribe failed");
   const result = (await res.json()) as SubscriptionResult;
   redirectToCheckout(result.url);
   return result;

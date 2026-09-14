@@ -40,34 +40,56 @@ export function AIAssistant() {
     }
   }, [messages, typing]);
 
-  function answer(text: string) {
-    const found = cannedForLang.find(
-      (c) => c.prompt.toLowerCase() === text.trim().toLowerCase()
-    );
-    if (found) return found.answer;
-    if (lang === "pt") {
-      return "Estou em modo demo, por isso só tenho algumas respostas pré-definidas. Toca numa das sugestões em baixo para ver o que consigo fazer.";
-    }
-    return "I'm in demo mode, so I only carry a few canned answers. Tap one of the suggestions below to see what I can do.";
-  }
-
-  function send(text: string) {
+  async function send(text: string) {
     if (!text.trim()) return;
     const id = Math.random().toString(36).slice(2);
-    setMessages((m) => [...m, { id, role: "user", text }]);
+    const nextUser: Msg = { id, role: "user", text };
+    setMessages((m) => [...m, nextUser]);
     setInput("");
     setTyping(true);
-    window.setTimeout(() => {
+    try {
+      const history = [...messages, nextUser].map((m) => ({ role: m.role, text: m.text }));
+      const res = await fetch("/api/v1/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: history })
+      });
+      const body = (await res.json().catch(() => ({}))) as { text?: string; error?: string };
+      let reply = body.text;
+      if (!res.ok || !reply) {
+        if (body.error === "ai_not_configured" || res.status === 503) {
+          reply =
+            lang === "pt"
+              ? "Zenith remoto não está configurado. Usa as sugestões ou liga um modelo (OPENAI_API_KEY)."
+              : "Remote Zenith is not configured. Use a suggestion or set OPENAI_API_KEY.";
+        } else if (res.status === 401) {
+          reply =
+            lang === "pt"
+              ? "Inicia sessão para falar com o Zenith."
+              : "Sign in to talk to Zenith.";
+        } else {
+          reply =
+            lang === "pt"
+              ? "Não consegui completar a resposta. Tenta outra vez."
+              : "I could not complete that reply. Try again.";
+        }
+      }
+      setMessages((m) => [...m, { id: `${id}-r`, role: "assistant", text: reply }]);
+    } catch {
       setMessages((m) => [
         ...m,
         {
-          id: id + "-r",
+          id: `${id}-r`,
           role: "assistant",
-          text: answer(text)
+          text:
+            lang === "pt"
+              ? "Ligação falhou. Tenta outra vez."
+              : "Connection failed. Try again."
         }
       ]);
+    } finally {
       setTyping(false);
-    }, 700);
+    }
   }
 
   function onSubmit(e: FormEvent) {
@@ -157,13 +179,13 @@ export function AIAssistant() {
                   <p className="flex items-center gap-1.5 text-ink-100 font-semibold mb-1">
                     <MessageCirclePlus className="h-4 w-4 text-plasma-400" />
                     {lang === "pt"
-                      ? "Olá Inês — como posso ajudar com o teu treino hoje?"
-                      : "Hi Inês — how can I help with your training today?"}
+                      ? "Olá — como posso ajudar com o teu treino hoje?"
+                      : "Hi — how can I help with your training today?"}
                   </p>
                   <p>
                     {lang === "pt"
-                      ? "Estou ligado ao teu painel: prontidão, HRV, sono e plano semanal. Toca numa sugestão para começar."
-                      : "I'm wired into your dashboard: readiness, HRV, sleep and weekly plan. Tap a suggestion to start."}
+                      ? "Zenith interpreta o teu contexto. Métricas vêm da camada de dados — nunca são inventadas."
+                      : "Zenith interprets your context. Metrics come from the data layer — never invented."}
                   </p>
                 </div>
               )}

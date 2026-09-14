@@ -1,4 +1,5 @@
 import { isFirebaseWebConfigured } from "@/lib/firebase/config";
+import { resolveRateLimitBackend } from "@/lib/security/rate-limit";
 
 export type HealthDependency = {
   name: string;
@@ -56,25 +57,31 @@ export function buildHealthReport(env: NodeJS.ProcessEnv = process.env): HealthR
     detail: stravaReady ? "oauth configured" : "demo strava fallback"
   });
 
+  const redisBackend = resolveRateLimitBackend(env);
   deps.push({
     name: "redis",
-    status:
-      configured(env, "UPSTASH_REDIS_REST_URL") && configured(env, "UPSTASH_REDIS_REST_TOKEN")
-        ? "ok"
-        : "degraded",
+    status: redisBackend === "upstash" ? "ok" : demoMode ? "ok" : "degraded",
     detail:
-      configured(env, "UPSTASH_REDIS_REST_URL") ? "upstash rate limit" : "rate limit disabled"
+      redisBackend === "upstash"
+        ? "upstash rate limit"
+        : redisBackend === "skipped"
+          ? "rate limit skipped (LOCAL_DEMO)"
+          : "in-memory rate limit (upstash unset)"
   });
 
+  const firstPartyAnalytics = configured(env, "DATABASE_URL");
   deps.push({
     name: "analytics",
     status:
-      configured(env, "NEXT_PUBLIC_POSTHOG_KEY") || configured(env, "NEXT_PUBLIC_SENTRY_DSN")
+      configured(env, "NEXT_PUBLIC_POSTHOG_KEY") ||
+      configured(env, "NEXT_PUBLIC_SENTRY_DSN") ||
+      firstPartyAnalytics
         ? "ok"
         : "degraded",
     detail: [
       configured(env, "NEXT_PUBLIC_POSTHOG_KEY") ? "posthog" : null,
-      configured(env, "NEXT_PUBLIC_SENTRY_DSN") ? "sentry" : null
+      configured(env, "NEXT_PUBLIC_SENTRY_DSN") ? "sentry" : null,
+      firstPartyAnalytics ? "first-party events" : null
     ]
       .filter(Boolean)
       .join(" + ") || "not configured"
@@ -122,11 +129,13 @@ export function buildHealthReport(env: NodeJS.ProcessEnv = process.env): HealthR
 
 function resolveRealtimeDetail(env: NodeJS.ProcessEnv): string {
   const provider = env.NEXT_PUBLIC_REALTIME_PROVIDER ?? "broadcast";
-  if (provider === "convex" && env.NEXT_PUBLIC_CONVEX_URL) {
+  const convexUrl = env.NEXT_PUBLIC_CONVEX_URL?.trim() ?? "";
+  const convexOk = /^https?:\/\//i.test(convexUrl);
+  if (provider === "convex" && convexOk) {
     return "convex";
   }
   if (provider === "supabase" && env.NEXT_PUBLIC_SUPABASE_URL) {
     return "supabase realtime (NOT authority)";
   }
-  return "broadcast channel (demo)";
+  return "same-origin broadcast (convex unset)";
 }

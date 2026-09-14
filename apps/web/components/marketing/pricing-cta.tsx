@@ -40,7 +40,12 @@ export function PricingCta({ planName, period, variant = "outline", children }: 
     setLoading(true);
     try {
       await startSubscription({ plan: mapped, period });
-    } catch {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "";
+      if (message === "stripe_not_configured") {
+        window.location.assign("/pricing?billing=unavailable");
+        return;
+      }
       window.location.assign(
         `/signin?next=${encodeURIComponent(`/pricing?plan=${mapped}&period=${period}`)}`
       );

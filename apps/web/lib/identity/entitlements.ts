@@ -6,6 +6,8 @@ import type {
 } from "@fitconnect/types";
 import {
   capabilitiesFromPlan,
+  effectiveCapabilities,
+  isEntitlementLive,
   resolveActiveMode,
   toUserCapabilities
 } from "@fitconnect/types";
@@ -166,12 +168,14 @@ export async function resolveEntitlements(
     return {
       planId: "unknown",
       planCapabilities: ["athlete"],
-      status: "unknown"
+      status: "unknown",
+      gracePeriodEndsAt: null,
+      live: false
     };
   }
   const { data } = await client
     .from("user_subscriptions")
-    .select("plan_id,status")
+    .select("plan_id,status,grace_period_ends_at")
     .eq("user_id", uid)
     .maybeSingle();
 
@@ -183,11 +187,16 @@ export async function resolveEntitlements(
       ? statusRaw
       : "unknown"
   ) as EntitlementSnapshot["status"];
+  const gracePeriodEndsAt =
+    (data as { grace_period_ends_at?: string | null } | null)?.grace_period_ends_at ?? null;
+  const live = isEntitlementLive(status, gracePeriodEndsAt);
 
   return {
     planId: planId || "athlete",
-    planCapabilities: capabilitiesFromPlan(planId),
-    status
+    planCapabilities: live ? capabilitiesFromPlan(planId) : ["athlete"],
+    status,
+    gracePeriodEndsAt,
+    live
   };
 }
 
@@ -223,4 +232,10 @@ export async function ensureCapabilityFromRoleAssign(
   return persistActiveMode(uid, accessToken, mode);
 }
 
-export { resolveActiveMode, toUserCapabilities, capabilitiesFromPlan };
+export {
+  resolveActiveMode,
+  toUserCapabilities,
+  capabilitiesFromPlan,
+  effectiveCapabilities,
+  isEntitlementLive
+};

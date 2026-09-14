@@ -35,4 +35,25 @@ describe("auth config diagnostic (no secrets)", () => {
     expect(report.PRODUCTION_AUTH_READY).toBe(false);
     expect(report.ANDROID_GOOGLE_SERVICES).toBe("MISSING");
   });
+
+  it("marks production auth ready when Firebase web + data plane are present and demo is off", () => {
+    const report = buildAuthConfigDiagnostic({
+      env: {
+        NEXT_PUBLIC_DEMO_MODE: "false",
+        NEXT_PUBLIC_FIREBASE_API_KEY: "AIzaSyTest",
+        NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "x.firebaseapp.com",
+        NEXT_PUBLIC_FIREBASE_PROJECT_ID: "x",
+        NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "x.appspot.com",
+        NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "1",
+        NEXT_PUBLIC_FIREBASE_APP_ID: "1:1:web:abc",
+        NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon-key"
+      } as unknown as NodeJS.ProcessEnv,
+      googleServicesPath: path.join("definitely", "missing", "google-services.json")
+    });
+    expect(report.FIREBASE_WEB_CONFIG).toBe("PRESENT");
+    expect(report.SUPABASE_DATA_API).toBe("PRESENT");
+    expect(report.PRODUCTION_AUTH_READY).toBe(true);
+    expect(report.ANDROID_GOOGLE_SERVICES).toBe("MISSING");
+  });
 });

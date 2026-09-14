@@ -53,7 +53,15 @@ describe("POST /api/v1/readiness/compute", () => {
   });
 
   it("should_return_score_between_0_and_100", async () => {
-    const res = await POST(authed({ hrvMs: 68, sleepHours: 8, strainScore: 20 }));
+    const res = await POST(
+      authed({
+        hrvMs: 68,
+        baselineHrvMs: 64,
+        sleepHours: 8,
+        sleepEfficiency: 92,
+        strainScore: 20
+      })
+    );
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.score).toBeGreaterThanOrEqual(0);
@@ -66,9 +74,8 @@ describe("POST /api/v1/readiness/compute", () => {
     expect(res.status).toBe(422);
   });
 
-  it("should_clamp_hrv_zero_without_negative_score", async () => {
+  it("should_refuse_missing_sleep_instead_of_fabricating", async () => {
     const res = await POST(authed({ hrvMs: 0, strainScore: 0 }));
-    const body = await res.json();
-    expect(body.score).toBeGreaterThanOrEqual(0);
+    expect(res.status).toBe(422);
   });
 });

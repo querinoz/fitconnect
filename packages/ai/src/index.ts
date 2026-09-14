@@ -110,3 +110,14 @@ export {
   evaluateAthleteState,
   evaluateZenithReadinessCore as evaluateZenithReadiness,
 };
+
+export {
+  orchestrateZenith,
+  resolveLlmRoute
+} from "./orchestrator";
+export type {
+  ZenithOrchestratorInput,
+  ZenithOrchestratorResult,
+  ZenithSpecialist,
+  LlmRoute
+} from "./orchestrator";

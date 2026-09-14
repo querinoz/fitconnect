@@ -6,11 +6,11 @@ import { AuthGate } from "@/components/auth-gate";
 import { InboxTabPanel } from "@/components/mobile/athlete-tab-panels";
 import { useAthleteMessages } from "@/lib/api/hooks/use-athlete-messages";
 import { useAuthStore } from "@/lib/auth-store";
-import { DEMO_ATHLETE_ID } from "@/lib/dashboard/seed";
+import { resolveDashboardAthleteId } from "@/lib/dashboard/resolve-scope";
 
 export default function AthleteInboxPage() {
   const user = useAuthStore((s) => s.user);
-  const athleteId = user?.athleteId ?? DEMO_ATHLETE_ID;
+  const athleteId = resolveDashboardAthleteId(user);
   const { messages, loading } = useAthleteMessages(athleteId);
 
   return (

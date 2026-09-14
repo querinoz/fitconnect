@@ -23,16 +23,28 @@ function clamp(n: number, min: number, max: number) {
   return Math.min(max, Math.max(min, n));
 }
 
-function safeNumber(value: number, fallback: number): number {
-  return Number.isFinite(value) ? value : fallback;
+export function hasCompleteReadinessInputs(
+  input: Partial<ReadinessInputs>
+): input is ReadinessInputs {
+  return (
+    Number.isFinite(input.hrvMs) &&
+    Number.isFinite(input.baselineHrvMs) &&
+    Number.isFinite(input.sleepHours) &&
+    Number.isFinite(input.sleepEfficiency) &&
+    Number.isFinite(input.strainScore)
+  );
 }
 
 export function computeReadiness(input: ReadinessInputs): ReadinessResult {
-  const hrvMs = clamp(safeNumber(input.hrvMs, 0), 0, 200);
-  const baselineHrvMs = clamp(safeNumber(input.baselineHrvMs, 58), 1, 200);
-  const sleepHours = safeNumber(input.sleepHours, 7.5);
-  const sleepEfficiency = clamp(safeNumber(input.sleepEfficiency, 85), 0, 100);
-  const strainScore = clamp(safeNumber(input.strainScore, 0), 0, 100);
+  if (!hasCompleteReadinessInputs(input)) {
+    throw new Error("insufficient_data");
+  }
+
+  const hrvMs = clamp(input.hrvMs, 0, 200);
+  const baselineHrvMs = clamp(input.baselineHrvMs, 1, 200);
+  const sleepHours = input.sleepHours;
+  const sleepEfficiency = clamp(input.sleepEfficiency, 0, 100);
+  const strainScore = clamp(input.strainScore, 0, 100);
 
   const historyWeight =
     input.historyDays === 7 ? 1.04 : input.historyDays === 1 ? 0.96 : 1;
@@ -80,11 +92,11 @@ export function mapRecoveryToComputeStatus(
 
 export function computeReadinessForApi(input: ReadinessInputs): ReadinessComputeResult {
   const result = computeReadiness(input);
-  const hrvMs = clamp(safeNumber(input.hrvMs, 0), 0, 200);
-  const baselineHrvMs = clamp(safeNumber(input.baselineHrvMs, 58), 1, 200);
-  const sleepHours = safeNumber(input.sleepHours, 7.5);
-  const sleepEfficiency = clamp(safeNumber(input.sleepEfficiency, 85), 0, 100);
-  const strainScore = clamp(safeNumber(input.strainScore, 0), 0, 100);
+  const hrvMs = clamp(input.hrvMs, 0, 200);
+  const baselineHrvMs = clamp(input.baselineHrvMs, 1, 200);
+  const sleepHours = input.sleepHours;
+  const sleepEfficiency = clamp(input.sleepEfficiency, 0, 100);
+  const strainScore = clamp(input.strainScore, 0, 100);
 
   const hrvRatio = baselineHrvMs > 0 ? hrvMs / baselineHrvMs : 1;
   const hrvComponent = clamp(hrvRatio * 100, 0, 100);

@@ -18,12 +18,39 @@ export async function POST(req: Request) {
   const bound = await requireAthleteId(req, body.athleteId);
   if (isAuthFailure(bound)) return bound.response;
 
+  const hrvSeries = Array.isArray(body.hrvSeries)
+    ? body.hrvSeries.filter((n) => Number.isFinite(n))
+    : [];
+  const sleepHoursSeries = Array.isArray(body.sleepHoursSeries)
+    ? body.sleepHoursSeries.filter((n) => Number.isFinite(n))
+    : [];
+
+  if (
+    hrvSeries.length === 0 ||
+    sleepHoursSeries.length === 0 ||
+    body.baselineHrv == null ||
+    body.trainingLoad7d == null
+  ) {
+    return NextResponse.json(
+      {
+        error: "insufficient_data",
+        missing: [
+          hrvSeries.length === 0 ? "hrvSeries" : null,
+          sleepHoursSeries.length === 0 ? "sleepHoursSeries" : null,
+          body.baselineHrv == null ? "baselineHrv" : null,
+          body.trainingLoad7d == null ? "trainingLoad7d" : null
+        ].filter(Boolean)
+      },
+      { status: 422 }
+    );
+  }
+
   const result = await evaluateReadiness({
     athleteId: bound.athleteId,
-    hrvSeries: body.hrvSeries ?? [62, 64, 68],
-    sleepHoursSeries: body.sleepHoursSeries ?? [7.2, 7.8, 8.1],
-    trainingLoad7d: body.trainingLoad7d ?? 3200,
-    baselineHrv: body.baselineHrv ?? 65
+    hrvSeries,
+    sleepHoursSeries,
+    trainingLoad7d: body.trainingLoad7d,
+    baselineHrv: body.baselineHrv
   });
 
   return NextResponse.json({ readiness: result });

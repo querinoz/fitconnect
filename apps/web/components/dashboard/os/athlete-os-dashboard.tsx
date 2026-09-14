@@ -51,7 +51,6 @@ type AthleteOsDashboardProps = {
   hrv: number;
   baselineHrv: number;
   sleepHours: string;
-  hrvSeed?: number;
   sessions: SessionSummary[];
   sessionsLoading?: boolean;
   coachName: string;
@@ -78,7 +77,6 @@ export function AthleteOsDashboard({
   hrv,
   baselineHrv,
   sleepHours,
-  hrvSeed = 1,
   sessions,
   sessionsLoading,
   coachName,
@@ -87,7 +85,7 @@ export function AthleteOsDashboard({
   athleteId,
   liveSection,
   todayPlan,
-  streakWeeks = 5,
+  streakWeeks = 0,
   onBookSession
 }: AthleteOsDashboardProps) {
   const { dashboard, hub, insights } = useLocale();
@@ -236,7 +234,7 @@ export function AthleteOsDashboard({
                 sleepHours={sleepHours}
               />
               {!compactCockpit ? (
-                <HrvChartFull baselineHrv={baselineHrv} seed={hrvSeed} />
+                <HrvChartFull />
               ) : null}
               <SessionsPanel
                 sessions={sessions}

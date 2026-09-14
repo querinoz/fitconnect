@@ -11,6 +11,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import { useOnboardingStore } from "@/lib/onboarding/store";
 import { startSubscription } from "@/lib/stripe/client";
 import { cn } from "@/lib/utils";
+import { resolveDashboardAthleteId } from "@/lib/dashboard/resolve-scope";
 import { BentoCard } from "@/components/elite-os/bento-card";
 
 const SPORTS = ["Running", "Cycling", "Swimming", "Strength", "Triathlon", "Climbing"];
@@ -154,7 +155,7 @@ export default function AthleteOnboardingPage() {
   }
 
   if (step === 3) {
-    const athleteId = user?.athleteId ?? "a-ines";
+    const athleteId = resolveDashboardAthleteId(user);
     return (
       <OnboardingShell
         step={3}

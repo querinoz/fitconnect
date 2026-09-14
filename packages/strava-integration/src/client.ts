@@ -57,6 +57,11 @@ const DEFAULT_STREAM_KEYS: StravaStreamType[] = [
   "grade_smooth"
 ];
 
+/** Status-only — never embed upstream body (may contain athlete data). */
+export function formatStravaApiError(status: number): string {
+  return `Strava API ${status}`;
+}
+
 export class StravaClient {
   private lastRateLimit: StravaRateLimit | null = null;
 
@@ -128,8 +133,8 @@ export class StravaClient {
   }
 
   private async errorFromResponse(res: Response): Promise<Error> {
-    const body = await res.text().catch(() => "");
-    return new Error(`Strava API ${res.status}: ${body.slice(0, 200)}`);
+    await res.text().catch(() => "");
+    return new Error(formatStravaApiError(res.status));
   }
 
   /** Exchange authorization code for tokens. */

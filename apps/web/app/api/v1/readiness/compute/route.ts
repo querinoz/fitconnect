@@ -6,10 +6,10 @@ import { requireAuth } from "@/lib/api/require-auth";
 
 const computeBodySchema = z.object({
   hrvMs: z.number(),
-  baselineHrvMs: z.number().optional(),
-  sleepHours: z.number().nullable().optional(),
-  sleepEfficiency: z.number().optional(),
-  strainScore: z.number().optional(),
+  baselineHrvMs: z.number(),
+  sleepHours: z.number(),
+  sleepEfficiency: z.number(),
+  strainScore: z.number(),
   historyDays: z.union([z.literal(1), z.literal(7)]).optional()
 });
 
@@ -37,10 +37,10 @@ export async function POST(req: Request) {
 
   const result = computeReadinessForApi({
     hrvMs: parsed.data.hrvMs,
-    baselineHrvMs: parsed.data.baselineHrvMs ?? 58,
-    sleepHours: parsed.data.sleepHours ?? 7.5,
-    sleepEfficiency: parsed.data.sleepEfficiency ?? 85,
-    strainScore: parsed.data.strainScore ?? 0,
+    baselineHrvMs: parsed.data.baselineHrvMs,
+    sleepHours: parsed.data.sleepHours,
+    sleepEfficiency: parsed.data.sleepEfficiency,
+    strainScore: parsed.data.strainScore,
     historyDays: parsed.data.historyDays
   });
 

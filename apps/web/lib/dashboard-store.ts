@@ -10,7 +10,7 @@ import type {
   LiveSessionIntent,
   PlanBlock
 } from "./dashboard/types";
-import { computeReadiness } from "./readiness/compute";
+import { computeReadiness, hasCompleteReadinessInputs } from "./readiness/compute";
 import type { AICoPilotAlert, LiveTick, Reaction } from "./realtime/types";
 
 type DashboardStore = DashboardState & {
@@ -175,15 +175,19 @@ export const useDashboardStore = create<DashboardStore>()((set, get) => ({
     set((s) => ({
       athletes: s.athletes.map((a) => {
         if (a.id !== athleteId) return a;
-        const sleepHours = Number.parseFloat(a.sleepHours) || 7.5;
-        const readiness = computeReadiness({
+        const sleepHours = Number.parseFloat(a.sleepHours);
+        const input = {
           hrvMs,
-          baselineHrvMs: Math.max(58, a.hrv - 4),
+          baselineHrvMs: a.hrv,
           sleepHours,
           sleepEfficiency: a.sleepEfficiency,
           strainScore:
             a.recoveryStatus === "red" ? 72 : a.recoveryStatus === "amber" ? 48 : 28
-        });
+        };
+        if (!hasCompleteReadinessInputs(input)) {
+          return { ...a, hrv: hrvMs };
+        }
+        const readiness = computeReadiness(input);
         return {
           ...a,
           hrv: hrvMs,

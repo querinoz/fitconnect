@@ -9,7 +9,7 @@ import { EliteAppPage } from "@/components/shell/elite";
 import { BentoCard, EliteButton } from "@/components/elite-os";
 import { EliteChip } from "@/components/elite-os/elite-chip";
 import { useAuthStore } from "@/lib/auth-store";
-import { DEMO_ATHLETE_ID } from "@/lib/dashboard/seed";
+import { resolveDashboardAthleteId } from "@/lib/dashboard/resolve-scope";
 import { trackEvent } from "@/lib/observability/posthog";
 import type { WearableProvider } from "@fitconnect/types";
 import { Activity, Check, ExternalLink, Link2 } from "lucide-react";
@@ -25,10 +25,11 @@ const PROVIDERS: { id: WearableProvider; label: string; envKey: string }[] = [
 
 export default function WearablesSettingsPage() {
   const user = useAuthStore((s) => s.user);
-  const athleteId = user?.athleteId ?? DEMO_ATHLETE_ID;
+  const athleteId = resolveDashboardAthleteId(user);
   const [connected, setConnected] = useState<WearableProvider[]>([]);
 
   useEffect(() => {
+    if (!athleteId) return;
     void fetch(`/api/v1/integrations/status?athleteId=${encodeURIComponent(athleteId)}`)
       .then((r) => r.json())
       .then((data: { providers: { id: WearableProvider; status: string }[] }) => {

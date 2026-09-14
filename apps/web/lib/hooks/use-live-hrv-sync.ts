@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
+import { isDemoModeEnv } from "@/lib/auth/middleware-auth";
 import { useDashboardStore } from "@/lib/dashboard-store";
 import { resolveTransport } from "@/lib/platform/realtime/resolve-transport";
 
-/** Simulates wearable HRV sync + cross-tab broadcast every 45s. */
+/** Subscribe to real vitals. Never invent HRV outside explicit LOCAL_DEMO. */
 export function useLiveHrvSync(athleteId: string, enabled = true) {
   const ingest = useDashboardStore((s) => s.ingestHrvReading);
 
@@ -19,6 +20,12 @@ export function useLiveHrvSync(athleteId: string, enabled = true) {
         ingest(athleteId, msg.hrvMs);
       }
     });
+
+    if (!isDemoModeEnv(process.env.NEXT_PUBLIC_DEMO_MODE)) {
+      return () => {
+        unsub();
+      };
+    }
 
     const tick = () => {
       const athlete = useDashboardStore
@@ -43,3 +50,4 @@ export function useLiveHrvSync(athleteId: string, enabled = true) {
     };
   }, [athleteId, enabled, ingest]);
 }
+

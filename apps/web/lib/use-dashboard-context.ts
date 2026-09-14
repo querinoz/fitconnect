@@ -14,13 +14,12 @@ import {
   selectSessionsForCoach,
   useDashboardStore
 } from "@/lib/dashboard-store";
-import { DEMO_ATHLETE_ID } from "@/lib/dashboard/seed";
+import { resolveDashboardAthleteId, resolveDashboardCoachId } from "@/lib/dashboard/resolve-scope";
 import { getTrainerById } from "@/lib/dashboard/seed";
 
 export function useAthleteContext(overrideId?: string) {
   const user = useAuthStore((s) => s.user);
-  const athleteId =
-    overrideId ?? user?.athleteId ?? (user?.role === "admin" ? DEMO_ATHLETE_ID : "");
+  const athleteId = overrideId ?? resolveDashboardAthleteId(user);
 
   const state = useDashboardStore();
   return useMemo(() => {
@@ -46,7 +45,7 @@ export function useAthleteContext(overrideId?: string) {
 
 export function useCoachContext() {
   const user = useAuthStore((s) => s.user);
-  const coachId = user?.coachId ?? "t-001";
+  const coachId = resolveDashboardCoachId(user);
 
   const state = useDashboardStore();
   return useMemo(() => {

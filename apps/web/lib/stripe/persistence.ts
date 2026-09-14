@@ -172,3 +172,31 @@ export async function getCustomerIdPg(userId: string): Promise<string | null> {
   const row = await getSubscriptionPg(userId);
   return row?.stripe_customer_id ?? null;
 }
+
+export async function grantPlanCapabilitiesPg(userId: string, planId: string): Promise<void> {
+  const { capabilitiesFromPlan } = await import("@fitconnect/types");
+  const caps = capabilitiesFromPlan(planId);
+  for (const cap of caps) {
+    await pgQuery(
+      `insert into public.user_capabilities (uid, capability, source, granted_at)
+       values ($1, $2, 'plan', now())
+       on conflict (uid, capability) do update set source = excluded.source`,
+      [userId, cap]
+    );
+  }
+  if (!caps.includes("coach")) {
+    await pgQuery(
+      `delete from public.user_capabilities
+       where uid = $1 and capability = 'coach' and source = 'plan'`,
+      [userId]
+    );
+  }
+}
+
+export async function revokePlanCoachCapabilityPg(userId: string): Promise<void> {
+  await pgQuery(
+    `delete from public.user_capabilities
+     where uid = $1 and capability = 'coach' and source = 'plan'`,
+    [userId]
+  );
+}

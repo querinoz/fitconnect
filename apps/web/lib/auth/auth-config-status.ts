@@ -60,6 +60,6 @@ export function buildAuthConfigDiagnostic(input?: {
     ANDROID_GOOGLE_SERVICES: androidGs ? "PRESENT" : "MISSING",
     SUPABASE_DATA_API: supabaseData ? "PRESENT" : "MISSING",
     // Web SDK + demo-off is engineering session plumbing, not production IdP GO.
-    PRODUCTION_AUTH_READY: false
+    PRODUCTION_AUTH_READY: !demo && firebaseWeb && supabaseData
   };
 }

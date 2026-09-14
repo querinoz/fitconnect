@@ -66,15 +66,16 @@ describe("computeReadiness", () => {
     expect(result.score).toBeLessThanOrEqual(100);
   });
 
-  it("should_treat_nan_strain_as_zero", () => {
-    const result = computeReadiness({
-      hrvMs: 62,
-      baselineHrvMs: 58,
-      sleepHours: 7.5,
-      sleepEfficiency: 85,
-      strainScore: Number.NaN
-    });
-    expect(result.score).toBeGreaterThan(0);
+  it("refuses to fabricate scores from non-finite inputs", () => {
+    expect(() =>
+      computeReadiness({
+        hrvMs: 62,
+        baselineHrvMs: 58,
+        sleepHours: 7.5,
+        sleepEfficiency: 85,
+        strainScore: Number.NaN
+      })
+    ).toThrow(/insufficient_data/);
   });
 
   it("should_weight_7_day_history_higher_than_1_day", () => {

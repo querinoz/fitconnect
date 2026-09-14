@@ -31,7 +31,33 @@ export type EntitlementSnapshot = {
   /** Capabilities granted by the current plan (may be a subset of owned). */
   planCapabilities: AppCapability[];
   status: "active" | "trialing" | "past_due" | "canceled" | "none" | "unknown";
+  gracePeriodEndsAt: string | null;
+  /** True while the plan is active, trialing, or past_due inside grace. */
+  live: boolean;
 };
+
+export function isEntitlementLive(
+  status: EntitlementSnapshot["status"],
+  gracePeriodEndsAt?: string | null,
+  now: number = Date.now()
+): boolean {
+  if (status === "active" || status === "trialing") return true;
+  if (status === "past_due" && gracePeriodEndsAt) {
+    const ends = Date.parse(gracePeriodEndsAt);
+    return Number.isFinite(ends) && ends > now;
+  }
+  return false;
+}
+
+/** Drop coach (and other paid) capabilities when the plan is no longer live. */
+export function effectiveCapabilities(
+  owned: AppCapability[],
+  planCapabilities: AppCapability[],
+  live: boolean
+): AppCapability[] {
+  if (live) return Array.from(new Set(owned));
+  return owned.filter((c) => c === "athlete" || planCapabilities.includes(c));
+}
 
 export type UnifiedIdentityMe = {
   uid: string;

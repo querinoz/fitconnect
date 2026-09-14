@@ -25,12 +25,25 @@ export function AnalyticsBootstrap() {
 
   useEffect(() => {
     if (!pathname) return;
-    if (pathname === "/") trackEvent("landing_view", { path: pathname });
-    if (pathname === "/mobile") trackEvent("demo_open", { path: pathname });
-    if (pathname.startsWith("/discover")) trackEvent("discover_view", { path: pathname });
-    if (pathname.startsWith("/trainer/")) trackEvent("coach_profile", { path: pathname });
-    if (pathname.includes("/signup")) trackEvent("signup", { path: pathname });
-    if (pathname.includes("/dashboard")) trackEvent("readiness_view", { path: pathname });
+    const event =
+      pathname === "/"
+        ? "landing_view"
+        : pathname.startsWith("/discover")
+          ? "discover_view"
+          : pathname.startsWith("/trainer/")
+            ? "coach_profile"
+            : pathname.includes("/signup")
+              ? "signup"
+              : pathname.includes("/dashboard")
+                ? "readiness_view"
+                : null;
+    if (!event) return;
+    trackEvent(event, { path: pathname });
+    void fetch("/api/v1/telemetry", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: event, path: pathname })
+    }).catch(() => undefined);
   }, [pathname]);
 
   return null;

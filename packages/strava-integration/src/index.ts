@@ -6,7 +6,8 @@ export {
   createPushSubscription,
   listPushSubscriptions,
   deletePushSubscription,
-  deauthorizeAthlete
+  deauthorizeAthlete,
+  formatStravaApiError
 } from "./client";
 
 export {

@@ -4,7 +4,9 @@ import {
   listCapabilities,
   readPreferredActiveMode,
   resolveEntitlements,
-  resolveActiveMode
+  resolveActiveMode,
+  effectiveCapabilities,
+  persistActiveMode
 } from "@/lib/identity/entitlements";
 import { getIdentityProfile } from "@/lib/identity/repository";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
@@ -32,7 +34,9 @@ export async function GET(request: Request) {
       entitlements: {
         planId: "team",
         planCapabilities: ["athlete", "coach"],
-        status: "active"
+        status: "active",
+        gracePeriodEndsAt: null,
+        live: true
       },
       onboardingCompleted: true,
       onboardingStep: 0,
@@ -52,18 +56,26 @@ export async function GET(request: Request) {
     );
   }
 
-  const capabilities = await listCapabilities(auth.user.id, auth.accessToken);
+  const owned = await listCapabilities(auth.user.id, auth.accessToken);
   const preferred = await readPreferredActiveMode(auth.user.id, auth.accessToken);
   const legacy =
     profileResult.profile?.role === "coach" || profileResult.profile?.role === "athlete"
       ? profileResult.profile.role
       : null;
+  const entitlements = await resolveEntitlements(auth.user.id, auth.accessToken);
+  const capabilities = effectiveCapabilities(
+    owned,
+    entitlements.planCapabilities,
+    entitlements.live
+  );
   const activeMode = resolveActiveMode({
     capabilities,
     preferred,
     legacyRole: legacy
   });
-  const entitlements = await resolveEntitlements(auth.user.id, auth.accessToken);
+  if (preferred === "coach" && activeMode === "athlete") {
+    await persistActiveMode(auth.user.id, auth.accessToken, "athlete");
+  }
   const profile = profileResult.profile;
 
   return NextResponse.json({

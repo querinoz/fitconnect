@@ -127,3 +127,12 @@ describe("matchStravaEndpoint", () => {
     await expect(client.getActivityComments(9)).rejects.toBeInstanceOf(StravaPathDeniedError);
   });
 });
+
+describe("formatStravaApiError", () => {
+  it("never embeds upstream body", async () => {
+    const { formatStravaApiError } = await import("./client");
+    const msg = formatStravaApiError(403);
+    expect(msg).toBe("Strava API 403");
+    expect(msg).not.toMatch(/athlete|token|email/i);
+  });
+});

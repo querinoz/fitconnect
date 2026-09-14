@@ -11,7 +11,6 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { generateHrvSeries } from "@/lib/readiness/compute";
 import { rechartsTheme } from "@/lib/charts/recharts-theme";
 
 const RANGES = [
@@ -43,19 +42,31 @@ function CustomTooltip({
   );
 }
 
-export function HrvChartFull({ baselineHrv, seed = 1 }: { baselineHrv: number; seed?: number }) {
+export function HrvChartFull({
+  series = []
+}: {
+  series?: { date: string; hrv: number; sleep: number }[];
+}) {
   const [range, setRange] = useState(14);
-  const full = useMemo(
-    () =>
-      generateHrvSeries(30, baselineHrv, seed).map((d) => ({
-        date: d.day,
-        hrv: d.hrv,
-        sleep: d.sleep
-      })),
-    [baselineHrv, seed]
-  );
-  const data = full.slice(-range);
-  const avg = Math.round(data.reduce((s, d) => s + d.hrv, 0) / data.length);
+  const data = useMemo(() => series.slice(-range), [series, range]);
+  const avg = data.length
+    ? Math.round(data.reduce((s, d) => s + d.hrv, 0) / data.length)
+    : null;
+
+  if (data.length === 0 || avg == null) {
+    return (
+      <div className="rounded-2xl border border-ink-800 bg-ink-900/40 p-6">
+        <p className="mb-1 text-xs font-medium uppercase tracking-wider text-ink-500">
+          HRV × Sleep correlation
+        </p>
+        <p className="font-display text-base font-bold text-ink-100">Recovery trend</p>
+        <p className="mt-3 text-sm text-ink-400">
+          No HRV series yet. Connect Health Connect or a wearable — we never invent recovery
+          charts.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-2xl border border-ink-800 bg-ink-900/40 p-6">

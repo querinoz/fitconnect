@@ -46,4 +46,26 @@ describe("buildHealthReport", () => {
     expect(report.dependencies.find((d) => d.name === "firebase")?.status).toBe("ok");
     expect(report.dependencies.find((d) => d.name === "auth")?.status).toBe("ok");
   });
+
+  it("uses in-memory rate limit when Upstash is unset", () => {
+    const report = buildHealthReport({
+      ...process.env,
+      NEXT_PUBLIC_DEMO_MODE: "false",
+      UPSTASH_REDIS_REST_URL: undefined,
+      UPSTASH_REDIS_REST_TOKEN: undefined
+    } as NodeJS.ProcessEnv);
+    expect(report.dependencies.find((d) => d.name === "redis")?.detail).toMatch(/in-memory/);
+  });
+
+  it("marks first-party analytics ok when DATABASE_URL is set", () => {
+    const report = buildHealthReport({
+      ...process.env,
+      NEXT_PUBLIC_DEMO_MODE: "false",
+      NEXT_PUBLIC_POSTHOG_KEY: undefined,
+      NEXT_PUBLIC_SENTRY_DSN: undefined,
+      DATABASE_URL: "postgres://example/db"
+    } as NodeJS.ProcessEnv);
+    expect(report.dependencies.find((d) => d.name === "analytics")?.status).toBe("ok");
+    expect(report.dependencies.find((d) => d.name === "analytics")?.detail).toMatch(/first-party/);
+  });
 });

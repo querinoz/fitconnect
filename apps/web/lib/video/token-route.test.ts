@@ -79,6 +79,8 @@ describe("video token IDOR", () => {
         participantId: "user-a"
       })
     );
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(503);
+    const body = (await response.json()) as { error?: string };
+    expect(body.error).toBe("livekit_not_configured");
   });
 });

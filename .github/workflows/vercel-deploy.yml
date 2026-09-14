@@ -19,6 +19,24 @@ env:
   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
   NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+  STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+  STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+  STRIPE_PRICE_ATHLETE_MONTHLY: ${{ secrets.STRIPE_PRICE_ATHLETE_MONTHLY }}
+  STRIPE_PRICE_ATHLETE_ANNUAL: ${{ secrets.STRIPE_PRICE_ATHLETE_ANNUAL }}
+  STRIPE_PRICE_TEAM_MONTHLY: ${{ secrets.STRIPE_PRICE_TEAM_MONTHLY }}
+  STRIPE_PRICE_TEAM_ANNUAL: ${{ secrets.STRIPE_PRICE_TEAM_ANNUAL }}
+  STRIPE_PRICE_COACH_MONTHLY: ${{ secrets.STRIPE_PRICE_COACH_MONTHLY }}
+  STRIPE_PRICE_COACH_ANNUAL: ${{ secrets.STRIPE_PRICE_COACH_ANNUAL }}
+  UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+  UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+  NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+  NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
+  NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+  LIVEKIT_API_KEY: ${{ secrets.LIVEKIT_API_KEY }}
+  LIVEKIT_API_SECRET: ${{ secrets.LIVEKIT_API_SECRET }}
+  NEXT_PUBLIC_LIVEKIT_URL: ${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
 jobs:
   deploy:
@@ -75,12 +93,12 @@ jobs:
       # vercel pull does not include GitHub environment secrets. Bake the public
       # Firebase web config into the pulled env files so `vercel build --prod`
       # inlines it (production /api/health was AUTH_UNAVAILABLE without this).
-      - name: Inject Firebase web config
+      - name: Inject GitHub production secrets into Vercel env
         run: |
           python3 - <<'PY'
           import os
           from pathlib import Path
-          keys = [
+          required = [
               "NEXT_PUBLIC_FIREBASE_API_KEY",
               "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
               "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
@@ -88,24 +106,56 @@ jobs:
               "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
               "NEXT_PUBLIC_FIREBASE_APP_ID",
           ]
+          optional = [
+              "STRIPE_SECRET_KEY",
+              "STRIPE_WEBHOOK_SECRET",
+              "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+              "STRIPE_PRICE_ATHLETE_MONTHLY",
+              "STRIPE_PRICE_ATHLETE_ANNUAL",
+              "STRIPE_PRICE_TEAM_MONTHLY",
+              "STRIPE_PRICE_TEAM_ANNUAL",
+              "STRIPE_PRICE_COACH_MONTHLY",
+              "STRIPE_PRICE_COACH_ANNUAL",
+              "UPSTASH_REDIS_REST_URL",
+              "UPSTASH_REDIS_REST_TOKEN",
+              "NEXT_PUBLIC_POSTHOG_KEY",
+              "NEXT_PUBLIC_POSTHOG_HOST",
+              "NEXT_PUBLIC_SENTRY_DSN",
+              "LIVEKIT_API_KEY",
+              "LIVEKIT_API_SECRET",
+              "NEXT_PUBLIC_LIVEKIT_URL",
+              "OPENAI_API_KEY",
+          ]
+          keys = required + optional
           paths = [
               Path(".vercel/.env.production.local"),
               Path("apps/web/.vercel/.env.production.local"),
           ]
+          injected_optional = 0
           for path in paths:
               text = path.read_text(encoding="utf-8") if path.exists() else ""
               lines = [
                   ln for ln in text.splitlines()
                   if not any(ln.startswith(f"{k}=") for k in keys)
               ]
-              for key in keys:
+              for key in required:
                   value = os.environ.get(key, "").strip()
                   if not value:
                       raise SystemExit(f"missing {key}")
                   lines.append(f"{key}={value}")
+              for key in optional:
+                  value = os.environ.get(key, "").strip()
+                  if not value:
+                      continue
+                  injected_optional += 1
+                  lines.append(f"{key}={value}")
               path.parent.mkdir(parents=True, exist_ok=True)
               path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-          print(f"injected {len(keys)} NEXT_PUBLIC_FIREBASE keys into {len(paths)} env files")
+          print(
+              f"injected {len(required)} required Firebase keys; "
+              f"{injected_optional} optional secret slots were non-empty "
+              f"(counted across {len(paths)} env files)"
+          )
           PY
 
       - name: Build with Vercel
@@ -119,6 +169,18 @@ jobs:
           NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
           NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
           NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+          NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
+          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+          NEXT_PUBLIC_LIVEKIT_URL: ${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+          LIVEKIT_API_KEY: ${{ secrets.LIVEKIT_API_KEY }}
+          LIVEKIT_API_SECRET: ${{ secrets.LIVEKIT_API_SECRET }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Deploy prebuilt
         run: pnpm dlx vercel@latest deploy --prebuilt --prod

@@ -1,4 +1,4 @@
-import { computeReadiness } from "@/lib/readiness/compute";
+import { computeReadiness, hasCompleteReadinessInputs } from "@/lib/readiness/compute";
 import { getPrisma } from "@/lib/db/client";
 import { listStravaActivities } from "@/lib/integrations/strava/repository";
 
@@ -15,14 +15,18 @@ export async function recalcReadinessFromActivities(athleteExternalId: string) {
   const recentLoad = activities.reduce((s, a) => s + a.movingTimeSec / 60, 0);
   const strainScore = Math.min(100, Math.round(recentLoad / 3));
 
-  const baselineHrv = Math.max(58, athlete.hrv - 4);
-  const score = computeReadiness({
+  const sleepHours = Number.parseFloat(athlete.sleepHours);
+  const input = {
     hrvMs: athlete.hrv,
-    baselineHrvMs: baselineHrv,
-    sleepHours: Number.parseFloat(athlete.sleepHours) || 7.5,
+    baselineHrvMs: athlete.hrv,
+    sleepHours,
     sleepEfficiency: athlete.sleepEfficiency,
     strainScore
-  });
+  };
+  if (!hasCompleteReadinessInputs(input) || !Number.isFinite(athlete.hrv) || athlete.hrv <= 0) {
+    return null;
+  }
+  const score = computeReadiness(input);
 
   await prisma.athleteProfile.update({
     where: { externalId: athleteExternalId },

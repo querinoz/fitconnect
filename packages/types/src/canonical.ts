@@ -13,33 +13,36 @@ export type ActivityVisibility = "private" | "public" | "followers";
  * Canonical sport keys for persisted activities.
  * Aligns with Android `Sport` enum names (lowercase for SQL text).
  */
-export type CanonicalSport =
-  | "RUN"
-  | "TRAIL_RUN"
-  | "WALK"
-  | "HIKE"
-  | "RIDE"
-  | "MOUNTAIN_BIKE"
-  | "GRAVEL"
-  | "INDOOR_RIDE"
-  | "E_BIKE"
-  | "SWIM_POOL"
-  | "SWIM_OPEN"
-  | "STRENGTH"
-  | "HIIT"
-  | "YOGA"
-  | "PILATES"
-  | "MOBILITY"
-  | "ROW"
-  | "SKI"
-  | "SNOWBOARD"
-  | "SURF"
-  | "SAIL"
-  | "PADDLE"
-  | "RACQUET"
-  | "TEAM"
-  | "GOLF"
-  | "OTHER";
+export const CANONICAL_SPORTS = [
+  "RUN",
+  "TRAIL_RUN",
+  "WALK",
+  "HIKE",
+  "RIDE",
+  "MOUNTAIN_BIKE",
+  "GRAVEL",
+  "INDOOR_RIDE",
+  "E_BIKE",
+  "SWIM_POOL",
+  "SWIM_OPEN",
+  "STRENGTH",
+  "HIIT",
+  "YOGA",
+  "PILATES",
+  "MOBILITY",
+  "ROW",
+  "SKI",
+  "SNOWBOARD",
+  "SURF",
+  "SAIL",
+  "PADDLE",
+  "RACQUET",
+  "TEAM",
+  "GOLF",
+  "OTHER"
+] as const;
+
+export type CanonicalSport = (typeof CANONICAL_SPORTS)[number];
 
 /** Storage units for activity telemetry — never ambiguous. */
 export const ACTIVITY_UNITS = {

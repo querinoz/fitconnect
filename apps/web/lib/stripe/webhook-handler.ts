@@ -2,8 +2,10 @@ import type Stripe from "stripe";
 import { getPrisma } from "@/lib/db/client";
 import {
   claimStripeEventPg,
+  grantPlanCapabilitiesPg,
   isStripePgPersistenceAvailable,
   recordPaymentTransactionPg,
+  revokePlanCoachCapabilityPg,
   updateSubscriptionByStripeIdPg,
   upsertSubscriptionPg
 } from "./persistence";
@@ -64,6 +66,7 @@ export async function handleCheckoutSessionCompleted(event: Stripe.Event) {
         status: "active",
         gracePeriodEndsAt: null
       });
+      await grantPlanCapabilitiesPg(userId, session.metadata?.planId ?? "athlete");
       return;
     }
 
@@ -89,6 +92,9 @@ export async function handleCheckoutSessionCompleted(event: Stripe.Event) {
         gracePeriodEndsAt: null
       }
     });
+    if (isStripePgPersistenceAvailable()) {
+      await grantPlanCapabilitiesPg(userId, session.metadata?.planId ?? "athlete");
+    }
     return;
   }
 
@@ -125,6 +131,12 @@ export async function handleSubscriptionUpdated(event: Stripe.Event) {
       status: subscription.status,
       planId
     });
+    const userId = subscription.metadata?.userId;
+    if (userId && (subscription.status === "canceled" || subscription.status === "unpaid")) {
+      await revokePlanCoachCapabilityPg(userId);
+    } else if (userId && (subscription.status === "active" || subscription.status === "trialing")) {
+      await grantPlanCapabilitiesPg(userId, planId);
+    }
     return;
   }
 
@@ -142,6 +154,8 @@ export async function handleSubscriptionDeleted(event: Stripe.Event) {
 
   if (isStripePgPersistenceAvailable()) {
     await updateSubscriptionByStripeIdPg(subscription.id, { status: "cancelled" });
+    const userId = subscription.metadata?.userId;
+    if (userId) await revokePlanCoachCapabilityPg(userId);
     return;
   }
 

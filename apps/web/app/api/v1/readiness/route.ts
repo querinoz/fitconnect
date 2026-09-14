@@ -26,5 +26,5 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.json({ score: 82, source: "demo" });
+  return NextResponse.json({ score: null, source: "insufficient_data" });
 }
