@@ -1,18 +1,5 @@
 import Foundation
 
-struct ContractEndpoint: Identifiable, Hashable {
-    let id: String
-    let name: String
-    let method: String
-    let path: String
-    let status: String
-}
-
-protocol ApiContract {
-    func endpoints() async -> [ContractEndpoint]
-}
-import Foundation
-
 protocol ApiContract {
     func athleteDashboard() -> AthleteDashboardSnapshot
     func athleteDiscoverCards() -> [FeatureHighlight]

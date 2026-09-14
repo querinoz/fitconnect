@@ -1,22 +1,5 @@
 import Foundation
 
-enum HealthKitIntegrationStatus: String {
-    case blockedExternal = "BLOCKED_EXTERNAL"
-    case planned = "PLANNED"
-}
-
-struct HealthMetricPermission: Identifiable, Hashable {
-    let id: String
-    let name: String
-    let status: HealthKitIntegrationStatus
-    let note: String
-}
-
-protocol HealthKitContract {
-    func requestedPermissions() async -> [HealthMetricPermission]
-}
-import Foundation
-
 struct HealthKitCapability: Hashable {
     let title: String
     let status: String

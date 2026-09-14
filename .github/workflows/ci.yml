@@ -35,6 +35,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: node scripts/ci-gate-lint.mjs
+      - run: node scripts/check-swift-duplicate-decls.mjs
       - run: node --test scripts/lighthouse-mobile.test.mjs scripts/inject-github-secrets-into-vercel-env.test.mjs scripts/preflight-vercel-env.test.mjs scripts/classify-vercel-build-failure.test.mjs
       - run: pnpm tooling:health
       - run: pnpm lint
@@ -94,7 +95,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"

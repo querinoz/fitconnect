@@ -7,13 +7,13 @@ import { AuthGate } from "@/components/auth-gate";
 import { InboxList } from "@/components/app/inbox-list";
 import { InboxTabPanel } from "@/components/mobile/athlete-tab-panels";
 import { useAuthStore } from "@/lib/auth-store";
-import { DEMO_COACH_TOMAS_ID } from "@/lib/dashboard/seed";
+import { resolveDashboardCoachId } from "@/lib/dashboard/resolve-scope";
 import type { ThreadMessage } from "@fitconnect/types";
 import { useStitchMobile } from "@/lib/hooks/use-media-query";
 
 export default function CoachInboxPage() {
   const user = useAuthStore((s) => s.user);
-  const coachId = user?.coachId ?? DEMO_COACH_TOMAS_ID;
+  const coachId = resolveDashboardCoachId(user);
   const [messages, setMessages] = useState<ThreadMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const stitchMobile = useStitchMobile();

@@ -1,37 +1,3 @@
-import Observation
-import SwiftUI
-
-@MainActor
-@Observable
-final class RootRouter {
-    var activeRole: AppRole?
-
-    func signIn(as role: AppRole) {
-        activeRole = role
-    }
-
-    func signOut() {
-        activeRole = nil
-    }
-}
-
-struct RootRouterView: View {
-    let router: RootRouter
-
-    var body: some View {
-        Group {
-            switch router.activeRole {
-            case .athlete:
-                AthleteShell(router: router)
-            case .coach:
-                CoachShell(router: router)
-            case nil:
-                AuthView(router: router)
-            }
-        }
-        .animation(MotionTokens.smooth, value: router.activeRole)
-    }
-}
 import SwiftUI
 
 struct RootRouter: View {

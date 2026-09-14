@@ -1,7 +1,7 @@
 {
   "version": 4,
   "updated": "2026-09-14",
-  "headBaseline": "327ab7eb621fe336e711426c4e2871fefb12d46d",
+  "headBaseline": "aff47c8e35e86158b9db489a3a1f19e5c396ba32",
   "productionAlias": "https://fitconnect-phi.vercel.app",
   "dispositions": [
     "IMPLEMENTED",
@@ -250,7 +250,8 @@
       "id": "coach.athlete_management",
       "category": "COACH",
       "surfaces": ["web", "android"],
-      "disposition": "IMPLEMENTED"
+      "disposition": "IMPLEMENTED",
+      "notes": "Coach inbox/sessions/athlete pages use resolveDashboardCoachId — no Tomás seed leak when DEMO_MODE=false."
     },
     {
       "id": "coach.programs_assignments",
@@ -405,7 +406,7 @@
       "surfaces": ["android"],
       "disposition": "IMPLEMENTED",
       "ux": "VERIFIED",
-      "notes": "Native Compose. 2026-09-14: Maestro 2.10.0 athlete-ia.yaml PASS on fitconnect_phone (Feed → Ascend → Train FAB → Dashboard → Profile). Package com.fitconnect.android."
+      "notes": "Native Compose. Maestro athlete-ia.yaml PASS on fitconnect_phone. UnusedBoxWithConstraintsScope lint in athlete/coach Feed replaced with Box (CI :coach:lintDebug)."
     },
     {
       "id": "wear.glanceable_workout",
@@ -421,7 +422,7 @@
       "surfaces": ["ios"],
       "disposition": "IMPLEMENTED",
       "ux": "BLOCKED",
-      "notes": "Source present. Simulator BLOCKED on Windows. LocalDemoBanner is explicitly LOCAL_DEMO."
+      "notes": "Source present and de-duplicated (concatenated Path A types removed 2026-09-14). Simulator BLOCKED on Windows. LocalDemoBanner is explicitly LOCAL_DEMO. HealthKit remains a contract, not a fake PASS."
     },
     {
       "id": "sports.licensing",

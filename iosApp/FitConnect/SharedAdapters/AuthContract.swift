@@ -1,25 +1,3 @@
-import Foundation
-
-enum AppRole: String, CaseIterable, Identifiable, Hashable {
-    case athlete
-    case coach
-
-    var id: String { rawValue }
-    var title: String { rawValue.capitalized }
-}
-
-struct DemoUser: Identifiable, Hashable {
-    let id: String
-    let name: String
-    let role: AppRole
-    let headline: String
-    let location: String
-}
-
-protocol AuthContract {
-    func signIn(role: AppRole) async throws -> DemoUser
-    func signOut() async
-}
 import Observation
 import SwiftUI
 

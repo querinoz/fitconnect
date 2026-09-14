@@ -7,14 +7,14 @@ import { SessionsList } from "@/components/app/sessions-list";
 import { SessionsTabPanel } from "@/components/mobile/athlete-tab-panels";
 import { SectionHeader } from "@/components/ui-glass/premium-system";
 import { useAuthStore } from "@/lib/auth-store";
-import { DEMO_COACH_TOMAS_ID } from "@/lib/dashboard/seed";
+import { resolveDashboardCoachId } from "@/lib/dashboard/resolve-scope";
 import type { SessionSummary } from "@fitconnect/types";
 import { useStitchMobile } from "@/lib/hooks/use-media-query";
 import { useEffect, useState } from "react";
 
 export default function CoachSessionsPage() {
   const user = useAuthStore((s) => s.user);
-  const coachId = user?.coachId ?? DEMO_COACH_TOMAS_ID;
+  const coachId = resolveDashboardCoachId(user);
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const stitchMobile = useStitchMobile();

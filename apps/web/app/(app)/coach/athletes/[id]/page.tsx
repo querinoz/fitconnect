@@ -12,7 +12,8 @@ import {
   selectAthlete,
   selectPlanForAthlete
 } from "@/lib/dashboard-store";
-import { DEMO_COACH_TOMAS_ID, getTrainerById } from "@/lib/dashboard/seed";
+import { getTrainerById } from "@/lib/dashboard/seed";
+import { resolveDashboardCoachId } from "@/lib/dashboard/resolve-scope";
 import { ReadinessCard } from "@/components/loops/morning-handshake/readiness-card";
 import { QuickDiffChips } from "@/components/loops/morning-handshake/quick-diff-chips";
 import { LiveMetrics } from "@/components/loops/live-session/live-metrics";
@@ -252,7 +253,7 @@ export default function CoachAthleteDetailPage() {
   const params = useParams<{ id: string }>();
   const athleteId = params.id;
   const user = useAuthStore((s) => s.user);
-  const coachId = user?.coachId ?? DEMO_COACH_TOMAS_ID;
+  const coachId = resolveDashboardCoachId(user);
   const coachSelf = user?.name?.split(" ")[0] ?? "You";
 
   return (

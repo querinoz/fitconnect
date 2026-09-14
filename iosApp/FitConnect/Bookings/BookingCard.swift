@@ -1,39 +1,6 @@
 import SwiftUI
 
 struct BookingCard: View {
-    let booking: DemoCatalog.Booking
-    let accent: Color
-
-    init(booking: DemoCatalog.Booking, accent: Color = EosColors.telemetry) {
-        self.booking = booking
-        self.accent = accent
-    }
-
-    var body: some View {
-        GlassCard(accent: accent) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(booking.title)
-                        .font(.headline)
-                        .foregroundStyle(EosColors.textPrimary)
-                    Text(booking.counterpart)
-                        .font(.subheadline)
-                        .foregroundStyle(EosColors.textSecondary)
-                }
-                Spacer()
-                StatusChip(title: booking.time, accent: accent)
-            }
-
-            DetailRow(label: "Location", value: booking.location)
-            Text(booking.notes)
-                .font(.subheadline)
-                .foregroundStyle(EosColors.textSecondary)
-        }
-    }
-}
-import SwiftUI
-
-struct BookingCard: View {
     let booking: BookingSummary
 
     var body: some View {

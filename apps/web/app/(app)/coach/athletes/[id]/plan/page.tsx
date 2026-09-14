@@ -12,7 +12,7 @@ import {
   selectPlanForAthlete,
   useDashboardStore
 } from "@/lib/dashboard-store";
-import { DEMO_COACH_TOMAS_ID } from "@/lib/dashboard/seed";
+import { resolveDashboardCoachId } from "@/lib/dashboard/resolve-scope";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
@@ -20,7 +20,7 @@ export default function CoachPlanBuilderPage() {
   const params = useParams();
   const athleteId = String(params.id);
   const user = useAuthStore((s) => s.user);
-  const coachId = user?.coachId ?? DEMO_COACH_TOMAS_ID;
+  const coachId = resolveDashboardCoachId(user);
 
   const athlete = useDashboardStore((s) => selectAthlete(s, athleteId));
   const plan = useDashboardStore((s) => selectPlanForAthlete(s, athleteId));

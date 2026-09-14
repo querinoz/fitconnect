@@ -1,17 +1,5 @@
 import Foundation
 
-struct RealtimeSnapshot: Identifiable, Hashable {
-    let id: String
-    let channel: String
-    let freshness: String
-    let listeners: Int
-}
-
-protocol RealtimeContract {
-    func channelSnapshots() async -> [RealtimeSnapshot]
-}
-import Foundation
-
 protocol RealtimeContract {
     var statusLabel: String { get }
     var latencyLabel: String { get }
