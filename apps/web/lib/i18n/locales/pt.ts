@@ -402,7 +402,13 @@ export const pt = {
       chartTitle: "Curva de strain ao vivo",
       chartSubtitle: "FC, ritmo e carga",
       endSession: "Terminar sessão",
-      startLive: "Iniciar sessão ao vivo"
+      startLive: "Iniciar sessão ao vivo",
+      emptyTitle: "Nenhum treino na fila",
+      emptyBody:
+        "O TRAIN guiado corre na app Android. Liga um dispositivo ou reserva um coach — a frequência cardíaca nunca é inventada.",
+      connectDevice: "Ligar um dispositivo",
+      findCoach: "Encontrar um coach",
+      waitingTelemetry: "À espera do dispositivo"
     },
     coach: {
       rosterTitle: "Plantel",
@@ -412,7 +418,11 @@ export const pt = {
       greenReadiness: "Prontidão verde",
       amberReadiness: "Prontidão âmbar",
       sendCheckIn: "Enviar check-in",
-      messageSent: "Mensagem enviada"
+      messageSent: "Mensagem enviada",
+      emptyRoster: "Ainda não tens atletas no roster.",
+      emptyCoach: "Nenhum coach está ligado a esta conta.",
+      findCoach: "Encontrar um coach",
+      unavailableHrv: "HRV indisponível"
     },
     inbox: {
       title: "Inbox",
@@ -423,7 +433,9 @@ export const pt = {
       approve: "Aprovar",
       checkInTitle: "Check-in do coach",
       checkInSentBody: "A tua nota está visível na pré-visualização da app.",
-      checkInPrompt: "Como sentiste a última série?"
+      checkInPrompt: "Como sentiste a última série?",
+      emptyTitle: "Inbox em silêncio",
+      emptyBody: "Planos e check-ins do teu coach aparecem aqui."
     },
     profile: {
       title: "Perfil",
@@ -434,7 +446,8 @@ export const pt = {
       athleteRole: "Atleta híbrido · Lisboa",
       coachRole: "Coach de força · Madrid",
       streak: "Série",
-      score: "Score"
+      score: "Score",
+      scoreUnavailable: "—"
     },
     appearance: {
       title: "Aparência",

@@ -27,7 +27,6 @@ export function SessionsTabPanel({
   onStartLive?: () => void;
   onEndLive?: () => void;
 }) {
-  const router = useRouter();
   const [localLive, setLocalLive] = useState(false);
   const live = sessionLive || localLive;
   const upcoming = sessions.find((s) => s.status === "scheduled") ?? sessions[0];
@@ -37,6 +36,7 @@ export function SessionsTabPanel({
     <StitchSessionsScreen
       sessionLive={live}
       loading={loading}
+      empty={!loading && sessions.length === 0}
       title={mapped?.title}
       meta={mapped?.meta}
       timeLabel={mapped?.timeLabel}
@@ -44,7 +44,6 @@ export function SessionsTabPanel({
       onStart={() => {
         setLocalLive(true);
         onStartLive?.();
-        router.push("/dashboard");
       }}
       onEnd={() => {
         setLocalLive(false);
@@ -58,7 +57,7 @@ export function CoachTabPanel({
   coachName,
   coachHeadline,
   coachAvatar,
-  hrvMs = 68,
+  hrvMs,
   isCoach = false,
   roster
 }: {
@@ -113,8 +112,8 @@ export function InboxTabPanel({
 export function ProfileTabPanel({
   name,
   subtitle,
-  streakDays = 35,
-  readinessScore = 82,
+  streakDays = 0,
+  readinessScore = 0,
   isCoach = false,
   showSettings = true,
   extra

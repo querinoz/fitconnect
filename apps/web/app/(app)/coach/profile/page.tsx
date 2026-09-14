@@ -45,8 +45,8 @@ export default function CoachProfilePlaceholderPage() {
           isCoach
           name={user?.name ?? "Coach"}
           subtitle="Verified specialist"
-          streakDays={35}
-          readinessScore={84}
+          streakDays={0}
+          readinessScore={0}
           extra={themeExtra}
         />
       ) : (

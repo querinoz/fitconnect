@@ -253,6 +253,9 @@ export type StitchSessionsScreenProps = {
   pace?: string;
   load?: string;
   loading?: boolean;
+  empty?: boolean;
+  /** Marketing device mock only — never use on authenticated product surfaces. */
+  preview?: boolean;
   joinHref?: string;
   onStart: () => void;
   onEnd: () => void;
@@ -267,13 +270,16 @@ export function StitchSessionsScreen({
   pace,
   load,
   loading,
+  empty,
+  preview = false,
   joinHref,
   onStart,
   onEnd
 }: StitchSessionsScreenProps) {
   const s = useLocale().mobileApp.sessions;
-  const workoutTitle = title ?? s.workoutTitle;
-  const workoutMeta = meta ?? s.workoutMeta;
+  const workoutTitle = title ?? (preview ? s.workoutTitle : undefined);
+  const workoutMeta = meta ?? (preview ? s.workoutMeta : undefined);
+  const showEmpty = !preview && (empty || (!loading && !workoutTitle && !sessionLive));
 
   return (
     <StitchScreenMotion>
@@ -282,12 +288,31 @@ export function StitchSessionsScreen({
         <PremiumCard tone={sessionLive ? "brand" : "neutral"} className="p-4">
           {loading ? (
             <p className="text-sm text-ink-400">Loading sessions…</p>
+          ) : showEmpty ? (
+            <div className="space-y-3">
+              <p className="font-display text-lg font-bold">{s.emptyTitle}</p>
+              <p className="text-sm text-ink-400">{s.emptyBody}</p>
+              <div className="flex flex-col gap-2">
+                <Link
+                  href="/settings/wearables"
+                  className="flex h-11 w-full items-center justify-center rounded-2xl bg-grad-pulse text-sm font-semibold text-ink-950"
+                >
+                  {s.connectDevice}
+                </Link>
+                <Link
+                  href="/discover"
+                  className="flex h-11 w-full items-center justify-center rounded-2xl border border-brand-500/30 text-sm font-semibold text-brand-200"
+                >
+                  {s.findCoach}
+                </Link>
+              </div>
+            </div>
           ) : (
             <>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="font-display text-lg font-bold">{workoutTitle}</p>
-                  <p className="mt-1 text-xs text-ink-400">{workoutMeta}</p>
+                  <p className="font-display text-lg font-bold">{workoutTitle ?? s.waitingTelemetry}</p>
+                  {workoutMeta ? <p className="mt-1 text-xs text-ink-400">{workoutMeta}</p> : null}
                 </div>
                 <span
                   className={cn(
@@ -297,34 +322,36 @@ export function StitchSessionsScreen({
                       : "bg-brand-500/15 text-brand-300"
                   )}
                 >
-                  {sessionLive ? s.liveNow : (timeLabel ?? "07:30")}
+                  {sessionLive ? s.liveNow : (timeLabel ?? s.nextUp)}
                 </span>
               </div>
 
               <div className="mt-5 grid grid-cols-3 gap-2">
                 <StitchMetric
                   label={s.hr}
-                  value={sessionLive ? (hr ?? "142") : " -- "}
+                  value={sessionLive ? (hr ?? "—") : " -- "}
                   icon={HeartPulse}
                   compact
                 />
                 <StitchMetric
                   label={s.pace}
-                  value={sessionLive ? (pace ?? "4:38") : " -- "}
+                  value={sessionLive ? (pace ?? "—") : " -- "}
                   icon={Activity}
                   compact
                 />
                 <StitchMetric
                   label={s.load}
-                  value={sessionLive ? (load ?? "68%") : " -- "}
+                  value={sessionLive ? (load ?? "—") : " -- "}
                   icon={Zap}
                   compact
                 />
               </div>
 
-              <ChartShell title={s.chartTitle} subtitle={s.chartSubtitle}>
-                <StitchLoadBars live={sessionLive} />
-              </ChartShell>
+              {preview || sessionLive ? (
+                <ChartShell title={s.chartTitle} subtitle={s.chartSubtitle}>
+                  <StitchLoadBars live={sessionLive} />
+                </ChartShell>
+              ) : null}
 
               {joinHref && sessionLive ? (
                 <Link
@@ -358,7 +385,7 @@ export function StitchSessionsScreen({
 export type StitchRosterRow = {
   name: string;
   readinessLabel: string;
-  hrvMs: number;
+  hrvMs?: number;
 };
 
 export type StitchCoachScreenProps = {
@@ -370,6 +397,7 @@ export type StitchCoachScreenProps = {
   roster?: StitchRosterRow[];
   messageSent?: boolean;
   onSendCheckIn?: () => void;
+  preview?: boolean;
 };
 
 export function StitchCoachScreen({
@@ -377,22 +405,22 @@ export function StitchCoachScreen({
   coachName = "Coach Diego",
   coachHeadline,
   coachAvatar,
-  hrvMs = 68,
+  hrvMs,
   roster,
   messageSent,
-  onSendCheckIn
+  onSendCheckIn,
+  preview = false
 }: StitchCoachScreenProps) {
   const c = useLocale().mobileApp.coach;
   const title = isCoach ? c.rosterTitle : c.coachTitle;
-  const rows: StitchRosterRow[] =
-    roster ??
-    (isCoach
-      ? [
-          { name: "Ines M.", readinessLabel: c.greenReadiness, hrvMs: 68 },
-          { name: "Joao R.", readinessLabel: c.amberReadiness, hrvMs: 49 },
-          { name: "Sara K.", readinessLabel: c.greenReadiness, hrvMs: 72 }
-        ]
-      : [{ name: coachName, readinessLabel: coachHeadline ?? c.greenReadiness, hrvMs }]);
+  const demoRoster: StitchRosterRow[] = isCoach
+    ? [
+        { name: "Ines M.", readinessLabel: c.greenReadiness, hrvMs: 68 },
+        { name: "Joao R.", readinessLabel: c.amberReadiness, hrvMs: 49 },
+        { name: "Sara K.", readinessLabel: c.greenReadiness, hrvMs: 72 }
+      ]
+    : [{ name: coachName, readinessLabel: coachHeadline ?? c.greenReadiness, hrvMs }];
+  const rows: StitchRosterRow[] = roster ?? (preview ? demoRoster : []);
 
   return (
     <StitchScreenMotion>
@@ -402,7 +430,18 @@ export function StitchCoachScreen({
           kicker={isCoach ? c.activeAthletes : c.onlineNow}
         />
         <PremiumCard className="p-4">
-          {rows.map((row) => (
+          {rows.length === 0 ? (
+            <div className="space-y-3">
+              <p className="text-sm text-ink-300">{isCoach ? c.emptyRoster : c.emptyCoach}</p>
+              <Link
+                href={isCoach ? "/coach/roster" : "/discover"}
+                className="inline-flex h-11 items-center justify-center rounded-2xl bg-grad-pulse px-4 text-sm font-semibold text-ink-950"
+              >
+                {isCoach ? c.rosterTitle : c.findCoach}
+              </Link>
+            </div>
+          ) : (
+          rows.map((row) => (
             <div
               key={row.name}
               className="flex items-center justify-between border-b border-glass-border py-3 last:border-b-0"
@@ -429,9 +468,14 @@ export function StitchCoachScreen({
                   <p className="text-xs text-ink-400">{row.readinessLabel}</p>
                 </div>
               </div>
-              <span className="text-xs tabular-nums text-accent-400">{row.hrvMs} ms</span>
+              <span className="text-xs tabular-nums text-accent-400">
+                {typeof row.hrvMs === "number" && Number.isFinite(row.hrvMs)
+                  ? `${row.hrvMs} ms`
+                  : c.unavailableHrv}
+              </span>
             </div>
-          ))}
+          ))
+          )}
         </PremiumCard>
         <button
           type="button"
@@ -459,8 +503,9 @@ export function StitchInboxScreen({
   loading,
   planApproved = false,
   messageSent = false,
-  onApprovePlan
-}: StitchInboxScreenProps) {
+  onApprovePlan,
+  preview = false
+}: StitchInboxScreenProps & { preview?: boolean }) {
   const i = useLocale().mobileApp.inbox;
   const hasMessages = messages.length > 0;
 
@@ -480,7 +525,7 @@ export function StitchInboxScreen({
               body={expandMessageBody(msg)}
             />
           ))
-        ) : (
+        ) : preview ? (
           <>
             <StitchMessageCard
               title={i.planApprovedTitle}
@@ -493,6 +538,11 @@ export function StitchInboxScreen({
               body={messageSent ? i.checkInSentBody : i.checkInPrompt}
             />
           </>
+        ) : (
+          <PremiumCard className="space-y-3 p-4">
+            <p className="font-display text-lg font-bold">{i.emptyTitle}</p>
+            <p className="text-sm text-ink-400">{i.emptyBody}</p>
+          </PremiumCard>
         )}
       </div>
     </StitchScreenMotion>
@@ -506,6 +556,7 @@ export type StitchProfileScreenProps = {
   readinessScore: number;
   isCoach?: boolean;
   showSettings?: boolean;
+  preview?: boolean;
 };
 
 export function StitchProfileScreen({
@@ -514,9 +565,17 @@ export function StitchProfileScreen({
   streakDays,
   readinessScore,
   isCoach = false,
-  showSettings = true
+  showSettings = true,
+  preview = false
 }: StitchProfileScreenProps) {
   const p = useLocale().mobileApp.profile;
+  const scoreValue = isCoach
+    ? preview
+      ? "4.96"
+      : p.scoreUnavailable
+    : readinessScore > 0
+      ? String(readinessScore)
+      : p.scoreUnavailable;
 
   return (
     <StitchScreenMotion>
@@ -538,7 +597,7 @@ export function StitchProfileScreen({
           <MetricTile label={p.streak} value={`${streakDays}d`} icon={Zap} tone="volt" />
           <MetricTile
             label={p.score}
-            value={isCoach ? "4.96" : String(readinessScore)}
+            value={scoreValue}
             icon={Activity}
           />
         </div>

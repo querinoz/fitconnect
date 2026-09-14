@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { isLocalDemo } from "@/lib/dashboard/resolve-scope";
 
 const ALERTS = [
   {
@@ -43,6 +44,14 @@ const CONFIG = {
 };
 
 export function AlertCards() {
+  if (!isLocalDemo()) {
+    return (
+      <p className="mb-6 text-sm text-ink-400">
+        No roster alerts yet. Recovery flags appear when athlete wearables send HRV and sleep —
+        we never invent those signals.
+      </p>
+    );
+  }
   return (
     <div className="mb-6 grid gap-3 md:grid-cols-3">
       {ALERTS.map((a) => {
@@ -72,7 +81,19 @@ export function AlertCards() {
   );
 }
 
-export function PayoutSummary() {
+export function PayoutSummary({ netPayout }: { netPayout?: string }) {
+  if (!isLocalDemo()) {
+    return (
+      <div className="rounded-2xl border border-ink-800 bg-ink-900/40 p-5">
+        <h3 className="font-display text-sm font-bold text-ink-100">Payout Summary</h3>
+        <p className="mt-2 text-sm text-ink-400">
+          {netPayout && netPayout !== "—"
+            ? `Recorded take-home ${netPayout}.`
+            : "Stripe Connect is not live in this environment. Earnings stay blank until keys are configured."}
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="rounded-2xl border border-ink-800 bg-ink-900/40 p-5">
       <div className="mb-4 flex items-center justify-between">

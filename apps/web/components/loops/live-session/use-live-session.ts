@@ -4,6 +4,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useChannel } from "@/lib/realtime/use-channel";
 import { startTicker } from "@/lib/realtime/synthetic";
 import { applyMessage } from "@/lib/realtime/handlers";
+import { isLocalDemo } from "@/lib/dashboard/resolve-scope";
 import type { LiveSessionIntent } from "@/lib/dashboard/types";
 import type { LiveTick, SessionEnd, SessionStart } from "@/lib/realtime/types";
 
@@ -32,17 +33,19 @@ export function useLiveSession({
     };
     send(sessionStart);
     applyMessage(sessionStart);
-    stopRef.current = startTicker({
-      athleteId,
-      intent,
-      intervalMs: 1500,
-      sendTick: (t) => {
-        ticksRef.current = [...ticksRef.current, t];
-        setTicks((p) => [...p, t]);
-        send(t);
-        applyMessage(t);
-      }
-    });
+    if (isLocalDemo()) {
+      stopRef.current = startTicker({
+        athleteId,
+        intent,
+        intervalMs: 1500,
+        sendTick: (t) => {
+          ticksRef.current = [...ticksRef.current, t];
+          setTicks((p) => [...p, t]);
+          send(t);
+          applyMessage(t);
+        }
+      });
+    }
   }, [athleteId, intent, send]);
 
   const end = useCallback(() => {
@@ -76,9 +79,9 @@ export function useLiveSession({
     () => ({
       isActive,
       ticks,
-      hr: last?.hr ?? 0,
-      pace: last?.pace ?? 0,
-      cadence: last?.cadence ?? 0,
+      hr: last?.hr ?? null,
+      pace: last?.pace ?? null,
+      cadence: last?.cadence ?? null,
       elapsedSec: last?.elapsedSec ?? 0,
       start,
       end

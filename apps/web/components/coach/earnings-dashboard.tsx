@@ -26,8 +26,9 @@ import {
 } from "@/components/ui-glass/premium-system";
 import { Button } from "@/components/ui/button";
 import { CreditCard, Download, TrendingUp, Wallet } from "lucide-react";
-import { useState } from "react";
-import { startConnectOnboarding } from "@/lib/stripe/client";
+import { useEffect, useState } from "react";
+import { isLocalDemo } from "@/lib/dashboard/resolve-scope";
+import { startConnectOnboarding, fetchStripeStatus } from "@/lib/stripe/client";
 
 const tooltipStyle = {
   background: rechartsTheme.tooltipBg,
@@ -37,18 +38,35 @@ const tooltipStyle = {
 
 export function CoachEarningsDashboard({ coachId }: { coachId: string }) {
   const metrics = useDashboardStore((s) => selectCoachMetrics(s, coachId));
-  const series = getCoachEarningsSeries(coachId);
-  const payouts = getCoachPayouts(coachId);
-  const [stripeConnected, setStripeConnected] = useState(coachId === "t-002");
+  const demo = isLocalDemo();
+  const series = demo ? getCoachEarningsSeries(coachId) : [];
+  const payouts = demo ? getCoachPayouts(coachId) : [];
+  const [stripeConnected, setStripeConnected] = useState(false);
   const [connectLoading, setConnectLoading] = useState(false);
+  const [connectError, setConnectError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetchStripeStatus()
+      .then((status) => {
+        if (cancelled) return;
+        setStripeConnected(Boolean(status.connect?.payoutsEnabled));
+      })
+      .catch(() => {
+        if (!cancelled) setStripeConnected(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleConnectStripe() {
     setConnectLoading(true);
+    setConnectError(null);
     try {
       await startConnectOnboarding(coachId);
-      setStripeConnected(true);
     } catch {
-      // onboarding redirect or auth required
+      setConnectError("Stripe Connect is not configured. Nothing was marked as connected.");
     } finally {
       setConnectLoading(false);
     }
@@ -117,9 +135,14 @@ export function CoachEarningsDashboard({ coachId }: { coachId: string }) {
             <p className="text-sm font-semibold text-ink-50">Stripe Connect</p>
             <p className="text-xs text-ink-400 mt-1">
               {stripeConnected
-                ? "Payouts enabled · next transfer est. Fri"
+                ? "Payouts enabled"
                 : "Complete onboarding to receive session payouts"}
             </p>
+            {connectError ? (
+              <p className="text-xs text-eos-alert mt-1" role="alert">
+                {connectError}
+              </p>
+            ) : null}
           </div>
           {!stripeConnected && (
             <Button type="button" disabled={connectLoading} onClick={() => void handleConnectStripe()}>
@@ -151,7 +174,14 @@ export function CoachEarningsDashboard({ coachId }: { coachId: string }) {
               </tr>
             </thead>
             <tbody>
-              {payouts.map((row) => (
+              {payouts.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-4 py-6 text-sm text-ink-400">
+                    No transactions yet. Completed bookings appear here after Stripe Connect is live.
+                  </td>
+                </tr>
+              ) : (
+              payouts.map((row) => (
                 <tr key={row.id} className="border-t border-ink-800/80">
                   <td className="px-4 py-3 text-ink-100">{row.athleteName}</td>
                   <td className="px-4 py-3 text-ink-400">{row.sessionType}</td>
@@ -171,7 +201,8 @@ export function CoachEarningsDashboard({ coachId }: { coachId: string }) {
                     </span>
                   </td>
                 </tr>
-              ))}
+              ))
+              )}
             </tbody>
           </table>
         </div>

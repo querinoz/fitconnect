@@ -14,18 +14,25 @@ export function LiveMetrics({
   elapsedSec,
   ticks
 }: {
-  hr: number;
-  pace: number;
-  cadence: number;
+  hr: number | null;
+  pace: number | null;
+  cadence: number | null;
   elapsedSec: number;
   ticks: number[];
 }) {
+  const missing = ticks.length === 0;
   return (
     <GlassCard tone="live" className="space-y-4">
+      {missing ? (
+        <p className="text-sm text-ink-400">
+          Waiting for device telemetry. Heart rate, pace and cadence stay blank until a wearable
+          sends them — we never invent those numbers.
+        </p>
+      ) : null}
       <div className="flex items-end gap-6 flex-wrap">
-        <Stat label="HR" value={String(hr)} unit="bpm" big />
-        <Stat label="Pace" value={pace.toFixed(1)} unit="min/km" />
-        <Stat label="Cadence" value={String(cadence)} unit="spm" />
+        <Stat label="HR" value={hr == null ? "—" : String(hr)} unit="bpm" big />
+        <Stat label="Pace" value={pace == null ? "—" : pace.toFixed(1)} unit="min/km" />
+        <Stat label="Cadence" value={cadence == null ? "—" : String(cadence)} unit="spm" />
         <div className="ml-auto text-right">
           <p className="text-xs uppercase tracking-[0.18em] text-ink-400">
             Elapsed

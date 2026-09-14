@@ -17,6 +17,7 @@ import {
 import type { WearableProvider } from "@fitconnect/types";
 import { isAuthFailure, requireAthleteId } from "@/lib/api/require-auth";
 import { enforceRateLimit } from "@/lib/security/rate-limit";
+import { providerConfiguredFromEnv } from "@/lib/integrations/provider-connect";
 
 const PROVIDER_CATALOG: {
   id: WearableProvider;
@@ -87,7 +88,7 @@ export async function GET(request: Request) {
       status: conn?.status ?? (p.id === "strava" && connected ? "connected" : "disconnected"),
       connectedAt: conn?.connectedAt ?? null,
       lastSyncAt: p.id === "strava" ? lastSyncAt : conn?.lastSyncAt ?? null,
-      configured: p.id === "strava" ? Boolean(process.env.STRAVA_CLIENT_ID) : false
+      configured: providerConfiguredFromEnv(p.id)
     };
   });
 

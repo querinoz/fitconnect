@@ -240,8 +240,13 @@ export function selectHabitsForAthlete(state: DashboardState, athleteId: string)
 
 export function selectCoachMetrics(state: DashboardState, coachId: string) {
   return (
-    state.coachMetrics.find((m) => m.coachId === coachId) ??
-    state.coachMetrics[0]
+    state.coachMetrics.find((m) => m.coachId === coachId) ?? {
+      coachId,
+      activeAthletes: 0,
+      revenueMtd: "—",
+      sessionsWeek: 0,
+      retention: 0
+    }
   );
 }
 

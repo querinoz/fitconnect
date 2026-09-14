@@ -143,7 +143,7 @@ export function IntegrationsHub({ athleteId }: { athleteId: string }) {
                   {p.status}
                 </span>
               </div>
-              {p.id === "strava" && p.status !== "connected" && (
+              {p.id === "strava" && p.status !== "connected" && p.configured ? (
                 <Link
                   href={`/api/v1/integrations/strava/connect?athleteId=${encodeURIComponent(athleteId)}`}
                   className="mt-3 inline-flex h-9 items-center gap-2 rounded-full bg-grad-pulse px-4 text-xs font-semibold text-ink-950 fc-liquid-btn"
@@ -151,7 +151,12 @@ export function IntegrationsHub({ athleteId }: { athleteId: string }) {
                   <Link2 className="h-3.5 w-3.5" />
                   Connect Strava
                 </Link>
-              )}
+              ) : null}
+              {p.id === "strava" && p.status !== "connected" && !p.configured ? (
+                <p className="mt-3 text-[10px] text-ink-500">
+                  Strava OAuth is not configured on this environment.
+                </p>
+              ) : null}
             </PremiumCard>
           </motion.div>
         ))}

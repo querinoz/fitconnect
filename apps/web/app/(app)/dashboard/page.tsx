@@ -373,6 +373,9 @@ function AthleteDashboardBody() {
           onBookSession={() => setBookingOpen(true)}
           telemetry={telemetry}
           metricsReady={Boolean(readiness)}
+          onAcceptInsight={(mult) => {
+            if (plan && (mult ?? 1) < 1) apply(plan.id, "lighter-day");
+          }}
         />
       )}
 

@@ -68,7 +68,23 @@ export function SessionsPanel({
             </p>
             <div className="space-y-2">
               {upcoming.length === 0 ? (
-                <p className="text-sm text-ink-500">No upcoming sessions.</p>
+                <div className="space-y-2">
+                  <p className="text-sm text-ink-500">No upcoming sessions.</p>
+                  <div className="flex flex-wrap gap-2">
+                    {onBookSession ? (
+                      <EliteButton type="button" size="sm" onClick={onBookSession}>
+                        Book a coach
+                      </EliteButton>
+                    ) : (
+                      <EliteButton asChild size="sm">
+                        <Link href="/discover">Find a coach</Link>
+                      </EliteButton>
+                    )}
+                    <EliteButton asChild size="sm" variant="ghost">
+                      <Link href="/settings/wearables">Connect a device</Link>
+                    </EliteButton>
+                  </div>
+                </div>
               ) : (
                 upcoming.map((s) => {
                   const isToday = s.when.toLowerCase().includes("today");

@@ -125,14 +125,17 @@ function CoachDashboardBody() {
   }
 
   return (
-    <CoachOsDashboard
-      coachId={coachId}
-      coachName={coach?.name ?? "Coach"}
-      coachTitle={coach?.headline ?? "Verified specialist"}
-      coachAvatar={coach?.avatar}
-      netPayout={metrics.revenueMtd}
-      attentionCount={amberCount}
-      demoSection={demoSection}
-    />
+        <CoachOsDashboard
+          coachId={coachId}
+          coachName={coach?.name ?? "Coach"}
+          coachTitle={coach?.headline ?? "Verified specialist"}
+          coachAvatar={coach?.avatar}
+          netPayout={metrics.revenueMtd}
+          attentionCount={amberCount}
+          athleteCount={metrics.activeAthletes}
+          sessionsWeek={metrics.sessionsWeek}
+          retention={metrics.retention}
+          demoSection={demoSection}
+        />
   );
 }

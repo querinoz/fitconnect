@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AiInsightsPanel } from "./ai-insights-panel";
@@ -30,5 +30,25 @@ describe("AiInsightsPanel", () => {
     expect(screen.getByRole("button", { name: /accept adjustment/i })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /why/i }));
     expect(screen.getByText(/not a medical diagnosis/i)).toBeInTheDocument();
+  });
+
+  it("forwards Accept to the plan callback", async () => {
+    const user = userEvent.setup();
+    const onAccept = vi.fn();
+    render(
+      <AiInsightsPanel
+        onAccept={onAccept}
+        telemetry={{
+          hrvMs: 40,
+          baselineHrvMs: 70,
+          sleepHours: 4.5,
+          strainScore: 90,
+          plannedHighIntensity: true
+        }}
+      />
+    );
+    await user.click(screen.getByRole("button", { name: /accept adjustment/i }));
+    expect(onAccept).toHaveBeenCalled();
+    expect(screen.getByText(/adjustment accepted/i)).toBeInTheDocument();
   });
 });

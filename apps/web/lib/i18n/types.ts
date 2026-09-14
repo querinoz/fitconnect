@@ -406,6 +406,11 @@ export type Dict = {
       chartSubtitle: string;
       endSession: string;
       startLive: string;
+      emptyTitle: string;
+      emptyBody: string;
+      connectDevice: string;
+      findCoach: string;
+      waitingTelemetry: string;
     };
     coach: {
       rosterTitle: string;
@@ -416,6 +421,10 @@ export type Dict = {
       amberReadiness: string;
       sendCheckIn: string;
       messageSent: string;
+      emptyRoster: string;
+      emptyCoach: string;
+      findCoach: string;
+      unavailableHrv: string;
     };
     inbox: {
       title: string;
@@ -427,6 +436,8 @@ export type Dict = {
       checkInTitle: string;
       checkInSentBody: string;
       checkInPrompt: string;
+      emptyTitle: string;
+      emptyBody: string;
     };
     profile: {
       title: string;
@@ -438,6 +449,7 @@ export type Dict = {
       coachRole: string;
       streak: string;
       score: string;
+      scoreUnavailable: string;
     };
     appearance: {
       title: string;

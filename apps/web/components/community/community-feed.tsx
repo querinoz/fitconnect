@@ -14,8 +14,8 @@ function withReactions(post: CommunityPost): FeedPost {
   return {
     ...post,
     reactions: {
-      "🔥": Math.max(1, post.likes % 7),
-      "💪": post.likes % 5,
+      "🔥": post.likes,
+      "💪": 0,
       "👏": post.comments
     }
   };
@@ -28,6 +28,8 @@ export function CommunityFeed({
 }) {
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [postError, setPostError] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [kind, setKind] = useState<CommunityPost["kind"]>("Check-in");
   const { messages, send } = useChannel("community:feed");
@@ -37,11 +39,24 @@ export function CommunityFeed({
     async function load() {
       try {
         const res = await fetch("/api/v1/community/posts");
+        if (res.status === 503) {
+          if (!cancelled) {
+            setPosts([]);
+            setError("Feed is unavailable until persistence is configured.");
+          }
+          return;
+        }
         if (!res.ok) throw new Error("feed unavailable");
         const body = (await res.json()) as { posts: CommunityPost[] };
-        if (!cancelled) setPosts(body.posts.map(withReactions));
+        if (!cancelled) {
+          setPosts(body.posts.map(withReactions));
+          setError(null);
+        }
       } catch {
-        if (!cancelled) setPosts([]);
+        if (!cancelled) {
+          setPosts([]);
+          setError("Could not load the feed. Try again.");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -92,25 +107,22 @@ export function CommunityFeed({
     if (!draft.trim()) return;
     const postKind = kind;
     const text = draft.trim();
+    setPostError(null);
     const res = await fetch("/api/v1/community/posts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text, kind: postKind })
     });
-    const body = res.ok ? ((await res.json()) as { post: CommunityPost }) : null;
-    const post = body?.post ?? {
-      id: `c-local-${Date.now()}`,
-      author: {
-        name: "You",
-        avatar: "https://i.pravatar.cc/200?img=8",
-        sport: "Running" as Sport
-      },
-      kind: postKind,
-      text,
-      likes: 0,
-      comments: 0,
-      ago: "just now"
-    };
+    if (res.status === 401) {
+      setPostError("Sign in to post. We will not create a fake check-in.");
+      return;
+    }
+    if (!res.ok) {
+      setPostError("Post failed. Nothing was published.");
+      return;
+    }
+    const body = (await res.json()) as { post: CommunityPost };
+    const post = body.post;
     send({
       kind: "community-post",
       id: post.id,
@@ -127,7 +139,7 @@ export function CommunityFeed({
     setDraft("");
   }, [draft, kind, send]);
 
-  function react(postId: string, emoji: string) {
+  async function react(postId: string, emoji: string) {
     setPosts((prev) =>
       prev.map((p) =>
         p.id === postId
@@ -141,6 +153,41 @@ export function CommunityFeed({
           : p
       )
     );
+    const res = await fetch(`/api/v1/community/posts/${encodeURIComponent(postId)}/reactions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ emoji })
+    });
+    if (!res.ok) {
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === postId
+            ? {
+                ...p,
+                reactions: {
+                  ...p.reactions,
+                  [emoji]: Math.max(0, (p.reactions[emoji] ?? 1) - 1)
+                }
+              }
+            : p
+        )
+      );
+    }
+  }
+
+  async function share(post: FeedPost) {
+    const url = `${window.location.origin}/feed`;
+    const payload = `${post.text}\n${url}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "FitConnect", text: post.text, url });
+        return;
+      }
+    } catch {
+      /* user cancelled */
+      return;
+    }
+    await navigator.clipboard.writeText(payload);
   }
 
   return (
@@ -171,16 +218,38 @@ export function CommunityFeed({
           placeholder="Share a PR, check-in, or race report…"
           className="w-full rounded-xl border border-ink-800 bg-ink-950/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/60"
         />
-        <Button type="button" size="sm" onClick={publish} disabled={!draft.trim()}>
+        <Button type="button" size="sm" onClick={() => void publish()} disabled={!draft.trim()}>
           Post to feed
         </Button>
-        <p className="text-[10px] text-ink-500">
-          Posts persist in Supabase and sync live via BroadcastChannel.
-        </p>
+        {postError ? (
+          <p className="text-xs text-eos-alert" role="alert">
+            {postError}
+          </p>
+        ) : (
+          <p className="text-[10px] text-ink-500">
+            Strava activities never appear here. Failed posts are not shown as published.
+          </p>
+        )}
       </PremiumCard>
 
       {loading ? (
         <p className="text-sm text-ink-500">Loading community feed…</p>
+      ) : null}
+
+      {error ? (
+        <PremiumCard className="p-5 space-y-2">
+          <p className="font-semibold text-ink-100">Feed unavailable</p>
+          <p className="text-sm text-ink-400">{error}</p>
+        </PremiumCard>
+      ) : null}
+
+      {!loading && !error && visible.length === 0 ? (
+        <PremiumCard className="p-5 space-y-2">
+          <p className="font-semibold text-ink-100">Your squad is quiet</p>
+          <p className="text-sm text-ink-400">
+            Post a check-in to start the Feed. Training metrics live on Dashboard — never here.
+          </p>
+        </PremiumCard>
       ) : null}
 
       {visible.map((post) => (
@@ -213,7 +282,7 @@ export function CommunityFeed({
               <button
                 key={emoji}
                 type="button"
-                onClick={() => react(post.id, emoji)}
+                onClick={() => void react(post.id, emoji)}
                 className="rounded-full border border-ink-800 bg-ink-950/50 px-2.5 py-1 text-xs hover:border-brand-400/40"
               >
                 {emoji} {post.reactions[emoji] ?? 0}
@@ -229,7 +298,11 @@ export function CommunityFeed({
               <MessageCircle className="h-3.5 w-3.5" aria-hidden />
               {post.comments}
             </span>
-            <button type="button" className="inline-flex items-center gap-1 hover:text-ink-300">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 hover:text-ink-300"
+              onClick={() => void share(post)}
+            >
               <Share2 className="h-3.5 w-3.5" aria-hidden />
               Share
             </button>

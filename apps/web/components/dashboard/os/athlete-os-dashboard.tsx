@@ -65,6 +65,7 @@ type AthleteOsDashboardProps = {
   onBookSession?: () => void;
   telemetry?: InsightTelemetry;
   metricsReady?: boolean;
+  onAcceptInsight?: (volumeMultiplier: number | null) => void;
 };
 
 function greetingKey(h = new Date().getHours()) {
@@ -92,7 +93,8 @@ export function AthleteOsDashboard({
   streakWeeks = 0,
   onBookSession,
   telemetry,
-  metricsReady = true
+  metricsReady = true,
+  onAcceptInsight
 }: AthleteOsDashboardProps) {
   const { dashboard, hub, insights } = useLocale();
   const os = dashboard.os;
@@ -219,7 +221,7 @@ export function AthleteOsDashboard({
                   </BentoCard>
                 </>
               ) : null}
-              <AiInsightsPanel telemetry={telemetry} />
+              <AiInsightsPanel telemetry={telemetry} onAccept={onAcceptInsight} />
             </EliteBentoMotionItem>
 
             {!compactCockpit ? (

@@ -56,5 +56,11 @@ describe("integrations status route", () => {
     expect(body.strava.activities).toBeUndefined();
     expect(body.syncLogs).toBeUndefined();
     expect(JSON.stringify(body)).not.toMatch(/accessToken|refreshToken|client_secret/i);
+    expect(body.providers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: "whoop", configured: false, status: "disconnected" }),
+        expect.objectContaining({ id: "strava" })
+      ])
+    );
   });
 });

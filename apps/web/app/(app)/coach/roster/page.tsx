@@ -8,14 +8,14 @@ import { RosterList } from "@/components/app/roster-list";
 import { CoachTabPanel } from "@/components/mobile/athlete-tab-panels";
 import { EliteAppPage } from "@/components/shell/elite";
 import { useAuthStore } from "@/lib/auth-store";
-import { DEMO_COACH_TOMAS_ID } from "@/lib/dashboard/seed";
+import { resolveDashboardCoachId } from "@/lib/dashboard/resolve-scope";
 import type { DashboardAthlete } from "@/lib/dashboard/types";
 import { useStitchMobile } from "@/lib/hooks/use-media-query";
 import { useLocale } from "@/lib/i18n-provider";
 
 export default function CoachRosterPage() {
   const user = useAuthStore((s) => s.user);
-  const coachId = user?.coachId ?? DEMO_COACH_TOMAS_ID;
+  const coachId = user?.coachId ?? resolveDashboardCoachId(user);
   const [roster, setRoster] = useState<DashboardAthlete[]>([]);
   const [loading, setLoading] = useState(true);
   const stitchMobile = useStitchMobile();

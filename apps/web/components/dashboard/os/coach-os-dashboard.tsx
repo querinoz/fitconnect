@@ -44,6 +44,9 @@ type CoachOsDashboardProps = {
   coachAvatar?: string;
   netPayout?: string;
   attentionCount?: number;
+  athleteCount?: number;
+  sessionsWeek?: number;
+  retention?: number;
   demoSection?: React.ReactNode;
 };
 
@@ -51,9 +54,12 @@ export function CoachOsDashboard({
   coachId,
   coachName,
   coachTitle,
-  coachAvatar = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
-  netPayout = "€4,089",
-  attentionCount = 1,
+  coachAvatar,
+  netPayout,
+  attentionCount = 0,
+  athleteCount = 0,
+  sessionsWeek = 0,
+  retention = 0,
   demoSection
 }: CoachOsDashboardProps) {
   const t = useT();
@@ -81,8 +87,14 @@ export function CoachOsDashboard({
           profileSlot={
             <>
               <div className="flex items-center gap-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={coachAvatar} alt="" className="h-9 w-9 rounded-xl object-cover" />
+                {coachAvatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={coachAvatar} alt="" className="h-9 w-9 rounded-xl object-cover" />
+                ) : (
+                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-eos-carbon text-sm font-bold text-eos-on-surface-muted">
+                    {firstName.slice(0, 1).toUpperCase()}
+                  </div>
+                )}
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="truncate text-sm font-semibold text-eos-on-surface">
@@ -98,7 +110,7 @@ export function CoachOsDashboard({
                   {t("coachDashboard", "thisMonth")}
                 </p>
                 <p className="font-display text-base font-bold text-eos-voltline">
-                  {netPayout}{" "}
+                  {netPayout ?? "—"}{" "}
                   <span className="text-xs text-eos-voltline/60">
                     {t("coachDashboard", "takeHome")}
                   </span>
@@ -152,29 +164,29 @@ export function CoachOsDashboard({
             <StatCard
               icon={Users}
               label={t("coachDashboard", "activeAthletes")}
-              value="34"
-              change="+3"
+              value={String(athleteCount)}
+              change={attentionCount > 0 ? `${attentionCount} need attention` : "—"}
               color="text-brand-400"
             />
             <StatCard
               icon={DollarSign}
               label={t("coachDashboard", "mrr")}
-              value="€4,810"
-              change="+6.4"
+              value={netPayout ?? "—"}
+              change="—"
               color="text-lime-400"
             />
             <StatCard
               icon={BarChart3}
               label={t("coachDashboard", "sessionsThisMonth")}
-              value="69"
-              change="+4"
+              value={String(sessionsWeek)}
+              change="—"
               color="text-plasma-500"
             />
             <StatCard
               icon={TrendingUp}
               label={t("coachDashboard", "retentionRate")}
-              value="94%"
-              change="+2"
+              value={retention > 0 ? `${retention}%` : "—"}
+              change="—"
               color="text-brand-400"
             />
           </div>
@@ -206,7 +218,7 @@ export function CoachOsDashboard({
             <EliteBentoMotionItem className="space-y-eos-bento xl:col-span-3">
               <GamificationPanel variant="coach" />
               <AiInsightsPanel />
-              <PayoutSummary />
+              <PayoutSummary netPayout={netPayout} />
               <VoltButton asChild variant="subtle" className="w-full rounded-xl text-sm">
                 <Link href="/coach/earnings">{t("coachDashboard", "earningsStripeConnect")}</Link>
               </VoltButton>

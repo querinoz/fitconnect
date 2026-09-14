@@ -404,7 +404,13 @@ export const en: Dict = {
       chartTitle: "Live strain curve",
       chartSubtitle: "HR, pace and load",
       endSession: "End session",
-      startLive: "Start live session"
+      startLive: "Start live session",
+      emptyTitle: "No workout queued",
+      emptyBody:
+        "Guided TRAIN runs on the Android app. Connect a device or book a coach — live heart rate is never invented.",
+      connectDevice: "Connect a device",
+      findCoach: "Find a coach",
+      waitingTelemetry: "Waiting for device"
     },
     coach: {
       rosterTitle: "Roster",
@@ -414,7 +420,11 @@ export const en: Dict = {
       greenReadiness: "Green readiness",
       amberReadiness: "Amber readiness",
       sendCheckIn: "Send check-in",
-      messageSent: "Message sent"
+      messageSent: "Message sent",
+      emptyRoster: "No athletes on your roster yet.",
+      emptyCoach: "No coach is linked to this account.",
+      findCoach: "Find a coach",
+      unavailableHrv: "HRV unavailable"
     },
     inbox: {
       title: "Inbox",
@@ -425,7 +435,9 @@ export const en: Dict = {
       approve: "Approve",
       checkInTitle: "Coach check-in",
       checkInSentBody: "Your note is now visible in the app preview.",
-      checkInPrompt: "How did the last set feel?"
+      checkInPrompt: "How did the last set feel?",
+      emptyTitle: "Inbox is quiet",
+      emptyBody: "Plans and check-ins from your coach appear here."
     },
     profile: {
       title: "Profile",
@@ -436,7 +448,8 @@ export const en: Dict = {
       athleteRole: "Hybrid athlete · Lisbon",
       coachRole: "Strength coach · Madrid",
       streak: "Streak",
-      score: "Score"
+      score: "Score",
+      scoreUnavailable: "—"
     },
     appearance: {
       title: "Appearance",

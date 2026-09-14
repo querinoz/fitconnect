@@ -88,6 +88,7 @@ export function MobileAppPreview({
             )}
             {screen === "sessions" && (
               <StitchSessionsScreen
+                preview
                 sessionLive={sessionLive}
                 onStart={() => setSessionLive(true)}
                 onEnd={() => {
@@ -98,6 +99,7 @@ export function MobileAppPreview({
             )}
             {screen === "coach" && (
               <StitchCoachScreen
+                preview
                 isCoach={isCoach}
                 messageSent={messageSent}
                 onSendCheckIn={() => setMessageSent(true)}
@@ -105,6 +107,7 @@ export function MobileAppPreview({
             )}
             {screen === "profile" && (
               <StitchProfileScreen
+                preview
                 name={isCoach ? m.profile.coachName : m.profile.athleteName}
                 subtitle={isCoach ? m.profile.coachRole : m.profile.athleteRole}
                 streakDays={streak}

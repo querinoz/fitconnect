@@ -1,0 +1,30 @@
+appId: com.fitconnect.android
+name: Athlete IA — Feed Ascend Train Dashboard Profile
+---
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible:
+      id: "athlete_os"
+    timeout: 20000
+- tapOn:
+    id: "athlete_tab_feed"
+- assertVisible:
+    id: "athlete_os"
+- tapOn:
+    id: "athlete_tab_ascend"
+- assertVisible:
+    id: "athlete_os"
+- tapOn:
+    id: "athlete_train_fab"
+- back
+- assertVisible:
+    id: "athlete_os"
+- tapOn:
+    id: "athlete_tab_dashboard"
+- assertVisible:
+    id: "athlete_os"
+- tapOn:
+    id: "athlete_tab_profile"
+- assertVisible:
+    id: "athlete_bottom_nav"

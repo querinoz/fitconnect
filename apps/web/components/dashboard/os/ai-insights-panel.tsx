@@ -23,7 +23,15 @@ function finite(n: number | null | undefined): n is number {
   return typeof n === "number" && Number.isFinite(n);
 }
 
-export function AiInsightsPanel({ telemetry }: { telemetry?: InsightTelemetry }) {
+export function AiInsightsPanel({
+  telemetry,
+  onAccept,
+  onKeep
+}: {
+  telemetry?: InsightTelemetry;
+  onAccept?: (volumeMultiplier: number | null) => void;
+  onKeep?: () => void;
+}) {
   const [decision, setDecision] = useState<Decision>(null);
   const [whyOpen, setWhyOpen] = useState(false);
 
@@ -98,14 +106,24 @@ export function AiInsightsPanel({ telemetry }: { telemetry?: InsightTelemetry })
                 </p>
               ) : (
                 <div className="flex flex-wrap gap-2">
-                  <EliteButton type="button" size="sm" onClick={() => setDecision("accept")}>
+                  <EliteButton
+                    type="button"
+                    size="sm"
+                    onClick={() => {
+                      setDecision("accept");
+                      onAccept?.(primary.volumeMultiplier ?? null);
+                    }}
+                  >
                     Accept adjustment
                   </EliteButton>
                   <EliteButton
                     type="button"
                     size="sm"
                     variant="ghost"
-                    onClick={() => setDecision("keep")}
+                    onClick={() => {
+                      setDecision("keep");
+                      onKeep?.();
+                    }}
                   >
                     Keep original
                   </EliteButton>

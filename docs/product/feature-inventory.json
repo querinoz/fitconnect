@@ -1,7 +1,7 @@
 {
-  "version": 3,
+  "version": 4,
   "updated": "2026-09-14",
-  "headBaseline": "bce8ba5742dcd901db40c82877045bdf82e151c7",
+  "headBaseline": "327ab7eb621fe336e711426c4e2871fefb12d46d",
   "productionAlias": "https://fitconnect-phi.vercel.app",
   "dispositions": [
     "IMPLEMENTED",
@@ -153,8 +153,8 @@
       "category": "TRAINING",
       "surfaces": ["web", "android"],
       "disposition": "IMPLEMENTED",
-      "ux": "DEFERRED",
-      "benchmark": "NTC/NRC: start-in-two-taps + next action. Guided workout Wave 2 is still the execution gap (docs/product/WORKOUT_ENGINE_WAVE2.md).",
+      "ux": "IMPROVED",
+      "benchmark": "NTC/NRC: start-in-two-taps + next action. Web TRAIN no longer invents a queued workout or live HR; empty state points to devices/coach. Guided execution remains Android Wave 2.",
       "notes": "MCP create_workout drafts only; confirmation required."
     },
     {
@@ -162,8 +162,8 @@
       "category": "TRAINING",
       "surfaces": ["web", "android", "wear"],
       "disposition": "IMPLEMENTED",
-      "ux": "DEFERRED",
-      "benchmark": "Garmin/Apple: glanceable live metrics. Wear paths exist; Windows session did not complete device UX proof."
+      "ux": "IMPROVED",
+      "benchmark": "Garmin/Apple: glanceable live metrics. Web live session no longer synthesizes HR unless DEMO_MODE=true. Guided TRAIN is Android StrengthWorkoutScreen. Wear AVD fitconnect_wear exists but was not booted in this session."
     },
     {
       "id": "training.sets_reps",
@@ -184,7 +184,7 @@
       "surfaces": ["web", "android", "wear"],
       "disposition": "IMPLEMENTED",
       "security": "VERIFIED",
-      "notes": "Live metrics from session ticks; never fabricated in Zenith panel."
+      "notes": "Live metrics from session ticks only when DEMO_MODE or a device sends them. Production DEMO_MODE=false leaves HR/pace blank rather than inventing bpm."
     },
     {
       "id": "training.cadence_power_calories_load",
@@ -276,8 +276,8 @@
       "category": "BOOKING",
       "surfaces": ["web", "android", "ios"],
       "disposition": "IMPLEMENTED",
-      "ux": "DEFERRED",
-      "benchmark": "Leaders confirm slot + timezone + payment state. Code paths exist (bookings API, RecoveryBookingModal). Production payment is BLOCKED without Stripe keys. Duplicate/stale slot handling is API-level, not fully walked authenticated on prod.",
+      "ux": "IMPROVED",
+      "benchmark": "Leaders confirm slot + timezone + payment state. RecoveryBookingModal now POSTs /api/v1/bookings and never toasts success on failure. No coach → Find a coach. Production payment remains BLOCKED without Stripe keys. Signed-in alias walk BLOCKED (no test account).",
       "security": "VERIFIED"
     },
     {
@@ -302,14 +302,14 @@
       "category": "ZENITH",
       "surfaces": ["web"],
       "disposition": "IMPLEMENTED",
-      "notes": "create_workout and booking writes require confirmation; dashboard Accept/Keep for load advice is local until plan apply APIs are wired."
+      "notes": "create_workout and booking writes require confirmation. Dashboard Accept applies lighter-day on the in-memory plan when a plan exists; production plans still need Workout-engine Wave 2 APIs."
     },
     {
       "id": "devices.health_connect",
       "category": "DEVICES",
       "surfaces": ["android"],
       "disposition": "IMPLEMENTED",
-      "notes": "Canonical data plane. Windows session: source+Gradle path; runtime proof needs emulator/device."
+      "notes": "Canonical data plane. Web Connect no longer fakes a Health Connect session. Permissions stay on Android."
     },
     {
       "id": "devices.healthkit",
@@ -405,7 +405,7 @@
       "surfaces": ["android"],
       "disposition": "IMPLEMENTED",
       "ux": "VERIFIED",
-      "notes": "Native Compose. 2026-09-14: assembleDebug, install on fitconnect_phone, Maestro 2.10.0 launch.yaml (splash→guest→LOCAL_DEMO Inês→athlete_os) and athlete-nav.yaml (Train FAB). Wear assembleDebug only — no Wear AVD in this run."
+      "notes": "Native Compose. 2026-09-14: Maestro 2.10.0 athlete-ia.yaml PASS on fitconnect_phone (Feed → Ascend → Train FAB → Dashboard → Profile). Package com.fitconnect.android."
     },
     {
       "id": "wear.glanceable_workout",
@@ -413,7 +413,7 @@
       "surfaces": ["wear"],
       "disposition": "IMPLEMENTED",
       "ux": "DEFERRED",
-      "notes": "WearMainActivity, tiles, complications. Not claimed verified without a Wear AVD/device in this session."
+      "notes": "WearMainActivity, tiles, complications. AVD fitconnect_wear is present on this host but was not booted in this session. Not claimed glanceability-verified."
     },
     {
       "id": "ios.swiftui",
