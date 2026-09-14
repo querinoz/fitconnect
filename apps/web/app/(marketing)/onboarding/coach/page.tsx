@@ -10,7 +10,6 @@ import {
 import { useAuthStore } from "@/lib/auth-store";
 import { useVerificationStore } from "@/lib/coach/verification-store";
 import { useOnboardingStore } from "@/lib/onboarding/store";
-import { startConnectOnboarding } from "@/lib/stripe/client";
 import { cn } from "@/lib/utils";
 
 const SPORTS = ["Running", "Cycling", "Swimming", "Strength", "Triathlon", "Climbing"];
@@ -25,6 +24,7 @@ export default function CoachOnboardingPage() {
   const [step, setStep] = useState(1);
   const [busy, setBusy] = useState(false);
   const [docs, setDocs] = useState<string[]>([]);
+  const [stripeError, setStripeError] = useState<string | null>(null);
 
   function toggleSport(sport: string) {
     const sports = coach.sports.includes(sport)
@@ -35,12 +35,43 @@ export default function CoachOnboardingPage() {
 
   async function connectStripe() {
     setBusy(true);
-    const coachId = user?.coachId ?? `t-new-${Date.now()}`;
-    const res = await startConnectOnboarding(coachId);
-    patchCoach({ stripeConnected: true });
-    window.open(res.onboardingUrl, "_blank", "noopener,noreferrer");
-    setBusy(false);
-    setStep(5);
+    setStripeError(null);
+    try {
+      const res = await fetch("/api/stripe/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ coachId: user?.coachId ?? "self" })
+      });
+      const body = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        onboardingUrl?: string;
+        payoutsEnabled?: boolean;
+        onboardingComplete?: boolean;
+        demo?: boolean;
+      };
+      if (res.status === 401) {
+        setStripeError("Sign in to connect payouts.");
+        return;
+      }
+      if (res.status === 503 || body.error === "stripe_not_configured") {
+        setStripeError("Stripe is not configured here. Continue without payouts — nothing was connected.");
+        return;
+      }
+      if (!res.ok) {
+        setStripeError("Could not start Stripe Connect. Nothing was connected.");
+        return;
+      }
+      const live = Boolean(body.payoutsEnabled || body.onboardingComplete);
+      patchCoach({ stripeConnected: live });
+      if (body.onboardingUrl && !body.demo) {
+        window.open(body.onboardingUrl, "_blank", "noopener,noreferrer");
+      }
+      setStep(5);
+    } catch {
+      setStripeError("Could not start Stripe Connect. Nothing was connected.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function finish() {
@@ -207,9 +238,24 @@ export default function CoachOnboardingPage() {
         nextDisabled={busy}
       >
         <p className="text-sm text-ink-300">
-          Express onboarding opens in a new tab. Demo mode simulates a connected account
-          instantly.
+          Express onboarding opens Stripe when live keys exist. This environment will not
+          pretend payouts are enabled.
         </p>
+        {stripeError ? (
+          <p className="mt-3 text-sm text-eos-alert" role="alert">
+            {stripeError}
+          </p>
+        ) : null}
+        <button
+          type="button"
+          onClick={() => {
+            patchCoach({ stripeConnected: false });
+            setStep(5);
+          }}
+          className="mt-4 text-sm text-ink-400 underline-offset-2 hover:underline"
+        >
+          Continue without Stripe
+        </button>
       </OnboardingShell>
     );
   }

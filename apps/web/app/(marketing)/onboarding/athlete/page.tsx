@@ -178,15 +178,16 @@ export default function AthleteOnboardingPage() {
             </span>
           </a>
           {["Garmin", "WHOOP", "Oura", "Apple Health"].map((w) => (
-            <button
+            <a
               key={w}
-              type="button"
-              onClick={() => patchAthlete({ wearablesConnected: true })}
+              href="/settings/wearables"
               className="rounded-xl border border-ink-800 bg-ink-950/60 px-4 py-3 text-left text-sm hover:border-brand-500/40"
             >
               <span className="font-semibold text-ink-100">{w}</span>
-              <span className="block text-xs text-ink-500 mt-1">Coming soon</span>
-            </button>
+              <span className="block text-xs text-ink-500 mt-1">
+                Partner connection is not live in this environment
+              </span>
+            </a>
           ))}
         </div>
         <button

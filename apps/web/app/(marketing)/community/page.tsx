@@ -91,7 +91,7 @@ export default function CommunityPage() {
           const res = await fetch("/api/v1/community/posts", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: post.text, kind: post.kind, author: post.author })
+            body: JSON.stringify({ text: post.text, kind: post.kind })
           });
           if (!res.ok) return false;
           window.dispatchEvent(new CustomEvent("fitconnect:community-refresh"));
