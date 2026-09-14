@@ -7,6 +7,9 @@
     <string name="nav_continue_anonymous">Continuar de forma anónima</string>
     <string name="nav_auth_title">Iniciar sesión</string>
     <string name="nav_auth_body">Inicia sesión con tu cuenta FitConnect.</string>
+    <string name="auth_welcome_title">Bienvenido de nuevo</string>
+    <string name="auth_welcome_body">Inicia sesión en tu cuenta FitConnect.</string>
+    <string name="auth_or_continue_with">O CONTINÚA CON</string>
     <string name="auth_email_label">Email</string>
     <string name="auth_password_label">Contraseña</string>
     <string name="auth_submit">Entrar</string>
@@ -62,6 +65,8 @@
     <string name="nav_auth_live_body">Inicia sesión con tu cuenta FitConnect.</string>
     <string name="nav_auth_unconfigured_body">La autenticación de producción no está configurada. Coloca google-services.json (gitignored) desde Firebase Console.</string>
     <string name="splash_tagline">Elite OS · Connect. Train. Perform.</string>
+    <string name="splash_tagline_line1">TU ENTRENAMIENTO. CONECTADO.</string>
+    <string name="splash_tagline_line2">TU RENDIMIENTO. ELEVADO.</string>
     <string name="splash_get_started">Empezar</string>
     <string name="notification_channel_system">Sistema</string>
     <string name="notification_channel_session">Sesiones</string>

@@ -8,6 +8,9 @@
     <string name="nav_auth_title">Entrar</string>
     <string name="nav_auth_body">Inicia sessão com a tua conta FitConnect.</string>
     <string name="nav_auth_live_body">Entra com a tua conta FitConnect.</string>
+    <string name="auth_welcome_title">Bem-vindo de volta</string>
+    <string name="auth_welcome_body">Entra na tua conta FitConnect.</string>
+    <string name="auth_or_continue_with">OU CONTINUA COM</string>
     <string name="nav_auth_unconfigured_body">A autenticação de produção não está configurada. Coloca o google-services.json (gitignored) da consola Firebase e define URL/chave anónima do Supabase. O login fica bloqueado até a identidade estar pronta.</string>
     <string name="auth_email_label">Email</string>
     <string name="auth_password_label">Palavra-passe</string>
@@ -62,6 +65,8 @@
     <string name="nav_enter_demo_session">Entrar no demo de atleta</string>
     <string name="nav_enter_coach_demo">Entrar no demo de treinador</string>
     <string name="splash_tagline">Elite OS · Connect. Train. Perform.</string>
+    <string name="splash_tagline_line1">O TEU TREINO. LIGADO.</string>
+    <string name="splash_tagline_line2">A TUA PERFORMANCE. ELEVADA.</string>
     <string name="splash_get_started">Começar</string>
     <string name="notification_channel_system">Sistema</string>
     <string name="notification_channel_session">Sessões</string>
