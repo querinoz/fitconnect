@@ -88,7 +88,21 @@ jobs:
       # running these steps inside apps/web makes deploy look for apps/web/apps/web
       # (run 34773470298 attempt 1: path does not exist).
       - name: Pull Vercel env
-        run: pnpm dlx vercel@48.12.1 pull --yes --environment=production
+        run: |
+          set +e
+          pnpm dlx vercel@48.12.1 whoami > /tmp/vercel-pull.log 2>&1
+          whoami_code=$?
+          echo "----- vercel whoami (exit $whoami_code) -----"
+          sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g' /tmp/vercel-pull.log | tail -n 20
+          if [ $whoami_code -ne 0 ]; then
+            echo "::error::Vercel token cannot authenticate (whoami failed). Rotate VERCEL_TOKEN in the production GitHub environment."
+            exit 1
+          fi
+          pnpm dlx vercel@48.12.1 pull --yes --environment=production > /tmp/vercel-pull.log 2>&1
+          code=$?
+          echo "----- vercel pull (exit $code) -----"
+          sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g' /tmp/vercel-pull.log | tail -n 40
+          exit $code
 
       # vercel pull does not include GitHub environment secrets. Bake the public
       # Firebase web config into the pulled env files so `vercel build --prod`
