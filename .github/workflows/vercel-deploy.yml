@@ -95,12 +95,15 @@ jobs:
           set +e
           pnpm dlx vercel@latest pull --yes --environment=production > /tmp/vercel-pull.log 2>&1
           code=$?
+          redacted="$(sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g' /tmp/vercel-pull.log | tail -n 20)"
           echo "----- vercel pull (exit $code) -----"
-          sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g' /tmp/vercel-pull.log | tail -n 40
+          echo "$redacted"
           if [ $code -eq 0 ]; then
+            echo "::notice::vercel pull succeeded"
             exit 0
           fi
-          echo "Pull did not complete; linking from VERCEL_ORG_ID + VERCEL_PROJECT_ID and continuing to Inject/Build/Deploy."
+          oneline="$(printf '%s' "$redacted" | tr '\n' ' ')"
+          echo "::warning::vercel pull failed (exit $code); linking from ORG/PROJECT ids and continuing Inject/Build/Deploy. CLI: ${oneline}"
           mkdir -p .vercel
           printf '{"orgId":"%s","projectId":"%s"}\n' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
           exit 0
@@ -174,7 +177,18 @@ jobs:
           PY
 
       - name: Build with Vercel
-        run: pnpm dlx vercel@latest build --prod
+        run: |
+          set +e
+          pnpm dlx vercel@latest build --prod --yes > /tmp/vercel-build.log 2>&1
+          code=$?
+          redacted="$(sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g' /tmp/vercel-build.log | tail -n 30)"
+          echo "----- vercel build (exit $code) -----"
+          echo "$redacted"
+          if [ $code -ne 0 ]; then
+            oneline="$(printf '%s' "$redacted" | tr '\n' ' ')"
+            echo "::error::vercel build failed (exit $code). CLI: ${oneline}"
+          fi
+          exit $code
         env:
           NEXT_PUBLIC_DEMO_MODE: "false"
           NEXT_PUBLIC_REALTIME_PROVIDER: broadcast
@@ -198,4 +212,4 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Deploy prebuilt
-        run: pnpm dlx vercel@latest deploy --prebuilt --prod
+        run: pnpm dlx vercel@latest deploy --prebuilt --prod --yes
