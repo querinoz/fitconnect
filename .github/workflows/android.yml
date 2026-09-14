@@ -53,6 +53,8 @@ jobs:
         # CI without secrets must not claim a production release artifact.
         # Windows checkouts may drop the executable bit; ensure gradlew is runnable on Linux runners.
         # :wear:assembleDebug is listed explicitly so Wear stays a hard gate (not only via `build`).
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.internal.http.connectionTimeout=120000 -Dorg.gradle.internal.http.socketTimeout=120000"
         run: |
           chmod +x ./gradlew
           ./gradlew build :wear:assembleDebug -x :app:assembleRelease -x :app:bundleRelease -x :wear:assembleRelease -x :wear:bundleRelease

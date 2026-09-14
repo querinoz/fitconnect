@@ -102,9 +102,13 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
       - name: Assemble Wear debug APK
         working-directory: android
+        env:
+          # Wrapper default networkTimeout was 10s; cold CI cache misses timed out
+          # downloading gradle-9.5.0-bin.zip and failed the release gate.
+          GRADLE_OPTS: "-Dorg.gradle.internal.http.connectionTimeout=120000 -Dorg.gradle.internal.http.socketTimeout=120000"
         run: |
           chmod +x ./gradlew
-          ./gradlew :wear:assembleDebug
+          ./gradlew :wear:assembleDebug --stacktrace
 
   test-coverage-gate:
     name: Coverage gate
