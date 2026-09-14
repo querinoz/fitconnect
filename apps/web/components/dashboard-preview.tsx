@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useLocale } from "@/lib/i18n-provider";
+import { athleteAppEntryHref, coachAppEntryHref } from "@/lib/auth/app-entry-href";
+import { isDemoModeEnv } from "@/lib/auth/middleware-auth";
 import { RoleDashboardPreview } from "@/components/dashboard/role-dashboard-preview";
 import {
   AIInsight,
@@ -95,18 +97,22 @@ export function DashboardPreview() {
           />
           <div className="mt-8 flex flex-wrap gap-4">
             <Link
-              href="/dashboard"
+              href={athleteAppEntryHref()}
               className="inline-flex items-center gap-2 text-brand-300 hover:text-brand-200 font-semibold"
             >
-              {locale.dashboardPreview.athleteCta}{" "}
+              {isDemoModeEnv(process.env.NEXT_PUBLIC_DEMO_MODE)
+                ? locale.dashboardPreview.athleteCta
+                : locale.nav.dashboard}{" "}
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
             <Link
-              href="/coach/dashboard"
+              href={coachAppEntryHref()}
               className="inline-flex items-center gap-2 text-ink-300 hover:text-ink-100 font-semibold"
             >
               <HeartHandshake className="h-4 w-4" aria-hidden />
-              {locale.dashboardPreview.coachCta}
+              {isDemoModeEnv(process.env.NEXT_PUBLIC_DEMO_MODE)
+                ? locale.dashboardPreview.coachCta
+                : locale.nav.coachDashboard}
             </Link>
           </div>
         </div>

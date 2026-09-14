@@ -13,6 +13,7 @@ import {
 } from "@/lib/dashboard-store";
 import { getTrainerById } from "@/lib/dashboard/seed";
 import { isLocalDemo, resolveDashboardCoachId } from "@/lib/dashboard/resolve-scope";
+import { athleteAppEntryHref } from "@/lib/auth/app-entry-href";
 import { BentoCard, EliteButton } from "@/components/elite-os";
 import { useCoPilot } from "@/components/loops/ai-copilot/use-co-pilot";
 import { evaluateRoster } from "@/lib/ai/rules";
@@ -94,7 +95,7 @@ function CoachDashboardBody() {
           <EliteButton type="button" variant="ghost" onClick={() => resetDemo()}>
             Reset demo data
           </EliteButton>
-          <EliteButton type="button" variant="secondary" onClick={() => router.push("/signin?demo=athlete")}>
+          <EliteButton type="button" variant="secondary" onClick={() => router.push(athleteAppEntryHref())}>
             Athlete sign-in shortcut
           </EliteButton>
         </div>

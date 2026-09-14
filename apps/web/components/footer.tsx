@@ -6,6 +6,7 @@ import { Logo } from "./brand/logo";
 import { Wordmark } from "./brand/wordmark";
 import { useT } from "@/lib/i18n-provider";
 import { FITCONNECT_INSTAGRAM_URL, mailto } from "@/lib/site/contact";
+import { athleteAppEntryHref, coachAppEntryHref } from "@/lib/auth/app-entry-href";
 
 export function Footer() {
   const t = useT();
@@ -13,8 +14,8 @@ export function Footer() {
   const product = [
     { label: t("nav", "findCoach"), href: "/discover" },
     { label: t("nav", "programs"), href: "/programs" },
-    { label: t("nav", "dashboard"), href: "/dashboard" },
-    { label: t("nav", "coachDashboard"), href: "/coach/dashboard?demo=coach" },
+    { label: t("nav", "dashboard"), href: athleteAppEntryHref() },
+    { label: t("nav", "coachDashboard"), href: coachAppEntryHref() },
     { label: t("nav", "community"), href: "/community" },
     { label: t("hero", "demoCta"), href: "/mobile" },
     { label: t("nav", "methodology"), href: "/#methodology" },

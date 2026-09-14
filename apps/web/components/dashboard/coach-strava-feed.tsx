@@ -5,6 +5,8 @@ import { getSportMeta } from "@fitconnect/types";
 import { PremiumCard, SectionHeader } from "@/components/ui-glass/premium-system";
 import { StravaActivityMap } from "@/components/dashboard/strava-activity-map";
 import Link from "next/link";
+import { isDemoModeEnv } from "@/lib/auth/middleware-auth";
+import { athleteAppEntryHref } from "@/lib/auth/app-entry-href";
 
 type ActivityRow = {
   id: string;
@@ -44,12 +46,21 @@ export function CoachStravaFeed({ coachId }: { coachId: string }) {
             No Strava activities yet. Ask your roster to connect Strava from their
             integrations hub.
           </p>
-          <Link
-            href="/dashboard?demo=1"
-            className="mt-4 inline-block text-sm font-semibold text-brand-300 hover:text-brand-200"
-          >
-            Open athlete demo →
-          </Link>
+          {isDemoModeEnv(process.env.NEXT_PUBLIC_DEMO_MODE) ? (
+            <Link
+              href={athleteAppEntryHref()}
+              className="mt-4 inline-block text-sm font-semibold text-brand-300 hover:text-brand-200"
+            >
+              Open athlete demo →
+            </Link>
+          ) : (
+            <Link
+              href="/coach/roster"
+              className="mt-4 inline-block text-sm font-semibold text-brand-300 hover:text-brand-200"
+            >
+              View roster →
+            </Link>
+          )}
         </PremiumCard>
       </section>
     );

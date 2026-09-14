@@ -6,9 +6,15 @@ import { useLocale } from "@/lib/i18n-provider";
 import { useGsapReveal } from "@/hooks/use-gsap-reveal";
 import { EliteButton } from "@/components/elite-os";
 import { cn } from "@/lib/utils";
+import { athleteAppEntryHref } from "@/lib/auth/app-entry-href";
+import { isDemoModeEnv } from "@/lib/auth/middleware-auth";
 
 export function FinalCta() {
-  const copy = useLocale().landingEditorial.finalCta;
+  const locale = useLocale();
+  const copy = locale.landingEditorial.finalCta;
+  const secondaryLabel = isDemoModeEnv(process.env.NEXT_PUBLIC_DEMO_MODE)
+    ? copy.secondary
+    : locale.nav.signIn;
   const ref = useRef<HTMLElement>(null);
   useGsapReveal(ref, { selector: "[data-reveal]", y: 40, stagger: 0.12 });
 
@@ -46,7 +52,7 @@ export function FinalCta() {
           <Link href="/signup">{copy.primary}</Link>
         </EliteButton>
         <EliteButton asChild variant="secondary" size="lg" className="rounded-full">
-          <Link href="/dashboard?demo=athlete">{copy.secondary}</Link>
+          <Link href={athleteAppEntryHref()}>{secondaryLabel}</Link>
         </EliteButton>
       </div>
       <p

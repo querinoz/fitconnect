@@ -6,6 +6,8 @@ import { BrandLockup } from "@/components/brand/brand-lockup";
 import { LangPicker } from "@/components/lang-picker";
 import { useLocale } from "@/lib/i18n-provider";
 import { cn } from "@/lib/utils";
+import { isDemoModeEnv } from "@/lib/auth/middleware-auth";
+import { athleteAppEntryHref } from "@/lib/auth/app-entry-href";
 
 const LINKS = [
   { href: "/discover", key: "discover" as const },
@@ -62,9 +64,9 @@ export function MarketingNav({ minimal = false }: MarketingNavProps) {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <LangPicker compact />
-          {!minimal && (
+          {!minimal && isDemoModeEnv(process.env.NEXT_PUBLIC_DEMO_MODE) && (
             <Link
-              href="/dashboard?demo=athlete"
+              href={athleteAppEntryHref()}
               className="hidden rounded-full border border-white/10 px-3 py-1.5 text-xs font-medium text-ink-100 transition hover:border-volt-500/30 hover:text-volt-300 sm:inline-flex"
             >
               {nav.demo}

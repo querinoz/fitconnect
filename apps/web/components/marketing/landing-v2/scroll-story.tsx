@@ -11,16 +11,22 @@ import { LandingCinematicBg } from "@/components/landing/landing-cinematic-bg";
 import { LandingPhoneStage, type LandingPhoneRole } from "@/components/landing/landing-phone-stage";
 import { EliteButton } from "@/components/elite-os";
 import { cn } from "@/lib/utils";
+import { athleteAppEntryHref, coachAppEntryHref } from "@/lib/auth/app-entry-href";
 
 const PANELS: {
   key: LandingPhoneRole;
-  href: string;
   copyKey: "athletes" | "coaches" | "together";
 }[] = [
-  { key: "athlete", copyKey: "athletes", href: "/dashboard?demo=athlete" },
-  { key: "coach", copyKey: "coaches", href: "/coach/dashboard?demo=coach" },
-  { key: "together", copyKey: "together", href: "/community" }
+  { key: "athlete", copyKey: "athletes" },
+  { key: "coach", copyKey: "coaches" },
+  { key: "together", copyKey: "together" }
 ];
+
+function panelHref(key: LandingPhoneRole): string {
+  if (key === "athlete") return athleteAppEntryHref();
+  if (key === "coach") return coachAppEntryHref();
+  return "/community";
+}
 
 export function ScrollStory() {
   const { landingV2 } = useLocale();
@@ -118,7 +124,7 @@ export function ScrollStory() {
                   {c.body}
                 </p>
                 <EliteButton asChild size="sm" className="mt-8 rounded-full">
-                  <Link href={panel.href}>
+                  <Link href={panelHref(panel.key)}>
                     {c.cta}
                     <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
                   </Link>

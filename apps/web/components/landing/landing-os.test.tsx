@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { LanguageProvider } from "@/lib/i18n-provider";
+import { athleteAppEntryHref, coachAppEntryHref } from "@/lib/auth/app-entry-href";
 import { LandingEcosystemAct } from "@/components/landing/landing-ecosystem-act";
 import { LandingOsNav } from "@/components/landing/landing-os-nav";
 import { LandingProblemAct } from "@/components/landing/landing-problem-act";
@@ -15,6 +16,10 @@ function wrap(ui: ReactElement) {
 }
 
 describe("landing OS narrative", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("exposes working nav destinations", () => {
     wrap(<LandingOsNav />);
     expect(screen.getByRole("link", { name: /enter elite os/i })).toHaveAttribute("href", "/signup");
@@ -73,13 +78,27 @@ describe("landing OS narrative", () => {
     expect(screen.getByTestId("landing-phone-together")).toBeVisible();
     expect(screen.getByRole("link", { name: /open athlete os/i })).toHaveAttribute(
       "href",
-      "/dashboard?demo=athlete"
+      athleteAppEntryHref()
     );
     expect(screen.getByRole("link", { name: /open coach os/i })).toHaveAttribute(
       "href",
-      "/coach/dashboard?demo=coach"
+      coachAppEntryHref()
     );
     expect(screen.getAllByText(/local demo/i).length).toBeGreaterThan(0);
+  });
+
+  it("sends production landing CTAs to ONE LOGIN, not impersonation URLs", () => {
+    vi.stubEnv("NEXT_PUBLIC_DEMO_MODE", "false");
+    wrap(<ScrollStory />);
+    expect(screen.getByRole("link", { name: /open athlete os/i })).toHaveAttribute(
+      "href",
+      "/signin?next=/dashboard"
+    );
+    expect(screen.getByRole("link", { name: /open coach os/i })).toHaveAttribute(
+      "href",
+      "/signin?next=/coach/dashboard"
+    );
+    vi.unstubAllEnvs();
   });
 
   it("keeps the preview phone and coaches roster inside a two-column frame", () => {
