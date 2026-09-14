@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 import { AuthGate } from "@/components/auth-gate";
 import { ProfileTabPanel } from "@/components/mobile/athlete-tab-panels";
 import { AthleteProfileForm } from "@/components/athlete/athlete-profile-form";
+import { ActiveExperienceSwitcher } from "@/components/identity/active-experience-switcher";
 import { useAuthStore } from "@/lib/auth-store";
 import { resolveDashboardAthleteId } from "@/lib/dashboard/resolve-scope";
 import { selectAthlete, useDashboardStore } from "@/lib/dashboard-store";
@@ -23,7 +24,12 @@ export default function AthleteProfilePlaceholderPage() {
         subtitle={athlete ? athlete.sports.join(" · ") : "Athlete profile"}
         streakDays={(athlete?.streakWeeks ?? 0) * 7}
         readinessScore={athlete?.readiness ?? 0}
-        extra={stitchMobile ? undefined : <AthleteProfileForm />}
+        extra={
+          <>
+            <ActiveExperienceSwitcher />
+            {stitchMobile ? undefined : <AthleteProfileForm />}
+          </>
+        }
       />
     </AuthGate>
   );

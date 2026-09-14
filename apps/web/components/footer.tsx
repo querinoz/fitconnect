@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Github, Instagram, Twitter, Youtube } from "lucide-react";
+import { Github, Instagram } from "lucide-react";
 import { Logo } from "./brand/logo";
 import { Wordmark } from "./brand/wordmark";
 import { useT } from "@/lib/i18n-provider";
-import { FITCONNECT_INSTAGRAM_URL, mailto } from "@/lib/site/contact";
+import { FITCONNECT_CONTACT_EMAIL, FITCONNECT_INSTAGRAM_URL, mailto } from "@/lib/site/contact";
 import { athleteAppEntryHref, coachAppEntryHref } from "@/lib/auth/app-entry-href";
 
 export function Footer() {
@@ -24,10 +24,19 @@ export function Footer() {
 
   const company = [
     { label: t("nav", "forCoaches"), href: "/trainer" },
-    { label: t("footer", "about"), href: "#" },
-    { label: t("footer", "careers"), href: "#" },
-    { label: t("footer", "press"), href: "#" },
-    { label: t("footer", "partnerships"), href: "#" }
+    { label: t("footer", "about"), href: "/#methodology" },
+    {
+      label: t("footer", "careers"),
+      href: `mailto:${FITCONNECT_CONTACT_EMAIL}?subject=${encodeURIComponent("FitConnect careers")}`
+    },
+    {
+      label: t("footer", "press"),
+      href: `mailto:${FITCONNECT_CONTACT_EMAIL}?subject=${encodeURIComponent("FitConnect press")}`
+    },
+    {
+      label: t("footer", "partnerships"),
+      href: `mailto:${FITCONNECT_CONTACT_EMAIL}?subject=${encodeURIComponent("FitConnect partnerships")}`
+    }
   ];
 
   const legal = [
@@ -39,8 +48,6 @@ export function Footer() {
 
   const social = [
     { label: "Instagram", icon: Instagram, href: FITCONNECT_INSTAGRAM_URL },
-    { label: "Twitter", icon: Twitter, href: "#" },
-    { label: "YouTube", icon: Youtube, href: "#" },
     {
       label: "GitHub",
       icon: Github,

@@ -88,12 +88,14 @@ export default function CommunityPage() {
         open={createOpen}
         onOpenChange={setCreateOpen}
         onPublish={async (post) => {
-          await fetch("/api/v1/community/posts", {
+          const res = await fetch("/api/v1/community/posts", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text: post.text, kind: post.kind, author: post.author })
           });
+          if (!res.ok) return false;
           window.dispatchEvent(new CustomEvent("fitconnect:community-refresh"));
+          return true;
         }}
       />
 

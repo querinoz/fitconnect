@@ -13,16 +13,20 @@ const POST_KINDS = ["PR", "Check-in", "Race", "Question"] as const;
 type CreatePostModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onPublish: (post: CommunityPost) => void;
+  onPublish: (post: CommunityPost) => void | Promise<boolean | void>;
 };
 
 export function CreatePostModal({ open, onOpenChange, onPublish }: CreatePostModalProps) {
   const reduce = useReducedMotion();
   const [kind, setKind] = useState<(typeof POST_KINDS)[number]>("Check-in");
   const [text, setText] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [publishing, setPublishing] = useState(false);
 
-  function handlePublish() {
-    if (!text.trim()) return;
+  async function handlePublish() {
+    if (!text.trim() || publishing) return;
+    setError(null);
+    setPublishing(true);
     const post: CommunityPost = {
       id: `c-local-${Date.now()}`,
       author: {
@@ -36,9 +40,19 @@ export function CreatePostModal({ open, onOpenChange, onPublish }: CreatePostMod
       comments: 0,
       ago: "just now"
     };
-    onPublish(post);
-    setText("");
-    onOpenChange(false);
+    try {
+      const result = await onPublish(post);
+      if (result === false) {
+        setError("Post failed. Nothing was published.");
+        return;
+      }
+      setText("");
+      onOpenChange(false);
+    } catch {
+      setError("Post failed. Nothing was published.");
+    } finally {
+      setPublishing(false);
+    }
   }
 
   return (
@@ -99,13 +113,18 @@ export function CreatePostModal({ open, onOpenChange, onPublish }: CreatePostMod
                     placeholder="Share a PR, check-in, or race report…"
                     className="w-full rounded-xl border border-eos-on-surface/10 bg-eos-floor px-3 py-2 text-sm text-eos-on-surface focus:outline-none focus:ring-2 focus:ring-eos-voltline/60"
                   />
+                  {error ? (
+                    <p className="text-sm text-eos-alert" role="alert">
+                      {error}
+                    </p>
+                  ) : null}
                   <Button
                     type="button"
                     className="w-full bg-eos-voltline text-eos-floor hover:bg-eos-voltline"
-                    disabled={!text.trim()}
-                    onClick={handlePublish}
+                    disabled={!text.trim() || publishing}
+                    onClick={() => void handlePublish()}
                   >
-                    Post to feed
+                    {publishing ? "Publishing…" : "Post to feed"}
                   </Button>
                 </div>
               </motion.div>

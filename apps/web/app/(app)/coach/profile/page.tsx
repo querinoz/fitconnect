@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 import { AuthGate } from "@/components/auth-gate";
 import { ProfileTabPanel } from "@/components/mobile/athlete-tab-panels";
 import { ProfileSettingsPanel } from "@/components/mobile/profile-settings-panel";
+import { ActiveExperienceSwitcher } from "@/components/identity/active-experience-switcher";
 import { EliteAppPage } from "@/components/shell/elite";
 import { BentoCard } from "@/components/elite-os";
 import { useAuthStore } from "@/lib/auth-store";
@@ -47,7 +48,12 @@ export default function CoachProfilePlaceholderPage() {
           subtitle="Verified specialist"
           streakDays={0}
           readinessScore={0}
-          extra={themeExtra}
+          extra={
+            <>
+              <ActiveExperienceSwitcher />
+              {themeExtra}
+            </>
+          }
         />
       ) : (
         <EliteAppPage
@@ -55,6 +61,7 @@ export default function CoachProfilePlaceholderPage() {
           title="Profile"
           subtitle="Branding, availability and athlete-facing theme defaults."
         >
+          <ActiveExperienceSwitcher />
           <ProfileSettingsPanel />
           {themeExtra}
         </EliteAppPage>
