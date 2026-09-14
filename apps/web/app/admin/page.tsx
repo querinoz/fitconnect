@@ -11,6 +11,8 @@ import { loadAdminKpis } from "@/lib/admin/kpis";
 import { formatPrice } from "@/lib/utils";
 import { EliteAppPage } from "@/components/shell/elite";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminOverviewPage() {
   const kpis = await loadAdminKpis();
 

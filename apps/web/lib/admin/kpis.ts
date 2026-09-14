@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { pgQuery } from "@/lib/db/pg-pool";
 import { isDatabaseConfigured } from "@/lib/db/client";
 
@@ -35,6 +36,11 @@ export type FunnelStep = {
   rate: number;
 };
 
+/** Abort SSG even if a parent layout is a Client Component (the 5d627a4 failure). */
+async function requireAdminRuntime(): Promise<void> {
+  await connection();
+}
+
 const EMPTY_KPIS: AdminKpis = {
   paidAthletes: 0,
   verifiedCoaches: 0,
@@ -59,6 +65,7 @@ export function emptyAdminFunnel(): FunnelStep[] {
 }
 
 export async function loadAdminKpis(): Promise<AdminKpis> {
+  await requireAdminRuntime();
   if (!isDatabaseConfigured()) return emptyAdminKpis();
   const paid = await pgQuery<{ n: string }>(
     `select count(*)::text as n from public.user_subscriptions where status in ('active','trialing')`
@@ -88,6 +95,7 @@ export async function loadAdminKpis(): Promise<AdminKpis> {
 }
 
 export async function loadAdminAthletes(): Promise<AdminAthleteRow[]> {
+  await requireAdminRuntime();
   if (!isDatabaseConfigured()) return [];
   const rows = await pgQuery<{
     user_id: string;
@@ -107,6 +115,7 @@ export async function loadAdminAthletes(): Promise<AdminAthleteRow[]> {
 }
 
 export async function loadAdminPayments(): Promise<AdminPaymentRow[]> {
+  await requireAdminRuntime();
   if (!isDatabaseConfigured()) return [];
   const rows = await pgQuery<{
     stripe_checkout_session_id: string;
@@ -132,6 +141,7 @@ export async function loadAdminPayments(): Promise<AdminPaymentRow[]> {
 }
 
 export async function loadAdminFunnel(): Promise<FunnelStep[]> {
+  await requireAdminRuntime();
   if (!isDatabaseConfigured()) return emptyAdminFunnel();
   const rows = await pgQuery<{ name: string; n: string }>(
     `select name, count(*)::text as n from public.analytics_events group by name`

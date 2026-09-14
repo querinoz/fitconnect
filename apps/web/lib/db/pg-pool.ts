@@ -1,15 +1,16 @@
 import pg from "pg";
+import { isRuntimeSafeDatabaseUrl } from "./runtime-hosts";
 import { postgresSslOption } from "./pg-ssl";
 
 let pool: pg.Pool | null = null;
 
 export function getPgPool(): pg.Pool | null {
   const url = process.env.DATABASE_URL?.trim();
-  if (!url) return null;
+  if (!isRuntimeSafeDatabaseUrl(url)) return null;
   if (!pool) {
     pool = new pg.Pool({
       connectionString: url,
-      ssl: postgresSslOption(url),
+      ssl: postgresSslOption(url!),
       max: 4
     });
   }

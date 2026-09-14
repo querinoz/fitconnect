@@ -2,6 +2,9 @@ import { BentoCard, EliteChip } from "@/components/elite-os";
 import { loadAdminAthletes } from "@/lib/admin/kpis";
 import { EliteAppPage } from "@/components/shell/elite";
 
+/** Privileged Postgres. Never SSG against CI/Vercel env (including docker host `base`). */
+export const dynamic = "force-dynamic";
+
 export default async function AdminAthletesPage() {
   const athletes = await loadAdminAthletes();
 

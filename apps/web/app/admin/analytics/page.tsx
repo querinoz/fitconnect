@@ -2,6 +2,8 @@ import { BentoCard } from "@/components/elite-os";
 import { loadAdminFunnel } from "@/lib/admin/kpis";
 import { EliteAppPage } from "@/components/shell/elite";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminAnalyticsPage() {
   const funnel = await loadAdminFunnel();
   const hasEvents = funnel.some((step) => step.count > 0);

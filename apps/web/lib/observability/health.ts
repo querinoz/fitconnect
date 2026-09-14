@@ -1,3 +1,4 @@
+import { isRuntimeSafeDatabaseUrl } from "@/lib/db/runtime-hosts";
 import { isFirebaseWebConfigured } from "@/lib/firebase/config";
 import { resolveRateLimitBackend } from "@/lib/security/rate-limit";
 import { stripeCheckoutMode, stripeHealthDetail } from "@/lib/stripe/mode";
@@ -37,10 +38,16 @@ export function buildHealthReport(env: NodeJS.ProcessEnv = process.env): HealthR
         : "AUTH_UNAVAILABLE — firebase web config missing"
   });
 
+  const dbUrl = env.DATABASE_URL?.trim() ?? "";
+  const dbSafe = isRuntimeSafeDatabaseUrl(dbUrl, env.FITCONNECT_ALLOW_DOCKER_DB === "1");
   deps.push({
     name: "database",
-    status: configured(env, "DATABASE_URL") ? "ok" : "degraded",
-    detail: configured(env, "DATABASE_URL") ? "postgresql" : "DATABASE_URL not set"
+    status: dbSafe ? "ok" : "degraded",
+    detail: dbSafe
+      ? "postgresql"
+      : dbUrl
+        ? "DATABASE_URL host is docker-only (not usable in CI/Vercel)"
+        : "DATABASE_URL not set"
   });
 
   const stripeMode = stripeCheckoutMode(env);
@@ -74,7 +81,7 @@ export function buildHealthReport(env: NodeJS.ProcessEnv = process.env): HealthR
           : "in-memory rate limit (upstash unset)"
   });
 
-  const firstPartyAnalytics = configured(env, "DATABASE_URL");
+  const firstPartyAnalytics = dbSafe;
   deps.push({
     name: "analytics",
     status:

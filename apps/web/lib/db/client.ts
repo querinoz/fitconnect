@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+import { isRuntimeSafeDatabaseUrl } from "./runtime-hosts";
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
@@ -8,7 +9,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 export function isDatabaseConfigured(): boolean {
-  return Boolean(process.env.DATABASE_URL?.trim());
+  return isRuntimeSafeDatabaseUrl(process.env.DATABASE_URL);
 }
 
 function createClient(): PrismaClient {

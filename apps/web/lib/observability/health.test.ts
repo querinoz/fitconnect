@@ -69,6 +69,16 @@ describe("buildHealthReport", () => {
     expect(report.dependencies.find((d) => d.name === "analytics")?.detail).toMatch(/first-party/);
   });
 
+  it("does not treat docker hostname base as a live postgres", () => {
+    const report = buildHealthReport({
+      ...process.env,
+      NEXT_PUBLIC_DEMO_MODE: "false",
+      DATABASE_URL: "postgres://user:pass@base:5432/postgres"
+    } as NodeJS.ProcessEnv);
+    expect(report.dependencies.find((d) => d.name === "database")?.status).toBe("degraded");
+    expect(report.dependencies.find((d) => d.name === "database")?.detail).toMatch(/docker-only/);
+  });
+
   it("does not claim live or demo checkout when Stripe is unset", () => {
     const report = buildHealthReport({
       ...process.env,

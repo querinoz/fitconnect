@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   isPlaceholderValue,
-  mergeAndSanitizeEnv
+  mergeAndSanitizeEnv,
+  PLACEHOLDER_HOSTS
 } from "./inject-github-secrets-into-vercel-env.mjs";
+import { DOCKER_ONLY_HOSTS } from "./lib/docker-only-hosts.mjs";
 
 const firebase = {
   NEXT_PUBLIC_FIREBASE_API_KEY: "A".repeat(39),
@@ -65,4 +67,10 @@ test("placeholder detector", () => {
   assert.equal(isPlaceholderValue("TURBO_API", "https://vercel.com"), true);
   assert.equal(isPlaceholderValue("DATABASE_URL", "postgres://x@base/db"), true);
   assert.equal(isPlaceholderValue("NEXT_PUBLIC_APP_URL", "https://fitconnect-phi.vercel.app"), false);
+});
+
+test("inject placeholder hosts include every docker-only hostname", () => {
+  for (const host of DOCKER_ONLY_HOSTS) {
+    assert.equal(PLACEHOLDER_HOSTS.has(host), true, host);
+  }
 });

@@ -10,6 +10,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  # Pin: last known-good CLI on 2026-09-14. Do not use vercel@latest in production deploys.
+  VERCEL_CLI: "59.16.0"
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -44,15 +46,15 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
         with:
           version: 9.15.9
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
 
       - name: Install dependencies
@@ -105,7 +107,7 @@ jobs:
           set +e
           mkdir -p .vercel
           printf '{"orgId":"%s","projectId":"%s"}\n' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
-          npx --yes vercel@latest pull --yes --environment=production > /tmp/vercel-pull.log 2>&1
+          npx --yes vercel@${VERCEL_CLI} pull --yes --environment=production > /tmp/vercel-pull.log 2>&1
           code=$?
           errors="$(grep -E 'Error:|Downloaded|Linked|Created' /tmp/vercel-pull.log | sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g' | tail -n 15)"
           echo "----- vercel pull (exit $code) -----"
@@ -129,39 +131,22 @@ jobs:
         run: |
           node scripts/inject-github-secrets-into-vercel-env.mjs
 
+      - name: Preflight Vercel env (no docker hosts)
+        env:
+          DATABASE_URL: ""
+          DIRECT_URL: ""
+          PGHOST: ""
+        run: node scripts/preflight-vercel-env.mjs
+
       - name: Build with Vercel
-        run: |
-          set +e
-          attempt=1
-          while [ $attempt -le 2 ]; do
-            npx --yes vercel@latest build --prod --yes > /tmp/vercel-build.log 2>&1
-            code=$?
-            if [ $code -eq 0 ]; then
-              break
-            fi
-            if grep -q "EAI_AGAIN" /tmp/vercel-build.log && [ $attempt -eq 1 ]; then
-              echo "::warning::vercel build hit transient DNS (EAI_AGAIN); retrying once"
-              attempt=2
-              continue
-            fi
-            break
-          done
-          errors="$(grep -E 'Error:|Compiled|Build|✅|warn' /tmp/vercel-build.log | sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g' | tail -n 30)"
-          echo "----- vercel build (exit $code) -----"
-          echo "$errors"
-          if [ $code -ne 0 ]; then
-            echo "----- vercel build tail (redacted) -----"
-            tail -n 60 /tmp/vercel-build.log | sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g'
-            oneline="$(printf '%s' "$errors" | tr '\n' ' ')"
-            echo "::error::vercel build failed (exit $code). CLI: ${oneline}"
-          fi
-          exit $code
+        run: node scripts/vercel-build-with-retry.mjs
         env:
           VERCEL_TELEMETRY_DISABLED: "1"
           TURBO_REMOTE_CACHE_DISABLED: "1"
           TURBO_API: ""
           TURBO_TOKEN: ""
           TURBO_TEAM: ""
+          FITCONNECT_ENV_CLASS: vercel-prebuild
           NEXT_PUBLIC_DEMO_MODE: "false"
           NEXT_PUBLIC_REALTIME_PROVIDER: broadcast
           NEXT_PUBLIC_APP_URL: https://fitconnect-phi.vercel.app
@@ -188,6 +173,6 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Deploy prebuilt
-        run: npx --yes vercel@latest deploy --prebuilt --prod --yes
+        run: npx --yes vercel@${VERCEL_CLI} deploy --prebuilt --prod --yes
         env:
           VERCEL_TELEMETRY_DISABLED: "1"
