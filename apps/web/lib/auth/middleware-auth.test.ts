@@ -75,6 +75,9 @@ describe("middleware auth policy", () => {
     expect(isProtectedPath("/insights")).toBe(true);
     expect(isProtectedPath("/insights/export")).toBe(true);
     expect(isProtectedPath("/dashboard")).toBe(true);
+    expect(isProtectedPath("/map")).toBe(true);
+    expect(isProtectedPath("/map/live")).toBe(true);
+    expect(isProtectedPath("/discover")).toBe(false);
     expect(isProtectedPath("/")).toBe(false);
   });
 });

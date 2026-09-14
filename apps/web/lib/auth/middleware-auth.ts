@@ -10,6 +10,7 @@ export const PROTECTED_PREFIXES = [
   "/insights",
   "/achievements",
   "/feed",
+  "/map",
 ] as const;
 
 export function isProtectedPath(pathname: string): boolean {
