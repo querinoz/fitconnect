@@ -50,6 +50,7 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
   const [motionOverride, setMotionOverride] = useState<MotionPreference>(null);
   const [osReduced, setOsReduced] = useState(false);
   const [highContrast, setHighContrastState] = useState(false);
+  const [motionReady, setMotionReady] = useState(false);
 
   const reduceMotion = resolveEffectiveReduced(osReduced, motionOverride);
 
@@ -58,11 +59,16 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
     if (savedColor === "light" || savedColor === "dark") {
       setColorModeState(savedColor);
     }
-    setMotionOverride(readMotionOverride());
-    setHighContrastState(localStorage.getItem(KEY_CONTRAST) === "1");
+    const override = readMotionOverride();
+    setMotionOverride(override);
+    const contrastOn = localStorage.getItem(KEY_CONTRAST) === "1";
+    setHighContrastState(contrastOn);
 
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     setOsReduced(mq.matches);
+    applyMotionDataset(resolveEffectiveReduced(mq.matches, override));
+    document.documentElement.dataset.contrast = contrastOn ? "high" : "normal";
+    setMotionReady(true);
     const onChange = (event: MediaQueryListEvent) => setOsReduced(event.matches);
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
@@ -76,9 +82,13 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
   }, [colorMode]);
 
   useEffect(() => {
+    // First client paint has osReduced=false. Applying that as data-motion="full"
+    // would override html[data-motion="reduced"] / the OS media query and leave
+    // --motion-duration at 300ms until the matchMedia effect commits.
+    if (!motionReady) return;
     applyMotionDataset(reduceMotion);
     document.documentElement.dataset.contrast = highContrast ? "high" : "normal";
-  }, [reduceMotion, highContrast]);
+  }, [reduceMotion, highContrast, motionReady]);
 
   const setColorMode = useCallback((mode: ColorMode) => {
     setColorModeState(mode);

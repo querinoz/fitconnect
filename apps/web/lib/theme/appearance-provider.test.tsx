@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AppearanceProvider } from "./appearance-provider";
@@ -25,6 +25,22 @@ function Probe() {
   );
 }
 
+function mockMatchMedia(matches: boolean) {
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn().mockImplementation((query: string) => ({
+      matches: matches && query.includes("prefers-reduced-motion"),
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false
+    }))
+  );
+}
+
 describe("<AppearanceProvider />", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -32,6 +48,11 @@ describe("<AppearanceProvider />", () => {
     document.documentElement.dataset.contrast = "normal";
     document.documentElement.classList.remove("light");
     document.documentElement.classList.add("dark");
+    mockMatchMedia(false);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it("should_default_to_dark_mode_and_full_motion_after_hydrate", async () => {
@@ -45,6 +66,21 @@ describe("<AppearanceProvider />", () => {
       expect(screen.getByTestId("motion").textContent).toBe("false");
     });
     expect(document.documentElement.dataset.motion).toBe("full");
+  });
+
+  it("should_honor_os_reduced_motion_without_stamping_full_on_hydrate", async () => {
+    mockMatchMedia(true);
+    document.documentElement.dataset.motion = "reduced";
+    render(
+      <AppearanceProvider>
+        <Probe />
+      </AppearanceProvider>
+    );
+    expect(document.documentElement.dataset.motion).not.toBe("full");
+    await waitFor(() => {
+      expect(screen.getByTestId("motion").textContent).toBe("true");
+    });
+    expect(document.documentElement.dataset.motion).toBe("reduced");
   });
 
   it("should_persist_reduce_motion_to_localStorage_and_dataset", async () => {

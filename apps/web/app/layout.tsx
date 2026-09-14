@@ -156,7 +156,7 @@ export default function RootLayout({
         ) : null}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var langs=['en','pt','es','fr','de','it'];var l=localStorage.getItem('fitconnect.lang');if(l&&langs.indexOf(l)>=0){document.documentElement.lang=l;}var m=localStorage.getItem('fitconnect:motion');var os=window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(m==='reduced'){document.documentElement.dataset.motion='reduced';}else if(m==='full'){document.documentElement.dataset.motion='full';}else{document.documentElement.dataset.motion=os?'reduced':'full';}document.documentElement.dataset.colorMode='dark';}catch(e){document.documentElement.dataset.motion='full';}})();`
+            __html: `(function(){try{var langs=['en','pt','es','fr','de','it'];var l=localStorage.getItem('fitconnect.lang');if(l&&langs.indexOf(l)>=0){document.documentElement.lang=l;}var m=localStorage.getItem('fitconnect:motion');var os=window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(m==='reduced'){document.documentElement.dataset.motion='reduced';}else if(m==='full'){document.documentElement.dataset.motion='full';}else if(os){document.documentElement.dataset.motion='reduced';}document.documentElement.dataset.colorMode='dark';}catch(e){}})();`
           }}
         />
         <Providers initialLang={DEFAULT_LANG}>
