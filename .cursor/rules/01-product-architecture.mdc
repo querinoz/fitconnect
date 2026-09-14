@@ -1,0 +1,20 @@
+---
+description: Product architecture pointer — ONE LOGIN, All-Sports, native clients, provider adapters
+alwaysApply: true
+---
+
+# Product architecture
+
+Canonical rules live in `AGENTS.md` and `.cursor/rules/fitconnect-architecture.mdc`. Do not fork them here.
+
+Locked product model:
+
+- **ONE LOGIN / ONE ACCOUNT / ONE SESSION.** Athlete and Coach are modes of the same identity.
+- Nav: **Feed → Ascend → [TRAIN] → Dashboard → Profile.** Feed is social, not a metrics dashboard.
+- Data plane adapters: Health Connect, HealthKit, Garmin, WHOOP, Strava (never social), future official APIs.
+- Core: Training, Recovery, Performance, GPS, Realtime, Booking, Social.
+- AI: FitConnect MCP Gateway + tool registry + permissions + audit + Zenith. Not an unrestricted backend.
+- Data: PostgreSQL authoritative; pgvector regenerable; Supabase Realtime.
+- Clients: Web (Next.js), Android (Compose + Wear), iOS (SwiftUI + HealthKit).
+
+Terra / Spike / ROOK remain disabled optional aggregator flags only.

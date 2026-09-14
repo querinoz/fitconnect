@@ -1,0 +1,17 @@
+---
+description: Web quality loop — build, browser, a11y, console, network, performance, E2E, production smoke
+globs: "{apps/web/**,scripts/**,playwright.config.*}"
+alwaysApply: false
+---
+
+# Web quality
+
+For Web / Next.js UI work:
+
+CODE → BUILD → BROWSER → ACCESSIBILITY → CONSOLE → NETWORK → PERFORMANCE → E2E → REGRESSION → PRODUCTION SMOKE
+
+Applicable tools: Playwright (CLI + MCP when exploratory), Chrome DevTools / cursor-ide-browser, Lighthouse / `pnpm lighthouse:mobile`, axe-core where wired, visual regression specs.
+
+Never declare Web UI complete from unit tests alone.
+
+Do not lower the Lighthouse mobile gate in CI. Honor `prefers-reduced-motion`. Keep landing-motion coverage meaningful.

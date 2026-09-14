@@ -1,0 +1,24 @@
+---
+description: MCP and Zenith security — registry, authz, audit; no unrestricted execution
+alwaysApply: true
+---
+
+# MCP / Zenith security
+
+FitConnect MCP is a **controlled tool layer**, not an unrestricted backend.
+
+Production authorization belongs to FitConnect (`/api/v1/mcp` gateway: registry, schemas, validation, auth, permissions, audit, rate limits, timeouts, isolation).
+
+## Forbidden in the production trust boundary
+
+- Unrestricted shell
+- Arbitrary SQL
+- Uncontrolled community MCP servers
+- Provider secrets in client bundles or logs
+- Fabricated biometric data in Zenith
+
+Zenith must use authorized tools and real data. If data is missing, say so. Consequential writes need user confirmation.
+
+Cursor `.mcp.json` servers are **developer-machine** tools. They are not the product MCP gateway. Firecrawl / Perplexity require human API keys and must not receive production database credentials.
+
+Supabase MCP, if used at all, is least-privilege and never production-destructive without explicit authorization.

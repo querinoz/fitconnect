@@ -1,0 +1,19 @@
+---
+description: Native Android / Wear quality — Compose, ADB, Maestro, lint, never Expo UI
+globs: "{android/**,packages/design-tokens/**}"
+alwaysApply: false
+---
+
+# Android / Wear quality
+
+FitConnect Android is Jetpack Compose + Health Connect + Wear. Do not migrate the athlete UI to Expo/React Native.
+
+Loop: IMPLEMENT → BUILD → INSTALL → LAUNCH → INTERACT → ASSERT → ACCESSIBILITY → PERFORMANCE → REGRESSION
+
+Applicable tools: Gradle, Android lint, Detekt, ktlint, Kover when configured, ADB, emulator or physical device, Maestro for critical journeys, Compose UI tests.
+
+Never claim UX works because `assembleDebug` succeeded.
+
+Wear: glanceability, large touch targets, reconnect, battery-sensitive behavior. Do not copy phone layouts onto the watch.
+
+This agent host is often Windows — iOS Simulator is unavailable here; Android emulator/device is the mobile runtime.

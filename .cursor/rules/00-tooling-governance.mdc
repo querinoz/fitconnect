@@ -1,0 +1,50 @@
+---
+description: Permanent AI tooling — use every applicable approved skill/MCP/plugin; never install untrusted servers
+alwaysApply: true
+---
+
+# FitConnect tooling governance
+
+"Always use everything" means: **use every applicable, approved, compatible tool**. It does not mean install arbitrary MCP servers because they exist.
+
+## Before significant work
+
+1. Inspect installed Cursor plugins, project skills, `.cursor/rules`, `AGENTS.md`, `.mcp.json`, CI workflows, and platform SDKs.
+2. Select tools that materially help this task.
+3. Use all selected tools. Do not silently skip an applicable installed capability.
+4. Record why a listed tool was not applicable when that distinction matters.
+
+## Prefer
+
+- Official, actively maintained open-source projects
+- Permissive licenses
+- Local / self-hosted / zero-recurring-cost tooling
+- Least privilege (no production DB, secrets, or filesystem root on an MCP)
+
+## Never
+
+- Connect an unknown MCP to production credentials or databases
+- Treat "free to install" as "free to operate"
+- Print secrets, tokens, or env values
+- Claim Web/Android/iOS verification from unit tests or `assembleDebug` alone
+- Introduce Terra / Spike / ROOK as mandatory core dependencies
+- Replace native Android/Compose or SwiftUI/iOS with Expo for UI
+- Generate redundant tool calls just to satisfy a checklist
+
+## Hierarchy (resolve conflicts here)
+
+1. Architecture + security (`AGENTS.md`, `fitconnect-architecture.mdc`, `06-ai-mcp-security.mdc`)
+2. This tooling governance
+3. Platform quality (`03-web`, `04-android`, `05-ios`)
+4. Product / UX (`02-ux-benchmark`)
+5. Release gates (`07-release-gates.mdc`, `verify-before-responding.mdc`)
+
+## Inventory
+
+Keep `.cursor/tooling-inventory.md` and `.cursor/tooling-policy.json` current when adding or dropping tools.
+
+Health check (no secrets in output):
+
+```bash
+pnpm tooling:health
+```

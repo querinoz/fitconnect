@@ -1,0 +1,24 @@
+---
+description: Release is code + tests + official Vercel alias + live smoke — CI green is not enough
+globs: "{.github/workflows/**,apps/web/vercel.json,scripts/**}"
+alwaysApply: false
+---
+
+# Release gates
+
+Official production path:
+
+Pull → inject Firebase / required env → `vercel build --prod` → `vercel deploy --prebuilt --prod` → production alias READY → live smoke
+
+Do not claim success from GitHub job status alone.
+
+## Must prove on the live alias
+
+- Homepage and critical nav (Feed, TRAIN, Dashboard, Profile)
+- Auth path
+- `/api/health` and `GET /api/v1/identity/me` (unauth must not be `503 rate_limit_not_configured`)
+- Deployed commit SHA is **not** a stale Session-6 artifact
+
+`verify-before-responding.mdc` still applies: run the ladder; report what was not run.
+
+HUMAN BLOCKER vs ENGINEERING FOLLOW-UP: credentials, legal/provider approval, and destructive prod DB changes are human-only. A failing workflow is not a reason to stop and wait for a new prompt — inspect the real error class and fix what is fixable in code.

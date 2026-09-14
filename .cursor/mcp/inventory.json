@@ -1,0 +1,17 @@
+{
+  "source": ".mcp.json",
+  "updated": "2026-09-14",
+  "servers": [
+    { "id": "playwright", "purpose": "desktop web QA", "credentials": "none", "productionTrust": false },
+    { "id": "playwright-mobile", "purpose": "Pixel 7 viewport", "credentials": "none", "productionTrust": false },
+    { "id": "playwright-webkit", "purpose": "WebKit checks on Windows", "credentials": "none", "productionTrust": false },
+    { "id": "context7", "purpose": "library docs", "credentials": "none-in-repo", "productionTrust": false },
+    { "id": "firecrawl", "purpose": "optional scrape", "credentials": "FIRECRAWL_API_KEY", "productionTrust": false, "status": "human-key" },
+    { "id": "perplexity", "purpose": "optional research", "credentials": "PERPLEXITY_API_KEY", "productionTrust": false, "status": "human-key" },
+    { "id": "chrome-mcp-server", "purpose": "local Chrome bridge", "credentials": "none", "status": "requires-local-bridge" }
+  ],
+  "notInstalled": [
+    { "id": "github-mcp", "reason": "use gh CLI" },
+    { "id": "supabase-mcp", "reason": "least privilege; avoid prod DB" }
+  ]
+}

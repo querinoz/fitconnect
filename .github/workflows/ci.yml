@@ -35,7 +35,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: node scripts/ci-gate-lint.mjs
-      - run: node --test scripts/lighthouse-mobile.test.mjs
+      - run: node --test scripts/lighthouse-mobile.test.mjs scripts/inject-github-secrets-into-vercel-env.test.mjs
+      - run: pnpm tooling:health
       - run: pnpm lint
       # Expo @fitconnect/mobile archived (ADR-005 / Path A). Turbo 2.x hard-fails if a
       # --filter references a package that is not in the workspace — do not negate it.

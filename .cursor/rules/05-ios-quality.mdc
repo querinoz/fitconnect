@@ -1,0 +1,13 @@
+---
+description: Native iOS / SwiftUI / HealthKit — macOS required for Simulator; do not fake it on Windows
+globs: "{ios/**,**/*.swift,**/*.xcodeproj/**}"
+alwaysApply: false
+---
+
+# iOS quality
+
+Direction: SwiftUI + HealthKit. Maestro / XCTest / SwiftLint / snapshot testing when running on macOS.
+
+On Windows or Linux: validate source and project configuration only. **Do not claim Simulator or device verification.** Leave a reproducible macOS/CI path.
+
+Never introduce Expo as the iOS UI architecture.

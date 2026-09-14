@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "updated": "2026-09-14",
+  "policy": {
+    "useEverythingMeans": "all-applicable-approved-compatible",
+    "installUntrustedMcps": false,
+    "terraSpikeRookCore": false,
+    "expoAndroidUi": false,
+    "leastPrivilege": true,
+    "neverPrintSecrets": true
+  },
+  "platforms": {
+    "windows": ["web", "android"],
+    "linux": ["web", "android"],
+    "macos": ["web", "android", "ios", "wear"]
+  },
+  "tools": [
+    {
+      "id": "playwright-cli",
+      "category": "web-e2e",
+      "status": "required",
+      "oss": true,
+      "autoUpdateSafe": false
+    },
+    {
+      "id": "playwright-mcp",
+      "category": "web-explore",
+      "status": "approved",
+      "config": ".mcp.json#playwright"
+    },
+    {
+      "id": "lighthouse-mobile",
+      "category": "web-perf",
+      "status": "required",
+      "command": "pnpm lighthouse:mobile"
+    },
+    {
+      "id": "github-cli",
+      "category": "release",
+      "status": "required"
+    },
+    {
+      "id": "vercel-cli",
+      "category": "release",
+      "status": "required",
+      "credentials": "GitHub environment production VERCEL_TOKEN"
+    },
+    {
+      "id": "maestro",
+      "category": "mobile-e2e",
+      "status": "approved",
+      "installWhen": "device-or-emulator-session"
+    },
+    {
+      "id": "figma-mcp",
+      "category": "design",
+      "status": "approved",
+      "oss": false,
+      "notes": "Plan/usage limits; not unrestricted OSS"
+    },
+    {
+      "id": "context7",
+      "category": "docs",
+      "status": "approved",
+      "config": ".mcp.json#context7"
+    },
+    {
+      "id": "firecrawl",
+      "category": "research",
+      "status": "optional-human-key",
+      "productionTrust": false
+    },
+    {
+      "id": "perplexity",
+      "category": "research",
+      "status": "optional-human-key",
+      "productionTrust": false
+    },
+    {
+      "id": "github-mcp",
+      "category": "release",
+      "status": "deferred",
+      "reason": "gh CLI covers required workflows with existing credentials"
+    },
+    {
+      "id": "supabase-mcp",
+      "category": "backend",
+      "status": "deferred",
+      "reason": "avoid production DB access from agent MCP"
+    }
+  ]
+}

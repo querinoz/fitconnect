@@ -114,87 +114,51 @@ jobs:
       # Firebase web config into the pulled env files so `vercel build --prod`
       # inlines it (production /api/health was AUTH_UNAVAILABLE without this).
       - name: Inject GitHub production secrets into Vercel env
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          NEXT_PUBLIC_APP_URL: https://fitconnect-phi.vercel.app
         run: |
-          python3 - <<'PY'
-          import os
-          from pathlib import Path
-          required = [
-              "NEXT_PUBLIC_FIREBASE_API_KEY",
-              "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
-              "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
-              "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
-              "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
-              "NEXT_PUBLIC_FIREBASE_APP_ID",
-          ]
-          optional = [
-              "STRIPE_SECRET_KEY",
-              "STRIPE_WEBHOOK_SECRET",
-              "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
-              "STRIPE_PRICE_ATHLETE_MONTHLY",
-              "STRIPE_PRICE_ATHLETE_ANNUAL",
-              "STRIPE_PRICE_TEAM_MONTHLY",
-              "STRIPE_PRICE_TEAM_ANNUAL",
-              "STRIPE_PRICE_COACH_MONTHLY",
-              "STRIPE_PRICE_COACH_ANNUAL",
-              "UPSTASH_REDIS_REST_URL",
-              "UPSTASH_REDIS_REST_TOKEN",
-              "NEXT_PUBLIC_POSTHOG_KEY",
-              "NEXT_PUBLIC_POSTHOG_HOST",
-              "NEXT_PUBLIC_SENTRY_DSN",
-              "LIVEKIT_API_KEY",
-              "LIVEKIT_API_SECRET",
-              "NEXT_PUBLIC_LIVEKIT_URL",
-              "OPENAI_API_KEY",
-          ]
-          keys = required + optional
-          paths = [
-              Path(".vercel/.env.production.local"),
-              Path("apps/web/.vercel/.env.production.local"),
-          ]
-          injected_optional = 0
-          for path in paths:
-              text = path.read_text(encoding="utf-8") if path.exists() else ""
-              lines = [
-                  ln for ln in text.splitlines()
-                  if not any(ln.startswith(f"{k}=") for k in keys)
-              ]
-              for key in required:
-                  value = os.environ.get(key, "").strip()
-                  if not value:
-                      raise SystemExit(f"missing {key}")
-                  lines.append(f"{key}={value}")
-              for key in optional:
-                  value = os.environ.get(key, "").strip()
-                  if not value:
-                      continue
-                  injected_optional += 1
-                  lines.append(f"{key}={value}")
-              path.parent.mkdir(parents=True, exist_ok=True)
-              path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-          print(
-              f"injected {len(required)} required Firebase keys; "
-              f"{injected_optional} optional secret slots were non-empty "
-              f"(counted across {len(paths)} env files)"
-          )
-          PY
+          node scripts/inject-github-secrets-into-vercel-env.mjs
 
       - name: Build with Vercel
         run: |
           set +e
-          npx --yes vercel@latest build --prod --yes > /tmp/vercel-build.log 2>&1
-          code=$?
-          errors="$(grep -E 'Error:|Compiled|Build|✅' /tmp/vercel-build.log | sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g' | tail -n 20)"
+          attempt=1
+          while [ $attempt -le 2 ]; do
+            npx --yes vercel@latest build --prod --yes > /tmp/vercel-build.log 2>&1
+            code=$?
+            if [ $code -eq 0 ]; then
+              break
+            fi
+            if grep -q "EAI_AGAIN" /tmp/vercel-build.log && [ $attempt -eq 1 ]; then
+              echo "::warning::vercel build hit transient DNS (EAI_AGAIN); retrying once"
+              attempt=2
+              continue
+            fi
+            break
+          done
+          errors="$(grep -E 'Error:|Compiled|Build|✅|warn' /tmp/vercel-build.log | sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g' | tail -n 30)"
           echo "----- vercel build (exit $code) -----"
           echo "$errors"
           if [ $code -ne 0 ]; then
+            echo "----- vercel build tail (redacted) -----"
+            tail -n 60 /tmp/vercel-build.log | sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g'
             oneline="$(printf '%s' "$errors" | tr '\n' ' ')"
             echo "::error::vercel build failed (exit $code). CLI: ${oneline}"
           fi
           exit $code
         env:
           VERCEL_TELEMETRY_DISABLED: "1"
+          TURBO_REMOTE_CACHE_DISABLED: "1"
+          TURBO_API: ""
+          TURBO_TOKEN: ""
+          TURBO_TEAM: ""
           NEXT_PUBLIC_DEMO_MODE: "false"
           NEXT_PUBLIC_REALTIME_PROVIDER: broadcast
+          NEXT_PUBLIC_APP_URL: https://fitconnect-phi.vercel.app
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
           NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}

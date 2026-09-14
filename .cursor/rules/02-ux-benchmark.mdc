@@ -1,0 +1,28 @@
+---
+description: Release UX gate — context first, insight→action, category benchmarks, no dead ends
+globs: "{apps/web/**/*.tsx,android/**/*.kt,ios/**/*.swift}"
+alwaysApply: false
+---
+
+# UX / product benchmark gate
+
+A feature is complete only when the user can discover → understand → use → recover → get the intended result → continue.
+
+## Interaction model
+
+- **Context first:** what does the user need to know now?
+- **Insight → action:** a number without a next step is incomplete (e.g. recovery below baseline + Accept / Keep / Why).
+- **Progressive disclosure:** critical information first; do not dump telemetry.
+- **Zero dead-end:** every important action produces a logical next step.
+
+## Required states
+
+loading, empty, success, partial, stale, offline, permission denied, provider disconnected, sync pending/failed, session expired, rate limited, unavailable capability.
+
+Never fake biometric data to hide missing providers.
+
+## Benchmarks (adapt, do not clone)
+
+WHOOP, Oura, Garmin Connect, Strava, Apple Fitness, Nike Run Club, Nike Training Club.
+
+Study hierarchy, empty states, coaching, notifications, and AI confirmation — then adapt to Elite OS (`--eos-*`, OLED dark + voltline). Do not copy branding or screens.
