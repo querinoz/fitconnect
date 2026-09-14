@@ -88,10 +88,7 @@ jobs:
       # running these steps inside apps/web makes deploy look for apps/web/apps/web
       # (run 34773470298 attempt 1: path does not exist).
       - name: Pull Vercel env
-        run: |
-          mkdir -p .vercel
-          printf '{"orgId":"%s","projectId":"%s"}\n' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
-          pnpm dlx vercel@48.12.1 pull --yes --environment=production --scope "$VERCEL_ORG_ID"
+        run: pnpm dlx vercel@48.12.1 pull --yes --environment=production
 
       # vercel pull does not include GitHub environment secrets. Bake the public
       # Firebase web config into the pulled env files so `vercel build --prod`
