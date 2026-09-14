@@ -26,7 +26,9 @@ describe("<MobileShell />", () => {
     expect(screen.getByText("Inês")).toBeInTheDocument();
     expect(screen.getByTestId("content")).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByLabelText("Today")).toBeInTheDocument();
+      expect(screen.getByLabelText("Dashboard")).toHaveAttribute("aria-current", "page");
+      expect(screen.getByLabelText("Feed")).toBeInTheDocument();
+      expect(screen.getByLabelText("Ascend")).toBeInTheDocument();
     });
   });
 });
