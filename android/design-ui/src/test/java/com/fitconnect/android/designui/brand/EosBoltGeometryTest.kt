@@ -26,6 +26,6 @@ class EosBoltGeometryTest {
         assertEquals(160f, EosMarkGeometry.CX)
         assertEquals(142f, EosMarkGeometry.CY)
         assertTrue(EosMarkGeometry.OUTER_R > EosMarkGeometry.INNER_R)
-        assertEquals(3, EosMarkGeometry.meshPaths(320f).size)
+        assertEquals(3, EosMarkGeometry.MESH_LAYER_COUNT)
     }
 }

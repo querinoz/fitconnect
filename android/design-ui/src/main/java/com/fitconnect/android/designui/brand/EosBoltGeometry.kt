@@ -64,6 +64,9 @@ object EosMarkGeometry {
         }
     }
 
+    /** F body, voltline mid-bar, ECG — count is JVM-safe; Path instances need Compose runtime. */
+    const val MESH_LAYER_COUNT = 3
+
     /** Sparse outline paths for atmosphere mesh tiles. */
     fun meshPaths(size: Float): List<Path> = listOf(fPath(size), midBarPath(size), ecgPath(size))
 }
