@@ -97,7 +97,7 @@ jobs:
           set +e
           mkdir -p .vercel
           printf '{"orgId":"%s","projectId":"%s"}\n' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
-          npx --yes vercel@latest pull --yes --environment=production --scope "$VERCEL_ORG_ID" > /tmp/vercel-pull.log 2>&1
+          npx --yes vercel@latest pull --yes --environment=production > /tmp/vercel-pull.log 2>&1
           code=$?
           errors="$(grep -E 'Error:|Downloaded|Linked|Created' /tmp/vercel-pull.log | sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g' | tail -n 15)"
           echo "----- vercel pull (exit $code) -----"
@@ -107,7 +107,7 @@ jobs:
             exit 0
           fi
           oneline="$(printf '%s' "$errors" | tr '\n' ' ')"
-          echo "::error::vercel pull failed (exit $code). A project-scoped token cannot load project settings; use a Full Account or Team token. CLI: ${oneline}"
+          echo "::error::vercel pull failed (exit $code). CLI: ${oneline}"
           exit $code
 
       # vercel pull does not include GitHub environment secrets. Bake the public
@@ -181,7 +181,7 @@ jobs:
       - name: Build with Vercel
         run: |
           set +e
-          npx --yes vercel@latest build --prod --yes --scope "$VERCEL_ORG_ID" > /tmp/vercel-build.log 2>&1
+          npx --yes vercel@latest build --prod --yes > /tmp/vercel-build.log 2>&1
           code=$?
           errors="$(grep -E 'Error:|Compiled|Build|✅' /tmp/vercel-build.log | sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g' | tail -n 20)"
           echo "----- vercel build (exit $code) -----"
@@ -215,6 +215,6 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Deploy prebuilt
-        run: npx --yes vercel@latest deploy --prebuilt --prod --yes --scope "$VERCEL_ORG_ID"
+        run: npx --yes vercel@latest deploy --prebuilt --prod --yes
         env:
           VERCEL_TELEMETRY_DISABLED: "1"
