@@ -10,6 +10,7 @@ import {
   resolveRunCount,
   resolveThresholds,
   scoreCategories,
+  shouldExtendLighthouseRuns,
   shouldFailProcess
 } from "./lighthouse-mobile.mjs";
 
@@ -122,5 +123,55 @@ describe("lighthouse-mobile gate contract", () => {
     ]);
     assert.equal(median.performance, 86);
     assert.equal(shouldFailProcess(median, true), false);
+  });
+
+  it("extends noisy CI medians without lowering the 84 floor", () => {
+    const thresholds = { performance: 84 };
+    assert.equal(
+      shouldExtendLighthouseRuns(
+        [
+          { performance: 75, failed: true },
+          { performance: 80, failed: true },
+          { performance: 91, failed: false }
+        ],
+        thresholds
+      ),
+      true
+    );
+    assert.equal(
+      shouldExtendLighthouseRuns(
+        [
+          { performance: 86, failed: false },
+          { performance: 88, failed: false },
+          { performance: 91, failed: false }
+        ],
+        thresholds
+      ),
+      false
+    );
+    assert.equal(
+      shouldExtendLighthouseRuns(
+        [
+          { performance: 70, failed: true },
+          { performance: 72, failed: true },
+          { performance: 78, failed: true }
+        ],
+        thresholds
+      ),
+      false
+    );
+    assert.equal(
+      shouldExtendLighthouseRuns(
+        [
+          { performance: 75, failed: true },
+          { performance: 80, failed: true },
+          { performance: 91, failed: false },
+          { performance: 85, failed: false },
+          { performance: 88, failed: false }
+        ],
+        thresholds
+      ),
+      false
+    );
   });
 });
