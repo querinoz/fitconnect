@@ -351,6 +351,9 @@ export type Dict = {
       sessions: string;
       analysis: string;
       achievements: string;
+      feed: string;
+      ascend: string;
+      dashboard: string;
       train: string;
       map: string;
       coach: string;

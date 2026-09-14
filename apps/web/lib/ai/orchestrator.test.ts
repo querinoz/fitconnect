@@ -3,7 +3,7 @@ import { orchestrateZenith } from "@fitconnect/ai";
 
 describe("zenith orchestrator", () => {
   it("marks metrics MISSING when telemetry is absent", () => {
-    const result = orchestrateZenith({ athleteId: "a1" });
+    const result = orchestrateZenith({ athleteId: "a1" }, {});
     expect(result.metrics.hrvMs.provenance).toBe("MISSING");
     expect(result.metrics.hrvMs.value).toBeNull();
     expect(result.llmRoute).toBe("fallback");
@@ -27,7 +27,21 @@ describe("zenith orchestrator", () => {
       specialist: "training",
       hrvMs: 70,
       sleepHours: 8
-    });
+    }, {});
     expect(result.actions[0]?.requiresApproval).toBe(true);
+  });
+
+  it("does not invent HRV from empty series", async () => {
+    const { evaluateReadinessGraph } = await import("@fitconnect/ai");
+    const result = await evaluateReadinessGraph({
+      athleteId: "a1",
+      hrvSeries: [],
+      sleepHoursSeries: [],
+      trainingLoad7d: 0,
+      baselineHrv: 60
+    });
+    expect(result.insufficientData).toBe(true);
+    expect(result.hrvMs).toBeNull();
+    expect(result.score).toBeNull();
   });
 });

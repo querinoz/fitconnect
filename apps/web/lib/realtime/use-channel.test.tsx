@@ -70,4 +70,40 @@ describe("useChannel", () => {
     });
     expect(b.result.current.messages.length).toBe(0);
   });
+
+  it("drops duplicate deliveries of the same event", () => {
+    const a = renderHook(() => useChannel("athlete:a1"));
+    const b = renderHook(() => useChannel("athlete:a1"));
+    const at = "2026-09-14T09:00:00.000Z";
+    act(() => {
+      a.result.current.send({
+        kind: "nudge",
+        athleteId: "a1",
+        coachId: "c1",
+        variant: "push",
+        at
+      });
+      a.result.current.send({
+        kind: "nudge",
+        athleteId: "a1",
+        coachId: "c1",
+        variant: "push",
+        at
+      });
+    });
+    expect(b.result.current.messages.filter((m) => m.kind === "nudge")).toHaveLength(1);
+  });
+
+  it("does not publish vitals onto the community feed", () => {
+    const feed = renderHook(() => useChannel("community:feed"));
+    act(() => {
+      feed.result.current.send({
+        kind: "vitals",
+        athleteId: "a1",
+        hrvMs: 58,
+        at: new Date().toISOString()
+      });
+    });
+    expect(feed.result.current.messages).toHaveLength(0);
+  });
 });

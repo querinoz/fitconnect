@@ -13,7 +13,7 @@ test.describe("voltline morning handshake @voltline", () => {
     await expect(swapBtn).toBeVisible({ timeout: 20_000 });
     await swapBtn.click();
 
-    await expect(athlete.getByRole("button", { name: "Apply" })).toBeVisible({
+    await expect(athlete.getByRole("button", { name: "Adjust" })).toBeVisible({
       timeout: 12_000
     });
 

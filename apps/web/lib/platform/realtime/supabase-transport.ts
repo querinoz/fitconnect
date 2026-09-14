@@ -23,7 +23,11 @@ export class SupabaseRealtimeTransport implements IRealtimeTransport {
     if (!set) {
       set = new Set();
       this.handlers.set(channel, set);
-      this.ensureChannel(channel);
+      const linked = this.ensureChannel(channel);
+      if (!linked) {
+        this.handlers.delete(channel);
+        return this.fallback.subscribe(channel, handler);
+      }
     }
     set.add(handler);
 
@@ -49,6 +53,10 @@ export class SupabaseRealtimeTransport implements IRealtimeTransport {
     }
 
     const ch = this.ensureChannel(channel);
+    if (!ch) {
+      this.fallback.publish(channel, msg);
+      return;
+    }
     void ch.send({ type: "broadcast", event: "message", payload: msg });
     // Same-tab fallback
     this.fallback.publish(channel, msg);
@@ -69,7 +77,7 @@ export class SupabaseRealtimeTransport implements IRealtimeTransport {
 
     const supa = createSupabaseBrowserClient();
     if (!supa) {
-      throw new Error("Supabase client unavailable");
+      return null;
     }
 
     const ch = supa.channel(`fc:${channel}`, {
@@ -83,7 +91,19 @@ export class SupabaseRealtimeTransport implements IRealtimeTransport {
       }
     });
 
-    void ch.subscribe();
+    const reconnect = () => {
+      if (this.channels.get(channel) !== ch) return;
+      window.setTimeout(() => {
+        if (this.channels.get(channel) !== ch) return;
+        void ch.subscribe(onStatus);
+      }, 1500);
+    };
+
+    const onStatus = (status: string) => {
+      if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") reconnect();
+    };
+
+    void ch.subscribe(onStatus);
     this.channels.set(channel, ch);
     return ch;
   }

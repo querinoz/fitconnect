@@ -15,6 +15,7 @@ describe("demo path role", () => {
 
   it("treats insights and map as athlete app surfaces", () => {
     expect(demoRoleForPath("/insights", null)).toBe("athlete");
+    expect(demoRoleForPath("/feed", null)).toBe("athlete");
     expect(demoRoleForPath("/map", "1")).toBe("athlete");
   });
 

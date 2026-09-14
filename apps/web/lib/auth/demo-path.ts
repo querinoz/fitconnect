@@ -4,6 +4,7 @@ export const ATHLETE_APP_PREFIXES = [
   "/dashboard",
   "/insights",
   "/achievements",
+  "/feed",
   "/sessions",
   "/inbox",
   "/my-coach",

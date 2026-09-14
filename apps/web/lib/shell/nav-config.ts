@@ -28,9 +28,9 @@ export function getShellNavItems(
   }
 
     return [
-      { href: "/dashboard", label: nav.today, icon: Home },
-      { href: "/insights", label: nav.analysis, icon: Activity },
-      { href: "/achievements", label: nav.achievements, icon: Trophy },
+      { href: "/feed", label: nav.feed, icon: UsersRound },
+      { href: "/achievements", label: nav.ascend, icon: Trophy },
+      { href: "/dashboard", label: nav.dashboard, icon: Activity },
       { href: "/profile", label: nav.profile, icon: UserRound }
     ];
 }

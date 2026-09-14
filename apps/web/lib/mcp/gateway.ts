@@ -9,6 +9,7 @@ import {
   mcpListPublicSpots,
   mcpListSocialFeed
 } from "./data";
+import { recordMcpAudit } from "./audit";
 import { looksLikePromptInjection, sanitizeUntrustedText } from "./sanitize";
 
 export type McpActor = {
@@ -47,32 +48,44 @@ export function listMcpCatalog() {
   }));
 }
 
+function auditAndReturn(actor: McpActor, result: McpResult): McpResult {
+  recordMcpAudit({
+    uid: actor.uid,
+    tool: result.tool,
+    ok: result.ok,
+    status: result.status,
+    risk: result.risk,
+    error: result.error
+  });
+  return result;
+}
+
 export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpResult> {
   const def = findMcpTool(call.tool);
   if (!def) {
-    return { ok: false, tool: call.tool, error: "unknown_tool", status: 404 };
+    return auditAndReturn(actor, { ok: false, tool: call.tool, error: "unknown_tool", status: 404 });
   }
   if (!hasCapability(actor, def.capabilities)) {
-    return {
+    return auditAndReturn(actor, {
       ok: false,
       tool: def.name,
       domain: def.domain,
       risk: def.risk,
       error: "forbidden",
       status: 403
-    };
+    });
   }
 
   const parsed = def.schema.safeParse(call.arguments ?? {});
   if (!parsed.success) {
-    return {
+    return auditAndReturn(actor, {
       ok: false,
       tool: def.name,
       domain: def.domain,
       risk: def.risk,
       error: "invalid_arguments",
       status: 422
-    };
+    });
   }
 
   const args = parsed.data as Record<string, unknown>;
@@ -135,14 +148,14 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
         startsAt: String(args.startsAt)
       });
       if (!booked.ok) {
-        return {
+        return auditAndReturn(actor, {
           ok: false,
           tool: def.name,
           domain: def.domain,
           risk: def.risk,
           error: booked.error,
           status: booked.error === "scheduledAt_in_past" ? 422 : 409
-        };
+        });
       }
       result = booked;
       break;
@@ -151,15 +164,15 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
       result = mcpAdminHealth();
       break;
     default:
-      return { ok: false, tool: def.name, error: "unhandled_tool", status: 500 };
+      return auditAndReturn(actor, { ok: false, tool: def.name, error: "unhandled_tool", status: 500 });
   }
 
-  return {
+  return auditAndReturn(actor, {
     ok: true,
     tool: def.name,
     domain: def.domain,
     risk: def.risk,
     result,
     status: 200
-  };
+  });
 }

@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, beforeEach } from "vitest";
 import { dispatchMcp, listMcpCatalog } from "./gateway";
+import { listMcpAudit, resetMcpAuditForTests } from "./audit";
 
 const athlete = {
   uid: "ath-1",
@@ -8,6 +9,10 @@ const athlete = {
 };
 
 describe("MCP gateway", () => {
+  beforeEach(() => {
+    resetMcpAuditForTests();
+  });
+
   it("lists domain tools", () => {
     const names = listMcpCatalog().map((t) => t.name);
     expect(names).toContain("get_athlete_profile");
@@ -16,15 +21,24 @@ describe("MCP gateway", () => {
     expect(names).toContain("list_providers");
   });
 
+  it("does not expose SQL, shell, or community-server tools", () => {
+    const names = listMcpCatalog().map((t) => t.name.toLowerCase());
+    expect(names.some((n) => /sql|shell|exec|eval|firecrawl|perplexity/.test(n))).toBe(
+      false
+    );
+  });
+
   it("rejects unknown tools", async () => {
     const res = await dispatchMcp(athlete, { tool: "drop_database" });
     expect(res.status).toBe(404);
     expect(res.ok).toBe(false);
+    expect(listMcpAudit("ath-1")[0]?.error).toBe("unknown_tool");
   });
 
   it("forbids admin tools for athletes", async () => {
     const res = await dispatchMcp(athlete, { tool: "admin_health" });
     expect(res.status).toBe(403);
+    expect(listMcpAudit("ath-1").some((e) => e.status === 403)).toBe(true);
   });
 
   it("does not fabricate readiness when telemetry is missing", async () => {

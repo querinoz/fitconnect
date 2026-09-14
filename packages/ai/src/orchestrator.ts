@@ -5,6 +5,7 @@
 
 import { evaluateAthleteState, type AthleteStateInput } from "@fitconnect/zenith-core";
 import type { MetricProvenance } from "@fitconnect/types";
+import { resolveLlmProvider } from "./llm-provider";
 
 export type ZenithSpecialist =
   | "recovery"
@@ -75,9 +76,11 @@ function safetyGate(specialist: ZenithSpecialist, userText: string | undefined):
   return reasons;
 }
 
-export function resolveLlmRoute(env: NodeJS.ProcessEnv = process.env): LlmRoute {
+export function resolveLlmRoute(env: NodeJS.Dict<string> = process.env): LlmRoute {
   if (env.ZENITH_LLM_ROUTE === "local") return "local";
-  if (env.OPENAI_API_KEY?.trim() && !env.OPENAI_API_KEY.includes("PASTE_")) return "remote";
+  if (env.ZENITH_LLM_ROUTE === "fallback") return "fallback";
+  const keys = [env.OPENAI_API_KEY, env.ANTHROPIC_API_KEY, env.GEMINI_API_KEY];
+  if (keys.some((k) => k?.trim() && !k.includes("PASTE_"))) return "remote";
   return "fallback";
 }
 
@@ -85,7 +88,10 @@ export function resolveLlmRoute(env: NodeJS.ProcessEnv = process.env): LlmRoute 
  * Deterministic orchestrator. Does not call an LLM.
  * Explanation text is engine-derived; remote rewrite is a separate optional step.
  */
-export function orchestrateZenith(input: ZenithOrchestratorInput): ZenithOrchestratorResult {
+export function orchestrateZenith(
+  input: ZenithOrchestratorInput,
+  env: NodeJS.Dict<string> = process.env
+): ZenithOrchestratorResult {
   const specialist = pickSpecialist(input);
   const state = evaluateAthleteState(input);
   const hrvPresent = input.hrvMs != null && Number.isFinite(input.hrvMs);
@@ -119,6 +125,6 @@ export function orchestrateZenith(input: ZenithOrchestratorInput): ZenithOrchest
     explanation,
     actions,
     safety: { blocked: specialist === "injury_safety", reasons: safetyReasons },
-    llmRoute: "fallback"
+    llmRoute: resolveLlmProvider(env).route
   };
 }

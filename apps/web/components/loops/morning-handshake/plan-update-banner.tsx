@@ -39,7 +39,7 @@ export function PlanUpdateBanner({
         Keep
       </button>
       <VoltButton type="button" onClick={onApply}>
-        Apply
+        Adjust
       </VoltButton>
     </GlassCard>
   );

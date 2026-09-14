@@ -6,10 +6,16 @@ describe("athlete shell IA", () => {
   it("has four destinations and no train tab", () => {
     const items = getShellNavItems("athlete", en.mobileApp.nav);
     expect(items.map((item) => item.href)).toEqual([
-      "/dashboard",
-      "/insights",
+      "/feed",
       "/achievements",
+      "/dashboard",
       "/profile"
+    ]);
+    expect(items.map((item) => item.label)).toEqual([
+      "Feed",
+      "Ascend",
+      "Dashboard",
+      "Profile"
     ]);
     expect(items.some((item) => item.href === "/sessions")).toBe(false);
     expect(items.length).toBe(4);

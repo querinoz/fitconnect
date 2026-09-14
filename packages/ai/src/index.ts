@@ -13,7 +13,11 @@ export type ReadinessInput = {
   baselineHrv: number;
 };
 
-export type ReadinessGraphResult = ReadinessSnapshot & {
+export type ReadinessGraphResult = Omit<ReadinessSnapshot, "score" | "hrvMs" | "sleepEfficiency"> & {
+  score: number | null;
+  hrvMs: number | null;
+  sleepEfficiency: number | null;
+  insufficientData: boolean;
   recommendation: string;
   source: "rules" | "llm";
   engineVersion?: string;
@@ -45,22 +49,42 @@ function statusFromZenithState(
 export async function evaluateReadinessGraph(
   input: ReadinessInput
 ): Promise<ReadinessGraphResult> {
-  const recentHrv = avg(input.hrvSeries.slice(-3));
-  const sleepAvg = avg(input.sleepHoursSeries.slice(-3));
+  const hrvSeries = input.hrvSeries.filter((n) => Number.isFinite(n));
+  const sleepHoursSeries = input.sleepHoursSeries.filter((n) => Number.isFinite(n));
+  const recentHrv = avg(hrvSeries.slice(-3));
+  const sleepAvg = avg(sleepHoursSeries.slice(-3));
+  const hrvPresent = hrvSeries.length > 0;
+  const sleepPresent = sleepHoursSeries.length > 0;
+  if (!hrvPresent && !sleepPresent) {
+    return {
+      athleteId: input.athleteId,
+      score: null,
+      hrvMs: null,
+      sleepHours: "insufficient",
+      sleepEfficiency: null,
+      recoveryStatus: "amber",
+      capturedAt: new Date().toISOString(),
+      insufficientData: true,
+      recommendation:
+        "Insufficient data — sync Health Connect or a wearable. We never invent HRV or sleep.",
+      source: "rules",
+      readinessState: "INSUFFICIENT"
+    };
+  }
   // Map 7d training load (AU) into 0–100 strain for the shared formula.
   const strainScore = Math.min(100, Math.round((input.trainingLoad7d / 4500) * 100));
 
   const engine = evaluateZenithReadinessCore({
-    hrvMs: recentHrv || null,
+    hrvMs: hrvPresent ? recentHrv : null,
     baselineHrvMs: input.baselineHrv,
-    hrvHistory: input.hrvSeries,
-    sleepHours: sleepAvg || null,
-    sleepEfficiency: Math.round(Math.min(100, (sleepAvg / 8) * 100)),
+    hrvHistory: hrvSeries,
+    sleepHours: sleepPresent ? sleepAvg : null,
+    sleepEfficiency: sleepPresent ? Math.round(Math.min(100, (sleepAvg / 8) * 100)) : null,
     strainScore,
     historyDays: 7,
   });
 
-  const score = engine.score ?? 0;
+  const score = engine.score;
   const recoveryStatus = statusFromZenithState(engine.state, engine.score);
 
   let recommendation =
@@ -83,11 +107,12 @@ export async function evaluateReadinessGraph(
   return {
     athleteId: input.athleteId,
     score,
-    hrvMs: Math.round(recentHrv),
-    sleepHours: `${sleepAvg.toFixed(1)}h`,
-    sleepEfficiency: Math.round(Math.min(100, (sleepAvg / 8) * 100)),
+    hrvMs: hrvPresent ? Math.round(recentHrv) : null,
+    sleepHours: sleepPresent ? `${sleepAvg.toFixed(1)}h` : "insufficient",
+    sleepEfficiency: sleepPresent ? Math.round(Math.min(100, (sleepAvg / 8) * 100)) : null,
     recoveryStatus,
     capturedAt: new Date().toISOString(),
+    insufficientData: false,
     recommendation,
     source: "rules",
     engineVersion: engine.engineVersion,
@@ -121,3 +146,5 @@ export type {
   ZenithSpecialist,
   LlmRoute
 } from "./orchestrator";
+export { resolveLlmProvider } from "./llm-provider";
+export type { LLMProvider } from "./llm-provider";

@@ -71,6 +71,7 @@ describe("middleware auth policy", () => {
 
   it("protects insights with the rest of the athlete workspace", () => {
     expect(isProtectedPath("/achievements")).toBe(true);
+    expect(isProtectedPath("/feed")).toBe(true);
     expect(isProtectedPath("/insights")).toBe(true);
     expect(isProtectedPath("/insights/export")).toBe(true);
     expect(isProtectedPath("/dashboard")).toBe(true);

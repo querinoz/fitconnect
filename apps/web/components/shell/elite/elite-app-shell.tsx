@@ -43,8 +43,10 @@ export function EliteAppShell({
   );
   const activeTab = resolveActiveNavItem(pathname, items);
   const onHome =
-    pathname === "/dashboard" || pathname === "/coach/dashboard";
-  const roleHome = role === "coach" ? "/coach/dashboard" : "/dashboard";
+    pathname === "/feed" ||
+    pathname === "/dashboard" ||
+    pathname === "/coach/dashboard";
+  const roleHome = role === "coach" ? "/coach/dashboard" : "/feed";
 
   useEffect(() => {
     document.documentElement.dataset.motion = getEffectiveMotionDataset();

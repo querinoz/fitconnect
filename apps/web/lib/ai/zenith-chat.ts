@@ -1,3 +1,5 @@
+import { orchestrateZenith, resolveLlmProvider } from "@fitconnect/ai";
+
 export const ZENITH_CHAT_SYSTEM_PROMPT = [
   "You are Zenith, FitConnect's athlete copilot.",
   "Never invent HRV, sleep, readiness, VO2, strain, or training-load numbers.",
@@ -7,17 +9,30 @@ export const ZENITH_CHAT_SYSTEM_PROMPT = [
   "Keep answers short and operational."
 ].join(" ");
 
-export function isOpenAiConfigured(env: NodeJS.ProcessEnv = process.env): boolean {
+export function isOpenAiConfigured(env: NodeJS.Dict<string> = process.env): boolean {
   const key = env.OPENAI_API_KEY?.trim();
   return Boolean(key && !key.includes("PASTE_"));
 }
 
+function groundedFallback(
+  messages: Array<{ role: "user" | "assistant"; text: string }>
+): { text: string; grounded: true } {
+  const lastUser = [...messages].reverse().find((m) => m.role === "user");
+  const result = orchestrateZenith({ athleteId: "self", userText: lastUser?.text }, {} as NodeJS.Dict<string>);
+  const missing = result.metrics.hrvMs.provenance === "MISSING";
+  const prefix = missing
+    ? "Telemetry is missing — no HRV or sleep was provided. "
+    : "";
+  return { text: `${prefix}${result.explanation}`.trim(), grounded: true };
+}
+
 export async function completeZenithChat(
   messages: Array<{ role: "user" | "assistant"; text: string }>,
-  env: NodeJS.ProcessEnv = process.env
-): Promise<{ text: string } | { error: string; status: number }> {
-  if (!isOpenAiConfigured(env)) {
-    return { error: "ai_not_configured", status: 503 };
+  env: NodeJS.Dict<string> = process.env
+): Promise<{ text: string; grounded?: boolean } | { error: string; status: number }> {
+  const provider = resolveLlmProvider(env);
+  if (provider.route !== "remote" || provider.id !== "openai" || !isOpenAiConfigured(env)) {
+    return groundedFallback(messages);
   }
   const key = env.OPENAI_API_KEY!.trim();
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -39,12 +54,12 @@ export async function completeZenithChat(
     })
   });
   if (!res.ok) {
-    return { error: "ai_upstream_error", status: 502 };
+    return groundedFallback(messages);
   }
   const json = (await res.json()) as {
     choices?: Array<{ message?: { content?: string } }>;
   };
   const text = json.choices?.[0]?.message?.content?.trim();
-  if (!text) return { error: "ai_empty", status: 502 };
+  if (!text) return groundedFallback(messages);
   return { text };
 }
