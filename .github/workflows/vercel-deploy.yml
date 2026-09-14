@@ -91,22 +91,24 @@ jobs:
       # while pull/deploy still work (VERCEL_TOKEN + ORG/PROJECT ids). Missing
       # tokens stay fail-closed in "Check Vercel auth" above.
       - name: Pull Vercel env
+        env:
+          VERCEL_TELEMETRY_DISABLED: "1"
         run: |
           set +e
-          pnpm dlx vercel@latest pull --yes --environment=production > /tmp/vercel-pull.log 2>&1
+          mkdir -p .vercel
+          printf '{"orgId":"%s","projectId":"%s"}\n' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
+          npx --yes vercel@latest pull --yes --environment=production --scope "$VERCEL_ORG_ID" > /tmp/vercel-pull.log 2>&1
           code=$?
-          redacted="$(sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g' /tmp/vercel-pull.log | tail -n 20)"
+          errors="$(grep -E 'Error:|Downloaded|Linked|Created' /tmp/vercel-pull.log | sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g' | tail -n 15)"
           echo "----- vercel pull (exit $code) -----"
-          echo "$redacted"
+          echo "$errors"
           if [ $code -eq 0 ]; then
             echo "::notice::vercel pull succeeded"
             exit 0
           fi
-          oneline="$(printf '%s' "$redacted" | tr '\n' ' ')"
-          echo "::warning::vercel pull failed (exit $code); linking from ORG/PROJECT ids and continuing Inject/Build/Deploy. CLI: ${oneline}"
-          mkdir -p .vercel
-          printf '{"orgId":"%s","projectId":"%s"}\n' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
-          exit 0
+          oneline="$(printf '%s' "$errors" | tr '\n' ' ')"
+          echo "::error::vercel pull failed (exit $code). A project-scoped token cannot load project settings; use a Full Account or Team token. CLI: ${oneline}"
+          exit $code
 
       # vercel pull does not include GitHub environment secrets. Bake the public
       # Firebase web config into the pulled env files so `vercel build --prod`
@@ -179,17 +181,18 @@ jobs:
       - name: Build with Vercel
         run: |
           set +e
-          pnpm dlx vercel@latest build --prod --yes > /tmp/vercel-build.log 2>&1
+          npx --yes vercel@latest build --prod --yes --scope "$VERCEL_ORG_ID" > /tmp/vercel-build.log 2>&1
           code=$?
-          redacted="$(sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g' /tmp/vercel-build.log | tail -n 30)"
+          errors="$(grep -E 'Error:|Compiled|Build|✅' /tmp/vercel-build.log | sed -E 's/[A-Za-z0-9_\-]{24,}/[redacted]/g' | tail -n 20)"
           echo "----- vercel build (exit $code) -----"
-          echo "$redacted"
+          echo "$errors"
           if [ $code -ne 0 ]; then
-            oneline="$(printf '%s' "$redacted" | tr '\n' ' ')"
+            oneline="$(printf '%s' "$errors" | tr '\n' ' ')"
             echo "::error::vercel build failed (exit $code). CLI: ${oneline}"
           fi
           exit $code
         env:
+          VERCEL_TELEMETRY_DISABLED: "1"
           NEXT_PUBLIC_DEMO_MODE: "false"
           NEXT_PUBLIC_REALTIME_PROVIDER: broadcast
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
@@ -212,4 +215,6 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Deploy prebuilt
-        run: pnpm dlx vercel@latest deploy --prebuilt --prod --yes
+        run: npx --yes vercel@latest deploy --prebuilt --prod --yes --scope "$VERCEL_ORG_ID"
+        env:
+          VERCEL_TELEMETRY_DISABLED: "1"
