@@ -16,7 +16,7 @@ Machine-readable twin: `.cursor/tooling-policy.json`. Refresh after installing o
 | Supabase MCP | Backend | optional official | Apache-2.0 | yes | hosted | SaaS | DB token | not connected | deferred — too easy to point at prod |
 | Figma MCP + plugin | Design | Figma × Cursor | proprietary | no | plan limits | SaaS | Figma auth | design-to-code when files exist | approved when designs exist |
 | Firebase plugin | Auth/mobile | Cursor plugin | proprietary | no | yes | SaaS | project auth | Android/web Firebase | approved |
-| Maestro | Mobile E2E | mobile-dev-inc/maestro | Apache-2.0 | yes | yes | local | none | Android/iOS/web journeys | approved; install when exercising device |
+| Maestro | Mobile E2E | mobile-dev-inc/maestro official installer (`https://get.maestro.mobile.dev`) | Apache-2.0 | yes | yes | local | none | Android/iOS/web journeys | installed 2.10.0 on this Windows host; flows in `.maestro/` |
 | Android SDK / Gradle / Compose | Android | Google | mixed | partial | SDK free | local | keystore for release | native app | required |
 | Detekt / ktlint / Kover | Android quality | OSS | Apache/MIT | yes | yes | local | none | lint/coverage | required in Android CI where wired |
 | ADB / emulator | Android runtime | Google | mixed | n/a | yes | local | none | install/launch | required for UX claims |

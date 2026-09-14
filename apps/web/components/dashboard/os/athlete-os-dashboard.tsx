@@ -36,6 +36,8 @@ import type { SessionSummary } from "@fitconnect/types";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { NivisPanel } from "@/components/ui-glass/nivis-panel";
+import { isLocalDemo } from "@/lib/dashboard/resolve-scope";
+import type { InsightTelemetry } from "./ai-insights-panel";
 
 type TodayPlanBlock = {
   day: string;
@@ -61,6 +63,8 @@ type AthleteOsDashboardProps = {
   todayPlan?: TodayPlanBlock;
   streakWeeks?: number;
   onBookSession?: () => void;
+  telemetry?: InsightTelemetry;
+  metricsReady?: boolean;
 };
 
 function greetingKey(h = new Date().getHours()) {
@@ -86,7 +90,9 @@ export function AthleteOsDashboard({
   liveSection,
   todayPlan,
   streakWeeks = 0,
-  onBookSession
+  onBookSession,
+  telemetry,
+  metricsReady = true
 }: AthleteOsDashboardProps) {
   const { dashboard, hub, insights } = useLocale();
   const os = dashboard.os;
@@ -166,6 +172,7 @@ export function AthleteOsDashboard({
                 coachName={coachName}
                 streakWeeks={streakWeeks}
                 todayPlan={todayPlan}
+                metricsReady={metricsReady}
                 actions={
                   <>
                     <Button
@@ -198,7 +205,7 @@ export function AthleteOsDashboard({
             </EliteBentoMotionItem>
 
             <EliteBentoMotionItem className="flex flex-col gap-eos-bento md:col-span-12 xl:col-span-4">
-              {!compactCockpit ? (
+              {!compactCockpit && isLocalDemo() ? (
                 <>
                   <BentoCard padding="md" label={dashboard.strava_sync.title}>
                     <p className="text-sm font-medium text-eos-on-surface">
@@ -212,7 +219,7 @@ export function AthleteOsDashboard({
                   </BentoCard>
                 </>
               ) : null}
-              <AiInsightsPanel />
+              <AiInsightsPanel telemetry={telemetry} />
             </EliteBentoMotionItem>
 
             {!compactCockpit ? (
@@ -227,13 +234,15 @@ export function AthleteOsDashboard({
             ) : null}
 
             <EliteBentoMotionItem className="space-y-eos-bento md:col-span-12 xl:col-span-8">
-              <ReadinessCardWithExplain
-                readiness={readiness}
-                hrv={hrv}
-                baselineHrv={baselineHrv}
-                sleepHours={sleepHours}
-              />
-              {!compactCockpit ? (
+              {metricsReady ? (
+                <ReadinessCardWithExplain
+                  readiness={readiness}
+                  hrv={hrv}
+                  baselineHrv={baselineHrv}
+                  sleepHours={sleepHours}
+                />
+              ) : null}
+              {!compactCockpit && isLocalDemo() ? (
                 <HrvChartFull />
               ) : null}
               <SessionsPanel

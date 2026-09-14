@@ -47,6 +47,7 @@ import { EliteButton } from "@/components/elite-os/elite-button";
 import { EliteChip } from "@/components/elite-os/elite-chip";
 import { BodyText, Headline, LabelCaps } from "@/components/elite-os/typography";
 import { useEliteMotion } from "@/lib/motion/use-elite-motion";
+import { isDemoModeEnv } from "@/lib/auth/middleware-auth";
 import { cn } from "@/lib/utils";
 
 interface AuthShellProps {
@@ -102,6 +103,8 @@ export function AuthShell({
   );
 
   const authErrorParam = searchParams.get("error");
+  const isDemoMode = isDemoModeEnv(process.env.NEXT_PUBLIC_DEMO_MODE);
+  const bullets = isDemoMode ? locale.auth.demoBullets : locale.auth.bullets;
 
   function resolveRedirect(role: import("@/lib/auth").UserRole) {
     return redirectOverride ?? nextFromQuery ?? dashboardPathForRole(role);
@@ -118,10 +121,10 @@ export function AuthShell({
   }
 
   useEffect(() => {
-    if (mode !== "signin" || !coachDemoShortcut) return;
+    if (mode !== "signin" || !coachDemoShortcut || !isDemoMode) return;
     setIdentifier("tomas@fitconnect.local");
     setPassword("Coach");
-  }, [coachDemoShortcut, mode]);
+  }, [coachDemoShortcut, mode, isDemoMode]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -288,7 +291,7 @@ export function AuthShell({
           <BodyText className="mt-4 max-w-md text-lg">{subtitle}</BodyText>
 
           <ul className="mt-8 space-y-3">
-            {locale.auth.bullets.map((line, i) => (
+            {bullets.map((line, i) => (
               <motion.li
                 key={i}
                 initial={fadeIn.initial}
@@ -311,7 +314,7 @@ export function AuthShell({
           transition={uiTransition}
         >
           <EliteAuthPanel
-            badge="Authenticate to access telemetry."
+            badge={isDemoMode ? "LOCAL_DEMO" : "ONE LOGIN"}
             title={embedded ? heading : mode === "signin" ? t("auth", "submitSignIn") : t("auth", "submitSignUp")}
             subtitle={embedded ? subtitle : undefined}
           >

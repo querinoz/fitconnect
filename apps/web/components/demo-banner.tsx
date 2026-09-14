@@ -2,10 +2,14 @@
 
 import Link from "next/link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
+import { isDemoModeEnv } from "@/lib/auth/middleware-auth";
 import { useT } from "@/lib/i18n-provider";
 
 export function DemoBanner() {
   const t = useT();
+  if (!isDemoModeEnv(process.env.NEXT_PUBLIC_DEMO_MODE)) {
+    return null;
+  }
   return (
     <div
       role="region"

@@ -1,5 +1,6 @@
 import { isFirebaseWebConfigured } from "@/lib/firebase/config";
 import { resolveRateLimitBackend } from "@/lib/security/rate-limit";
+import { stripeCheckoutMode, stripeHealthDetail } from "@/lib/stripe/mode";
 
 export type HealthDependency = {
   name: string;
@@ -42,11 +43,11 @@ export function buildHealthReport(env: NodeJS.ProcessEnv = process.env): HealthR
     detail: configured(env, "DATABASE_URL") ? "postgresql" : "DATABASE_URL not set"
   });
 
-  const stripeLive = configured(env, "STRIPE_SECRET_KEY");
+  const stripeMode = stripeCheckoutMode(env);
   deps.push({
     name: "stripe",
-    status: stripeLive ? "ok" : "degraded",
-    detail: stripeLive ? "live checkout" : "demo checkout routes"
+    status: stripeMode === "none" ? "degraded" : "ok",
+    detail: stripeHealthDetail(stripeMode)
   });
 
   const stravaReady =
@@ -54,7 +55,11 @@ export function buildHealthReport(env: NodeJS.ProcessEnv = process.env): HealthR
   deps.push({
     name: "strava",
     status: stravaReady ? "ok" : "degraded",
-    detail: stravaReady ? "oauth configured" : "demo strava fallback"
+    detail: stravaReady
+      ? "oauth configured"
+      : demoMode
+        ? "demo strava fallback"
+        : "oauth not configured"
   });
 
   const redisBackend = resolveRateLimitBackend(env);

@@ -820,6 +820,7 @@ export type Dict = {
     continueToDashboard: string;
     signOut: string;
     bullets: [string, string, string];
+    demoBullets: [string, string, string];
   };
   fitme: {
     cta: string;

@@ -31,7 +31,8 @@ const nextConfig = {
     "@fitconnect/api-client",
     "@fitconnect/design-tokens",
     "@fitconnect/maps",
-    "@fitconnect/maps",
+    "@fitconnect/ai",
+    "@fitconnect/zenith-core"
   ],
   allowedDevOrigins: ["*.trycloudflare.com"],
     async headers() {

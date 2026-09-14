@@ -46,6 +46,9 @@ describe("production rate limit", () => {
       env
     );
     expect(blocked?.status).toBe(429);
+    expect(blocked?.headers.get("Retry-After")).toBeTruthy();
+    expect(blocked?.headers.get("X-RateLimit-Limit")).toBe("5");
+    expect(blocked?.headers.get("X-RateLimit-Remaining")).toBe("0");
     const body = (await blocked?.json()) as { error?: string };
     expect(body.error).toBe("rate_limited");
   });

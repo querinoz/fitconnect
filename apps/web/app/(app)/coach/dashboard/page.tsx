@@ -11,7 +11,8 @@ import {
   selectAthletesForCoach,
   selectCoachMetrics
 } from "@/lib/dashboard-store";
-import { DEMO_COACH_TOMAS_ID, getTrainerById } from "@/lib/dashboard/seed";
+import { getTrainerById } from "@/lib/dashboard/seed";
+import { isLocalDemo, resolveDashboardCoachId } from "@/lib/dashboard/resolve-scope";
 import { BentoCard, EliteButton } from "@/components/elite-os";
 import { useCoPilot } from "@/components/loops/ai-copilot/use-co-pilot";
 import { evaluateRoster } from "@/lib/ai/rules";
@@ -31,7 +32,7 @@ export default function CoachDashboardPage() {
 
 function CoachDashboardBody() {
   const user = useAuthStore((s) => s.user);
-  const coachId = user?.coachId ?? DEMO_COACH_TOMAS_ID;
+  const coachId = resolveDashboardCoachId(user);
   const router = useRouter();
   const resetDemo = useDashboardStore((s) => s.resetDemo);
   const [demoPanel, setDemoPanel] = useState(false);
@@ -39,7 +40,7 @@ function CoachDashboardBody() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    setDemoPanel(window.location.search.includes("demo=1"));
+    setDemoPanel(isLocalDemo() && window.location.search.includes("demo=1"));
   }, []);
 
   const metrics = useDashboardStore((s) => selectCoachMetrics(s, coachId));
@@ -54,6 +55,7 @@ function CoachDashboardBody() {
   useCoachBookingInbox(coachId);
 
   useEffect(() => {
+    if (!isLocalDemo()) return;
     const today = new Date().toISOString().slice(0, 10);
     const key = `${coachId}:${today}`;
     if (evaluatedRef.current === key) return;
@@ -129,7 +131,7 @@ function CoachDashboardBody() {
       coachTitle={coach?.headline ?? "Verified specialist"}
       coachAvatar={coach?.avatar}
       netPayout={metrics.revenueMtd}
-      attentionCount={amberCount || 1}
+      attentionCount={amberCount}
       demoSection={demoSection}
     />
   );

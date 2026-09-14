@@ -760,7 +760,7 @@ export const en: Dict = {
     wearableSyncHint:
       "Sync your wearable to unlock AI adjustments from your coach.",
     noAthleteProfile:
-      "No athlete profile linked to this account. Sign in as Athlete / Athlete for the demo.",
+      "No athlete profile is linked to this account yet. Finish onboarding or connect a wearable to load your OS.",
     os: {
       greetingMorning: "Good morning 👋",
       greetingAfternoon: "Good afternoon 👋",
@@ -970,14 +970,19 @@ export const en: Dict = {
     legalNote:
       "By continuing you agree to our Terms and acknowledge our Privacy Policy. We never post on your behalf.",
     usernameLabel: "Username or email",
-    usernamePlaceholder: "Admin",
+    usernamePlaceholder: "you@example.com",
     signInPasswordPlaceholder: "Your password",
-    invalidCredentials: "Invalid username or password. Try Admin / Admin.",
+    invalidCredentials: "Invalid email or password.",
     alreadySignedIn: "You already have an active session.",
     signedInAs: "Signed in as {name}",
     continueToDashboard: "Go to dashboard",
     signOut: "Sign out",
     bullets: [
+      "One account — Athlete and Coach are modes of the same session",
+      "Feed, Ascend, TRAIN, Dashboard, Profile — one operating system",
+      "Recovery advice only from your data. We never invent HRV or sleep"
+    ],
+    demoBullets: [
       "Demo: Athlete / Athlete · Coach / Coach · Marina / Marina (multi-sport)",
       "Emails: ines@fitconnect.local · tomas@fitconnect.local · marina@fitconnect.local · admin@fitconnect.local",
       "HRV + sleep readiness — same data both sides see"

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct LocalDemoBanner: View {
-    var note: String
+    var note: String = "LOCAL_DEMO — SwiftUI shell. Device/Simulator proof requires macOS."
 
     var body: some View {
         HStack(spacing: 12) {

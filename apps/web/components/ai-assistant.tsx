@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useLanguage, useLocale, useT } from "@/lib/i18n-provider";
+import { isDemoModeEnv } from "@/lib/auth/middleware-auth";
 import { cn } from "@/lib/utils";
 
 type Msg = { id: string; role: "user" | "assistant"; text: string };
@@ -27,6 +28,7 @@ export function AIAssistant() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const cannedForLang = locale.ai.canned;
+  const isDemoMode = isDemoModeEnv(process.env.NEXT_PUBLIC_DEMO_MODE);
 
   useEffect(() => {
     if (open) {
@@ -157,9 +159,11 @@ export function AIAssistant() {
                   {t("ai", "panelSubtitle")}
                 </p>
               </div>
+              {isDemoMode ? (
               <span className="inline-flex items-center gap-1 rounded-full bg-plasma-500/15 text-plasma-300 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ring-plasma-500/30">
                 <Sparkles className="h-3 w-3" /> {t("ai", "demoTag")}
               </span>
+              ) : null}
               <button
                 type="button"
                 onClick={() => setOpen(false)}

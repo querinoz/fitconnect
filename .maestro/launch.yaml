@@ -1,0 +1,52 @@
+appId: com.fitconnect.android
+name: Launch athlete OS
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: "splash_sys_init"
+    timeout: 25000
+- tapOn:
+    id: "splash_sys_init"
+- extendedWaitUntil:
+    visible:
+      id: "screen_guest"
+    timeout: 20000
+- tapOn:
+    id: "screen_guest_primary"
+- extendedWaitUntil:
+    visible:
+      id: "screen_auth"
+    timeout: 20000
+- tapOn:
+    id: "auth_email"
+- inputText: "ines@fitconnect.demo"
+- tapOn:
+    id: "auth_password"
+- inputText: "password1"
+- tapOn: "Sign in"
+- repeat:
+    times: 8
+    commands:
+      - tapOn:
+          id: "onboarding_skip"
+          optional: true
+      - tapOn:
+          id: "onboarding_continue"
+          optional: true
+      - tapOn:
+          id: "onboarding_finish"
+          optional: true
+- tapOn:
+    id: "onboarding_finish"
+    optional: true
+- tapOn:
+    id: "role_select_athlete"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "athlete_os"
+    timeout: 60000
+- assertVisible:
+    id: "athlete_bottom_nav"

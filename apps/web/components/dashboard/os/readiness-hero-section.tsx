@@ -30,6 +30,7 @@ type ReadinessHeroSectionProps = {
   todayPlan?: TodayPlanBlock;
   actions?: ReactNode;
   className?: string;
+  metricsReady?: boolean;
 };
 
 export function ReadinessHeroSection({
@@ -44,7 +45,8 @@ export function ReadinessHeroSection({
   streakWeeks = 5,
   todayPlan,
   actions,
-  className
+  className,
+  metricsReady = true
 }: ReadinessHeroSectionProps) {
   const { dashboard } = useLocale();
   const os = dashboard.os;
@@ -84,12 +86,16 @@ export function ReadinessHeroSection({
             {formatMsg(os.titleSuffix, { name: firstName })}
           </h1>
           <p className="mt-2 max-w-sm text-sm text-ink-400">
-            {formatMsg(hrvDiff >= 0 ? os.hrvTrendUp : os.hrvTrendDown, {
-              delta: Math.abs(hrvDiff)
-            })}
+            {metricsReady
+              ? formatMsg(hrvDiff >= 0 ? os.hrvTrendUp : os.hrvTrendDown, {
+                  delta: Math.abs(hrvDiff)
+                })
+              : dashboard.wearableSyncHint}
           </p>
 
           <div className="relative mx-auto mt-6 grid size-[168px] place-items-center lg:mx-0">
+            {metricsReady ? (
+              <>
             <div
               aria-hidden
               className="absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,var(--eos-voltline),var(--eos-performance),var(--eos-voltline))] opacity-25 motion-safe:animate-spin [animation-duration:12s]"
@@ -102,6 +108,15 @@ export function ReadinessHeroSection({
               className="relative motion-safe:animate-[pulse_4s_ease-in-out_infinite] shadow-[0_0_60px_color-mix(in_srgb,var(--eos-voltline)_18%,transparent)]"
               data-testid="readiness-hero-ring"
             />
+              </>
+            ) : (
+              <div
+                className="grid size-[168px] place-items-center rounded-full border border-eos-outline bg-eos-floor/60 px-4 text-center"
+                data-testid="readiness-hero-empty"
+              >
+                <p className="text-xs text-ink-400">{dashboard.wearableSyncHint}</p>
+              </div>
+            )}
           </div>
 
           <p className="mt-4 font-display text-lg font-bold text-volt-400">{band}</p>
@@ -129,11 +144,15 @@ export function ReadinessHeroSection({
             <MetricTile
               icon={TrendingUp}
               label={dashboard.hrvLabel}
-              value={`${hrv} ms`}
-              delta={hrvDiff >= 0 ? `+${hrvDiff}` : `${hrvDiff}`}
+              value={metricsReady ? `${hrv} ms` : "—"}
+              delta={metricsReady ? (hrvDiff >= 0 ? `+${hrvDiff}` : `${hrvDiff}`) : undefined}
               positive={hrvDiff >= 0}
             />
-            <MetricTile icon={Moon} label={dashboard.sleepRecovery} value={sleepHours} />
+            <MetricTile
+              icon={Moon}
+              label={dashboard.sleepRecovery}
+              value={metricsReady ? sleepHours : "—"}
+            />
             <MetricTile
               icon={Zap}
               label={dashboard.pr_tracker.title}

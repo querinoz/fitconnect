@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { AuthShell } from "@/components/auth-shell";
 import { useT } from "@/lib/i18n-provider";
+import { LiquidLoader } from "@/components/ui-glass/liquid-loader";
 
 interface SignInClientProps {
   redirectOverride?: string;
@@ -31,7 +32,7 @@ function SignInContent(props: SignInClientProps) {
 
 export function SignInClient(props: SignInClientProps) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<LiquidLoader fullscreen label="Loading sign in" size="lg" />}>
       <SignInContent {...props} />
     </Suspense>
   );

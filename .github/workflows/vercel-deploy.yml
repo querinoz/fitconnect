@@ -65,11 +65,19 @@ jobs:
         run: pnpm --filter @fitconnect/web typecheck
 
       - name: Apply Supabase migrations
-        continue-on-error: true
-        run: pnpm db:supabase:migrate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ] && [ -z "$DIRECT_URL" ]; then
+            echo "::notice::DATABASE_URL and DIRECT_URL unset — skipping migrations (not a silent apply success)."
+            exit 0
+          fi
+          if [ -z "$DATABASE_URL" ] || [ -z "$DIRECT_URL" ]; then
+            echo "::error::Both DATABASE_URL and DIRECT_URL are required to apply migrations."
+            exit 1
+          fi
+          pnpm db:supabase:migrate
 
       - name: Check Vercel auth
         run: |

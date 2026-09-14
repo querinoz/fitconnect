@@ -32,6 +32,7 @@
     "@fitconnect/strava-integration": "workspace:*",
     "@fitconnect/types": "workspace:*",
     "@fitconnect/utils": "workspace:*",
+    "@fitconnect/zenith-core": "workspace:*",
     "@gsap/react": "^2.1.2",
     "@livekit/components-react": "^2.9.21",
     "@prisma/adapter-pg": "^7.10.0",

@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { AuthGate } from "@/components/auth-gate";
 import { useAuthStore } from "@/lib/auth-store";
 import {
@@ -39,6 +40,7 @@ import { computeReadiness, hasCompleteReadinessInputs } from "@/lib/readiness/co
 import { RpeFeedbackModal } from "@/components/loops/live-session/rpe-feedback-modal";
 import { recommendationFromRpe } from "@/lib/ai/rules";
 import { useLiveHrvSync } from "@/lib/hooks/use-live-hrv-sync";
+import { useT } from "@/lib/i18n-provider";
 
 function intentFromPlan(blocks: PlanBlock[]): LiveSessionIntent {
   const next = blocks.find((b) => !b.completed) ?? blocks[0]!;
@@ -62,6 +64,7 @@ function coachFirstName(coachId: string | undefined): string {
 }
 
 function AthleteDashboardBody() {
+  const t = useT();
   const user = useAuthStore((s) => s.user);
   const resetDemo = useDashboardStore((s) => s.resetDemo);
   const athleteId = resolveDashboardAthleteId(user);
@@ -77,7 +80,7 @@ function AthleteDashboardBody() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    setDemoPanel(window.location.search.includes("demo=1"));
+    setDemoPanel(isLocalDemo() && window.location.search.includes("demo=1"));
   }, []);
 
   const baselineHrv = athlete?.hrv;
@@ -122,22 +125,38 @@ function AthleteDashboardBody() {
     return () => clearTimeout(id);
   }, [nudges.messages]);
 
-  if (!athlete || !plan || !readiness) {
+  if (!athlete) {
     return (
-      <BentoCard elevation="1">
-        <p className="text-sm text-ink-300">
-          No athlete profile is linked to this account.
-        </p>
+      <BentoCard elevation="1" className="space-y-4 p-6">
+        <p className="text-sm text-ink-300">{t("dashboard", "noAthleteProfile")}</p>
+        <div className="flex flex-wrap gap-2">
+          <EliteButton asChild size="sm">
+            <Link href="/settings/wearables">Connect a device</Link>
+          </EliteButton>
+          <EliteButton asChild size="sm" variant="ghost">
+            <Link href="/onboarding/athlete">Finish onboarding</Link>
+          </EliteButton>
+        </div>
       </BentoCard>
     );
   }
 
   const coachName = coachFirstName(athlete.coachId);
-  const nextBlock = plan.blocks.find((b) => !b.completed) ?? plan.blocks[0]!;
+  const nextBlock = plan?.blocks.find((b) => !b.completed) ?? plan?.blocks[0];
   const pending = listener.pendingDiff;
   const planBannerCoach =
     pending != null ? coachFirstName(pending.coachId) : coachName;
   const planApproved = !listener.pendingDiff;
+  const sleepHoursNum = Number.parseFloat(athlete.sleepHours);
+  const telemetry = {
+    hrvMs: Number.isFinite(athlete.hrv) ? athlete.hrv : null,
+    baselineHrvMs: Number.isFinite(athlete.hrv) ? athlete.hrv : null,
+    sleepHours: Number.isFinite(sleepHoursNum) ? sleepHoursNum : null,
+    strainScore: null,
+    plannedHighIntensity: /interval|threshold|high|zone 4/i.test(
+      `${nextBlock?.title ?? ""} ${nextBlock?.intensity ?? ""}`
+    )
+  };
 
   const onEnd = () => {
     session.end();
@@ -196,7 +215,7 @@ function AthleteDashboardBody() {
           diff={listener.pendingDiff.diff}
           onApply={() => {
             const d = listener.pendingDiff?.diff;
-            if (d === "lighter-day" || d === "swap-z2" || d === "add-recovery") {
+            if (plan && (d === "lighter-day" || d === "swap-z2" || d === "add-recovery")) {
               apply(plan.id, d);
               listener.dismiss();
             }
@@ -205,7 +224,7 @@ function AthleteDashboardBody() {
         />
       )}
 
-      {!showStitchToday && !session.isActive && (
+      {!showStitchToday && !session.isActive && nextBlock && plan ? (
         <SessionCard
           title={nextBlock.title}
           durationMin={45}
@@ -213,7 +232,7 @@ function AthleteDashboardBody() {
           morphId={`session-${plan.id}`}
           onStart={session.start}
         />
-      )}
+      ) : null}
 
       {session.isActive && (
         <>
@@ -254,9 +273,10 @@ function AthleteDashboardBody() {
             maxHr={session.ticks.reduce((m, t) => Math.max(m, t.hr), 0)}
             durationSec={session.ticks.at(-1)?.elapsedSec ?? 0}
           />
+          {readiness ? (
           <StravaBrandedCard
             athleteName={athlete.name}
-            activityName={nextBlock.title ?? "Training session"}
+            activityName={nextBlock?.title ?? "Training session"}
             sportType={athlete.sports[0] ?? "Workout"}
             distanceKm={
               session.ticks.length
@@ -284,6 +304,7 @@ function AthleteDashboardBody() {
             date={new Date()}
             showShare
           />
+          ) : null}
         </div>
       )}
 
@@ -293,7 +314,7 @@ function AthleteDashboardBody() {
 
   return (
     <>
-      {showStitchToday ? (
+      {showStitchToday && readiness && plan ? (
         session.isActive ? (
           <div className="space-y-4">{liveSection}</div>
         ) : (
@@ -328,7 +349,7 @@ function AthleteDashboardBody() {
         <AthleteOsDashboard
           name={athlete.name}
           sports={athlete.sports}
-          readiness={readiness.score}
+          readiness={readiness?.score ?? 0}
           hrv={athlete.hrv}
           baselineHrv={athlete.hrv}
           sleepHours={athlete.sleepHours}
@@ -338,14 +359,20 @@ function AthleteDashboardBody() {
           goalTitle={athlete.goalTitle}
           athleteId={athleteId}
           liveSection={liveSection}
-          todayPlan={{
-            day: nextBlock.day,
-            title: nextBlock.title,
-            detail: nextBlock.detail,
-            intensity: nextBlock.intensity
-          }}
+          todayPlan={
+            nextBlock
+              ? {
+                  day: nextBlock.day,
+                  title: nextBlock.title,
+                  detail: nextBlock.detail,
+                  intensity: nextBlock.intensity
+                }
+              : undefined
+          }
           streakWeeks={athlete.streakWeeks}
           onBookSession={() => setBookingOpen(true)}
+          telemetry={telemetry}
+          metricsReady={Boolean(readiness)}
         />
       )}
 
@@ -360,21 +387,24 @@ function AthleteDashboardBody() {
         />
       )}
 
-      <RecoveryBookingModal
-        readinessScore={readiness.score}
-        coachName={coachName}
-        coachId={athlete.coachId}
-        athleteId={athleteId}
-        athleteName={athlete.name}
-        open={bookingOpen}
-        onClose={() => setBookingOpen(false)}
-      />
+      {readiness ? (
+        <RecoveryBookingModal
+          readinessScore={readiness.score}
+          coachName={coachName}
+          coachId={athlete.coachId}
+          athleteId={athleteId}
+          athleteName={athlete.name}
+          open={bookingOpen}
+          onClose={() => setBookingOpen(false)}
+        />
+      ) : null}
 
       <RpeFeedbackModal
         open={rpeOpen}
-        sessionTitle={nextBlock.title}
+        sessionTitle={nextBlock?.title ?? "Session"}
         onClose={() => setRpeOpen(false)}
         onSubmit={(rpe, notes) => {
+          if (!plan) return;
           void fetch(`/api/v1/sessions/${plan.id}/feedback`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },

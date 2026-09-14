@@ -10,12 +10,16 @@ import {
   type SubscriptionPlan
 } from "./plans";
 import { isProductionSecurityMode } from "@/lib/security/runtime";
+import { isStripeConfigured } from "./mode";
+
+export { stripeCheckoutMode, isStripeConfigured, stripeHealthDetail } from "./mode";
+export type { StripeCheckoutMode } from "./mode";
 
 let stripeInstance: Stripe | null = null;
 
+/** True when a real Stripe secret is present (test or live). Not "live mode". */
 export function isStripeLive(): boolean {
-  const key = process.env.STRIPE_SECRET_KEY?.trim();
-  return Boolean(key && !key.includes("PASTE"));
+  return isStripeConfigured();
 }
 
 export function getStripe(): Stripe {

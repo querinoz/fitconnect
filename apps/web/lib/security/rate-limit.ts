@@ -122,15 +122,32 @@ export async function enforceRateLimit(
   const key = clientKey(request, bucket);
   const policy = RATE_LIMIT_POLICY[bucket];
   const limiter = limiterFor(bucket, env);
+  const windowMs = parseWindowMs(policy.window);
 
-  const result = limiter
-    ? await limiter.limit(key)
-    : enforceMemoryLimit(`${bucket}:${key}`, policy.limit, parseWindowMs(policy.window));
+  let result: { success: boolean; reset: number; limit?: number; remaining?: number };
+  try {
+    result = limiter
+      ? await limiter.limit(key)
+      : enforceMemoryLimit(`${bucket}:${key}`, policy.limit, windowMs);
+  } catch {
+    // Upstash outage must not 503 identity/auth. Fall back to in-process window.
+    result = enforceMemoryLimit(`${bucket}:${key}`, policy.limit, windowMs);
+  }
 
   if (result.success) return null;
   const retryAfter = Math.max(1, Math.ceil((result.reset - Date.now()) / 1000));
+  const remaining = result.remaining ?? 0;
+  const limit = result.limit ?? policy.limit;
   return NextResponse.json(
     { error: "rate_limited", bucket, retryAfter },
-    { status: 429, headers: { "Retry-After": String(retryAfter) } }
+    {
+      status: 429,
+      headers: {
+        "Retry-After": String(retryAfter),
+        "X-RateLimit-Limit": String(limit),
+        "X-RateLimit-Remaining": String(Math.max(0, remaining)),
+        "X-RateLimit-Reset": String(Math.ceil(result.reset / 1000))
+      }
+    }
   );
 }

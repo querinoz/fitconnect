@@ -68,4 +68,22 @@ describe("buildHealthReport", () => {
     expect(report.dependencies.find((d) => d.name === "analytics")?.status).toBe("ok");
     expect(report.dependencies.find((d) => d.name === "analytics")?.detail).toMatch(/first-party/);
   });
+
+  it("does not claim live or demo checkout when Stripe is unset", () => {
+    const report = buildHealthReport({
+      ...process.env,
+      NEXT_PUBLIC_DEMO_MODE: "false",
+      STRIPE_SECRET_KEY: undefined
+    } as NodeJS.ProcessEnv);
+    expect(report.dependencies.find((d) => d.name === "stripe")?.detail).toBe("not configured");
+  });
+
+  it("labels sk_test keys as test mode, not live checkout", () => {
+    const report = buildHealthReport({
+      ...process.env,
+      NEXT_PUBLIC_DEMO_MODE: "false",
+      STRIPE_SECRET_KEY: "sk_test_fixture"
+    } as NodeJS.ProcessEnv);
+    expect(report.dependencies.find((d) => d.name === "stripe")?.detail).toBe("stripe test mode");
+  });
 });

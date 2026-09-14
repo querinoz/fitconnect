@@ -672,7 +672,7 @@ export const it = {
     wearableSyncHint:
       "Sincronizza il wearable per sbloccare gli aggiustamenti IA del coach.",
     noAthleteProfile:
-      "Nessun profilo atleta su questo account. Accedi come Athlete / Athlete per la demo.",
+      "Nessun profilo atleta è ancora collegato a questo account. Completa l'onboarding o collega un wearable.",
     os: {
       greetingMorning: "Buongiorno 👋",
       greetingAfternoon: "Buon pomeriggio 👋",
@@ -881,15 +881,20 @@ export const it = {
     legalNote:
       "Continuando accetti i nostri Termini e riconosci l'Informativa sulla privacy. Non pubblichiamo mai per tuo conto.",
     usernameLabel: "Username o e-mail",
-    usernamePlaceholder: "Admin",
+    usernamePlaceholder: "tu@esempio.com",
     signInPasswordPlaceholder: "La tua password",
-    invalidCredentials: "Username o password non validi. Prova Admin / Admin.",
+    invalidCredentials: "Username o password non validi.",
     alreadySignedIn: "Hai già una sessione attiva.",
     signedInAs: "Accesso come {name}",
     continueToDashboard: "Vai alla dashboard",
     signOut: "Esci",
     bullets: [
-      "12.418 specialisti verificati in 10 sport",
+      "Un account — Atleta e Coach sono modalità della stessa sessione",
+      "Feed, Ascend, TRAIN, Dashboard, Profilo — un sistema operativo",
+      "Recupero solo dai tuoi dati. Non inventiamo mai HRV o sonno"
+    ],
+    demoBullets: [
+      "Demo: Athlete / Athlete · Coach / Coach · Admin / Admin",
       "Intro gratuita di 15 min con ogni coach",
       "Segnali di prontezza HRV + sonno dal primo giorno"
     ]

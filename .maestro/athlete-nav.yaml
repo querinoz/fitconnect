@@ -1,0 +1,16 @@
+appId: com.fitconnect.android
+name: Athlete nav — Feed Train Dashboard Profile
+---
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible:
+      id: "athlete_os"
+    timeout: 20000
+- tapOn:
+    id: "athlete_train_fab"
+- back
+- assertVisible:
+    id: "athlete_os"
+- assertVisible:
+    id: "athlete_bottom_nav"

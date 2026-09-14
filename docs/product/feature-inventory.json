@@ -1,0 +1,434 @@
+{
+  "version": 3,
+  "updated": "2026-09-14",
+  "headBaseline": "3dd990e229e146c7e7445f0461627be37b89536c",
+  "productionAlias": "https://fitconnect-phi.vercel.app",
+  "dispositions": [
+    "IMPLEMENTED",
+    "VERIFIED",
+    "BENCHMARKED",
+    "IMPROVED",
+    "DEFERRED",
+    "BLOCKED"
+  ],
+  "benchmarkSources": [
+    "WHOOP",
+    "Oura",
+    "Garmin Connect",
+    "Strava",
+    "Apple Fitness",
+    "Nike Run Club",
+    "Nike Training Club"
+  ],
+  "features": [
+    {
+      "id": "auth.signup",
+      "category": "AUTH",
+      "surfaces": ["web", "android", "ios"],
+      "disposition": "IMPLEMENTED",
+      "ux": "IMPROVED",
+      "benchmark": "Leaders use one identity + social IdP. FitConnect is ONE LOGIN. Production UI no longer offers demo personas when DEMO_MODE=false.",
+      "security": "VERIFIED",
+      "tests": ["apps/web/components/demo-banner.test.tsx", "apps/web/tests/e2e/signin-copy.spec.ts", "apps/web/tests/e2e/phase9-auth.spec.ts"],
+      "production": "Unauthenticated identity/me = 401. Signed-in production walk BLOCKED (no test account)."
+    },
+    {
+      "id": "auth.login",
+      "category": "AUTH",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "ux": "IMPROVED",
+      "benchmark": "WHOOP/Oura: email + Apple/Google, no fake personas. Applied.",
+      "security": "VERIFIED",
+      "tests": ["lib/api/require-auth.prod.test.ts"]
+    },
+    {
+      "id": "auth.logout",
+      "category": "AUTH",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "ux": "VERIFIED",
+      "benchmark": "Session clear + redirect. Matches Garmin/Apple account switcher simplicity."
+    },
+    {
+      "id": "auth.session",
+      "category": "AUTH",
+      "surfaces": ["web"],
+      "disposition": "IMPLEMENTED",
+      "security": "VERIFIED",
+      "notes": "Firebase IdP cookie gate on protected routes when demo is off."
+    },
+    {
+      "id": "auth.recovery",
+      "category": "AUTH",
+      "surfaces": ["web"],
+      "disposition": "IMPLEMENTED",
+      "notes": "Magic link + password. Provider reset emails remain Firebase-human config."
+    },
+    {
+      "id": "auth.profile",
+      "category": "AUTH",
+      "surfaces": ["web", "android", "ios"],
+      "disposition": "IMPLEMENTED",
+      "ux": "VERIFIED"
+    },
+    {
+      "id": "auth.one_account",
+      "category": "AUTH",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "notes": "Athlete/Coach are modes of one identity."
+    },
+    {
+      "id": "auth.role_switching",
+      "category": "AUTH",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "ux": "VERIFIED",
+      "tests": ["android designui ActiveExperienceSwitcher"]
+    },
+    {
+      "id": "feed.posts",
+      "category": "FEED",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "ux": "BENCHMARKED",
+      "benchmark": "Strava is activity-social; NRC is club/feed light. FitConnect Feed is social-first, not a metrics dashboard. Strava-origin rows excluded by persistence/RLS.",
+      "production": "Anonymous /feed redirects to signin (307)."
+    },
+    {
+      "id": "feed.reactions",
+      "category": "FEED",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "tests": ["apps/web/app/api/v1/community/posts/[id]/reactions"]
+    },
+    {
+      "id": "feed.comments",
+      "category": "FEED",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "feed.sharing",
+      "category": "FEED",
+      "surfaces": ["web"],
+      "disposition": "IMPLEMENTED",
+      "notes": "Strava branded share card is opt-in post-session, never a third-party Strava feed."
+    },
+    {
+      "id": "feed.connections",
+      "category": "FEED",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "feed.discovery",
+      "category": "FEED",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "routes": ["/discover", "android DiscoverScreen"]
+    },
+    {
+      "id": "feed.communities",
+      "category": "FEED",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "feed.challenges",
+      "category": "FEED",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "tests": ["api/v1/squads/challenges"]
+    },
+    {
+      "id": "feed.notifications",
+      "category": "FEED",
+      "surfaces": ["web", "android", "ios"],
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "training.create",
+      "category": "TRAINING",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "ux": "DEFERRED",
+      "benchmark": "NTC/NRC: start-in-two-taps + next action. Guided workout Wave 2 is still the execution gap (docs/product/WORKOUT_ENGINE_WAVE2.md).",
+      "notes": "MCP create_workout drafts only; confirmation required."
+    },
+    {
+      "id": "training.execute",
+      "category": "TRAINING",
+      "surfaces": ["web", "android", "wear"],
+      "disposition": "IMPLEMENTED",
+      "ux": "DEFERRED",
+      "benchmark": "Garmin/Apple: glanceable live metrics. Wear paths exist; Windows session did not complete device UX proof."
+    },
+    {
+      "id": "training.sets_reps",
+      "category": "TRAINING",
+      "surfaces": ["android", "web"],
+      "disposition": "IMPLEMENTED",
+      "notes": "Schema 017 + StrengthWorkoutScreen. Open-gym gap: execution UI PARTIAL."
+    },
+    {
+      "id": "training.duration_pace_distance",
+      "category": "TRAINING",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "training.heart_rate",
+      "category": "TRAINING",
+      "surfaces": ["web", "android", "wear"],
+      "disposition": "IMPLEMENTED",
+      "security": "VERIFIED",
+      "notes": "Live metrics from session ticks; never fabricated in Zenith panel."
+    },
+    {
+      "id": "training.cadence_power_calories_load",
+      "category": "TRAINING",
+      "surfaces": ["android", "web"],
+      "disposition": "IMPLEMENTED",
+      "notes": "Present when provider supplies them. Missing stays missing."
+    },
+    {
+      "id": "training.history_progression_records",
+      "category": "TRAINING",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "tests": ["ProgressionEngine TS+Kotlin"]
+    },
+    {
+      "id": "recovery.sleep_hrv_rhr",
+      "category": "RECOVERY",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "ux": "IMPROVED",
+      "benchmark": "WHOOP/Oura: recovery is a sentence + next action, not a lone percentage. Zenith panel now: rationale + Accept / Keep / Why, empty-connect if no HRV/sleep.",
+      "security": "VERIFIED"
+    },
+    {
+      "id": "recovery.readiness_fatigue_trends",
+      "category": "RECOVERY",
+      "surfaces": ["web", "android", "wear"],
+      "disposition": "IMPLEMENTED",
+      "ux": "IMPROVED",
+      "tests": ["packages/zenith-core", "apps/web/components/dashboard/os/ai-insights-panel.test.tsx"]
+    },
+    {
+      "id": "gps.activity_routes",
+      "category": "GPS",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "routes": ["/map", "MapLibre"]
+    },
+    {
+      "id": "gps.spots",
+      "category": "GPS",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "notes": "Public spots approximate; exact coords never returned via MCP."
+    },
+    {
+      "id": "gps.secret_spots_danger",
+      "category": "GPS",
+      "surfaces": ["android", "web"],
+      "disposition": "IMPLEMENTED",
+      "ux": "BENCHMARKED",
+      "benchmark": "Strava segments are social; FitConnect spots stay privacy-first (docs/product/GPS_PRIVACY.md)."
+    },
+    {
+      "id": "coach.discovery",
+      "category": "COACH",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "routes": ["/discover", "/trainer/[id]"]
+    },
+    {
+      "id": "coach.athlete_management",
+      "category": "COACH",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "coach.programs_assignments",
+      "category": "COACH",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "coach.feedback_communication",
+      "category": "COACH",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "routes": ["/inbox", "/coach/inbox"]
+    },
+    {
+      "id": "coach.availability",
+      "category": "COACH",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "booking.full_journey",
+      "category": "BOOKING",
+      "surfaces": ["web", "android", "ios"],
+      "disposition": "IMPLEMENTED",
+      "ux": "DEFERRED",
+      "benchmark": "Leaders confirm slot + timezone + payment state. Code paths exist (bookings API, RecoveryBookingModal). Production payment is BLOCKED without Stripe keys. Duplicate/stale slot handling is API-level, not fully walked authenticated on prod.",
+      "security": "VERIFIED"
+    },
+    {
+      "id": "zenith.context_recommendations",
+      "category": "ZENITH",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "ux": "IMPROVED",
+      "benchmark": "Unlike generic chatbots, WHOOP/Oura coach copy is telemetry-grounded. Zenith uses zenith-core + MCP; no fabricated HRV/sleep.",
+      "tests": ["packages/ai", "apps/web/lib/mcp"]
+    },
+    {
+      "id": "zenith.mcp_permissions_audit",
+      "category": "ZENITH",
+      "surfaces": ["web"],
+      "disposition": "VERIFIED",
+      "security": "VERIFIED",
+      "notes": "Registry at GET /api/v1/mcp. No unrestricted shell/SQL tools."
+    },
+    {
+      "id": "zenith.confirmations",
+      "category": "ZENITH",
+      "surfaces": ["web"],
+      "disposition": "IMPLEMENTED",
+      "notes": "create_workout and booking writes require confirmation; dashboard Accept/Keep for load advice is local until plan apply APIs are wired."
+    },
+    {
+      "id": "devices.health_connect",
+      "category": "DEVICES",
+      "surfaces": ["android"],
+      "disposition": "IMPLEMENTED",
+      "notes": "Canonical data plane. Windows session: source+Gradle path; runtime proof needs emulator/device."
+    },
+    {
+      "id": "devices.healthkit",
+      "category": "DEVICES",
+      "surfaces": ["ios"],
+      "disposition": "IMPLEMENTED",
+      "ux": "BLOCKED",
+      "notes": "HealthKitContract.swift present. Simulator BLOCKED on Windows (environment, not product defect)."
+    },
+    {
+      "id": "devices.garmin",
+      "category": "DEVICES",
+      "surfaces": ["android", "web"],
+      "disposition": "IMPLEMENTED",
+      "notes": "Adapter architecture. Live Garmin OAuth is provider-approval / human credentials."
+    },
+    {
+      "id": "devices.whoop",
+      "category": "DEVICES",
+      "surfaces": ["android", "web"],
+      "disposition": "IMPLEMENTED",
+      "notes": "Adapter + preview copy. Not claimed live without credentials."
+    },
+    {
+      "id": "devices.strava",
+      "category": "DEVICES",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "security": "VERIFIED",
+      "notes": "Never social. Token exchange edge-only. Production health reports oauth configured vs not configured honestly."
+    },
+    {
+      "id": "devices.sync_stale_disconnect",
+      "category": "DEVICES",
+      "surfaces": ["web", "android"],
+      "disposition": "IMPLEMENTED",
+      "routes": ["/settings/wearables"]
+    },
+    {
+      "id": "realtime.workout_telemetry_gps",
+      "category": "REALTIME",
+      "surfaces": ["web", "android", "wear"],
+      "disposition": "IMPLEMENTED",
+      "notes": "Broadcast default; Convex when URL is absolute https. Production currently same-origin broadcast unless Convex configured."
+    },
+    {
+      "id": "realtime.presence_coaching_social",
+      "category": "REALTIME",
+      "surfaces": ["web"],
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "realtime.reconnect",
+      "category": "REALTIME",
+      "surfaces": ["web", "android", "wear"],
+      "disposition": "IMPLEMENTED"
+    },
+    {
+      "id": "billing.stripe",
+      "category": "BILLING",
+      "surfaces": ["web"],
+      "disposition": "IMPLEMENTED",
+      "production": "BLOCKED",
+      "notes": "Live checkout code + webhook signature + idempotency exist. Health no longer claims demo/live falsely. Human must set STRIPE_SECRET_KEY (sk_live_ or sk_test_) and STRIPE_WEBHOOK_SECRET. Never fake paid success."
+    },
+    {
+      "id": "security.rate_limit",
+      "category": "SECURITY",
+      "surfaces": ["web"],
+      "disposition": "IMPLEMENTED",
+      "production": "BLOCKED",
+      "notes": "Memory fallback with 429 + X-RateLimit-* headers. Distributed Upstash is the production preference; credentials are human-only."
+    },
+    {
+      "id": "data.migrations",
+      "category": "DATA",
+      "surfaces": ["ci"],
+      "disposition": "IMPLEMENTED",
+      "production": "BLOCKED",
+      "notes": "Deploy workflow skips when DATABASE_URL/DIRECT_URL unset; fails closed if only one is set. No continue-on-error. Not destructive."
+    },
+    {
+      "id": "landing.elite_os",
+      "category": "WEB",
+      "surfaces": ["web"],
+      "disposition": "VERIFIED",
+      "tests": ["landing-motion Playwright"],
+      "production": "200 on /"
+    },
+    {
+      "id": "android.compose_os",
+      "category": "ANDROID",
+      "surfaces": ["android"],
+      "disposition": "IMPLEMENTED",
+      "ux": "VERIFIED",
+      "notes": "Native Compose. 2026-09-14: assembleDebug, install on fitconnect_phone, Maestro 2.10.0 launch.yaml (splash→guest→LOCAL_DEMO Inês→athlete_os) and athlete-nav.yaml (Train FAB). Wear assembleDebug only — no Wear AVD in this run."
+    },
+    {
+      "id": "wear.glanceable_workout",
+      "category": "WEAR",
+      "surfaces": ["wear"],
+      "disposition": "IMPLEMENTED",
+      "ux": "DEFERRED",
+      "notes": "WearMainActivity, tiles, complications. Not claimed verified without a Wear AVD/device in this session."
+    },
+    {
+      "id": "ios.swiftui",
+      "category": "IOS",
+      "surfaces": ["ios"],
+      "disposition": "IMPLEMENTED",
+      "ux": "BLOCKED",
+      "notes": "Source present. Simulator BLOCKED on Windows. LocalDemoBanner is explicitly LOCAL_DEMO."
+    },
+    {
+      "id": "sports.licensing",
+      "category": "SPORTS_DATA",
+      "surfaces": ["web"],
+      "disposition": "DEFERRED",
+      "notes": "Professional live sports feeds are not bundled. Fitness providers stay behind adapters. No free sports API assumed commercially licensed."
+    }
+  ]
+}

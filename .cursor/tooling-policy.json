@@ -48,8 +48,10 @@
     {
       "id": "maestro",
       "category": "mobile-e2e",
-      "status": "approved",
-      "installWhen": "device-or-emulator-session"
+      "status": "installed",
+      "version": "2.10.0",
+      "source": "https://get.maestro.mobile.dev",
+      "notes": "Windows host; flows in .maestro/; appId com.fitconnect.android"
     },
     {
       "id": "figma-mcp",
