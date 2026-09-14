@@ -22,6 +22,17 @@ export async function pgQuery<T extends pg.QueryResultRow>(
 ): Promise<T[]> {
   const p = getPgPool();
   if (!p) return [];
-  const { rows } = await p.query<T>(text, params);
-  return rows;
+  try {
+    const { rows } = await p.query<T>(text, params);
+    return rows;
+  } catch (err) {
+    const code =
+      typeof err === "object" && err !== null && "code" in err
+        ? String((err as { code: unknown }).code)
+        : "";
+    if (code === "EAI_AGAIN" || code === "ENOTFOUND" || code === "ECONNREFUSED") {
+      return [];
+    }
+    throw err;
+  }
 }

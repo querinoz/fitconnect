@@ -44,6 +44,23 @@ test("keeps a real production app URL and injects optional redis when set", () =
   assert.ok(injectedOptional >= 2);
 });
 
+test("omits DATABASE_URL even when the host is real and drops libpq host=base", () => {
+  const { keys, text } = mergeAndSanitizeEnv(
+    [
+      "DATABASE_URL=postgres://postgres:pass@db.example.supabase.co:5432/postgres",
+      "DIRECT_URL=postgres://postgres:pass@db.example.supabase.co:5432/postgres",
+      "PGHOST=base",
+      "OTHER=host=base port=5432"
+    ].join("\n"),
+    firebase
+  );
+  assert.equal(keys.includes("DATABASE_URL"), false);
+  assert.equal(keys.includes("DIRECT_URL"), false);
+  assert.equal(keys.includes("PGHOST"), false);
+  assert.equal(keys.includes("OTHER"), false);
+  assert.equal(text.includes("db.example.supabase.co"), false);
+});
+
 test("placeholder detector", () => {
   assert.equal(isPlaceholderValue("TURBO_API", "https://vercel.com"), true);
   assert.equal(isPlaceholderValue("DATABASE_URL", "postgres://x@base/db"), true);

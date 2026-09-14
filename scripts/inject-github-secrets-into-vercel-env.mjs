@@ -65,8 +65,6 @@ const OPTIONAL = [
   "LIVEKIT_API_SECRET",
   "NEXT_PUBLIC_LIVEKIT_URL",
   "OPENAI_API_KEY",
-  "DATABASE_URL",
-  "DIRECT_URL",
   "NEXT_PUBLIC_APP_URL",
   "NEXT_PUBLIC_SUPABASE_URL",
   "NEXT_PUBLIC_SUPABASE_ANON_KEY",
@@ -74,6 +72,16 @@ const OPTIONAL = [
 ];
 
 const PRODUCTION_APP_URL = "https://fitconnect-phi.vercel.app";
+
+/** Never SSG against GitHub Actions DNS for docker compose hosts (`base`, `db`). Runtime still uses Vercel project env. */
+export const BUILD_OMIT_DB_KEYS = new Set([
+  "DATABASE_URL",
+  "DIRECT_URL",
+  "PGHOST",
+  "POSTGRES_HOST",
+  "POSTGRES_URL",
+  "PRISMA_DATABASE_URL"
+]);
 
 function unquote(raw) {
   const v = raw.trim();
@@ -96,14 +104,32 @@ export function hostnameOf(value) {
   }
 }
 
+export function connectionHosts(value) {
+  const hosts = [];
+  const v = value.trim();
+  const urlHost = hostnameOf(v);
+  if (urlHost) hosts.push(urlHost);
+  try {
+    if (v.includes("://")) {
+      const paramHost = new URL(v).searchParams.get("host");
+      if (paramHost) hosts.push(paramHost.toLowerCase());
+    }
+  } catch {
+    /* ignore */
+  }
+  const kv = /(?:^|[;\s])host\s*=\s*([^\s;]+)/i.exec(v);
+  if (kv?.[1]) hosts.push(kv[1].toLowerCase());
+  return hosts;
+}
+
 export function isPlaceholderValue(key, value) {
   const v = value.trim();
   if (!v) return true;
   if (PLACEHOLDER_VALUES.has(v.toLowerCase())) return true;
   if (v.toUpperCase().includes("PASTE_")) return true;
   if (TURBO_REMOTE_KEYS.has(key)) return true;
-  const host = hostnameOf(v);
-  if (host && PLACEHOLDER_HOSTS.has(host)) return true;
+  if (BUILD_OMIT_DB_KEYS.has(key)) return true;
+  if (connectionHosts(v).some((host) => PLACEHOLDER_HOSTS.has(host))) return true;
   if (!v.includes("://") && PLACEHOLDER_HOSTS.has(v.toLowerCase())) return true;
   return false;
 }
@@ -140,6 +166,9 @@ export function mergeAndSanitizeEnv(text, env = process.env) {
   const map = parseEnvText(text);
 
   for (const key of TURBO_REMOTE_KEYS) {
+    map.delete(key);
+  }
+  for (const key of BUILD_OMIT_DB_KEYS) {
     map.delete(key);
   }
 
@@ -216,10 +245,19 @@ const isMain =
 
 if (isMain) {
   const result = injectGithubSecretsIntoVercelEnv();
+  const first = envFilePaths()[0];
+  const keys = fs.existsSync(first)
+    ? fs
+        .readFileSync(first, "utf8")
+        .split(/\r?\n/)
+        .map((ln) => ln.split("=")[0]?.trim())
+        .filter(Boolean)
+        .filter((k) => !k.startsWith("#"))
+    : [];
   console.log(
     `injected ${REQUIRED.length} required Firebase keys; ` +
       `${result.injectedOptional} optional secret slots were non-empty ` +
       `(counted across ${result.written.length} env files); ` +
-      `placeholder TURBO_* / host=base values stripped`
+      `DATABASE_URL omitted from CLI build; remaining keys: ${keys.join(",")}`
   );
 }

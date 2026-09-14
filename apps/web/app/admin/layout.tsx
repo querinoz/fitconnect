@@ -1,26 +1,8 @@
-"use client";
+import { AdminGate } from "./admin-gate";
 
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { AdminShell } from "@/components/shell/admin-shell";
-import { useAuthStore } from "@/lib/auth-store";
-import { useAuthHydrated } from "@/lib/use-auth-hydrated";
+/** Admin KPI pages query Postgres. Never SSG against a docker hostname like `base`. */
+export const dynamic = "force-dynamic";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const hydrated = useAuthHydrated();
-  const user = useAuthStore((s) => s.user);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    if (!user || user.role !== "admin") {
-      router.replace("/signin?next=/admin");
-    }
-  }, [hydrated, user, router]);
-
-  if (!hydrated || !user || user.role !== "admin") {
-    return null;
-  }
-
-  return <AdminShell>{children}</AdminShell>;
+  return <AdminGate>{children}</AdminGate>;
 }
