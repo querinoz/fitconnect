@@ -1,5 +1,5 @@
 import type { LoggedSet, TrainSnapshot } from "./types";
-import { IDLE_SNAPSHOT } from "./machine";
+import { IDLE_SNAPSHOT, normalizeTrainSnapshot } from "./machine";
 
 export const TRAIN_SESSION_KEY = "fitconnect.train.session.v1";
 export const TRAIN_HISTORY_KEY = "fitconnect.train.history.v1";
@@ -47,7 +47,7 @@ export function loadTrainSnapshot(): TrainSnapshot | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as TrainSnapshot;
     if (!parsed?.phase) return null;
-    return parsed;
+    return normalizeTrainSnapshot(parsed);
   } catch {
     return null;
   }

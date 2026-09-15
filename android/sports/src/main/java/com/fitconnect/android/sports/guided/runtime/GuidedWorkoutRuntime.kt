@@ -122,6 +122,8 @@ class GuidedWorkoutRuntime(
 
     suspend fun pause(): AppResult<GuidedSessionSnapshot> = dispatch(WorkoutCommand.Pause)
 
+    suspend fun interrupt(): AppResult<GuidedSessionSnapshot> = dispatch(WorkoutCommand.Interrupt)
+
     suspend fun resume(): AppResult<GuidedSessionSnapshot> = dispatch(WorkoutCommand.Resume)
 
     suspend fun skipExercise(): AppResult<GuidedSessionSnapshot> = dispatch(WorkoutCommand.SkipExercise)

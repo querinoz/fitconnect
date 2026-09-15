@@ -86,10 +86,14 @@ export type TrainSlot = {
 
 export type TrainPhase =
   | "idle"
-  | "briefing"
+  | "prep"
+  | "warmup"
   | "active"
   | "rest"
   | "paused"
+  | "substituting"
+  | "interrupted"
+  | "completing"
   | "complete";
 
 export type LoggedSet = {
@@ -104,7 +108,7 @@ export type LoggedSet = {
   skipped: boolean;
 };
 
-export type SaveStatus = "idle" | "saving" | "saved" | "local_only" | "failed";
+export type SaveStatus = "idle" | "save_pending" | "saved" | "local_only" | "failed";
 
 export type TrainSnapshot = {
   phase: TrainPhase;
@@ -143,9 +147,33 @@ export type TrainCommand =
   | { type: "extend_rest"; extraSec: number }
   | { type: "pause" }
   | { type: "resume" }
+  | { type: "interrupt"; reason?: string }
+  | { type: "enter_substitution" }
+  | { type: "cancel_substitution" }
   | { type: "tick" }
   | { type: "finish"; nowMs: number }
   | { type: "reset" }
   | { type: "restore"; snapshot: TrainSnapshot }
   | { type: "mark_save"; status: SaveStatus; error?: string }
   | { type: "substitute"; replacementExerciseId: string };
+
+export const TRAIN_PHASE_LABEL: Record<TrainPhase, string> = {
+  idle: "IDLE",
+  prep: "PREP",
+  warmup: "WARM-UP",
+  active: "ACTIVE",
+  rest: "REST",
+  paused: "PAUSED",
+  substituting: "SUBSTITUTION",
+  interrupted: "INTERRUPTED",
+  completing: "COMPLETING",
+  complete: "COMPLETED"
+};
+
+export const SAVE_STATUS_LABEL: Record<SaveStatus, string> = {
+  idle: "READY",
+  save_pending: "SAVE PENDING",
+  saved: "SAVED",
+  local_only: "LOCAL",
+  failed: "SAVE FAILED"
+};

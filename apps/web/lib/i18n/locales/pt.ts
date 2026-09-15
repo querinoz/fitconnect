@@ -20,7 +20,7 @@ export const pt = {
     cta: "Ver código no GitHub"
   },
   hero: {
-    livePill: "Ao vivo · 12 418 especialistas verificados em 10 desportos",
+    livePill: "Ao vivo · especialistas verificados em 10 desportos",
     tagline: "Sistemas · entregues · especialistas verificados",
     title1: "Os melhores",
     titleAccent: "especialistas",
@@ -500,7 +500,7 @@ export const pt = {
   trustStrip: {
     reviews: "4,94 ★ · 27k+ avaliações verificadas",
     rejected: "62% de candidatos rejeitados",
-    coaches: "12 418 coaches verificados"
+    coaches: "Coaches verificados no marketplace"
   },
   featuredCoaches: {
     eyebrow: "Coaches em destaque",
@@ -1116,8 +1116,8 @@ export const pt = {
     title: "Especialistas a sério.",
     titleAccent: "Resultados a sério.",
     subtitle:
-      "Selecionados entre 12 418 coaches verificados em 10 desportos. Média de 10,4 anos de coaching, 96% de retenção.",
-    seeAll: "Ver os 12 418"
+      "Selecionados no marketplace de coaches. Experiência e retenção são publicadas por perfil — nunca como um total inventado.",
+    seeAll: "Ver todos os coaches"
   },
   testimonials: {
     eyebrow: "Histórias de atletas",
@@ -1135,7 +1135,7 @@ export const pt = {
     steps: [
       {
         title: "Conta-nos os teus objetivos",
-        body: "Perfil de 60 segundos. Desporto, nível, agenda, modalidade preferida. Mostramos os teus 3 melhores matches entre 12 418 especialistas verificados.",
+        body: "Perfil de 60 segundos. Desporto, nível, agenda, modalidade preferida. Mostramos os teus 3 melhores matches entre coaches realmente listados.",
         detail: "Tempo médio de match: 47 segundos"
       },
       {
@@ -1217,7 +1217,7 @@ export const pt = {
       }
     ],
     ctaTitle: "Pronto para a coisa real?",
-    ctaBody: "12 418 especialistas verificados. Intro grátis de 15 min com cada coach.",
+    ctaBody: "Especialistas verificados no marketplace. Intro grátis de 15 min com cada coach listado.",
     ctaButton: "Encontrar o meu especialista"
   },
   comparison: {
@@ -1545,7 +1545,7 @@ export const pt = {
       body: "Planos genéricos estagnam na semana oito. Os nossos coaches comprometem-se com uma ou duas disciplinas.",
       metricLabel: "Experiência média",
       metricValue: "10,4 anos",
-      citation: "Roster FitConnect 2026, n=12 418"
+      citation: "Marketplace FitConnect. Totais de roster por publicar até haver dados de produção."
     },
     {
       title: "Programação consciente da recuperação",

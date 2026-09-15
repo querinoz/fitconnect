@@ -9,9 +9,12 @@ import com.fitconnect.android.sports.progression.SideMode
 enum class WorkoutPhase {
     IDLE,
     PREP,
+    WARMUP,
     ACTIVE,
     REST,
     PAUSED,
+    INTERRUPTED,
+    SUBSTITUTING,
     COMPLETING,
     COMPLETED,
     FAILED,
@@ -260,6 +263,7 @@ sealed class WorkoutCommand {
     data object SkipRest : WorkoutCommand()
     data class ExtendRest(val extraSec: Int) : WorkoutCommand()
     data object Pause : WorkoutCommand()
+    data object Interrupt : WorkoutCommand()
     data object Resume : WorkoutCommand()
     data object SkipExercise : WorkoutCommand()
     data object Finish : WorkoutCommand()

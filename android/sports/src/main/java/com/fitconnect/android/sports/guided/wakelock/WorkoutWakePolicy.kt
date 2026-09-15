@@ -12,8 +12,8 @@ object WorkoutWakePolicy {
     ): Boolean {
         if (!inWorkoutContext) return false
         return when (phase) {
-            WorkoutPhase.ACTIVE, WorkoutPhase.REST, WorkoutPhase.COMPLETING -> true
-            WorkoutPhase.PAUSED -> pausedElapsedMs < PAUSE_RELEASE_TIMEOUT_MS
+            WorkoutPhase.ACTIVE, WorkoutPhase.WARMUP, WorkoutPhase.REST, WorkoutPhase.COMPLETING -> true
+            WorkoutPhase.PAUSED, WorkoutPhase.INTERRUPTED -> pausedElapsedMs < PAUSE_RELEASE_TIMEOUT_MS
             else -> false
         }
     }

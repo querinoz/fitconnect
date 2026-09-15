@@ -75,11 +75,11 @@ describe("TRAIN recommendation", () => {
 });
 
 describe("TRAIN state machine", () => {
-  it("runs discover → briefing → active → rest → complete with logged volume", () => {
+  it("runs discover → prep → active → rest → completing with logged volume", () => {
     const plan = getTrainPlan("plan_recovery_v1")!;
     const slots = buildSlots(plan);
     let snap = reduceTrain(IDLE_SNAPSHOT, { type: "select_plan", planId: plan.id });
-    expect(snap.phase).toBe("briefing");
+    expect(snap.phase).toBe("prep");
     snap = reduceTrain(snap, { type: "start", nowMs: 1_000, sessionId: "sess-1" });
     expect(snap.phase).toBe("active");
     expect(currentSlot(snap)?.name).toBe(slots[0]?.name);
@@ -88,7 +88,7 @@ describe("TRAIN state machine", () => {
       if (snap.phase === "rest") {
         snap = reduceTrain(snap, { type: "skip_rest" });
       }
-      if (snap.phase === "complete") break;
+      if (snap.phase === "completing" || snap.phase === "complete") break;
       const slot = currentSlot(snap)!;
       snap = reduceTrain(snap, {
         type: "log_set",
@@ -101,10 +101,15 @@ describe("TRAIN state machine", () => {
     }
     while (snap.phase === "rest") {
       snap = reduceTrain(snap, { type: "skip_rest" });
-      if (snap.phase === "active") {
+      if (snap.phase === "active" || snap.phase === "warmup") {
         snap = reduceTrain(snap, { type: "finish", nowMs: 50_000 });
       }
     }
+    if (snap.phase !== "completing" && snap.phase !== "complete") {
+      snap = reduceTrain(snap, { type: "finish", nowMs: 50_000 });
+    }
+    expect(snap.phase).toBe("completing");
+    snap = reduceTrain(snap, { type: "mark_save", status: "saved" });
     expect(snap.phase).toBe("complete");
     expect(snap.sets.length).toBeGreaterThan(0);
     expect(durationMs(snap)).toBeGreaterThan(0);
@@ -187,5 +192,45 @@ describe("TRAIN state machine", () => {
       "ex_bench_press"
     );
     expect(best?.loadKg).toBe(40);
+  });
+
+  it("starts warm-up plans in WARMUP and restores legacy briefing snapshots as PREP", () => {
+    let snap = reduceTrain(IDLE_SNAPSHOT, { type: "select_plan", planId: "plan_warmup_v1" });
+    expect(snap.phase).toBe("prep");
+    snap = reduceTrain(snap, { type: "start", nowMs: 0, sessionId: "warm" });
+    expect(snap.phase).toBe("warmup");
+    snap = reduceTrain(snap, { type: "interrupt", reason: "background" });
+    expect(snap.phase).toBe("interrupted");
+    snap = reduceTrain(snap, { type: "resume" });
+    expect(snap.phase).toBe("warmup");
+
+    const restored = reduceTrain(IDLE_SNAPSHOT, {
+      type: "restore",
+      snapshot: {
+        ...IDLE_SNAPSHOT,
+        phase: "briefing" as never,
+        planId: "plan_hiit_v1",
+        saveStatus: "saving" as never
+      }
+    });
+    expect(restored.phase).toBe("prep");
+    expect(restored.saveStatus).toBe("save_pending");
+  });
+
+  it("keeps substitution and completing as explicit states", () => {
+    let snap = reduceTrain(IDLE_SNAPSHOT, { type: "select_plan", planId: "plan_upper_push_v2" });
+    snap = reduceTrain(snap, { type: "start", nowMs: 0, sessionId: "sub" });
+    snap = reduceTrain(snap, { type: "enter_substitution" });
+    expect(snap.phase).toBe("substituting");
+    snap = reduceTrain(snap, { type: "substitute", replacementExerciseId: "ex_dumbbell_press" });
+    expect(snap.phase).toBe("active");
+    expect(currentSlot(snap)?.exerciseId).toBe("ex_dumbbell_press");
+    snap = reduceTrain(snap, { type: "finish", nowMs: 9 });
+    expect(snap.phase).toBe("completing");
+    snap = reduceTrain(snap, { type: "mark_save", status: "save_pending" });
+    expect(snap.phase).toBe("completing");
+    snap = reduceTrain(snap, { type: "mark_save", status: "failed", error: "Cloud save failed." });
+    expect(snap.phase).toBe("complete");
+    expect(snap.saveStatus).toBe("failed");
   });
 });

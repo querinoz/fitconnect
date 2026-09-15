@@ -552,7 +552,7 @@ export const FAQS = [
   },
   {
     q: "How is FitConnect different from Future or Caliber?",
-    a: "Future and Caliber pair you with one in-house generalist coach. FitConnect is a marketplace of 12,000 verified specialists across 10 sports — yoga, surf, BJJ, climbing — that platforms like Future simply do not coach. You get the human accountability they offer, plus genuine sport-specific expertise."
+    a: "Future and Caliber pair you with one in-house generalist coach. FitConnect is a marketplace of verified specialists across 10 sports — yoga, surf, BJJ, climbing — that platforms like Future simply do not coach. You get the human accountability they offer, plus genuine sport-specific expertise."
   },
   {
     q: "Can my coach see my Apple Watch / Garmin / Whoop data?",
@@ -838,7 +838,7 @@ export const METHODOLOGY: MethodologyPillar[] = [
     body:
       "Generic plans plateau at week eight. Our coaches each commit to one or two disciplines, which means programming that knows the difference between a Vinyasa flow and a Bikram class, an Olympic squat and a powerlifting squat, an outdoor lead and a sport project.",
     metric: { label: "Avg coach experience", value: "10.4 yrs" },
-    citation: "FitConnect 2026 trainer roster, n=12,418"
+    citation: "FitConnect coach marketplace. Roster totals stay unpublished until production data is live."
   },
   {
     id: "m-2",
@@ -1029,9 +1029,9 @@ export const QUIZ_OPTIONS = {
 };
 
 export const STATS = {
-  athletes: 184_512,
-  trainers: 12_418,
-  sessions: 1_240_000,
+  athletes: null,
+  trainers: null,
+  sessions: null,
   countries: 47,
   avgRating: 4.94,
   rebookRate: 0.82

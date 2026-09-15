@@ -1,5 +1,5 @@
 import { buildSlots, getTrainPlan, substituteExercise } from "./catalog";
-import type { LoggedSet, ReadinessView, TrainCommand, TrainPhase, TrainSnapshot } from "./types";
+import type { LoggedSet, ReadinessView, SaveStatus, TrainCommand, TrainPhase, TrainSnapshot } from "./types";
 
 export const IDLE_SNAPSHOT: TrainSnapshot = {
   phase: "idle",
@@ -19,24 +19,60 @@ export const IDLE_SNAPSHOT: TrainSnapshot = {
   substituted: {}
 };
 
-function activePhases(phase: TrainPhase): boolean {
-  return phase === "active" || phase === "rest" || phase === "paused";
+const WORK_PHASES: TrainPhase[] = ["warmup", "active"];
+const TIMER_PHASES: TrainPhase[] = ["warmup", "active", "rest"];
+const HOLD_PHASES: TrainPhase[] = ["paused", "interrupted", "substituting"];
+const LIVE_PHASES: TrainPhase[] = [
+  "warmup",
+  "active",
+  "rest",
+  "paused",
+  "substituting",
+  "interrupted"
+];
+
+function isWorkPhase(phase: TrainPhase): boolean {
+  return WORK_PHASES.includes(phase);
+}
+
+function isLivePhase(phase: TrainPhase): boolean {
+  return LIVE_PHASES.includes(phase);
+}
+
+function workPhaseForPlan(planId: string | null): TrainPhase {
+  const plan = planId ? getTrainPlan(planId) : undefined;
+  if (plan?.trainingType === "warm-up") return "warmup";
+  return "active";
+}
+
+function restoreWorkPhase(snapshot: TrainSnapshot): TrainPhase {
+  if (snapshot.resumePhase === "rest") return "rest";
+  if (snapshot.resumePhase === "warmup") return "warmup";
+  if (snapshot.resumePhase === "active") return "active";
+  return workPhaseForPlan(snapshot.planId);
+}
+
+function completing(snapshot: TrainSnapshot, nowMs: number, slotIndex = snapshot.slotIndex): TrainSnapshot {
+  return {
+    ...snapshot,
+    phase: "completing",
+    completedAtMs: snapshot.completedAtMs ?? nowMs,
+    slotIndex,
+    restRemainingSec: 0,
+    restDurationSec: 0,
+    workRemainingSec: 0,
+    lastError: null
+  };
 }
 
 function enterNextSlot(snapshot: TrainSnapshot, nextIndex: number, nowMs: number): TrainSnapshot {
   const plan = snapshot.planId ? getTrainPlan(snapshot.planId) : undefined;
-  if (!plan) return { ...snapshot, phase: "complete", completedAtMs: nowMs };
+  if (!plan) return completing(snapshot, nowMs);
   const slots = buildSlots(applySubs(plan, snapshot.substituted));
   const finished = slots[nextIndex - 1];
   const restSec = finished?.restSec ?? 0;
   if (nextIndex >= slots.length && restSec <= 0) {
-    return {
-      ...snapshot,
-      phase: "complete",
-      completedAtMs: nowMs,
-      slotIndex: slots.length,
-      restRemainingSec: 0
-    };
+    return completing(snapshot, nowMs, slots.length);
   }
   if (restSec > 0) {
     return {
@@ -49,7 +85,7 @@ function enterNextSlot(snapshot: TrainSnapshot, nextIndex: number, nowMs: number
   }
   return armWorkTimer({
     ...snapshot,
-    phase: "active",
+    phase: workPhaseForPlan(snapshot.planId),
     slotIndex: nextIndex,
     restRemainingSec: 0,
     restDurationSec: 0
@@ -58,15 +94,10 @@ function enterNextSlot(snapshot: TrainSnapshot, nextIndex: number, nowMs: number
 
 function completeIfPastEnd(snapshot: TrainSnapshot, nowMs = Date.now()): TrainSnapshot {
   const plan = snapshot.planId ? getTrainPlan(snapshot.planId) : undefined;
-  if (!plan) return { ...snapshot, phase: "complete", completedAtMs: snapshot.completedAtMs ?? nowMs };
+  if (!plan) return completing(snapshot, nowMs);
   const total = buildSlots(applySubs(plan, snapshot.substituted)).length;
   if (snapshot.slotIndex >= total) {
-    return {
-      ...snapshot,
-      phase: "complete",
-      completedAtMs: snapshot.completedAtMs ?? nowMs,
-      restRemainingSec: 0
-    };
+    return completing(snapshot, nowMs, total);
   }
   return snapshot;
 }
@@ -125,38 +156,58 @@ export function previousSetForCurrent(snapshot: TrainSnapshot): LoggedSet | unde
   return [...snapshot.sets].reverse().find((item) => item.exerciseId === slot.exerciseId);
 }
 
+export function normalizeTrainSnapshot(raw: TrainSnapshot): TrainSnapshot {
+  const legacyPhase = raw.phase as string;
+  const phase: TrainPhase =
+    legacyPhase === "briefing" ? "prep" : ((legacyPhase as TrainPhase) ?? "idle");
+  const legacySave = raw.saveStatus as string;
+  const saveStatus: SaveStatus =
+    legacySave === "saving" ? "save_pending" : ((raw.saveStatus as SaveStatus) ?? "idle");
+  return {
+    ...IDLE_SNAPSHOT,
+    ...raw,
+    phase,
+    saveStatus,
+    workRemainingSec: raw.workRemainingSec ?? 0,
+    workDurationSec: raw.workDurationSec ?? 0,
+    resumePhase:
+      raw.resumePhase === ("briefing" as TrainPhase) ? "prep" : (raw.resumePhase ?? null)
+  };
+}
+
 export function reduceTrain(snapshot: TrainSnapshot, command: TrainCommand): TrainSnapshot {
   switch (command.type) {
     case "restore":
-      return {
-        ...IDLE_SNAPSHOT,
-        ...command.snapshot,
-        workRemainingSec: command.snapshot.workRemainingSec ?? 0,
-        workDurationSec: command.snapshot.workDurationSec ?? 0
-      };
+      return normalizeTrainSnapshot(command.snapshot);
     case "reset":
       return { ...IDLE_SNAPSHOT };
     case "select_plan": {
-      if (activePhases(snapshot.phase) && snapshot.phase !== "paused") {
+      if (isLivePhase(snapshot.phase) && !HOLD_PHASES.includes(snapshot.phase)) {
         return { ...snapshot, lastError: "Finish or pause the live session before changing plans." };
+      }
+      if (HOLD_PHASES.includes(snapshot.phase) && snapshot.phase !== "paused") {
+        return { ...snapshot, lastError: "Resume or finish the interrupted session before changing plans." };
+      }
+      if (snapshot.phase === "paused") {
+        return { ...snapshot, lastError: "Finish or resume the paused session before changing plans." };
       }
       if (!getTrainPlan(command.planId)) {
         return { ...snapshot, lastError: "That session is not in the catalog." };
       }
       return {
         ...IDLE_SNAPSHOT,
-        phase: "briefing",
+        phase: "prep",
         planId: command.planId,
         lastError: null
       };
     }
     case "start": {
-      if (snapshot.phase !== "briefing" || !snapshot.planId) {
+      if (snapshot.phase !== "prep" || !snapshot.planId) {
         return { ...snapshot, lastError: "Preview a session before starting." };
       }
       return armWorkTimer({
         ...snapshot,
-        phase: "active",
+        phase: workPhaseForPlan(snapshot.planId),
         sessionId: command.sessionId,
         startedAtMs: command.nowMs,
         completedAtMs: null,
@@ -169,11 +220,11 @@ export function reduceTrain(snapshot: TrainSnapshot, command: TrainCommand): Tra
       });
     }
     case "log_set": {
-      if (snapshot.phase !== "active") {
-        return { ...snapshot, lastError: "Log sets only during the active block." };
+      if (!isWorkPhase(snapshot.phase)) {
+        return { ...snapshot, lastError: "Log sets only during the work block." };
       }
       const slot = currentSlot(snapshot);
-      if (!slot) return { ...snapshot, phase: "complete", completedAtMs: command.nowMs };
+      if (!slot) return completing(snapshot, command.nowMs);
       const logged: LoggedSet = {
         exerciseId: slot.exerciseId,
         name: slot.name,
@@ -192,7 +243,7 @@ export function reduceTrain(snapshot: TrainSnapshot, command: TrainCommand): Tra
       );
     }
     case "skip_exercise": {
-      if (snapshot.phase !== "active") return snapshot;
+      if (!isWorkPhase(snapshot.phase)) return snapshot;
       const plan = snapshot.planId ? getTrainPlan(snapshot.planId) : undefined;
       if (!plan) return snapshot;
       const slots = buildSlots(applySubs(plan, snapshot.substituted));
@@ -226,7 +277,7 @@ export function reduceTrain(snapshot: TrainSnapshot, command: TrainCommand): Tra
       return completeIfPastEnd(
         armWorkTimer({
           ...snapshot,
-          phase: "active",
+          phase: workPhaseForPlan(snapshot.planId),
           restRemainingSec: 0,
           restDurationSec: 0
         })
@@ -242,52 +293,104 @@ export function reduceTrain(snapshot: TrainSnapshot, command: TrainCommand): Tra
       };
     }
     case "pause": {
-      if (snapshot.phase !== "active" && snapshot.phase !== "rest") return snapshot;
-      return { ...snapshot, resumePhase: snapshot.phase, phase: "paused" };
+      if (!TIMER_PHASES.includes(snapshot.phase)) return snapshot;
+      return { ...snapshot, resumePhase: snapshot.phase, phase: "paused", lastError: null };
     }
-    case "resume": {
-      if (snapshot.phase !== "paused") return snapshot;
+    case "interrupt": {
+      if (!TIMER_PHASES.includes(snapshot.phase)) return snapshot;
       return {
         ...snapshot,
-        phase: snapshot.resumePhase === "rest" ? "rest" : "active",
+        resumePhase: snapshot.phase,
+        phase: "interrupted",
+        lastError: command.reason === "background"
+          ? "Session interrupted while the app was in the background. Resume to continue — completed sets are kept."
+          : "Session interrupted. Resume to continue — completed sets are kept."
+      };
+    }
+    case "resume": {
+      if (snapshot.phase !== "paused" && snapshot.phase !== "interrupted") return snapshot;
+      return {
+        ...snapshot,
+        phase: restoreWorkPhase(snapshot),
+        resumePhase: null,
+        lastError: null
+      };
+    }
+    case "enter_substitution": {
+      if (!isWorkPhase(snapshot.phase) && snapshot.phase !== "prep") return snapshot;
+      return { ...snapshot, resumePhase: snapshot.phase, phase: "substituting", lastError: null };
+    }
+    case "cancel_substitution": {
+      if (snapshot.phase !== "substituting") return snapshot;
+      return {
+        ...snapshot,
+        phase: snapshot.resumePhase === "prep" ? "prep" : restoreWorkPhase(snapshot),
         resumePhase: null
       };
     }
     case "tick": {
-      if (snapshot.phase === "active" && snapshot.workRemainingSec > 0) {
+      if (isWorkPhase(snapshot.phase) && snapshot.workRemainingSec > 0) {
         return { ...snapshot, workRemainingSec: snapshot.workRemainingSec - 1 };
       }
       if (snapshot.phase !== "rest") return snapshot;
       if (snapshot.restRemainingSec <= 1) {
         return completeIfPastEnd(
-          armWorkTimer({ ...snapshot, phase: "active", restRemainingSec: 0 })
+          armWorkTimer({
+            ...snapshot,
+            phase: workPhaseForPlan(snapshot.planId),
+            restRemainingSec: 0
+          })
         );
       }
       return { ...snapshot, restRemainingSec: snapshot.restRemainingSec - 1 };
     }
     case "finish": {
-      if (!activePhases(snapshot.phase) && snapshot.phase !== "paused") return snapshot;
+      if (!isLivePhase(snapshot.phase)) return snapshot;
+      return completing(snapshot, command.nowMs);
+    }
+    case "mark_save": {
+      const terminal =
+        command.status === "saved" || command.status === "failed" || command.status === "local_only";
       return {
         ...snapshot,
-        phase: "complete",
-        completedAtMs: command.nowMs,
-        restRemainingSec: 0
+        phase: snapshot.phase === "completing" && terminal ? "complete" : snapshot.phase,
+        saveStatus: command.status,
+        lastError:
+          command.error !== undefined
+            ? command.error
+            : command.status === "saved"
+              ? null
+              : snapshot.lastError
       };
     }
-    case "mark_save":
-      return { ...snapshot, saveStatus: command.status, lastError: command.error ?? snapshot.lastError };
     case "substitute": {
-      if (snapshot.phase !== "briefing" && snapshot.phase !== "active") return snapshot;
-      const slot = currentSlot(snapshot);
+      if (
+        snapshot.phase !== "prep" &&
+        snapshot.phase !== "substituting" &&
+        !isWorkPhase(snapshot.phase)
+      ) {
+        return snapshot;
+      }
+      const slot = currentSlot(
+        snapshot.phase === "prep" ? { ...snapshot, slotIndex: 0 } : snapshot
+      );
       if (!slot) return snapshot;
       if (!slot.substitutions.includes(command.replacementExerciseId)) {
         return { ...snapshot, lastError: "That substitute is not available for this movement." };
       }
-      return {
+      const applied = {
         ...snapshot,
         substituted: { ...snapshot.substituted, [slot.exerciseId]: command.replacementExerciseId },
         lastError: null
       };
+      if (snapshot.phase === "substituting") {
+        return {
+          ...applied,
+          phase: snapshot.resumePhase === "prep" ? "prep" : restoreWorkPhase(snapshot),
+          resumePhase: null
+        };
+      }
+      return applied;
     }
     default:
       return snapshot;
@@ -329,6 +432,12 @@ export function zenithCues(snapshot: TrainSnapshot, readiness: ReadinessView): s
   }
   if (snapshot.phase === "rest") {
     cues.push("Rest is programmed. Optional slow breathing — not a measured recovery signal.");
+  }
+  if (snapshot.phase === "interrupted") {
+    cues.push("Timers are frozen. Nothing was uploaded while interrupted.");
+  }
+  if (snapshot.phase === "warmup") {
+    cues.push("Warm-up block. Heart rate stays blank unless a connected source is streaming.");
   }
   return cues;
 }

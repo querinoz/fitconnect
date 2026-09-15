@@ -22,7 +22,7 @@ export const en: Dict = {
     cta: "View source on GitHub"
   },
   hero: {
-    livePill: "Live · 12,418 verified specialists across 10 sports",
+    livePill: "Live · verified specialists across 10 sports",
     tagline: "Systems · shipped · verified specialists",
     title1: "The world's best",
     titleAccent: "specialists",
@@ -501,7 +501,7 @@ export const en: Dict = {
   trustStrip: {
     reviews: "4.94 ★ · 27k+ verified reviews",
     rejected: "62% of applicants rejected",
-    coaches: "12,418 verified coaches"
+    coaches: "Verified coaches in the live marketplace"
   },
   featuredCoaches: {
     eyebrow: "Featured coaches",
@@ -613,7 +613,7 @@ export const en: Dict = {
       },
       {
         title: "Programs library",
-        body: "84 branded programs by signature coaches. Battle-tested by 12,000+ athletes."
+        body: "Branded programs by signature coaches. Completion counts stay unpublished until production data is live."
       },
       {
         title: "Free 15-min intro call",
@@ -700,7 +700,7 @@ export const en: Dict = {
       },
       {
         q: "How is FitConnect different from Future or Caliber?",
-        a: "Future and Caliber pair you with one in-house generalist coach. FitConnect is a marketplace of 12,000 verified specialists across 10 sports — yoga, surf, BJJ, climbing — that platforms like Future simply do not coach. You get the human accountability they offer, plus genuine sport-specific expertise."
+        a: "Future and Caliber pair you with one in-house generalist coach. FitConnect is a marketplace of verified specialists across 10 sports — yoga, surf, BJJ, climbing — that platforms like Future simply do not coach. You get the human accountability they offer, plus genuine sport-specific expertise."
       },
       {
         q: "Can my coach see my Apple Watch / Garmin / Whoop data?",
@@ -1116,8 +1116,8 @@ export const en: Dict = {
     title: "Real specialists.",
     titleAccent: "Real results.",
     subtitle:
-      "Hand-picked from 12,418 verified coaches across 10 sports. Average of 10.4 years coaching, 96% client retention.",
-    seeAll: "See all 12,418"
+      "Hand-picked from the live coach marketplace. Experience and retention are published per profile — never as a fake roster total.",
+    seeAll: "See all coaches"
   },
   testimonials: {
     eyebrow: "Athlete stories",
@@ -1134,7 +1134,7 @@ export const en: Dict = {
     steps: [
       {
         title: "Tell us about your goals",
-        body: "60-second profile. Sport, level, schedule, preferred modality. We surface your top 3 matches across 12,418 verified specialists.",
+        body: "60-second profile. Sport, level, schedule, preferred modality. We surface your top 3 matches from coaches who are actually listed.",
         detail: "Avg. match time: 47 seconds"
       },
       {
@@ -1216,7 +1216,7 @@ export const en: Dict = {
       }
     ],
     ctaTitle: "Ready for the real thing?",
-    ctaBody: "12,418 verified specialists. Free 15-min intro with every coach.",
+    ctaBody: "Verified specialists in the marketplace. Free 15-min intro with every listed coach.",
     ctaButton: "Find your specialist"
   },
   comparison: {
@@ -1562,7 +1562,7 @@ export const en: Dict = {
       body: "Generic plans plateau at week eight. Our coaches each commit to one or two disciplines, which means programming that knows the difference between a Vinyasa flow and a Bikram class, an Olympic squat and a powerlifting squat, an outdoor lead and a sport project.",
       metricLabel: "Avg coach experience",
       metricValue: "10.4 yrs",
-      citation: "FitConnect 2026 trainer roster, n=12,418"
+      citation: "FitConnect coach marketplace. Roster totals stay unpublished until production data is live."
     },
     {
       title: "Recovery-aware programming",

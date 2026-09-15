@@ -8,16 +8,20 @@ import org.junit.Test
 
 class HealthConnectPermissionMapperTest {
     @Test
-    fun onboardingMapsToFourReadPermissions() {
+    fun onboardingMapsToRecordReadsPlusHistoryAndBackground() {
+        val records = HealthConnectPermissionMapper.recordPermissionsForFeature(HealthFeature.ONBOARDING)
         val perms = HealthConnectPermissionMapper.onboardingPermissions()
-        assertEquals(4, perms.size)
-        assertTrue(perms.all { it.startsWith("android.permission.health.") })
+        assertEquals(4, records.size)
+        assertTrue(records.all { it.startsWith("android.permission.health.") })
+        assertTrue(perms.containsAll(records))
+        assertTrue(perms.any { it.endsWith("READ_HEALTH_DATA_HISTORY") })
+        assertTrue(perms.any { it.endsWith("READ_HEALTH_DATA_IN_BACKGROUND") })
     }
 
     @Test
-    fun sleepIsSeparateFromOnboarding() {
+    fun sleepIsSeparateFromOnboardingRecords() {
         val sleep = HealthConnectPermissionMapper.permissionsForFeature(HealthFeature.SLEEP)
-        val onboarding = HealthConnectPermissionMapper.onboardingPermissions()
+        val onboarding = HealthConnectPermissionMapper.recordPermissionsForFeature(HealthFeature.ONBOARDING)
         assertTrue(sleep.none { it in onboarding })
     }
 }

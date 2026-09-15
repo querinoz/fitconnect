@@ -34,6 +34,7 @@ object WorkoutSessionMachine {
             WorkoutCommand.SkipRest -> skipRest(state, clock, eventId)
             is WorkoutCommand.ExtendRest -> extendRest(state, command.extraSec, clock, eventId)
             WorkoutCommand.Pause -> pause(state, clock, eventId)
+            WorkoutCommand.Interrupt -> interrupt(state, clock, eventId)
             WorkoutCommand.Resume -> resume(state, clock, eventId)
             WorkoutCommand.SkipExercise -> skipExercise(state, clock, eventId)
             WorkoutCommand.Finish -> finish(state, clock, eventId)
@@ -90,9 +91,17 @@ object WorkoutSessionMachine {
         if (state.phase != WorkoutPhase.PREP) {
             return reject(state, "Start is only valid from PREP.")
         }
+        val nextPhase =
+            if (state.plan.name.contains("warm", ignoreCase = true) ||
+                state.workoutId.contains("warmup", ignoreCase = true)
+            ) {
+                WorkoutPhase.WARMUP
+            } else {
+                WorkoutPhase.ACTIVE
+            }
         val timed = maybeStartTimed(state, 0, clock)
         val next = state.copy(
-            phase = WorkoutPhase.ACTIVE,
+            phase = nextPhase,
             startedAtMs = clock.wallClockMs(),
             timed = timed,
             lastError = null,
@@ -107,8 +116,8 @@ object WorkoutSessionMachine {
         eventId: () -> String,
         setId: () -> String,
     ): ReduceResult {
-        if (state.phase != WorkoutPhase.ACTIVE) {
-            return reject(state, "Sets can only be logged while ACTIVE.")
+        if (state.phase != WorkoutPhase.ACTIVE && state.phase != WorkoutPhase.WARMUP) {
+            return reject(state, "Sets can only be logged while ACTIVE or WARMUP.")
         }
         val slot = state.currentSlot ?: return reject(state, "No current exercise.")
         when (val check = SetValidator.validate(slot, input)) {
@@ -174,8 +183,11 @@ object WorkoutSessionMachine {
         clock: WorkoutClock,
         eventId: () -> String,
     ): ReduceResult {
-        if (state.phase != WorkoutPhase.ACTIVE && state.phase != WorkoutPhase.REST) {
-            return reject(state, "Pause is only valid from ACTIVE or REST.")
+        if (state.phase != WorkoutPhase.ACTIVE &&
+            state.phase != WorkoutPhase.REST &&
+            state.phase != WorkoutPhase.WARMUP
+        ) {
+            return reject(state, "Pause is only valid from ACTIVE, WARMUP, or REST.")
         }
         val next = state.copy(
             phase = WorkoutPhase.PAUSED,
@@ -187,12 +199,35 @@ object WorkoutSessionMachine {
         return ReduceResult(next, listOf(event(next, "workout_paused", clock, eventId)))
     }
 
+    private fun interrupt(
+        state: GuidedSessionSnapshot,
+        clock: WorkoutClock,
+        eventId: () -> String,
+    ): ReduceResult {
+        if (state.phase != WorkoutPhase.ACTIVE &&
+            state.phase != WorkoutPhase.REST &&
+            state.phase != WorkoutPhase.WARMUP
+        ) {
+            return ReduceResult(state)
+        }
+        val next = state.copy(
+            phase = WorkoutPhase.INTERRUPTED,
+            pausedFrom = state.phase,
+            rest = state.rest?.let { MonotonicTimer.freezeRest(it, clock) },
+            timed = state.timed?.let { MonotonicTimer.freezeTimed(it, clock) },
+            lastError = "Session interrupted. Resume to continue — completed sets are kept.",
+        )
+        return ReduceResult(next, listOf(event(next, "workout_interrupted", clock, eventId)))
+    }
+
     private fun resume(
         state: GuidedSessionSnapshot,
         clock: WorkoutClock,
         eventId: () -> String,
     ): ReduceResult {
-        if (state.phase != WorkoutPhase.PAUSED) return reject(state, "Resume is only valid from PAUSED.")
+        if (state.phase != WorkoutPhase.PAUSED && state.phase != WorkoutPhase.INTERRUPTED) {
+            return reject(state, "Resume is only valid from PAUSED or INTERRUPTED.")
+        }
         val target = state.pausedFrom ?: WorkoutPhase.ACTIVE
         val rest = state.rest?.let {
             it.copy(elapsedAnchorMs = clock.elapsedRealtimeMs(), wallAnchorMs = clock.wallClockMs())
@@ -215,7 +250,9 @@ object WorkoutSessionMachine {
         clock: WorkoutClock,
         eventId: () -> String,
     ): ReduceResult {
-        if (state.phase != WorkoutPhase.ACTIVE) return reject(state, "Skip is only valid while ACTIVE.")
+        if (state.phase != WorkoutPhase.ACTIVE && state.phase != WorkoutPhase.WARMUP) {
+            return reject(state, "Skip is only valid while ACTIVE or WARMUP.")
+        }
         val slot = state.currentSlot ?: return finish(state, clock, eventId)
         var nextIndex = state.slotIndex + 1
         while (nextIndex < state.schedule.size &&
@@ -274,7 +311,7 @@ object WorkoutSessionMachine {
                 if (MonotonicTimer.restRemaining(rest, clock) > 0) return ReduceResult(state)
                 return enterActive(state, rest.nextSlotIndex, clock, eventId, "rest_elapsed")
             }
-            WorkoutPhase.ACTIVE -> {
+            WorkoutPhase.ACTIVE, WorkoutPhase.WARMUP -> {
                 val timed = state.timed ?: return ReduceResult(state)
                 if (MonotonicTimer.timedRemaining(timed, clock) > 0) return ReduceResult(state)
                 val slot = state.currentSlot ?: return ReduceResult(state)
@@ -437,12 +474,23 @@ object WorkoutSessionMachine {
             )
         }
         return state.copy(
-            phase = WorkoutPhase.ACTIVE,
+            phase = workPhase(state),
             slotIndex = nextIndex,
             rest = null,
             timed = maybeStartTimed(state, nextIndex, clock),
             lastError = null,
         )
+    }
+
+    private fun workPhase(state: GuidedSessionSnapshot): WorkoutPhase {
+        return if (
+            state.plan.name.contains("warm", ignoreCase = true) ||
+            state.workoutId.contains("warmup", ignoreCase = true)
+        ) {
+            WorkoutPhase.WARMUP
+        } else {
+            WorkoutPhase.ACTIVE
+        }
     }
 
     private fun maybeStartTimed(

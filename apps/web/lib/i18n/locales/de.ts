@@ -20,7 +20,7 @@ export const de = {
     cta: "Quellcode auf GitHub ansehen"
   },
   hero: {
-    livePill: "Live · 12.418 verifizierte Spezialisten in 10 Sportarten",
+    livePill: "Live · verifizierte Spezialisten in 10 Sportarten",
     tagline: "Systeme · ausgeliefert · verifizierte Spezialisten",
     title1: "Die besten",
     titleAccent: "Spezialisten",
@@ -398,7 +398,7 @@ export const de = {
   trustStrip: {
     reviews: "4,94 ★ · 27k+ verifizierte Bewertungen",
     rejected: "62 % der Bewerbungen abgelehnt",
-    coaches: "12.418 verifizierte Coaches"
+    coaches: "Verifizierte Coaches im Marketplace"
   },
   featuredCoaches: {
     eyebrow: "Featured Coaches",
@@ -1014,8 +1014,8 @@ export const de = {
     title: "Echte Spezialisten.",
     titleAccent: "Echte Ergebnisse.",
     subtitle:
-      "Handverlesen aus 12.418 verifizierten Coaches in 10 Sportarten. Ø 10,4 Jahre Coaching, 96 % Kundenbindung.",
-    seeAll: "Alle 12.418 ansehen"
+      "Handverlesen aus dem Coach-Marketplace. Erfahrung und Bindung stehen am Profil — nie als erfundene Gesamtsumme.",
+    seeAll: "Alle Coaches ansehen"
   },
   testimonials: {
     eyebrow: "Athleten-Geschichten",
@@ -1032,7 +1032,7 @@ export const de = {
     steps: [
       {
         title: "Erzähl uns deine Ziele",
-        body: "60-Sekunden-Profil. Sport, Level, Zeitplan, bevorzugte Modalität. Wir zeigen deine Top-3-Matches unter 12.418 verifizierten Spezialisten.",
+        body: "60-Sekunden-Profil. Sport, Level, Zeitplan, bevorzugte Modalität. Wir zeigen deine Top-3-Matches unter tatsächlich gelisteten Coaches.",
         detail: "Ø Match-Zeit: 47 Sekunden"
       },
       {
@@ -1114,7 +1114,7 @@ export const de = {
       }
     ],
     ctaTitle: "Bereit für das Echte?",
-    ctaBody: "12.418 verifizierte Spezialisten. Kostenloses 15-Min-Intro bei jedem Coach.",
+    ctaBody: "Verifizierte Spezialisten im Marketplace. Kostenloses 15-Min-Intro bei jedem gelisteten Coach.",
     ctaButton: "Deinen Spezialisten finden"
   },
   comparison: {
@@ -1458,7 +1458,7 @@ export const de = {
       body: "Les plans génériques plafonnent à la huitième semaine. Nos coaches s'engagent sur une ou deux disciplines.",
       metricLabel: "Expérience moyenne",
       metricValue: "10,4 ans",
-      citation: "Roster FitConnect 2026, n=12 418"
+      citation: "FitConnect-Marketplace. Roster-Summen bleiben unveröffentlicht, bis Produktionsdaten vorliegen."
     },
     {
       title: "Erholungsbewusste Programmierung",

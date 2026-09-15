@@ -103,7 +103,11 @@ fun StrengthWorkoutScreen() {
     }
 
     LaunchedEffect(snap.phase) {
-        while (snap.phase == WorkoutPhase.ACTIVE || snap.phase == WorkoutPhase.REST) {
+        while (
+            snap.phase == WorkoutPhase.ACTIVE ||
+            snap.phase == WorkoutPhase.WARMUP ||
+            snap.phase == WorkoutPhase.REST
+        ) {
             delay(250)
             runtime.tick()
         }
@@ -111,9 +115,15 @@ fun StrengthWorkoutScreen() {
 
     LaunchedEffect(snap.phase) {
         pausedElapsed = 0L
-        while (snap.phase == WorkoutPhase.PAUSED) {
+        while (snap.phase == WorkoutPhase.PAUSED || snap.phase == WorkoutPhase.INTERRUPTED) {
             delay(1_000)
             pausedElapsed += 1_000
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            scope.launch { runtime.interrupt() }
         }
     }
 
@@ -150,7 +160,7 @@ fun StrengthWorkoutScreen() {
                         snap = snap,
                         syncLabel = syncLabel(snap.syncStatus),
                         onPrimaryAction = when (snap.phase) {
-                            WorkoutPhase.PAUSED -> ({ scope.launch { runtime.resume() } })
+                            WorkoutPhase.PAUSED, WorkoutPhase.INTERRUPTED -> ({ scope.launch { runtime.resume() } })
                             else -> null
                         },
                     )
@@ -178,7 +188,7 @@ fun StrengthWorkoutScreen() {
             WorkoutPhase.IDLE, WorkoutPhase.PREP, WorkoutPhase.RECOVERING -> {
                 item { PrepPhase(snap, onStart = { scope.launch { runtime.start() } }, onSelectPlan = { id -> scope.launch { runtime.selectPlan(id) } }) }
             }
-            WorkoutPhase.ACTIVE -> {
+            WorkoutPhase.ACTIVE, WorkoutPhase.WARMUP, WorkoutPhase.SUBSTITUTING -> {
                 item {
                     ActivePhase(
                         snap = snap,
@@ -199,11 +209,11 @@ fun StrengthWorkoutScreen() {
                     )
                 }
             }
-            WorkoutPhase.PAUSED -> {
+            WorkoutPhase.PAUSED, WorkoutPhase.INTERRUPTED -> {
                 item {
                     EosPremiumCard {
                         Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
-                            EliteSysLabel(text = "PAUSED")
+                            EliteSysLabel(text = if (snap.phase == WorkoutPhase.INTERRUPTED) "INTERRUPTED" else "PAUSED")
                             EliteButton(
                                 label = "Resume",
                                 onClick = { scope.launch { runtime.resume() } },
@@ -338,9 +348,10 @@ private fun workoutPhaseSubtitle(snap: GuidedSessionSnapshot): String = when (sn
     WorkoutPhase.PREP,
     WorkoutPhase.RECOVERING,
     -> GuidedPlanCatalog.card(snap.plan.workoutId.ifBlank { GuidedPlanCatalog.featuredId }).purpose
-    WorkoutPhase.ACTIVE -> "Live set logging preserves progression, timer, and sync state."
+    WorkoutPhase.ACTIVE, WorkoutPhase.WARMUP, WorkoutPhase.SUBSTITUTING -> "Live set logging preserves progression, timer, and sync state."
     WorkoutPhase.REST -> "Rest timer is active. Extend or skip without leaving the session."
     WorkoutPhase.PAUSED -> "Session paused locally. Resume when ready to continue."
+    WorkoutPhase.INTERRUPTED -> "Session interrupted. Resume to continue — completed sets are kept."
     WorkoutPhase.COMPLETING,
     WorkoutPhase.COMPLETED,
     WorkoutPhase.SYNC_PENDING,

@@ -67,6 +67,10 @@ class GuidedWorkoutWave2Test {
         val illegal = WorkoutSessionMachine.reduce(resumed.snapshot, WorkoutCommand.Start, clock)
         assertEquals("Start is only valid from PREP.", illegal.rejected)
         assertEquals(WorkoutPhase.ACTIVE, illegal.snapshot.phase)
+        val interrupted = WorkoutSessionMachine.reduce(resumed.snapshot, WorkoutCommand.Interrupt, clock)
+        assertEquals(WorkoutPhase.INTERRUPTED, interrupted.snapshot.phase)
+        val afterInterrupt = WorkoutSessionMachine.reduce(interrupted.snapshot, WorkoutCommand.Resume, clock)
+        assertEquals(WorkoutPhase.ACTIVE, afterInterrupt.snapshot.phase)
     }
 
     @Test

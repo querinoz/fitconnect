@@ -51,7 +51,7 @@ describe("TrainExperience", () => {
     expect(screen.queryByText(/142 bpm|\d+ kcal/i)).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /restore session/i }));
-    expect(screen.getByTestId("train-briefing")).toBeInTheDocument();
+    expect(screen.getByTestId("train-prep")).toBeInTheDocument();
     await user.click(screen.getByTestId("train-start"));
     expect(screen.getByTestId("train-live")).toBeInTheDocument();
     expect(screen.queryByText(/heart-rate zone/i)).not.toBeInTheDocument();
@@ -71,7 +71,7 @@ describe("TrainExperience", () => {
       }
     }
     expect(await screen.findByTestId("train-complete")).toBeInTheDocument();
-    expect(screen.getByText("Device")).toBeInTheDocument();
+    expect(await screen.findByText("Device")).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent(/not configured/i);
   });
 });

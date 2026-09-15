@@ -101,3 +101,20 @@ describe("MCP gateway", () => {
     expect(res.result).toMatchObject({ stravaNeverSocial: true });
   });
 });
+
+describe("MCP 2026-07-28 protocol", () => {
+  it("advertises a stateless server identity and supported versions", async () => {
+    const { MCP_PROTOCOL_VERSION, isSupportedProtocolVersion, mcpDiscoverPayload, readRequestedProtocolVersion } =
+      await import("./protocol");
+    expect(MCP_PROTOCOL_VERSION).toBe("2026-07-28");
+    expect(isSupportedProtocolVersion("2026-07-28")).toBe(true);
+    expect(isSupportedProtocolVersion("1999-01-01")).toBe(false);
+    expect(readRequestedProtocolVersion({ "io.modelcontextprotocol/protocolVersion": "2026-07-28" })).toBe(
+      "2026-07-28"
+    );
+    const discover = mcpDiscoverPayload(null);
+    expect(discover.session).toBe("stateless");
+    expect(discover.tools).toBeNull();
+    expect(discover.authorization.clientRegistration).toBe("cimd");
+  });
+});

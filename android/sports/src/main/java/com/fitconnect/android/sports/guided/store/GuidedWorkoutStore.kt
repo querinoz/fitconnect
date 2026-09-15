@@ -74,9 +74,12 @@ class InMemoryGuidedWorkoutStore : GuidedWorkoutStore {
 
 private fun WorkoutPhase.isInProgress(): Boolean = when (this) {
     WorkoutPhase.PREP,
+    WorkoutPhase.WARMUP,
     WorkoutPhase.ACTIVE,
     WorkoutPhase.REST,
     WorkoutPhase.PAUSED,
+    WorkoutPhase.INTERRUPTED,
+    WorkoutPhase.SUBSTITUTING,
     WorkoutPhase.COMPLETING,
     WorkoutPhase.RECOVERING,
     -> true

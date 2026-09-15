@@ -39,7 +39,7 @@ class WearTileService : TileService() {
         val layout = when {
             engine == null -> emptyLayout()
             phase == LiveActivityPhase.RUNNING || phase == LiveActivityPhase.PAUSED ->
-                sessionLayout(phase)
+                sessionLayout(engine.state.value)
             WearRuntime.lastBlockCode != null -> errorLayout(WearRuntime.lastBlockCode ?: "ERROR")
             else -> readinessLayout(WearRuntime.resolveReadiness().toPresentation())
         }
@@ -69,13 +69,27 @@ class WearTileService : TileService() {
         valueColor = EliteSurfaceColors.VOLTLINE,
     )
 
-    private fun sessionLayout(phase: LiveActivityPhase) = metricColumn(
-        kicker = if (phase == LiveActivityPhase.PAUSED) "PAUSED" else "ACTIVE",
-        value = "LIVE",
-        footnote = "SESSION · WATCH",
+    private fun sessionLayout(snap: com.fitconnect.android.capture.LiveActivitySnapshot) = metricColumn(
+        kicker = if (snap.phase == LiveActivityPhase.PAUSED) "PAUSED" else "ACTIVE",
+        value = formatElapsed(snap.elapsedMs),
+        footnote = if (
+            snap.hrBpm != null &&
+            snap.sourceKind != com.fitconnect.shared.source.DataSourceKind.LOCAL_DEMO
+        ) {
+            "HR ${snap.hrBpm}"
+        } else {
+            "SESSION · NO FAKE HR"
+        },
         kickerColor = EliteSurfaceColors.TELEMETRY,
         valueColor = EliteSurfaceColors.VOLTLINE,
     )
+
+    private fun formatElapsed(elapsedMs: Long): String {
+        val totalSec = (elapsedMs / 1000L).coerceAtLeast(0L)
+        val m = totalSec / 60L
+        val s = totalSec % 60L
+        return "${m}:${s.toString().padStart(2, '0')}"
+    }
 
     private fun emptyLayout() = metricColumn(
         kicker = "FITCONNECT",

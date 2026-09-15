@@ -36,15 +36,19 @@ class HealthConnectExerciseSessionReader(
         }
         val hc = client ?: return emptyList<ExerciseSessionDto>() to (changeToken ?: "")
         return if (changeToken.isNullOrBlank()) {
-            initialImport(hc)
+            initialImport(hc, permissionGateway.grantSnapshot().historyGranted)
         } else {
             incrementalChanges(hc, changeToken)
         }
     }
 
-    private suspend fun initialImport(hc: HealthConnectClient): Pair<List<ExerciseSessionDto>, String> {
+    private suspend fun initialImport(
+        hc: HealthConnectClient,
+        historyGranted: Boolean,
+    ): Pair<List<ExerciseSessionDto>, String> {
         val end = Instant.now()
-        val start = end.minus(historyDays, ChronoUnit.DAYS)
+        val days = if (historyGranted) 3650L else historyDays
+        val start = end.minus(days, ChronoUnit.DAYS)
         val response = hc.readRecords(
             ReadRecordsRequest(
                 recordType = ExerciseSessionRecord::class,

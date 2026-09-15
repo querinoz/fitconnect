@@ -12,7 +12,17 @@ export async function GET(request: Request) {
 
   const recalc = await recalcReadinessFromActivities(auth.athleteId);
   if (recalc?.score != null) {
-    return NextResponse.json({ score: recalc.score, source: "strava" });
+  return NextResponse.json({
+    score: recalc.score,
+    source: "strava",
+    provider: "STRAVA",
+    confidence: "derived",
+    unit: "score",
+    measuredAt: null,
+    hrvMs: null,
+    sleepHours: null,
+    restingHrBpm: null
+  });
   }
 
   const prisma = getPrisma();
@@ -22,9 +32,29 @@ export async function GET(request: Request) {
       select: { readiness: true }
     });
     if (athlete) {
-      return NextResponse.json({ score: athlete.readiness, source: "profile" });
+      return NextResponse.json({
+        score: athlete.readiness,
+        source: "profile",
+        provider: "FITCONNECT",
+        confidence: "derived",
+        unit: "score",
+        measuredAt: null,
+        hrvMs: null,
+        sleepHours: null,
+        restingHrBpm: null
+      });
     }
   }
 
-  return NextResponse.json({ score: null, source: "insufficient_data" });
+  return NextResponse.json({
+    score: null,
+    source: "insufficient_data",
+    provider: "none",
+    confidence: "missing",
+    unit: "score",
+    measuredAt: null,
+    hrvMs: null,
+    sleepHours: null,
+    restingHrBpm: null
+  });
 }

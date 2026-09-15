@@ -116,3 +116,17 @@ object HealthConnectPermissionPolicy {
         HealthFeature.BLOOD -> BLOOD
     }
 }
+
+enum class HealthConnectHistoryWindow {
+    /** Default Health Connect window when READ_HEALTH_DATA_HISTORY is not granted. */
+    THIRTY_DAYS,
+    FULL,
+    UNKNOWN,
+}
+
+enum class HealthConnectBackgroundAccess {
+    GRANTED,
+    DENIED,
+    FEATURE_UNAVAILABLE,
+    UNKNOWN,
+}

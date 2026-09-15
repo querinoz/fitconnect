@@ -79,6 +79,7 @@ describe("middleware auth policy", () => {
     expect(isProtectedPath("/map/live")).toBe(true);
     expect(isProtectedPath("/train")).toBe(true);
     expect(isProtectedPath("/train/live")).toBe(true);
+    expect(isProtectedPath("/recovery")).toBe(true);
     expect(isProtectedPath("/coaches")).toBe(true);
     expect(isProtectedPath("/discover")).toBe(false);
     expect(isProtectedPath("/")).toBe(false);

@@ -12,6 +12,10 @@ import com.fitconnect.android.fitness.domain.HealthFeature
 /**
  * Maps [HealthConnectPermissionPolicy] groups to Jetpack Health Connect permissions.
  * ViewModels request features — never raw permission strings.
+ *
+ * History and background reads are extra Health Connect 1.1 permissions. Without
+ * [HealthPermission.PERMISSION_READ_HEALTH_DATA_HISTORY], reads older than 30 days fail.
+ * Without [HealthPermission.PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND], background sync must not run.
  */
 object HealthConnectPermissionMapper {
     private val recordByPolicyName: Map<String, kotlin.reflect.KClass<out androidx.health.connect.client.records.Record>> =
@@ -23,13 +27,22 @@ object HealthConnectPermissionMapper {
             "SleepSession" to SleepSessionRecord::class,
         )
 
-    fun permissionsForFeature(feature: HealthFeature): Set<String> =
+    fun recordPermissionsForFeature(feature: HealthFeature): Set<String> =
         HealthConnectPermissionPolicy.forFeature(feature)
             .mapNotNull { recordByPolicyName[it] }
             .map { HealthPermission.getReadPermission(it) }
             .toSet()
 
-    fun onboardingPermissions(): Set<String> = permissionsForFeature(HealthFeature.ONBOARDING)
+    fun accessPermissions(): Set<String> = setOf(
+        HealthPermission.PERMISSION_READ_HEALTH_DATA_HISTORY,
+        HealthPermission.PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND,
+    )
+
+    fun permissionsForFeature(feature: HealthFeature): Set<String> =
+        recordPermissionsForFeature(feature)
+
+    fun onboardingPermissions(): Set<String> =
+        recordPermissionsForFeature(HealthFeature.ONBOARDING) + accessPermissions()
 
     fun sleepPermissions(): Set<String> = permissionsForFeature(HealthFeature.SLEEP)
 }

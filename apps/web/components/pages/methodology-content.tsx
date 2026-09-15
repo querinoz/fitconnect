@@ -138,9 +138,9 @@ export function MethodologyContent() {
         <section className="mx-auto max-w-7xl fc-section-x px-4 sm:px-6 py-16">
           <div className="rounded-3xl border border-ink-800 bg-ink-900/40 p-10 grid md:grid-cols-3 gap-8 text-center">
             {[
-              { label: mp.stats.interviewed, value: "32,184" },
-              { label: mp.stats.accepted, value: "12,418" },
-              { label: mp.stats.acceptanceRate, value: "38.6%" }
+              { label: mp.stats.interviewed, value: "—" },
+              { label: mp.stats.accepted, value: "—" },
+              { label: mp.stats.acceptanceRate, value: "—" }
             ].map((s) => (
               <div key={s.label}>
                 <p className="font-display text-5xl font-bold gradient-text">{s.value}</p>

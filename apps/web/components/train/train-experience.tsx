@@ -46,6 +46,7 @@ import {
 import { readinessFromApi } from "@/lib/train/readiness";
 import { recommendPlan } from "@/lib/train/recommend";
 import type { ReadinessView, TrainPlan, TrainSnapshot } from "@/lib/train/types";
+import { TRAIN_PHASE_LABEL } from "@/lib/train/types";
 import { cn } from "@/lib/utils";
 
 const FILTER_CHIPS = [
@@ -97,6 +98,7 @@ export function TrainExperience() {
   const [load, setLoad] = useState("");
   const [rpe, setRpe] = useState<number | null>(null);
   const restored = useRef(false);
+  const saveStartedFor = useRef<string | null>(null);
 
   const dispatch = useCallback((command: Parameters<typeof reduceTrain>[1]) => {
     setSnapshot((current) => reduceTrain(current, command));
@@ -128,13 +130,25 @@ export function TrainExperience() {
   }, []);
 
   useEffect(() => {
-    if (snapshot.phase !== "rest" && snapshot.phase !== "active") return;
+    const liveTimers =
+      snapshot.phase === "rest" || snapshot.phase === "active" || snapshot.phase === "warmup";
+    if (!liveTimers) return;
     const id = window.setInterval(() => {
       setNowMs(Date.now());
       dispatch({ type: "tick" });
     }, 1000);
     return () => window.clearInterval(id);
   }, [snapshot.phase, dispatch]);
+
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        dispatch({ type: "interrupt", reason: "background" });
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, [dispatch]);
 
   const slot = currentSlot(snapshot);
   const slotKey = `${snapshot.phase}:${slot?.slotIndex ?? "none"}:${slot?.exerciseId ?? ""}`;
@@ -166,7 +180,14 @@ export function TrainExperience() {
   const previous = previousSetForCurrent(snapshot);
   const upcoming = nextSlot(snapshot);
   const elapsed = formatTimer(Math.floor(durationMs(snapshot, nowMs) / 1000));
-  const live = snapshot.phase === "active" || snapshot.phase === "rest" || snapshot.phase === "paused";
+  const live =
+    snapshot.phase === "active" ||
+    snapshot.phase === "warmup" ||
+    snapshot.phase === "rest" ||
+    snapshot.phase === "paused" ||
+    snapshot.phase === "interrupted" ||
+    snapshot.phase === "substituting";
+  const done = snapshot.phase === "completing" || snapshot.phase === "complete";
   const historyBest = slot
     ? bestSetFromHistory(listLocalHistory(), slot.exerciseId, snapshot.sessionId)
     : null;
@@ -224,7 +245,7 @@ export function TrainExperience() {
       });
       return;
     }
-    dispatch({ type: "mark_save", status: "saving" });
+    dispatch({ type: "mark_save", status: "save_pending" });
     try {
       const res = await fetch("/api/v1/workout-sessions", {
         method: "POST",
@@ -269,13 +290,18 @@ export function TrainExperience() {
   }
 
   function finishNow() {
-    const now = Date.now();
-    setSnapshot((current) => {
-      const next = reduceTrain(current, { type: "finish", nowMs: now });
-      void saveCompletion(next);
-      return next;
-    });
+    dispatch({ type: "finish", nowMs: Date.now() });
   }
+
+  useEffect(() => {
+    if (snapshot.phase !== "completing") return;
+    if (snapshot.saveStatus !== "idle") return;
+    if (!snapshot.sessionId || saveStartedFor.current === snapshot.sessionId) return;
+    saveStartedFor.current = snapshot.sessionId;
+    void saveCompletion(snapshot);
+    // saveCompletion closes over the current snapshot; status updates go through dispatch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot.phase, snapshot.sessionId, snapshot.saveStatus]);
 
   return (
     <div
@@ -285,14 +311,14 @@ export function TrainExperience() {
       <header className="space-y-3">
         <p className="eos-label-caps text-eos-voltline">TRAIN</p>
         <h1 className="eos-headline text-4xl italic tracking-tight text-eos-on-surface sm:text-6xl">
-          {snapshot.phase === "complete"
+          {snapshot.phase === "complete" || snapshot.phase === "completing"
             ? "Session in the book."
             : live
               ? "Stay with this block."
               : "Your session is about to begin."}
         </h1>
         <p className="max-w-2xl text-sm text-eos-on-surface-muted sm:text-base">
-          Discover, brief, train, rest, finish. Heart rate, HRV and calories stay blank unless a
+          Discover, prep, train, rest, finish. Heart rate, HRV and calories stay blank unless a
           real source provides them.
         </p>
         <div className="flex flex-wrap gap-2">
@@ -301,7 +327,9 @@ export function TrainExperience() {
             tone={readiness.available ? "live" : "muted"}
           />
           {offline ? <StatusChip label="OFFLINE" tone="warn" /> : null}
-          {live ? <StatusChip label={snapshot.phase.toUpperCase()} tone="live" /> : null}
+          {snapshot.phase !== "idle" ? (
+            <StatusChip label={TRAIN_PHASE_LABEL[snapshot.phase]} tone={live ? "live" : "muted"} />
+          ) : null}
         </div>
       </header>
 
@@ -345,7 +373,7 @@ export function TrainExperience() {
         </>
       )}
 
-      {snapshot.phase === "briefing" && plan ? (
+      {snapshot.phase === "prep" && plan ? (
         <Briefing
           plan={plan}
           readiness={readiness}
@@ -358,7 +386,7 @@ export function TrainExperience() {
         />
       ) : null}
 
-      {snapshot.phase === "active" && plan && slot ? (
+      {(snapshot.phase === "active" || snapshot.phase === "warmup") && plan && slot ? (
         <LiveBlock
           plan={plan}
           snapshot={snapshot}
@@ -389,7 +417,7 @@ export function TrainExperience() {
           onSkip={() => dispatch({ type: "skip_exercise", nowMs: Date.now() })}
           onPause={() => dispatch({ type: "pause" })}
           onFinish={finishNow}
-          onSubstitute={(id) => dispatch({ type: "substitute", replacementExerciseId: id })}
+          onOpenSubstitution={() => dispatch({ type: "enter_substitution" })}
         />
       ) : null}
 
@@ -407,11 +435,17 @@ export function TrainExperience() {
         />
       ) : null}
 
-      {snapshot.phase === "paused" ? (
-        <BentoCard label="PAUSED" elevation="glass">
-          <p className="eos-headline text-3xl">Hold.</p>
+      {snapshot.phase === "paused" || snapshot.phase === "interrupted" ? (
+        <BentoCard
+          label={snapshot.phase === "interrupted" ? "INTERRUPTED" : "PAUSED"}
+          elevation="glass"
+          data-testid={snapshot.phase === "interrupted" ? "train-interrupted" : "train-paused"}
+        >
+          <p className="eos-headline text-3xl">
+            {snapshot.phase === "interrupted" ? "Hold. The session is still here." : "Hold."}
+          </p>
           <p className="mt-2 text-sm text-eos-on-surface-muted">
-            The session is local. Timers are frozen. Nothing was uploaded.
+            Timers are frozen. Completed sets stay on this device. Nothing was uploaded.
           </p>
           <div className="mt-6 flex flex-col gap-2 sm:flex-row">
             <PrimaryButton onClick={() => dispatch({ type: "resume" })}>Resume</PrimaryButton>
@@ -420,7 +454,37 @@ export function TrainExperience() {
         </BentoCard>
       ) : null}
 
-      {snapshot.phase === "complete" && plan ? (
+      {snapshot.phase === "substituting" && plan && slot ? (
+        <BentoCard label="SUBSTITUTION" elevation="glass" data-testid="train-substitution">
+          <p className="eos-headline text-3xl">{slot.name}</p>
+          <p className="mt-2 text-sm text-eos-on-surface-muted">
+            Swap for equipment, difficulty, or an injury-safer pattern. This is not medical advice.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {slot.substitutions.length === 0 ? (
+              <p className="text-sm">No catalog substitute is listed for this movement.</p>
+            ) : (
+              slot.substitutions.map((id) => {
+                const sub = findAnyExercise(id);
+                if (!sub) return null;
+                return (
+                  <GhostButton
+                    key={id}
+                    onClick={() => dispatch({ type: "substitute", replacementExerciseId: id })}
+                  >
+                    {sub.name}
+                  </GhostButton>
+                );
+              })
+            )}
+          </div>
+          <GhostButton className="mt-6" onClick={() => dispatch({ type: "cancel_substitution" })}>
+            Keep original
+          </GhostButton>
+        </BentoCard>
+      ) : null}
+
+      {done && plan ? (
         <CompleteBlock
           plan={plan}
           snapshot={snapshot}
@@ -429,6 +493,7 @@ export function TrainExperience() {
           prs={devicePrs(snapshot.sets, listLocalHistory(), snapshot.sessionId)}
           onRetry={() => void saveCompletion(snapshot)}
           onNew={() => {
+            saveStartedFor.current = null;
             clearTrainSnapshot();
             setAscendNote(null);
             dispatch({ type: "reset" });
@@ -442,7 +507,7 @@ export function TrainExperience() {
         </p>
       ) : null}
 
-      {!live && snapshot.phase !== "complete" ? (
+      {!live && !done ? (
         <footer className="flex flex-wrap gap-3 text-sm">
           <Link className="text-eos-telemetry underline-offset-4 hover:underline" href="/coaches">
             Find a coach
@@ -491,7 +556,7 @@ function ReadinessCard({
             {recommendation.adapted ? "adapted" : "catalog default"}
           </p>
           <PrimaryButton className="mt-4" onClick={onOpen}>
-            Open briefing
+            Open prep
           </PrimaryButton>
         </div>
       </div>
@@ -642,7 +707,7 @@ function Briefing({
 }) {
   const slots = buildSlots(plan);
   return (
-    <BentoCard label="BRIEFING" elevation="glass" data-testid="train-briefing">
+    <BentoCard label="PREP" elevation="glass" data-testid="train-prep">
       <p className="eos-headline text-4xl sm:text-5xl">{plan.title}</p>
       <p className="mt-2 text-eos-on-surface-muted">{plan.purpose}</p>
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -701,16 +766,17 @@ function LiveBlock(props: {
   onSkip: () => void;
   onPause: () => void;
   onFinish: () => void;
-  onSubstitute: (id: string) => void;
+  onOpenSubstitution: () => void;
 }) {
   const pct = props.progress.total
     ? Math.round((props.progress.done / props.progress.total) * 100)
     : 0;
+  const liveLabel = props.snapshot.phase === "warmup" ? "WARM-UP" : "ACTIVE";
   return (
     <div className="space-y-4" data-testid="train-live">
       <ProgressRing percent={pct} label={`${props.progress.done}/${props.progress.total}`} elapsed={props.elapsed} />
       <SessionTimeline snapshot={props.snapshot} />
-      <BentoCard label={`ACTIVE · SET ${props.slot.setNumber}/${props.slot.targetSets}`} elevation="2">
+      <BentoCard label={`${liveLabel} · SET ${props.slot.setNumber}/${props.slot.targetSets}`} elevation="2">
         <p className="eos-headline text-4xl leading-none sm:text-6xl">{props.slot.name}</p>
         <p className="mt-3 text-sm text-eos-on-surface-muted">{props.slot.instructions}</p>
         <p className="mt-1 text-xs uppercase tracking-wider text-eos-telemetry">
@@ -783,17 +849,9 @@ function LiveBlock(props: {
         {props.slot.substitutions.length > 0 ? (
           <div className="mt-4">
             <p className="text-xs uppercase tracking-wider text-eos-on-surface-muted">Cannot perform this?</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {props.slot.substitutions.map((id) => {
-                const sub = findAnyExercise(id);
-                if (!sub) return null;
-                return (
-                  <GhostButton key={id} onClick={() => props.onSubstitute(id)}>
-                    {sub.name}
-                  </GhostButton>
-                );
-              })}
-            </div>
+            <GhostButton className="mt-2" onClick={props.onOpenSubstitution} data-testid="train-open-sub">
+              Substitute movement
+            </GhostButton>
           </div>
         ) : null}
         <PrimaryButton className="mt-6" onClick={props.onLog} data-testid="train-log-set">
@@ -910,7 +968,7 @@ function CompleteBlock({
               ? "Cloud"
               : snapshot.saveStatus === "local_only"
                 ? "Device"
-                : snapshot.saveStatus === "saving"
+                : snapshot.saveStatus === "save_pending"
                   ? "Saving"
                   : snapshot.saveStatus === "failed"
                     ? "Retry"
@@ -942,7 +1000,7 @@ function CompleteBlock({
         <Link className="text-eos-telemetry underline-offset-4 hover:underline" href="/achievements">
           Open Ascend
         </Link>
-        <Link className="text-eos-telemetry underline-offset-4 hover:underline" href="/dashboard">
+        <Link className="text-eos-telemetry underline-offset-4 hover:underline" href="/recovery">
           Recovery context
         </Link>
       </div>
@@ -959,7 +1017,9 @@ function SessionTimeline({ snapshot }: { snapshot: TrainSnapshot }) {
     <ol className="flex flex-wrap gap-1" aria-label="Session timeline">
       {slots.map((item, index) => {
         const done = index < snapshot.sets.length;
-        const current = index === snapshot.slotIndex && snapshot.phase === "active";
+        const current =
+          index === snapshot.slotIndex &&
+          (snapshot.phase === "active" || snapshot.phase === "warmup");
         return (
           <li
             key={`${item.exerciseId}-${item.setNumber}-${index}`}

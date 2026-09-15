@@ -255,7 +255,7 @@ export default function PricingPage() {
                 </h2>
               </div>
               <p className="text-xs text-ink-500">
-                Median rates across 12,418 coaches · Apr 2026
+                Median listed rates from published coach profiles · not a fabricated roster total
               </p>
             </div>
             <div className="mt-8 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
