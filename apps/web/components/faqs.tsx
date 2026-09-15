@@ -29,7 +29,7 @@ const FAQS_PT: { q: string; a: string }[] = [
   },
   {
     q: "Em que é que a FitConnect é diferente da Future ou Caliber?",
-    a: "A Future e a Caliber emparelham-te com um coach generalista da casa. A FitConnect é um marketplace de 12 000 especialistas verificados em 10 desportos — yoga, surf, BJJ, escalada — que plataformas como a Future simplesmente não treinam. Ganhas a responsabilização humana, mais a verdadeira especialização."
+    a: "A Future e a Caliber emparelham-te com um coach generalista da casa. A FitConnect é um marketplace de especialistas verificados em 10 desportos — yoga, surf, BJJ, escalada — que plataformas como a Future simplesmente não treinam. Ganhas a responsabilização humana, mais a verdadeira especialização."
   },
   {
     q: "O meu coach pode ver os meus dados de Apple Watch / Garmin / Whoop?",
