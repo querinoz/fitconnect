@@ -14,7 +14,12 @@ const ALLOWED_EVENTS = new Set([
   "community_map_view",
   "strava_connect",
   "onboarding_complete",
-  "paid_session"
+  "paid_session",
+  "ios_page_view",
+  "ios_install_click",
+  "ios_qr_view",
+  "ios_copy_link",
+  "ios_testflight_click"
 ]);
 
 export function isAllowedAnalyticsEvent(name: string): boolean {

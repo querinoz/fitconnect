@@ -13,7 +13,7 @@ export function AppIntroSplash() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.location.pathname === "/") return;
+    if (typeof window !== "undefined" && (window.location.pathname === "/" || window.location.pathname === "/ios")) return;
     if (shouldReduceMotion()) return;
     try {
       if (sessionStorage.getItem(INTRO_KEY)) return;

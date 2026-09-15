@@ -5,6 +5,8 @@ describe("first-party analytics", () => {
   it("allowlists product events only", () => {
     expect(isAllowedAnalyticsEvent("landing_view")).toBe(true);
     expect(isAllowedAnalyticsEvent("signup")).toBe(true);
+    expect(isAllowedAnalyticsEvent("ios_page_view")).toBe(true);
+    expect(isAllowedAnalyticsEvent("ios_install_click")).toBe(true);
     expect(isAllowedAnalyticsEvent("password")).toBe(false);
   });
 });

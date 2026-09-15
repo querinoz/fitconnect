@@ -12,6 +12,7 @@ export function Footer() {
   const t = useT();
 
   const product = [
+    { label: "iOS", href: "/ios" },
     { label: t("nav", "findCoach"), href: "/discover" },
     { label: t("nav", "programs"), href: "/programs" },
     { label: t("nav", "dashboard"), href: athleteAppEntryHref() },

@@ -52,6 +52,14 @@ function OptionalRuntimeSdks({ children }: { children: ReactNode }) {
   if (pathname === "/") {
     return <>{children}</>;
   }
+  if (pathname === "/ios") {
+    return (
+      <>
+        <AnalyticsBootstrap />
+        {children}
+      </>
+    );
+  }
   return (
     <ConvexClientProvider>
       <FirebaseProvider>

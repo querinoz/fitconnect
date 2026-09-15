@@ -83,6 +83,8 @@ describe("middleware auth policy", () => {
     expect(isProtectedPath("/martial-arts")).toBe(true);
     expect(isProtectedPath("/coaches")).toBe(true);
     expect(isProtectedPath("/discover")).toBe(false);
+    expect(isProtectedPath("/ios")).toBe(false);
+    expect(isProtectedPath("/ios/install")).toBe(false);
     expect(isProtectedPath("/")).toBe(false);
   });
 });

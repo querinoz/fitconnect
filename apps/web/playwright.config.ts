@@ -13,7 +13,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: {
-    baseURL: "http://localhost:3001",
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3001",
     locale: "en-US",
     extraHTTPHeaders: { "Accept-Language": "en-US" },
     trace: "on-first-retry",
@@ -28,7 +28,9 @@ export default defineConfig({
   webServer: {
     command: process.env.CI ? "pnpm --filter @fitconnect/web start" : "pnpm dev",
     cwd: repoRoot,
-    url: "http://localhost:3001/api/health",
+    url: process.env.PLAYWRIGHT_BASE_URL
+      ? `${process.env.PLAYWRIGHT_BASE_URL.replace(/\/$/, "")}/api/health`
+      : "http://localhost:3001/api/health",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

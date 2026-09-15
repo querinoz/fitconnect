@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { MarketingShell } from "@/components/shell/marketing-shell";
 
 const AUTH_PATHS = new Set(["/signin", "/signup"]);
-const FOCUS_PATHS = new Set(["/mobile"]);
+const FOCUS_PATHS = new Set(["/mobile", "/ios"]);
 
 function isFocusPath(pathname: string) {
   return (

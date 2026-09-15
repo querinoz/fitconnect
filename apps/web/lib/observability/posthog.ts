@@ -1,4 +1,4 @@
-type PostHogEvent =
+export type PostHogEvent =
   | "landing_view"
   | "demo_open"
   | "discover_view"
@@ -10,7 +10,12 @@ type PostHogEvent =
   | "readiness_view"
   | "wearable_connect"
   | "community_map_view"
-  | "strava_connect";
+  | "strava_connect"
+  | "ios_page_view"
+  | "ios_install_click"
+  | "ios_qr_view"
+  | "ios_copy_link"
+  | "ios_testflight_click";
 
 declare global {
   interface Window {

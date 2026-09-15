@@ -5,6 +5,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
   const pages = [
     { url: base, priority: 1, changeFrequency: "weekly" as const },
+    { url: `${base}/ios`, priority: 0.9, changeFrequency: "weekly" as const },
     { url: `${base}/mobile`, priority: 0.9, changeFrequency: "monthly" as const },
     { url: `${base}/app/mobile`, priority: 0.85, changeFrequency: "monthly" as const },
     { url: `${base}/discover`, priority: 0.9, changeFrequency: "weekly" as const },
