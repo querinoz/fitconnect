@@ -26,13 +26,15 @@ jobs:
 
   ios-simulator:
     name: iOS + watchOS simulator
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
       - uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: latest-stable
+          xcode-version: "26"
+      - name: Fail closed unless Xcode 26 + iOS 26 SDK
+        run: node scripts/ios-require-xcode26.mjs
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Simulator build + test

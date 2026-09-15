@@ -37,6 +37,10 @@ function mustNotContain(rel, needle) {
 for (const rel of [
   "iosApp/AppStore/ExportOptions.plist",
   "iosApp/AppStore/AppStoreMetadata.json",
+  "iosApp/AppStore/BetaReview.json",
+  "scripts/ios-require-xcode26.mjs",
+  "scripts/asc-testflight.mjs",
+  "scripts/set-ios-testflight-url.mjs",
   "iosApp/FitConnect/FitConnectRelease.entitlements",
   "iosApp/ci_scripts/ci_post_clone.sh",
   "iosApp/ci_scripts/ci_pre_xcodebuild.sh",
@@ -70,8 +74,14 @@ mustContain("iosApp/project.yml", "archive:");
 mustContain("iosApp/AppStore/ExportOptions.plist", "app-store-connect");
 mustContain("iosApp/AppStore/ExportOptions.plist", "APPLE_TEAM_ID");
 mustContain("iosApp/AppStore/AppStoreMetadata.json", "com.fitconnect.ios");
-mustContain(".github/workflows/ios-testflight.yml", "macos-15");
+mustContain(".github/workflows/ios-testflight.yml", "macos-26");
+mustContain(".github/workflows/ios-testflight.yml", 'xcode-version: "26"');
+mustContain(".github/workflows/ios-testflight.yml", "ios-require-xcode26.mjs");
+mustContain(".github/workflows/ios-testflight.yml", "asc-testflight.mjs");
 mustContain(".github/workflows/ios-testflight.yml", "ios-testflight-archive.sh");
+mustNotContain(".github/workflows/ios-testflight.yml", "latest-stable");
+mustContain("scripts/ios-testflight-archive.sh", "ios-require-xcode26.mjs");
+mustContain("scripts/ios-testflight-archive.sh", "after-upload");
 mustContain("iosApp/ci_scripts/ci_post_clone.sh", "xcodegen generate");
 mustContain(".gitignore", "AuthKey_*.p8");
 mustContain(".gitignore", "GoogleService-Info.plist");

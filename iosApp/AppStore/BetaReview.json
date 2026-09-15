@@ -1,0 +1,34 @@
+{
+  "appleDocs": {
+    "sdkGate": "https://developer.apple.com/news/upcoming-requirements/",
+    "sdkGateSince": "2026-04-28",
+    "xcode": "26+",
+    "iosSdk": "26+",
+    "watchSdk": "26+",
+    "testFlightPublicLink": "https://developer.apple.com/help/app-store-connect/test-a-beta-version/invite-external-testers",
+    "betaGroupsApi": "https://developer.apple.com/documentation/appstoreconnectapi/post-v1-betagroups",
+    "jwt": "https://developer.apple.com/documentation/appstoreconnectapi/generating-tokens-for-api-requests"
+  },
+  "app": {
+    "name": "FitConnect",
+    "bundleId": "com.fitconnect.ios",
+    "sku": "fitconnect-ios",
+    "primaryLocale": "en-US",
+    "marketingVersion": "0.1.0",
+    "minIos": "17.0",
+    "targetDevice": "iPhone 14 Pro"
+  },
+  "betaReview": {
+    "demoAccountRequired": false,
+    "notes": "FitConnect is a coaching OS. Sign in with Apple or email (ONE LOGIN). TRAIN starts a real HKWorkoutSession. Health samples missing stay missing — the app does not invent HR, HRV, sleep, calories, or bookings. Martial Arts Fight Mode is a round/rest timer; device motion is not punch force. Live Activity and widgets read the App Group store. Watch companion embeds with the iOS app.",
+    "whatsNew": "First TestFlight: ONE LOGIN, Feed, Ascend, TRAIN, Dashboard, Profile, HealthKit, Live Activity / Dynamic Island, widgets, Watch companion, Martial Arts Fight Mode.",
+    "privacyPolicyUrl": "https://fitconnect-phi.vercel.app/privacy",
+    "contactEmail": "SET_IN_APP_STORE_CONNECT",
+    "feedbackEmail": "SET_IN_APP_STORE_CONNECT",
+    "contactPhone": "SET_IN_APP_STORE_CONNECT"
+  },
+  "groups": {
+    "internal": "Owner",
+    "external": "Public Testers"
+  }
+}

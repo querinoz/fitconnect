@@ -37,7 +37,7 @@ jobs:
       - run: node scripts/ci-gate-lint.mjs
       - run: node scripts/check-swift-duplicate-decls.mjs
       - run: node scripts/check-ios-parity.mjs
-      - run: node --test scripts/lighthouse-mobile.test.mjs scripts/inject-github-secrets-into-vercel-env.test.mjs scripts/preflight-vercel-env.test.mjs scripts/classify-vercel-build-failure.test.mjs scripts/pg-apply-guard.test.mjs
+      - run: node --test scripts/lighthouse-mobile.test.mjs scripts/inject-github-secrets-into-vercel-env.test.mjs scripts/preflight-vercel-env.test.mjs scripts/classify-vercel-build-failure.test.mjs scripts/pg-apply-guard.test.mjs scripts/ios-require-xcode26.test.mjs scripts/asc-testflight.test.mjs scripts/set-ios-testflight-url.test.mjs
       - run: pnpm tooling:health
       - run: pnpm lint
       # Expo @fitconnect/mobile archived (ADR-005 / Path A). Turbo 2.x hard-fails if a

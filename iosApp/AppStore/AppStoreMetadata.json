@@ -4,7 +4,12 @@
   "sku": "fitconnect-ios",
   "primaryLocale": "en-US",
   "platforms": ["iOS", "watchOS"],
-  "marketingVersion": "1.0.0",
+  "marketingVersion": "0.1.0",
+  "xcode": "26+",
+  "sdk": {
+    "iOS": "26+",
+    "watchOS": "26+"
+  },
   "minIos": "17.0",
   "minWatchos": "10.0",
   "deviceFamily": ["iPhone", "iPad"],

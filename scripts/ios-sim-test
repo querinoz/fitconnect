@@ -10,6 +10,7 @@ if [[ "$(uname -s)" != "Darwin" ]]; then
 fi
 
 command -v xcodegen >/dev/null || { echo "FAIL: brew install xcodegen"; exit 1; }
+node "$ROOT/scripts/ios-require-xcode26.mjs"
 node "$ROOT/scripts/ios-device-check.mjs"
 
 cd "$ROOT/iosApp"
@@ -29,9 +30,11 @@ echo "== iOS Simulator tests =="
 set +e
 STATUS=1
 for dest in \
+  "platform=iOS Simulator,name=iPhone 17 Pro" \
   "platform=iOS Simulator,name=iPhone 16 Pro" \
   "platform=iOS Simulator,name=iPhone 16" \
-  "platform=iOS Simulator,name=iPhone 15"; do
+  "platform=iOS Simulator,name=iPhone 15 Pro" \
+  "platform=iOS Simulator,name=iPhone 14 Pro"; do
   xcodebuild \
     -scheme FitConnect \
     -destination "$dest" \

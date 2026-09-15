@@ -63,6 +63,11 @@ def main() -> int:
         or os.environ.get("CI_BUILD_NUMBER")
         or "1"
     )
+    marketing = (
+        os.environ.get("FITCONNECT_MARKETING_VERSION")
+        or os.environ.get("MARKETING_VERSION")
+        or "0.1.0"
+    )
     key_out = pathlib.Path(
         os.environ.get(
             "APP_STORE_CONNECT_API_KEY_PATH",
@@ -122,9 +127,15 @@ def main() -> int:
         yml,
         count=1,
     )
-    if n:
+    yml2, n_m = re.subn(
+        r'MARKETING_VERSION:\s*"[^"]+"',
+        f'MARKETING_VERSION: "{marketing}"',
+        yml2,
+        count=1,
+    )
+    if n or n_m:
         yml_path.write_text(yml2, encoding="utf-8", newline="\n")
-        log(f"stamped CURRENT_PROJECT_VERSION {build}")
+        log(f"stamped CURRENT_PROJECT_VERSION {build} MARKETING_VERSION {marketing}")
 
     github_output = os.environ.get("GITHUB_OUTPUT")
     if github_output:

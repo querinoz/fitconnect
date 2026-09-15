@@ -9,6 +9,11 @@ on:
       - ".github/workflows/ios-testflight.yml"
       - "scripts/ios-inject-ci-secrets.py"
       - "scripts/ios-testflight-archive.sh"
+      - "scripts/ios-require-xcode26.mjs"
+      - "scripts/ios-require-xcode26.sh"
+      - "scripts/asc-testflight.mjs"
+      - "scripts/set-ios-testflight-url.mjs"
+      - "scripts/lib/testflight-join-url.mjs"
       - "scripts/check-ios-testflight.mjs"
 
 permissions:
@@ -31,6 +36,7 @@ jobs:
         with:
           node-version: 22
       - run: node scripts/check-ios-testflight.mjs
+      - run: node --test scripts/ios-require-xcode26.test.mjs scripts/asc-testflight.test.mjs scripts/set-ios-testflight-url.test.mjs
       - id: gate
         env:
           HAS_TEAM: ${{ secrets.APPLE_TEAM_ID != '' }}
@@ -60,8 +66,11 @@ jobs:
     name: Archive + App Store Connect upload
     needs: secrets-gate
     if: needs.secrets-gate.outputs.ready == 'true'
-    runs-on: macos-15
-    timeout-minutes: 90
+    runs-on: macos-26
+    timeout-minutes: 150
+    outputs:
+      public_link: ${{ steps.distribute.outputs.public_link }}
+      processing_state: ${{ steps.distribute.outputs.processing_state }}
     env:
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
@@ -69,13 +78,47 @@ jobs:
       APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
       IOS_GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST }}
       FITCONNECT_REQUIRE_UPLOAD_SECRETS: "1"
+      FITCONNECT_MARKETING_VERSION: "0.1.0"
       CURRENT_PROJECT_VERSION: ${{ github.run_number }}
     steps:
       - uses: actions/checkout@v5
       - uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: latest-stable
+          xcode-version: "26"
+      - name: Fail closed unless Xcode 26 + iOS 26 SDK
+        run: node scripts/ios-require-xcode26.mjs
       - name: Install XcodeGen
         run: brew install xcodegen
-      - name: Archive and upload
-        run: chmod +x scripts/ios-testflight-archive.sh iosApp/ci_scripts/*.sh && ./scripts/ios-testflight-archive.sh
+      - name: Ensure App Store Connect app record
+        run: node scripts/asc-testflight.mjs ensure
+        continue-on-error: true
+      - id: distribute
+        name: Archive, upload, poll TestFlight
+        run: chmod +x scripts/ios-testflight-archive.sh scripts/ios-require-xcode26.sh scripts/ios-sim-test iosApp/ci_scripts/*.sh && ./scripts/ios-testflight-archive.sh
+
+  vercel-ios-url:
+    name: Set Vercel IOS_TESTFLIGHT_URL
+    needs: testflight-upload
+    if: needs.testflight-upload.outputs.public_link != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Configure Production IOS_TESTFLIGHT_URL
+        run: |
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "VERCEL_TOKEN or VERCEL_PROJECT_ID absent — not failing the TestFlight upload."
+            echo "HUMAN: Vercel → Project → Settings → Environment Variables"
+            echo "Key: IOS_TESTFLIGHT_URL  Environment: Production"
+            echo "Value: the PUBLIC_LINK from the previous job (https://testflight.apple.com/join/...)"
+            echo "Then Redeploy production."
+            exit 0
+          fi
+          node scripts/set-ios-testflight-url.mjs "${{ needs.testflight-upload.outputs.public_link }}"

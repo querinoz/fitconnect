@@ -118,7 +118,7 @@ if (!darwin) {
   console.log("\nNEXT (no Mac required):");
   console.log("  Follow iosApp/TESTFLIGHT.md click-by-click");
   console.log("  Add the five GitHub Actions secrets");
-  console.log("  GitHub → Actions → iOS TestFlight → Run workflow");
+  console.log("  GitHub → Actions → iOS TestFlight → Run workflow (macos-26 / Xcode 26)");
   console.log("  iPhone 14 Pro → TestFlight → Install FitConnect");
 }
 
