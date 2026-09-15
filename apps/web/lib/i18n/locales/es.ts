@@ -509,7 +509,7 @@ export const es = {
       },
       {
         title: "Biblioteca de programas",
-        body: "84 programas de marca de coaches destacados. Probados por más de 12.000 atletas."
+        body: "Programas de marca de coaches destacados. Los conteos de completado se publican cuando haya datos de producción."
       },
       {
         title: "Llamada intro gratuita de 15 min",
@@ -596,7 +596,7 @@ export const es = {
       },
       {
         q: "¿En qué se diferencia FitConnect de Future o Caliber?",
-        a: "Future y Caliber te emparejan con un coach generalista interno. FitConnect es un marketplace de 12.000 especialistas verificados en 10 deportes — yoga, surf, BJJ, escalada — que plataformas como Future simplemente no cubren. Obtienes la responsabilidad humana que ofrecen, más expertise deportiva real."
+        a: "Future y Caliber te emparejan con un coach generalista interno. FitConnect es un marketplace de especialistas verificados en 10 deportes — yoga, surf, BJJ, escalada — que plataformas como Future simplemente no cubren. Obtienes la responsabilidad humana que ofrecen, más expertise deportiva real."
       },
       {
         q: "¿Puede mi coach ver mis datos de Apple Watch / Garmin / Whoop?",
