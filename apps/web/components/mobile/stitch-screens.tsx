@@ -294,8 +294,14 @@ export function StitchSessionsScreen({
               <p className="text-sm text-ink-400">{s.emptyBody}</p>
               <div className="flex flex-col gap-2">
                 <Link
-                  href="/settings/wearables"
+                  href="/train"
                   className="flex h-11 w-full items-center justify-center rounded-2xl bg-grad-pulse text-sm font-semibold text-ink-950"
+                >
+                  {s.startTrain}
+                </Link>
+                <Link
+                  href="/settings/wearables"
+                  className="flex h-11 w-full items-center justify-center rounded-2xl border border-brand-500/30 text-sm font-semibold text-brand-200"
                 >
                   {s.connectDevice}
                 </Link>

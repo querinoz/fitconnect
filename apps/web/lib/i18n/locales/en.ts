@@ -407,7 +407,8 @@ export const en: Dict = {
       startLive: "Start live session",
       emptyTitle: "No workout queued",
       emptyBody:
-        "Guided TRAIN runs on the Android app. Connect a device or book a coach — live heart rate is never invented.",
+        "No coach session is queued. Open TRAIN for guided work, connect a device, or book a coach — live heart rate is never invented.",
+      startTrain: "Open TRAIN",
       connectDevice: "Connect a device",
       findCoach: "Find a coach",
       waitingTelemetry: "Waiting for device"

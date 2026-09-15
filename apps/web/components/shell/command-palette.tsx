@@ -73,6 +73,14 @@ export function CommandPalette({ role, open, onOpenChange }: CommandPaletteProps
         keywords: ["load", "ctl", "history", "csv", "g a"]
       },
       {
+        id: "train",
+        label: "TRAIN",
+        section: "navigation",
+        icon: PlayCircle,
+        href: role === "coach" ? "/coach/sessions" : "/train",
+        keywords: ["workout", "train", "gym", "session", "g t"]
+      },
+      {
         id: "sessions",
         label: cp.goSessions,
         section: "navigation",
@@ -361,6 +369,11 @@ export function useCommandPaletteShortcut(
           window.location.href = window.location.pathname.startsWith("/coach")
             ? "/coach/sessions"
             : "/sessions";
+        } else if (e.key === "t") {
+          e.preventDefault();
+          window.location.href = window.location.pathname.startsWith("/coach")
+            ? "/coach/sessions"
+            : "/train";
         }
       }
     };

@@ -34,12 +34,12 @@ describe("<EliteMobileDock />", () => {
       <EliteMobileDock
         items={items}
         active="/dashboard"
-        trainHref="/sessions"
+        trainHref="/train"
         trainLabel="Train"
       />
     );
     expect(screen.getByLabelText("Today")).toHaveAttribute("aria-current", "page");
-    expect(screen.getByLabelText("Train")).toHaveAttribute("href", "/sessions");
+    expect(screen.getByLabelText("Train")).toHaveAttribute("href", "/train");
     expect(screen.getAllByRole("link")).toHaveLength(5);
   });
 

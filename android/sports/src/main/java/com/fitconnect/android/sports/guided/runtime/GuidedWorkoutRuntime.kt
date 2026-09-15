@@ -8,6 +8,7 @@ import com.fitconnect.android.foundation.offline.SyncQueue
 import com.fitconnect.android.foundation.offline.SyncWork
 import com.fitconnect.android.foundation.session.SessionStore
 import com.fitconnect.android.sports.guided.catalog.DefaultGuidedPlan
+import com.fitconnect.android.sports.guided.catalog.GuidedPlanCatalog
 import com.fitconnect.android.sports.guided.completion.ActivityCompletionFactory
 import com.fitconnect.android.sports.guided.domain.FakeWorkoutClock
 import com.fitconnect.android.sports.guided.domain.GuidedSessionSnapshot
@@ -74,6 +75,41 @@ class GuidedWorkoutRuntime(
             ),
         )
     }
+
+    suspend fun selectPlan(planId: String, userIdOverride: String? = null): AppResult<GuidedSessionSnapshot> =
+        mutex.withLock {
+            val current = _snapshot.value
+            if (current.phase != WorkoutPhase.IDLE &&
+                current.phase != WorkoutPhase.PREP &&
+                current.phase != WorkoutPhase.FAILED &&
+                current.phase != WorkoutPhase.COMPLETED &&
+                current.phase != WorkoutPhase.SYNCED
+            ) {
+                return AppResult.Err(
+                    com.fitconnect.android.foundation.common.AppError.Unexpected(
+                        "Finish or pause the live session before changing plans.",
+                    ),
+                )
+            }
+            val userId = userIdOverride
+                ?: current.userId.ifBlank { sessionStore?.snapshot()?.userId }
+            if (userId.isNullOrBlank()) {
+                return AppResult.Err(
+                    com.fitconnect.android.foundation.common.AppError.Auth(
+                        com.fitconnect.android.foundation.common.AppError.AuthKind.UNAUTHENTICATED,
+                    ),
+                )
+            }
+            val sessionId = idFactory()
+            persistUnlocked(
+                WorkoutSessionMachine.reduce(
+                    GuidedSessionSnapshot.idle(),
+                    WorkoutCommand.LoadPlan(userId, GuidedPlanCatalog.plan(planId), sessionId),
+                    clock,
+                    eventId = idFactory,
+                ),
+            )
+        }
 
     suspend fun start(): AppResult<GuidedSessionSnapshot> = dispatch(WorkoutCommand.Start)
 

@@ -272,6 +272,16 @@ class GuidedWorkoutWave2Test {
         assertEquals(sessionId, env.runtime.snapshot.value.sessionId)
     }
 
+    @Test
+    fun selectPlanLoadsCatalogSessionWhileInPrep() = runBlocking {
+        val runtime = runtime()
+        runtime.prepare("uid-1")
+        assertEquals(DefaultGuidedPlan.WORKOUT_ID, runtime.snapshot.value.plan.workoutId)
+        runtime.selectPlan("plan_hiit_v1", "uid-1")
+        assertEquals("plan_hiit_v1", runtime.snapshot.value.plan.workoutId)
+        assertEquals(WorkoutPhase.PREP, runtime.snapshot.value.phase)
+    }
+
     private fun runtime(): GuidedWorkoutRuntime =
         GuidedWorkoutRuntime(store = InMemoryGuidedWorkoutStore(), logger = logger, clock = clock)
 

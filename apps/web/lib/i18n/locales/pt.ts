@@ -405,7 +405,8 @@ export const pt = {
       startLive: "Iniciar sessão ao vivo",
       emptyTitle: "Nenhum treino na fila",
       emptyBody:
-        "O TRAIN guiado corre na app Android. Liga um dispositivo ou reserva um coach — a frequência cardíaca nunca é inventada.",
+        "Nenhuma sessão de coach na fila. Abre TRAIN para treino guiado, liga um dispositivo ou reserva um coach — a frequência cardíaca nunca é inventada.",
+      startTrain: "Abrir TRAIN",
       connectDevice: "Ligar um dispositivo",
       findCoach: "Encontrar um coach",
       waitingTelemetry: "À espera do dispositivo"

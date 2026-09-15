@@ -408,6 +408,7 @@ export type Dict = {
       startLive: string;
       emptyTitle: string;
       emptyBody: string;
+      startTrain: string;
       connectDevice: string;
       findCoach: string;
       waitingTelemetry: string;

@@ -20,6 +20,7 @@ vi.mock("@/lib/i18n-provider", () => ({
         startLive: "Start live session",
         emptyTitle: "No workout queued",
         emptyBody: "Guided TRAIN runs on the Android app.",
+        startTrain: "Open TRAIN",
         connectDevice: "Connect a device",
         findCoach: "Find a coach",
         waitingTelemetry: "Waiting for device"
@@ -41,6 +42,7 @@ describe("StitchSessionsScreen", () => {
     expect(screen.getByText("No workout queued")).toBeInTheDocument();
     expect(screen.queryByText("Lower body strength")).not.toBeInTheDocument();
     expect(screen.queryByText("142")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /open train/i })).toHaveAttribute("href", "/train");
     expect(screen.getByRole("link", { name: /connect a device/i })).toHaveAttribute(
       "href",
       "/settings/wearables"

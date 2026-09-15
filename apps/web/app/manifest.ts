@@ -27,10 +27,16 @@ export default function manifest(): MetadataRoute.Manifest {
         description: "Find verified coaches near you"
       },
       {
+        name: "TRAIN",
+        short_name: "TRAIN",
+        url: "/train",
+        description: "Guided workout discovery and live session"
+      },
+      {
         name: "Sessions",
         short_name: "Sessions",
         url: "/sessions",
-        description: "Upcoming and live sessions"
+        description: "Upcoming and live coach sessions"
       }
     ],
     icons: [

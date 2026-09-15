@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Bolt
-import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -72,6 +71,7 @@ import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.designui.theme.toColor
 import com.fitconnect.android.foundation.a11y.Accessibility
 import com.fitconnect.android.foundation.common.AppResult
+import com.fitconnect.android.sports.guided.catalog.GuidedPlanCatalog
 import com.fitconnect.android.sports.guided.domain.GuidedSessionSnapshot
 import com.fitconnect.android.sports.guided.domain.SetLogInput
 import com.fitconnect.android.sports.guided.domain.SetSide
@@ -176,7 +176,7 @@ fun StrengthWorkoutScreen() {
         }
         when (snap.phase) {
             WorkoutPhase.IDLE, WorkoutPhase.PREP, WorkoutPhase.RECOVERING -> {
-                item { PrepPhase(snap, onStart = { scope.launch { runtime.start() } }) }
+                item { PrepPhase(snap, onStart = { scope.launch { runtime.start() } }, onSelectPlan = { id -> scope.launch { runtime.selectPlan(id) } }) }
             }
             WorkoutPhase.ACTIVE -> {
                 item {
@@ -194,7 +194,7 @@ fun StrengthWorkoutScreen() {
                     RestPhase(
                         snap = snap,
                         onSkip = { scope.launch { runtime.skipRest() } },
-                        onExtend = { scope.launch { runtime.extendRest(15) } },
+                        onExtend = { extra -> scope.launch { runtime.extendRest(extra) } },
                         onPause = { scope.launch { runtime.pause() } },
                     )
                 }
@@ -337,7 +337,7 @@ private fun workoutPhaseSubtitle(snap: GuidedSessionSnapshot): String = when (sn
     WorkoutPhase.IDLE,
     WorkoutPhase.PREP,
     WorkoutPhase.RECOVERING,
-    -> "Prep the next block before logging sets."
+    -> GuidedPlanCatalog.card(snap.plan.workoutId.ifBlank { GuidedPlanCatalog.featuredId }).purpose
     WorkoutPhase.ACTIVE -> "Live set logging preserves progression, timer, and sync state."
     WorkoutPhase.REST -> "Rest timer is active. Extend or skip without leaving the session."
     WorkoutPhase.PAUSED -> "Session paused locally. Resume when ready to continue."
@@ -350,10 +350,14 @@ private fun workoutPhaseSubtitle(snap: GuidedSessionSnapshot): String = when (sn
 }
 
 @Composable
-private fun PrepPhase(snap: GuidedSessionSnapshot, onStart: () -> Unit) {
+private fun PrepPhase(
+    snap: GuidedSessionSnapshot,
+    onStart: () -> Unit,
+    onSelectPlan: (String) -> Unit,
+) {
     val volt = EliteSurfaceColors.VOLTLINE.toColor()
     val minutes = snap.plan.estimatedDurationMin.coerceAtLeast(1)
-    val calories = (minutes * 11).coerceAtLeast(200)
+    val card = GuidedPlanCatalog.card(snap.plan.workoutId.ifBlank { GuidedPlanCatalog.featuredId })
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -369,7 +373,7 @@ private fun PrepPhase(snap: GuidedSessionSnapshot, onStart: () -> Unit) {
             color = volt,
         )
         Text(
-            text = "YOUR PERFORMANCE. CONNECTED.",
+            text = "YOUR SESSION IS ABOUT TO BEGIN.",
             style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 2.sp),
             color = Color.White.copy(alpha = 0.92f),
         )
@@ -434,7 +438,7 @@ private fun PrepPhase(snap: GuidedSessionSnapshot, onStart: () -> Unit) {
                         modifier = Modifier.size(14.dp),
                     )
                     Text(
-                        "PERFORMANCE",
+                        "BRIEFING",
                         style = MaterialTheme.typography.labelSmall,
                         color = volt,
                     )
@@ -447,7 +451,7 @@ private fun PrepPhase(snap: GuidedSessionSnapshot, onStart: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(EliteSpace.Xs),
             ) {
                 Text(
-                    text = "WHAT\nWHY\nWHEN",
+                    text = snap.plan.name.ifBlank { card.plan.name },
                     style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Black),
                     color = Color.White,
                 )
@@ -459,7 +463,7 @@ private fun PrepPhase(snap: GuidedSessionSnapshot, onStart: () -> Unit) {
                         .background(volt),
                 )
                 Text(
-                    text = "Push harder. Move smarter.",
+                    text = card.purpose,
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color.White.copy(alpha = 0.9f),
                 )
@@ -475,17 +479,22 @@ private fun PrepPhase(snap: GuidedSessionSnapshot, onStart: () -> Unit) {
                     )
                     PrepMetric(
                         icon = Icons.Outlined.BarChart,
-                        value = "HIGH",
-                        label = "INTENSITY",
+                        value = card.plannedIntensity.uppercase(),
+                        label = "PLANNED",
                     )
                     PrepMetric(
-                        icon = Icons.Outlined.LocalFireDepartment,
-                        value = "$calories",
-                        label = "CALORIES",
+                        icon = Icons.Outlined.Bolt,
+                        value = "${snap.plan.exercises.size}",
+                        label = "MOVES",
                     )
                 }
             }
         }
+        Text(
+            text = "Heart rate, HRV and calories stay blank unless a connected source provides them.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         EliteButton(
             label = "START SESSION",
             onClick = onStart,
@@ -496,6 +505,29 @@ private fun PrepPhase(snap: GuidedSessionSnapshot, onStart: () -> Unit) {
                 .testTag("workout_start"),
             contentDescription = "Start guided workout",
         )
+        EliteSysLabel(text = "CATALOG")
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("workout_catalog"),
+            verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm),
+        ) {
+            GuidedPlanCatalog.cards().forEach { item ->
+                EliteButton(
+                    label = "${item.plan.name} · ${item.plan.estimatedDurationMin} min",
+                    onClick = { onSelectPlan(item.plan.workoutId) },
+                    variant = if (item.plan.workoutId == snap.plan.workoutId) {
+                        EliteButtonVariant.Primary
+                    } else {
+                        EliteButtonVariant.Secondary
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("workout_plan_${item.plan.workoutId}"),
+                    contentDescription = "Select ${item.plan.name}",
+                )
+            }
+        }
     }
 }
 
@@ -545,6 +577,11 @@ private fun ActivePhase(
     EosPremiumCard(modifier = Modifier.testTag("workout_active")) {
         Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Md)) {
             EliteSysLabel(text = "ACTIVE · SET ${slot.setNumber}")
+            Text(
+                text = "${snap.sets.size} logged · ${snap.plan.name}",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Text(text = exercise.name, style = EliteMetricHeroTextStyle)
             Text(
                 text = when (slot.side) {
@@ -671,7 +708,7 @@ private fun ActivePhase(
 private fun RestPhase(
     snap: GuidedSessionSnapshot,
     onSkip: () -> Unit,
-    onExtend: () -> Unit,
+    onExtend: (Int) -> Unit,
     onPause: () -> Unit,
 ) {
     val remaining = snap.rest?.let {
@@ -693,6 +730,11 @@ private fun RestPhase(
             snap.currentSlot?.let {
                 Text(text = "Next: ${it.exercise.name} · set ${it.setNumber}")
             }
+            Text(
+                text = "Optional: inhale 4 · hold 4 · exhale 6. Not a measured recovery signal.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             EliteButton(
                 label = "Skip rest",
                 onClick = onSkip,
@@ -703,9 +745,15 @@ private fun RestPhase(
             )
             EliteButton(
                 label = "Extend +15s",
-                onClick = onExtend,
+                onClick = { onExtend(15) },
                 variant = EliteButtonVariant.Secondary,
                 modifier = Modifier.fillMaxWidth().testTag("workout_extend_rest"),
+            )
+            EliteButton(
+                label = "Extend +30s",
+                onClick = { onExtend(30) },
+                variant = EliteButtonVariant.Secondary,
+                modifier = Modifier.fillMaxWidth().testTag("workout_extend_rest_30"),
             )
             EliteButton(
                 label = "Pause",

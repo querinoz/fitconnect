@@ -93,7 +93,7 @@ export function EliteAppShell({
         <EliteMobileDock
           items={items}
           active={pathname}
-          trainHref={role === "athlete" ? "/sessions" : undefined}
+          trainHref={role === "athlete" ? "/train" : undefined}
           trainLabel={mobileApp.nav.train}
         />
       </div>

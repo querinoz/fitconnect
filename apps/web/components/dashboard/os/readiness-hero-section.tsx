@@ -183,7 +183,7 @@ export function ReadinessHeroSection({
             )}
             <div className="mt-4 flex flex-col gap-2 sm:flex-row">
               <VoltButton asChild className="flex-1 rounded-xl text-sm">
-                <Link href="/sessions">
+                <Link href="/train">
                   <PlayCircle className="mr-2 h-4 w-4" />
                   {dashboard.todayPlan.startSession}
                 </Link>

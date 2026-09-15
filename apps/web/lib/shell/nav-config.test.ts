@@ -18,6 +18,7 @@ describe("athlete shell IA", () => {
       "Profile"
     ]);
     expect(items.some((item) => item.href === "/sessions")).toBe(false);
+    expect(items.some((item) => item.href === "/train")).toBe(false);
     expect(items.length).toBe(4);
   });
 });

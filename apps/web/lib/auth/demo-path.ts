@@ -11,6 +11,7 @@ export const ATHLETE_APP_PREFIXES = [
   "/profile",
   "/settings",
   "/map",
+  "/train",
 ] as const;
 
 export function isAthleteAppPath(pathname: string): boolean {

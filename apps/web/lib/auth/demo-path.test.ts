@@ -17,6 +17,7 @@ describe("demo path role", () => {
     expect(demoRoleForPath("/insights", null)).toBe("athlete");
     expect(demoRoleForPath("/feed", null)).toBe("athlete");
     expect(demoRoleForPath("/map", "1")).toBe("athlete");
+    expect(demoRoleForPath("/train", null)).toBe("athlete");
   });
 
   it("lets explicit demo=athlete win on a coach URL", () => {
