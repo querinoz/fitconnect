@@ -37,7 +37,7 @@ const FAQS_PT: { q: string; a: string }[] = [
   },
   {
     q: "Há uma opção gratuita?",
-    a: "Sim — o plano gratuito permite navegar, guardar 10 favoritos e ler mais de 27 000 avaliações verificadas. Só pagas quando reservas uma sessão ou entras num programa."
+    a: "Sim — o plano gratuito permite navegar, guardar 10 favoritos e ler avaliações verificadas publicadas no marketplace. Só pagas quando reservas uma sessão ou entras num programa."
   }
 ];
 
