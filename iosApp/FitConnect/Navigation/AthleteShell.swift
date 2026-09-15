@@ -105,5 +105,41 @@ struct AthleteShell: View {
             }
         }
         .animation(MotionTokens.quick(reduceMotion: reduceMotion), value: selection)
+        .onChange(of: session.pendingDeepLink) { _, value in
+            guard let value else { return }
+            applyDeepLink(value)
+            session.pendingDeepLink = nil
+        }
+        .onAppear {
+            if let pending = session.pendingDeepLink {
+                applyDeepLink(pending)
+                session.pendingDeepLink = nil
+            }
+        }
+    }
+
+    private func applyDeepLink(_ value: String) {
+        switch value {
+        case "recovery":
+            selection = .dashboard
+            path.append(.recovery)
+        case "martial-arts":
+            selection = .train
+            path.append(.martialArts)
+        case "connections":
+            selection = .profile
+            path.append(.connections)
+        case "ascend":
+            selection = .ascend
+        case "feed":
+            selection = .feed
+        case "booking":
+            selection = .dashboard
+            path.append(.bookings)
+        case "coach":
+            session.switchMode(to: .coach)
+        default:
+            selection = .train
+        }
     }
 }

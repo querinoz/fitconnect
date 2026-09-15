@@ -3,6 +3,7 @@ import SwiftUI
 struct AthleteTrainHomeView: View {
     var onNavigate: (AthleteRoute) -> Void
     @State private var snapshot = TrainSessionSnapshot.idle
+    @State private var sessionId = ""
     @State private var ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     @StateObject private var workout = LiveWorkoutController()
     @StateObject private var motion = CoreMotionSession()
@@ -65,14 +66,22 @@ struct AthleteTrainHomeView: View {
             .padding(20)
         }
         .onReceive(ticker) { _ in
+            applyGlanceCommand()
             let live: Set<TrainPhase> = [.active, .warmup, .rest, .warning]
             if live.contains(snapshot.phase) {
                 snapshot = TrainReducer.reduce(snapshot, .tick)
             }
+            publishGlance()
         }
         .onChange(of: snapshot.phase) { _, phase in
+            publishGlance()
             if phase == .completing {
                 persistLocalThenFailClosed()
+            }
+        }
+        .onAppear {
+            if snapshot.phase == .idle {
+                GlanceSharedStore.save(GlanceBridge.dailyCatalog())
             }
         }
         .accessibilityIdentifier("athlete-train")
@@ -85,9 +94,11 @@ struct AthleteTrainHomeView: View {
             EmptyView()
         case .prep:
             primary("Start") {
+                sessionId = UUID().uuidString
                 snapshot = TrainReducer.reduce(snapshot, .start)
                 workout.start(activity: snapshot.plan?.combat != nil ? .martialArts : .traditional)
                 motion.start()
+                publishGlance()
             }
             if snapshot.plan?.combat != nil {
                 Button("Open Fight Mode") {
@@ -138,7 +149,7 @@ struct AthleteTrainHomeView: View {
 
     private func persistLocalThenFailClosed() {
         let row = PersistedTrainSession(
-            sessionId: UUID().uuidString,
+            sessionId: sessionId.isEmpty ? UUID().uuidString : sessionId,
             planId: snapshot.plan?.id ?? "unknown",
             phase: snapshot.phase.rawValue,
             elapsedSec: snapshot.elapsedSec,
@@ -148,8 +159,25 @@ struct AthleteTrainHomeView: View {
         )
         TrainLocalStore.upsert(row)
         snapshot = TrainReducer.reduce(snapshot, .markSave(.localOnly))
+        TrainLiveActivityController.sync(snapshot: GlanceBridge.dailyCatalog())
         workout.end()
         motion.stop()
+    }
+
+    private func publishGlance() {
+        let id = sessionId.isEmpty ? snapshot.plan?.id ?? "" : sessionId
+        TrainLiveActivityController.sync(snapshot: GlanceBridge.fromTrain(snapshot, heartRate: workout.heartRateLabel, sessionId: id))
+    }
+
+    private func applyGlanceCommand() {
+        let command = GlanceSharedStore.takeCommand()
+        guard command != .none else { return }
+        snapshot = GlanceBridge.apply(command, to: snapshot)
+        switch command {
+        case .pause: workout.pause()
+        case .resume: workout.resume()
+        case .skipRest, .none: break
+        }
     }
 
     private func primary(_ title: String, action: @escaping () -> Void) -> some View {

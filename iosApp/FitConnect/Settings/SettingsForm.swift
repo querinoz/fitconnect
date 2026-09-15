@@ -45,7 +45,10 @@ struct SettingsForm: View {
         case let .toggle(initial):
             Toggle("", isOn: Binding(
                 get: { toggleState[row.id] ?? initial },
-                set: { toggleState[row.id] = $0 }
+                set: { next in
+                    toggleState[row.id] = next
+                    persistGlance(id: row.id, value: next)
+                }
             ))
             .labelsHidden()
             .tint(row.accent.color)
@@ -57,11 +60,32 @@ struct SettingsForm: View {
         }
     }
 
+    private static func persistGlance(id: String, value: Bool) {
+        let defaults = GlanceSharedStore.defaults()
+        switch id {
+        case "glance-recovery": defaults.set(value, forKey: "glance.showRecovery")
+        case "glance-hr": defaults.set(value, forKey: "glance.showHeartRate")
+        case "glance-lock": defaults.set(value, forKey: "glance.showLockDetails")
+        case "glance-coach": defaults.set(value, forKey: "glance.showCoachNotifications")
+        case "glance-device": defaults.set(value, forKey: "glance.showDeviceStatus")
+        default: break
+        }
+    }
+
     private static func seed(sections: [SettingsSectionModel]) -> [String: Bool] {
         sections.reduce(into: [:]) { partial, section in
             for row in section.rows {
                 if case let .toggle(value) = row.value {
-                    partial[row.id] = value
+                    switch row.id {
+                    case "glance-recovery":
+                        partial[row.id] = GlancePrivacy.showRecoveryOnWidget(GlanceSharedStore.defaults())
+                    case "glance-hr":
+                        partial[row.id] = GlancePrivacy.showHeartRateOnLiveActivity(GlanceSharedStore.defaults())
+                    case "glance-lock":
+                        partial[row.id] = GlancePrivacy.showWorkoutDetailsOnLockScreen(GlanceSharedStore.defaults())
+                    default:
+                        partial[row.id] = value
+                    }
                 }
             }
         }

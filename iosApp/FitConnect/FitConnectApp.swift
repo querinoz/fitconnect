@@ -7,6 +7,7 @@ struct FitConnectApp: App {
 
     init() {
         _ = FirebaseBootstrap.configureIfPresent()
+        FitBackgroundRefresh.register()
     }
 
     var body: some Scene {
@@ -18,6 +19,13 @@ struct FitConnectApp: App {
                     if let restored = await FirebaseAuthBridge().restore(), !session.isAuthenticated {
                         session.completeSignIn(identity: restored)
                     }
+                    FitBackgroundRefresh.schedule()
+                    if !GlanceSharedStore.load().isLive {
+                        GlanceSharedStore.save(GlanceBridge.dailyCatalog())
+                    }
+                }
+                .onOpenURL { url in
+                    session.pendingDeepLink = FitDeepLink.destination(url)
                 }
         }
     }

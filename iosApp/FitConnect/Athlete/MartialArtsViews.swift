@@ -48,6 +48,7 @@ struct MartialArtsCatalogView: View {
 struct FightModeView: View {
     let disciplineId: String
     @State private var round = CombatRoundSnapshot.idle
+    @State private var sessionId = UUID().uuidString
     @State private var muted = false
     @State private var ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     @StateObject private var workout = LiveWorkoutController()
@@ -92,6 +93,7 @@ struct FightModeView: View {
             round = next
         }
         .onReceive(ticker) { _ in
+            applyFightCommand()
             let live: Set<CombatRoundPhase> = [.countdown, .work, .warning, .rest]
             if live.contains(round.phase) {
                 let previous = round.phase
@@ -102,6 +104,7 @@ struct FightModeView: View {
                     #endif
                 }
             }
+            publishFightGlance()
         }
         .navigationTitle("Fight Mode")
     }
@@ -110,9 +113,11 @@ struct FightModeView: View {
     private var controls: some View {
         if round.phase == .idle || round.phase == .complete {
             Button("Start") {
+                sessionId = UUID().uuidString
                 round = CombatRoundReducer.reduce(round, .start)
                 workout.start(activity: .martialArts)
                 motion.start()
+                publishFightGlance()
             }
                 .buttonStyle(FightPrimary())
         }
@@ -126,6 +131,7 @@ struct FightModeView: View {
                     round = CombatRoundReducer.reduce(round, .finish)
                     workout.end()
                     motion.stop()
+                    publishFightGlance()
                 }
             }
         }
@@ -139,8 +145,28 @@ struct FightModeView: View {
             Button("Resume") {
                 round = CombatRoundReducer.reduce(round, .resume)
                 workout.resume()
+                publishFightGlance()
             }
                 .buttonStyle(FightPrimary())
+        }
+    }
+
+    private func publishFightGlance() {
+        TrainLiveActivityController.sync(snapshot: GlanceBridge.fromFight(round, heartRate: workout.heartRateLabel, sessionId: sessionId))
+    }
+
+    private func applyFightCommand() {
+        switch GlanceSharedStore.takeCommand() {
+        case .pause:
+            round = CombatRoundReducer.reduce(round, .pause)
+            workout.pause()
+        case .resume:
+            round = CombatRoundReducer.reduce(round, .resume)
+            workout.resume()
+        case .skipRest:
+            round = CombatRoundReducer.reduce(round, .skipRest)
+        case .none:
+            break
         }
     }
 

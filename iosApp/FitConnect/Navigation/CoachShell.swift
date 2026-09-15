@@ -75,5 +75,12 @@ struct CoachShell: View {
                 }
             }
         }
+        .onChange(of: session.pendingDeepLink) { _, value in
+            guard let value else { return }
+            if value == "booking" || value == "coach" {
+                path.append(.bookings)
+            }
+            session.pendingDeepLink = nil
+        }
     }
 }

@@ -68,6 +68,20 @@ struct WatchFightView: View {
                     #endif
                 }
             }
+            publishWatchGlance()
         }
+    }
+
+    private func publishWatchGlance() {
+        var snap = GlanceSnapshot.idle
+        snap.kind = "fight"
+        snap.phase = round.phase.rawValue.uppercased()
+        snap.title = "FIGHT"
+        snap.remainingSec = round.remainingSec
+        snap.roundLabel = "R\(max(round.currentRound, 1))/\(round.prescription.roundCount)"
+        snap.nextAction = WatchFightPresentation.nextAction(round.phase)
+        snap.heartRateLabel = workout.heartRateLabel
+        snap.deepLink = FitDeepLink.martialArts
+        GlanceSharedStore.save(snap)
     }
 }

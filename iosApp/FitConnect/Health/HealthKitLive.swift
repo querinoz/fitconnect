@@ -41,11 +41,6 @@ enum HealthKitObserverPlan {
         status == .sharingAuthorized
     }
 }
-    case unavailable
-    case denied
-    case limitedHistory
-    case notDetermined
-}
 
 struct HealthKitLiveAdapter: HealthKitStoreContract {
     func capability() -> HealthKitCapability {
@@ -135,6 +130,7 @@ struct HealthKitLiveAdapter: HealthKitStoreContract {
         if let sleep = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) { read.insert(sleep) }
         do {
             try await store.requestAuthorization(toShare: [], read: read)
+            HealthKitBackgroundDelivery.enableAfterAuthorization()
             return .sharingAuthorized
         } catch {
             return .sharingDenied

@@ -277,6 +277,7 @@ class FitConnectApplication : Application() {
         container.connectivity.start()
         container.lifecycle.start()
         startupTracer.mark("shell_ready")
+        com.fitconnect.android.sync.BackgroundWorkScheduler.register(this)
         runCatching {
             Wearable.getCapabilityClient(this).addLocalCapability(WearPaths.CAPABILITY)
         }

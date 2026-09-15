@@ -36,13 +36,18 @@ targets:
         INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: FitConnect uses Bluetooth to connect instrumented gloves, bags, pads and bands when you pair them. No hardware is invented.
         INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription: FitConnect connects to combat and training accessories you select.
         INFOPLIST_KEY_NSMotionUsageDescription: FitConnect may read device motion for orientation and acceleration. Acceleration is never shown as measured punch force.
-        INFOPLIST_KEY_UIBackgroundModes: workout
+        INFOPLIST_KEY_UIBackgroundModes: [workout, processing]
+        INFOPLIST_KEY_NSSupportsLiveActivities: YES
+        INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates: YES
+        INFOPLIST_KEY_BGTaskSchedulerPermittedIdentifiers: [com.fitconnect.ios.refresh]
         SUPPORTS_MACCATALYST: NO
         CODE_SIGNING_ALLOWED: YES
     dependencies:
       - target: FitConnectWatch
         embed: true
         codeSign: false
+      - target: FitConnectWidgets
+        embed: true
       - package: firebase-ios-sdk
         product: FirebaseCore
       - package: firebase-ios-sdk
@@ -57,6 +62,8 @@ targets:
       - path: FitConnect/Health/SensorHonesty.swift
       - path: FitConnect/Health/LiveWorkoutSession.swift
       - path: FitConnect/Health/CoreMotionSession.swift
+      - path: FitConnect/Glance/BackgroundWorkload.swift
+      - path: FitConnect/Glance/GlanceSharedStore.swift
     entitlements:
       path: FitConnectWatch/FitConnectWatch.entitlements
     settings:
@@ -70,6 +77,28 @@ targets:
         INFOPLIST_KEY_NSHealthUpdateUsageDescription: The watch writes the workout session you start so it can continue in the background.
         INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp: NO
         TARGETED_DEVICE_FAMILY: 4
+        INFOPLIST_KEY_UIBackgroundModes: workout
+  FitConnectWidgets:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: FitConnectWidgets
+      - path: FitConnect/Glance/BackgroundWorkload.swift
+      - path: FitConnect/Glance/GlanceSharedStore.swift
+      - path: FitConnect/Glance/TrainLiveAttributes.swift
+      - path: FitConnect/Glance/TrainLiveIntents.swift
+    entitlements:
+      path: FitConnectWidgets/FitConnectWidgets.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.fitconnect.ios.widgets
+        PRODUCT_NAME: FitConnectWidgets
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: FitConnectWidgets/Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: FitConnect
+        TARGETED_DEVICE_FAMILY: 1
+        SKIP_INSTALL: YES
   FitConnectTests:
     type: bundle.unit-test
     platform: iOS

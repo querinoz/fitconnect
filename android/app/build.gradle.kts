@@ -231,6 +231,7 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.androidx.work.runtime.ktx)
 
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)

@@ -6,4 +6,6 @@
     <color name="eos_voltline">#C8FF00</color>
     <color name="eos_connect">#00DDB4</color>
     <color name="eos_elevated">#151B2D</color>
+    <color name="eos_text_primary">#F4F7FB</color>
+    <color name="eos_text_secondary">#A8B0C2</color>
 </resources>

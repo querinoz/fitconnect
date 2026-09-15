@@ -79,6 +79,10 @@ protocol CombatBleContract {
 }
 
 struct CoreBluetoothCombatAdapter: CombatBleContract {
+    /// bluetooth-central is not a global background mode. Connect only while
+    /// an accessory session is user-initiated; do not keep BLE streams alive.
+    static let backgroundModeRequested = false
+
     func scan() -> [BleDeviceRecord] {
         []
     }

@@ -81,6 +81,7 @@ final class AppSessionStore {
     var role: AppRole?
     var identity: IdentityProfile?
     var lastAuthError: String?
+    var pendingDeepLink: String?
 
     var activeMode: AppRole? { role }
 

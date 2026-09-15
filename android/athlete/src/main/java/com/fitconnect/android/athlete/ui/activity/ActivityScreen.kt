@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
@@ -40,6 +41,8 @@ import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
 import com.fitconnect.android.capture.GpsFeedStatus
 import com.fitconnect.android.capture.LiveActivityEngine
 import com.fitconnect.android.capture.LiveActivityPhase
+import com.fitconnect.android.capture.glance.GlancePrefs
+import com.fitconnect.android.capture.service.TrainSessionService
 import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.design.EliteSurfaceInstrument
 import com.fitconnect.android.designui.charts.EliteChartPalette
@@ -72,6 +75,8 @@ import com.fitconnect.ascend.copy.AscendCopy
 import com.fitconnect.ascend.domain.ProcessResult
 import com.fitconnect.shared.telemetry.MetricAvailability
 import com.fitconnect.shared.telemetry.TelemetryEnvelope
+import com.fitconnect.shared.source.DataSourceKind
+import com.fitconnect.shared.glance.GlanceSnapshot
 import com.fitconnect.shared.workout.WorkoutSport
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
@@ -93,6 +98,7 @@ fun ActivityScreen(
     var completeDismissed by remember { mutableStateOf(false) }
     var processedSession by remember { mutableStateOf<String?>(null) }
     val locale by container.platform.localeManager.observe().collectAsState(initial = AppLocale.EN)
+    val context = LocalContext.current
 
     val outdoor = container.outdoorCapture
     val outdoorState by outdoor.state.collectAsState()
@@ -107,6 +113,41 @@ fun ActivityScreen(
     }.collectAsState(initial = emptyList())
     // Map consumes Room (canonical). Engine route is only a live hint before Room emits.
     val mapPoints = if (roomRoute.isNotEmpty()) roomRoute else snap.route
+    LaunchedEffect(snap.phase, snap.elapsedMs, snap.sessionId, snap.hrBpm, sport) {
+        val live = snap.phase == LiveActivityPhase.RUNNING ||
+            snap.phase == LiveActivityPhase.PAUSED ||
+            snap.phase == LiveActivityPhase.COUNTDOWN ||
+            snap.phase == LiveActivityPhase.RESUMING ||
+            snap.phase == LiveActivityPhase.READY
+        val hrLabel = if (snap.sourceKind == DataSourceKind.REAL_SENSOR && snap.hrBpm != null) {
+            "${snap.hrBpm} bpm"
+        } else {
+            "DATA UNAVAILABLE"
+        }
+        GlancePrefs.save(
+            context,
+            GlanceSnapshot(
+                sessionId = snap.sessionId,
+                kind = "train",
+                phase = snap.phase.name,
+                title = sport.wireKey,
+                remainingSec = (snap.elapsedMs / 1000L).toInt(),
+                heartRateLabel = hrLabel,
+                sport = sport.wireKey,
+                deepLink = "fitconnect://app/train",
+            ),
+        )
+        if (!sport.outdoorGps && live) {
+            TrainSessionService.start(
+                context,
+                snap.phase.name,
+                LiveActivityEngine.formatElapsed(snap.elapsedMs),
+                sport.wireKey,
+            )
+        } else if (!sport.outdoorGps) {
+            TrainSessionService.stop(context)
+        }
+    }
     val qualityLabel = GpsQualityResolver.label(
         GpsQualityResolver.resolve(
             phase = outdoorState.phase,

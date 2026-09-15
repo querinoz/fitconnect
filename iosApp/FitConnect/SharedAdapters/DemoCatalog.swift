@@ -208,6 +208,11 @@ enum DemoCatalog {
             title: "Privacy",
             rows: [
                 SettingsRowModel(id: "health-share", title: "Share health socially", subtitle: "HR, HRV, sleep and impact stay private unless you enable this.", systemImage: "lock.heart", accent: .alert, value: .toggle(false)),
+                SettingsRowModel(id: "glance-recovery", title: "Show Recovery on Widget", subtitle: "Off by default. Widgets never invent HRV or sleep.", systemImage: "heart.text.square", accent: .telemetry, value: .toggle(false)),
+                SettingsRowModel(id: "glance-hr", title: "Show Heart Rate on Live Activity", subtitle: "Lock Screen and Dynamic Island stay conservative.", systemImage: "heart", accent: .alert, value: .toggle(false)),
+                SettingsRowModel(id: "glance-lock", title: "Show Workout Details on Lock Screen", subtitle: "Phase and next action. Heart rate still follows the HR toggle.", systemImage: "lock.iphone", accent: .iris, value: .toggle(true)),
+                SettingsRowModel(id: "glance-coach", title: "Show Coach Notifications", subtitle: "Booking and message alerts only.", systemImage: "bell", accent: .connect, value: .toggle(true)),
+                SettingsRowModel(id: "glance-device", title: "Show Device Status", subtitle: "Sync issues can appear as notifications.", systemImage: "applewatch", accent: .warning, value: .toggle(true)),
                 SettingsRowModel(id: "healthkit", title: "HealthKit", subtitle: "Authorize per metric. Missing stays missing.", systemImage: "heart.text.square", accent: .telemetry, value: .detail("Review"))
             ]
         )

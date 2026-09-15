@@ -85,4 +85,11 @@
     <string name="nav_role_unknown">unknown</string>
     <string name="nav_error_title">Error</string>
     <string name="nav_error_body">Something went wrong. Retry or return and try another path.</string>
+    <string name="widget_today_description">Today\'s training</string>
+    <string name="widget_train_description">Open TRAIN</string>
+    <string name="widget_recovery_description">Recovery when real data exists</string>
+    <string name="widget_progress_description">Persisted XP and streak</string>
+    <string name="widget_martial_description">Martial Arts Fight Mode</string>
+    <string name="widget_coach_description">Next booking — no athlete health</string>
+    <string name="widget_device_description">Device and sync status</string>
 </resources>

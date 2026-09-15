@@ -184,4 +184,51 @@ final class BookingAndPrivacyTests: XCTestCase {
         XCTAssertEqual(LiveWorkoutController().heartRateLabel, "DATA UNAVAILABLE")
         XCTAssertFalse(DeviceMotionSample.fromDeviceMotion(timestamp: 0, userAx: 1, userAy: 0, userAz: 0, rotX: 0, rotY: 0, rotZ: 0).claimsDirectForce)
     }
+
+    func testBackgroundPolicyDoesNotKeepAppAlive() {
+        XCTAssertFalse(BackgroundPolicy.allowsPermanentProcess())
+        XCTAssertEqual(BackgroundPolicy.catalog.first?.classification, .continuousSession)
+        XCTAssertTrue(CoreBluetoothCombatAdapter.backgroundModeRequested == false)
+    }
+
+    func testGlanceStoreRoundTripAndPrivacy() {
+        GlanceSharedStore.defaults().set(false, forKey: "glance.showRecovery")
+        GlanceSharedStore.defaults().set(false, forKey: "glance.showHeartRate")
+        var snap = GlanceSnapshot.idle
+        snap.phase = "REST"
+        snap.remainingSec = 24
+        snap.recoveryHRV = "DATA UNAVAILABLE"
+        GlanceSharedStore.save(snap)
+        let loaded = GlanceSharedStore.load()
+        XCTAssertEqual(loaded.clock, "0:24")
+        XCTAssertTrue(loaded.isLive)
+        let redacted = GlancePrivacy.redact(loaded, surface: .widget, defaults: GlanceSharedStore.defaults())
+        XCTAssertEqual(redacted.recoveryHRV, "HIDDEN")
+        GlanceSharedStore.enqueue(.skipRest)
+        XCTAssertEqual(GlanceSharedStore.takeCommand(), .skipRest)
+        XCTAssertEqual(GlanceSharedStore.takeCommand(), .none)
+    }
+
+    func testLiveIslandAndDeepLinks() {
+        let compact = TrainLivePresentation.islandCompact(phase: "REST", clock: "0:24")
+        XCTAssertEqual(compact.leading, "REST")
+        XCTAssertEqual(TrainLivePresentation.islandCompact(phase: "WARNING", clock: "0:09").leading, "WARN")
+        XCTAssertEqual(TrainLivePresentation.islandCompact(phase: "PAUSED", clock: "2:01").leading, "PAUSE")
+        XCTAssertEqual(FitDeepLink.destination(URL(string: "fitconnect://app/martial-arts")!), "martial-arts")
+        XCTAssertEqual(FitDeepLink.destination(URL(string: "fitconnect://app/train")!), "train")
+        XCTAssertEqual(HealthKitObserverPlan.enableBackgroundDelivery(status: .sharingDenied), false)
+        XCTAssertEqual(WidgetTimelinePolicy.reloadMinutes(isLive: false), 60)
+    }
+
+    func testGlanceBridgeMapsFightWithoutInventingForce() {
+        var round = CombatRoundSnapshot.idle
+        round.disciplineId = "muay_thai"
+        round.phase = .rest
+        round.remainingSec = 24
+        round.currentRound = 3
+        let snap = GlanceBridge.fromFight(round, heartRate: "DATA UNAVAILABLE", sessionId: "s1")
+        XCTAssertEqual(snap.phase, "REST")
+        XCTAssertEqual(snap.kind, "fight")
+        XCTAssertFalse(snap.heartRateLabel.contains("164"))
+    }
 }

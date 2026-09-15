@@ -83,6 +83,14 @@ mustContain("iosApp/FitConnect/Health/CoreMotionSession.swift", "CMDeviceMotion"
 mustContain("iosApp/FitConnect/Auth/FirebaseBootstrap.swift", "FirebaseApp.configure");
 mustContain("iosApp/FitConnect/Auth/FirebaseBootstrap.swift", "rawNonce");
 mustContain("iosApp/GoogleService-Info.plist.example", "REPLACE_ME");
+mustContain("iosApp/FitConnect/Glance/GlanceSharedStore.swift", "group.com.fitconnect.ios");
+mustContain("iosApp/FitConnect/Glance/TrainLiveAttributes.swift", "TrainLiveAttributes");
+mustContain("iosApp/FitConnectWidgets/FitConnectWidgets.swift", "ActivityConfiguration");
+mustContain("iosApp/FitConnectWidgets/FitConnectWidgets.swift", "DynamicIsland");
+mustContain("iosApp/FitConnect/FitConnect.entitlements", "group.com.fitconnect.ios");
+mustContain("iosApp/project.yml", "FitConnectWidgets");
+mustContain("iosApp/project.yml", "NSSupportsLiveActivities");
+mustContain("iosApp/project.yml", "processing");
 mustContain(".github/workflows/ios.yml", "macos-15");
 
 mustNotContain("iosApp/FitConnect/Athlete/TelemetryView.swift", "164 bpm", "fabricated HR");
