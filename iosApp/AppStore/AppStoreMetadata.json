@@ -1,0 +1,32 @@
+{
+  "name": "FitConnect",
+  "bundleId": "com.fitconnect.ios",
+  "sku": "fitconnect-ios",
+  "primaryLocale": "en-US",
+  "platforms": ["iOS", "watchOS"],
+  "marketingVersion": "1.0.0",
+  "minIos": "17.0",
+  "minWatchos": "10.0",
+  "deviceFamily": ["iPhone", "iPad"],
+  "targetDevice": "iPhone 14 Pro",
+  "architectures": ["arm64"],
+  "identifiers": {
+    "ios": "com.fitconnect.ios",
+    "watch": "com.fitconnect.ios.watchkitapp",
+    "widgets": "com.fitconnect.ios.widgets",
+    "appGroup": "group.com.fitconnect.ios"
+  },
+  "capabilities": [
+    "Sign in with Apple",
+    "HealthKit",
+    "HealthKit Background Delivery",
+    "Push Notifications",
+    "Background Modes: workout, processing, remote-notification",
+    "App Groups",
+    "Live Activities"
+  ],
+  "encryption": {
+    "ITSAppUsesNonExemptEncryption": false,
+    "note": "Flip to true in project.yml if custom cryptography is added beyond HTTPS/TLS and Apple system crypto."
+  }
+}

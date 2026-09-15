@@ -97,6 +97,10 @@ mustContain("iosApp/project.yml", "FitConnectWatchTests");
 mustContain("iosApp/project.yml", "remote-notification");
 mustContain("iosApp/Config/Local.xcconfig.example", "DEVELOPMENT_TEAM");
 mustContain(".github/workflows/ios.yml", "macos-15");
+mustContain(".github/workflows/ios-testflight.yml", "ios-testflight-archive.sh");
+mustContain("iosApp/FitConnect/FitConnectRelease.entitlements", "<string>production</string>");
+mustContain("iosApp/TESTFLIGHT.md", "APP_STORE_CONNECT_API_KEY_P8");
+mustContain("iosApp/project.yml", "ITSAppUsesNonExemptEncryption");
 
 mustNotContain("iosApp/FitConnect/Athlete/TelemetryView.swift", "164 bpm", "fabricated HR");
 mustNotContain("iosApp/FitConnect", "DemoSessionStore", "legacy two-role store");

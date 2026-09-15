@@ -1,0 +1,81 @@
+name: iOS TestFlight
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/elite-os-v2, main, master]
+    paths:
+      - "iosApp/**"
+      - ".github/workflows/ios-testflight.yml"
+      - "scripts/ios-inject-ci-secrets.py"
+      - "scripts/ios-testflight-archive.sh"
+      - "scripts/check-ios-testflight.mjs"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-testflight
+  cancel-in-progress: false
+
+jobs:
+  secrets-gate:
+    name: TestFlight secrets present?
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      ready: ${{ steps.gate.outputs.ready }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: node scripts/check-ios-testflight.mjs
+      - id: gate
+        env:
+          HAS_TEAM: ${{ secrets.APPLE_TEAM_ID != '' }}
+          HAS_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID != '' }}
+          HAS_ISSUER: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID != '' }}
+          HAS_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 != '' }}
+          HAS_PLIST: ${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST != '' }}
+        run: |
+          echo "APPLE_TEAM_ID present: $HAS_TEAM"
+          echo "APP_STORE_CONNECT_API_KEY_ID present: $HAS_KEY"
+          echo "APP_STORE_CONNECT_ISSUER_ID present: $HAS_ISSUER"
+          echo "APP_STORE_CONNECT_API_KEY_P8 present: $HAS_P8"
+          echo "IOS_GOOGLE_SERVICE_INFO_PLIST present: $HAS_PLIST"
+          if [ "$HAS_TEAM" = true ] && [ "$HAS_KEY" = true ] && [ "$HAS_ISSUER" = true ] && [ "$HAS_P8" = true ] && [ "$HAS_PLIST" = true ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Upload skipped until GitHub Secrets in iosApp/TESTFLIGHT.md are set."
+          fi
+      - name: workflow_dispatch requires secrets
+        if: github.event_name == 'workflow_dispatch' && steps.gate.outputs.ready != 'true'
+        run: |
+          echo "Add the five GitHub Secrets, then run this workflow again."
+          exit 1
+
+  testflight-upload:
+    name: Archive + App Store Connect upload
+    needs: secrets-gate
+    if: needs.secrets-gate.outputs.ready == 'true'
+    runs-on: macos-15
+    timeout-minutes: 90
+    env:
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+      IOS_GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST }}
+      FITCONNECT_REQUIRE_UPLOAD_SECRETS: "1"
+      CURRENT_PROJECT_VERSION: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Archive and upload
+        run: chmod +x scripts/ios-testflight-archive.sh iosApp/ci_scripts/*.sh && ./scripts/ios-testflight-archive.sh

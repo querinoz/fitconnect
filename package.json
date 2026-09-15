@@ -38,6 +38,7 @@
     "audit:mobile": "pnpm --filter @fitconnect/web audit:mobile",
     "smoke": "pnpm --filter @fitconnect/web smoke",
     "ios:device-check": "node scripts/ios-device-check.mjs",
+    "ios:testflight-check": "node scripts/check-ios-testflight.mjs",
     "smoke:all": "pnpm smoke && pnpm smoke:mobile",
     "env:start": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-start.ps1",
     "env:setup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-setup.ps1",

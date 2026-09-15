@@ -41,10 +41,14 @@ targets:
         PRODUCT_MODULE_NAME: FitConnect
         PRODUCT_NAME: FitConnect
         GENERATE_INFOPLIST_FILE: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_ENTITLEMENTS: FitConnect/FitConnect.entitlements
         INFOPLIST_KEY_CFBundleDisplayName: FitConnect
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIStatusBarStyle: UIStatusBarStyleLightContent
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        INFOPLIST_KEY_LSRequiresIPhoneOS: YES
         INFOPLIST_KEY_NSHealthShareUsageDescription: FitConnect reads heart rate, HRV, sleep, energy, distance and steps you authorize so training and recovery can use real Apple Health samples. Missing stays missing.
         INFOPLIST_KEY_NSHealthUpdateUsageDescription: FitConnect may write workout sessions you start in TRAIN or Fight Mode into Apple Health. It does not invent samples.
         INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: FitConnect uses Bluetooth to connect instrumented gloves, bags, pads and bands when you pair them. No hardware is invented.
@@ -56,6 +60,11 @@ targets:
         INFOPLIST_KEY_BGTaskSchedulerPermittedIdentifiers: [com.fitconnect.ios.refresh]
         SUPPORTS_MACCATALYST: NO
         TARGETED_DEVICE_FAMILY: "1,2"
+      configs:
+        Debug:
+          CODE_SIGN_ENTITLEMENTS: FitConnect/FitConnect.entitlements
+        Release:
+          CODE_SIGN_ENTITLEMENTS: FitConnect/FitConnectRelease.entitlements
     dependencies:
       - target: FitConnectWatch
         embed: true
@@ -85,6 +94,7 @@ targets:
         PRODUCT_MODULE_NAME: FitConnectWatch
         PRODUCT_NAME: FitConnect Watch
         GENERATE_INFOPLIST_FILE: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_CFBundleDisplayName: FitConnect
         INFOPLIST_KEY_WKCompanionAppBundleIdentifier: com.fitconnect.ios
         INFOPLIST_KEY_NSHealthShareUsageDescription: The watch reads heart rate during an active workout session you start.
@@ -153,6 +163,8 @@ schemes:
       config: Debug
       targets:
         - FitConnectTests
+    archive:
+      config: Release
   FitConnectWatch:
     build:
       targets:
@@ -164,3 +176,5 @@ schemes:
       config: Debug
       targets:
         - FitConnectWatchTests
+    archive:
+      config: Release

@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 /**
- * Cross-platform iOS device-enablement diagnostic.
+ * Cross-platform iOS diagnostic for TestFlight (primary) and Mac USB (optional).
  * Never prints secrets, tokens, or plist API keys.
- * xcodebuild / device install are BLOCKED on non-darwin hosts.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -45,9 +44,7 @@ function walkSwift(dir, acc = []) {
 }
 
 const yml = read("iosApp/project.yml");
-if (!yml.includes("PRODUCT_BUNDLE_IDENTIFIER: com.fitconnect.ios\n") && !yml.includes("PRODUCT_BUNDLE_IDENTIFIER: com.fitconnect.ios\r\n")) {
-  if (!yml.includes("PRODUCT_BUNDLE_IDENTIFIER: com.fitconnect.ios")) errors.push("iOS bundle id missing");
-}
+if (!yml.includes("PRODUCT_BUNDLE_IDENTIFIER: com.fitconnect.ios")) errors.push("iOS bundle id missing");
 for (const id of [
   "com.fitconnect.ios.watchkitapp",
   "com.fitconnect.ios.widgets",
@@ -57,11 +54,13 @@ for (const id of [
   if (!yml.includes(id)) errors.push(`project.yml missing ${id}`);
 }
 if (!yml.includes("GoogleService-Info.plist")) errors.push("project.yml must copy GoogleService-Info.plist as optional resource");
-if (!yml.includes("aps-environment") && !read("iosApp/FitConnect/FitConnect.entitlements").includes("aps-environment")) {
-  errors.push("missing aps-environment (Push Notifications)");
-}
+if (!yml.includes("FitConnectRelease.entitlements")) errors.push("Release entitlements path missing");
+if (!yml.includes("ITSAppUsesNonExemptEncryption")) errors.push("export compliance key missing");
 if (!read("iosApp/FitConnect/FitConnect.entitlements").includes("aps-environment")) {
   errors.push("FitConnect.entitlements missing aps-environment");
+}
+if (!read("iosApp/FitConnect/FitConnectRelease.entitlements").includes("production")) {
+  errors.push("FitConnectRelease.entitlements must use aps-environment production");
 }
 if (!yml.includes("remote-notification")) errors.push("UIBackgroundModes must include remote-notification");
 if (!yml.includes("FitConnectWatchTests")) errors.push("missing watch test target");
@@ -69,19 +68,21 @@ if (!yml.includes("Config/Debug.xcconfig")) errors.push("missing Debug.xcconfig 
 
 const gitignore = read(".gitignore");
 if (!gitignore.includes("GoogleService-Info.plist")) errors.push(".gitignore must exclude live Firebase plist");
+if (!gitignore.includes("AuthKey_*.p8")) errors.push(".gitignore must exclude App Store Connect .p8 keys");
 if (!gitignore.includes("Local.xcconfig")) warns.push(".gitignore should exclude iosApp/Config/Local.xcconfig");
 
 if (!exists("iosApp/GoogleService-Info.plist.example")) errors.push("missing Firebase plist example");
-if (exists("iosApp/GoogleService-Info.plist")) ok.push("GoogleService-Info.plist present (not printed)");
-else warns.push("GoogleService-Info.plist ABSENT — copy the example and paste Firebase Apple values (gitignored)");
+if (exists("iosApp/GoogleService-Info.plist")) ok.push("GoogleService-Info.plist present locally (not printed)");
+else warns.push("GoogleService-Info.plist ABSENT locally — TestFlight CI injects IOS_GOOGLE_SERVICE_INFO_PLIST");
 
 if (exists("iosApp/Config/Local.xcconfig")) {
-  const local = fs.readFileSync(path.join(root, "iosApp/Config/Local.xcconfig"), "utf8");
-  if (local.includes("YOURTEAMID")) warns.push("Local.xcconfig still has YOURTEAMID — paste the Apple Team ID");
-  else ok.push("Local.xcconfig present (Team ID not printed)");
+  ok.push("Local.xcconfig present (Team ID not printed)");
 } else {
-  warns.push("Local.xcconfig ABSENT — copy iosApp/Config/Local.xcconfig.example");
+  warns.push("Local.xcconfig ABSENT locally — GitHub Actions writes it from APPLE_TEAM_ID");
 }
+
+if (!exists(".github/workflows/ios-testflight.yml")) errors.push("missing TestFlight workflow");
+if (!exists("iosApp/TESTFLIGHT.md")) errors.push("missing iosApp/TESTFLIGHT.md");
 
 const runtime = read("iosApp/FitConnect/SharedAdapters/FitRuntime.swift");
 if (!runtime.includes("isAllowedOnDevice")) errors.push("FitRuntime must reject localhost on device");
@@ -99,27 +100,27 @@ for (const file of walkSwift(path.join(root, "iosApp/FitConnect"))) {
 
 if (darwin) {
   if (which("xcodegen")) ok.push("xcodegen installed");
-  else errors.push("xcodegen missing — brew install xcodegen");
+  else warns.push("xcodegen missing on this Mac — brew install xcodegen (CI installs it)");
   const xcode = spawnSync("xcode-select", ["-p"], { encoding: "utf8" });
   if (xcode.status === 0) ok.push(`xcode-select ${xcode.stdout.trim()}`);
-  else errors.push("xcode-select missing — xcode-select --install");
+  else warns.push("xcode-select missing on this Mac — cloud CI still works");
 } else {
-  warns.push("Host is not macOS — xcodebuild / Simulator / iPhone install are BLOCKED here");
+  ok.push("Host is Windows/Linux — USB Xcode install BLOCKED; TestFlight cloud path is the supported route");
 }
 
-console.log("FitConnect iOS device check");
+console.log("FitConnect iOS device / TestFlight check");
 console.log(`host: ${process.platform}`);
 for (const line of ok) console.log(`OK    ${line}`);
 for (const line of warns) console.log(`WARN  ${line}`);
 for (const line of errors) console.log(`FAIL  ${line}`);
 
 if (!darwin) {
-  console.log("\nNEXT ON A MAC:");
-  console.log("  xcode-select --install && brew install xcodegen");
-  console.log("  cp iosApp/Config/Local.xcconfig.example iosApp/Config/Local.xcconfig   # paste Team ID");
-  console.log("  cp iosApp/GoogleService-Info.plist.example iosApp/GoogleService-Info.plist  # paste Firebase Apple app");
-  console.log("  ./scripts/ios-device-check && ./scripts/ios-sim-test && ./scripts/ios-device-install");
+  console.log("\nNEXT (no Mac required):");
+  console.log("  Follow iosApp/TESTFLIGHT.md click-by-click");
+  console.log("  Add the five GitHub Actions secrets");
+  console.log("  GitHub → Actions → iOS TestFlight → Run workflow");
+  console.log("  iPhone 14 Pro → TestFlight → Install FitConnect");
 }
 
 if (errors.length) process.exit(1);
-console.log(errors.length ? "" : "\nSTATIC READY — physical iPhone still requires Mac + Team + Firebase plist.");
+console.log("\nSTATIC READY — TestFlight upload still needs Apple program + GitHub Secrets.");

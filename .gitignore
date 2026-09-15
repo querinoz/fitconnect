@@ -94,4 +94,10 @@ iosApp/**/GoogleService-Info.plist
 iosApp/Config/Local.xcconfig
 iosApp/DerivedData/
 iosApp/**/xcuserdata/
+iosApp/AppStore/ExportOptions.generated.plist
+**/AuthKey_*.p8
+**/*.p12
+**/*.mobileprovision
+**/*.cer
+!iosApp/AppStore/ExportOptions.plist
 

@@ -22,6 +22,7 @@ jobs:
       - run: node scripts/check-swift-duplicate-decls.mjs
       - run: node scripts/check-ios-parity.mjs
       - run: node scripts/ios-device-check.mjs
+      - run: node scripts/check-ios-testflight.mjs
 
   ios-simulator:
     name: iOS + watchOS simulator
