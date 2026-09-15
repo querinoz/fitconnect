@@ -56,11 +56,11 @@ struct FitConnectAuthAdapter: AuthContract {
     }
 
     func configurationState() -> AuthConfigurationState {
+        if FirebaseBootstrap.plistPresent {
+            return .firebaseReady
+        }
         if AppSessionStore.localDemoAllowed {
             return .localDemoAllowed
-        }
-        if Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") != nil {
-            return .firebaseReady
         }
         return .notConfigured
     }
@@ -86,9 +86,7 @@ final class AppSessionStore {
     var activeMode: AppRole? { role }
 
     static var localDemoAllowed: Bool {
-        let env = ProcessInfo.processInfo.environment["FITCONNECT_LOCAL_DEMO"] == "true"
-        let defaults = UserDefaults.standard.bool(forKey: "fitconnect.localDemo")
-        return env || defaults
+        FitRuntime.localDemoAllowed()
     }
 
     func completeSignIn(identity: IdentityProfile, active: AppRole = .athlete) {
@@ -128,6 +126,9 @@ final class AppSessionStore {
         role = nil
         isAuthenticated = false
         lastAuthError = nil
+        KeychainStore.delete(account: "firebase-uid")
+        KeychainStore.delete(account: "firebase-id-token")
+        KeychainStore.delete(account: "apple-user-id")
         UserDefaults.standard.removeObject(forKey: "fitconnect.session")
     }
 

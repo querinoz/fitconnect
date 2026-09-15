@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  echo "BLOCKED: ios-device-install requires macOS, Xcode, and a connected iPhone."
+  exit 2
+fi
+
+if [[ ! -f "$ROOT/iosApp/Config/Local.xcconfig" ]] || grep -q "YOURTEAMID" "$ROOT/iosApp/Config/Local.xcconfig"; then
+  echo "FAIL: set DEVELOPMENT_TEAM in iosApp/Config/Local.xcconfig"
+  exit 1
+fi
+if [[ ! -f "$ROOT/iosApp/GoogleService-Info.plist" ]]; then
+  echo "FAIL: iosApp/GoogleService-Info.plist is required for Sign in with Apple / Firebase on device"
+  exit 1
+fi
+
+node "$ROOT/scripts/ios-device-check.mjs"
+cd "$ROOT/iosApp"
+xcodegen generate
+
+UDID=""
+if command -v xcrun >/dev/null; then
+  LIST="$(xcrun xctrace list devices 2>/dev/null || true)"
+  UDID="$(printf '%s\n' "$LIST" | awk '/iPhone/{if ($0 !~ /Simulator/) print}' | sed -n 's/.*(\([A-F0-9-]\{25,\}\)).*/\1/p' | head -1 || true)"
+fi
+
+if [[ -z "$UDID" ]]; then
+  echo "FAIL: no physical iPhone visible."
+  echo "1. Unlock iPhone 14 Pro and tap Trust"
+  echo "2. Settings → Privacy & Security → Developer Mode → On → restart"
+  echo "3. Reconnect USB and re-run ./scripts/ios-device-install"
+  exit 2
+fi
+
+echo "Using iPhone UDID (not printed in full): ${UDID:0:8}…"
+
+xcodebuild \
+  -scheme FitConnect \
+  -destination "id=$UDID" \
+  -configuration Debug \
+  -allowProvisioningUpdates \
+  -derivedDataPath "$ROOT/iosApp/DerivedData" \
+  build
+
+APP="$(find "$ROOT/iosApp/DerivedData/Build/Products/Debug-iphoneos" -maxdepth 1 -name 'FitConnect.app' | head -1)"
+if [[ -z "$APP" ]]; then
+  echo "FAIL: FitConnect.app not found under DerivedData"
+  exit 1
+fi
+
+if xcrun devicectl device install app --device "$UDID" "$APP"; then
+  xcrun devicectl device process launch --device "$UDID" com.fitconnect.ios || true
+  echo "INSTALL ✅  launched com.fitconnect.ios"
+else
+  echo "Build succeeded. If install failed, open iosApp/FitConnect.xcodeproj, select the iPhone, press Run."
+  exit 1
+fi

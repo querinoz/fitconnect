@@ -37,7 +37,7 @@
     "convex:accept-tos": "node scripts/convex-accept-tos.mjs",
     "audit:mobile": "pnpm --filter @fitconnect/web audit:mobile",
     "smoke": "pnpm --filter @fitconnect/web smoke",
-    "smoke:mobile": "node scripts/mobile-pwa-check.mjs http://localhost:3001",
+    "ios:device-check": "node scripts/ios-device-check.mjs",
     "smoke:all": "pnpm smoke && pnpm smoke:mobile",
     "env:start": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-start.ps1",
     "env:setup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-setup.ps1",

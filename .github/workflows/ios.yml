@@ -21,6 +21,7 @@ jobs:
           node-version: 22
       - run: node scripts/check-swift-duplicate-decls.mjs
       - run: node scripts/check-ios-parity.mjs
+      - run: node scripts/ios-device-check.mjs
 
   ios-simulator:
     name: iOS + watchOS simulator
@@ -33,50 +34,5 @@ jobs:
           xcode-version: latest-stable
       - name: Install XcodeGen
         run: brew install xcodegen
-      - name: Generate Xcode project
-        working-directory: iosApp
-        run: xcodegen generate
-      - name: Build iOS (unsigned simulator)
-        working-directory: iosApp
-        run: |
-          xcodebuild \
-            -scheme FitConnect \
-            -destination 'generic/platform=iOS Simulator' \
-            -configuration Debug \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
-            build
-      - name: Test iOS simulator
-        working-directory: iosApp
-        run: |
-          set +e
-          for dest in \
-            "platform=iOS Simulator,name=iPhone 16" \
-            "platform=iOS Simulator,name=iPhone 16 Pro" \
-            "platform=iOS Simulator,name=iPhone 15"; do
-            xcodebuild \
-              -scheme FitConnect \
-              -destination "$dest" \
-              -configuration Debug \
-              CODE_SIGNING_ALLOWED=NO \
-              CODE_SIGNING_REQUIRED=NO \
-              CODE_SIGN_IDENTITY="" \
-              test
-            status=$?
-            if [ "$status" -eq 0 ]; then
-              exit 0
-            fi
-          done
-          exit "$status"
-      - name: Build watchOS (unsigned simulator)
-        working-directory: iosApp
-        run: |
-          xcodebuild \
-            -scheme FitConnectWatch \
-            -destination 'generic/platform=watchOS Simulator' \
-            -configuration Debug \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
-            build
+      - name: Simulator build + test
+        run: chmod +x scripts/ios-sim-test scripts/ios-device-check scripts/ios-device-build scripts/ios-device-install && ./scripts/ios-sim-test

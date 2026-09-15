@@ -91,6 +91,11 @@ mustContain("iosApp/FitConnect/FitConnect.entitlements", "group.com.fitconnect.i
 mustContain("iosApp/project.yml", "FitConnectWidgets");
 mustContain("iosApp/project.yml", "NSSupportsLiveActivities");
 mustContain("iosApp/project.yml", "processing");
+mustContain("iosApp/FitConnect/SharedAdapters/FitRuntime.swift", "isAllowedOnDevice");
+mustContain("iosApp/FitConnect/FitConnect.entitlements", "aps-environment");
+mustContain("iosApp/project.yml", "FitConnectWatchTests");
+mustContain("iosApp/project.yml", "remote-notification");
+mustContain("iosApp/Config/Local.xcconfig.example", "DEVELOPMENT_TEAM");
 mustContain(".github/workflows/ios.yml", "macos-15");
 
 mustNotContain("iosApp/FitConnect/Athlete/TelemetryView.swift", "164 bpm", "fabricated HR");

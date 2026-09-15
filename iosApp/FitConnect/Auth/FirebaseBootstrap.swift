@@ -100,6 +100,12 @@ final class AppleSignInCoordinator: NSObject, ASAuthorizationControllerDelegate,
             let name = [credential.fullName?.givenName, credential.fullName?.familyName]
                 .compactMap { $0 }
                 .joined(separator: " ")
+            KeychainStore.set(credential.user, account: "apple-user-id")
+            result?.user.getIDToken { token, _ in
+                if let token {
+                    KeychainStore.set(token, account: "firebase-id-token")
+                }
+            }
             self.continuation?.resume(returning: .success(IdentityProfile(
                 firebaseUid: uid,
                 displayName: name.isEmpty ? "Apple user" : name,
@@ -117,7 +123,11 @@ final class AppleSignInCoordinator: NSObject, ASAuthorizationControllerDelegate,
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        continuation?.resume(returning: .failure(.appleUnavailable))
+        if let authError = error as? ASAuthorizationError, authError.code == .canceled {
+            continuation?.resume(returning: .failure(.cancelled))
+        } else {
+            continuation?.resume(returning: .failure(.appleUnavailable))
+        }
         continuation = nil
     }
 }

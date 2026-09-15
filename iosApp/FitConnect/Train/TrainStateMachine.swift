@@ -1,6 +1,6 @@
 import Foundation
 
-enum TrainPhase: String, Equatable, CaseIterable {
+enum TrainPhase: String, Equatable, CaseIterable, Codable {
     case idle
     case prep
     case warmup
@@ -14,7 +14,7 @@ enum TrainPhase: String, Equatable, CaseIterable {
     case complete
 }
 
-enum SaveStatus: String, Equatable, CaseIterable {
+enum SaveStatus: String, Equatable, CaseIterable, Codable {
     case idle
     case savePending = "save_pending"
     case saved
@@ -22,7 +22,7 @@ enum SaveStatus: String, Equatable, CaseIterable {
     case failed
 }
 
-struct CombatPlanMeta: Equatable {
+struct CombatPlanMeta: Equatable, Codable {
     var disciplineId: String
     var sessionMode: String
     var roundCount: Int
@@ -32,7 +32,7 @@ struct CombatPlanMeta: Equatable {
     var focus: String
 }
 
-struct TrainPlanSummary: Identifiable, Equatable {
+struct TrainPlanSummary: Identifiable, Equatable, Codable {
     let id: String
     let title: String
     let purpose: String
@@ -41,14 +41,14 @@ struct TrainPlanSummary: Identifiable, Equatable {
     var combat: CombatPlanMeta?
 }
 
-struct LoggedTrainSet: Equatable {
+struct LoggedTrainSet: Equatable, Codable {
     var name: String
     var setNumber: Int
     var timeSec: Int?
     var skipped: Bool
 }
 
-struct TrainSessionSnapshot: Equatable {
+struct TrainSessionSnapshot: Equatable, Codable {
     var phase: TrainPhase
     var resumePhase: TrainPhase?
     var plan: TrainPlanSummary?

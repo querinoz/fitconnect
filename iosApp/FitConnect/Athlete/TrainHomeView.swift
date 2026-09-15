@@ -72,15 +72,19 @@ struct AthleteTrainHomeView: View {
                 snapshot = TrainReducer.reduce(snapshot, .tick)
             }
             publishGlance()
+            TrainRecoveryStore.save(snapshot)
         }
         .onChange(of: snapshot.phase) { _, phase in
             publishGlance()
+            TrainRecoveryStore.save(snapshot)
             if phase == .completing {
                 persistLocalThenFailClosed()
             }
         }
         .onAppear {
-            if snapshot.phase == .idle {
+            if snapshot.phase == .idle, let recovered = TrainRecoveryStore.load() {
+                snapshot = recovered
+            } else if snapshot.phase == .idle {
                 GlanceSharedStore.save(GlanceBridge.dailyCatalog())
             }
         }
@@ -160,6 +164,7 @@ struct AthleteTrainHomeView: View {
         TrainLocalStore.upsert(row)
         snapshot = TrainReducer.reduce(snapshot, .markSave(.localOnly))
         TrainLiveActivityController.sync(snapshot: GlanceBridge.dailyCatalog())
+        TrainRecoveryStore.clear()
         workout.end()
         motion.stop()
     }

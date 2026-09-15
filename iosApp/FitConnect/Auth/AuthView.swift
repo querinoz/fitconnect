@@ -134,6 +134,8 @@ struct AuthView: View {
             return "Invalid credentials."
         case .appleUnavailable:
             return "Sign in with Apple requires a signed Apple capability on a real device or simulator with Xcode."
+        case .cancelled:
+            return "Sign in with Apple was cancelled."
         }
     }
 }

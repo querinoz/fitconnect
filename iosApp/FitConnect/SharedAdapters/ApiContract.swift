@@ -49,7 +49,7 @@ struct AppServices {
     let healthKit: any HealthKitContract
     let map: any MapContract
 
-    static let production = AppServices(
+        static let production = AppServices(
         api: HonestCatalogApi(),
         auth: FitConnectAuthAdapter(),
         offlineQueue: LocalDemoOfflineQueue(),
@@ -58,4 +58,10 @@ struct AppServices {
         healthKit: HealthKitLiveAdapter(),
         map: LocalDemoMapAdapter()
     )
+
+    static var apiClient: FitAPIClient {
+        FitAPIClient(baseURL: FitRuntime.apiBaseURL(), tokenProvider: {
+            KeychainStore.get(account: "firebase-id-token")
+        })
+    }
 }

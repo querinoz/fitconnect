@@ -11,6 +11,7 @@ enum AuthRuntimeError: Error, Equatable {
     case network
     case invalidCredentials
     case appleUnavailable
+    case cancelled
 }
 
 protocol FirebaseAuthRuntime {
@@ -29,6 +30,9 @@ struct FirebaseAuthBridge: FirebaseAuthRuntime {
         #if canImport(FirebaseAuth)
         do {
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
+            if let token = try? await result.user.getIDToken() {
+                KeychainStore.set(token, account: "firebase-id-token")
+            }
             return .success(IdentityProfile(
                 firebaseUid: result.user.uid,
                 displayName: result.user.displayName ?? email,
@@ -73,5 +77,7 @@ struct FirebaseAuthBridge: FirebaseAuthRuntime {
         try? Auth.auth().signOut()
         #endif
         KeychainStore.delete(account: "firebase-uid")
+        KeychainStore.delete(account: "firebase-id-token")
+        KeychainStore.delete(account: "apple-user-id")
     }
 }

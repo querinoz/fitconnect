@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  echo "BLOCKED: ios-device-build requires macOS + Xcode."
+  exit 2
+fi
+
+if [[ ! -f "$ROOT/iosApp/Config/Local.xcconfig" ]]; then
+  echo "FAIL: copy iosApp/Config/Local.xcconfig.example → Local.xcconfig and set DEVELOPMENT_TEAM"
+  exit 1
+fi
+if grep -q "YOURTEAMID" "$ROOT/iosApp/Config/Local.xcconfig"; then
+  echo "FAIL: replace YOURTEAMID in iosApp/Config/Local.xcconfig"
+  exit 1
+fi
+if [[ ! -f "$ROOT/iosApp/GoogleService-Info.plist" ]]; then
+  echo "WARN: GoogleService-Info.plist missing — Auth will show not configured. Build continues."
+fi
+
+node "$ROOT/scripts/ios-device-check.mjs"
+cd "$ROOT/iosApp"
+xcodegen generate
+
+echo "== Device SDK build (generic iOS) =="
+xcodebuild \
+  -scheme FitConnect \
+  -destination 'generic/platform=iOS' \
+  -configuration Debug \
+  -allowProvisioningUpdates \
+  build
+
+echo "DEVICE BUILD ✅  Install with ./scripts/ios-device-install"

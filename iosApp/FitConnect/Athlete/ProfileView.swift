@@ -42,6 +42,7 @@ struct AthleteProfileView: View {
                 }
 
                 Button("Sign out") {
+                    FirebaseAuthBridge().signOut()
                     session.signOut()
                 }
                 .font(.headline)

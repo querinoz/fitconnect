@@ -1,29 +1,43 @@
-# FitConnect iOS + Apple Watch
+# FitConnect iOS — iPhone 14 Pro
 
-First-class native SwiftUI platform. This is not a Path A demo shell and not Expo.
+Windows cannot compile or install this app. All remaining work is Mac + Apple account.
 
-Windows authors and statically validates this tree. **Compile, simulator, HealthKit authorization, Sign in with Apple, and Watch runtime require macOS + Xcode.** That is an Apple execution environment constraint, not an iOS implementation gap.
-
-Next human step after macOS CI: **signed build on an iPhone 14 Pro** (Firebase Auth, HealthKit, TRAIN, Fight Mode, Recovery, battery). Not App Store submission.
-
-## Product shape
-
-- **ONE LOGIN** — `FirebaseApp.configure()` when `GoogleService-Info.plist` is present. Sign in with Apple uses a SHA-256 nonce and Firebase credential exchange. Athlete and Coach are modes of one session.
-- Navigation: **Feed → Ascend → TRAIN → Dashboard → Profile**
-- TRAIN uses `HKWorkoutSession` + `HKLiveWorkoutBuilder` + `HKLiveWorkoutDataSource`. Heart rate is DATA UNAVAILABLE until HealthKit delivers a sample.
-- Core Motion uses `CMDeviceMotion` (attitude, rotation, user acceleration). Acceleration is never DIRECT force.
-- Apple Watch: glanceable Fight Mode, haptics on warning, background workout via the live builder.
-- Booking / Stripe / empty catalog: fail closed. No fabricated HR, readiness, EUR, or bookings.
-
-## Generate and run (macOS)
+## One-time (Mac)
 
 ```bash
-cd iosApp
+xcode-select --install
 brew install xcodegen
-cp GoogleService-Info.plist.example GoogleService-Info.plist   # then fill Firebase Apple values — never commit the live plist
-xcodegen generate
-xcodebuild -scheme FitConnect -destination 'generic/platform=iOS Simulator' -configuration Debug build CODE_SIGNING_ALLOWED=NO
-xcodebuild -scheme FitConnectWatch -destination 'generic/platform=watchOS Simulator' -configuration Debug build CODE_SIGNING_ALLOWED=NO
+git checkout feat/elite-os-v2
+cp iosApp/Config/Local.xcconfig.example iosApp/Config/Local.xcconfig
+# paste DEVELOPMENT_TEAM (Apple Developer → Membership)
+cp iosApp/GoogleService-Info.plist.example iosApp/GoogleService-Info.plist
+# replace REPLACE_ME with the Firebase iOS app (Bundle ID com.fitconnect.ios). Never commit this file.
+./scripts/ios-device-check
+./scripts/ios-sim-test
 ```
 
-CI: `.github/workflows/ios.yml` on `macos-15`.
+Firebase Console: add iOS app `com.fitconnect.ios`, enable Email + Apple, download plist.
+
+Xcode (first signed run): open `iosApp/FitConnect.xcodeproj` → target FitConnect → Signing & Capabilities → Team. Enable only: Sign in with Apple, HealthKit, Push Notifications, Background Modes (Workout, Background processing, Remote notifications), App Groups `group.com.fitconnect.ios`.
+
+## iPhone 14 Pro
+
+1. Unlock, Trust This Computer.
+2. Settings → Privacy & Security → Developer Mode → On.
+3. USB connect.
+4. `./scripts/ios-device-install`
+
+If install fails, Xcode → select the iPhone → Run. Development signing is enough. Not App Store.
+
+## First device tests (in order)
+
+1. ONE LOGIN — Apple or email → Athlete → switch Coach → no logout.
+2. TRAIN — start → lock → Dynamic Island → background → pause/resume → complete. Missing HR stays DATA UNAVAILABLE.
+3. Martial Arts — Boxing / Muay Thai / BJJ Fight Mode rounds.
+4. HealthKit — authorize / deny / revoke. Never invent samples.
+5. Widgets + Live Activity + Watch if paired.
+
+Fill results in `iosApp/DeviceQAMatrix.json`.
+
+LOCAL_DEMO is Debug-only and hidden when the Firebase plist is present. Release cannot enable it.
+Physical iPhone never uses localhost; API defaults to `https://fitconnect-phi.vercel.app`.

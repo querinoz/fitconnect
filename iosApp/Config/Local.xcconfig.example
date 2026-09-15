@@ -1,0 +1,8 @@
+// Copy this file to Local.xcconfig (gitignored).
+// Team ID: Apple Developer → Membership → Team ID
+DEVELOPMENT_TEAM = YOURTEAMID
+CODE_SIGN_STYLE = Automatic
+
+// Physical iPhone must use HTTPS. Do not set localhost here.
+// FITCONNECT_API_BASE_URL = https:/$()/fitconnect-phi.vercel.app
+// FITCONNECT_ENV = development

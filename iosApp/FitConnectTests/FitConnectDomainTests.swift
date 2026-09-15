@@ -232,3 +232,28 @@ final class BookingAndPrivacyTests: XCTestCase {
         XCTAssertFalse(snap.heartRateLabel.contains("164"))
     }
 }
+
+final class DeviceRuntimeTests: XCTestCase {
+    func testReleaseNeverAllowsLocalDemo() {
+        XCTAssertFalse(FitRuntime.localDemoAllowed(isDebug: false, env: ["FITCONNECT_LOCAL_DEMO": "true"], defaults: .standard))
+    }
+
+    func testDeviceRejectsLocalhostAPI() {
+        let local = URL(string: "http://localhost:3001")!
+        XCTAssertFalse(FitRuntime.isAllowedOnDevice(local, isSimulator: false))
+        XCTAssertTrue(FitRuntime.isAllowedOnDevice(local, isSimulator: true))
+        XCTAssertTrue(FitRuntime.isAllowedOnDevice(FitRuntime.productionAPI, isSimulator: false))
+        XCTAssertEqual(FitRuntime.apiBaseURL(bundle: Bundle(for: DeviceRuntimeTests.self), isSimulator: false).host, "fitconnect-phi.vercel.app")
+    }
+
+    func testTrainRecoveryRoundTrip() {
+        var snap = TrainSessionSnapshot.idle
+        snap.phase = .active
+        snap.workRemainingSec = 90
+        snap.plan = TrainReducer.catalog.first
+        TrainRecoveryStore.save(snap)
+        XCTAssertEqual(TrainRecoveryStore.load()?.phase, .active)
+        TrainRecoveryStore.clear()
+        XCTAssertNil(TrainRecoveryStore.load())
+    }
+}

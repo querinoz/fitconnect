@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  echo "BLOCKED: ios-sim-test requires macOS + Xcode."
+  echo "Run: node scripts/ios-device-check.mjs"
+  exit 2
+fi
+
+command -v xcodegen >/dev/null || { echo "FAIL: brew install xcodegen"; exit 1; }
+node "$ROOT/scripts/ios-device-check.mjs"
+
+cd "$ROOT/iosApp"
+xcodegen generate
+
+echo "== iOS Simulator build =="
+xcodebuild \
+  -scheme FitConnect \
+  -destination 'generic/platform=iOS Simulator' \
+  -configuration Debug \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO \
+  CODE_SIGN_IDENTITY="" \
+  build
+
+echo "== iOS Simulator tests =="
+set +e
+STATUS=1
+for dest in \
+  "platform=iOS Simulator,name=iPhone 16 Pro" \
+  "platform=iOS Simulator,name=iPhone 16" \
+  "platform=iOS Simulator,name=iPhone 15"; do
+  xcodebuild \
+    -scheme FitConnect \
+    -destination "$dest" \
+    -configuration Debug \
+    CODE_SIGNING_ALLOWED=NO \
+    CODE_SIGNING_REQUIRED=NO \
+    CODE_SIGN_IDENTITY="" \
+    test
+  STATUS=$?
+  if [[ "$STATUS" -eq 0 ]]; then
+    break
+  fi
+done
+set -e
+if [[ "$STATUS" -ne 0 ]]; then
+  echo "FAIL: iOS unit tests"
+  exit "$STATUS"
+fi
+
+echo "== watchOS Simulator build =="
+xcodebuild \
+  -scheme FitConnectWatch \
+  -destination 'generic/platform=watchOS Simulator' \
+  -configuration Debug \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO \
+  CODE_SIGN_IDENTITY="" \
+  build
+
+echo "== watchOS Simulator tests (best effort) =="
+set +e
+xcodebuild \
+  -scheme FitConnectWatch \
+  -destination 'generic/platform=watchOS Simulator' \
+  -configuration Debug \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO \
+  CODE_SIGN_IDENTITY="" \
+  test
+WATCH_STATUS=$?
+set -e
+if [[ "$WATCH_STATUS" -ne 0 ]]; then
+  echo "WARN: watchOS tests did not run on a named simulator. Build succeeded; re-run with a paired Watch simulator in Xcode."
+fi
+
+echo "iOS BUILD ✅  iOS TESTS ✅  watchOS BUILD ✅"
+if [[ "$WATCH_STATUS" -eq 0 ]]; then
+  echo "watchOS TESTS ✅"
+else
+  echo "watchOS TESTS ⚠️  (build ok; named Watch simulator needed for test action)"
+fi

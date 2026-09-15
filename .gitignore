@@ -91,4 +91,7 @@ iosApp/*.xcodeproj/
 iosApp/*.xcworkspace/
 iosApp/**/GoogleService-Info.plist
 !iosApp/GoogleService-Info.plist.example
+iosApp/Config/Local.xcconfig
+iosApp/DerivedData/
+iosApp/**/xcuserdata/
 

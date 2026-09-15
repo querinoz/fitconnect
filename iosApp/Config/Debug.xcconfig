@@ -1,0 +1,5 @@
+#include? "Local.xcconfig"
+
+FITCONNECT_ENV = development
+FITCONNECT_API_BASE_URL = https:/$()/fitconnect-phi.vercel.app
+CODE_SIGN_STYLE = Automatic

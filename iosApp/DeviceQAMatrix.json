@@ -1,0 +1,33 @@
+{
+  "device": "iPhone 14 Pro",
+  "iosVersion": "",
+  "build": "",
+  "branch": "feat/elite-os-v2",
+  "tests": [
+    { "id": "AUTH", "result": "BLOCKED", "notes": "Needs signed device + Firebase plist" },
+    { "id": "ONE_LOGIN", "result": "BLOCKED", "notes": "Sign in with Apple / Firebase then Athlete↔Coach without logout" },
+    { "id": "MODE_SWITCH", "result": "BLOCKED", "notes": "" },
+    { "id": "FEED", "result": "BLOCKED", "notes": "" },
+    { "id": "TRAIN", "result": "BLOCKED", "notes": "lock / background / pause / resume / complete" },
+    { "id": "OFFLINE_TRAIN", "result": "BLOCKED", "notes": "" },
+    { "id": "BACKGROUND_TRAIN", "result": "BLOCKED", "notes": "HKWorkoutSession, not keep-alive" },
+    { "id": "MARTIAL_ARTS", "result": "BLOCKED", "notes": "Boxing / Muay Thai / BJJ Fight Mode" },
+    { "id": "HEALTHKIT", "result": "BLOCKED", "notes": "authorize / deny / revoke — never fabricate" },
+    { "id": "RECOVERY", "result": "BLOCKED", "notes": "DATA UNAVAILABLE until samples exist" },
+    { "id": "ZENITH", "result": "PARTIAL", "notes": "UI present; MCP/tools still architecture" },
+    { "id": "BOOKING", "result": "PARTIAL", "notes": "fail-closed without Stripe/keys" },
+    { "id": "COACH", "result": "BLOCKED", "notes": "same session, mode switch" },
+    { "id": "CONNECTIONS", "result": "BLOCKED", "notes": "" },
+    { "id": "WIDGET", "result": "BLOCKED", "notes": "add/remove/tap/deep link" },
+    { "id": "LIVE_ACTIVITY", "result": "BLOCKED", "notes": "Lock Screen during TRAIN" },
+    { "id": "DYNAMIC_ISLAND", "result": "BLOCKED", "notes": "iPhone 14 Pro compact/expanded/minimal" },
+    { "id": "NOTIFICATIONS", "result": "BLOCKED", "notes": "permission only — APNs key is human" },
+    { "id": "WATCH", "result": "BLOCKED", "notes": "hardware Watch" },
+    { "id": "BLE", "result": "PARTIAL", "notes": "no hardware invented; discovery empty" },
+    { "id": "REALTIME", "result": "PARTIAL", "notes": "status Not connected until socket is wired" },
+    { "id": "OFFLINE", "result": "BLOCKED", "notes": "" },
+    { "id": "PERFORMANCE", "result": "BLOCKED", "notes": "long session battery" },
+    { "id": "ACCESSIBILITY", "result": "BLOCKED", "notes": "VoiceOver TRAIN / Fight Mode" },
+    { "id": "SECURITY", "result": "PARTIAL", "notes": "Keychain tokens; widget store has no secrets" }
+  ]
+}
