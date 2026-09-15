@@ -116,6 +116,8 @@ export type TrainSnapshot = {
   slotIndex: number;
   restRemainingSec: number;
   restDurationSec: number;
+  workRemainingSec: number;
+  workDurationSec: number;
   sets: LoggedSet[];
   lastError: string | null;
   saveStatus: SaveStatus;

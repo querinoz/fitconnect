@@ -81,6 +81,14 @@ export function CommandPalette({ role, open, onOpenChange }: CommandPaletteProps
         keywords: ["workout", "train", "gym", "session", "g t"]
       },
       {
+        id: "coaches",
+        label: "Find a coach",
+        section: "navigation",
+        icon: UsersRound,
+        href: "/coaches",
+        keywords: ["coach", "book", "marketplace"]
+      },
+      {
         id: "sessions",
         label: cp.goSessions,
         section: "navigation",

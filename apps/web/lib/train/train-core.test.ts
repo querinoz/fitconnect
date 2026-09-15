@@ -12,6 +12,7 @@ import {
 } from "./machine";
 import { readinessFromApi } from "./readiness";
 import { recommendPlan } from "./recommend";
+import { bestSetFromHistory } from "./persistence";
 
 describe("TRAIN catalog", () => {
   it("ships a multi-sport library with honest metadata and no calorie claims", () => {
@@ -31,6 +32,8 @@ describe("TRAIN catalog", () => {
     const home = filterPlans({ location: "home", maxDuration: 20 });
     expect(home.every((plan) => plan.location === "home" && plan.durationMin <= 20)).toBe(true);
     expect(filterPlans({ sport: "hiit" }).map((plan) => plan.id)).toContain("plan_hiit_v1");
+    expect(getTrainPlan("plan_warmup_v1")?.trainingType).toBe("warm-up");
+    expect(filterPlans({ trainingType: "cool-down" }).map((plan) => plan.id)).toContain("plan_cooldown_v1");
   });
 
   it("substitutes a movement without inventing load history", () => {
@@ -153,5 +156,36 @@ describe("TRAIN state machine", () => {
       rpe: 7
     });
     expect(volumeKg(snap)).toBe(300);
+  });
+
+  it("arms a timed work countdown without inventing heart rate", () => {
+    let snap = reduceTrain(IDLE_SNAPSHOT, { type: "select_plan", planId: "plan_hiit_v1" });
+    snap = reduceTrain(snap, { type: "start", nowMs: 0, sessionId: "timed" });
+    expect(snap.workRemainingSec).toBeGreaterThan(0);
+    const remaining = snap.workRemainingSec;
+    snap = reduceTrain(snap, { type: "tick" });
+    expect(snap.workRemainingSec).toBe(remaining - 1);
+    expect(snap.phase).toBe("active");
+  });
+
+  it("reads a previous best from device history only", () => {
+    const best = bestSetFromHistory(
+      [
+        {
+          sessionId: "old",
+          planId: "plan_upper_push_v2",
+          completedAtMs: 1,
+          durationMs: 1_000,
+          sets: 1,
+          volumeKg: 200,
+          saveStatus: "local_only",
+          bestSets: [
+            { exerciseId: "ex_bench_press", name: "Barbell bench press", reps: 5, loadKg: 40, rpe: 7 }
+          ]
+        }
+      ],
+      "ex_bench_press"
+    );
+    expect(best?.loadKg).toBe(40);
   });
 });

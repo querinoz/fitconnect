@@ -1,12 +1,12 @@
 "use client";
 
 import { AuthGate } from "@/components/auth-gate";
-import { GamificationPanel } from "@/components/gamification/gamification-panel";
+import { AscendExperience } from "@/components/ascend/ascend-experience";
 
 export default function AchievementsPage() {
   return (
     <AuthGate roles={["athlete", "admin"]}>
-      <GamificationPanel />
+      <AscendExperience />
     </AuthGate>
   );
 }

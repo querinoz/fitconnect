@@ -19,7 +19,10 @@ import {
   findAnyExercise,
   getTrainPlan
 } from "@/lib/train/catalog";
+import { success as hapticSuccess, tap as hapticTap } from "@/lib/pwa/haptics";
+import { notifyTrainProgress } from "@/lib/train/progress";
 import {
+  IDLE_SNAPSHOT,
   currentSlot,
   durationMs,
   formatTimer,
@@ -31,11 +34,14 @@ import {
   zenithCues
 } from "@/lib/train/machine";
 import {
+  bestSetFromHistory,
   clearTrainSnapshot,
+  devicePrs,
   listLocalHistory,
   loadTrainSnapshot,
   persistTrainSnapshot,
-  recordLocalHistory
+  recordLocalHistory,
+  setsForHistory
 } from "@/lib/train/persistence";
 import { readinessFromApi } from "@/lib/train/readiness";
 import { recommendPlan } from "@/lib/train/recommend";
@@ -52,7 +58,8 @@ const FILTER_CHIPS = [
   { id: "mobility", label: "Mobility" },
   { id: "recovery", label: "Recovery" },
   { id: "conditioning", label: "Conditioning" },
-  { id: "sport", label: "Sport" }
+  { id: "sport", label: "Sport" },
+  { id: "endurance", label: "Endurance" }
 ] as const;
 
 function newId(): string {
@@ -73,21 +80,7 @@ async function fetchReadiness(): Promise<ReadinessView> {
 
 export function TrainExperience() {
   const user = useAuthStore((s) => s.user);
-  const [snapshot, setSnapshot] = useState<TrainSnapshot>(() => reduceTrain({
-    phase: "idle",
-    resumePhase: null,
-    planId: null,
-    sessionId: "",
-    startedAtMs: null,
-    completedAtMs: null,
-    slotIndex: 0,
-    restRemainingSec: 0,
-    restDurationSec: 0,
-    sets: [],
-    lastError: null,
-    saveStatus: "idle",
-    substituted: {}
-  }, { type: "reset" }));
+  const [snapshot, setSnapshot] = useState<TrainSnapshot>(() => reduceTrain(IDLE_SNAPSHOT, { type: "reset" }));
   const [readiness, setReadiness] = useState<ReadinessView>(() =>
     readinessFromApi({ score: null, source: "pending" })
   );
@@ -95,7 +88,11 @@ export function TrainExperience() {
   const [maxDuration, setMaxDuration] = useState<number | undefined>(undefined);
   const [difficulty, setDifficulty] = useState("all");
   const [location, setLocation] = useState("all");
+  const [equipment, setEquipment] = useState("all");
+  const [trainingType, setTrainingType] = useState("all");
   const [offline, setOffline] = useState(false);
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  const [ascendNote, setAscendNote] = useState<string | null>(null);
   const [reps, setReps] = useState("");
   const [load, setLoad] = useState("");
   const [rpe, setRpe] = useState<number | null>(null);
@@ -131,8 +128,11 @@ export function TrainExperience() {
   }, []);
 
   useEffect(() => {
-    if (snapshot.phase !== "rest") return;
-    const id = window.setInterval(() => dispatch({ type: "tick" }), 1000);
+    if (snapshot.phase !== "rest" && snapshot.phase !== "active") return;
+    const id = window.setInterval(() => {
+      setNowMs(Date.now());
+      dispatch({ type: "tick" });
+    }, 1000);
     return () => window.clearInterval(id);
   }, [snapshot.phase, dispatch]);
 
@@ -154,17 +154,22 @@ export function TrainExperience() {
         sport,
         difficulty,
         location,
+        equipment,
+        trainingType,
         maxDuration
       }),
-    [sport, difficulty, location, maxDuration]
+    [sport, difficulty, location, equipment, trainingType, maxDuration]
   );
   const plan = snapshot.planId ? getTrainPlan(snapshot.planId) : undefined;
   const progress = sessionProgress(snapshot);
   const cues = zenithCues(snapshot, readiness);
   const previous = previousSetForCurrent(snapshot);
   const upcoming = nextSlot(snapshot);
-  const elapsed = formatTimer(Math.floor(durationMs(snapshot) / 1000));
+  const elapsed = formatTimer(Math.floor(durationMs(snapshot, nowMs) / 1000));
   const live = snapshot.phase === "active" || snapshot.phase === "rest" || snapshot.phase === "paused";
+  const historyBest = slot
+    ? bestSetFromHistory(listLocalHistory(), slot.exerciseId, snapshot.sessionId)
+    : null;
 
   async function saveCompletion(next: TrainSnapshot) {
     if (!next.planId || !next.sessionId || !next.startedAtMs || !next.completedAtMs) return;
@@ -190,9 +195,27 @@ export function TrainExperience() {
       planId: next.planId,
       completedAtMs: next.completedAtMs,
       durationMs: durationMs(next),
-      sets: next.sets.length,
-      saveStatus: "local_only"
+      sets: next.sets.filter((set) => !set.skipped).length,
+      volumeKg: volumeKg(next),
+      saveStatus: "local_only",
+      bestSets: setsForHistory(next.sets)
     });
+    const progress = await notifyTrainProgress({
+      sessionId: next.sessionId,
+      durationMs: durationMs(next),
+      planId: next.planId
+    });
+    if (progress.status === "applied" && progress.awardedXp != null) {
+      setAscendNote(`Ascend recorded +${progress.awardedXp} XP from this session.`);
+    } else if (progress.status === "duplicate") {
+      setAscendNote("This session was already counted in Ascend.");
+    } else if (progress.status === "local_only" || progress.status === "offline") {
+      setAscendNote("Ascend cloud is unavailable. Session stays on this device.");
+    } else if (progress.status === "unauthorized") {
+      setAscendNote("Sign in to write Ascend progress. Local history is kept.");
+    } else {
+      setAscendNote("Ascend was not updated. Training history on this device is intact.");
+    }
     if (!user?.id) {
       dispatch({
         type: "mark_save",
@@ -225,8 +248,17 @@ export function TrainExperience() {
         });
         return;
       }
+      recordLocalHistory({
+        sessionId: next.sessionId,
+        planId: next.planId,
+        completedAtMs: next.completedAtMs,
+        durationMs: durationMs(next),
+        sets: next.sets.filter((set) => !set.skipped).length,
+        volumeKg: volumeKg(next),
+        saveStatus: "saved",
+        bestSets: setsForHistory(next.sets)
+      });
       dispatch({ type: "mark_save", status: "saved" });
-      clearTrainSnapshot();
     } catch {
       dispatch({
         type: "mark_save",
@@ -273,20 +305,24 @@ export function TrainExperience() {
         </div>
       </header>
 
-      {snapshot.phase === "idle" || snapshot.phase === "briefing" ? (
+      {snapshot.phase === "idle" ? (
         <ReadinessCard readiness={readiness} recommendation={recommendation} onOpen={() => dispatch({ type: "select_plan", planId: recommendation.plan.id })} />
       ) : null}
 
-      {(snapshot.phase === "idle" || snapshot.phase === "briefing") && (
+      {snapshot.phase === "idle" && (
         <>
           <FilterBar
             sport={sport}
             difficulty={difficulty}
             location={location}
+            equipment={equipment}
+            trainingType={trainingType}
             maxDuration={maxDuration}
             onSport={setSport}
             onDifficulty={setDifficulty}
             onLocation={setLocation}
+            onEquipment={setEquipment}
+            onTrainingType={setTrainingType}
             onDuration={setMaxDuration}
           />
           <section aria-label="Workout library" className="grid gap-4 md:grid-cols-2">
@@ -314,7 +350,10 @@ export function TrainExperience() {
           plan={plan}
           readiness={readiness}
           cues={cues}
-          onStart={() => dispatch({ type: "start", nowMs: Date.now(), sessionId: newId() })}
+          onStart={() => {
+            hapticTap();
+            dispatch({ type: "start", nowMs: Date.now(), sessionId: newId() });
+          }}
           onBack={() => dispatch({ type: "reset" })}
         />
       ) : null}
@@ -326,6 +365,7 @@ export function TrainExperience() {
           slot={slot}
           upcoming={upcoming}
           previous={previous}
+          historyBest={historyBest}
           progress={progress}
           elapsed={elapsed}
           cues={cues}
@@ -335,7 +375,8 @@ export function TrainExperience() {
           onReps={setReps}
           onLoad={setLoad}
           onRpe={setRpe}
-          onLog={() =>
+          onLog={() => {
+            hapticSuccess();
             dispatch({
               type: "log_set",
               nowMs: Date.now(),
@@ -343,8 +384,8 @@ export function TrainExperience() {
               loadKg: load ? Number(load) : null,
               timeSec: slot.targetTimeSec,
               rpe
-            })
-          }
+            });
+          }}
           onSkip={() => dispatch({ type: "skip_exercise", nowMs: Date.now() })}
           onPause={() => dispatch({ type: "pause" })}
           onFinish={finishNow}
@@ -384,8 +425,12 @@ export function TrainExperience() {
           plan={plan}
           snapshot={snapshot}
           elapsed={elapsed}
+          ascendNote={ascendNote}
+          prs={devicePrs(snapshot.sets, listLocalHistory(), snapshot.sessionId)}
+          onRetry={() => void saveCompletion(snapshot)}
           onNew={() => {
             clearTrainSnapshot();
+            setAscendNote(null);
             dispatch({ type: "reset" });
           }}
         />
@@ -399,6 +444,9 @@ export function TrainExperience() {
 
       {!live && snapshot.phase !== "complete" ? (
         <footer className="flex flex-wrap gap-3 text-sm">
+          <Link className="text-eos-telemetry underline-offset-4 hover:underline" href="/coaches">
+            Find a coach
+          </Link>
           <Link className="text-eos-telemetry underline-offset-4 hover:underline" href="/sessions">
             Coach bookings
           </Link>
@@ -455,10 +503,14 @@ function FilterBar(props: {
   sport: string;
   difficulty: string;
   location: string;
+  equipment: string;
+  trainingType: string;
   maxDuration?: number;
   onSport: (value: string) => void;
   onDifficulty: (value: string) => void;
   onLocation: (value: string) => void;
+  onEquipment: (value: string) => void;
+  onTrainingType: (value: string) => void;
   onDuration: (value: number | undefined) => void;
 }) {
   return (
@@ -486,9 +538,27 @@ function FilterBar(props: {
         ))}
         {["all", ...TRAIN_FILTERS.locations].map((item) => (
           <FilterChip
-            key={item}
+            key={`loc-${item}`}
             active={props.location === item}
             onClick={() => props.onLocation(item)}
+          >
+            {item}
+          </FilterChip>
+        ))}
+        {["all", ...TRAIN_FILTERS.equipment].map((item) => (
+          <FilterChip
+            key={`eq-${item}`}
+            active={props.equipment === item}
+            onClick={() => props.onEquipment(item)}
+          >
+            {item === "all" ? "Any kit" : item}
+          </FilterChip>
+        ))}
+        {["all", "warm-up", "cool-down"].map((item) => (
+          <FilterChip
+            key={`type-${item}`}
+            active={props.trainingType === item}
+            onClick={() => props.onTrainingType(item)}
           >
             {item}
           </FilterChip>
@@ -617,6 +687,7 @@ function LiveBlock(props: {
   slot: NonNullable<ReturnType<typeof currentSlot>>;
   upcoming: ReturnType<typeof nextSlot>;
   previous: ReturnType<typeof previousSetForCurrent>;
+  historyBest: ReturnType<typeof bestSetFromHistory>;
   progress: { done: number; total: number };
   elapsed: string;
   cues: string[];
@@ -638,6 +709,7 @@ function LiveBlock(props: {
   return (
     <div className="space-y-4" data-testid="train-live">
       <ProgressRing percent={pct} label={`${props.progress.done}/${props.progress.total}`} elapsed={props.elapsed} />
+      <SessionTimeline snapshot={props.snapshot} />
       <BentoCard label={`ACTIVE · SET ${props.slot.setNumber}/${props.slot.targetSets}`} elevation="2">
         <p className="eos-headline text-4xl leading-none sm:text-6xl">{props.slot.name}</p>
         <p className="mt-3 text-sm text-eos-on-surface-muted">{props.slot.instructions}</p>
@@ -650,6 +722,11 @@ function LiveBlock(props: {
             Previous: {props.previous.reps ?? "—"}
             {props.previous.loadKg != null ? ` × ${props.previous.loadKg} kg` : ""}
             {props.previous.rpe != null ? ` · RPE ${props.previous.rpe}` : ""}
+          </p>
+        ) : props.historyBest ? (
+          <p className="mt-3 text-sm">
+            Last time on this device: {props.historyBest.reps ?? "—"}
+            {props.historyBest.loadKg != null ? ` × ${props.historyBest.loadKg} kg` : ""}
           </p>
         ) : (
           <p className="mt-3 text-sm text-eos-on-surface-muted">No previous logged set for this movement.</p>
@@ -666,8 +743,12 @@ function LiveBlock(props: {
             />
           </label>
         ) : (
-          <p className="mt-6 font-mono text-5xl text-eos-telemetry" aria-label="Timed target">
-            {formatTimer(props.slot.targetTimeSec ?? 0)}
+          <p
+            className="mt-6 font-mono text-5xl text-eos-telemetry motion-safe:transition-transform"
+            aria-label="Timed remaining"
+            aria-live="polite"
+          >
+            {formatTimer(props.snapshot.workRemainingSec || props.slot.targetTimeSec || 0)}
           </p>
         )}
         {props.slot.weighted ? (
@@ -796,14 +877,21 @@ function CompleteBlock({
   plan,
   snapshot,
   elapsed,
+  ascendNote,
+  prs,
+  onRetry,
   onNew
 }: {
   plan: TrainPlan;
   snapshot: TrainSnapshot;
   elapsed: string;
+  ascendNote: string | null;
+  prs: string[];
+  onRetry: () => void;
   onNew: () => void;
 }) {
   const history = listLocalHistory();
+  const canRetry = snapshot.saveStatus === "failed" || snapshot.saveStatus === "local_only";
   return (
     <BentoCard label="COMPLETE" elevation="2" data-testid="train-complete">
       <p className="eos-headline text-5xl text-eos-voltline">Session in the book.</p>
@@ -830,16 +918,63 @@ function CompleteBlock({
           }
         />
       </div>
+      {prs.length > 0 ? (
+        <p className="mt-4 text-sm text-eos-performance">
+          Device PRs vs your last logged sets: {prs.join(", ")}. Not a global ranking.
+        </p>
+      ) : null}
       <p className="mt-4 text-sm text-eos-on-surface-muted">
-        Heart-rate zones, calories and PRs stay hidden unless a connected source recorded them.
+        Heart-rate zones, calories and cloud PRs stay hidden unless a connected source recorded them.
       </p>
+      {ascendNote ? <p className="mt-2 text-sm">{ascendNote}</p> : null}
       {history[0] ? (
         <p className="mt-2 text-sm">Last saved locally: {plan.title} · {elapsed}</p>
+      ) : null}
+      {canRetry ? (
+        <GhostButton className="mt-4 w-full" onClick={onRetry} data-testid="train-retry-save">
+          Retry cloud save
+        </GhostButton>
       ) : null}
       <PrimaryButton className="mt-6" onClick={onNew} data-testid="train-new">
         Back to TRAIN
       </PrimaryButton>
+      <div className="mt-3 flex flex-wrap gap-3 text-sm">
+        <Link className="text-eos-telemetry underline-offset-4 hover:underline" href="/achievements">
+          Open Ascend
+        </Link>
+        <Link className="text-eos-telemetry underline-offset-4 hover:underline" href="/dashboard">
+          Recovery context
+        </Link>
+      </div>
     </BentoCard>
+  );
+}
+
+function SessionTimeline({ snapshot }: { snapshot: TrainSnapshot }) {
+  if (!snapshot.planId) return null;
+  const plan = getTrainPlan(snapshot.planId);
+  if (!plan) return null;
+  const slots = buildSlots(plan);
+  return (
+    <ol className="flex flex-wrap gap-1" aria-label="Session timeline">
+      {slots.map((item, index) => {
+        const done = index < snapshot.sets.length;
+        const current = index === snapshot.slotIndex && snapshot.phase === "active";
+        return (
+          <li
+            key={`${item.exerciseId}-${item.setNumber}-${index}`}
+            className={
+              done
+                ? "h-2 w-6 rounded-full bg-eos-voltline"
+                : current
+                  ? "h-2 w-6 rounded-full bg-eos-telemetry"
+                  : "h-2 w-6 rounded-full bg-white/10"
+            }
+            title={`${item.name} set ${item.setNumber}`}
+          />
+        );
+      })}
+    </ol>
   );
 }
 
@@ -873,7 +1008,7 @@ function ProgressRing({
   return (
     <div className="flex items-center gap-4">
       <div
-        className="grid h-20 w-20 place-items-center rounded-full"
+        className="grid h-20 w-20 place-items-center rounded-full motion-reduce:[transition:none]"
         style={{
           background: `conic-gradient(var(--eos-voltline) ${clamped * 3.6}deg, rgba(255,255,255,0.08) 0deg)`
         }}

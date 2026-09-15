@@ -39,7 +39,7 @@ function makeGamificationStore(getDaily: () => MissionDef[], storageName: string
   return create<GamificationState>()(
     persist(
       (set, get) => ({
-        xp: 120,
+        xp: 0,
         completedToday: [] as string[],
         lastActiveDate: null,
         streakDays: 0,

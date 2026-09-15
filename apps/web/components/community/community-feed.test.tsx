@@ -38,4 +38,43 @@ describe("CommunityFeed", () => {
     expect(await screen.findByText(/sign in to post/i)).toBeInTheDocument();
     expect(screen.queryByText(/just now/i)).not.toBeInTheDocument();
   });
+
+  it("does not map clap reactions to comment counts", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((url: string) => {
+        if (String(url).includes("/comments")) {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: async () => ({ comments: [] })
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            posts: [
+              {
+                id: "p1",
+                author: { name: "Ines", avatar: "/a.png", sport: "Running" },
+                kind: "Check-in",
+                text: "Easy miles",
+                likes: 2,
+                comments: 9,
+                ago: "1h"
+              }
+            ]
+          })
+        });
+      })
+    );
+    const user = userEvent.setup();
+    render(<CommunityFeed filteredIds={null} />);
+    expect(await screen.findByText(/easy miles/i)).toBeInTheDocument();
+    expect(screen.getByText("🔥 2")).toBeInTheDocument();
+    expect(screen.getByText("👏 0")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /comments/i }));
+    expect(await screen.findByText(/no comments yet/i)).toBeInTheDocument();
+  });
 });

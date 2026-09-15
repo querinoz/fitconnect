@@ -304,7 +304,8 @@ function DiscoverInner() {
           Elite Discovery
         </h1>
         <p className="mt-2 max-w-2xl text-eos-on-surface-muted">
-          Connect with world-class performance specialists. Matches optimized by FitConnect telemetry data.
+          Editorial specialist previews. Live availability and booking require a signed-in session
+          at /coaches — this page does not invent a booked slot.
         </p>
       </header>
 

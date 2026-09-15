@@ -445,6 +445,42 @@ export const TRAIN_PLANS: TrainPlan[] = [
     structure: ["Push", "Squat", "Brace", "Skip"],
     zenithNote: "Equipment-free on purpose. Substitute any movement you cannot perform.",
     exercises: [pushUp, { ...squat, weighted: false, targetLoadKg: null }, plank, jumpRope]
+  },
+  {
+    id: "plan_warmup_v1",
+    title: "Prime the session",
+    purpose: "Raise temperature and open hips before the main work.",
+    outcome: "A completed warm-up. Not a readiness or calorie score.",
+    durationMin: 8,
+    difficulty: "easy",
+    equipment: ["none"],
+    location: "home",
+    sport: "mobility",
+    goal: "mobility",
+    plannedIntensity: "recover",
+    trainingType: "warm-up",
+    muscleGroups: ["hips", "shoulders"],
+    structure: ["Open", "Brace"],
+    zenithNote: "Use this before a heavier catalog session. It does not replace a recovery signal.",
+    exercises: [hipOpen, { ...plank, targetSets: 1, targetTimeSec: 20, restSec: 20 }]
+  },
+  {
+    id: "plan_cooldown_v1",
+    title: "Downshift",
+    purpose: "Leave the session with breathing and an easy walk-down.",
+    outcome: "A completed cool-down. HRV is not inferred from this block.",
+    durationMin: 8,
+    difficulty: "easy",
+    equipment: ["none"],
+    location: "home",
+    sport: "recovery",
+    goal: "recovery",
+    plannedIntensity: "restore",
+    trainingType: "cool-down",
+    muscleGroups: ["parasympathetic"],
+    structure: ["Breath", "Easy close"],
+    zenithNote: "Optional breathing is coaching copy, not a measured recovery observation.",
+    exercises: [breath]
   }
 ];
 
@@ -463,7 +499,9 @@ export const TRAIN_FILTERS = {
   ] as const,
   durations: [15, 25, 35, 45] as const,
   difficulties: ["easy", "moderate", "hard"] as const,
-  locations: ["gym", "home", "outdoor", "pool"] as const
+  locations: ["gym", "home", "outdoor", "pool"] as const,
+  equipment: ["none", "dumbbells", "barbell", "bike"] as const,
+  trainingTypes: ["strength", "hypertrophy", "endurance", "conditioning", "mobility", "recovery", "sport-specific", "warm-up", "cool-down"] as const
 };
 
 export function getTrainPlan(id: string): TrainPlan | undefined {
@@ -731,6 +769,7 @@ export function filterPlans(input: {
   maxDuration?: number;
   intensity?: string;
   muscle?: string;
+  trainingType?: string;
 }): TrainPlan[] {
   return TRAIN_PLANS.filter((plan) => {
     if (input.sport && input.sport !== "all" && plan.sport !== input.sport) return false;
@@ -741,6 +780,9 @@ export function filterPlans(input: {
     if (input.location && input.location !== "all" && plan.location !== input.location) return false;
     if (input.maxDuration && plan.durationMin > input.maxDuration) return false;
     if (input.intensity && input.intensity !== "all" && plan.plannedIntensity !== input.intensity) {
+      return false;
+    }
+    if (input.trainingType && input.trainingType !== "all" && plan.trainingType !== input.trainingType) {
       return false;
     }
     if (input.muscle && !plan.muscleGroups.includes(input.muscle)) return false;

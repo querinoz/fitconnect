@@ -1,4 +1,5 @@
 import { TRAIN_PLANS } from "./catalog";
+import { listLocalHistory } from "./persistence";
 import type { ReadinessView, TrainPlan } from "./types";
 
 export type Recommendation = {
@@ -9,12 +10,19 @@ export type Recommendation = {
 
 export function recommendPlan(readiness: ReadinessView, plans = TRAIN_PLANS): Recommendation {
   const fallback = plans.find((plan) => plan.id === "plan_upper_push_v2") ?? plans[0]!;
+  const recent = typeof window !== "undefined" ? listLocalHistory()[0] : undefined;
+  const recentNote =
+    recent && recent.planId === fallback.id
+      ? " Your last session on this device was the same plan — pick another card if you want variety."
+      : "";
+
   if (!readiness.available || !readiness.band) {
     return {
       plan: fallback,
       adapted: false,
       reason:
-        "No reliable recovery signal. Showing the default strength session — not an adapted prescription."
+        "No reliable recovery signal. Showing the default strength session — not an adapted prescription." +
+        recentNote
     };
   }
   const pick =

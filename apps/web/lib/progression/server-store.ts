@@ -1,4 +1,5 @@
 import { resolveCanonicalLevel } from "@/lib/ascend/canonical-levels";
+import { DEFAULT_PROGRESSION_XP, xpForProgressionEvent } from "@/lib/progression/xp";
 
 /**
  * IN_MEMORY_DEMO adapter — process-local Map.
@@ -19,6 +20,7 @@ export type ProgressionEvent = {
     elevationGainM?: number;
     /** Canonical activities.id when awarding from a workout */
     sessionId?: string;
+    workoutId?: string;
   };
 };
 
@@ -44,7 +46,7 @@ const users = new Map<string, UserState>();
 
 function defaultState(): UserState {
   return {
-    totalXp: 120,
+    totalXp: DEFAULT_PROGRESSION_XP,
     streakDays: 0,
     badges: [],
     eventIds: new Set(),
@@ -71,10 +73,7 @@ export function getProgression(userId: string): ProgressionSnapshot {
 }
 
 function xpForEvent(event: ProgressionEvent): number {
-  if (typeof event.xpAward === "number" && event.xpAward > 0) return event.xpAward;
-  if (event.type === "MISSION_COMPLETED") return 25;
-  const distanceM = event.payload?.distanceM ?? 0;
-  return Math.max(15, Math.round(distanceM / 100));
+  return xpForProgressionEvent(event);
 }
 
 export type ApplyEventResult = {

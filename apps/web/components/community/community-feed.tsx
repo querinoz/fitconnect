@@ -6,9 +6,17 @@ import { useChannel } from "@/lib/realtime/use-channel";
 import { Button } from "@/components/ui/button";
 import { PremiumCard } from "@/components/ui-glass/premium-system";
 import { cn } from "@/lib/utils";
-import { Heart, MessageCircle, Share2 } from "lucide-react";
+import { Heart, MessageCircle, Share2, Flag } from "lucide-react";
 
 type FeedPost = CommunityPost & { reactions: Record<string, number> };
+
+type PostComment = {
+  id: string;
+  postId: string;
+  authorId: string;
+  text: string;
+  createdAt: string;
+};
 
 function withReactions(post: CommunityPost): FeedPost {
   return {
@@ -16,7 +24,7 @@ function withReactions(post: CommunityPost): FeedPost {
     reactions: {
       "🔥": post.likes,
       "💪": 0,
-      "👏": post.comments
+      "👏": 0
     }
   };
 }
@@ -32,12 +40,31 @@ export function CommunityFeed({
   const [postError, setPostError] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [kind, setKind] = useState<CommunityPost["kind"]>("Check-in");
+  const [offline, setOffline] = useState(false);
   const { messages, send } = useChannel("community:feed");
+
+  useEffect(() => {
+    const onStatus = () => setOffline(typeof navigator !== "undefined" && navigator.onLine === false);
+    onStatus();
+    window.addEventListener("online", onStatus);
+    window.addEventListener("offline", onStatus);
+    return () => {
+      window.removeEventListener("online", onStatus);
+      window.removeEventListener("offline", onStatus);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       try {
+        if (typeof navigator !== "undefined" && navigator.onLine === false) {
+          if (!cancelled) {
+            setError("You are offline. Posts already on this device stay visible; new posts will not publish.");
+            setLoading(false);
+          }
+          return;
+        }
         const res = await fetch("/api/v1/community/posts");
         if (res.status === 503) {
           if (!cancelled) {
@@ -90,7 +117,7 @@ export function CommunityFeed({
           likes: 0,
           comments: 0,
           ago: "just now",
-          reactions: { "🔥": 1 }
+          reactions: { "🔥": 0, "💪": 0, "👏": 0 }
         },
         ...prev
       ];
@@ -105,6 +132,10 @@ export function CommunityFeed({
 
   const publish = useCallback(async () => {
     if (!draft.trim()) return;
+    if (offline) {
+      setPostError("You are offline. Nothing was published.");
+      return;
+    }
     const postKind = kind;
     const text = draft.trim();
     setPostError(null);
@@ -137,7 +168,7 @@ export function CommunityFeed({
     });
     setPosts((prev) => [withReactions(post), ...prev]);
     setDraft("");
-  }, [draft, kind, send]);
+  }, [draft, kind, send, offline]);
 
   async function react(postId: string, emoji: string) {
     setPosts((prev) =>
@@ -184,14 +215,31 @@ export function CommunityFeed({
         return;
       }
     } catch {
-      /* user cancelled */
       return;
     }
     await navigator.clipboard.writeText(payload);
   }
 
+  async function report(postId: string) {
+    const res = await fetch(`/api/v1/community/posts/${encodeURIComponent(postId)}/report`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason: "user_report" })
+    });
+    if (!res.ok) {
+      setPostError("Report was not stored. Try again after signing in.");
+      return;
+    }
+    setPostError("Report received. We will not hide the post until moderation runs.");
+  }
+
   return (
     <div className="space-y-6">
+      {offline ? (
+        <p role="status" className="text-sm text-eos-recovery">
+          Offline — new posts, comments, and reactions will not publish.
+        </p>
+      ) : null}
       <PremiumCard className="p-4 space-y-3">
         <p className="text-sm font-semibold text-ink-100">Create post</p>
         <div className="flex flex-wrap gap-1.5">
@@ -218,7 +266,7 @@ export function CommunityFeed({
           placeholder="Share a PR, check-in, or race report…"
           className="w-full rounded-xl border border-ink-800 bg-ink-950/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/60"
         />
-        <Button type="button" size="sm" onClick={() => void publish()} disabled={!draft.trim()}>
+        <Button type="button" size="sm" onClick={() => void publish()} disabled={!draft.trim() || offline}>
           Post to feed
         </Button>
         {postError ? (
@@ -283,7 +331,7 @@ export function CommunityFeed({
                 key={emoji}
                 type="button"
                 onClick={() => void react(post.id, emoji)}
-                className="rounded-full border border-ink-800 bg-ink-950/50 px-2.5 py-1 text-xs hover:border-brand-400/40"
+                className="min-h-11 rounded-full border border-ink-800 bg-ink-950/50 px-2.5 py-1 text-xs hover:border-brand-400/40"
               >
                 {emoji} {post.reactions[emoji] ?? 0}
               </button>
@@ -292,7 +340,7 @@ export function CommunityFeed({
           <div className="flex items-center gap-4 text-xs text-ink-500 pt-2 border-t border-ink-800">
             <span className="inline-flex items-center gap-1">
               <Heart className="h-3.5 w-3.5" aria-hidden />
-              {post.likes + Object.values(post.reactions).reduce((a, b) => a + b, 0)}
+              {Object.values(post.reactions).reduce((a, b) => a + b, 0)}
             </span>
             <span className="inline-flex items-center gap-1">
               <MessageCircle className="h-3.5 w-3.5" aria-hidden />
@@ -300,15 +348,121 @@ export function CommunityFeed({
             </span>
             <button
               type="button"
-              className="inline-flex items-center gap-1 hover:text-ink-300"
+              className="inline-flex min-h-11 items-center gap-1 hover:text-ink-300"
               onClick={() => void share(post)}
             >
               <Share2 className="h-3.5 w-3.5" aria-hidden />
               Share
             </button>
+            <button
+              type="button"
+              className="inline-flex min-h-11 items-center gap-1 hover:text-eos-alert"
+              onClick={() => void report(post.id)}
+            >
+              <Flag className="h-3.5 w-3.5" aria-hidden />
+              Report
+            </button>
           </div>
+          <CommentsThread postId={post.id} />
         </PremiumCard>
       ))}
+    </div>
+  );
+}
+
+function CommentsThread({ postId }: { postId: string }) {
+  const [open, setOpen] = useState(false);
+  const [comments, setComments] = useState<PostComment[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function load() {
+    setLoading(true);
+    setError(null);
+    const res = await fetch(`/api/v1/community/posts/${encodeURIComponent(postId)}/comments`);
+    if (res.status === 503) {
+      setError("Comments are unavailable until persistence is configured.");
+      setComments([]);
+      setLoading(false);
+      return;
+    }
+    if (!res.ok) {
+      setError("Could not load comments.");
+      setLoading(false);
+      return;
+    }
+    const body = (await res.json()) as { comments: PostComment[] };
+    setComments(body.comments);
+    setLoading(false);
+  }
+
+  async function submit() {
+    if (!draft.trim()) return;
+    const res = await fetch(`/api/v1/community/posts/${encodeURIComponent(postId)}/comments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: draft.trim() })
+    });
+    if (res.status === 401) {
+      setError("Sign in to comment. Nothing was posted.");
+      return;
+    }
+    if (res.status === 503) {
+      setError("Comments are unavailable until persistence is configured.");
+      return;
+    }
+    if (!res.ok) {
+      setError("Comment failed. Nothing was posted.");
+      return;
+    }
+    const body = (await res.json()) as { comment: PostComment };
+    setComments((prev) => [...prev, body.comment]);
+    setDraft("");
+    setError(null);
+  }
+
+  return (
+    <div className="space-y-2">
+      <button
+        type="button"
+        className="min-h-11 text-xs uppercase tracking-wider text-eos-telemetry"
+        onClick={() => {
+          const next = !open;
+          setOpen(next);
+          if (next) void load();
+        }}
+      >
+        {open ? "Hide comments" : "Comments"}
+      </button>
+      {open ? (
+        <div className="space-y-2">
+          {loading ? <p className="text-xs text-ink-500">Loading comments…</p> : null}
+          {error ? (
+            <p className="text-xs text-eos-alert" role="alert">
+              {error}
+            </p>
+          ) : null}
+          {comments.map((comment) => (
+            <p key={comment.id} className="text-sm text-ink-200">
+              {comment.text}
+            </p>
+          ))}
+          {!loading && !error && comments.length === 0 ? (
+            <p className="text-xs text-ink-500">No comments yet.</p>
+          ) : null}
+          <textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            rows={2}
+            placeholder="Write a comment…"
+            className="w-full rounded-xl border border-ink-800 bg-ink-950/60 px-3 py-2 text-sm"
+          />
+          <Button type="button" size="sm" onClick={() => void submit()} disabled={!draft.trim()}>
+            Comment
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

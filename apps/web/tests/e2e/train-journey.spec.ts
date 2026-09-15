@@ -6,3 +6,12 @@ test("TRAIN is a first-class athlete destination", async ({ page }) => {
   expect(response!.status()).toBeLessThan(500);
   await expect(page).toHaveURL(/\/(train|signin)/);
 });
+
+test("Ascend and coach directory do not 500", async ({ page }) => {
+  const ascend = await page.goto("/achievements");
+  expect(ascend).not.toBeNull();
+  expect(ascend!.status()).toBeLessThan(500);
+  const coaches = await page.goto("/coaches");
+  expect(coaches).not.toBeNull();
+  expect(coaches!.status()).toBeLessThan(500);
+});

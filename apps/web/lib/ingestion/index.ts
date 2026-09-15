@@ -18,3 +18,4 @@ export type IngestionResult = {
 export { ingestWhoopWebhook } from "./providers/whoop";
 export { ingestOuraWebhook } from "./providers/oura";
 export { ingestStravaWebhook } from "./providers/strava";
+export { ingestGarminHealthPayload } from "./providers/garmin";

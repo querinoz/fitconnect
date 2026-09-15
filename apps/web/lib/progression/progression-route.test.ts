@@ -25,7 +25,7 @@ describe("/api/v1/ascend/progression", () => {
     const body = await res.json();
     expect(body.source).toBe("memory");
     expect(body.progression.level.level).toBeGreaterThanOrEqual(1);
-    expect(body.progression.totalXp).toBe(120);
+    expect(body.progression.totalXp).toBe(0);
   });
 
   it("deduplicates events by eventId", async () => {
@@ -56,5 +56,22 @@ describe("/api/v1/ascend/progression", () => {
     expect(first.awardedXp).toBeGreaterThan(0);
     expect(second.status).toBe("DUPLICATE");
     expect(second.awardedXp).toBe(0);
+  });
+
+  it("awards duration-based XP for a completed workout", async () => {
+    const res = await POST(
+      new Request("http://localhost/api/v1/ascend/progression", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId: "evt-duration-1",
+          type: "WORKOUT_COMPLETED",
+          payload: { durationMs: 20 * 60_000 }
+        })
+      })
+    );
+    const body = await res.json();
+    expect(body.status).toBe("APPLIED");
+    expect(body.awardedXp).toBe(40);
   });
 });

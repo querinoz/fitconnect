@@ -3,6 +3,7 @@ import { createSupabaseAdminClient } from "@/lib/db/supabase-admin";
 import { pgQuery } from "@/lib/db/pg-pool";
 import { createSupabaseRlsClient } from "@/lib/identity/supabase-rls-client";
 import type { ApplyEventResult, ProgressionEvent, ProgressionSnapshot } from "@/lib/progression/server-store";
+import { DEFAULT_PROGRESSION_XP, xpForProgressionEvent } from "@/lib/progression/xp";
 
 type ProgressRow = {
   user_id: string;
@@ -11,8 +12,6 @@ type ProgressRow = {
   badges: string[] | unknown;
   updated_at: string;
 };
-
-const DEFAULT_XP = 120;
 
 function snapshotFromRow(row: ProgressRow): ProgressionSnapshot {
   return {
@@ -27,10 +26,7 @@ function snapshotFromRow(row: ProgressRow): ProgressionSnapshot {
 }
 
 function xpForEvent(event: ProgressionEvent): number {
-  if (typeof event.xpAward === "number" && event.xpAward > 0) return event.xpAward;
-  if (event.type === "MISSION_COMPLETED") return 25;
-  const distanceM = event.payload?.distanceM ?? 0;
-  return Math.max(15, Math.round(distanceM / 100));
+  return xpForProgressionEvent(event);
 }
 
 async function readProgressRow(userId: string): Promise<ProgressRow | null> {
@@ -70,7 +66,7 @@ export async function getProgressionFromSupabase(userId: string): Promise<Progre
   const now = new Date().toISOString();
   const row: ProgressRow = {
     user_id: userId,
-    total_xp: DEFAULT_XP,
+    total_xp: DEFAULT_PROGRESSION_XP,
     streak_days: 0,
     badges: [],
     updated_at: now

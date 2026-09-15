@@ -11,6 +11,8 @@ export const IDLE_SNAPSHOT: TrainSnapshot = {
   slotIndex: 0,
   restRemainingSec: 0,
   restDurationSec: 0,
+  workRemainingSec: 0,
+  workDurationSec: 0,
   sets: [],
   lastError: null,
   saveStatus: "idle",
@@ -45,13 +47,13 @@ function enterNextSlot(snapshot: TrainSnapshot, nextIndex: number, nowMs: number
       restRemainingSec: restSec
     };
   }
-  return {
+  return armWorkTimer({
     ...snapshot,
     phase: "active",
     slotIndex: nextIndex,
     restRemainingSec: 0,
     restDurationSec: 0
-  };
+  });
 }
 
 function completeIfPastEnd(snapshot: TrainSnapshot, nowMs = Date.now()): TrainSnapshot {
@@ -67,6 +69,18 @@ function completeIfPastEnd(snapshot: TrainSnapshot, nowMs = Date.now()): TrainSn
     };
   }
   return snapshot;
+}
+
+function armWorkTimer(snapshot: TrainSnapshot): TrainSnapshot {
+  const slot = currentSlot(snapshot);
+  if (slot?.mode === "time" && slot.targetTimeSec && slot.targetTimeSec > 0) {
+    return {
+      ...snapshot,
+      workDurationSec: slot.targetTimeSec,
+      workRemainingSec: slot.targetTimeSec
+    };
+  }
+  return { ...snapshot, workDurationSec: 0, workRemainingSec: 0 };
 }
 
 function applySubs(
@@ -114,7 +128,12 @@ export function previousSetForCurrent(snapshot: TrainSnapshot): LoggedSet | unde
 export function reduceTrain(snapshot: TrainSnapshot, command: TrainCommand): TrainSnapshot {
   switch (command.type) {
     case "restore":
-      return command.snapshot;
+      return {
+        ...IDLE_SNAPSHOT,
+        ...command.snapshot,
+        workRemainingSec: command.snapshot.workRemainingSec ?? 0,
+        workDurationSec: command.snapshot.workDurationSec ?? 0
+      };
     case "reset":
       return { ...IDLE_SNAPSHOT };
     case "select_plan": {
@@ -135,7 +154,7 @@ export function reduceTrain(snapshot: TrainSnapshot, command: TrainCommand): Tra
       if (snapshot.phase !== "briefing" || !snapshot.planId) {
         return { ...snapshot, lastError: "Preview a session before starting." };
       }
-      return {
+      return armWorkTimer({
         ...snapshot,
         phase: "active",
         sessionId: command.sessionId,
@@ -144,8 +163,10 @@ export function reduceTrain(snapshot: TrainSnapshot, command: TrainCommand): Tra
         slotIndex: 0,
         sets: [],
         lastError: null,
-        saveStatus: "idle"
-      };
+        saveStatus: "idle",
+        workRemainingSec: 0,
+        workDurationSec: 0
+      });
     }
     case "log_set": {
       if (snapshot.phase !== "active") {
@@ -202,12 +223,14 @@ export function reduceTrain(snapshot: TrainSnapshot, command: TrainCommand): Tra
     }
     case "skip_rest": {
       if (snapshot.phase !== "rest") return snapshot;
-      return completeIfPastEnd({
-        ...snapshot,
-        phase: "active",
-        restRemainingSec: 0,
-        restDurationSec: 0
-      });
+      return completeIfPastEnd(
+        armWorkTimer({
+          ...snapshot,
+          phase: "active",
+          restRemainingSec: 0,
+          restDurationSec: 0
+        })
+      );
     }
     case "extend_rest": {
       if (snapshot.phase !== "rest") return snapshot;
@@ -231,9 +254,14 @@ export function reduceTrain(snapshot: TrainSnapshot, command: TrainCommand): Tra
       };
     }
     case "tick": {
+      if (snapshot.phase === "active" && snapshot.workRemainingSec > 0) {
+        return { ...snapshot, workRemainingSec: snapshot.workRemainingSec - 1 };
+      }
       if (snapshot.phase !== "rest") return snapshot;
       if (snapshot.restRemainingSec <= 1) {
-        return completeIfPastEnd({ ...snapshot, phase: "active", restRemainingSec: 0 });
+        return completeIfPastEnd(
+          armWorkTimer({ ...snapshot, phase: "active", restRemainingSec: 0 })
+        );
       }
       return { ...snapshot, restRemainingSec: snapshot.restRemainingSec - 1 };
     }
