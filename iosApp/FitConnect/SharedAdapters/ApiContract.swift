@@ -20,7 +20,7 @@ protocol ApiContract {
     func coachSettings() -> [SettingsSectionModel]
 }
 
-struct LocalDemoApi: ApiContract {
+struct HonestCatalogApi: ApiContract {
     func athleteDashboard() -> AthleteDashboardSnapshot { DemoCatalog.athleteDashboard }
     func athleteDiscoverCards() -> [FeatureHighlight] { DemoCatalog.athleteDiscover }
     func athletePrograms() -> [ProgramSummary] { DemoCatalog.athletePrograms }
@@ -49,13 +49,13 @@ struct AppServices {
     let healthKit: any HealthKitContract
     let map: any MapContract
 
-    static let pathA = AppServices(
-        api: LocalDemoApi(),
-        auth: LocalDemoAuthAdapter(),
+    static let production = AppServices(
+        api: HonestCatalogApi(),
+        auth: FitConnectAuthAdapter(),
         offlineQueue: LocalDemoOfflineQueue(),
         realtime: LocalDemoRealtime(),
         zoneEngine: LocalDemoZoneEngine(),
-        healthKit: BlockedExternalHealthKitAdapter(),
+        healthKit: HealthKitLiveAdapter(),
         map: LocalDemoMapAdapter()
     )
 }

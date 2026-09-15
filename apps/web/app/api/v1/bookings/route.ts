@@ -2,11 +2,14 @@ import { NextResponse } from "next/server";
 import { isAuthFailure, requireAthleteId, requireAuth } from "@/lib/api/require-auth";
 import { createAthleteBooking, listAthleteBookings } from "@/lib/db/bookings";
 import { publishSessionBooking } from "@/lib/realtime/publish-booking";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 /**
  * Athlete list-own-bookings — auth subject only; demo mode forbidden (Path A).
  */
 export async function GET(req: Request) {
+  const limited = await enforceRateLimit(req, "booking");
+  if (limited) return limited;
   const auth = await requireAuth(req);
   if (!auth.ok) return auth.response;
   if (auth.demo) {
@@ -25,6 +28,8 @@ export async function GET(req: Request) {
  * Identity always from auth subject; client cannot impersonate another athleteId.
  */
 export async function POST(req: Request) {
+  const limited = await enforceRateLimit(req, "booking");
+  if (limited) return limited;
   const resolved = await requireAthleteId(req);
   if (isAuthFailure(resolved)) return resolved.response;
 

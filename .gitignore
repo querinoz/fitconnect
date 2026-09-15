@@ -86,3 +86,9 @@ qa/reports/*-selftest.json
 /reel01_hexatar.mp4
 content/instagram/publish-run.log
 
+# iOS — generated Xcode project and live Firebase Apple plist (never commit secrets)
+iosApp/*.xcodeproj/
+iosApp/*.xcworkspace/
+iosApp/**/GoogleService-Info.plist
+!iosApp/GoogleService-Info.plist.example
+

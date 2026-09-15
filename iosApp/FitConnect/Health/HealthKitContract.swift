@@ -39,10 +39,10 @@ struct HealthKitCapability: Hashable {
 struct BlockedExternalHealthKitAdapter: HealthKitContract {
     func capability() -> HealthKitCapability {
         HealthKitCapability(
-            title: "HealthKit contract",
-            status: "Blocked external",
-            detail: "This Windows workspace can ship the SwiftUI source tree, but it cannot verify entitlements, simulator behavior, or physical-device HealthKit flows.",
-            buildNote: "IOS_PHYSICAL_BUILD_BLOCKED_EXTERNAL"
+            title: "HealthKit",
+            status: "DATA UNAVAILABLE",
+            detail: "HealthKit is not available in this process. Simulator or device plus user authorization are required. Missing stays missing.",
+            buildNote: "Apple execution required for live samples. This is not a fabricated fallback."
         )
     }
 

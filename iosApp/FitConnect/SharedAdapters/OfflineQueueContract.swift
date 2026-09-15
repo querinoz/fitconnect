@@ -6,6 +6,6 @@ protocol OfflineQueueContract {
 }
 
 struct LocalDemoOfflineQueue: OfflineQueueContract {
-    let pendingCount = 2
-    let statusCopy = "Actions stay editable offline and queue for later sync."
+    var pendingCount: Int { TrainLocalStore.load().filter { $0.saveStatus != SaveStatus.saved.rawValue }.count }
+    let statusCopy = "Sessions stay on-device until the API confirms save. Pending is never invented."
 }

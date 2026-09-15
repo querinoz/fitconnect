@@ -10,6 +10,7 @@ import {
 } from "@/lib/community/supabase-repository";
 import type { CommunityPost } from "@/lib/data";
 import { persistenceReady, isMemoryPersistence } from "@/lib/persistence/config";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 export async function GET() {
   if (!persistenceReady()) {
@@ -26,6 +27,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const limited = await enforceRateLimit(request, "social");
+  if (limited) return limited;
   const auth = await requireAuth(request);
   if (!auth.ok) return auth.response;
 

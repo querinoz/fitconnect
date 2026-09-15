@@ -8,6 +8,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
 import { postgresSslOption } from "./lib/pg-ssl.mjs";
+import { assertMigrationApplyAllowed } from "./lib/pg-apply-guard.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const fileArg = process.argv[2];
@@ -44,6 +45,11 @@ const url = process.env.DIRECT_URL;
 if (!url) {
   console.error("DIRECT_URL required");
   process.exit(1);
+}
+const applyGate = assertMigrationApplyAllowed(url, process.env);
+if (!applyGate.ok) {
+  console.error(applyGate.reason);
+  process.exit(2);
 }
 
 const filePath = path.join(root, "supabase", "migrations", fileArg);

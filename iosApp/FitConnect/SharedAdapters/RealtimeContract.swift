@@ -7,7 +7,7 @@ protocol RealtimeContract {
 }
 
 struct LocalDemoRealtime: RealtimeContract {
-    let statusLabel = "Live telemetry link"
-    let latencyLabel = "42 ms local relay"
+    let statusLabel = "Not connected"
+    let latencyLabel = "No live sample"
     let accent = EosAccent.telemetry
 }

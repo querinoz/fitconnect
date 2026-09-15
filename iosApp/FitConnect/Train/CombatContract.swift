@@ -138,3 +138,20 @@ enum CombatRoundReducer {
         return next
     }
 }
+
+enum WatchFightPresentation {
+    static func nextAction(_ phase: CombatRoundPhase) -> String {
+        switch phase {
+        case .idle: return "START ROUND"
+        case .countdown: return "WORK"
+        case .work, .warning: return "REST"
+        case .rest: return "NEXT ROUND"
+        case .paused: return "RESUME"
+        case .complete: return "DONE"
+        }
+    }
+
+    static func clock(_ remainingSec: Int) -> String {
+        String(format: "%d:%02d", remainingSec / 60, remainingSec % 60)
+    }
+}

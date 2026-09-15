@@ -8,7 +8,7 @@ struct AthleteVaultView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                LocalDemoBanner(note: "Vault doubles as achievements, saved plans, and booking memory in Path A.")
+                FitStatusBanner(note: "Saved plans and bookings stay empty until they exist for this identity.")
 
                 GlassCard(accent: .iris) {
                     Text("VAULT")

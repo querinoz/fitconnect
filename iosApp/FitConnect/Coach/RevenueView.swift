@@ -6,7 +6,7 @@ struct CoachRevenueView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                LocalDemoBanner(note: "Revenue reuses live coach KPIs so the More stack has meaningful depth.")
+                LocalDemoBanner(note: "Payouts stay NOT CONNECTED until Stripe Connect is configured. No fake EUR.")
                 ForEach(metrics.filter { $0.id == "revenue" || $0.id == "bookings" }) { metric in
                     BentoMetric(metric: metric)
                 }

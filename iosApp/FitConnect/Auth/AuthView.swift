@@ -1,8 +1,12 @@
 import SwiftUI
 
 struct AuthView: View {
-    @Bindable var session: DemoSessionStore
+    @Bindable var session: AppSessionStore
     let services: AppServices
+    @State private var email = ""
+    @State private var password = ""
+    @State private var busy = false
+    private let firebase = FirebaseAuthBridge()
 
     var body: some View {
         ZStack {
@@ -14,66 +18,122 @@ struct AuthView: View {
                         Text("FitConnect")
                             .font(.system(size: 34, weight: .bold, design: .rounded))
                             .foregroundStyle(EosColors.textPrimary)
-                        Text(services.auth.headline(for: session.role))
+                        Text(services.auth.headline(for: nil))
                             .font(.title3)
                             .foregroundStyle(EosColors.textSecondary)
                     }
 
-                    LocalDemoBanner(note: "Path A boots local SwiftUI flows only. Expo is archived and external physical iOS builds remain blocked.")
+                    configurationCard
 
-                    GlassCard(accent: .voltline) {
-                        Text("ATHLETE INTELLIGENCE")
-                            .font(.system(size: 11, weight: .medium, design: .monospaced))
-                            .foregroundStyle(EosColors.textSecondary)
-                        Text("Mirror the Android feature surface with real SwiftUI destinations, local demo data, and honest integration boundaries.")
-                            .font(.headline)
-                            .foregroundStyle(EosColors.textPrimary)
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 16) {
-                                ForEach(DemoCatalog.athleteDashboard.metrics) { metric in
-                                    HexMetric(metric: metric)
-                                }
-                            }
+                    if services.auth.configurationState() == .localDemoAllowed {
+                        Button("Continue LOCAL_DEMO") {
+                            session.signInLocalDemo()
                         }
+                        .font(.headline)
+                        .foregroundStyle(EosColors.floor)
+                        .padding(.vertical, 14)
+                        .frame(maxWidth: .infinity)
+                        .background(Capsule().fill(EosColors.voltline))
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("auth-local-demo")
                     }
 
-                    VStack(spacing: 14) {
-                        roleButton(for: .athlete, subtitle: "Open Today, Analysis, Vault, Profile and the Train action.")
-                        roleButton(for: .coach, subtitle: "Open Overview, Athletes, Calendar, Inbox and More.")
+                    VStack(alignment: .leading, spacing: 10) {
+                        TextField("Email", text: $email)
+                            .textContentType(.username)
+                            .textInputAutocapitalization(.never)
+                            .padding(14)
+                            .background(RoundedRectangle(cornerRadius: 16).fill(EosColors.surfaceRaised))
+                        SecureField("Password", text: $password)
+                            .textContentType(.password)
+                            .padding(14)
+                            .background(RoundedRectangle(cornerRadius: 16).fill(EosColors.surfaceRaised))
+                        Button("Sign in with email") {
+                            Task { await signInEmail() }
+                        }
+                        .font(.headline)
+                        .foregroundStyle(EosColors.textPrimary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Capsule().stroke(EosColors.stroke, lineWidth: 1))
+                        .buttonStyle(.plain)
+                        .disabled(busy)
                     }
+
+                    Button("Sign in with Apple") {
+                        Task { await signInApple() }
+                    }
+                    .font(.headline)
+                    .foregroundStyle(EosColors.floor)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Capsule().fill(Color.white))
+                    .buttonStyle(.plain)
+                    .disabled(busy)
+                    .accessibilityIdentifier("auth-apple")
+
+                    if let err = session.lastAuthError {
+                        Text(err)
+                            .foregroundStyle(EosColors.alert)
+                    }
+
+                    Text("Athlete and Coach are modes of one identity. There is no separate coach login.")
+                        .font(.footnote)
+                        .foregroundStyle(EosColors.muted)
                 }
                 .padding(20)
             }
         }
     }
 
-    private func roleButton(for role: AppRole, subtitle: String) -> some View {
-        Button {
-            session.signIn(as: role)
-        } label: {
-            HStack(alignment: .top, spacing: 14) {
-                Image(systemName: role == .athlete ? "figure.run" : "person.3")
-                    .font(.title2.weight(.bold))
-                    .foregroundStyle(role.accent.color)
-                    .frame(width: 46, height: 46)
-                    .background(Circle().fill(EosColors.surfaceRaised))
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Continue as \(role.title)")
-                        .font(.headline)
-                        .foregroundStyle(EosColors.textPrimary)
-                    Text(subtitle)
-                        .font(.subheadline)
-                        .foregroundStyle(EosColors.textSecondary)
-                }
-                Spacer(minLength: 0)
-                Image(systemName: "arrow.right")
-                    .foregroundStyle(EosColors.textSecondary)
-            }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(EosColors.surfaceRaised))
-            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(role.accent.color.opacity(0.24), lineWidth: 1))
+    @ViewBuilder
+    private var configurationCard: some View {
+        let state = services.auth.configurationState()
+        GlassCard(accent: state == .notConfigured ? .warning : .voltline) {
+            Text("ONE LOGIN")
+                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                .foregroundStyle(EosColors.textSecondary)
+            Text(state == .notConfigured
+                 ? "Firebase is not configured on this device. Copy GoogleService-Info.plist from the example template. Sign-in will not be faked."
+                 : "Firebase remains the canonical IdP. Sign in with Apple is offered when the Apple capability is present.")
+                .foregroundStyle(EosColors.textPrimary)
         }
-        .buttonStyle(.plain)
+    }
+
+    private func signInEmail() async {
+        busy = true
+        defer { busy = false }
+        let result = await firebase.signIn(email: email, password: password)
+        switch result {
+        case .success(let identity):
+            session.completeSignIn(identity: identity)
+        case .failure(let error):
+            session.lastAuthError = message(error)
+        }
+    }
+
+    private func signInApple() async {
+        busy = true
+        defer { busy = false }
+        let result = await firebase.signInWithApple()
+        switch result {
+        case .success(let identity):
+            session.completeSignIn(identity: identity)
+        case .failure(let error):
+            session.lastAuthError = message(error)
+        }
+    }
+
+    private func message(_ error: AuthRuntimeError) -> String {
+        switch error {
+        case .notConfigured:
+            return "Firebase Auth is not configured."
+        case .network:
+            return "Network error. Session was not created."
+        case .invalidCredentials:
+            return "Invalid credentials."
+        case .appleUnavailable:
+            return "Sign in with Apple requires a signed Apple capability on a real device or simulator with Xcode."
+        }
     }
 }

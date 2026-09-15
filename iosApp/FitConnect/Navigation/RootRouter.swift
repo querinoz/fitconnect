@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct RootRouter: View {
-    @Bindable var session: DemoSessionStore
+    @Bindable var session: AppSessionStore
     let services: AppServices
 
     var body: some View {

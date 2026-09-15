@@ -6,7 +6,7 @@ struct AthleteProgramsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                LocalDemoBanner(note: "Programs stay athlete-specific and local to this demo shell.")
+                FitStatusBanner(note: "Programs stay empty until the API returns rows for this identity.")
                 ForEach(programs) { program in
                     ProgramCard(program: program)
                 }

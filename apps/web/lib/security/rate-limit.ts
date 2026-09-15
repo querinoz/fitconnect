@@ -10,7 +10,11 @@ export type RateLimitBucket =
   | "ingestion"
   | "strava"
   | "account-delete"
-  | "highcost";
+  | "highcost"
+  | "mcp"
+  | "zenith"
+  | "booking"
+  | "social";
 
 export const RATE_LIMIT_POLICY: Record<
   RateLimitBucket,
@@ -23,7 +27,11 @@ export const RATE_LIMIT_POLICY: Record<
   ingestion: { limit: 30, window: "1 m", scope: "ip" },
   strava: { limit: 30, window: "1 m", scope: "ip+user" },
   "account-delete": { limit: 5, window: "1 h", scope: "ip+user" },
-  highcost: { limit: 20, window: "1 m", scope: "ip+user" }
+  highcost: { limit: 20, window: "1 m", scope: "ip+user" },
+  mcp: { limit: 30, window: "1 m", scope: "ip+user" },
+  zenith: { limit: 20, window: "1 m", scope: "ip+user" },
+  booking: { limit: 20, window: "1 m", scope: "ip+user" },
+  social: { limit: 30, window: "1 m", scope: "ip+user" }
 };
 
 export type RateLimitBackend = "upstash" | "memory" | "skipped";

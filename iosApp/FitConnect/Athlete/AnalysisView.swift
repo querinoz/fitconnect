@@ -8,13 +8,13 @@ struct AthleteAnalysisView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                LocalDemoBanner(note: "LOCAL_DEMO analysis mirrors the Android Discover and telemetry surfaces.")
+                FitStatusBanner(note: "Analysis does not invent workload, HRV, or freshness.")
 
                 GlassCard(accent: .telemetry) {
                     Text("ANALYSIS")
                         .font(.system(size: 11, weight: .medium, design: .monospaced))
                         .foregroundStyle(EosColors.textSecondary)
-                    Text("Workload is trending high, but freshness recovers on time.")
+                    Text("Progression waits on completed sessions. Workload is not invented.")
                         .font(.system(size: 28, weight: .bold, design: .rounded))
                         .foregroundStyle(EosColors.textPrimary)
                     Text("Use the editorial cards below as the SwiftUI equivalent of the Android insight surface.")

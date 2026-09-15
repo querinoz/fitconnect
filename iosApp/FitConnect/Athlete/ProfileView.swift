@@ -1,58 +1,58 @@
 import SwiftUI
 
 struct AthleteProfileView: View {
-    @Bindable var session: DemoSessionStore
+    @Bindable var session: AppSessionStore
     let notifications: [AppNotificationItem]
     var onNavigate: (AthleteRoute) -> Void
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                LocalDemoBanner(note: "Profile keeps account actions local while the rest of Path A stays in demo mode.")
-
                 GlassCard(accent: .voltline) {
-                    Text("Maya Costa")
+                    Text(session.identity?.displayName ?? "Athlete")
                         .font(.system(size: 28, weight: .bold, design: .rounded))
                         .foregroundStyle(EosColors.textPrimary)
-                    Text("Climber / endurance athlete / local demo session")
+                    Text(session.identity?.firebaseUid ?? "unsigned")
+                        .font(.system(size: 12, design: .monospaced))
                         .foregroundStyle(EosColors.textSecondary)
                     HStack(spacing: 10) {
-                        chip("LOCAL_DEMO", accent: .voltline)
-                        chip("Path A", accent: .iris)
-                        chip("SwiftUI", accent: .telemetry)
+                        chip(session.identity?.provider.rawValue.uppercased() ?? "NONE", accent: .voltline)
+                        chip("Athlete mode", accent: .iris)
                     }
+                }
+
+                if session.identity?.modes.contains(.coach) == true {
+                    Button("Switch to Coach") {
+                        session.switchMode(to: .coach)
+                    }
+                    .font(.headline)
+                    .foregroundStyle(EosColors.textPrimary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Capsule().stroke(EosColors.iris, lineWidth: 1))
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("switch-coach")
                 }
 
                 VStack(spacing: 12) {
-                    NeoControl(title: "Messages", subtitle: "Continue the coach thread and inbox surface.", systemImage: "message.badge", accent: .telemetry) { onNavigate(.messages) }
-                    NeoControl(title: "Notifications", subtitle: "Review workout, queue, and coach alerts.", systemImage: "bell", accent: .warning) { onNavigate(.notifications) }
-                    NeoControl(title: "Settings", subtitle: "Open local toggles and Path A platform notes.", systemImage: "gearshape", accent: .iris) { onNavigate(.settings) }
+                    NeoControl(title: "Connections", subtitle: "HealthKit, Watch, WHOOP, Oura, Garmin, Strava.", systemImage: "link", accent: .telemetry) { onNavigate(.connections) }
+                    NeoControl(title: "Booking", subtitle: "Native checkout. No fake success.", systemImage: "calendar", accent: .voltline) { onNavigate(.bookings) }
+                    NeoControl(title: "Zenith", subtitle: "MCP-backed recommendations. No diagnosis.", systemImage: "sparkles", accent: .iris) { onNavigate(.zenith) }
+                    NeoControl(title: "Settings", subtitle: "Privacy for HR, HRV, sleep and impact.", systemImage: "gearshape", accent: .warning) { onNavigate(.settings) }
                 }
 
-                GlassCard(accent: .success) {
-                    Text("LATEST ALERT")
-                        .font(.system(size: 11, weight: .medium, design: .monospaced))
-                        .foregroundStyle(EosColors.textSecondary)
-                    if let first = notifications.first {
-                        Text(first.title)
-                            .font(.headline)
-                            .foregroundStyle(EosColors.textPrimary)
-                        Text(first.body)
-                            .foregroundStyle(EosColors.textSecondary)
-                    }
-                    Button("Sign out") {
-                        session.signOut()
-                    }
-                    .font(.headline)
-                    .foregroundStyle(EosColors.floor)
-                    .padding(.vertical, 12)
-                    .frame(maxWidth: .infinity)
-                    .background(Capsule().fill(EosColors.voltline))
-                    .buttonStyle(.plain)
+                Button("Sign out") {
+                    session.signOut()
                 }
+                .font(.headline)
+                .foregroundStyle(EosColors.floor)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity)
+                .background(Capsule().fill(EosColors.voltline))
+                .buttonStyle(.plain)
             }
             .padding(20)
-            .padding(.bottom, 132)
+            .padding(.bottom, 28)
         }
     }
 

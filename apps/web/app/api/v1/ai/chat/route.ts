@@ -4,7 +4,7 @@ import { enforceRateLimit } from "@/lib/security/rate-limit";
 import { completeZenithChat } from "@/lib/ai/zenith-chat";
 
 export async function POST(request: Request) {
-  const limited = await enforceRateLimit(request, "highcost");
+  const limited = await enforceRateLimit(request, "zenith");
   if (limited) return limited;
 
   const auth = await requireAuth(request);

@@ -10,37 +10,47 @@ struct AthleteTelemetryView: View {
 
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                LocalDemoBanner(note: "\(realtime.statusLabel) / \(realtime.latencyLabel)")
-
                 GlassCard(accent: .telemetry) {
                     Text("TELEMETRY")
                         .font(.system(size: 11, weight: .medium, design: .monospaced))
                         .foregroundStyle(EosColors.textSecondary)
-                    Text("Live effort is stable and cadence drift is under control.")
-                        .font(.system(size: 30, weight: .bold, design: .rounded))
+                    Text("Live samples only. Missing stays missing.")
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
                         .foregroundStyle(EosColors.textPrimary)
+                    Text("\(realtime.statusLabel) · \(realtime.latencyLabel)")
+                        .foregroundStyle(EosColors.textSecondary)
                     HStack(spacing: 12) {
-                        metricCard(title: "Heart rate", value: "164 bpm", accent: .alert)
-                        metricCard(title: "Cadence", value: "91 rpm", accent: .telemetry)
-                        metricCard(title: "Power", value: "282 w", accent: .voltline)
+                        metricCard(title: "Heart rate", value: "MISSING", accent: .alert)
+                        metricCard(title: "Cadence", value: "MISSING", accent: .telemetry)
+                        metricCard(title: "Power", value: "MISSING", accent: .voltline)
                     }
                 }
 
-                GlassCard(accent: .iris) {
-                    Text("ZONE ENGINE")
-                        .font(.system(size: 11, weight: .medium, design: .monospaced))
-                        .foregroundStyle(EosColors.textSecondary)
-                    ForEach(zones) { zone in
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack {
-                                Text(zone.name)
-                                    .foregroundStyle(EosColors.textPrimary)
-                                Spacer()
-                                Text(zone.duration)
-                                    .foregroundStyle(zone.accent.color)
+                if zones.isEmpty {
+                    GlassCard(accent: .iris) {
+                        Text("ZONE ENGINE")
+                            .font(.system(size: 11, weight: .medium, design: .monospaced))
+                            .foregroundStyle(EosColors.textSecondary)
+                        Text("No zone minutes until a workout with HR samples exists.")
+                            .foregroundStyle(EosColors.textSecondary)
+                    }
+                } else {
+                    GlassCard(accent: .iris) {
+                        Text("ZONE ENGINE")
+                            .font(.system(size: 11, weight: .medium, design: .monospaced))
+                            .foregroundStyle(EosColors.textSecondary)
+                        ForEach(zones) { zone in
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack {
+                                    Text(zone.name)
+                                        .foregroundStyle(EosColors.textPrimary)
+                                    Spacer()
+                                    Text(zone.duration)
+                                        .foregroundStyle(zone.accent.color)
+                                }
+                                ProgressView(value: zone.share)
+                                    .tint(zone.accent.color)
                             }
-                            ProgressView(value: zone.share)
-                                .tint(zone.accent.color)
                         }
                     }
                 }

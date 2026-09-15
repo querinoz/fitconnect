@@ -11,6 +11,7 @@ import {
 } from "@/lib/api/require-auth";
 import { publishDirectMessage } from "@/lib/realtime/publish-message";
 import { getPrisma } from "@/lib/db/client";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -44,6 +45,8 @@ export async function GET(req: Request) {
  * Memory-first for Wave 3 API closure; Prisma when available.
  */
 export async function POST(req: Request) {
+  const limited = await enforceRateLimit(req, "social");
+  if (limited) return limited;
   const auth = await requireAuth(req);
   if (!auth.ok) return auth.response;
 

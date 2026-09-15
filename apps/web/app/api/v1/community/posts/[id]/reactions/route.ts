@@ -6,6 +6,7 @@ import {
   upsertPostReaction
 } from "@/lib/community/post-reactions";
 import { persistenceReady } from "@/lib/persistence/config";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 export async function GET(
   _req: Request,
@@ -23,6 +24,8 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const limited = await enforceRateLimit(req, "social");
+  if (limited) return limited;
   const auth = await requireAuth(req);
   if (!auth.ok) return auth.response;
   if (!persistenceReady()) {

@@ -1,9 +1,10 @@
 import SwiftUI
 
 enum AthleteTab: String, Hashable {
-    case home
-    case analysis
-    case vault
+    case feed
+    case ascend
+    case train
+    case dashboard
     case profile
 }
 
@@ -17,40 +18,47 @@ enum AthleteRoute: Hashable {
     case map
     case settings
     case bookings
+    case martialArts
+    case fightMode(String)
+    case recovery
+    case connections
+    case zenith
 }
 
 struct AthleteShell: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Bindable var session: DemoSessionStore
+    @Bindable var session: AppSessionStore
     let services: AppServices
 
-    @State private var selection: AthleteTab = .home
+    @State private var selection: AthleteTab = .train
     @State private var path: [AthleteRoute] = []
-    @State private var showingTrainActions = false
 
     var body: some View {
         NavigationStack(path: $path) {
-            ZStack(alignment: .bottom) {
+            ZStack {
                 HoneycombBackground(accent: .voltline)
 
                 TabView(selection: $selection) {
-                    AthleteHomeView(snapshot: services.api.athleteDashboard(), realtime: services.realtime, offlineQueue: services.offlineQueue) { route in
-                        path.append(route)
-                    }
-                    .tag(AthleteTab.home)
-                    .tabItem { Label("Today", systemImage: "house") }
+                    AthleteFeedView { route in path.append(route) }
+                        .tag(AthleteTab.feed)
+                        .tabItem { Label("Feed", systemImage: "rectangle.stack") }
 
-                    AthleteAnalysisView(cards: services.api.athleteDiscoverCards(), zones: services.zoneEngine.athleteZones()) { route in
-                        path.append(route)
-                    }
-                    .tag(AthleteTab.analysis)
-                    .tabItem { Label("Analysis", systemImage: "waveform.path.ecg") }
+                    AthleteAscendView { route in path.append(route) }
+                        .tag(AthleteTab.ascend)
+                        .tabItem { Label("Ascend", systemImage: "chart.line.uptrend.xyaxis") }
 
-                    AthleteVaultView(programs: services.api.athletePrograms(), bookings: services.api.athleteBookings()) { route in
-                        path.append(route)
-                    }
-                    .tag(AthleteTab.vault)
-                    .tabItem { Label("Vault", systemImage: "shippingbox") }
+                    AthleteTrainHomeView { route in path.append(route) }
+                        .tag(AthleteTab.train)
+                        .tabItem { Label("TRAIN", systemImage: "figure.run") }
+
+                    AthleteDashboardView(
+                        snapshot: services.api.athleteDashboard(),
+                        realtime: services.realtime,
+                        offlineQueue: services.offlineQueue,
+                        healthKit: services.healthKit
+                    ) { route in path.append(route) }
+                        .tag(AthleteTab.dashboard)
+                        .tabItem { Label("Dashboard", systemImage: "square.grid.2x2") }
 
                     AthleteProfileView(session: session, notifications: services.api.athleteNotifications()) { route in
                         path.append(route)
@@ -60,27 +68,13 @@ struct AthleteShell: View {
                 }
                 .toolbarBackground(.visible, for: .tabBar)
                 .toolbarBackground(EosColors.floor.opacity(0.96), for: .tabBar)
-
-                Button {
-                    withAnimation(MotionTokens.quick(reduceMotion: reduceMotion)) {
-                        showingTrainActions = true
-                    }
-                } label: {
-                    Label("Train", systemImage: "figure.run")
-                        .font(.headline)
-                        .foregroundStyle(EosColors.floor)
-                        .padding(.horizontal, 22)
-                        .padding(.vertical, 14)
-                        .background(Capsule().fill(EosColors.trainGradient))
-                }
-                .padding(.bottom, 72)
             }
             .navigationDestination(for: AthleteRoute.self) { route in
                 switch route {
                 case .discover:
                     AthleteDiscoverView(cards: services.api.athleteDiscoverCards())
                 case .workout:
-                    AthleteWorkoutView(programs: services.api.athletePrograms())
+                    AthleteTrainHomeView { next in path.append(next) }
                 case .telemetry:
                     AthleteTelemetryView(realtime: services.realtime, zones: services.zoneEngine.athleteZones(), healthKit: services.healthKit)
                 case .programs:
@@ -94,52 +88,22 @@ struct AthleteShell: View {
                 case .settings:
                     AthleteSettingsView(sections: services.api.athleteSettings())
                 case .bookings:
-                    AthleteBookingsView(bookings: services.api.athleteBookings())
+                    NativeBookingView()
+                case .martialArts:
+                    MartialArtsCatalogView { discipline in
+                        path.append(.fightMode(discipline))
+                    }
+                case .fightMode(let discipline):
+                    FightModeView(disciplineId: discipline)
+                case .recovery:
+                    RecoveryView(healthKit: services.healthKit)
+                case .connections:
+                    ConnectionsView()
+                case .zenith:
+                    ZenithNativeView()
                 }
             }
-            .sheet(isPresented: $showingTrainActions) {
-                TrainActionSheet { route in
-                    showingTrainActions = false
-                    path.append(route)
-                }
-                .presentationDetents([.height(320)])
-                .presentationBackground(.thinMaterial)
-            }
         }
-    }
-}
-
-private struct TrainActionSheet: View {
-    var onSelect: (AthleteRoute) -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Train")
-                .font(.title2.bold())
-            Text("Primary athlete action for Path A. Pick a destination to continue the local demo flow.")
-                .foregroundStyle(EosColors.textSecondary)
-
-            actionButton("Start workout", systemImage: "figure.strengthtraining.traditional", route: .workout)
-            actionButton("Open telemetry", systemImage: "waveform.path.ecg", route: .telemetry)
-            actionButton("Review route", systemImage: "map", route: .map)
-            actionButton("Open programs", systemImage: "list.bullet.rectangle", route: .programs)
-
-            Spacer(minLength: 0)
-        }
-        .padding(22)
-    }
-
-    private func actionButton(_ title: String, systemImage: String, route: AthleteRoute) -> some View {
-        Button {
-            onSelect(route)
-        } label: {
-            Label(title, systemImage: systemImage)
-                .font(.headline)
-                .foregroundStyle(EosColors.textPrimary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(14)
-                .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(EosColors.surfaceRaised))
-        }
-        .buttonStyle(.plain)
+        .animation(MotionTokens.quick(reduceMotion: reduceMotion), value: selection)
     }
 }

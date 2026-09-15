@@ -2,7 +2,8 @@ import { describe, expect, it, beforeEach } from "vitest";
 import {
   enforceRateLimit,
   resetMemoryRateLimitForTests,
-  resolveRateLimitBackend
+  resolveRateLimitBackend,
+  RATE_LIMIT_POLICY
 } from "./rate-limit";
 import { isProductionSecurityMode } from "./runtime";
 
@@ -61,6 +62,13 @@ describe("production rate limit", () => {
         UPSTASH_REDIS_REST_TOKEN: "token"
       } as unknown as NodeJS.ProcessEnv)
     ).toBe("upstash");
+  });
+
+  it("protects mcp zenith booking and social buckets", async () => {
+    expect(RATE_LIMIT_POLICY.mcp.limit).toBe(30);
+    expect(RATE_LIMIT_POLICY.zenith.limit).toBe(20);
+    expect(RATE_LIMIT_POLICY.booking.limit).toBe(20);
+    expect(RATE_LIMIT_POLICY.social.limit).toBe(30);
   });
 
   it("skips in explicit LOCAL_DEMO", async () => {

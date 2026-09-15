@@ -1,45 +1,39 @@
 import SwiftUI
 
 struct CoachProfileView: View {
-    @Bindable var session: DemoSessionStore
+    @Bindable var session: AppSessionStore
     let notifications: [AppNotificationItem]
     var onNavigate: (CoachRoute) -> Void
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                LocalDemoBanner(note: "More groups coach profile, settings, notifications, and deeper operations.")
-
                 GlassCard(accent: .iris) {
-                    Text("Sofia Mendes")
+                    Text(session.identity?.displayName ?? "Coach")
                         .font(.system(size: 28, weight: .bold, design: .rounded))
                         .foregroundStyle(EosColors.textPrimary)
-                    Text("Head coach / roster orchestration / local Path A session")
+                    Text("ONE LOGIN — coach mode. Sign-out is not required to train as athlete.")
                         .foregroundStyle(EosColors.textSecondary)
-                    HStack(spacing: 10) {
-                        chip("LOCAL_DEMO", accent: .voltline)
-                        chip("Coach", accent: .iris)
-                        chip("More", accent: .telemetry)
+                }
+
+                if session.identity?.modes.contains(.athlete) == true {
+                    Button("Switch to Athlete") {
+                        session.switchMode(to: .athlete)
                     }
+                    .font(.headline)
+                    .foregroundStyle(EosColors.textPrimary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Capsule().stroke(EosColors.voltline, lineWidth: 1))
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("switch-athlete")
                 }
 
                 VStack(spacing: 12) {
-                    NeoControl(title: "Programs", subtitle: "Open the coach program catalogue.", systemImage: "list.bullet.rectangle", accent: .voltline) { onNavigate(.programs) }
-                    NeoControl(title: "Revenue", subtitle: "See live retainers and booking KPIs.", systemImage: "creditcard", accent: .telemetry) { onNavigate(.revenue) }
-                    NeoControl(title: "Settings", subtitle: "Review Path A platform notes and toggles.", systemImage: "gearshape", accent: .iris) { onNavigate(.settings) }
-                }
-
-                if let first = notifications.first {
-                    GlassCard(accent: first.accent) {
-                        Text("LATEST ALERT")
-                            .font(.system(size: 11, weight: .medium, design: .monospaced))
-                            .foregroundStyle(EosColors.textSecondary)
-                        Text(first.title)
-                            .font(.headline)
-                            .foregroundStyle(EosColors.textPrimary)
-                        Text(first.body)
-                            .foregroundStyle(EosColors.textSecondary)
-                    }
+                    NeoControl(title: "Programs", subtitle: "Assigned work. Empty until the API returns rows.", systemImage: "list.bullet.rectangle", accent: .voltline) { onNavigate(.programs) }
+                    NeoControl(title: "Bookings", subtitle: "Approve or reject. No seed bookings.", systemImage: "calendar", accent: .telemetry) { onNavigate(.bookings) }
+                    NeoControl(title: "Payouts", subtitle: "Stripe Connect state — never a fake EUR balance.", systemImage: "creditcard", accent: .warning) { onNavigate(.revenue) }
+                    NeoControl(title: "Settings", subtitle: "Mode, notifications, privacy.", systemImage: "gearshape", accent: .iris) { onNavigate(.settings) }
                 }
 
                 Button("Sign out") {
@@ -54,14 +48,5 @@ struct CoachProfileView: View {
             }
             .padding(20)
         }
-    }
-
-    private func chip(_ title: String, accent: EosAccent) -> some View {
-        Text(title)
-            .font(.system(size: 11, weight: .medium, design: .monospaced))
-            .foregroundStyle(accent.color)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(accent.color.opacity(0.14), in: Capsule())
     }
 }

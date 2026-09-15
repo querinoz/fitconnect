@@ -1,0 +1,19 @@
+{
+  "generated": "repository-side iOS first-class matrix",
+  "note": "COMPLETE here means repository implementation exists. Runtime Apple proof requires macOS/Xcode/device.",
+  "rows": [
+    { "feature": "Auth ONE LOGIN Firebase", "web": "COMPLETE", "android": "COMPLETE", "ios": "COMPLETE", "watch": "PARTIAL" },
+    { "feature": "Feed", "web": "COMPLETE", "android": "COMPLETE", "ios": "COMPLETE", "watch": "MISSING" },
+    { "feature": "TRAIN state machine", "web": "COMPLETE", "android": "COMPLETE", "ios": "COMPLETE", "watch": "COMPLETE" },
+    { "feature": "Ascend", "web": "COMPLETE", "android": "COMPLETE", "ios": "COMPLETE", "watch": "MISSING" },
+    { "feature": "Recovery", "web": "COMPLETE", "android": "COMPLETE", "ios": "COMPLETE", "watch": "PARTIAL" },
+    { "feature": "Zenith", "web": "COMPLETE", "android": "PARTIAL", "ios": "COMPLETE", "watch": "MISSING" },
+    { "feature": "Martial Arts / Fight Mode", "web": "COMPLETE", "android": "COMPLETE", "ios": "COMPLETE", "watch": "COMPLETE" },
+    { "feature": "Booking", "web": "COMPLETE", "android": "PARTIAL", "ios": "COMPLETE", "watch": "MISSING" },
+    { "feature": "Coach mode", "web": "COMPLETE", "android": "COMPLETE", "ios": "COMPLETE", "watch": "MISSING" },
+    { "feature": "Connections", "web": "COMPLETE", "android": "COMPLETE", "ios": "COMPLETE", "watch": "PARTIAL" },
+    { "feature": "HealthKit / Health Connect", "web": "PARTIAL", "android": "COMPLETE", "ios": "COMPLETE", "watch": "COMPLETE" },
+    { "feature": "Realtime", "web": "COMPLETE", "android": "PARTIAL", "ios": "PARTIAL", "watch": "PARTIAL" },
+    { "feature": "Notifications", "web": "PARTIAL", "android": "PARTIAL", "ios": "PARTIAL", "watch": "PARTIAL" }
+  ]
+}

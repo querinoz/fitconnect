@@ -17,7 +17,7 @@ enum CoachRoute: Hashable {
 }
 
 struct CoachShell: View {
-    @Bindable var session: DemoSessionStore
+    @Bindable var session: AppSessionStore
     let services: AppServices
 
     @State private var selection: CoachTab = .overview

@@ -6,8 +6,11 @@ import {
 } from "@/lib/db/repository";
 import { isAuthFailure, requireCoachId } from "@/lib/api/require-auth";
 import { publishSessionBooking } from "@/lib/realtime/publish-booking";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 export async function GET(req: Request) {
+  const limited = await enforceRateLimit(req, "booking");
+  if (limited) return limited;
   const resolved = await requireCoachId(req);
   if (isAuthFailure(resolved)) return resolved.response;
   const { bookings, source } = await listCoachBookings(resolved.coachId);
@@ -15,6 +18,8 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const limited = await enforceRateLimit(req, "booking");
+  if (limited) return limited;
   const resolved = await requireCoachId(req);
   if (isAuthFailure(resolved)) return resolved.response;
 

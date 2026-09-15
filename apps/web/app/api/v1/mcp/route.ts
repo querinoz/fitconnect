@@ -26,7 +26,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const limited = await enforceRateLimit(request, "highcost");
+  const limited = await enforceRateLimit(request, "mcp");
   if (limited) return limited;
 
   const auth = await requireAuth(request);
