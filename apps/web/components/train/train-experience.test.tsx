@@ -74,4 +74,24 @@ describe("TrainExperience", () => {
     expect(await screen.findByText("Device")).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent(/not configured/i);
   });
+
+  it("runs Fight Mode pause, resume, and complete without inventing force", async () => {
+    const user = userEvent.setup();
+    window.history.pushState({}, "", "/train?sport=martial_arts");
+    render(<TrainExperience />);
+
+    const boxing = await screen.findByRole("button", { name: /Boxing bag — 5×3/i });
+    await user.click(boxing);
+    expect(await screen.findByTestId("combat-prep")).toBeInTheDocument();
+    await user.click(screen.getByTestId("train-start"));
+    expect(screen.getByTestId("combat-live")).toBeInTheDocument();
+    expect(screen.getByTestId("combat-telemetry")).toHaveTextContent("MISSING");
+    expect(screen.queryByText(/142 bpm|\d+ kcal|900 n/i)).not.toBeInTheDocument();
+    await user.click(screen.getByTestId("combat-pause"));
+    expect(screen.getByTestId("train-paused")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /^Resume$/i }));
+    expect(screen.getByTestId("combat-live")).toBeInTheDocument();
+    await user.click(screen.getByTestId("combat-finish"));
+    expect(await screen.findByTestId("train-complete")).toBeInTheDocument();
+  });
 });

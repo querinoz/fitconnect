@@ -18,10 +18,13 @@ import com.fitconnect.android.telemetry.observability.TelemetryObservability
 import com.fitconnect.android.telemetry.observability.WatchDiagnostics
 import com.fitconnect.android.telemetry.wear.GmsWearCompanion
 import com.fitconnect.android.telemetry.wear.GmsWearSessionLink
+import com.fitconnect.android.telemetry.wear.GmsWearCombatRound
 import com.fitconnect.android.telemetry.wear.GmsWearWorkoutControl
 import com.fitconnect.android.telemetry.wear.InMemoryWearSessionLink
+import com.fitconnect.android.telemetry.wear.NoWearCombatRound
 import com.fitconnect.android.telemetry.wear.NoWearCompanion
 import com.fitconnect.android.telemetry.wear.NoWearWorkoutControl
+import com.fitconnect.android.telemetry.wear.WearCombatRoundPort
 import com.fitconnect.android.telemetry.wear.WearOsPlatformAdapter
 import com.fitconnect.android.telemetry.wear.WearSessionLink
 import com.fitconnect.android.telemetry.wear.WearTelemetryInbox
@@ -67,6 +70,7 @@ interface TelemetryContainer {
     val wearCompanion: WearableCompanionPort
     val wearSessionLink: WearSessionLink
     val wearWorkout: WearWorkoutControlPort
+    val wearCombatRound: WearCombatRoundPort
     val wearInbox: WearTelemetryInbox
     val wearDiagnostics: WatchDiagnostics
     val healthData: HealthDataRepository
@@ -138,6 +142,8 @@ class DefaultTelemetryContainer(
         if (appContext != null) GmsWearSessionLink(appContext) else InMemoryWearSessionLink()
     override val wearWorkout: WearWorkoutControlPort =
         if (appContext != null) GmsWearWorkoutControl(appContext) else NoWearWorkoutControl()
+    override val wearCombatRound: WearCombatRoundPort =
+        if (appContext != null) GmsWearCombatRound(appContext) else NoWearCombatRound()
     override val healthData: HealthDataRepository =
         if (appContext != null) {
             AndroidHealthDataRepository(appContext, store)

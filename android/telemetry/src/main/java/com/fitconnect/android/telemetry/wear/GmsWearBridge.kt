@@ -7,6 +7,7 @@ import com.fitconnect.android.telemetry.observability.WatchDiagEvent
 import com.fitconnect.android.telemetry.observability.WatchDiagnostics
 import com.fitconnect.shared.sync.OutboxQueue
 import com.fitconnect.shared.sync.OutboxRecord
+import com.fitconnect.shared.wear.CombatRoundWire
 import com.fitconnect.shared.wear.SessionControlCommand
 import com.fitconnect.shared.wear.WearPaths
 import com.google.android.gms.wearable.CapabilityClient
@@ -151,6 +152,39 @@ class GmsWearWorkoutControl(private val context: Context) : WearWorkoutControlPo
         nodes.forEach { node ->
             Wearable.getMessageClient(context)
                 .sendMessage(node.id, WearPaths.SESSION_CONTROL, payload)
+                .await()
+        }
+        return AppResult.Ok(Unit)
+    }
+}
+
+class GmsWearCombatRound(private val context: Context) : WearCombatRoundPort {
+    override suspend fun publishRound(
+        phase: String,
+        round: Int,
+        remainingSec: Int,
+        disciplineId: String,
+        syncedAtEpochMs: Long,
+    ): AppResult<Unit> {
+        val nodes = try {
+            remoteFitConnectNodes(context, CapabilityClient.FILTER_REACHABLE)
+        } catch (t: Throwable) {
+            return AppResult.Err(AppError.Unexpected(t.message ?: "Wear capability query failed"))
+        }
+        if (nodes.isEmpty()) {
+            return AppResult.Err(AppError.Unexpected("No FitConnect Wear node reachable"))
+        }
+        val payload = CombatRoundWire.encode(
+            phase = phase,
+            round = round,
+            remainingSec = remainingSec,
+            disciplineId = disciplineId,
+            syncedAtEpochMs = syncedAtEpochMs,
+            connected = true,
+        ).toByteArray()
+        nodes.forEach { node ->
+            Wearable.getMessageClient(context)
+                .sendMessage(node.id, WearPaths.COMBAT_ROUND, payload)
                 .await()
         }
         return AppResult.Ok(Unit)

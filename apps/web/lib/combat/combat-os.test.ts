@@ -16,6 +16,15 @@ import { buildSharePayload } from "./social";
 import { WEIGHT_SAFETY_COPY } from "./weight-class";
 import { zenithCombatContext } from "./zenith";
 import { metricAllowed } from "./sensors";
+import {
+  createDevMockPacket,
+  packetMayClaimDirectForce,
+  bleHardwareUnavailable
+} from "./sensor-adapters";
+import { classifyTechniqueHypothesis, TECHNIQUE_MODEL, assertNeverConfirmedFromModel } from "./technique-classifier";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { sanitizeIngestEvent } from "./ingest";
 import { accelerationOutlier, eventDedupeKey, isDuplicate, normalizeIso } from "./quality";
 import { calibrationReady, emptyCalibration, kinematicsNeedCalibration } from "./calibration";
@@ -111,6 +120,30 @@ describe("Round engine", () => {
     expect(snap.remainingSec).toBe(remaining);
     snap = reduceRound(snap, { type: "resume" });
     expect(snap.phase).toBe("countdown");
+  });
+
+  it("skips rest and finishes without stranded phases", () => {
+    let snap = reduceRound(IDLE_ROUND, {
+      type: "configure",
+      disciplineId: "bjj",
+      prescription: {
+        roundCount: 2,
+        workSec: 2,
+        restSec: 30,
+        warningSec: 1,
+        countdownSec: 0,
+        sessionMode: "rolling"
+      }
+    });
+    snap = reduceRound(snap, { type: "start", nowMs: 1 });
+    snap = reduceRound(snap, { type: "tick" });
+    snap = reduceRound(snap, { type: "tick" });
+    expect(snap.phase).toBe("rest");
+    snap = reduceRound(snap, { type: "skip_rest" });
+    expect(snap.phase).toBe("work");
+    expect(snap.currentRound).toBe(2);
+    snap = reduceRound(snap, { type: "finish", nowMs: 9 });
+    expect(snap.phase).toBe("complete");
   });
 });
 
@@ -244,14 +277,37 @@ describe("Recovery, social, Zenith, safety copy", () => {
     expect(buildSharePayload({ title: "HRV 42", disciplineName: "Boxing" })).toEqual({
       error: "sensitive_content"
     });
-    const ok = buildSharePayload({ title: "Completed 8 rounds", disciplineName: "Muay Thai", roundsCompleted: 8 });
-    expect(ok).toMatchObject({ includesBiometrics: false, roundsCompleted: 8 });
+    expect(buildSharePayload({ title: "Head impact 4g", disciplineName: "Boxing" })).toEqual({
+      error: "sensitive_content"
+    });
+    const ok = buildSharePayload({
+      kind: "milestone",
+      title: "Completed 8 rounds",
+      disciplineName: "Muay Thai",
+      roundsCompleted: 8
+    });
+    expect(ok).toMatchObject({ includesBiometrics: false, roundsCompleted: 8, kind: "milestone" });
   });
 
   it("builds Zenith context that forbids medical claims", () => {
-    const ctx = zenithCombatContext({ disciplineId: "judo", sessionMode: "randori" });
+    const ctx = zenithCombatContext({
+      disciplineId: "judo",
+      sessionMode: "randori",
+      experience: "competitor",
+      goal: "randori control",
+      round: 2,
+      historySessions: 4
+    });
     expect(ctx?.medicalClaims).toBe(false);
     expect(ctx?.briefing.toLowerCase()).toMatch(/ippon|wearable/);
+    expect(ctx?.disciplineName).toBe("Judo");
+    const boxing = zenithCombatContext({ disciplineId: "boxing" });
+    const bjj = zenithCombatContext({ disciplineId: "bjj" });
+    const capoeira = zenithCombatContext({ disciplineId: "capoeira" });
+    expect(boxing?.disciplineName).toBe("Boxing");
+    expect(bjj?.disciplineName).toMatch(/Brazilian Jiu-Jitsu|BJJ/i);
+    expect(capoeira?.disciplineName).toBe("Capoeira");
+    expect(boxing?.briefing).not.toBe(bjj?.briefing);
   });
 });
 
@@ -310,5 +366,39 @@ describe("Ingest honesty, quality, calibration", () => {
     expect(calibrationReady(emptyCalibration("WATCH_IMU"))).toBe(false);
     expect(kinematicsNeedCalibration("WATCH_IMU")).toBe(true);
     expect(kinematicsNeedCalibration("HR_STRAP")).toBe(false);
+  });
+});
+
+describe("DEV_MOCK sensors, unvalidated ML, migration 035", () => {
+  it("never lets a mock packet claim direct force", () => {
+    const packet = createDevMockPacket({
+      sensor: "WATCH_IMU",
+      metric: "impact_force",
+      value: 900,
+      unit: "N"
+    });
+    expect(packet.sourceKind).toBe("DEV_MOCK");
+    expect(packetMayClaimDirectForce(packet)).toBe(false);
+    expect(bleHardwareUnavailable().telemetryLive).toBe(false);
+  });
+
+  it("keeps technique ML unvalidated and never CONFIRMED", () => {
+    expect(TECHNIQUE_MODEL.validated).toBe(false);
+    const hyp = classifyTechniqueHypothesis({ label: "cross", sensorConfidence: 0.9 });
+    expect(hyp.classification).not.toBe("CONFIRMED");
+    expect(hyp.validated).toBe(false);
+    expect(() => assertNeverConfirmedFromModel("CONFIRMED")).toThrow(/cannot CONFIRM/i);
+  });
+
+  it("keeps 035 additive, forced RLS, and anon-ungranted", () => {
+    const sql = readFileSync(
+      join(dirname(fileURLToPath(import.meta.url)), "../../../../supabase/migrations/035_combat_os.sql"),
+      "utf8"
+    );
+    expect(sql).toMatch(/force row level security/i);
+    expect(sql.toLowerCase()).not.toMatch(/grant[\s\S]{0,80}to anon/);
+    expect(sql).not.toMatch(/disable row level security/i);
+    expect(sql).toMatch(/combat_calibrations/);
+    expect(sql.toLowerCase()).toMatch(/authenticated/);
   });
 });

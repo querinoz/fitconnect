@@ -18,4 +18,10 @@ object CombatWearClock {
     }
 
     fun watchImuForceAllowed(): Boolean = false
+
+    fun footnote(connected: Boolean, disciplineId: String?): String {
+        val sport = disciplineId?.replace('_', ' ') ?: "martial arts"
+        val link = if (connected) "phone linked" else "offline · last glance"
+        return "$sport · $link · IMU is not punch force"
+    }
 }

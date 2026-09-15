@@ -8,6 +8,7 @@ describe("MartialArtsExperience", () => {
     const user = userEvent.setup();
     render(<MartialArtsExperience />);
     expect(screen.getByTestId("martial-arts-os")).toBeInTheDocument();
+    expect(screen.getByTestId("fight-mode-cta")).toHaveAttribute("href", "/train?sport=martial_arts");
     expect(screen.getByRole("button", { name: "Boxing" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Capoeira" }));
     expect(screen.getByText(/UNESCO ICH 00892/i)).toBeInTheDocument();

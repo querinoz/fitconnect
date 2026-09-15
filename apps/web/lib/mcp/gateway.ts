@@ -138,6 +138,10 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
       const ctx = zenithCombatContext({
         disciplineId: String(args.disciplineId),
         sessionMode: typeof args.sessionMode === "string" ? (args.sessionMode as never) : null,
+        experience: typeof args.experience === "string" ? (args.experience as never) : null,
+        goal: typeof args.goal === "string" ? args.goal : null,
+        round: typeof args.round === "number" ? args.round : null,
+        historySessions: typeof args.historySessions === "number" ? args.historySessions : null,
         presentMetrics: Array.isArray(args.presentMetrics) ? (args.presentMetrics as string[]) : []
       });
       result = ctx ?? { error: "unknown_discipline", medicalClaims: false };

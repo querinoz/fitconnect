@@ -1,5 +1,10 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import withSerwistInit from "@serwist/next";
+import { inheritRepoRootEnv } from "./lib/env/inherit-parent-env.mjs";
 import { isPWADisabled, pwaInitOptions } from "./lib/pwa/config.mjs";
+
+inheritRepoRootEnv(path.dirname(fileURLToPath(import.meta.url)));
 
 const withSerwist = withSerwistInit({
   swSrc: pwaInitOptions.swSrc,

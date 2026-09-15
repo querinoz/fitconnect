@@ -9,6 +9,8 @@ export type CombatZenithContext = {
   sessionMode: CombatSessionMode | null;
   experience: "beginner" | "intermediate" | "advanced" | "competitor" | null;
   goal: string | null;
+  round: number | null;
+  historySessions: number | null;
   telemetryAvailable: string[];
   telemetryMissing: string[];
   briefing: string;
@@ -20,6 +22,8 @@ export function zenithCombatContext(input: {
   sessionMode?: CombatSessionMode | null;
   experience?: CombatZenithContext["experience"];
   goal?: string | null;
+  round?: number | null;
+  historySessions?: number | null;
   presentMetrics?: string[];
   recovery?: CombatRecoveryView | null;
 }): CombatZenithContext | null {
@@ -35,9 +39,18 @@ export function zenithCombatContext(input: {
   const briefing = [
     `${d.name} · ${adapter.family}. ${d.telemetryNotes}`,
     input.sessionMode ? `Session mode ${input.sessionMode}.` : "No session mode selected.",
+    input.experience ? `Athlete experience: ${input.experience}.` : "",
+    input.goal ? `Goal: ${input.goal}.` : "",
+    typeof input.round === "number" ? `Current round ${input.round}.` : "",
+    typeof input.historySessions === "number"
+      ? `Owned history: ${input.historySessions} combat sessions.`
+      : "History unknown — do not invent prior volume.",
     adapter.headlineIsNotStrikeRate ? "Do not lead with strikes per minute." : "Volume and rate only from logged or sensor events.",
     "No official scores from a generic wearable.",
     "No concussion or injury diagnosis.",
+    telemetryAvailable.length
+      ? `Valid telemetry: ${telemetryAvailable.join(", ")}.`
+      : "No valid combat telemetry in this turn.",
     recoveryNote,
     cultural
   ]
@@ -50,6 +63,8 @@ export function zenithCombatContext(input: {
     sessionMode: input.sessionMode ?? null,
     experience: input.experience ?? null,
     goal: input.goal ?? null,
+    round: input.round ?? null,
+    historySessions: input.historySessions ?? null,
     telemetryAvailable,
     telemetryMissing,
     briefing,

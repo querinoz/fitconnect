@@ -72,6 +72,7 @@ fun WearInstrument(
 ) {
     val snap by engine.state.collectAsState()
     val phoneSynced by WearReadinessInbox.lastSyncedFlow.collectAsState()
+    val combatGlance by WearCombatInbox.glanceFlow.collectAsState()
     val readiness = WearReadinessSelector.select(
         phoneSynced = phoneSynced,
         healthServices = WearRuntime.healthServicesReadiness,
@@ -200,6 +201,7 @@ private fun WearIdlePager(
 ) {
     val scope = rememberCoroutineScope()
     val presentation = readiness.toPresentation()
+    val combatGlance by WearCombatInbox.glanceFlow.collectAsState()
     BackHandler(enabled = pagerState.currentPage > 0) {
         scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
     }
@@ -233,9 +235,12 @@ private fun WearIdlePager(
                         footnote = if (hrCapability == MetricAvailability.AVAILABLE) hrText else "Health Services required",
                     )
                     WearIdlePane.FIGHT -> WearMetricPane(
-                        title = CombatWearClock.headline("idle", 0),
-                        value = CombatWearClock.formatClock(0),
-                        footnote = "Phone Fight Mode · watch IMU is not punch force",
+                        title = CombatWearClock.headline(combatGlance?.phase ?: "idle", combatGlance?.round ?: 0),
+                        value = CombatWearClock.formatClock(combatGlance?.remainingSec ?: 0),
+                        footnote = CombatWearClock.footnote(
+                            connected = combatGlance?.connected == true,
+                            disciplineId = combatGlance?.disciplineId,
+                        ),
                     )
                     WearIdlePane.ASCEND -> {
                         val ascend = WearRuntime.ascend.snapshot(LocalDemoIdentity.ATHLETE_ID)

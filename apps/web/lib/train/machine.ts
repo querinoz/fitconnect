@@ -368,6 +368,28 @@ export function reduceTrain(snapshot: TrainSnapshot, command: TrainCommand): Tra
     }
     case "finish": {
       if (!isLivePhase(snapshot.phase)) return snapshot;
+      const plan = snapshot.planId ? getTrainPlan(snapshot.planId) : undefined;
+      const slot = currentSlot(snapshot);
+      if (plan?.combat && slot && isWorkPhase(snapshot.phase)) {
+        const already = snapshot.sets.some(
+          (set) => set.exerciseId === slot.exerciseId && set.setNumber === slot.setNumber && !set.skipped
+        );
+        if (!already) {
+          const elapsed = Math.max(1, (slot.targetTimeSec ?? snapshot.workDurationSec) - snapshot.workRemainingSec);
+          const logged: LoggedSet = {
+            exerciseId: slot.exerciseId,
+            name: slot.name,
+            setNumber: slot.setNumber,
+            reps: null,
+            loadKg: null,
+            timeSec: elapsed,
+            rpe: null,
+            completedAtMs: command.nowMs,
+            skipped: false
+          };
+          return completing({ ...snapshot, sets: [...snapshot.sets, logged], workRemainingSec: 0 }, command.nowMs);
+        }
+      }
       return completing(snapshot, command.nowMs);
     }
     case "mark_save": {

@@ -17,6 +17,10 @@ class WearControlListenerService : WearableListenerService() {
                 WearReadinessInbox.ingest(wire)
             }
             WearPaths.SYNC_STATUS -> Unit
+            WearPaths.COMBAT_ROUND -> {
+                val wire = messageEvent.data.toString(Charsets.UTF_8)
+                WearCombatInbox.ingest(wire)
+            }
             else -> return
         }
     }

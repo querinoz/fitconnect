@@ -1,5 +1,5 @@
 export type CombatSharePayload = {
-  kind: "combat_session" | "competition_result" | "milestone";
+  kind: "combat_session" | "competition_result" | "milestone" | "pr";
   title: string;
   disciplineName: string;
   roundsCompleted: number | null;
@@ -8,9 +8,10 @@ export type CombatSharePayload = {
   includesBiometrics: false;
 };
 
-const BLOCKED = /hrv|heart rate|sleep|resting hr|force n|concussion|impact_force/i;
+const BLOCKED = /hrv|heart rate|\bhr\b|sleep|resting hr|force n|impact_force|head impact|concussion|newtons/i;
 
 export function buildSharePayload(input: {
+  kind?: CombatSharePayload["kind"];
   title: string;
   disciplineName: string;
   roundsCompleted?: number | null;
@@ -20,7 +21,7 @@ export function buildSharePayload(input: {
   const blob = `${input.title} ${input.outcome ?? ""}`;
   if (BLOCKED.test(blob)) return { error: "sensitive_content" };
   return {
-    kind: "combat_session",
+    kind: input.kind ?? "combat_session",
     title: input.title,
     disciplineName: input.disciplineName,
     roundsCompleted: input.roundsCompleted ?? null,

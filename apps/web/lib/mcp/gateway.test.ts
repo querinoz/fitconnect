@@ -91,6 +91,9 @@ describe("MCP gateway", () => {
     });
     expect(res.ok).toBe(true);
     expect(res.result).toMatchObject({ medicalClaims: false, disciplineId: "muay_thai" });
+    const muay = res.result as { briefing: string; disciplineName: string };
+    expect(muay.disciplineName.toLowerCase()).toMatch(/muay thai/);
+    expect(muay.briefing.toLowerCase()).not.toMatch(/concussion diagnosis|invented force 900/);
   });
 
   it("drafts workouts as approve-before-apply", async () => {

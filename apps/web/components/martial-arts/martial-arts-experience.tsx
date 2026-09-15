@@ -52,6 +52,13 @@ export function MartialArtsExperience() {
           Catalog v{index.version} · {index.count} disciplines. Boxing is not Muay Thai. Capoeira is not
           strikes per minute. Force is never inferred from a watch IMU.
         </p>
+        <Link
+          href="/train?sport=martial_arts"
+          data-testid="fight-mode-cta"
+          className="inline-flex min-h-11 items-center rounded-full bg-eos-voltline px-5 font-display text-eos-floor"
+        >
+          TRAIN · Fight Mode
+        </Link>
       </header>
 
       <div className="flex gap-2 overflow-x-auto pb-1">
@@ -155,6 +162,12 @@ function DisciplineDetail({
         ))}
       </ul>
       <blockquote className="mt-6 border-l-2 border-eos-iris pl-4 text-sm">{zenith}</blockquote>
+      <Link
+        href="/train?sport=martial_arts"
+        className="mt-6 inline-flex min-h-11 items-center rounded-full bg-eos-voltline px-5 font-display text-eos-floor"
+      >
+        Open Fight Mode
+      </Link>
     </BentoCard>
   );
 }

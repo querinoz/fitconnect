@@ -36,6 +36,17 @@ interface WearWorkoutControlPort {
     suspend fun endWorkout(): AppResult<Unit>
 }
 
+/** Phone → watch Fight Mode clock. Never carries force, HR, or strike counts. */
+interface WearCombatRoundPort {
+    suspend fun publishRound(
+        phase: String,
+        round: Int,
+        remainingSec: Int,
+        disciplineId: String,
+        syncedAtEpochMs: Long,
+    ): AppResult<Unit>
+}
+
 /** No-op adapter used until a Wear OS companion is paired. */
 class NoWearCompanion : WearableCompanionPort {
     override suspend fun state(): WearCompanionState = WearCompanionState.NOT_PAIRED
@@ -53,5 +64,16 @@ class NoWearWorkoutControl : WearWorkoutControlPort {
     override suspend fun resumeWorkout(): AppResult<Unit> =
         AppResult.Err(com.fitconnect.android.foundation.common.AppError.Unexpected("NOT_PAIRED"))
     override suspend fun endWorkout(): AppResult<Unit> =
+        AppResult.Err(com.fitconnect.android.foundation.common.AppError.Unexpected("NOT_PAIRED"))
+}
+
+class NoWearCombatRound : WearCombatRoundPort {
+    override suspend fun publishRound(
+        phase: String,
+        round: Int,
+        remainingSec: Int,
+        disciplineId: String,
+        syncedAtEpochMs: Long,
+    ): AppResult<Unit> =
         AppResult.Err(com.fitconnect.android.foundation.common.AppError.Unexpected("NOT_PAIRED"))
 }

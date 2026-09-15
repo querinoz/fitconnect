@@ -92,6 +92,10 @@ export const MCP_TOOLS: McpToolDef[] = [
     schema: z.object({
       disciplineId: z.string().min(2).max(64),
       sessionMode: z.string().max(40).optional(),
+      experience: z.enum(["beginner", "intermediate", "advanced", "competitor"]).optional(),
+      goal: z.string().max(200).optional(),
+      round: z.number().int().min(0).max(99).optional(),
+      historySessions: z.number().int().min(0).max(100000).optional(),
       presentMetrics: z.array(z.string()).optional()
     })
   },

@@ -3,6 +3,9 @@ export { reduceRound, IDLE_ROUND, formatClock, roundHeadline, isLiveRound } from
 export type { RoundSnapshot, RoundPhase, RoundCommand } from "./round-engine";
 export { measured, missingMeasurement, assertHonestForce, displayLabelForMeasurement, canMeasureDirectForce } from "./measurement";
 export { SENSOR_CAPABILITIES, capabilitiesFor, metricAllowed } from "./sensors";
+export { createDevMockPacket, createRealPacket, packetMayClaimDirectForce, bleHardwareUnavailable, BLE_DEVICE_KINDS } from "./sensor-adapters";
+export { classifyTechniqueHypothesis, TECHNIQUE_MODEL, assertNeverConfirmedFromModel } from "./technique-classifier";
+export { combatProductState, combatStateCopy } from "./visual-state";
 export { adapterFor, modeAllowed, analyticsDimensions } from "./adapters";
 export { zenithCombatContext } from "./zenith";
 export { combatRecoveryFromSignals } from "./recovery";

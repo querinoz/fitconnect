@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { combatProductState } from "@/lib/combat/visual-state";
 import { TRAIN_PLANS, buildSlots, filterPlans, getTrainPlan, substituteExercise } from "./catalog";
 import {
   IDLE_SNAPSHOT,
@@ -257,5 +258,29 @@ describe("TRAIN state machine", () => {
     expect(snap.phase === "rest" || snap.phase === "active" || snap.phase === "completing").toBe(true);
     const cues = zenithCues(snap, readinessFromApi({ score: null, source: "insufficient_data" }));
     expect(cues.join(" ")).toMatch(/FIGHT MODE|taekwondo/i);
+  });
+
+  it("maps combat TRAIN phases onto the product state list without stranding save failures", () => {
+    const combat = getTrainPlan("plan_boxing_bag_v1")!.combat!;
+    let snap = reduceTrain(IDLE_SNAPSHOT, { type: "select_plan", planId: "plan_boxing_bag_v1" });
+    expect(combatProductState(snap, combat)).toBe("PREP");
+    snap = reduceTrain(snap, { type: "start", nowMs: 0, sessionId: "box-1" });
+    expect(combatProductState(snap, combat)).toBe("ROUND");
+    snap = { ...snap, workRemainingSec: combat.warningSec };
+    expect(combatProductState(snap, combat)).toBe("WARNING");
+    snap = reduceTrain(snap, { type: "pause" });
+    expect(combatProductState(snap, combat)).toBe("PAUSED");
+    snap = reduceTrain(snap, { type: "resume" });
+    snap = reduceTrain(snap, { type: "interrupt", reason: "background" });
+    expect(combatProductState(snap, combat)).toBe("INTERRUPTED");
+    snap = reduceTrain(snap, { type: "resume" });
+    snap = reduceTrain(snap, { type: "tick" });
+    snap = reduceTrain(snap, { type: "finish", nowMs: 9 });
+    expect(snap.sets.some((set) => !set.skipped && typeof set.timeSec === "number")).toBe(true);
+    expect(combatProductState(snap, combat)).toBe("COMPLETING");
+    snap = reduceTrain(snap, { type: "mark_save", status: "save_pending" });
+    expect(combatProductState(snap, combat)).toBe("SAVE_PENDING");
+    snap = reduceTrain(snap, { type: "mark_save", status: "failed", error: "Cloud save failed." });
+    expect(combatProductState(snap, combat)).toBe("SAVE_FAILED");
   });
 });
