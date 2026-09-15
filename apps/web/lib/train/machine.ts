@@ -330,7 +330,29 @@ export function reduceTrain(snapshot: TrainSnapshot, command: TrainCommand): Tra
     }
     case "tick": {
       if (isWorkPhase(snapshot.phase) && snapshot.workRemainingSec > 0) {
-        return { ...snapshot, workRemainingSec: snapshot.workRemainingSec - 1 };
+        const remaining = snapshot.workRemainingSec - 1;
+        const plan = snapshot.planId ? getTrainPlan(snapshot.planId) : undefined;
+        const slot = currentSlot(snapshot);
+        if (remaining <= 0 && plan?.combat && slot?.mode === "time") {
+          const nowMs = Date.now();
+          const logged: LoggedSet = {
+            exerciseId: slot.exerciseId,
+            name: slot.name,
+            setNumber: slot.setNumber,
+            reps: null,
+            loadKg: null,
+            timeSec: slot.targetTimeSec,
+            rpe: null,
+            completedAtMs: nowMs,
+            skipped: false
+          };
+          return enterNextSlot(
+            { ...snapshot, workRemainingSec: 0, sets: [...snapshot.sets, logged], lastError: null },
+            snapshot.slotIndex + 1,
+            nowMs
+          );
+        }
+        return { ...snapshot, workRemainingSec: remaining };
       }
       if (snapshot.phase !== "rest") return snapshot;
       if (snapshot.restRemainingSec <= 1) {
@@ -413,6 +435,11 @@ export function volumeKg(snapshot: TrainSnapshot): number {
 export function zenithCues(snapshot: TrainSnapshot, readiness: ReadinessView): string[] {
   const cues: string[] = [];
   const plan = snapshot.planId ? getTrainPlan(snapshot.planId) : undefined;
+  if (plan?.combat) {
+    cues.push(
+      `FIGHT MODE · ${plan.combat.disciplineId.replace(/_/g, " ")} · ${plan.combat.roundCount} × ${plan.combat.roundDurationSec}s. ${plan.combat.focus}`
+    );
+  }
   if (plan) cues.push(plan.zenithNote);
   if (readiness.available && readiness.score != null && readiness.band) {
     cues.push(

@@ -33,6 +33,7 @@ enum class Sport {
     RACQUET,
     TEAM,
     GOLF,
+    MARTIAL_ARTS,
     OTHER,
 }
 

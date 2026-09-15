@@ -50,6 +50,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun TrainingScreen(
     onOpenSession: (String) -> Unit,
+    onOpenFight: () -> Unit = {},
 ) {
     val container = LocalAthleteContainer.current
     val scope = rememberCoroutineScope()
@@ -68,6 +69,17 @@ fun TrainingScreen(
             subtitle = "Upcoming · live session · completed",
             testTag = "athlete_training",
         ) {
+            item {
+                EliteCard(onClick = onOpenFight) {
+                    EliteTag("FIGHT MODE")
+                    Text("Martial Arts", style = MaterialTheme.typography.titleLarge)
+                    Text(
+                        "Round timer · no invented punch force",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
             item { Text("Upcoming", style = MaterialTheme.typography.titleMedium) }
             items(upcoming, key = { it.id }) { session ->
                 SessionRow(session) { onOpenSession(session.id) }

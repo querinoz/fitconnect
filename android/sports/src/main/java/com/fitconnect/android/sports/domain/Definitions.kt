@@ -9,6 +9,7 @@ enum class SportCategory {
     WATER,
     WINTER,
     MIND_BODY,
+    COMBAT,
     OTHER,
 }
 
@@ -36,6 +37,9 @@ enum class WearableCapability {
     STEPS,
     HEALTH_CONNECT,
     WEAR_OS,
+    IMU,
+    FORCE_SENSOR,
+    PRESSURE,
 }
 
 enum class TrainingType {

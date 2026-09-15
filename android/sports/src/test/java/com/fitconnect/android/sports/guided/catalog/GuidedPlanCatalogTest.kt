@@ -12,6 +12,7 @@ class GuidedPlanCatalogTest {
         assertTrue(cards.any { it.sport == "strength" })
         assertTrue(cards.any { it.sport == "hiit" })
         assertTrue(cards.any { it.sport == "mobility" })
+        assertTrue(cards.any { it.sport == "martial_arts" })
         cards.forEach { card ->
             assertTrue(card.purpose.isNotBlank())
             assertTrue(card.plan.exercises.isNotEmpty())

@@ -13,6 +13,7 @@ class WearPathsContractTest {
         assertEquals("/telemetry/batch", WearPaths.TELEMETRY_BATCH)
         assertEquals("/session/control", WearPaths.SESSION_CONTROL)
         assertEquals("fitconnect_telemetry", WearPaths.CAPABILITY)
+        assertEquals("/combat/round", WearPaths.COMBAT_ROUND)
         assertTrue(WearPaths.SCHEMA.startsWith("telemetry."))
     }
 }

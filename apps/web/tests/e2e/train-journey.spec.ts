@@ -7,6 +7,13 @@ test("TRAIN is a first-class athlete destination", async ({ page }) => {
   await expect(page).toHaveURL(/\/(train|signin)/);
 });
 
+test("Martial Arts OS is a first-class athlete destination", async ({ page }) => {
+  const response = await page.goto("/martial-arts");
+  expect(response).not.toBeNull();
+  expect(response!.status()).toBeLessThan(500);
+  await expect(page).toHaveURL(/\/(martial-arts|signin)/);
+});
+
 test("Ascend and coach directory do not 500", async ({ page }) => {
   const ascend = await page.goto("/achievements");
   expect(ascend).not.toBeNull();

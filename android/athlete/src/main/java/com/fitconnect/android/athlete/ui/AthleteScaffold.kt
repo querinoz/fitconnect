@@ -161,6 +161,7 @@ fun AthleteOsApp(
         1f
     }
     val hideNav = current?.startsWith("athlete/training/") == true ||
+        current == AthleteDest.FIGHT.route ||
         (current == AthleteDest.ACTIVITY.route && live.phase != LiveActivityPhase.IDLE)
     val onBottomTab = AthleteDest.bottomTabs.any { it.route == current } ||
         current == AthleteDest.HOME.route ||

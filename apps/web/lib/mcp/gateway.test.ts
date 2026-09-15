@@ -19,6 +19,8 @@ describe("MCP gateway", () => {
     expect(names).toContain("get_current_readiness");
     expect(names).toContain("create_workout");
     expect(names).toContain("list_providers");
+    expect(names).toContain("list_martial_arts");
+    expect(names).toContain("zenith_combat_context");
   });
 
   it("does not expose SQL, shell, or community-server tools", () => {
@@ -71,6 +73,24 @@ describe("MCP gateway", () => {
     expect(body.providers.find((p) => p.providerId === "TERRA")?.enabled).toBe(false);
     expect(body.providers.find((p) => p.providerId === "HEALTH_CONNECT")?.enabled).toBe(true);
     expect(body.providers.find((p) => p.providerId === "STRAVA")?.shareable).toBe(false);
+  });
+
+  it("lists martial arts disciplines without inventing athlete stats", async () => {
+    const res = await dispatchMcp(athlete, { tool: "list_martial_arts" });
+    expect(res.ok).toBe(true);
+    const body = res.result as { sport: string; count: number; disciplines: Array<{ id: string }> };
+    expect(body.sport).toBe("MARTIAL_ARTS");
+    expect(body.count).toBeGreaterThanOrEqual(31);
+    expect(body.disciplines.some((d) => d.id === "capoeira")).toBe(true);
+  });
+
+  it("builds combat Zenith context without medical claims", async () => {
+    const res = await dispatchMcp(athlete, {
+      tool: "zenith_combat_context",
+      arguments: { disciplineId: "muay_thai", sessionMode: "pad_work" }
+    });
+    expect(res.ok).toBe(true);
+    expect(res.result).toMatchObject({ medicalClaims: false, disciplineId: "muay_thai" });
   });
 
   it("drafts workouts as approve-before-apply", async () => {

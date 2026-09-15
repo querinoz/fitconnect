@@ -17,6 +17,7 @@ enum class WorkoutSport(
     STRENGTH("Strength", outdoorGps = false),
     MOBILITY("Mobility", outdoorGps = false),
     RECOVERY("Recovery", outdoorGps = false),
+    MARTIAL_ARTS("MartialArts", outdoorGps = false),
     CUSTOM("Custom", outdoorGps = false),
     ;
 

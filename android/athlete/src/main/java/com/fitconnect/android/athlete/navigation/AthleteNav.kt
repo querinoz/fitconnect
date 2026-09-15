@@ -23,6 +23,7 @@ import com.fitconnect.android.athlete.ui.settings.SettingsScreen
 import com.fitconnect.android.athlete.ui.sleep.SleepScreen
 import com.fitconnect.android.athlete.ui.sports.SportsScreen
 import com.fitconnect.android.athlete.ui.telemetry.TelemetryScreen
+import com.fitconnect.android.athlete.ui.training.CombatFightModeScreen
 import com.fitconnect.android.athlete.ui.training.SessionDetailScreen
 import com.fitconnect.android.athlete.ui.training.TrainingScreen
 import com.fitconnect.android.athlete.ui.vault.PerformanceVaultScreen
@@ -53,6 +54,7 @@ enum class AthleteDest(
     WORKOUT("athlete/workout", "Guided", "W", bottom = false),
     TRAINING("athlete/training", "Sessions", "S"),
     SESSION("athlete/training/{sessionId}", "Session", "T"),
+    FIGHT("athlete/fight", "Fight", "K"),
 
     // Secondary / drawer
     DISCOVER("athlete/discover", "Discover", "C"),
@@ -191,7 +193,10 @@ fun AthleteNavHost(
             AthleteDest.TRAINING.route,
             deepLinks = listOf(navDeepLink { uriPattern = "fitconnect://app/athlete/training" }),
         ) {
-            TrainingScreen(onOpenSession = { id -> navController.navigate("athlete/training/$id") })
+            TrainingScreen(
+                onOpenSession = { id -> navController.navigate("athlete/training/$id") },
+                onOpenFight = { navController.navigate(AthleteDest.FIGHT.route) },
+            )
         }
         composable(
             route = AthleteDest.SESSION.route,
@@ -202,6 +207,12 @@ fun AthleteNavHost(
             ),
         ) { entry ->
             SessionDetailScreen(sessionId = entry.arguments?.getString("sessionId").orEmpty())
+        }
+        composable(
+            AthleteDest.FIGHT.route,
+            deepLinks = listOf(navDeepLink { uriPattern = "fitconnect://app/athlete/fight" }),
+        ) {
+            CombatFightModeScreen()
         }
         composable(AthleteDest.SPORTS.route) { SportsScreen() }
         composable(AthleteDest.PROGRAMS.route) { ProgramsScreen() }

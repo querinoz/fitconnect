@@ -16,6 +16,9 @@ class DefaultSportsCatalogTest {
         listOf("Run", "Ride", "Swim", "TrailRun", "Yoga", "Workout", "AlpineSki", "Pickleball").forEach {
             assertTrue("missing stravaType $it", strava.contains(it))
         }
+        assertTrue(all.any { it.category.name == "COMBAT" })
+        assertTrue(all.any { it.id.value == "martial_arts" })
+        assertTrue(all.any { it.id.value == "boxing" })
     }
 
     @Test

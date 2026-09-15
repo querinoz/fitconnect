@@ -54,6 +54,20 @@ enum TrainReducer {
             purpose: "Raise temperature before main work.",
             durationMin: 8,
             trainingType: "warm-up"
+        ),
+        TrainPlanSummary(
+            id: "plan_boxing_bag_v1",
+            title: "Boxing bag — 5×3",
+            purpose: "Fight-mode rounds. Punch force is not invented from Apple Watch IMU.",
+            durationMin: 24,
+            trainingType: "combat-rounds"
+        ),
+        TrainPlanSummary(
+            id: "plan_capoeira_roda_v1",
+            title: "Capoeira roda",
+            purpose: "Ginga and community rhythm — not strikes per minute.",
+            durationMin: 20,
+            trainingType: "combat-cultural"
         )
     ]
 

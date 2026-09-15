@@ -1,5 +1,6 @@
 package com.fitconnect.android.sports.registry
 
+import com.fitconnect.android.sports.combat.CombatCatalog
 import com.fitconnect.android.sports.domain.CompetitionType
 import com.fitconnect.android.sports.domain.EnvironmentKind
 import com.fitconnect.android.sports.domain.MetricDefinition
@@ -232,6 +233,38 @@ object DefaultSportsCatalog {
             competition = setOf(CompetitionType.PERSONAL_CHALLENGE),
         ),
         sport(
+            id = SportId.MARTIAL_ARTS,
+            name = "Martial Arts",
+            category = SportCategory.COMBAT,
+            olympic = OlympicStatus.NON_OLYMPIC,
+            env = EnvironmentKind.INDOOR,
+            part = ParticipationKind.INDIVIDUAL,
+            strava = "Workout",
+            equipment = listOf("Gloves", "Wraps", "Mat"),
+            required = listOf(
+                m("rounds", "Rounds", "count", MetricValueType.COUNT),
+                m("duration", "Duration", "min", MetricValueType.DURATION),
+            ),
+            optional = listOf(
+                m("strike_acceleration", "Strike acceleration", "m/s^2"),
+                m("rpe", "RPE", "", MetricValueType.SCORE),
+            ),
+            performance = listOf("rounds", "work_rate"),
+            recovery = listOf("hrv", "sleep", "rpe"),
+            risk = listOf("impact_exposure", "fatigue"),
+            wearables = setOf(
+                WearableCapability.HEART_RATE,
+                WearableCapability.HEALTH_CONNECT,
+                WearableCapability.WEAR_OS,
+                WearableCapability.IMU,
+                WearableCapability.FORCE_SENSOR,
+                WearableCapability.PRESSURE,
+            ),
+            training = setOf(TrainingType.SKILL, TrainingType.TECHNIQUE, TrainingType.INTERVAL, TrainingType.COMPETITION_PREP),
+            competition = setOf(CompetitionType.MATCH, CompetitionType.TOURNAMENT, CompetitionType.PERSONAL_CHALLENGE),
+            capabilities = setOf("combat_os", "rounds", "provenance"),
+        ),
+        sport(
             id = SportId.OTHER,
             name = "Other",
             category = SportCategory.OTHER,
@@ -287,7 +320,7 @@ object DefaultSportsCatalog {
             training = setOf(TrainingType.ENDURANCE, TrainingType.INTERVAL),
             competition = setOf(CompetitionType.RACE, CompetitionType.TIME_TRIAL),
         ),
-    ) + stravaCoverageSports()
+    ) + stravaCoverageSports() + combatCoverageSports()
 
     /**
      * Canonical Strava activity types not already covered by the rich seeds above.
@@ -369,6 +402,33 @@ object DefaultSportsCatalog {
                 training = setOf(TrainingType.MIXED, TrainingType.ENDURANCE),
                 competition = setOf(CompetitionType.PERSONAL_CHALLENGE),
                 capabilities = setOf("metrics", "strava_coverage"),
+            )
+        }
+    }
+
+    private fun combatCoverageSports(): List<SportDefinition> {
+        return CombatCatalog.requiredIds.map { id ->
+            sport(
+                id = SportId.of(id),
+                name = CombatCatalog.displayName(id),
+                category = SportCategory.COMBAT,
+                olympic = when (id) {
+                    "boxing", "judo", "karate", "taekwondo", "wrestling" -> OlympicStatus.OLYMPIC
+                    else -> OlympicStatus.NON_OLYMPIC
+                },
+                env = EnvironmentKind.INDOOR,
+                part = ParticipationKind.INDIVIDUAL,
+                strava = "Workout",
+                equipment = listOf("Discipline-specific"),
+                required = listOf(m("duration", "Duration", "min", MetricValueType.DURATION)),
+                optional = listOf(m("rpe", "RPE", "", MetricValueType.SCORE), m("rounds", "Rounds", "count", MetricValueType.COUNT)),
+                performance = listOf("duration"),
+                recovery = listOf("hrv", "rpe"),
+                risk = listOf("fatigue"),
+                wearables = setOf(WearableCapability.HEART_RATE, WearableCapability.IMU, WearableCapability.HEALTH_CONNECT),
+                training = setOf(TrainingType.SKILL, TrainingType.TECHNIQUE, TrainingType.INTERVAL),
+                competition = setOf(CompetitionType.MATCH, CompetitionType.PERSONAL_CHALLENGE),
+                capabilities = setOf("combat_os", "discipline"),
             )
         }
     }

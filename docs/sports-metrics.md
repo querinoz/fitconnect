@@ -177,7 +177,45 @@ Injury-risk banding (advisory only, never a hard block): `<0.8` undertraining, `
 - Task Force of ESC/NASPE (1996) and subsequent HRV literature — rMSSD, log-transform convention.
 - Golden Cheetah source (`GoldenCheetah/src/Metrics`) — reference implementation used for the F1 golden-file comparison; this doc is the spec, Golden Cheetah is the empirical check.
 
-## 9. Open questions (resolve before F7, not blocking F0/F1 scaffolding)
+## 10. Combat sports telemetry (Martial Arts OS)
+
+Combat metrics are **not** Golden Cheetah / FIT-file physiology. They follow the same honesty rules: SI units internally, `null` when undefined, and **estimated vs measured is a field**.
+
+### 10.1 Measurement types
+
+| Type | Meaning | Example |
+| --- | --- | --- |
+| `DIRECT` | Sensor measures the physical quantity named | Instrumented bag or glove force transducer vs a calibrated load cell |
+| `ESTIMATED` | Model/calibration infers a related quantity | Glove IMU → estimated impact (not newtons) |
+| `PROXY` | A different quantity used as a stand-in | Punch acceleration as a proxy for intensity |
+
+A watch or phone IMU **must not** emit `impact_force` as `DIRECT`. If product code receives that combination, it is rewritten to `impact_estimate` / `ESTIMATED` (see `apps/web/lib/combat/measurement.ts`).
+
+### 10.2 What common sensors can support
+
+- **Watch / wrist IMU:** acceleration, angular velocity; optional punch *count* after calibration. Not force. Not official scores.
+- **Glove IMU:** kinematics and counts. IMU-only systems compute derivatives of acceleration — they do not measure force. Validated glove *force* requires a co-located transducer (Menzel & Potthast 2021 vs Kistler + Vicon).
+- **Insole pressure:** plantar pressure (direct at the foot). Lower-limb contribution to a punch is a proxy.
+- **sEMG:** activation timing/intensity. Not a medical fatigue diagnosis.
+- **Electronic scoring (WT PSS / hogu):** competition points only when that hardware is present.
+
+### 10.3 Fatigue presentation
+
+If round 1 rate is 82 strikes/min and round 5 is 61, the UI may show **OUTPUT DECLINE**. It must not show “you are fatigued by 25%” unless a documented, reviewed model exists. None is implemented.
+
+### 10.4 Head impact
+
+Detected high-acceleration head events are labeled `IMPACT_EVENT`. FitConnect does not diagnose concussion.
+
+### 10.5 Sources (combat)
+
+- Menzel, T. & Potthast, W. (2021). Validation of a Unique Boxing Monitoring System. *Sensors* 21(21):6947.
+- Limb biomechanics in combat sports, *Frontiers in Bioengineering and Biotechnology* (2025) — IMU + pressure + sEMG; gold-standard validation still required.
+- FIAS Sport SAMBO amendments (2026). Scoring is ruleset-versioned, never inferred from IMU.
+- UNESCO ICH: Capoeira circle 00892 (2014); Taekkyeon 00452 (2011); Pencak Silat 01391 (2019); Silat 01504 (2019); Kun Lbokator 01868 (2022); Chidaoba 01371 (2018).
+- UFC & Meta (22 Jun 2026): Meta UFC Rankings use fight outcomes. Significant-strike stats were tested and not used in that ranking model.
+
+## 11. Open questions (resolve before F7, not blocking F0/F1 scaffolding)
 
 - Sex coefficient for TRIMP: stored on athlete profile or asked at onboarding? Not yet decided — F3 scope.
 - Whether ACWR banding should ever surface as a nudge to the coach vs. athlete-only — product decision, not engineering, park in `qa/HUMAN-QUEUE.md` if it comes up before F10.

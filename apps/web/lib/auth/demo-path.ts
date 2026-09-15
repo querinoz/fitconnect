@@ -13,6 +13,8 @@ export const ATHLETE_APP_PREFIXES = [
   "/map",
   "/train",
   "/coaches",
+  "/recovery",
+  "/martial-arts",
 ] as const;
 
 export function isAthleteAppPath(pathname: string): boolean {

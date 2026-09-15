@@ -260,6 +260,98 @@ const shadowBox: TrainExercise = ex({
   substitutions: ["ex_march_in_place"]
 });
 
+function combatRound(id: string, name: string, instructions: string, sets: number, workSec: number, restSec: number): TrainExercise {
+  return ex({
+    exerciseId: id,
+    name,
+    mode: "time",
+    weighted: false,
+    targetSets: sets,
+    targetRepsMin: 0,
+    targetRepsMax: 0,
+    targetLoadKg: null,
+    targetTimeSec: workSec,
+    restSec,
+    notes: "Rounds auto-complete. Force is never invented from a watch.",
+    muscles: ["full-body"],
+    instructions,
+    substitutions: ["ex_shadow_box", "ex_march_in_place"]
+  });
+}
+
+const boxingBag = combatRound(
+  "ex_boxing_bag",
+  "Bag round",
+  "Jab, cross, hook. Volume is logged per round — not punch force.",
+  5,
+  180,
+  60
+);
+const muayThaiPads = combatRound(
+  "ex_muay_thai_round",
+  "Pad / bag round",
+  "Punches, kicks, knees. Boxing rules do not apply here.",
+  5,
+  180,
+  60
+);
+const bjjRoll = combatRound(
+  "ex_bjj_roll",
+  "Roll",
+  "Positional work. Log RPE. Submissions are manual or coach-confirmed.",
+  5,
+  300,
+  60
+);
+const judoRandori = combatRound(
+  "ex_judo_randori",
+  "Randori block",
+  "Throws are not scored as Ippon from an accelerometer.",
+  4,
+  240,
+  60
+);
+const mmaRound = combatRound(
+  "ex_mma_round",
+  "MMA round",
+  "Striking + takedown entries. Wearable data is training telemetry, not official fight stats.",
+  5,
+  300,
+  60
+);
+const karateKumite = combatRound(
+  "ex_karate_kumite",
+  "Kumite round",
+  "Distance and combinations. Not kata.",
+  3,
+  180,
+  60
+);
+const karateKata = combatRound(
+  "ex_karate_kata",
+  "Kata pass",
+  "Sequence, timing, stance. Do not mix with kumite counts.",
+  6,
+  90,
+  30
+);
+const tkdKyorugi = combatRound(
+  "ex_tkd_round",
+  "Kyorugi round",
+  "Kick volume if you log it. Electronic scores need a scoring system.",
+  3,
+  120,
+  60
+);
+const capoeiraRoda = combatRound(
+  "ex_capoeira_roda",
+  "Roda / ginga block",
+  "Flow, ginga, music of the group. This is not strikes per minute.",
+  1,
+  1200,
+  0
+);
+
 export const TRAIN_PLANS: TrainPlan[] = [
   {
     id: "plan_upper_push_v2",
@@ -419,14 +511,23 @@ export const TRAIN_PLANS: TrainPlan[] = [
     difficulty: "moderate",
     equipment: ["none"],
     location: "home",
-    sport: "sport",
+    sport: "martial_arts",
     goal: "conditioning",
     plannedIntensity: "high",
     trainingType: "sport-specific",
     muscleGroups: ["shoulders", "core"],
     structure: ["Round", "Rest", "Round"],
     zenithNote: "Keep the chin tucked. This is not a fight, and we will not invent strike power.",
-    exercises: [shadowBox]
+    exercises: [shadowBox],
+    combat: {
+      disciplineId: "boxing",
+      sessionMode: "shadowboxing",
+      roundCount: 3,
+      roundDurationSec: 120,
+      restDurationSec: 60,
+      warningSec: 10,
+      focus: "Jab, cross, slip — skill rounds, not sparring."
+    }
   },
   {
     id: "plan_home_full_v1",
@@ -481,6 +582,249 @@ export const TRAIN_PLANS: TrainPlan[] = [
     structure: ["Breath", "Easy close"],
     zenithNote: "Optional breathing is coaching copy, not a measured recovery observation.",
     exercises: [breath]
+  },
+  {
+    id: "plan_boxing_bag_v1",
+    title: "Boxing bag — 5×3",
+    purpose: "Five three-minute rounds with a one-minute rest. Fight-mode timer, not a generic strength card.",
+    outcome: "Rounds logged. Punch force stays blank unless an instrumented bag or glove reports it.",
+    durationMin: 24,
+    difficulty: "hard",
+    equipment: ["heavy bag", "gloves"],
+    location: "gym",
+    sport: "martial_arts",
+    goal: "conditioning",
+    plannedIntensity: "high",
+    trainingType: "combat-rounds",
+    muscleGroups: ["shoulders", "core", "legs"],
+    structure: ["Round 1–5", "Rest 1:00", "10s warning"],
+    zenithNote: "Jab and cross volume only if you log it or a glove IMU counts. Acceleration is not newtons.",
+    exercises: [boxingBag],
+    combat: {
+      disciplineId: "boxing",
+      sessionMode: "bag_work",
+      roundCount: 5,
+      roundDurationSec: 180,
+      restDurationSec: 60,
+      warningSec: 10,
+      focus: "Combinations. Dominant hand stays unknown until logged."
+    }
+  },
+  {
+    id: "plan_muay_thai_v1",
+    title: "Muay Thai rounds",
+    purpose: "Five rounds that include kicks, knees and clinch conditioning — not boxing with a different skin.",
+    outcome: "Rounds completed. Elbows/knees are not inferred from a watch.",
+    durationMin: 24,
+    difficulty: "hard",
+    equipment: ["thai pads", "gloves"],
+    location: "gym",
+    sport: "martial_arts",
+    goal: "conditioning",
+    plannedIntensity: "high",
+    trainingType: "combat-rounds",
+    muscleGroups: ["hips", "shoulders", "core"],
+    structure: ["Round", "Clinch option", "Rest"],
+    zenithNote: "IFMA-style tools: punches, kicks, knees, elbows, clinch. Boxing scoring does not apply.",
+    exercises: [muayThaiPads],
+    combat: {
+      disciplineId: "muay_thai",
+      sessionMode: "pad_work",
+      roundCount: 5,
+      roundDurationSec: 180,
+      restDurationSec: 60,
+      warningSec: 10,
+      focus: "Combinations + clinch conditioning"
+    }
+  },
+  {
+    id: "plan_bjj_rolls_v1",
+    title: "BJJ rolls",
+    purpose: "Five five-minute rolls with rest. Positions are logged by you or your coach.",
+    outcome: "Rolls completed. Belts are never auto-awarded.",
+    durationMin: 30,
+    difficulty: "hard",
+    equipment: ["gi or nogi", "mat"],
+    location: "gym",
+    sport: "martial_arts",
+    goal: "conditioning",
+    plannedIntensity: "high",
+    trainingType: "combat-rounds",
+    muscleGroups: ["hips", "core", "grip"],
+    structure: ["Roll", "Rest", "Notes"],
+    zenithNote: "Sweeps, passes and submissions stay empty until entered. IMU classification is DETECTED until confirmed.",
+    exercises: [bjjRoll],
+    combat: {
+      disciplineId: "bjj",
+      sessionMode: "rolling",
+      roundCount: 5,
+      roundDurationSec: 300,
+      restDurationSec: 60,
+      warningSec: 10,
+      focus: "Positional work + honest RPE"
+    }
+  },
+  {
+    id: "plan_judo_randori_v1",
+    title: "Judo randori",
+    purpose: "Uchikomi-to-randori blocks. Landing events are not Ippon.",
+    outcome: "Randori minutes logged without fabricated scores.",
+    durationMin: 22,
+    difficulty: "hard",
+    equipment: ["judogi", "tatami"],
+    location: "gym",
+    sport: "martial_arts",
+    goal: "conditioning",
+    plannedIntensity: "high",
+    trainingType: "combat-rounds",
+    muscleGroups: ["grip", "hips", "core"],
+    structure: ["Randori", "Rest"],
+    zenithNote: "IJF Ippon/Waza-ari are official concepts — never inferred from a wearable.",
+    exercises: [judoRandori],
+    combat: {
+      disciplineId: "judo",
+      sessionMode: "randori",
+      roundCount: 4,
+      roundDurationSec: 240,
+      restDurationSec: 60,
+      warningSec: 10,
+      focus: "Throws and grip — coach confirms technique names"
+    }
+  },
+  {
+    id: "plan_mma_rounds_v1",
+    title: "MMA rounds",
+    purpose: "Five five-minute hybrid rounds. Training telemetry is not UFC statistics.",
+    outcome: "Rounds logged. Official fight stats require an official source.",
+    durationMin: 30,
+    difficulty: "hard",
+    equipment: ["gloves", "mat"],
+    location: "gym",
+    sport: "martial_arts",
+    goal: "conditioning",
+    plannedIntensity: "peak",
+    trainingType: "combat-rounds",
+    muscleGroups: ["full-body"],
+    structure: ["Strike", "Takedown entries", "Rest"],
+    zenithNote: "UFC/Meta rankings use fight outcomes. A session wearable is not that feed.",
+    exercises: [mmaRound],
+    combat: {
+      disciplineId: "mma",
+      sessionMode: "live_round",
+      roundCount: 5,
+      roundDurationSec: 300,
+      restDurationSec: 60,
+      warningSec: 10,
+      focus: "Strikes, takedown attempts, control — only if logged"
+    }
+  },
+  {
+    id: "plan_karate_kumite_v1",
+    title: "Karate kumite",
+    purpose: "Three kumite rounds. Kata is a different session.",
+    outcome: "Kumite rounds logged without mixing kata telemetry.",
+    durationMin: 12,
+    difficulty: "moderate",
+    equipment: ["gi", "mitts"],
+    location: "gym",
+    sport: "martial_arts",
+    goal: "conditioning",
+    plannedIntensity: "high",
+    trainingType: "combat-rounds",
+    muscleGroups: ["legs", "core"],
+    structure: ["Kumite", "Rest"],
+    zenithNote: "WKF scores are not computed from a watch.",
+    exercises: [karateKumite],
+    combat: {
+      disciplineId: "karate",
+      sessionMode: "kumite",
+      roundCount: 3,
+      roundDurationSec: 180,
+      restDurationSec: 60,
+      warningSec: 10,
+      focus: "Distance, reaction, combinations"
+    }
+  },
+  {
+    id: "plan_karate_kata_v1",
+    title: "Karate kata",
+    purpose: "Repeated kata passes. Timing and stance — not strike rate.",
+    outcome: "Kata repetitions logged as time blocks.",
+    durationMin: 14,
+    difficulty: "moderate",
+    equipment: ["gi"],
+    location: "home",
+    sport: "martial_arts",
+    goal: "mobility",
+    plannedIntensity: "moderate",
+    trainingType: "combat-forms",
+    muscleGroups: ["legs", "core"],
+    structure: ["Kata", "Reset"],
+    zenithNote: "Do not mix kata and kumite charts.",
+    exercises: [karateKata],
+    combat: {
+      disciplineId: "karate",
+      sessionMode: "kata",
+      roundCount: 6,
+      roundDurationSec: 90,
+      restDurationSec: 30,
+      warningSec: 10,
+      focus: "Sequence, balance, timing"
+    }
+  },
+  {
+    id: "plan_tkd_kyorugi_v1",
+    title: "Taekwondo kyorugi",
+    purpose: "Three two-minute rounds. Electronic scoring stays off unless the hardware is present.",
+    outcome: "Rounds logged. WT points are not inferred.",
+    durationMin: 10,
+    difficulty: "hard",
+    equipment: ["hogu optional"],
+    location: "gym",
+    sport: "martial_arts",
+    goal: "conditioning",
+    plannedIntensity: "high",
+    trainingType: "combat-rounds",
+    muscleGroups: ["legs", "hips"],
+    structure: ["Round", "Rest"],
+    zenithNote: "Head/body target only when a scoring system or coach records it.",
+    exercises: [tkdKyorugi],
+    combat: {
+      disciplineId: "taekwondo",
+      sessionMode: "live_round",
+      roundCount: 3,
+      roundDurationSec: 120,
+      restDurationSec: 60,
+      warningSec: 10,
+      focus: "Kicks + turning kicks — logged, not guessed"
+    }
+  },
+  {
+    id: "plan_capoeira_roda_v1",
+    title: "Capoeira roda",
+    purpose: "Twenty minutes of ginga, game and community rhythm — not a striking-rate workout.",
+    outcome: "Session duration logged. UNESCO context stays in the briefing.",
+    durationMin: 20,
+    difficulty: "moderate",
+    equipment: ["none"],
+    location: "gym",
+    sport: "martial_arts",
+    goal: "mobility",
+    plannedIntensity: "moderate",
+    trainingType: "combat-cultural",
+    muscleGroups: ["hips", "core", "shoulders"],
+    structure: ["Ginga", "Game", "Music of the group"],
+    zenithNote: "Capoeira circle is fight, dance, tradition and expression. Do not headline strikes/min.",
+    exercises: [capoeiraRoda],
+    combat: {
+      disciplineId: "capoeira",
+      sessionMode: "roda",
+      roundCount: 1,
+      roundDurationSec: 1200,
+      restDurationSec: 0,
+      warningSec: 30,
+      focus: "Ginga, flow, mobility, rhythm"
+    }
   }
 ];
 
@@ -495,13 +839,14 @@ export const TRAIN_FILTERS = {
     "mobility",
     "recovery",
     "conditioning",
-    "sport"
+    "sport",
+    "martial_arts"
   ] as const,
   durations: [15, 25, 35, 45] as const,
   difficulties: ["easy", "moderate", "hard"] as const,
   locations: ["gym", "home", "outdoor", "pool"] as const,
   equipment: ["none", "dumbbells", "barbell", "bike"] as const,
-  trainingTypes: ["strength", "hypertrophy", "endurance", "conditioning", "mobility", "recovery", "sport-specific", "warm-up", "cool-down"] as const
+  trainingTypes: ["strength", "hypertrophy", "endurance", "conditioning", "mobility", "recovery", "sport-specific", "warm-up", "cool-down", "combat-rounds", "combat-forms", "combat-cultural"] as const
 };
 
 export function getTrainPlan(id: string): TrainPlan | undefined {

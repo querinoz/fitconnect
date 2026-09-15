@@ -14,6 +14,7 @@ export const PROTECTED_PREFIXES = [
   "/train",
   "/coaches",
   "/recovery",
+  "/martial-arts",
 ] as const;
 
 export function isProtectedPath(pathname: string): boolean {

@@ -76,6 +76,26 @@ export const MCP_TOOLS: McpToolDef[] = [
     })
   },
   {
+    name: "list_martial_arts",
+    domain: "sports",
+    risk: "read",
+    description: "Martial Arts OS catalog: disciplines, families, ruleset versions. No invented athlete stats.",
+    capabilities: [],
+    schema: empty
+  },
+  {
+    name: "zenith_combat_context",
+    domain: "ai",
+    risk: "sensitive",
+    description: "Discipline-aware Zenith briefing. Never diagnoses injury or invents force.",
+    capabilities: ["athlete", "coach"],
+    schema: z.object({
+      disciplineId: z.string().min(2).max(64),
+      sessionMode: z.string().max(40).optional(),
+      presentMetrics: z.array(z.string()).optional()
+    })
+  },
+  {
     name: "list_sport_types",
     domain: "sports",
     risk: "read",

@@ -133,6 +133,27 @@ object GuidedPlanCatalog {
             structure = listOf("30/30 waves"),
             zenithNote = "Planned peak work. Heart-rate zones are not invented.",
         ),
+        card(
+            plan = WorkoutPlan(
+                workoutId = "plan_boxing_bag_v1",
+                name = "Boxing bag — 5x3",
+                estimatedDurationMin = 24,
+                exercises = listOf(
+                    planned("ex_boxing_bag", "Bag round", ExerciseMode.DURATION_SPEED, false, 5, 0, 0, null, 180, 60, ProgressionRule.TIME_PROGRESSION),
+                ),
+            ),
+            sport = "martial_arts",
+            goal = "conditioning",
+            difficulty = "hard",
+            equipment = listOf("heavy bag", "gloves"),
+            location = "gym",
+            plannedIntensity = "high",
+            purpose = "Five three-minute rounds. Punch force is not invented from a watch.",
+            outcome = "Rounds logged. Acceleration is not newtons.",
+            muscleGroups = listOf("shoulders", "core"),
+            structure = listOf("Round", "Rest"),
+            zenithNote = "FIGHT MODE. IMU count is DETECTED until confirmed. No official scores.",
+        ),
     )
 
     fun plan(id: String): WorkoutPlan = cards().firstOrNull { it.plan.workoutId == id }?.plan

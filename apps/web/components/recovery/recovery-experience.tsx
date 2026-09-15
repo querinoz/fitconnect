@@ -55,6 +55,9 @@ export function RecoveryExperience() {
         <Link className="text-eos-telemetry underline-offset-4 hover:underline" href="/train">
           Open TRAIN
         </Link>
+        <Link className="text-eos-telemetry underline-offset-4 hover:underline" href="/martial-arts">
+          Martial Arts OS
+        </Link>
         <Link className="text-eos-telemetry underline-offset-4 hover:underline" href="/settings/wearables">
           Device connections
         </Link>

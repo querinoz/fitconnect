@@ -18,6 +18,7 @@ describe("demo path role", () => {
     expect(demoRoleForPath("/feed", null)).toBe("athlete");
     expect(demoRoleForPath("/map", "1")).toBe("athlete");
     expect(demoRoleForPath("/train", null)).toBe("athlete");
+    expect(demoRoleForPath("/martial-arts", null)).toBe("athlete");
     expect(demoRoleForPath("/coaches", null)).toBe("athlete");
   });
 

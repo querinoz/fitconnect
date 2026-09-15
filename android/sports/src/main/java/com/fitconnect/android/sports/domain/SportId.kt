@@ -24,6 +24,7 @@ value class SportId(val value: String) {
         val PADEL = of("padel")
         val TRIATHLON = of("triathlon")
         val GYM = of("gym")
+        val MARTIAL_ARTS = of("martial_arts")
         val OTHER = of("other")
     }
 }

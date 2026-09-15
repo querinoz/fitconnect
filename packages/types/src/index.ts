@@ -31,6 +31,36 @@ export type {
 export { ACTIVITY_UNITS, CANONICAL_SPORTS, READINESS_UNITS, kjToKcal, kcalToKj } from "./canonical";
 
 export type {
+  CombatFamily,
+  PracticeKind,
+  ContactLevel,
+  MeasurementType,
+  MeasurementConfidence,
+  ClassificationStatus,
+  CombatSessionMode,
+  StrikeKind,
+  PunchClass,
+  KickClass,
+  GrapplingKind,
+  Side,
+  CombatSensor,
+  CombatMetricKey,
+  CombatMeasurement,
+  CombatEvent,
+  StrikeEvent,
+  GrapplingEvent,
+  MovementEvent,
+  ImpactSafetyEvent,
+  RankSystemId,
+  RulesetRef,
+  MartialArtDiscipline,
+  CombatRoundPrescription,
+  CombatAthleteProfile
+} from "./combat";
+
+export { COMBAT_OS_VERSION } from "./combat";
+
+export type {
   ProviderId,
   MetricProvenance,
   ProviderTier,

@@ -20,7 +20,10 @@ describe("TRAIN catalog", () => {
     const sports = new Set(TRAIN_PLANS.map((plan) => plan.sport));
     expect(sports.has("strength")).toBe(true);
     expect(sports.has("running")).toBe(true);
-    expect(sports.has("recovery")).toBe(true);
+    expect(TRAIN_PLANS.some((plan) => plan.sport === "martial_arts")).toBe(true);
+    expect(getTrainPlan("plan_boxing_bag_v1")?.combat?.disciplineId).toBe("boxing");
+    expect(getTrainPlan("plan_capoeira_roda_v1")?.combat?.sessionMode).toBe("roda");
+    expect(getTrainPlan("plan_muay_thai_v1")?.zenithNote.toLowerCase()).toMatch(/boxing scoring does not apply|knees/);
     for (const plan of TRAIN_PLANS) {
       expect(JSON.stringify(plan)).not.toMatch(/\d+\s*kcal|\d+\s*calories/i);
       expect(plan.exercises.length).toBeGreaterThan(0);
@@ -34,6 +37,8 @@ describe("TRAIN catalog", () => {
     expect(filterPlans({ sport: "hiit" }).map((plan) => plan.id)).toContain("plan_hiit_v1");
     expect(getTrainPlan("plan_warmup_v1")?.trainingType).toBe("warm-up");
     expect(filterPlans({ trainingType: "cool-down" }).map((plan) => plan.id)).toContain("plan_cooldown_v1");
+    expect(filterPlans({ sport: "martial_arts" }).every((plan) => plan.sport === "martial_arts")).toBe(true);
+    expect(filterPlans({ sport: "martial_arts" }).map((plan) => plan.id)).toContain("plan_bjj_rolls_v1");
   });
 
   it("substitutes a movement without inventing load history", () => {
@@ -65,6 +70,12 @@ describe("TRAIN recommendation", () => {
     expect(rec.adapted).toBe(false);
     expect(rec.plan.id).toBe("plan_upper_push_v2");
     expect(rec.reason.toLowerCase()).toMatch(/not an adapted/);
+  });
+
+  it("prefers a combat catalog session when martial arts is the active sport", () => {
+    const rec = recommendPlan(readinessFromApi({ score: null, source: "insufficient_data" }), undefined, "martial_arts");
+    expect(rec.plan.sport).toBe("martial_arts");
+    expect(rec.adapted).toBe(false);
   });
 
   it("selects restore work when a real restore band exists", () => {
@@ -232,5 +243,19 @@ describe("TRAIN state machine", () => {
     snap = reduceTrain(snap, { type: "mark_save", status: "failed", error: "Cloud save failed." });
     expect(snap.phase).toBe("complete");
     expect(snap.saveStatus).toBe("failed");
+  });
+
+  it("auto-completes combat timed rounds without a log tap", () => {
+    let snap = reduceTrain(IDLE_SNAPSHOT, { type: "select_plan", planId: "plan_tkd_kyorugi_v1" });
+    snap = reduceTrain(snap, { type: "start", nowMs: 0, sessionId: "combat-1" });
+    expect(snap.phase).toBe("active");
+    expect(snap.workRemainingSec).toBe(120);
+    for (let i = 0; i < 120; i += 1) {
+      snap = reduceTrain(snap, { type: "tick" });
+    }
+    expect(snap.sets.length).toBeGreaterThanOrEqual(1);
+    expect(snap.phase === "rest" || snap.phase === "active" || snap.phase === "completing").toBe(true);
+    const cues = zenithCues(snap, readinessFromApi({ score: null, source: "insufficient_data" }));
+    expect(cues.join(" ")).toMatch(/FIGHT MODE|taekwondo/i);
   });
 });

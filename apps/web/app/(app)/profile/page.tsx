@@ -28,6 +28,11 @@ export default function AthleteProfilePlaceholderPage() {
           <>
             <ActiveExperienceSwitcher />
             {stitchMobile ? undefined : <AthleteProfileForm />}
+            <p className="mt-4 text-sm">
+              <a className="text-eos-telemetry underline-offset-4 hover:underline" href="/martial-arts">
+                Martial Arts OS — discipline, rank, gym, competition
+              </a>
+            </p>
           </>
         }
       />

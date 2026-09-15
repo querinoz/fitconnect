@@ -492,6 +492,7 @@ class LiveActivityEngine(
             return when (sport) {
                 WorkoutSport.STRENGTH, WorkoutSport.MOBILITY, WorkoutSport.RECOVERY ->
                     (minutes * 6.0).toInt()
+                WorkoutSport.MARTIAL_ARTS -> 0
                 WorkoutSport.CYCLING, WorkoutSport.INDOOR_CYCLING ->
                     (km * 40.0).toInt()
                 else -> (km * 70.0).toInt()

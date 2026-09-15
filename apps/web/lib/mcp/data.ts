@@ -1,3 +1,4 @@
+import { catalogIndex, listDisciplines } from "@/lib/combat";
 import { CANONICAL_SPORTS } from "@fitconnect/types";
 import { listCommunityPosts } from "@/lib/community/server-posts";
 import { listCommunityPostsFromSupabase } from "@/lib/community/supabase-repository";
@@ -8,6 +9,20 @@ import { buildHealthReport } from "@/lib/observability/health";
 
 export function mcpCanonicalSports() {
   return { sports: [...CANONICAL_SPORTS] };
+}
+
+export function mcpMartialArtsCatalog() {
+  return {
+    ...catalogIndex(),
+    disciplines: listDisciplines().map((d) => ({
+      id: d.id,
+      name: d.name,
+      family: d.family,
+      practiceKinds: d.practiceKinds,
+      competitive: d.competitive,
+      unescoIch: d.unescoIch ?? null
+    }))
+  };
 }
 
 export async function mcpListSocialFeed() {

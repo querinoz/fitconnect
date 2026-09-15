@@ -39,6 +39,7 @@ export const CANONICAL_SPORTS = [
   "RACQUET",
   "TEAM",
   "GOLF",
+  "MARTIAL_ARTS",
   "OTHER"
 ] as const;
 

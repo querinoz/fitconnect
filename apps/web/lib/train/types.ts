@@ -8,7 +8,8 @@ export type TrainSport =
   | "mobility"
   | "recovery"
   | "conditioning"
-  | "sport";
+  | "sport"
+  | "martial_arts";
 
 export type TrainGoal =
   | "strength"
@@ -45,6 +46,16 @@ export type TrainExercise = {
   substitutions: string[];
 };
 
+export type CombatPlanMeta = {
+  disciplineId: string;
+  sessionMode: string;
+  roundCount: number;
+  roundDurationSec: number;
+  restDurationSec: number;
+  warningSec: number;
+  focus: string;
+};
+
 export type TrainPlan = {
   id: string;
   title: string;
@@ -62,6 +73,7 @@ export type TrainPlan = {
   structure: string[];
   zenithNote: string;
   exercises: TrainExercise[];
+  combat?: CombatPlanMeta;
 };
 
 export type TrainSlot = {

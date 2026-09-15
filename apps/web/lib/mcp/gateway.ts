@@ -1,13 +1,15 @@
 import { orchestrateZenith } from "@fitconnect/ai";
 import { DISABLED_AGGREGATORS } from "@fitconnect/types";
 import { listFitnessAdapters } from "@/lib/fitness/adapters";
+import { zenithCombatContext } from "@/lib/combat";
 import { findMcpTool, MCP_TOOLS } from "./catalog";
 import {
   mcpAdminHealth,
   mcpCanonicalSports,
   mcpCreateBooking,
   mcpListPublicSpots,
-  mcpListSocialFeed
+  mcpListSocialFeed,
+  mcpMartialArtsCatalog
 } from "./data";
 import { recordMcpAudit } from "./audit";
 import { looksLikePromptInjection, sanitizeUntrustedText } from "./sanitize";
@@ -129,6 +131,18 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
     case "list_sport_types":
       result = mcpCanonicalSports();
       break;
+    case "list_martial_arts":
+      result = mcpMartialArtsCatalog();
+      break;
+    case "zenith_combat_context": {
+      const ctx = zenithCombatContext({
+        disciplineId: String(args.disciplineId),
+        sessionMode: typeof args.sessionMode === "string" ? (args.sessionMode as never) : null,
+        presentMetrics: Array.isArray(args.presentMetrics) ? (args.presentMetrics as string[]) : []
+      });
+      result = ctx ?? { error: "unknown_discipline", medicalClaims: false };
+      break;
+    }
     case "list_providers":
       result = {
         providers: listFitnessAdapters().map((a) => a.constraints),

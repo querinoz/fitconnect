@@ -267,6 +267,9 @@ export function AthleteOsDashboard({
                   <EliteButton asChild variant="secondary" className="w-full" size="sm">
                     <Link href="/programs">{os.browsePrograms}</Link>
                   </EliteButton>
+                  <EliteButton asChild variant="secondary" className="w-full" size="sm">
+                    <Link href="/martial-arts">Martial Arts OS</Link>
+                  </EliteButton>
                 </div>
               </BentoCard>
               ) : null}

@@ -47,6 +47,7 @@ import { readinessFromApi } from "@/lib/train/readiness";
 import { recommendPlan } from "@/lib/train/recommend";
 import type { ReadinessView, TrainPlan, TrainSnapshot } from "@/lib/train/types";
 import { TRAIN_PHASE_LABEL } from "@/lib/train/types";
+import { CombatBriefing, CombatLiveBlock } from "@/components/train/combat-session";
 import { cn } from "@/lib/utils";
 
 const FILTER_CHIPS = [
@@ -60,6 +61,7 @@ const FILTER_CHIPS = [
   { id: "recovery", label: "Recovery" },
   { id: "conditioning", label: "Conditioning" },
   { id: "sport", label: "Sport" },
+  { id: "martial_arts", label: "Combat" },
   { id: "endurance", label: "Endurance" }
 ] as const;
 
@@ -97,6 +99,7 @@ export function TrainExperience() {
   const [reps, setReps] = useState("");
   const [load, setLoad] = useState("");
   const [rpe, setRpe] = useState<number | null>(null);
+  const [combatMuted, setCombatMuted] = useState(false);
   const restored = useRef(false);
   const saveStartedFor = useRef<string | null>(null);
 
@@ -112,6 +115,10 @@ export function TrainExperience() {
       dispatch({ type: "restore", snapshot: saved });
     }
     void fetchReadiness().then(setReadiness);
+    if (typeof window !== "undefined") {
+      const q = new URLSearchParams(window.location.search).get("sport");
+      if (q === "martial_arts") setSport("martial_arts");
+    }
   }, [dispatch]);
 
   useEffect(() => {
@@ -161,7 +168,7 @@ export function TrainExperience() {
     setRpe(null);
   }, [slotKey, nextReps, nextLoad]);
 
-  const recommendation = useMemo(() => recommendPlan(readiness), [readiness]);
+  const recommendation = useMemo(() => recommendPlan(readiness, undefined, sport), [readiness, sport]);
   const plans = useMemo(
     () =>
       filterPlans({
@@ -209,7 +216,12 @@ export function TrainExperience() {
         volumeKg: volumeKg(next),
         skipped: next.sets.filter((set) => set.skipped).length
       },
-      metadata: { workoutId: next.planId, surface: "web-train" }
+      metadata: {
+        workoutId: next.planId,
+        surface: "web-train",
+        disciplineId: getTrainPlan(next.planId)?.combat?.disciplineId ?? null,
+        combat: Boolean(getTrainPlan(next.planId)?.combat)
+      }
     };
     recordLocalHistory({
       sessionId: next.sessionId,
@@ -253,6 +265,23 @@ export function TrainExperience() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify(body)
       });
+      const combatPlan = getTrainPlan(next.planId)?.combat;
+      if (combatPlan && user?.id) {
+        await fetch("/api/v1/martial-arts/sessions", {
+          method: "POST",
+          credentials: "include",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            sessionId: next.sessionId,
+            disciplineId: combatPlan.disciplineId,
+            sessionMode: combatPlan.sessionMode,
+            startedAt: new Date(next.startedAtMs).toISOString(),
+            endedAt: new Date(next.completedAtMs).toISOString(),
+            roundsCompleted: next.sets.filter((set) => !set.skipped).length,
+            rpe: next.sets.map((set) => set.rpe).find((value) => value != null) ?? null
+          })
+        }).catch(() => undefined);
+      }
       if (res.status === 503) {
         dispatch({
           type: "mark_save",
@@ -318,8 +347,8 @@ export function TrainExperience() {
               : "Your session is about to begin."}
         </h1>
         <p className="max-w-2xl text-sm text-eos-on-surface-muted sm:text-base">
-          Discover, prep, train, rest, finish. Heart rate, HRV and calories stay blank unless a
-          real source provides them.
+          Discover, prep, train, rest, finish. Combat rounds auto-complete. Heart rate, HRV, calories
+          and punch force stay blank unless a real source provides them.
         </p>
         <div className="flex flex-wrap gap-2">
           <StatusChip
@@ -374,19 +403,49 @@ export function TrainExperience() {
       )}
 
       {snapshot.phase === "prep" && plan ? (
-        <Briefing
-          plan={plan}
-          readiness={readiness}
-          cues={cues}
-          onStart={() => {
-            hapticTap();
-            dispatch({ type: "start", nowMs: Date.now(), sessionId: newId() });
-          }}
-          onBack={() => dispatch({ type: "reset" })}
-        />
+        plan.combat ? (
+          <CombatBriefing
+            combat={plan.combat}
+            title={plan.title}
+            purpose={plan.purpose}
+            equipment={plan.equipment}
+            cues={cues}
+            onStart={() => {
+              hapticTap();
+              dispatch({ type: "start", nowMs: Date.now(), sessionId: newId() });
+            }}
+            onBack={() => dispatch({ type: "reset" })}
+          />
+        ) : (
+          <Briefing
+            plan={plan}
+            readiness={readiness}
+            cues={cues}
+            onStart={() => {
+              hapticTap();
+              dispatch({ type: "start", nowMs: Date.now(), sessionId: newId() });
+            }}
+            onBack={() => dispatch({ type: "reset" })}
+          />
+        )
       ) : null}
 
       {(snapshot.phase === "active" || snapshot.phase === "warmup") && plan && slot ? (
+        plan.combat ? (
+          <CombatLiveBlock
+            combat={plan.combat}
+            snapshot={snapshot}
+            elapsed={elapsed}
+            cues={cues}
+            muted={combatMuted}
+            onMute={setCombatMuted}
+            onPause={() => dispatch({ type: "pause" })}
+            onSkipRest={() => dispatch({ type: "skip_rest" })}
+            onFinish={finishNow}
+            rpe={rpe}
+            onRpe={setRpe}
+          />
+        ) : (
         <LiveBlock
           plan={plan}
           snapshot={snapshot}
@@ -419,9 +478,25 @@ export function TrainExperience() {
           onFinish={finishNow}
           onOpenSubstitution={() => dispatch({ type: "enter_substitution" })}
         />
+        )
       ) : null}
 
       {snapshot.phase === "rest" && plan ? (
+        plan.combat ? (
+          <CombatLiveBlock
+            combat={plan.combat}
+            snapshot={snapshot}
+            elapsed={elapsed}
+            cues={cues}
+            muted={combatMuted}
+            onMute={setCombatMuted}
+            onPause={() => dispatch({ type: "pause" })}
+            onSkipRest={() => dispatch({ type: "skip_rest" })}
+            onFinish={finishNow}
+            rpe={rpe}
+            onRpe={setRpe}
+          />
+        ) : (
         <RestBlock
           snapshot={snapshot}
           upcoming={currentSlot(snapshot) ?? upcoming}
@@ -433,6 +508,7 @@ export function TrainExperience() {
           onPlus30={() => dispatch({ type: "extend_rest", extraSec: 30 })}
           onPause={() => dispatch({ type: "pause" })}
         />
+        )
       ) : null}
 
       {snapshot.phase === "paused" || snapshot.phase === "interrupted" ? (
@@ -509,6 +585,9 @@ export function TrainExperience() {
 
       {!live && !done ? (
         <footer className="flex flex-wrap gap-3 text-sm">
+          <Link className="text-eos-telemetry underline-offset-4 hover:underline" href="/martial-arts">
+            Martial Arts OS
+          </Link>
           <Link className="text-eos-telemetry underline-offset-4 hover:underline" href="/coaches">
             Find a coach
           </Link>

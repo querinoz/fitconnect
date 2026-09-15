@@ -54,6 +54,7 @@ private enum class WearIdlePane {
     HOME,
     READINESS,
     HEART_RATE,
+    FIGHT,
     ASCEND,
     SLEEP,
     RECOVERY,
@@ -229,7 +230,12 @@ private fun WearIdlePager(
                         } else {
                             "UNAVAILABLE"
                         },
-                        footnote = hrCapability.name,
+                        footnote = if (hrCapability == MetricAvailability.AVAILABLE) hrText else "Health Services required",
+                    )
+                    WearIdlePane.FIGHT -> WearMetricPane(
+                        title = CombatWearClock.headline("idle", 0),
+                        value = CombatWearClock.formatClock(0),
+                        footnote = "Phone Fight Mode · watch IMU is not punch force",
                     )
                     WearIdlePane.ASCEND -> {
                         val ascend = WearRuntime.ascend.snapshot(LocalDemoIdentity.ATHLETE_ID)

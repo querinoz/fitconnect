@@ -15,4 +15,5 @@ object WearPaths {
     const val SYNC_PROFILE = "/sync/profile"
     const val SCHEMA = "telemetry.v1"
     const val ASCEND_SNAPSHOT = "/ascend/snapshot"
+    const val COMBAT_ROUND = "/combat/round"
 }

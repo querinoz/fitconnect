@@ -146,6 +146,9 @@ export function CoachOsDashboard({
               <EliteButton asChild size="sm">
                 <Link href="/coach/roster">{t("coachDashboard", "viewRoster")}</Link>
               </EliteButton>
+              <EliteButton asChild variant="secondary" size="sm">
+                <Link href="/martial-arts">Combat OS</Link>
+              </EliteButton>
               <Button
                 variant="outline"
                 size="sm"
