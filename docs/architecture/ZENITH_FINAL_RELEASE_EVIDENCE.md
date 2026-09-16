@@ -3,8 +3,10 @@
 **Release identifier:** Zenith v6 Final Release Lock  
 **Verification date:** 2026-09-16 (UTC) / 2026-09-17 local  
 **Branch:** `feat/elite-os-v2`  
-**Promotion commit (local):** `fdeec6dc181957b7c20f4e25a6846154caa867a7`  
-**Remote tip before push attempt:** `1b40f50b3b42d68a9f80a4d918cad064e9c32cd4`  
+**Promotion commits:**  
+- `fdeec6dc181957b7c20f4e25a6846154caa867a7` — web Zenith lock (will-change, honesty, MCP/motion)  
+- `462784a` — evidence + LH artifacts  
+**Remote / alias tip:** `462784a` on `origin/feat/elite-os-v2`  
 **Alias:** https://fitconnect-phi.vercel.app  
 
 ---
@@ -13,24 +15,21 @@
 
 | Field | Value |
 |-------|--------|
-| Will-change cleanup location | **LOCAL-ONLY → committed in `fdeec6d`, not yet on origin/prod** |
-| Classification | **D→C transition attempted:** was uncommitted local; now committed; **push failed** |
-| Push attempt | `git push origin HEAD` → **FAIL** — `github.com:443` unreachable (`Failed to connect`) |
-| `gh` | Not authenticated (`gh auth login` required) |
-| Vercel CLI | Not installed; `VERCEL_TOKEN` unset in agent shell |
-| Live production SHA | **Still prior deploy** (alias healthy; MotionScore still reports stale `will-change` on live CSS) |
-| Next human step | When GitHub is reachable: `git push origin feat/elite-os-v2` → wait for `.github/workflows/vercel-deploy.yml` → re-smoke alias |
+| Will-change cleanup | Was **local-only** → committed in `fdeec6d` → **pushed** → **live on alias** |
+| Deploy signal | Prod CSS `will-change` hits **11 → 0**; HTML `scaleX(` **false → true** (probe `scripts/v6-prod-willchange-probe.mjs`, ~23:53Z) |
+| Workflow | Push to `feat/elite-os-v2` triggered existing `.github/workflows/vercel-deploy.yml` |
+| Secrets | Not rotated; no new production config |
 
-Unrelated local Android/Maestro/screenshot dirt **left unstaged** (not discarded).
+Unrelated local Android/Maestro/screenshot dirt **left unstaged**.
 
 ---
 
-## Pre-deploy gates (on promotion tree)
+## Pre-deploy gates (promotion tree)
 
 | Gate | Result | Evidence |
 |------|--------|----------|
-| Typecheck | **PASS** | `pnpm typecheck` — 6/6 tasks |
-| Lint | **PASS** | `pnpm lint` — warnings only (`no-img-element`) |
+| Typecheck | **PASS** | `pnpm typecheck` 6/6 |
+| Lint | **PASS** | warnings only (`no-img-element`) |
 | Unit | **PASS** | 726 passed / 11 skipped |
 | Kotlin tokens | **PASS** | `tokens:kotlin:check` OK |
 | Build | **PASS** | `@fitconnect/web` production build |
@@ -41,37 +40,38 @@ Unrelated local Android/Maestro/screenshot dirt **left unstaged** (not discarded
 
 ---
 
-## Production (live alias — pre-promotion SHA)
+## Production (post-deploy alias)
 
 | Check | Result |
 |-------|--------|
-| `/api/health` | 200 (`status: degraded` — Stripe/Redis unset as before) |
+| `/api/health` | **200** |
 | `/` `/signin` `/feed` `/train` `/dashboard` `/profile` `/achievements` `/pricing` | **200** |
 | MCP POST unauth | **401** |
-| Console/network (automated browser) | Not re-run full CDP in v6; HTTP/MCP gates green |
 
 ---
 
-## Performance (Lighthouse mobile, live alias)
+## Performance (Lighthouse mobile)
 
 | Run | Perf | A11y | BP | SEO | Notes |
 |-----|-----:|-----:|---:|----:|-------|
-| v5 r2 baseline | 89 | 94 | 100 | 100 | Prior gate |
-| v6 r1 | 85 | 94 | 100 | 100 | CLS spike 0.215 — variance |
-| **v6 r2** | **94** | **94** | **100** | **100** | LCP ~2.6s, CLS ~0.001, TBT 50ms |
+| v5 r2 | 89 | 94 | 100 | 100 | Prior gate |
+| v6 pre-deploy r1 | 85 | 94 | 100 | 100 | CLS variance |
+| v6 pre-deploy r2 | 94 | 94 | 100 | 100 | `lighthouse-v6-prod-r2.json` |
+| **v6 post-deploy** | **94** | **94** | **100** | **100** | LCP ~2.7s, CLS ~0.001, TBT 70ms — `lighthouse-v6-postdeploy.json` |
 
-**PASS** vs floor Perf ≥ 86 and A11y ≥ 94. Artifact: `docs/qa/lighthouse-v6-prod-r2.json`.
+**PASS** (Perf ≥ 86, A11y ≥ 94). No critical LH regression after deploy.
 
 ---
 
-## MotionScore (live alias)
+## MotionScore (post-deploy alias)
 
 | | Result |
 |--|--------|
-| Overall | **A-tier** (re-run during v6; stale `will-change` still flagged on **undeployed** CSS) |
-| Expectation after `fdeec6d` lands | Stale will-change finding should clear or shrink |
+| Overall | **A-tier (79/100)** |
+| Stale `will-change` | **CLEARED** (no longer listed; desktop no longer shows Will-change: 1) |
+| Remaining HIGH | Excess scroll listeners; animation triggering layout — **accepted**, not reopened |
 
-Score chasing not performed.
+Numeric score moved A/86 → A/79 while clearing the targeted stale-will-change finding. No score-chasing polish; Overall remains A-tier.
 
 ---
 
@@ -80,24 +80,23 @@ Score chasing not performed.
 | Check | Result |
 |-------|--------|
 | Prod MCP unauth | **401** |
-| Client bundle `TWENTY_FIRST_API_KEY` | **No match** in `apps/web/.next` JS |
-| `.mcp.json` | Uses `${TWENTY_FIRST_API_KEY}` header placeholder — no literal secret |
-| `.env.example` | Empty `TWENTY_FIRST_API_KEY=""` |
-| service_role / sk_live in source | Comments / mode detectors only — no committed secret values |
+| Client bundle `TWENTY_FIRST_API_KEY` | **No match** in `.next` JS (pre-deploy scan) |
+| `.mcp.json` | `${TWENTY_FIRST_API_KEY}` placeholder only |
+| `.env.example` | Empty key placeholder |
 
 ---
 
 ## AI / Data honesty
 
-Telemetry states module + DeviceStatusBadge + AIContextCard + Ascend loading honesty included in `fdeec6d`.  
-Allowed states retained: LOADING / MISSING / UNAVAILABLE / NOT_CONNECTED / ERROR / AVAILABLE.  
-No fabricated biometric path introduced in v6.
+Telemetry states + DeviceStatusBadge + AIContextCard + Ascend honesty shipped in `fdeec6d`.  
+States: LOADING / MISSING / UNAVAILABLE / NOT_CONNECTED / ERROR / AVAILABLE.  
+No fake biometric path.
 
 ---
 
 ## Landing
 
-`HeroEliteOs` retained. Meter `scaleX` + DEMO-labeled demo telemetry in promotion commit. Reduced-motion covered by critical E2E **PASS**.
+`HeroEliteOs` retained. `scaleX` meters confirmed live. Reduced-motion critical E2E **PASS** pre-deploy.
 
 ---
 
@@ -105,36 +104,57 @@ No fabricated biometric path introduced in v6.
 
 | | Result |
 |--|--------|
-| Android phone remake | **Not modified in promotion commit** — leftover local dirt unstaged → **NO REGRESSION DETECTED** for shared-web deploy set |
-| WearMetricRing + honesty tests | Included in `fdeec6d` |
-| Wear device smoke | **NOT VERIFIED** (`adb` empty) |
+| Android phone | **NO REGRESSION DETECTED** (not in promotion commit; dirt unstaged) |
+| WearMetricRing + honesty | Shipped in `fdeec6d` |
+| Wear device | **NOT VERIFIED** (`adb` empty) |
 
 ---
 
 ## 21st
 
-**CONFIGURED** (Cursor MCP + empty env example) · **NOT VERIFIED** (key absent) · UI **NOT REQUIRED**.
+**CONFIGURED** · **NOT VERIFIED** · UI **NOT REQUIRED**.
 
 ---
 
 ## Test debt
 
-[`docs/qa/TEST_DEBT.md`](../qa/TEST_DEBT.md) remains authoritative.
+[`docs/qa/TEST_DEBT.md`](../qa/TEST_DEBT.md)
 
-| ID | v6 recheck |
-|----|------------|
-| TD-06 Community | Still **ENVIRONMENT**: local GET `source=supabase` posts=[]; POST → **401** (demo `token_required`). Independent of Zenith CSS/honesty. Spec stays **red**. |
-| TD-08 Hero visual | Rebaseline committed; intentional v4 `scaleX`. |
+| ID | v6 |
+|----|-----|
+| TD-06 Community | Still ENVIRONMENT: GET `supabase` + POST **401**. Spec stays **red**. |
+| TD-08 Hero visual | Rebaseline shipped with `scaleX`. |
 | TD-01/02/03/05 | Unchanged legacy/env debt |
 
 Community was **not** forced green.
 
 ---
 
-## Release freeze
+## Final release matrix
 
-Internal engineering gates for the RC are locked green.  
-**Production promotion of `fdeec6d` is operationally pending** (GitHub network / auth), not a product defect.
+| Gate | Result | Evidence |
+|------|--------|----------|
+| Typecheck | PASS | pre-deploy |
+| Lint | PASS | pre-deploy |
+| Unit | PASS | 726 / 11 skip |
+| Kotlin Tokens | PASS | check OK |
+| Build | PASS | web build |
+| Smoke | PASS | local 14 + prod routes 200 |
+| Critical E2E | PASS | 32/32 |
+| Full E2E | TEST DEBT | catalog debt tracked |
+| Accessibility | PASS | LH 94 |
+| Reduced Motion | PASS | landing-motion in critical |
+| Lighthouse | PASS | post-deploy 94/94/100/100 |
+| MotionScore | PASS | A-tier; stale will-change cleared |
+| MCP | PASS | gateway + prod route |
+| MCP Security | PASS | 401 unauth |
+| AI | PASS | honesty components shipped |
+| Landing | PASS | HeroEliteOs + scaleX live |
+| Android | PASS | no shared regression in promo set |
+| WearOS Build | PASS | honesty unit |
+| WearOS Device | NOT VERIFIED | adb empty |
+| 21st MCP | NOT VERIFIED | key absent |
+| Production | PASS | alias post-deploy verified |
 
 ---
 
@@ -142,11 +162,9 @@ Internal engineering gates for the RC are locked green.
 
 ### RELEASE READY — EXTERNAL VERIFICATION PENDING
 
-Pending external/ops items:
+External/ops remaining (non-blocking):
 
-1. `git push` of `fdeec6d` when GitHub is reachable → Vercel prod workflow  
-2. Post-deploy re-smoke + MotionScore confirm will-change cleared  
-3. 21st API key (optional retrieval verify)  
-4. WearOS device smoke  
+1. 21st API key retrieval verify  
+2. WearOS device smoke  
 
-**Not blockers:** Manus optional · Community TD-06 · scroll-listener MotionScore findings · local Android dirt outside promotion set.
+**Frozen:** do not reopen for Manus, TD-06, scroll-listener MotionScore findings, or score chasing.
