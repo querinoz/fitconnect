@@ -4,9 +4,11 @@ import { signInDemo } from "./helpers/auth";
 test("admin overview shows KPI cards", async ({ page }) => {
   await signInDemo(page, "Admin", "Admin");
   await page.goto("/admin");
-  await expect(page.getByRole("heading", { name: "Admin overview" })).toBeVisible();
+  // Product copy (admin/page.tsx): heading "Overview", KPI "Paid athletes",
+  // subscription volume label — not the legacy "Admin overview" / "MRR" strings.
+  await expect(page.getByRole("heading", { name: /^Overview$/i })).toBeVisible();
   await expect(page.getByText("Paid athletes")).toBeVisible();
-  await expect(page.getByText("MRR")).toBeVisible();
+  await expect(page.getByText(/subscription volume|MRR/i)).toBeVisible();
 });
 
 test("admin can open coach verification queue", async ({ page }) => {

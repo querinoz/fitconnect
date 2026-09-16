@@ -7,7 +7,6 @@ import { useCallback, useEffect, useState } from "react";
 import { AuthGate } from "@/components/auth-gate";
 import { EliteAppPage } from "@/components/shell/elite";
 import { BentoCard, EliteButton } from "@/components/elite-os";
-import { EliteChip } from "@/components/elite-os/elite-chip";
 import { useAuthStore } from "@/lib/auth-store";
 import { resolveDashboardAthleteId } from "@/lib/dashboard/resolve-scope";
 import { trackEvent } from "@/lib/observability/posthog";
@@ -16,7 +15,8 @@ import {
   resolveProviderConnectAction,
   type ProviderConnectAction
 } from "@/lib/integrations/provider-connect";
-import { Activity, Check, ExternalLink, Link2, Smartphone, Watch } from "lucide-react";
+import { DeviceStatusBadge } from "@/components/devices/device-status-badge";
+import { Activity, ExternalLink, Link2, Smartphone, Watch } from "lucide-react";
 
 type ProviderRow = {
   id: WearableProvider;
@@ -128,7 +128,6 @@ export default function WearablesSettingsPage() {
         ) : null}
         <ul className="grid gap-3 sm:grid-cols-2">
           {providers.map((p) => {
-            const isConnected = p.status === "connected";
             const action = resolveProviderConnectAction(p);
             const copy = actionCopy(action);
             const canRun = action.kind === "strava_oauth" || action.kind === "strava_disconnect";
@@ -139,19 +138,11 @@ export default function WearablesSettingsPage() {
                     <div className="flex items-center gap-3">
                       <Activity className="h-5 w-5 text-eos-voltline" aria-hidden />
                       <div>
-                        <p className="font-semibold text-ink-50">{p.label}</p>
-                        <p className="text-xs text-ink-400 capitalize">{p.id.replace("_", " ")}</p>
+                        <p className="font-semibold text-eos-on-surface">{p.label}</p>
+                        <p className="text-xs text-eos-on-surface-muted capitalize">{p.id.replace("_", " ")}</p>
                       </div>
                     </div>
-                    {isConnected ? (
-                      <EliteChip tone="performance" as="span" className="text-[10px]">
-                        <Check className="mr-1 inline h-3 w-3" /> Connected
-                      </EliteChip>
-                    ) : (
-                      <EliteChip tone="neutral" as="span" className="text-[10px]">
-                        Disconnected
-                      </EliteChip>
-                    )}
+                    <DeviceStatusBadge status={p.status} />
                   </div>
                   <p className="text-xs text-eos-on-surface-muted">{copy.hint}</p>
                   {p.lastSyncAt ? (
@@ -191,7 +182,7 @@ export default function WearablesSettingsPage() {
           })}
         </ul>
         <BentoCard elevation="glass" className="mt-2">
-          <p className="text-sm text-ink-300">
+          <p className="text-sm text-eos-on-surface-muted">
             Strava OAuth uses scopes:{" "}
             <code className="text-eos-voltline">read, activity:read, activity:read_all, profile:read_all</code>
           </p>
@@ -202,7 +193,7 @@ export default function WearablesSettingsPage() {
             className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-eos-iris-soft"
           >
             Strava API reference
-            <ExternalLink className="h-3.5 w-3.5" />
+            <ExternalLink className="h-3.5 w-3.5" aria-hidden />
           </Link>
         </BentoCard>
       </EliteAppPage>

@@ -4,7 +4,7 @@
  * CSS vars live in elite-os.css — keep in sync via tokens-sync.test.ts.
  */
 
-import { COLOR_TOKENS } from "@fitconnect/design-tokens";
+import { COLOR_TOKENS, MOTION_TOKENS } from "@fitconnect/design-tokens";
 
 export const EOS_COLORS = {
   floor: COLOR_TOKENS.floor,
@@ -64,19 +64,24 @@ export const EOS_TYPOGRAPHY = {
 } as const;
 
 export const EOS_MOTION = {
-  easeOut: [0.16, 1, 0.3, 1] as const,
-  easeSpring: [0.25, 1.5, 0.5, 1] as const,
+  easeOut: MOTION_TOKENS.ease.kinetic,
+  /** @deprecated Prefer MOTION_TOKENS.ease.snap — forbidden on metric numbers. */
+  easeSpring: MOTION_TOKENS.ease.snap,
   duration: {
-    micro: 0.15,
-    ui: 0.22,
-    screen: 0.4,
-    data: 1.2
+    micro: MOTION_TOKENS.micro,
+    ui: MOTION_TOKENS.ui,
+    screen: MOTION_TOKENS.screen,
+    data: MOTION_TOKENS.data,
+    instant: MOTION_TOKENS.zenith.instant,
+    fast: MOTION_TOKENS.zenith.fast,
+    normal: MOTION_TOKENS.zenith.normal,
+    slow: MOTION_TOKENS.zenith.slow,
+    cinematic: MOTION_TOKENS.zenith.cinematic
   },
-  spring: {
-    stiffness: 380,
-    damping: 32,
-    mass: 0.8
-  }
+  spring: MOTION_TOKENS.spring.navigation,
+  springs: MOTION_TOKENS.spring,
+  stagger: MOTION_TOKENS.stagger,
+  zenith: MOTION_TOKENS.zenith
 } as const;
 
 /** Bento grid column presets */

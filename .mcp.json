@@ -57,6 +57,13 @@
     "context7": {
       "type": "http",
       "url": "https://mcp.context7.com/mcp"
+    },
+    "21st-dev": {
+      "type": "http",
+      "url": "https://21st.dev/api/mcp",
+      "headers": {
+        "x-api-key": "${TWENTY_FIRST_API_KEY}"
+      }
     }
   }
 }

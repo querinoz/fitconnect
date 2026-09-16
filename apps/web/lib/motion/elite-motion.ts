@@ -1,3 +1,4 @@
+import { MOTION_TOKENS } from "@fitconnect/design-tokens";
 import { EOS_MOTION } from "@/lib/design-system/tokens";
 import type { Transition } from "motion/react";
 
@@ -10,7 +11,13 @@ export type EliteMotionPreset = {
 
 const easeOut = EOS_MOTION.easeOut;
 
-/** Framer Motion presets aligned with Elite OS motion tokens. */
+/** Zenith Experience Engine duration ladder (seconds). */
+export const zenithMotion = MOTION_TOKENS.zenith;
+
+/** Named springs — never use spring overshoot on metric numbers. */
+export const zenithSpring = MOTION_TOKENS.spring;
+
+/** Framer Motion / Motion presets aligned with Elite OS + Zenith tokens. */
 export const eliteFadeUp = {
   initial: { opacity: 0, y: 12 },
   animate: { opacity: 1, y: 0 },
@@ -27,22 +34,20 @@ export const eliteFadeIn = {
 
 export const eliteSpring = {
   type: "spring" as const,
-  stiffness: EOS_MOTION.spring.stiffness,
-  damping: EOS_MOTION.spring.damping,
-  mass: EOS_MOTION.spring.mass
+  ...zenithSpring.navigation
 };
 
 export const eliteStagger = {
   animate: {
     transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.04
+      staggerChildren: MOTION_TOKENS.stagger,
+      delayChildren: MOTION_TOKENS.stagger
     }
   }
 };
 
 export const eliteHoverDepth = {
-  whileHover: { y: -2, transition: eliteSpring },
+  whileHover: { y: -2, transition: { type: "spring" as const, ...zenithSpring.snappy } },
   whileTap: { scale: 0.985 }
 };
 
@@ -57,26 +62,37 @@ export const eliteSheet = {
   initial: { opacity: 0, x: 24 },
   animate: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: 16 },
-  transition: { duration: EOS_MOTION.duration.screen, ease: easeOut }
+  transition: { duration: EOS_MOTION.duration.slow, ease: MOTION_TOKENS.ease.surface }
 } satisfies EliteMotionPreset;
 
 export const eliteModal = {
   initial: { opacity: 0, y: 16, scale: 0.98 },
   animate: { opacity: 1, y: 0, scale: 1 },
   exit: { opacity: 0, y: 12, scale: 0.98 },
-  transition: { duration: EOS_MOTION.duration.screen, ease: easeOut }
+  transition: { duration: EOS_MOTION.duration.slow, ease: MOTION_TOKENS.ease.surface }
 } satisfies EliteMotionPreset;
 
 export const eliteDrawerLeft = {
   initial: { x: "-100%" },
   animate: { x: 0 },
   exit: { x: "-100%" },
-  transition: { duration: EOS_MOTION.duration.screen, ease: easeOut }
+  transition: { duration: EOS_MOTION.duration.slow, ease: MOTION_TOKENS.ease.surface }
 } satisfies EliteMotionPreset;
 
 export const eliteMorph = {
   transition: { duration: EOS_MOTION.duration.ui, ease: easeOut }
 };
+
+/** Metric land — opacity + settle ease only (no spring overshoot on numbers). */
+export const eliteMetricLand = {
+  initial: { opacity: 0, y: 6 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0 },
+  transition: {
+    duration: EOS_MOTION.duration.cinematic,
+    ease: MOTION_TOKENS.ease.kinetic
+  }
+} satisfies EliteMotionPreset;
 
 export type RouteModalSize = "center" | "sheet" | "fullscreen";
 

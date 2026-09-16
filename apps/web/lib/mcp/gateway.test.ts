@@ -16,7 +16,10 @@ describe("MCP gateway", () => {
   it("lists domain tools", () => {
     const names = listMcpCatalog().map((t) => t.name);
     expect(names).toContain("get_athlete_profile");
+    expect(names).toContain("get_user_profile");
     expect(names).toContain("get_current_readiness");
+    expect(names).toContain("get_readiness");
+    expect(names).toContain("get_device_status");
     expect(names).toContain("create_workout");
     expect(names).toContain("list_providers");
     expect(names).toContain("list_martial_arts");
@@ -43,6 +46,37 @@ describe("MCP gateway", () => {
     expect(listMcpAudit("ath-1").some((e) => e.status === 403)).toBe(true);
   });
 
+  it("forbids coach profile for athlete-only capability", async () => {
+    const res = await dispatchMcp(athlete, { tool: "get_coach_profile" });
+    expect(res.status).toBe(403);
+    expect(res.error).toBe("forbidden");
+  });
+
+  it("allows coach profile for coach capability", async () => {
+    const coach = { uid: "coach-1", role: "coach", capabilities: ["coach"] };
+    const res = await dispatchMcp(coach, { tool: "get_coach_profile" });
+    expect(res.ok).toBe(true);
+    expect(res.result).toMatchObject({ uid: "coach-1", experience: "coach" });
+  });
+
+  it("does not leak other actor identity in profile tools", async () => {
+    const res = await dispatchMcp(athlete, { tool: "get_user_profile" });
+    expect(res.ok).toBe(true);
+    expect(res.result).toEqual({
+      uid: "ath-1",
+      role: "athlete",
+      capabilities: ["athlete"]
+    });
+  });
+
+  it("get_hrv never invents values when args omitted", async () => {
+    const res = await dispatchMcp(athlete, { tool: "get_hrv", arguments: {} });
+    expect(res.ok).toBe(true);
+    expect(res.result).toMatchObject({
+      hrvMs: { value: null, provenance: "MISSING" }
+    });
+  });
+
   it("does not fabricate readiness when telemetry is missing", async () => {
     const res = await dispatchMcp(athlete, { tool: "get_current_readiness", arguments: {} });
     expect(res.ok).toBe(true);
@@ -50,6 +84,28 @@ describe("MCP gateway", () => {
       .metrics;
     expect(metrics.hrvMs.provenance).toBe("MISSING");
     expect(metrics.hrvMs.value).toBeNull();
+  });
+
+  it("get_readiness alias never fabricates HRV", async () => {
+    const res = await dispatchMcp(athlete, { tool: "get_readiness", arguments: {} });
+    expect(res.ok).toBe(true);
+    const metrics = (res.result as { metrics: { hrvMs: { provenance: string } } }).metrics;
+    expect(metrics.hrvMs.provenance).toBe("MISSING");
+  });
+
+  it("get_device_status never pretends connected", async () => {
+    const res = await dispatchMcp(athlete, { tool: "get_device_status" });
+    expect(res.ok).toBe(true);
+    expect(res.result).toMatchObject({ status: "NOT_CONNECTED", devices: [] });
+  });
+
+  it("get_activity returns UNAVAILABLE without inventing sessions", async () => {
+    const res = await dispatchMcp(athlete, {
+      tool: "get_activity",
+      arguments: { activityId: "act-1" }
+    });
+    expect(res.ok).toBe(true);
+    expect(res.result).toMatchObject({ status: "UNAVAILABLE", id: "act-1" });
   });
 
   it("treats prompt injection as untrusted", async () => {

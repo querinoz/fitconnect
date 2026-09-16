@@ -22,11 +22,20 @@ describe("AscendExperience", () => {
   it("does not invent XP when cloud progression is unavailable", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () => new Response(JSON.stringify({ error: "persistence_not_configured" }), { status: 503 }))
+      vi.fn(async (input: RequestInfo) => {
+        const url = String(input);
+        if (url.includes("/api/v1/readiness")) {
+          return new Response(JSON.stringify({ score: null, source: "insufficient_data" }), {
+            status: 200
+          });
+        }
+        return new Response(JSON.stringify({ error: "persistence_not_configured" }), { status: 503 });
+      })
     );
     render(<AscendExperience />);
     expect(await screen.findByText(/data unavailable/i)).toBeInTheDocument();
     expect(screen.queryByText(/120 XP/i)).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /open train/i })).toHaveAttribute("href", "/train");
+    expect(await screen.findByTestId("ascend-readiness")).toHaveAttribute("data-state", "missing");
   });
 });

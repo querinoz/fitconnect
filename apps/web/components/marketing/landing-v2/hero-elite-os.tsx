@@ -15,10 +15,17 @@ export function HeroEliteOs() {
   const live = useLiveDemoTelemetry();
   const rootRef = useRef<HTMLElement>(null);
   const [showVideo, setShowVideo] = useState(false);
+  // Landing demo meters — explicitly DEMO-labeled in chrome. Sleep uses the same
+  // demo wave as HRV/load (never a silent hardcoded biometric presented as live).
   const telemetry = [
-    { key: "hrv" as const, value: `${live.hrvMs} ms`, tone: "text-eos-telemetry" },
-    { key: "load" as const, value: live.load.toFixed(2), tone: "text-eos-voltline" },
-    { key: "sleep" as const, value: "7h 18m", tone: "text-eos-performance" }
+    { key: "hrv" as const, value: `${live.hrvMs} ms`, tone: "text-eos-telemetry", fill: live.readiness },
+    { key: "load" as const, value: live.load.toFixed(2), tone: "text-eos-voltline", fill: Math.round(live.load * 100) },
+    {
+      key: "sleep" as const,
+      value: `${(6.8 + (live.hrvMs - 68) / 50).toFixed(1)}h`,
+      tone: "text-eos-performance",
+      fill: Math.round(55 + (live.hrvMs - 68))
+    }
   ];
 
   useEffect(() => {
@@ -167,8 +174,8 @@ export function HeroEliteOs() {
             </div>
             <div className="mt-4 h-2 overflow-hidden rounded-full bg-eos-surface-container-highest">
               <div
-                className="hero-eos-meter h-full rounded-full bg-gradient-to-r from-eos-telemetry to-eos-voltline"
-                style={{ width: `${live.readiness}%` }}
+                className="hero-eos-meter h-full w-full origin-left rounded-full bg-gradient-to-r from-eos-telemetry to-eos-voltline"
+                style={{ transform: `scaleX(${Math.min(1, Math.max(0.08, live.readiness / 100))})` }}
               />
             </div>
           </article>
@@ -212,7 +219,7 @@ export function HeroEliteOs() {
             </div>
 
             <div className="mt-6 space-y-5">
-              {telemetry.map((item, index) => {
+              {telemetry.map((item) => {
                 const label =
                   item.key === "hrv"
                     ? e.telemetryHrv
@@ -227,8 +234,10 @@ export function HeroEliteOs() {
                     </div>
                     <div className="h-2 overflow-hidden rounded-full bg-white/8">
                       <div
-                        className="hero-eos-meter h-full rounded-full bg-gradient-to-r from-eos-telemetry via-eos-performance to-eos-voltline"
-                        style={{ width: `${72 + index * 8}%` }}
+                        className="hero-eos-meter h-full w-full origin-left rounded-full bg-gradient-to-r from-eos-telemetry via-eos-performance to-eos-voltline"
+                        style={{
+                          transform: `scaleX(${Math.min(1, Math.max(0.08, item.fill / 100))})`
+                        }}
                       />
                     </div>
                   </div>

@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { TrendingDown, TrendingUp, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TelemetryMetric } from "@/components/telemetry/telemetry-metric";
 
 type ReadinessCardFullProps = {
   readiness: number;
@@ -129,16 +130,13 @@ export function ReadinessCardFull({
           />
         </svg>
         <div className="absolute inset-x-0 bottom-[12%] flex flex-col items-center justify-end">
-          <span
+          <TelemetryMetric
+            value={clampScore(readiness)}
+            label="Readiness"
             data-testid="readiness-score"
-            className="font-display text-[3.15rem] font-extrabold leading-none tracking-[-0.06em] text-eos-voltline tabular-nums sm:text-[3.35rem]"
-            style={{ textShadow: "0 0 40px color-mix(in srgb, var(--eos-voltline) 28%, transparent)" }}
-          >
-            {Math.round(clampScore(readiness))}
-          </span>
-          <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-eos-on-surface-subtle">
-            Readiness
-          </p>
+            valueClassName="text-[3.15rem] sm:text-[3.35rem]"
+            className="[&_p]:mt-2"
+          />
         </div>
       </div>
 

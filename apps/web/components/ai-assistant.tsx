@@ -1,29 +1,51 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import {
-  ArrowUp,
-  Brain,
-  MessageCirclePlus,
-  Sparkles,
-  X
-} from "lucide-react";
+import { ArrowUp, Brain, MessageCirclePlus, Sparkles, X } from "lucide-react";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useLanguage, useLocale, useT } from "@/lib/i18n-provider";
 import { isDemoModeEnv } from "@/lib/auth/middleware-auth";
 import { cn } from "@/lib/utils";
+import { AISuggestions } from "@/components/ai/ai-suggestions";
+import { AIContextCard } from "@/components/ai/ai-context-card";
+import { AIStreamingState } from "@/components/ai/ai-streaming-state";
+import { datumFromScore, type TelemetryDatum } from "@/lib/telemetry/states";
+import { muteEliteMotion, eliteFadeUp, eliteOverlay } from "@/lib/motion/elite-motion";
 
 type Msg = { id: string; role: "user" | "assistant"; text: string };
+
+async function loadReadinessContext(): Promise<TelemetryDatum> {
+  try {
+    const res = await fetch("/api/v1/readiness", { credentials: "include" });
+    if (res.status === 401) {
+      return datumFromScore("Readiness", null, { unauthorized: true, source: "unauthorized" });
+    }
+    if (!res.ok) {
+      return datumFromScore("Readiness", null, { source: "unavailable" });
+    }
+    const body = (await res.json()) as { score?: number | null; source?: string };
+    return datumFromScore("Readiness", body.score, { source: body.source });
+  } catch {
+    return datumFromScore("Readiness", null, { offline: true });
+  }
+}
 
 export function AIAssistant() {
   const t = useT();
   const { lang } = useLanguage();
   const locale = useLocale();
   const reduce = useReducedMotion();
+  const panelMotion = muteEliteMotion(eliteOverlay, reduce);
+  const msgMotion = muteEliteMotion(eliteFadeUp, reduce);
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Msg[]>([]);
   const [typing, setTyping] = useState(false);
+  const [readiness, setReadiness] = useState<TelemetryDatum>(() => ({
+    ...datumFromScore("Readiness", null),
+    state: "loading",
+    detail: "Loading training context…"
+  }));
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -33,6 +55,7 @@ export function AIAssistant() {
   useEffect(() => {
     if (open) {
       window.setTimeout(() => inputRef.current?.focus(), 60);
+      void loadReadinessContext().then(setReadiness);
     }
   }, [open]);
 
@@ -54,7 +77,15 @@ export function AIAssistant() {
       const res = await fetch("/api/v1/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: history })
+        body: JSON.stringify({
+          messages: history,
+          context: {
+            readiness:
+              readiness.state === "ready" && readiness.value != null
+                ? { score: readiness.value, source: readiness.source ?? null }
+                : { score: null, source: readiness.source ?? readiness.state }
+          }
+        })
       });
       const body = (await res.json().catch(() => ({}))) as { text?: string; error?: string };
       let reply = body.text;
@@ -101,162 +132,107 @@ export function AIAssistant() {
 
   return (
     <>
-      {/* Bubble */}
       <button
         type="button"
         aria-label={t("ai", "bubbleLabel")}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "fixed bottom-5 right-5 z-40 grid h-14 w-14 place-items-center rounded-full text-ink-50 shadow-elevated transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-plasma-400/70",
-          "bg-gradient-to-br from-plasma-500 via-brand-500 to-accent-500 hover:scale-105"
+          "fixed bottom-5 right-5 z-40 grid h-14 w-14 place-items-center rounded-full text-eos-floor shadow-elevated transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-eos-voltline/70",
+          "bg-eos-voltline hover:scale-105"
         )}
       >
-        <span
-          aria-hidden="true"
-          className="absolute inset-0 rounded-full bg-plasma-500/40 blur-xl"
-        />
-        <span
-          aria-hidden="true"
-          className="relative grid h-10 w-10 place-items-center rounded-full bg-ink-950/30 backdrop-blur"
-        >
-          {open ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Brain className="h-5 w-5" />
-          )}
+        <span aria-hidden="true" className="relative grid place-items-center">
+          {open ? <X className="h-5 w-5" /> : <Brain className="h-5 w-5" />}
         </span>
-        {!open && (
-          <span
-            aria-hidden="true"
-            className="absolute right-0 top-0 grid h-4 w-4 place-items-center rounded-full bg-accent-400 ring-2 ring-ink-950 text-[9px] font-bold text-ink-950"
-          >
-            ✦
-          </span>
-        )}
       </button>
 
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: reduce ? 0 : 16, scale: reduce ? 1 : 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: reduce ? 0 : 16, scale: reduce ? 1 : 0.95 }}
-            transition={{ duration: reduce ? 0 : 0.32, ease: [0.16, 1, 0.3, 1] }}
+            initial={panelMotion.initial}
+            animate={panelMotion.animate}
+            exit={panelMotion.exit ?? panelMotion.initial}
+            transition={panelMotion.transition}
             role="dialog"
+            aria-modal="true"
             aria-label={t("ai", "panelTitle")}
-            className="fixed bottom-24 right-5 z-40 w-[min(360px,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-ink-800 bg-ink-950/95 backdrop-blur-xl shadow-elevated"
+            className="fixed bottom-24 right-5 z-40 w-[min(360px,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-eos-outline bg-eos-floor/95 backdrop-blur-xl shadow-elevated"
           >
-            <header className="relative flex items-center gap-3 border-b border-ink-800 px-4 py-3">
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-plasma-500 via-brand-500 to-accent-500 text-ink-950">
-                <Brain className="h-4 w-4" />
+            <header className="relative flex items-center gap-3 border-b border-eos-outline px-4 py-3">
+              <span className="grid h-9 w-9 place-items-center rounded-xl bg-eos-voltline text-eos-floor">
+                <Brain className="h-4 w-4" aria-hidden />
               </span>
-              <div className="flex-1 min-w-0">
-                <p className="font-display font-bold text-ink-50 text-sm leading-tight">
+              <div className="min-w-0 flex-1">
+                <p className="font-display text-sm font-bold leading-tight text-eos-on-surface">
                   {t("ai", "panelTitle")}
                 </p>
-                <p className="text-[11px] text-ink-400 truncate">
-                  {t("ai", "panelSubtitle")}
-                </p>
+                <p className="truncate text-[11px] text-eos-on-surface-muted">{t("ai", "panelSubtitle")}</p>
               </div>
               {isDemoMode ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-plasma-500/15 text-plasma-300 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ring-plasma-500/30">
-                <Sparkles className="h-3 w-3" /> {t("ai", "demoTag")}
-              </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-eos-iris/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-eos-iris-soft ring-1 ring-eos-iris/30">
+                  <Sparkles className="h-3 w-3" /> {t("ai", "demoTag")}
+                </span>
               ) : null}
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label={t("ai", "closeLabel")}
-                className="grid h-8 w-8 place-items-center rounded-lg text-ink-500 hover:text-ink-100 hover:bg-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60"
+                className="grid h-8 w-8 place-items-center rounded-lg text-eos-on-surface-muted hover:bg-eos-elevated hover:text-eos-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-eos-voltline/60"
               >
                 <X className="h-4 w-4" />
               </button>
             </header>
 
-            <div
-              ref={scrollRef}
-              className="max-h-[58vh] overflow-y-auto px-4 py-3 space-y-3"
-            >
+            <div ref={scrollRef} className="max-h-[58vh] space-y-3 overflow-y-auto px-4 py-3">
               {messages.length === 0 && (
-                <div className="rounded-xl border border-ink-800 bg-ink-900/60 p-3 text-sm text-ink-300 leading-relaxed">
-                  <p className="flex items-center gap-1.5 text-ink-100 font-semibold mb-1">
-                    <MessageCirclePlus className="h-4 w-4 text-plasma-400" />
-                    {lang === "pt"
-                      ? "Olá — como posso ajudar com o teu treino hoje?"
-                      : "Hi — how can I help with your training today?"}
-                  </p>
-                  <p>
-                    {lang === "pt"
-                      ? "Zenith interpreta o teu contexto. Métricas vêm da camada de dados — nunca são inventadas."
-                      : "Zenith interprets your context. Metrics come from the data layer — never invented."}
-                  </p>
-                </div>
+                <>
+                  <div className="rounded-xl border border-eos-outline bg-eos-elevated/60 p-3 text-sm leading-relaxed text-eos-on-surface-muted">
+                    <p className="mb-1 flex items-center gap-1.5 font-semibold text-eos-on-surface">
+                      <MessageCirclePlus className="h-4 w-4 text-eos-voltline" />
+                      {lang === "pt"
+                        ? "Olá — como posso ajudar com o teu treino hoje?"
+                        : "Hi — how can I help with your training today?"}
+                    </p>
+                    <p>
+                      {lang === "pt"
+                        ? "Zenith interpreta o teu contexto. Métricas vêm da camada de dados — nunca são inventadas."
+                        : "Zenith interprets your context. Metrics come from the data layer — never invented."}
+                    </p>
+                  </div>
+                  <AIContextCard readiness={readiness} />
+                </>
               )}
 
               {messages.map((m) => (
                 <motion.div
                   key={m.id}
-                  initial={{ opacity: 0, y: reduce ? 0 : 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: reduce ? 0 : 0.22 }}
+                  initial={msgMotion.initial}
+                  animate={msgMotion.animate}
+                  transition={msgMotion.transition}
                   className={cn(
                     "max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
                     m.role === "user"
-                      ? "ml-auto bg-brand-500/15 text-ink-50 ring-1 ring-brand-400/30"
-                      : "mr-auto bg-ink-900/80 text-ink-200 ring-1 ring-ink-800"
+                      ? "ml-auto bg-eos-voltline/15 text-eos-on-surface ring-1 ring-eos-voltline/30"
+                      : "mr-auto bg-eos-elevated/80 text-eos-on-surface-muted ring-1 ring-eos-outline"
                   )}
                 >
                   {m.text}
                 </motion.div>
               ))}
 
-              {typing && (
-                <div className="mr-auto inline-flex items-center gap-2 rounded-2xl bg-ink-900/80 px-3.5 py-2.5 ring-1 ring-ink-800">
-                  <span className="flex gap-1">
-                    {[0, 1, 2].map((i) => (
-                      <span
-                        key={i}
-                        className="h-1.5 w-1.5 rounded-full bg-plasma-400"
-                        style={{
-                          animation: `pulse-soft 1.2s ease-in-out infinite`,
-                          animationDelay: `${i * 120}ms`
-                        }}
-                      />
-                    ))}
-                  </span>
-                  <span className="text-[11px] text-ink-500">
-                    {t("ai", "typingLabel")}
-                  </span>
-                </div>
-              )}
+              {typing ? <AIStreamingState label={t("ai", "typingLabel")} /> : null}
 
-              {messages.length === 0 && (
-                <div className="pt-2">
-                  <p className="text-[11px] uppercase tracking-widest text-ink-500 mb-2">
-                    {t("ai", "suggestionsHeading")}
-                  </p>
-                  <ul className="space-y-1.5">
-                    {cannedForLang.map((c) => (
-                      <li key={c.prompt}>
-                        <button
-                          type="button"
-                          onClick={() => send(c.prompt)}
-                          className="w-full text-left rounded-xl border border-ink-800 bg-ink-900/40 px-3 py-2 text-sm text-ink-200 hover:border-plasma-500/50 hover:bg-ink-900/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-plasma-400/60"
-                        >
-                          {c.prompt}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              {messages.length === 0 ? (
+                <AISuggestions
+                  heading={t("ai", "suggestionsHeading")}
+                  items={cannedForLang.map((c) => ({ prompt: c.prompt }))}
+                  onSelect={send}
+                />
+              ) : null}
             </div>
 
-            <form
-              onSubmit={onSubmit}
-              className="border-t border-ink-800 bg-ink-950/80 p-2.5"
-            >
+            <form onSubmit={onSubmit} className="border-t border-eos-outline bg-eos-floor/80 p-2.5">
               <div className="relative">
                 <input
                   ref={inputRef}
@@ -265,13 +241,13 @@ export function AIAssistant() {
                   onChange={(e) => setInput(e.target.value)}
                   placeholder={t("ai", "placeholder")}
                   aria-label={t("ai", "placeholder")}
-                  className="w-full rounded-xl border border-ink-800 bg-ink-900/80 pl-3.5 pr-11 h-11 text-sm text-ink-100 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-plasma-400/60 focus:border-plasma-500/50"
+                  className="h-11 w-full rounded-xl border border-eos-outline bg-eos-elevated/80 pl-3.5 pr-11 text-sm text-eos-on-surface placeholder:text-eos-on-surface-subtle focus:border-eos-voltline/50 focus:outline-none focus:ring-2 focus:ring-eos-voltline/60"
                 />
                 <button
                   type="submit"
                   aria-label={t("ai", "sendLabel")}
                   disabled={!input.trim()}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-plasma-500 to-brand-500 text-ink-50 disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-plasma-400/60"
+                  className="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg bg-eos-voltline text-eos-floor disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-eos-voltline/60"
                 >
                   <ArrowUp className="h-4 w-4" />
                 </button>

@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { BentoCard } from "@/components/elite-os/bento-card";
+import { TelemetryCard } from "@/components/telemetry/telemetry-card";
 import { DailyMissions } from "@/components/gamification/gamification-panel";
 import { listLocalHistory } from "@/lib/train/persistence";
 import { getTrainPlan } from "@/lib/train/catalog";
 import { formatTimer } from "@/lib/train/machine";
+import { datumFromScore, type TelemetryDatum } from "@/lib/telemetry/states";
 
 type ProgressionPayload = {
   source?: string;
@@ -19,31 +21,60 @@ type ProgressionPayload = {
   error?: string;
 };
 
+async function loadReadinessDatum(): Promise<TelemetryDatum> {
+  try {
+    const res = await fetch("/api/v1/readiness", { credentials: "include" });
+    if (res.status === 401) {
+      return datumFromScore("Readiness", null, { unauthorized: true, source: "unauthorized" });
+    }
+    if (!res.ok) {
+      return datumFromScore("Readiness", null, { source: "unavailable" });
+    }
+    const body = (await res.json()) as { score?: number | null; source?: string };
+    return datumFromScore("Readiness", body.score, { source: body.source });
+  } catch {
+    return datumFromScore("Readiness", null, { offline: true });
+  }
+}
+
 export function AscendExperience() {
   const [payload, setPayload] = useState<ProgressionPayload | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
+  const [readiness, setReadiness] = useState<TelemetryDatum>(() => ({
+    ...datumFromScore("Readiness", null),
+    state: "loading",
+    detail: "Loading readiness…"
+  }));
   const history = typeof window === "undefined" ? [] : listLocalHistory();
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
+      setReadiness({ ...datumFromScore("Readiness", null), state: "loading" });
       try {
-        const res = await fetch("/api/v1/ascend/progression", { credentials: "include" });
-        if (res.status === 503) {
+        const [progRes, readinessDatum] = await Promise.all([
+          fetch("/api/v1/ascend/progression", { credentials: "include" }),
+          loadReadinessDatum()
+        ]);
+        if (!cancelled) setReadiness(readinessDatum);
+        if (progRes.status === 503) {
           if (!cancelled) setStatus("unavailable");
           return;
         }
-        if (!res.ok) {
+        if (!progRes.ok) {
           if (!cancelled) setStatus("unavailable");
           return;
         }
-        const body = (await res.json()) as ProgressionPayload;
+        const body = (await progRes.json()) as ProgressionPayload;
         if (!cancelled) {
           setPayload(body);
           setStatus("ready");
         }
       } catch {
-        if (!cancelled) setStatus("unavailable");
+        if (!cancelled) {
+          setStatus("unavailable");
+          setReadiness(datumFromScore("Readiness", null, { offline: true }));
+        }
       }
     }
     void load();
@@ -66,8 +97,30 @@ export function AscendExperience() {
         </p>
       </header>
 
+      <div className="grid gap-3 sm:grid-cols-2" data-testid="ascend-telemetry-strip">
+        <TelemetryCard datum={readiness} href="/settings/wearables" data-testid="ascend-readiness" />
+        <TelemetryCard
+          datum={{
+            state: status === "loading" ? "loading" : status === "ready" ? "ready" : "unavailable",
+            value: status === "ready" ? xp : null,
+            label: "Ascend XP",
+            unit: "XP",
+            source: payload?.source,
+            detail:
+              status === "unavailable"
+                ? "Cloud Ascend is not configured. Device TRAIN history below is still yours."
+                : undefined
+          }}
+          data-testid="ascend-xp"
+        />
+      </div>
+
       <BentoCard label="PROGRESSION" elevation="2">
-        {status === "loading" ? <p>Loading progression…</p> : null}
+        {status === "loading" ? (
+          <p role="status" aria-live="polite">
+            Loading progression…
+          </p>
+        ) : null}
         {status === "unavailable" ? (
           <div className="space-y-2">
             <p className="eos-headline text-3xl">DATA UNAVAILABLE</p>
@@ -100,13 +153,21 @@ export function AscendExperience() {
             </Link>
           </p>
         ) : (
-          <ul className="space-y-2 text-sm">
-            {history.slice(0, 8).map((item) => (
-              <li key={item.sessionId}>
-                {getTrainPlan(item.planId)?.title ?? item.planId} ·{" "}
-                {formatTimer(Math.floor(item.durationMs / 1000))} · {item.sets} sets · {item.saveStatus}
-              </li>
-            ))}
+          <ul className="space-y-2">
+            {history.slice(0, 8).map((h) => {
+              const plan = getTrainPlan(h.planId);
+              return (
+                <li
+                  key={h.sessionId}
+                  className="flex items-center justify-between gap-3 border-b border-eos-outline/60 py-2 text-sm last:border-0"
+                >
+                  <span>{plan?.title ?? h.planId}</span>
+                  <span className="tabular-nums text-eos-on-surface-muted">
+                    {formatTimer(Math.round(h.durationMs / 1000))}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         )}
       </BentoCard>

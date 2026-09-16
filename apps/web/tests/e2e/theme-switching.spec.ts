@@ -13,6 +13,7 @@ test("appearance page sets data-theme via Aurora preset", async ({ page }) => {
   await signInDemo(page, "ines@fitconnect.local", "Athlete");
 
   await page.goto("/settings/appearance");
-  await page.getByRole("button", { name: /Aurora/i }).click();
+  // Native radio is opacity:0 (custom orbit UI). Click the settings label row.
+  await page.locator(".fc-theme-radio-label").filter({ hasText: "Aurora" }).first().click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "aurora");
 });

@@ -42,8 +42,18 @@
 
   /* ── Motion (kept raw — not colour tokens) ── */
   --fc-ease-kinetic: cubic-bezier(0.16, 1, 0.3, 1);
+  --fc-ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+  --fc-ease-traverse: cubic-bezier(0.65, 0, 0.35, 1);
+  --fc-ease-surface: cubic-bezier(0.25, 1, 0.5, 1);
+  --fc-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --fc-motion-instant: 90ms;
+  --fc-motion-fast: 150ms;
+  --fc-motion-normal: 220ms;
+  --fc-motion-slow: 340ms;
+  --fc-motion-cinematic: 800ms;
   --fc-motion-micro: 150ms;
   --fc-motion-ui: 220ms;
   --fc-motion-screen: 400ms;
   --fc-motion-data: 1200ms;
+  --fc-motion-stagger: 28ms;
 }

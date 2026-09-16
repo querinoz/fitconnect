@@ -4,7 +4,12 @@ import { signInDemo, signUpAthlete } from "./helpers/auth";
 test("athlete sign-in reaches dashboard", async ({ page }) => {
   await signInDemo(page, "Athlete", "Athlete");
   await expect(page).toHaveURL(/\/dashboard/);
-  await expect(page.getByText("Peak Readiness").or(page.getByText("Train Smart"))).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /Athlete OS|Peak Readiness/i })
+  ).toBeVisible();
+  // ONE LOGIN: no Athlete/Coach chooser on the auth surface after session.
+  await page.goto("/signin");
+  await expect(page.getByText(/Como Athlete|Como Coach|Role select|Persona/i)).toHaveCount(0);
 });
 
 test("signup starts athlete onboarding wizard", async ({ page }) => {

@@ -97,14 +97,28 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
   let result: unknown;
   switch (def.name) {
     case "get_athlete_profile":
+    case "get_user_profile":
       result = { uid: actor.uid, role: actor.role, capabilities: actor.capabilities };
       break;
+    case "get_coach_profile":
+      result = {
+        uid: actor.uid,
+        role: actor.role,
+        capabilities: actor.capabilities,
+        experience: "coach"
+      };
+      break;
     case "get_current_readiness":
+    case "get_readiness":
     case "get_recovery_state":
+    case "get_recovery":
     case "zenith_explain": {
       const orchestrated = orchestrateZenith({
         athleteId: actor.uid,
-        specialist: def.name === "get_recovery_state" ? "recovery" : (args.specialist as never),
+        specialist:
+          def.name === "get_recovery_state" || def.name === "get_recovery"
+            ? "recovery"
+            : (args.specialist as never),
         userText: rawUserText,
         hrvMs: typeof args.hrvMs === "number" ? args.hrvMs : null,
         baselineHrvMs: typeof args.baselineHrvMs === "number" ? args.baselineHrvMs : null,
@@ -118,6 +132,67 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
       };
       break;
     }
+    case "get_sleep": {
+      const hours = typeof args.sleepHours === "number" ? args.sleepHours : null;
+      const efficiency =
+        typeof args.sleepEfficiency === "number" ? args.sleepEfficiency : null;
+      result = {
+        sleepHours: {
+          value: hours,
+          provenance: hours == null ? "MISSING" : "PROVIDED"
+        },
+        sleepEfficiency: {
+          value: efficiency,
+          provenance: efficiency == null ? "MISSING" : "PROVIDED"
+        }
+      };
+      break;
+    }
+    case "get_hrv": {
+      const hrv = typeof args.hrvMs === "number" ? args.hrvMs : null;
+      const baseline = typeof args.baselineHrvMs === "number" ? args.baselineHrvMs : null;
+      result = {
+        hrvMs: { value: hrv, provenance: hrv == null ? "MISSING" : "PROVIDED" },
+        baselineHrvMs: {
+          value: baseline,
+          provenance: baseline == null ? "MISSING" : "PROVIDED"
+        }
+      };
+      break;
+    }
+    case "get_training_load": {
+      const strain = typeof args.strainScore === "number" ? args.strainScore : null;
+      result = {
+        strainScore: {
+          value: strain,
+          provenance: strain == null ? "MISSING" : "PROVIDED"
+        }
+      };
+      break;
+    }
+    case "get_activity":
+    case "get_workout":
+    case "get_program":
+      result = {
+        status: "UNAVAILABLE",
+        reason: "mcp_store_not_wired",
+        id:
+          typeof args.activityId === "string"
+            ? args.activityId
+            : typeof args.workoutId === "string"
+              ? args.workoutId
+              : typeof args.programId === "string"
+                ? args.programId
+                : null
+      };
+      break;
+    case "get_device_status":
+      result = {
+        devices: [],
+        status: "NOT_CONNECTED",
+        note: "Never reports connected without a live provider session."
+      };
+      break;
     case "create_workout":
       result = {
         draft: true,
@@ -148,6 +223,7 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
       break;
     }
     case "list_providers":
+    case "get_connections":
       result = {
         providers: listFitnessAdapters().map((a) => a.constraints),
         disabledAggregators: DISABLED_AGGREGATORS
@@ -157,6 +233,7 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
       result = await mcpListPublicSpots();
       break;
     case "list_social_feed":
+    case "get_feed":
       result = await mcpListSocialFeed();
       break;
     case "create_booking": {

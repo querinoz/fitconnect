@@ -9,8 +9,11 @@ export {
   eliteModal,
   eliteDrawerLeft,
   eliteMorph,
+  eliteMetricLand,
   eliteRoutePanel,
   muteEliteMotion,
+  zenithMotion,
+  zenithSpring,
   type EliteMotionPreset,
   type RouteModalSize
 } from "./elite-motion";

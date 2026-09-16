@@ -677,7 +677,6 @@ html.eos-app-shell-active .fc-dashboard-inner {
   border-radius: 9999px;
   pointer-events: none;
   filter: blur(90px);
-  will-change: transform;
 }
 
 html:not([data-motion="reduced"]) .eos-aurora-blob {
@@ -705,7 +704,6 @@ html:not([data-motion="reduced"]) .eos-aurora-blob {
 .eos-phone-rig {
   transform: rotateY(-18deg) rotateX(8deg);
   transform-style: preserve-3d;
-  will-change: transform;
 }
 
 @media (max-width: 767px) {

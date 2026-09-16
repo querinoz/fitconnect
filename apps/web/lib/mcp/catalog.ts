@@ -38,10 +38,40 @@ export const MCP_TOOLS: McpToolDef[] = [
     schema: empty
   },
   {
+    name: "get_user_profile",
+    domain: "athlete",
+    risk: "read",
+    description: "Return the authenticated account identity (same session — ONE LOGIN).",
+    capabilities: [],
+    schema: empty
+  },
+  {
+    name: "get_coach_profile",
+    domain: "coach",
+    risk: "read",
+    description: "Return coach capability identity for the authenticated session.",
+    capabilities: ["coach"],
+    schema: empty
+  },
+  {
     name: "get_current_readiness",
     domain: "health",
     risk: "sensitive",
     description: "Deterministic readiness from provided telemetry. Missing inputs stay MISSING.",
+    capabilities: ["athlete"],
+    schema: z.object({
+      hrvMs: z.number().nullable().optional(),
+      baselineHrvMs: z.number().nullable().optional(),
+      sleepHours: z.number().nullable().optional(),
+      sleepEfficiency: z.number().nullable().optional(),
+      strainScore: z.number().nullable().optional()
+    })
+  },
+  {
+    name: "get_readiness",
+    domain: "health",
+    risk: "sensitive",
+    description: "Alias of get_current_readiness. Missing inputs stay MISSING.",
     capabilities: ["athlete"],
     schema: z.object({
       hrvMs: z.number().nullable().optional(),
@@ -62,6 +92,104 @@ export const MCP_TOOLS: McpToolDef[] = [
       sleepHours: z.number().nullable().optional(),
       strainScore: z.number().nullable().optional()
     })
+  },
+  {
+    name: "get_recovery",
+    domain: "recovery",
+    risk: "sensitive",
+    description: "Alias of get_recovery_state. Never fabricates HRV/sleep.",
+    capabilities: ["athlete"],
+    schema: z.object({
+      hrvMs: z.number().nullable().optional(),
+      sleepHours: z.number().nullable().optional(),
+      strainScore: z.number().nullable().optional()
+    })
+  },
+  {
+    name: "get_sleep",
+    domain: "health",
+    risk: "sensitive",
+    description: "Sleep summary when authorized telemetry is supplied. Never invents hours.",
+    capabilities: ["athlete"],
+    schema: z.object({
+      sleepHours: z.number().nullable().optional(),
+      sleepEfficiency: z.number().nullable().optional()
+    })
+  },
+  {
+    name: "get_hrv",
+    domain: "health",
+    risk: "sensitive",
+    description: "HRV when authorized telemetry is supplied. Missing stays MISSING.",
+    capabilities: ["athlete"],
+    schema: z.object({
+      hrvMs: z.number().nullable().optional(),
+      baselineHrvMs: z.number().nullable().optional()
+    })
+  },
+  {
+    name: "get_training_load",
+    domain: "training",
+    risk: "sensitive",
+    description: "Training load when strain is provided. Never fabricates load.",
+    capabilities: ["athlete"],
+    schema: z.object({
+      strainScore: z.number().nullable().optional()
+    })
+  },
+  {
+    name: "get_activity",
+    domain: "training",
+    risk: "read",
+    description: "Single activity lookup. Returns UNAVAILABLE until activity store is wired for MCP.",
+    capabilities: ["athlete"],
+    schema: z.object({
+      activityId: z.string().min(1).max(128).optional()
+    })
+  },
+  {
+    name: "get_workout",
+    domain: "training",
+    risk: "read",
+    description: "Workout plan lookup. Returns UNAVAILABLE until workout store is wired for MCP.",
+    capabilities: ["athlete", "coach"],
+    schema: z.object({
+      workoutId: z.string().min(1).max(128).optional()
+    })
+  },
+  {
+    name: "get_device_status",
+    domain: "integrations",
+    risk: "read",
+    description: "Device connection status. Never pretends a device is connected.",
+    capabilities: [],
+    schema: empty
+  },
+  {
+    name: "get_program",
+    domain: "training",
+    risk: "read",
+    description: "Training program lookup. Returns UNAVAILABLE until program store is wired for MCP.",
+    capabilities: ["athlete", "coach"],
+    schema: z.object({
+      programId: z.string().min(1).max(128).optional()
+    })
+  },
+  {
+    name: "get_feed",
+    domain: "social",
+    risk: "read",
+    description: "Alias of list_social_feed. Strava-origin rows excluded by persistence.",
+    capabilities: [],
+    schema: empty
+  },
+  {
+    name: "get_connections",
+    domain: "integrations",
+    risk: "read",
+    description: "Alias of list_providers — fitness connection registry.",
+    capabilities: [],
+    schema: empty
   },
   {
     name: "create_workout",
