@@ -118,7 +118,7 @@ export async function queryUsda(query: string): Promise<AdapterResult> {
       foods: local,
       state: local.length ? "LOCAL_CACHE_ONLY" : "NOT_CONFIGURED",
       source: "USDA",
-      note: "USDA_FDC_API_KEY not configured — local USDA-tagged cache only.",
+      note: "USDA FoodData Central key not configured — local USDA-tagged cache only.",
       latencyMs: Date.now() - started
     };
   }
