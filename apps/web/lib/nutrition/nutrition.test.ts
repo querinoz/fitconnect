@@ -5,6 +5,9 @@ import {
   blockedForCombatWeightCut,
   lowEnergyAvailabilityFlag
 } from "./planning-engine";
+import { generateWeeklyMealPlan, mealPlanAllergenSafe } from "./meal-planner";
+import { buildGroceryList } from "./grocery";
+import { computeRecipeNutrition, getRecipeById } from "./recipes";
 import { searchFoods, getFoodById } from "./sources/food-catalog";
 import type { NutritionProfile } from "./types";
 
@@ -69,6 +72,73 @@ describe("nutrition planning", () => {
     const food = getFoodById("usda:chicken-breast-cooked")!;
     expect(allergenBlocked(food, ["peanut"])).toBe(false);
     expect(allergenBlocked({ ...food, name: "Peanut butter" }, ["peanut"])).toBe(true);
+  });
+});
+
+describe("meal planner + grocery", () => {
+  it("generates a 7-day plan with explainable slots", () => {
+    const plan = generateWeeklyMealPlan({
+      profile: baseProfile(),
+      sportNutritionKey: "endurance",
+      trainingDayKind: "hard",
+      bodyMassKg: 70,
+      sessionDurationMin: 60,
+      weekStartISO: "2026-09-14",
+      pantry: [{ foodId: "portfir:arroz-branco-cozido", quantity: 2, unit: "serving" }]
+    });
+    expect(plan.days).toHaveLength(7);
+    expect(plan.days[0]!.slots.length).toBeGreaterThan(0);
+    expect(plan.days[0]!.slots[0]!.why.length).toBeGreaterThan(0);
+    expect(mealPlanAllergenSafe(plan, baseProfile().allergies)).toBe(true);
+  });
+
+  it("never includes allergen foods when allergy set", () => {
+    const profile = baseProfile();
+    profile.allergies = ["chicken"];
+    const plan = generateWeeklyMealPlan({
+      profile,
+      sportNutritionKey: "strength",
+      trainingDayKind: "moderate",
+      bodyMassKg: 80,
+      sessionDurationMin: 45,
+      weekStartISO: "2026-09-14"
+    });
+    expect(mealPlanAllergenSafe(plan, profile.allergies)).toBe(true);
+    for (const day of plan.days) {
+      for (const slot of day.slots) {
+        for (const food of slot.foods) {
+          expect(food.name.toLowerCase()).not.toContain("chicken");
+        }
+      }
+    }
+  });
+
+  it("grocery remaining excludes pantry stock", () => {
+    const plan = generateWeeklyMealPlan({
+      profile: baseProfile(),
+      sportNutritionKey: "endurance",
+      trainingDayKind: "easy",
+      bodyMassKg: 70,
+      sessionDurationMin: 40,
+      weekStartISO: "2026-09-14"
+    });
+    const allIds = plan.days.flatMap((d) => d.slots.flatMap((s) => s.foodIds));
+    const first = allIds[0]!;
+    const count = allIds.filter((id) => id === first).length;
+    const grocery = buildGroceryList(plan, [
+      { foodId: first, quantity: count, unit: "serving" }
+    ]);
+    expect(grocery.every((g) => g.foodId !== first)).toBe(true);
+  });
+});
+
+describe("recipes", () => {
+  it("reconciles ingredient macros per serving", () => {
+    const recipe = getRecipeById("recipe:pt-arroz-feijao-frango")!;
+    const n = computeRecipeNutrition(recipe);
+    expect(n.missingFoodIds).toHaveLength(0);
+    expect(n.perServing.kcal).toBeGreaterThan(0);
+    expect(n.perServing.proteinG).toBeGreaterThan(0);
   });
 });
 

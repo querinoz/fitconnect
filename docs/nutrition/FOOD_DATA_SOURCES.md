@@ -2,9 +2,23 @@
 
 | Source | Priority | Use | Integration status |
 |--------|----------|-----|--------------------|
-| PortFIR / INSA Portugal | 1 (PT locale) | Local foods, PT terminology | Seed cache with `source: PORTFIR` + caveat; live API proxy TODO |
-| USDA FoodData Central | 2 | Global coverage | Seed cache with `source: USDA` + caveat; live FDC proxy TODO |
-| Open Food Facts | 3 | Branded / barcode | Seed + barcode lookup hook; never auto-log |
+| PortFIR / INSA Portugal | 1 (PT locale) | Local foods, PT terminology | Seed cache + `PORTFIR_PROXY_URL` server adapter (`queryPortfir`) |
+| USDA FoodData Central | 2 | Global coverage | Seed cache + live FDC when `USDA_FDC_API_KEY` set (`queryUsda`) |
+| Open Food Facts | 3 | Branded / barcode | Live server adapter (`queryOpenFoodFacts`); never auto-log |
+
+## Architecture
+
+```
+CLIENT → FitConnect /api/v1/nutrition/targets?view=foods → food-adapters → external
+```
+
+Never call PortFIR/USDA/OFF credentials from the mobile/web client bundle.
+
+## States
+
+`AVAILABLE` · `LOCAL_CACHE_ONLY` · `NOT_CONFIGURED` · `TIMEOUT` · `ERROR` · `RATE_LIMITED`
+
+Sources are never silently merged into one authoritative nutrient row.
 
 ## FoodRecord contract
 
