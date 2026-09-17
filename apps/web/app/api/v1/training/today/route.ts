@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/require-auth";
 import { adaptTodaySession } from "@/lib/sport-intelligence/adaptation-engine";
-import { emptySportsIdentity } from "@/lib/sport-intelligence/sports-identity";
+import { emptySportsIdentity, profileCompleteness } from "@/lib/sport-intelligence/sports-identity";
+import { readSportsIdentity } from "@/lib/sport-intelligence/identity-repository";
+import { listTrainingCompletions } from "@/lib/sport-intelligence/completion-repository";
 import { listSports } from "@/lib/sport-intelligence/sport-registry";
 import { readinessFromApi } from "@/lib/train/readiness";
+import { readNutritionProfile } from "@/lib/nutrition/nutrition-repository";
+import { planDailyTargets } from "@/lib/nutrition/planning-engine";
+import { getSport } from "@/lib/sport-intelligence/sport-registry";
 
 export async function GET(request: Request) {
   const auth = await requireAuth(request);
@@ -20,7 +25,8 @@ export async function GET(request: Request) {
         sessionTypes: s.sessionTypes,
         primaryMetrics: s.primaryMetrics,
         progressionStrategy: s.progressionStrategy,
-        safetyConstraints: s.safetyConstraints
+        safetyConstraints: s.safetyConstraints,
+        nutritionProfileKey: s.nutritionProfileKey
       }))
     });
   }
@@ -40,28 +46,70 @@ export async function GET(request: Request) {
     readiness = readinessFromApi({ score: null, source: "offline" });
   }
 
-  const profile = emptySportsIdentity(auth.user.id);
+  const { profile, backend } = await readSportsIdentity(auth.user.id);
+  const identity = profile.primarySport ? profile : emptySportsIdentity(auth.user.id);
   // Prefer query sport for explicit user choice (no silent assumption)
   const sportParam = url.searchParams.get("sport");
   if (sportParam && listSports().some((s) => s.id === sportParam)) {
-    profile.primarySport = sportParam as typeof profile.primarySport;
+    identity.primarySport = sportParam as typeof identity.primarySport;
+  } else if (profile.primarySport) {
+    identity.primarySport = profile.primarySport;
+    identity.secondarySports = profile.secondarySports;
+    identity.primaryGoal = profile.primaryGoal;
+    identity.sessionDurationMin = profile.sessionDurationMin;
+    identity.availableEquipment = profile.availableEquipment;
   }
 
+  const history = await listTrainingCompletions(auth.user.id, 10);
+  const recentPlanIds = history.sessions
+    .map((s) => (typeof s.payload.legacyPlanId === "string" ? s.payload.legacyPlanId : null))
+    .filter((x): x is string => Boolean(x));
+
   const card = adaptTodaySession({
-    profile,
+    profile: identity,
     readiness,
-    recentPlanIds: [],
-    timeAvailableMin: profile.sessionDurationMin ?? undefined
+    recentPlanIds,
+    timeAvailableMin: identity.sessionDurationMin ?? undefined
   });
+
+  const nutrition = await readNutritionProfile(auth.user.id);
+  const sport = getSport(card.sportId);
+  const dayKind =
+    card.trainingLoadLabel === "HIGH" ? "hard" : card.trainingLoadLabel === "LOW" ? "easy" : "moderate";
+  const targets = planDailyTargets({
+    profile: nutrition.profile,
+    sportNutritionKey: sport.nutritionProfileKey,
+    trainingDayKind: dayKind,
+    bodyMassKg: nutrition.profile.bodyMassKg,
+    sessionDurationMin: card.session.durationMin
+  });
+
+  const completeness = profileCompleteness(identity);
 
   return NextResponse.json({
     view: "today",
-    identityComplete: false,
-    missingIdentity: ["primary_sport", "primary_goal"],
+    identity,
+    identityBackend: backend,
+    identityComplete: completeness.complete,
+    missingIdentity: completeness.missing,
     today: card,
+    nutritionContext: {
+      estimateKind: targets.estimateKind,
+      confidence: targets.confidence,
+      kcal: targets.kcal,
+      proteinG: targets.proteinG,
+      carbohydrateG: targets.carbohydrateG,
+      fatG: targets.fatG,
+      hydrationMl: targets.hydrationMl,
+      fuelingHint: card.fuelingHint,
+      safetyFlags: targets.safetyFlags,
+      explanations: targets.explanations
+    },
+    recentCompletions: history.sessions.slice(0, 5),
     honesty: {
       readiness: card.readinessState,
-      note: "No fabricated biometrics. Nutrition fueling hint is contextual, not a logged meal."
+      nutrition: targets.estimateKind,
+      note: "No fabricated biometrics. Nutrition is ESTIMATE context, not a logged meal."
     }
   });
 }

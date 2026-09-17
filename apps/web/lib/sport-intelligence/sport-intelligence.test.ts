@@ -8,6 +8,7 @@ import {
 import { adaptTodaySession } from "./adaptation-engine";
 import { emptySportsIdentity } from "./sports-identity";
 import { suggestProgression } from "./progression-engine";
+import { suggestLoadWithSharedEngine } from "./progression-bridge";
 import { startRest, remainingSec, adjustRest, pauseRest, resumeRest } from "./rest-timer";
 import { composeSession, sortBlocks } from "./session-composer";
 
@@ -69,6 +70,58 @@ describe("adaptation engine", () => {
     expect(card.readinessState).toBe("AVAILABLE");
     expect(card.readinessScore).toBe(88);
     expect(card.session.explanation.dataUsed.some((d) => d.startsWith("readiness:"))).toBe(true);
+  });
+});
+
+describe("progression bridge", () => {
+  it("delegates to shared utils when working sets exist", () => {
+    const suggestion = suggestLoadWithSharedEngine(
+      {
+        strategy: "LINEAR",
+        previousLoadKg: 100,
+        previousReps: 5,
+        targetRepsMin: 5,
+        targetRepsMax: 5,
+        previousTimeSec: null,
+        previousDistanceM: null,
+        previousPaceSecPerKm: null,
+        previousPowerW: null,
+        readinessBand: "READY"
+      },
+      [
+        {
+          setType: "working",
+          actualReps: 5,
+          actualWeightKg: 100,
+          actualTimeSec: null,
+          targetReps: 5,
+          targetWeightKg: 100,
+          isFailed: false
+        }
+      ]
+    );
+    expect(suggestion.nextLoadKg).toBe(102.5);
+    expect(suggestion.explanation).toMatch(/@fitconnect\/utils/);
+  });
+
+  it("falls back to SI engine without working sets", () => {
+    const suggestion = suggestLoadWithSharedEngine(
+      {
+        strategy: "LINEAR",
+        previousLoadKg: 100,
+        previousReps: 5,
+        targetRepsMin: 5,
+        targetRepsMax: 5,
+        previousTimeSec: null,
+        previousDistanceM: null,
+        previousPaceSecPerKm: null,
+        previousPowerW: null,
+        readinessBand: "READY"
+      },
+      []
+    );
+    expect(suggestion.nextLoadKg).toBe(102.5);
+    expect(suggestion.explanation).not.toMatch(/@fitconnect\/utils/);
   });
 });
 
