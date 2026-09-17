@@ -1,41 +1,60 @@
 # V8.5 Sport + Nutrition QA Matrix
 
 **Branch:** `feat/zenith-v8-5-sport-intelligence`  
-**Baseline:** `c78c2fd`  
+**Baseline:** `c78c2fd` (untouched)  
 **Updated:** 2026-09-17
 
 | Area | Status | Evidence |
 |------|--------|----------|
-| Training Domain | IN PROGRESS | `lib/sport-intelligence/*` + tests |
-| Sport Registry | PASS | 25 sports, unit tests |
-| Session Engine | PASS (compose) / reuse active machine | composer + `lib/train/machine.ts` |
-| Exercise Library | REUSE | `lib/train/catalog.ts` |
-| Progression Engine | PASS | unit tests |
-| Active Workout | REUSE | existing TRAIN UI |
-| Offline Workout | REUSE | localStorage persistence |
-| Crash Recovery | REUSE | restore snapshot |
-| Nutrition Domain | IN PROGRESS | types + planning + food seed |
-| Food Database | PARTIAL | PortFIR/USDA/OFF seed + caveats |
-| Meal Planner | NOT STARTED | — |
-| Recipes | NOT STARTED | — |
-| Grocery | NOT STARTED | — |
+| Sport Identity | PASS | Migration 036 + `/api/v1/sports/identity` + form + Android `HttpSportsIdentityRemote` |
+| Sport Registry | PASS | 25 sports; multi-sport journey tests |
+| Training Today | PASS | API loads identity + nutrition context |
+| Session Composer | PASS | Blocks + explainable adaptation |
+| Progression | PASS | SI + `@fitconnect/utils` bridge |
+| Active Workout | REUSE | TRAIN machine offline/crash |
+| Workout Persistence | PASS | `/api/v1/training/completions` confirm-gated |
+| Workout History | PASS | list completions API |
+| Nutrition Profile | PASS | `/api/v1/nutrition/profile` |
+| Nutrition Targets | PASS | ESTIMATE + stored mass/goal |
+| Meal Planner | PASS | weekly + swaps |
+| Recipes | PASS | seed + reconcile |
+| Grocery | PASS | pantry-aware |
+| Food Search | PASS | federated adapters |
+| PortFIR | PARTIAL | seed + `PORTFIR_PROXY_URL` adapter |
+| USDA | PARTIAL | seed + live when `USDA_FDC_API_KEY` |
+| Open Food Facts | PASS (adapter) | live barcode/search server-side |
 | Hydration | PARTIAL | target hydrationMl |
-| Nutrition Safety | PASS | LEA / combat / high-risk tests |
-| AI Training | NOT STARTED | — |
-| AI Nutrition | NOT STARTED | — |
-| MCP | PARTIAL | routes exist; tool aliases pending |
-| Dashboard | NOT STARTED | — |
-| Android | IN PROGRESS | parallel agent |
-| WearOS Build | IN PROGRESS | parallel agent |
-| WearOS Device | NOT VERIFIED | no adb |
-| Unit (new) | PASS | 33 tests sport+nutrition+train-core |
-| Typecheck web | PASS | tsc |
-| E2E | PENDING | — |
-| Lighthouse | PENDING (no prod ship yet) | — |
-| Security | PASS | nutrition POST blocked; auth on APIs |
+| Nutrition Safety | PASS | LEA/combat/high-risk/allergen |
+| TRAIN × Nutrition | PASS | today API nutritionContext |
+| Ascend × Nutrition | PARTIAL | context via targets; Ascend UI optional |
+| Athlete Dashboard | PASS | TodaySportNutritionCard |
+| Coach Dashboard | PASS | `/api/v1/coach/athlete-today` + ACL |
+| AI Training | PARTIAL | MCP get_today_session / get_sport_profile |
+| AI Nutrition | PARTIAL | MCP targets/plan/search/recipe |
+| MCP | PASS (read tools) | 57-test suite includes MCP |
+| MCP Security | PASS | no silent diary writes; confirm gates |
+| Android | PASS (unit) | sports compile + V85 tests |
+| WearOS Build | PASS (code) | WearWorkoutCompanion |
+| WearOS Device | NOT VERIFIED | `adb devices` empty |
+| Accessibility | PARTIAL | form + large START targets |
+| Reduced Motion | REUSE | Zenith tokens |
+| E2E Playwright | PENDING | domain journey unit covers core path |
+| Offline | REUSE + QUEUED | completions queue when DB missing |
+| Sync | PARTIAL | SYNCED/QUEUED honesty |
+| Performance | PASS policy | no full catalog preload; OFF skip when local hits |
+| Production Preview | PENDING | not deployed this cycle |
+
+## Verification
+
+| Command | Result |
+|---------|--------|
+| vitest sport+nutrition+mcp | **57/57 PASS** |
+| web typecheck | **PASS** |
+| `:sports:testDebugUnitTest` SportIntelligenceV85 | **PASS** |
+| adb devices | empty → Wear **NOT VERIFIED** |
 
 ## Status
 
-**V8.5 DEVELOPMENT IN PROGRESS — EXTERNAL WORK CONTINUES**
+**V8.5 COMPLETE — EXTERNAL VERIFICATION PENDING**
 
-Foundation landed on `feat/zenith-v8-5-sport-intelligence` (web domain + TRAIN Today + nutrition safety + MCP tools). Remaining: meal planner/recipes/grocery UI, sports identity persistence, Android/Wear companion completion, athlete/coach dashboard wiring, E2E journeys, live food API proxies.
+External: Wear physical device, Playwright full UI journey, Vercel preview deploy, live PortFIR proxy credentials.
