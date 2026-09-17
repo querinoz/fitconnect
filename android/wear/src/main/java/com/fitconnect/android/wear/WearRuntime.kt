@@ -29,6 +29,10 @@ object WearRuntime {
     var allowLocalDemoReadiness: Boolean = false
     val ascend: AscendEngine = AscendEngine(demoLabeledUsers = setOf(LocalDemoIdentity.ATHLETE_ID))
 
+    /** Phone-linked TRAIN companion glance (foundation — updated by inbox / local start). */
+    @Volatile
+    var workoutCompanion: WearWorkoutCompanionState = WearWorkoutCompanionState()
+
     fun resolveReadiness(): ReadinessSource = WearReadinessSelector.select(
         phoneSynced = WearReadinessInbox.lastSynced,
         healthServices = healthServicesReadiness,

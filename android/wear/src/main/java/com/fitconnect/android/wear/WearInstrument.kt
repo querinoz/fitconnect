@@ -54,6 +54,7 @@ private enum class WearIdlePane {
     HOME,
     READINESS,
     HEART_RATE,
+    WORKOUT,
     FIGHT,
     ASCEND,
     SLEEP,
@@ -182,6 +183,7 @@ fun WearInstrument(
             onOpenSettings = {
                 scope.launch { pagerState.animateScrollToPage(WearIdlePane.SETTINGS.ordinal) }
             },
+            workoutCompanion = WearRuntime.workoutCompanion,
         )
     }
 }
@@ -198,6 +200,7 @@ private fun WearIdlePager(
     blocked: String?,
     onStart: () -> Unit,
     onOpenSettings: () -> Unit,
+    workoutCompanion: WearWorkoutCompanionState,
 ) {
     val scope = rememberCoroutineScope()
     val presentation = readiness.toPresentation()
@@ -233,6 +236,26 @@ private fun WearIdlePager(
                             "UNAVAILABLE"
                         },
                         footnote = if (hrCapability == MetricAvailability.AVAILABLE) hrText else "Health Services required",
+                    )
+                    WearIdlePane.WORKOUT -> WearWorkoutCompanion(
+                        state = workoutCompanion.copy(
+                            metricAvailability = if (hrCapability == MetricAvailability.AVAILABLE) {
+                                workoutCompanion.metricAvailability
+                            } else {
+                                MetricAvailability.UNAVAILABLE
+                            },
+                            primaryMetricValue = if (hrCapability == MetricAvailability.AVAILABLE) {
+                                workoutCompanion.primaryMetricValue
+                            } else {
+                                null
+                            },
+                            deviceStatus = when {
+                                combatGlance?.connected == true -> WearCompanionDeviceStatus.CONNECTED
+                                workoutCompanion.deviceStatus != WearCompanionDeviceStatus.UNKNOWN ->
+                                    workoutCompanion.deviceStatus
+                                else -> WearCompanionDeviceStatus.NOT_CONNECTED
+                            },
+                        ),
                     )
                     WearIdlePane.FIGHT -> WearMetricPane(
                         title = CombatWearClock.headline(combatGlance?.phase ?: "idle", combatGlance?.round ?: 0),

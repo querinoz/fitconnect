@@ -80,6 +80,11 @@ import com.fitconnect.android.sports.guided.domain.SystemWorkoutClock
 import com.fitconnect.android.sports.guided.domain.WorkoutPhase
 import com.fitconnect.android.sports.guided.timer.MonotonicTimer
 import com.fitconnect.android.sports.guided.wakelock.WorkoutWakePolicy
+import com.fitconnect.android.sports.domain.SportId
+import com.fitconnect.android.sports.intelligence.HonestMetric
+import com.fitconnect.android.sports.intelligence.SessionHonestyBundle
+import com.fitconnect.android.sports.intelligence.SportIntelligenceCatalog
+import com.fitconnect.android.athlete.ui.home.TodaySportSessionCard
 import com.fitconnect.android.sports.progression.ExerciseMode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -369,11 +374,26 @@ private fun PrepPhase(
     val volt = EliteSurfaceColors.VOLTLINE.toColor()
     val minutes = snap.plan.estimatedDurationMin.coerceAtLeast(1)
     val card = GuidedPlanCatalog.card(snap.plan.workoutId.ifBlank { GuidedPlanCatalog.featuredId })
+    val sportRec = remember(snap.plan.workoutId) {
+        SportIntelligenceCatalog.recommendToday(
+            sportId = SportId.STRENGTH,
+            honesty = SessionHonestyBundle(
+                readiness = HonestMetric.missing("Readiness not provided on TRAIN prep"),
+                heartRateBpm = HonestMetric.notConnected("Heart rate source not connected"),
+                caloriesKcal = HonestMetric.missing("Calories not provided"),
+            ),
+            preferredSessionType = "hypertrophy",
+        )
+    }
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(EliteSpace.Md),
     ) {
+        TodaySportSessionCard(
+            recommendation = sportRec,
+            onStart = onStart,
+        )
         EosFitConnectLockup(markSize = 28.dp, wordmarkSize = 16.sp)
         Text(
             text = "TRAIN",

@@ -36,8 +36,14 @@ import com.fitconnect.android.fitness.domain.HealthConnectSdkState
 import com.fitconnect.android.fitness.healthconnect.HealthConnectIntents
 import com.fitconnect.android.fitness.healthconnect.HealthConnectPermissionState
 import com.fitconnect.android.fitness.healthconnect.HealthConnectSdkMapper
+import com.fitconnect.android.athlete.domain.AthleteDataProvenance
+import com.fitconnect.android.athlete.domain.Provenanced
 import com.fitconnect.android.foundation.common.AppResult
 import com.fitconnect.android.foundation.navigation.identityBadgeLabel
+import com.fitconnect.android.sports.domain.SportId
+import com.fitconnect.android.sports.intelligence.HonestMetric
+import com.fitconnect.android.sports.intelligence.SessionHonestyBundle
+import com.fitconnect.android.sports.intelligence.SportIntelligenceCatalog
 import kotlinx.coroutines.launch
 
 @Composable
@@ -210,6 +216,20 @@ fun HomeScreen(
                 }
             }
             item {
+                val sportRecommendation = remember(readinessUi?.readinessPercent) {
+                    SportIntelligenceCatalog.recommendToday(
+                        sportId = SportId.STRENGTH,
+                        honesty = SessionHonestyBundle(
+                            readiness = honestReadiness(readinessUi?.readinessPercent),
+                        ),
+                    )
+                }
+                TodaySportSessionCard(
+                    recommendation = sportRecommendation,
+                    onStart = onOpenActivity,
+                )
+            }
+            item {
                 TodaySessionHeroSection(
                     session = recentSessions.firstOrNull(),
                     recommendation = home.readiness.recommendation,
@@ -283,4 +303,14 @@ fun HomeScreen(
             }
         }
     }
+}
+
+/** LOCAL_DEMO / insufficient readiness must never be shown as measured AVAILABLE. */
+internal fun honestReadiness(provenanced: Provenanced<Int>?): HonestMetric<Int> = when {
+    provenanced == null -> HonestMetric.missing("Readiness not provided")
+    provenanced.provenance == AthleteDataProvenance.LOCAL_DEMO ->
+        HonestMetric.unavailable("LOCAL_DEMO is not measured readiness")
+    provenanced.provenance == AthleteDataProvenance.INSUFFICIENT_DATA ->
+        HonestMetric.missing("Insufficient readiness inputs")
+    else -> HonestMetric.available(provenanced.value.coerceIn(0, 100))
 }
