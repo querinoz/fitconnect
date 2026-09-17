@@ -24,6 +24,7 @@ import { AiInsightsPanel } from "./ai-insights-panel";
 import { IntegrationsHub } from "@/components/dashboard/integrations-hub";
 import { GamificationPanel } from "@/components/gamification/gamification-panel";
 import { ReadinessHeroSection } from "./readiness-hero-section";
+import { TodaySportNutritionCard } from "./today-sport-nutrition-card";
 import { MapWidget } from "./map-widget";
 import { ActivityFeedLive } from "./activity-feed-live";
 import {
@@ -222,6 +223,10 @@ export function AthleteOsDashboard({
                 </>
               ) : null}
               <AiInsightsPanel telemetry={telemetry} onAccept={onAcceptInsight} />
+            </EliteBentoMotionItem>
+
+            <EliteBentoMotionItem className="md:col-span-12">
+              <TodaySportNutritionCard athleteId={athleteId} />
             </EliteBentoMotionItem>
 
             {!compactCockpit ? (

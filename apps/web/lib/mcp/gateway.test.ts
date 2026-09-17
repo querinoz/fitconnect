@@ -25,7 +25,11 @@ describe("MCP gateway", () => {
     expect(names).toContain("list_martial_arts");
     expect(names).toContain("zenith_combat_context");
     expect(names).toContain("get_today_session");
+    expect(names).toContain("get_sport_profile");
+    expect(names).toContain("search_food");
+    expect(names).toContain("get_recipe");
     expect(names).toContain("get_nutrition_targets");
+    expect(names).toContain("generate_meal_plan");
   });
 
   it("does not expose SQL, shell, or community-server tools", () => {
@@ -201,6 +205,47 @@ describe("MCP gateway", () => {
     expect(res.result).toMatchObject({
       estimateKind: "ESTIMATE",
       targets: expect.objectContaining({ estimateKind: "ESTIMATE" })
+    });
+  });
+
+  it("suggests meal plan without writing diary", async () => {
+    const res = await dispatchMcp(athlete, {
+      tool: "generate_meal_plan",
+      arguments: {
+        sport: "RUNNING",
+        goal: "PERFORMANCE",
+        day: "hard",
+        massKg: 70,
+        weekStart: "2026-09-14",
+        allergies: ["peanut"]
+      }
+    });
+    expect(res.ok).toBe(true);
+    expect(res.result).toMatchObject({
+      plan: expect.objectContaining({ days: expect.any(Array) }),
+      grocery: expect.any(Array),
+      note: expect.stringMatching(/confirmation/i)
+    });
+  });
+
+  it("returns sport profile without inventing sports", async () => {
+    const res = await dispatchMcp(athlete, { tool: "get_sport_profile" });
+    expect(res.ok).toBe(true);
+    expect(res.result).toMatchObject({
+      profile: expect.objectContaining({ userId: "ath-1", primarySport: null }),
+      note: expect.stringMatching(/never invented/i)
+    });
+  });
+
+  it("searches food without logging", async () => {
+    const res = await dispatchMcp(athlete, {
+      tool: "search_food",
+      arguments: { query: "arroz", locale: "pt-PT" }
+    });
+    expect(res.ok).toBe(true);
+    expect(res.result).toMatchObject({
+      foods: expect.any(Array),
+      note: expect.stringMatching(/never logs/i)
     });
   });
 });

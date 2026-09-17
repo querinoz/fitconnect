@@ -247,6 +247,37 @@ export const MCP_TOOLS: McpToolDef[] = [
     })
   },
   {
+    name: "get_sport_profile",
+    domain: "training",
+    risk: "read",
+    description: "Athlete sports identity (primary/secondary sport, goals, schedule).",
+    capabilities: ["athlete", "coach"],
+    schema: empty
+  },
+  {
+    name: "search_food",
+    domain: "training",
+    risk: "sensitive",
+    description:
+      "Server-side food search via PortFIR/USDA/OFF adapters. Never auto-logs.",
+    capabilities: ["athlete"],
+    schema: z.object({
+      query: z.string().min(1).max(120).optional(),
+      barcode: z.string().min(4).max(32).optional(),
+      locale: z.string().min(2).max(12).optional()
+    })
+  },
+  {
+    name: "get_recipe",
+    domain: "training",
+    risk: "sensitive",
+    description: "Recipe by id with reconciled nutrition per serving.",
+    capabilities: ["athlete"],
+    schema: z.object({
+      recipeId: z.string().min(3).max(80)
+    })
+  },
+  {
     name: "get_nutrition_targets",
     domain: "training",
     risk: "sensitive",
@@ -261,6 +292,24 @@ export const MCP_TOOLS: McpToolDef[] = [
         .optional(),
       massKg: z.number().positive().max(400).nullable().optional(),
       durationMin: z.number().positive().max(600).nullable().optional()
+    })
+  },
+  {
+    name: "generate_meal_plan",
+    domain: "training",
+    risk: "sensitive",
+    description:
+      "Suggest a weekly meal plan with explainable slots + grocery remaining. Never logs meals.",
+    capabilities: ["athlete"],
+    schema: z.object({
+      sport: z.string().min(2).max(40).optional(),
+      goal: z.string().min(2).max(40).optional(),
+      day: z
+        .enum(["rest", "easy", "moderate", "hard", "long", "competition", "recovery"])
+        .optional(),
+      massKg: z.number().positive().max(400).nullable().optional(),
+      weekStart: z.string().min(10).max(12).optional(),
+      allergies: z.array(z.string().min(1).max(40)).max(20).optional()
     })
   },
   {

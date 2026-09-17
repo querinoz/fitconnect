@@ -232,6 +232,37 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
       };
       break;
     }
+    case "get_sport_profile": {
+      const { readSportsIdentity } = await import("@/lib/sport-intelligence/identity-repository");
+      const { profile, backend } = await readSportsIdentity(actor.uid);
+      result = { profile, backend, note: "Sports identity — empty fields stay null, never invented." };
+      break;
+    }
+    case "search_food": {
+      const { lookupFoods } = await import("@/lib/nutrition/sources/food-lookup");
+      const looked = await lookupFoods({
+        query: typeof args.query === "string" ? args.query : undefined,
+        barcode: typeof args.barcode === "string" ? args.barcode : undefined,
+        locale: typeof args.locale === "string" ? args.locale : undefined
+      });
+      result = {
+        foods: looked.foods,
+        state: looked.state,
+        note: `${looked.note} MCP never logs food.`
+      };
+      break;
+    }
+    case "get_recipe": {
+      const { getRecipeById, computeRecipeNutrition } = await import("@/lib/nutrition/recipes");
+      const id = String(args.recipeId ?? "");
+      const recipe = getRecipeById(id);
+      result = {
+        recipe: recipe ?? null,
+        nutrition: recipe ? computeRecipeNutrition(recipe) : null,
+        note: recipe ? null : "Unknown recipe — not fabricated."
+      };
+      break;
+    }
     case "get_nutrition_targets": {
       const { planDailyTargets } = await import("@/lib/nutrition/planning-engine");
       const sportMod = await import("@/lib/sport-intelligence/sport-registry");
@@ -281,6 +312,62 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
         targets,
         estimateKind: targets.estimateKind,
         note: "Read-only ESTIMATE. Diary writes require explicit user confirmation."
+      };
+      break;
+    }
+    case "generate_meal_plan": {
+      const { generateWeeklyMealPlan } = await import("@/lib/nutrition/meal-planner");
+      const { buildGroceryList } = await import("@/lib/nutrition/grocery");
+      const sportMod = await import("@/lib/sport-intelligence/sport-registry");
+      const sportArg = typeof args.sport === "string" ? args.sport : "GENERAL_FITNESS";
+      const sport =
+        sportArg in sportMod.SPORT_REGISTRY
+          ? sportMod.SPORT_REGISTRY[
+              sportArg as import("@/lib/sport-intelligence/sport-registry").SportId
+            ]
+          : sportMod.SPORT_REGISTRY.GENERAL_FITNESS;
+      const day =
+        typeof args.day === "string"
+          ? (args.day as
+              | "rest"
+              | "easy"
+              | "moderate"
+              | "hard"
+              | "long"
+              | "competition"
+              | "recovery")
+          : "moderate";
+      const allergies = Array.isArray(args.allergies)
+        ? args.allergies.filter((a): a is string => typeof a === "string")
+        : [];
+      const plan = generateWeeklyMealPlan({
+        profile: {
+          userId: actor.uid,
+          goal:
+            typeof args.goal === "string"
+              ? (args.goal as import("@/lib/nutrition/types").NutritionGoal)
+              : "PERFORMANCE",
+          dietPattern: null,
+          allergies,
+          intolerances: [],
+          dislikes: [],
+          religiousRestrictions: [],
+          mealFrequency: 4,
+          countryLocale: "pt-PT",
+          highRiskContext: false,
+          declaredMedicalContext: false
+        },
+        sportNutritionKey: sport.nutritionProfileKey,
+        trainingDayKind: day,
+        bodyMassKg: typeof args.massKg === "number" ? args.massKg : 70,
+        sessionDurationMin: 45,
+        weekStartISO:
+          typeof args.weekStart === "string" ? args.weekStart : new Date().toISOString().slice(0, 10)
+      });
+      result = {
+        plan,
+        grocery: buildGroceryList(plan),
+        note: "Suggestion only — logging meals requires explicit user confirmation."
       };
       break;
     }

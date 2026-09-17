@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 import { AuthGate } from "@/components/auth-gate";
 import { ProfileTabPanel } from "@/components/mobile/athlete-tab-panels";
 import { AthleteProfileForm } from "@/components/athlete/athlete-profile-form";
+import { SportsIdentityForm } from "@/components/profile/sports-identity-form";
 import { ActiveExperienceSwitcher } from "@/components/identity/active-experience-switcher";
 import { useAuthStore } from "@/lib/auth-store";
 import { resolveDashboardAthleteId } from "@/lib/dashboard/resolve-scope";
@@ -27,6 +28,7 @@ export default function AthleteProfilePlaceholderPage() {
         extra={
           <>
             <ActiveExperienceSwitcher />
+            <SportsIdentityForm userId={athleteId} />
             {stitchMobile ? undefined : <AthleteProfileForm />}
             <p className="mt-4 text-sm">
               <a className="text-eos-telemetry underline-offset-4 hover:underline" href="/martial-arts">

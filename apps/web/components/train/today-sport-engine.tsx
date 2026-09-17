@@ -4,6 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { BentoCard } from "@/components/elite-os/bento-card";
 import { adaptTodaySession, type TodayTrainingCard } from "@/lib/sport-intelligence/adaptation-engine";
 import { emptySportsIdentity } from "@/lib/sport-intelligence/sports-identity";
+import {
+  fetchSportsIdentity,
+  persistSportsIdentity,
+  loadSportsIdentityCache
+} from "@/lib/sport-intelligence/identity-store";
 import { listSports, type SportId } from "@/lib/sport-intelligence/sport-registry";
 import type { ReadinessView } from "@/lib/train/types";
 import { cn } from "@/lib/utils";
@@ -36,11 +41,32 @@ export function TodaySportEngine({ readiness, userId, legacySportFilter, onStart
   } | null>(null);
 
   useEffect(() => {
-    if (legacySportFilter && legacySportFilter !== "all") {
-      const hit = listSports().find((s) => s.legacyTrainSports.includes(legacySportFilter));
-      if (hit) setSportId(hit.id);
-    }
-  }, [legacySportFilter]);
+    let cancelled = false;
+    (async () => {
+      const stored = await fetchSportsIdentity(userId);
+      if (cancelled) return;
+      if (stored.primarySport) {
+        setSportId(stored.primarySport);
+        return;
+      }
+      if (legacySportFilter && legacySportFilter !== "all") {
+        const hit = listSports().find((s) => s.legacyTrainSports.includes(legacySportFilter));
+        if (hit) setSportId(hit.id);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [legacySportFilter, userId]);
+
+  function selectSport(next: SportId) {
+    setSportId(next);
+    void persistSportsIdentity({
+      ...loadSportsIdentityCache(userId),
+      userId,
+      primarySport: next
+    });
+  }
 
   const card: TodayTrainingCard = useMemo(() => {
     const profile = emptySportsIdentity(userId);
@@ -105,7 +131,7 @@ export function TodaySportEngine({ readiness, userId, legacySportFilter, onStart
                 ? "border-eos-voltline bg-eos-voltline/15 text-eos-voltline"
                 : "border-eos-outline-variant text-eos-on-surface-muted"
             )}
-            onClick={() => setSportId(id)}
+            onClick={() => selectSport(id)}
           >
             {listSports().find((s) => s.id === id)?.label ?? id}
           </button>
