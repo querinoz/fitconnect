@@ -236,6 +236,34 @@ export const MCP_TOOLS: McpToolDef[] = [
     schema: empty
   },
   {
+    name: "get_today_session",
+    domain: "training",
+    risk: "read",
+    description:
+      "Sport Training Engine today card with explainable WHY. Never invents biometrics.",
+    capabilities: ["athlete"],
+    schema: z.object({
+      sport: z.string().min(2).max(40).optional()
+    })
+  },
+  {
+    name: "get_nutrition_targets",
+    domain: "training",
+    risk: "sensitive",
+    description:
+      "ESTIMATE nutrition targets for sport + training day. Read-only — never writes the diary.",
+    capabilities: ["athlete"],
+    schema: z.object({
+      sport: z.string().min(2).max(40).optional(),
+      goal: z.string().min(2).max(40).optional(),
+      day: z
+        .enum(["rest", "easy", "moderate", "hard", "long", "competition", "recovery"])
+        .optional(),
+      massKg: z.number().positive().max(400).nullable().optional(),
+      durationMin: z.number().positive().max(600).nullable().optional()
+    })
+  },
+  {
     name: "list_providers",
     domain: "integrations",
     risk: "read",

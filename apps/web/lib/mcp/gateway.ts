@@ -206,6 +206,84 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
     case "list_sport_types":
       result = mcpCanonicalSports();
       break;
+    case "get_today_session": {
+      const { adaptTodaySession } = await import("@/lib/sport-intelligence/adaptation-engine");
+      const { emptySportsIdentity } = await import("@/lib/sport-intelligence/sports-identity");
+      const sportMod = await import("@/lib/sport-intelligence/sport-registry");
+      const profile = emptySportsIdentity(actor.uid);
+      const sportArg = typeof args.sport === "string" ? args.sport : null;
+      if (sportArg && sportArg in sportMod.SPORT_REGISTRY) {
+        profile.primarySport = sportArg as import("@/lib/sport-intelligence/sport-registry").SportId;
+      }
+      const card = adaptTodaySession({
+        profile,
+        readiness: {
+          score: null,
+          band: null,
+          source: "mcp_no_telemetry",
+          available: false,
+          detail: "Pass readiness via product APIs — MCP does not invent scores."
+        },
+        recentPlanIds: []
+      });
+      result = {
+        today: card,
+        note: "Catalog/adaptation only. Biometrics remain MISSING unless provided by authorized product APIs."
+      };
+      break;
+    }
+    case "get_nutrition_targets": {
+      const { planDailyTargets } = await import("@/lib/nutrition/planning-engine");
+      const sportMod = await import("@/lib/sport-intelligence/sport-registry");
+      const sportArg = typeof args.sport === "string" ? args.sport : "GENERAL_FITNESS";
+      const sport =
+        sportArg in sportMod.SPORT_REGISTRY
+          ? sportMod.SPORT_REGISTRY[
+              sportArg as import("@/lib/sport-intelligence/sport-registry").SportId
+            ]
+          : sportMod.SPORT_REGISTRY.GENERAL_FITNESS;
+      const goal =
+        typeof args.goal === "string"
+          ? (args.goal as import("@/lib/nutrition/types").NutritionGoal)
+          : null;
+      const day =
+        typeof args.day === "string"
+          ? (args.day as
+              | "rest"
+              | "easy"
+              | "moderate"
+              | "hard"
+              | "long"
+              | "competition"
+              | "recovery")
+          : "moderate";
+      const targets = planDailyTargets({
+        profile: {
+          userId: actor.uid,
+          goal,
+          dietPattern: null,
+          allergies: [],
+          intolerances: [],
+          dislikes: [],
+          religiousRestrictions: [],
+          mealFrequency: null,
+          countryLocale: "pt-PT",
+          highRiskContext: false,
+          declaredMedicalContext: false
+        },
+        sportNutritionKey: sport.nutritionProfileKey,
+        trainingDayKind: day,
+        bodyMassKg: typeof args.massKg === "number" ? args.massKg : null,
+        sessionDurationMin: typeof args.durationMin === "number" ? args.durationMin : null
+      });
+      result = {
+        sportId: sport.id,
+        targets,
+        estimateKind: targets.estimateKind,
+        note: "Read-only ESTIMATE. Diary writes require explicit user confirmation."
+      };
+      break;
+    }
     case "list_martial_arts":
       result = mcpMartialArtsCatalog();
       break;

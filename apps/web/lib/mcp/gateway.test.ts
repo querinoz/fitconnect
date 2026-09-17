@@ -24,6 +24,8 @@ describe("MCP gateway", () => {
     expect(names).toContain("list_providers");
     expect(names).toContain("list_martial_arts");
     expect(names).toContain("zenith_combat_context");
+    expect(names).toContain("get_today_session");
+    expect(names).toContain("get_nutrition_targets");
   });
 
   it("does not expose SQL, shell, or community-server tools", () => {
@@ -178,6 +180,28 @@ describe("MCP gateway", () => {
     const res = await dispatchMcp(athlete, { tool: "list_social_feed" });
     expect(res.ok).toBe(true);
     expect(res.result).toMatchObject({ stravaNeverSocial: true });
+  });
+  it("returns explainable today session without inventing readiness", async () => {
+    const res = await dispatchMcp(athlete, { tool: "get_today_session", arguments: { sport: "RUNNING" } });
+    expect(res.ok).toBe(true);
+    expect(res.result).toMatchObject({
+      today: expect.objectContaining({
+        sportId: "RUNNING",
+        readinessState: "MISSING"
+      })
+    });
+  });
+
+  it("returns ESTIMATE nutrition targets as read-only", async () => {
+    const res = await dispatchMcp(athlete, {
+      tool: "get_nutrition_targets",
+      arguments: { sport: "RUNNING", goal: "PERFORMANCE", day: "hard", massKg: 70 }
+    });
+    expect(res.ok).toBe(true);
+    expect(res.result).toMatchObject({
+      estimateKind: "ESTIMATE",
+      targets: expect.objectContaining({ estimateKind: "ESTIMATE" })
+    });
   });
 });
 

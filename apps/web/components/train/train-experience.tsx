@@ -48,6 +48,7 @@ import { recommendPlan } from "@/lib/train/recommend";
 import type { ReadinessView, TrainPlan, TrainSnapshot } from "@/lib/train/types";
 import { TRAIN_PHASE_LABEL } from "@/lib/train/types";
 import { CombatBriefing, CombatLiveBlock } from "@/components/train/combat-session";
+import { TodaySportEngine } from "@/components/train/today-sport-engine";
 import { cn } from "@/lib/utils";
 
 const FILTER_CHIPS = [
@@ -347,8 +348,8 @@ export function TrainExperience() {
               : "Your session is about to begin."}
         </h1>
         <p className="max-w-2xl text-sm text-eos-on-surface-muted sm:text-base">
-          Discover, prep, train, rest, finish. Combat rounds auto-complete. Heart rate, HRV, calories
-          and punch force stay blank unless a real source provides them.
+          Sport Training Engine — today&apos;s session, readiness-aware adaptation, then execute.
+          Heart rate, HRV and calories stay blank unless a connected source provides them.
         </p>
         <div className="flex flex-wrap gap-2">
           <StatusChip
@@ -363,7 +364,15 @@ export function TrainExperience() {
       </header>
 
       {snapshot.phase === "idle" ? (
-        <ReadinessCard readiness={readiness} recommendation={recommendation} onOpen={() => dispatch({ type: "select_plan", planId: recommendation.plan.id })} />
+        <>
+          <TodaySportEngine
+            readiness={readiness}
+            userId={user?.id ?? "anonymous"}
+            legacySportFilter={sport}
+            onStartLegacyPlan={(planId) => dispatch({ type: "select_plan", planId })}
+          />
+          <ReadinessCard readiness={readiness} recommendation={recommendation} onOpen={() => dispatch({ type: "select_plan", planId: recommendation.plan.id })} />
+        </>
       ) : null}
 
       {snapshot.phase === "idle" && (
