@@ -10,8 +10,10 @@ import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.MonitorHeart
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -89,6 +91,7 @@ fun ProfileScreen(
     var capabilities by remember { mutableStateOf(setOf(UserRole.ATHLETE)) }
     var activeMode by remember { mutableStateOf(UserRole.ATHLETE) }
     var switchingMode by remember { mutableStateOf(false) }
+    var showGoalsDialog by remember { mutableStateOf(false) }
     val avatarPath by container.platform.keyValueStore
         .observe(PreferenceKeys.PROFILE_AVATAR_PATH)
         .collectAsState(initial = null)
@@ -134,6 +137,39 @@ fun ProfileScreen(
         devices = container.telemetry.deviceCenter.devices(athleteId)
         val sessions = (container.athleteRepository.sessions() as? AppResult.Ok)?.value
         sessionCount = sessions?.size?.takeIf { it > 0 }
+    }
+
+    if (showGoalsDialog) {
+        AlertDialog(
+            onDismissRequest = { showGoalsDialog = false },
+            title = { Text("Goals") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                    if (goals.isEmpty()) {
+                        Text(
+                            "EMPTY — no goals on file yet. Goals appear here when the athlete repository has entries.",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    } else {
+                        goals.forEach { goal ->
+                            Text(
+                                "${goal.title} · ${goal.progressPercent}%",
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                            EliteProgress(progress = goal.progressPercent / 100f)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { showGoalsDialog = false },
+                    modifier = Modifier.testTag("profile_goals_close"),
+                ) {
+                    Text("Close")
+                }
+            },
+        )
     }
 
     AthleteScreenScaffold(
@@ -316,8 +352,13 @@ fun ProfileScreen(
                     EliteSettingsRow(
                         title = "Goals",
                         icon = Icons.Outlined.Flag,
-                        trailing = goals.size.takeIf { it > 0 }?.toString(),
-                        onClick = { },
+                        trailing = goals.size.takeIf { it > 0 }?.toString() ?: "NONE",
+                        onClick = {
+                            showGoalsDialog = true
+                            container.platform.analytics.track(
+                                AnalyticsEvent("profile_goals_open", emptyMap()),
+                            )
+                        },
                     )
                     EliteSettingsRow(
                         title = "Appearance",

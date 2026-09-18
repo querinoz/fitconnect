@@ -180,7 +180,10 @@ export function TodaySportNutritionCard({ athleteId }: Props) {
           <Link href="/train">Open TRAIN</Link>
         </EliteButton>
         <EliteButton asChild variant="ghost" size="sm">
-          <Link href="/ascend">Ascend</Link>
+          <Link href="/nutrition">Nutrition</Link>
+        </EliteButton>
+        <EliteButton asChild variant="ghost" size="sm">
+          <Link href="/achievements">Ascend</Link>
         </EliteButton>
       </div>
     </BentoCard>

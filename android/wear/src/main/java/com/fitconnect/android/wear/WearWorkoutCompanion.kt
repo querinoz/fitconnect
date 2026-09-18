@@ -41,8 +41,10 @@ data class WearWorkoutCompanionState(
 
 enum class WearCompanionDeviceStatus {
     CONNECTED,
+    SYNCING,
     NOT_CONNECTED,
     UNAVAILABLE,
+    ERROR,
     UNKNOWN,
 }
 
@@ -57,8 +59,10 @@ object WearCompanionHonesty {
 
     fun deviceLabel(status: WearCompanionDeviceStatus): String = when (status) {
         WearCompanionDeviceStatus.CONNECTED -> "PHONE LINKED"
+        WearCompanionDeviceStatus.SYNCING -> "SYNCING"
         WearCompanionDeviceStatus.NOT_CONNECTED -> "NOT CONNECTED"
         WearCompanionDeviceStatus.UNAVAILABLE -> "UNAVAILABLE"
+        WearCompanionDeviceStatus.ERROR -> "LINK ERROR"
         WearCompanionDeviceStatus.UNKNOWN -> "LINK UNKNOWN"
     }
 }
