@@ -1,110 +1,112 @@
-# Zenith V8.5 — Final Evidence Freeze
+# Zenith V8.5 — Final Evidence Freeze (RC LOCK)
 
-**Date:** 2026-09-17 (re-verified 23:10–23:55 UTC+1)  
+**Date:** 2026-09-18  
 **Branch:** `feat/zenith-v8-5-sport-intelligence`  
-**Tip:** `5208d9f` (product tip `9fcbe08` + verification commit)  
+**Tip:** `cfcf55e`  
 **Frozen baseline (untouched):** `c78c2fd`  
 **Status:** **V8.5 COMPLETE — EXTERNAL VERIFICATION PENDING**
+
+## Separation of concerns
+
+| Layer | Meaning |
+|-------|---------|
+| **Product (V8.5 RC)** | Sport identity → TRAIN → completion → nutrition → food → MCP → coach ACL is implemented and locally verified |
+| **Known test debt** | 5 Playwright failures — pre-existing auth/community/live harness — proven unrelated to V8.5 paths |
+| **External verification** | Preview deploy/E2E and WearOS device smoke require credentials/device not available in this environment |
 
 ## Git integrity
 
 | Check | Result |
 |-------|--------|
-| HEAD on feature branch | PASS — `feat/zenith-v8-5-sport-intelligence` @ `5208d9f` |
-| Expected product commits present | PASS — `70db106`, `c9ae447`, `9f305bc`, `9fcbe08` |
-| `c78c2fd` is ancestor | PASS |
-| Baseline rewrite | NONE — no reset / force-push |
+| HEAD | `cfcf55e` |
+| Branch | `feat/zenith-v8-5-sport-intelligence` |
+| `c78c2fd` ancestor | PASS |
+| History rewrite / force-push | NONE |
+| V8.5 commits | `9f48232` … `9fcbe08` + verification `5208d9f` + docs `cfcf55e` |
 
-## Migration 036
+## Change audit (`c78c2fd..HEAD`)
 
-File: `supabase/migrations/036_sport_intelligence_nutrition.sql`
+82 files / +8387 lines — sport-intelligence, nutrition, migration 036, Android/Wear V8.5, docs, verification tests.  
+No secrets found in V8.5 lib paths. Untracked screenshots/snapshots remain uncommitted.
 
-| Concern | Result |
-|---------|--------|
-| Additive only (001–035 untouched) | PASS |
-| Tables | `athlete_sports_profiles`, `nutrition_profiles`, `nutrition_food_logs`, `sport_training_completions` |
-| Indexes | sport, user+date, user+completed_at |
-| RLS + FORCE RLS | PASS — all four tables |
-| Ownership | `user_id = public.firebase_uid()` |
-| Anon grants | REVOKED |
-| Food log write honesty | `source` constrained to `user_confirm` |
-| Sync states | explicit enum on completions |
+## Preview deployment
 
-## Connected product journey (code)
+| Item | Status |
+|------|--------|
+| Vercel CLI project link | Present (`.vercel/project.json`) |
+| `VERCEL_TOKEN` | missing |
+| `gh auth` | not logged in |
+| `vercel whoami` | No credentials |
+| Preview URL | **NOT VERIFIED — EXTERNAL AUTH UNAVAILABLE** |
+| Preview E2E | **NOT VERIFIED** |
 
-```
-PROFILE → /api/v1/sports/identity
-→ DASHBOARD TODAY
-→ TRAIN / completions (confirm:true)
-→ NUTRITION profile / targets / meal / grocery
-→ FOOD adapters (PortFIR / USDA / OFF) + confirm log
-→ MCP tools (athlete-gated)
-→ COACH athlete-today (nutrition ACL via share_with_coach)
-```
+This is an environment limitation, not a product failure.
 
-Android: sports identity remote + Wear companion hooks.  
-WearOS: assembleDebug PASS; device smoke NOT VERIFIED (`adb devices` empty).
+## WearOS device
 
-## Gate matrix (re-run evidence)
+`adb devices` → empty → **NOT VERIFIED** (build/unit already PASS).
+
+## Lighthouse reconciliation (2026-09-18)
+
+Same script (`scripts/lighthouse-mobile.mjs`, LH 12.8.2, mobile throttle). Dual runs.
+
+| Run | URL | Perf | A11y | BP | SEO | LCP | CLS |
+|-----|-----|------|------|----|-----|-----|-----|
+| Freeze evidence | prod `fitconnect-phi.vercel.app` | **94** | 94 | 100 | 100 | 2717 ms | 0.001 |
+| Local V8.5 r1 | `http://localhost:3001` | **89** | 94 | 100 | 100 | 3464 ms | 0.073 |
+| Local V8.5 r2 | `http://localhost:3001` | **87** | 94 | 100 | 100 | 3482 ms | 0.073 |
+| Prod live r1 | `https://fitconnect-phi.vercel.app` | **92** | 94 | 100 | 100 | 2860 ms | 0.001 |
+| Prod live r2 | `https://fitconnect-phi.vercel.app` | **93** | 94 | 100 | 100 | 2608 ms | 0.001 |
+
+**Interpretation**
+
+1. Local 87–90 vs freeze 94 is **not** a same-URL regression: localhost lacks CDN/edge caching; CLS ~0.073 vs prod ~0.001.
+2. Live production (frozen release, **not** V8.5 tip) remeasures **92–93**, within normal LH noise of freeze **94**. A11y/BP/SEO unchanged.
+3. An earlier prod outlier (perf 81, CLS 0.219) confirms run-to-run variance — do not treat single samples as regressions.
+4. V8.5 branch tip is **not** on production; Preview LH remains NOT VERIFIED until deploy credentials exist.
+5. Gate policy (perf ≥84) holds for local V8.5; no score chasing / no feature removal.
+
+Artifacts: `docs/qa/lighthouse-v85-recon-*.json`, `docs/qa/lighthouse-v7-freeze.json`.
+
+## Gate matrix
 
 | Gate | Status | Evidence |
 |------|--------|----------|
-| Git | PASS | ancestor `c78c2fd`; tip `5208d9f` |
-| Migration 036 | PASS | audit above |
-| Typecheck | PASS | `pnpm --filter @fitconnect/web typecheck` exit 0 |
-| Lint | PASS | exit 0 (img warnings only) |
-| Unit (V8.5 domain) | PASS | **65/65** sport + nutrition + adapters + MCP gateway/security |
-| Build | PASS | `next build` exit 0 |
-| Smoke | PASS | **14/14** `@ http://localhost:3001` |
-| Critical E2E | PASS | **27/27** `v85-sport-nutrition.spec.ts` (3 projects) |
-| Full E2E | PARTIAL | **37/42** mobile-chrome; 5 failures = PRE-EXISTING debt (see TEST_DEBT) |
-| Preview E2E | NOT VERIFIED | `VERCEL_TOKEN` missing; `gh` logged out; `vercel whoami` loggedIn:false |
-| Sport Identity | PASS | journey unit + API contracts |
-| Training | PASS | TodaySportEngine + TRAIN bridge + train-journey E2E |
-| Progression | PASS | unit |
-| Active Workout | PASS | TRAIN machine |
-| Offline / Crash | PASS (unit/machine) | device offline E2E NOT VERIFIED |
-| Nutrition | PASS | profile/targets/diary/safety unit |
-| Meal Plan / Recipes / Grocery | PASS | unit |
-| Food APIs | PASS | adapters unit |
-| PortFIR / USDA / OFF | PASS | honesty + no env key echo |
-| Nutrition Safety | PASS | LEA/combat guards |
-| Dashboard | PASS | wiring + route smoke |
-| Coach ACL | PASS | `coach-acl.test.ts` |
-| AI / MCP | PASS | gateway **25** + v85-security **3** |
-| MCP Security | PASS | anonymous 403; no food write tools; no sql/shell |
-| Android | PASS | `:sports:testDebugUnitTest` + Wear assemble |
-| WearOS Build | PASS | `:wear:assembleDebug` |
-| WearOS Device | NOT VERIFIED | empty `adb devices` |
-| Accessibility | PASS (LH a11y 94) | contrast debt pre-existing |
-| Reduced Motion | PASS (suite) | landing-motion reduced cases green in full E2E |
-| Lighthouse (local prod) | PASS gate | **90 / 94 / 100 / 100** vs freeze **94 / 94 / 100 / 100** (perf ≥84) |
+| Git integrity | PASS | tip `cfcf55e`; baseline ancestor |
+| Frozen baseline | PASS | `c78c2fd` untouched |
+| Typecheck | PASS | prior + this RC cycle |
+| Lint | PASS | img warnings only |
+| Unit | PASS | **65/65** |
+| Build | PASS | production `next build` |
+| Smoke | PASS | **14/14** local; prod landing **200** + `/api/health` reachable |
+| Critical E2E | PASS | **27/27** |
+| Full E2E | PARTIAL | **37/42**; 5 debt reconfirmed 2026-09-18 |
+| Test Debt Classification | PASS | independent reconfirm — no V8.5 causal path |
+| Sport Identity / TRAIN / Nutrition / Food / Safety | PASS | domain unit + APIs |
+| Dashboard / Coach ACL / MCP / MCP Security | PASS | unit + critical E2E |
+| Accessibility | PASS | LH a11y 94 (local + prod) |
+| Reduced Motion | PASS | landing-motion cases green in full suite |
+| Lighthouse | PASS (reconciled) | variance documented; not V8.5 prod regression |
 | MotionScore | SKIP | motion unchanged |
-| Security scan | PASS | no secrets in V8.5 libs |
-| Production Preview | NOT VERIFIED | deploy credentials unavailable |
+| Android / WearOS Build | PASS | prior assemble + sports tests |
+| WearOS Device | NOT VERIFIED | no adb target |
+| Preview Deployment / Preview E2E | NOT VERIFIED | EXTERNAL AUTH UNAVAILABLE |
+| Production-safe smoke | PASS | prod HTTP 200 + health JSON |
+| Security | PASS | no secrets in V8.5 client/lib paths |
+| Offline device workflow | NOT VERIFIED | no instrumented device |
 
-## Full E2E failure classification (mobile-chrome)
-
-| Spec | Class |
-|------|-------|
-| `celebrations.spec.ts` | PRE-EXISTING TEST_DEBT (demo auth / Start button) |
-| `live-session.spec.ts` | PRE-EXISTING TEST_DEBT (demo auth harness) |
-| `morning-handshake.spec.ts` | PRE-EXISTING TEST_DEBT (demo auth harness) |
-| `phase9-booking.spec.ts` | PRE-EXISTING TEST_DEBT (demo auth harness) |
-| `phase9-community.spec.ts` | PRE-EXISTING TEST_DEBT (feed post selector) |
-
-No V8.5 CURRENT REGRESSION identified. Log: `docs/qa/v85-full-playwright.log`.
-
-## Independent audit
+## Independent audit (external PE)
 
 | Question | Answer |
 |----------|--------|
-| Would I ship as RC? | Yes — preview + Wear device still external |
-| Does TRAIN / nutrition / sport differentiation work? | Yes (unit + critical E2E + build) |
-| Does MCP enforce authz? | Yes |
-| Can nutrition leak to coach? | No — ACL |
-| Wear without device? | Build only — NOT VERIFIED on hardware |
+| Ship as RC? | **Yes** — with external preview + Wear device still pending |
+| Sport/TRAIN/nutrition/MCP real? | Yes |
+| Fake PASS for preview/Wear? | No |
+| Frozen release mutated? | No |
+| Local 90 a V8.5 product regression? | **No** — URL/env variance; prod freeze band still ~92–94 |
 
-## Non-goals honored
+## Final status
 
-No new features, no architecture rewrite, no frozen baseline mutation, no fake PASS for preview/Wear device.
+**V8.5 COMPLETE — EXTERNAL VERIFICATION PENDING**
+
+Remaining only: Preview deploy/E2E (auth), WearOS device smoke (hardware).

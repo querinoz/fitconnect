@@ -1,38 +1,33 @@
-# V8.5 Test Debt Register
+# V8.5 Test Debt Register (RC LOCK)
 
-**Date:** 2026-09-17 (re-run)  
-**Policy:** Do not delete, skip, or weaken assertions to force green.
+**Date:** 2026-09-18  
+**Policy:** Do not skip, delete, or weaken assertions.
 
-## Full Playwright — mobile-chrome (2026-09-17)
+## Independently reconfirmed (2026-09-18)
 
-**37/42 PASS** · **5 FAIL** · classified PRE-EXISTING TEST_DEBT / HARNESS
+| Spec | Failure | V8.5 touch? | Class |
+|------|---------|-------------|-------|
+| `celebrations.spec.ts` | demo auth / Start timeout | No | PRE-EXISTING TEST_DEBT |
+| `live-session.spec.ts` | demo auth / coach UI | No | PRE-EXISTING TEST_DEBT |
+| `morning-handshake.spec.ts` | `openDemoAthleteAndCoach` | No | PRE-EXISTING TEST_DEBT |
+| `phase9-booking.spec.ts` | demo auth harness | No | PRE-EXISTING TEST_DEBT |
+| `phase9-community.spec.ts` | sign-in / post selector | No | PRE-EXISTING TEST_DEBT |
 
-| Spec | Failure mode | Class |
-|------|--------------|-------|
-| `celebrations.spec.ts` | demo sign-in; `Start` button timeout | PRE-EXISTING |
-| `live-session.spec.ts` | demo auth / coach heading not visible | PRE-EXISTING |
-| `morning-handshake.spec.ts` | `openDemoAthleteAndCoach` coach heading | PRE-EXISTING |
-| `phase9-booking.spec.ts` | same demo auth harness | PRE-EXISTING |
-| `phase9-community.spec.ts` | post body `p.leading-relaxed` not found | PRE-EXISTING |
-
-Evidence log: `docs/qa/v85-full-playwright.log`
-
-## Other known debt
-
-| Area | Class |
-|------|-------|
-| Landing LH contrast / heading-order | PRE-EXISTING a11y |
-| LH perf 90 vs freeze 94 | ENVIRONMENT variance (gate ≥84 PASS) |
-| Smoke script omits `/train` | HARNESS GAP (covered by v85 E2E) |
-
-## External NOT VERIFIED
-
-| Item | Blocker |
-|------|---------|
-| Vercel preview + Preview E2E + Preview LH | No token / gh / vercel login |
-| WearOS device smoke | `adb devices` empty |
-| Instrumented offline/crash UI E2E | Needs device + harness |
+Evidence: `docs/qa/v85-debt-reconfirm.log`  
+Path audit: no files under these specs/community/auth helpers in `c78c2fd..HEAD`.
 
 ## CURRENT REGRESSION (V8.5)
 
-**None** after re-verification loop.
+**None.**
+
+## External limitations (not debt)
+
+| Item | Status |
+|------|--------|
+| Preview deploy / Preview E2E | NOT VERIFIED — EXTERNAL AUTH UNAVAILABLE |
+| WearOS device smoke | NOT VERIFIED — adb empty |
+| Offline device E2E | NOT VERIFIED |
+
+## Lighthouse note
+
+Local 87–90 vs freeze 94 = environment variance (see FINAL_EVIDENCE reconciliation). Not filed as V8.5 CURRENT REGRESSION.

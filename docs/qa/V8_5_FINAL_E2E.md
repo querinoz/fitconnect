@@ -1,38 +1,38 @@
-# V8.5 Final E2E Evidence
+# V8.5 Final E2E Evidence (RC LOCK)
 
-**Date:** 2026-09-17 (re-run)  
-**Base URL:** `http://localhost:3001`  
-**Tip:** `5208d9f`
+**Date:** 2026-09-18  
+**Tip:** `cfcf55e`  
+**Base URL local:** `http://localhost:3001`
 
-## Critical V8.5 surfaces
+## Critical
 
-```powershell
-cd apps/web
-$env:PLAYWRIGHT_BASE_URL="http://localhost:3001"
-pnpm exec playwright test tests/e2e/v85-sport-nutrition.spec.ts --reporter=line
+**27/27 PASS** — `tests/e2e/v85-sport-nutrition.spec.ts` (3 projects) — prior freeze; still authoritative.
+
+## Full catalog (mobile-chrome)
+
+**37/42 PASS** — prior freeze log `docs/qa/v85-full-playwright.log`.
+
+## Debt reconfirm (2026-09-18)
+
+Isolated re-run of the five failures:
+
+```text
+celebrations / live-session / morning-handshake / phase9-booking / phase9-community
+→ 5 failed (auth harness / sign-in / coach heading / community post)
 ```
 
-**27/27 PASS** (mobile-chrome · mobile-safari · desktop-chrome)
+Log: `docs/qa/v85-debt-reconfirm.log`
 
-## Full Playwright (mobile-chrome project)
+Causal check: `git log c78c2fd..HEAD` on those specs + `helpers/auth.ts` + community routes → **empty** (no V8.5 touch).  
+Last auth helper change predates V8.5 (`29ddfdf`).
 
-```powershell
-pnpm exec playwright test --project=mobile-chrome --reporter=line
-```
+Classification retained: **PRE-EXISTING TEST DEBT**.
 
-**37 passed · 5 failed** (1.0m) — log `docs/qa/v85-full-playwright.log`
+## Preview E2E
 
-V8.5 critical cases inside full suite: all green.  
-Failures are pre-existing auth/community/live harness debt — not weakened or deleted.
+**NOT VERIFIED — EXTERNAL AUTH UNAVAILABLE** (no Vercel token / gh login).
 
-## Domain journey
+## Production-safe smoke
 
-`lib/sport-intelligence/journey.test.ts` + nutrition/MCP — **65/65** with gateway.
-
-## Smoke
-
-`node scripts/smoke-test.mjs http://localhost:3001` → **14/14 PASS**
-
-## Preview
-
-NOT VERIFIED — no Vercel/`gh` credentials in agent environment.
+- `https://fitconnect-phi.vercel.app/` → 200  
+- `/api/health` → JSON reachable (`status: degraded` for unset stripe/redis — expected, not V8.5)
