@@ -8,3 +8,12 @@
 | Profile Goals row | Android V9 | `ProfileScreen.kt` | Profile | athlete goals | repository goals | EMPTY/list | opens dialog | — | dialog | Wear honesty adjacent |
 | WearWorkoutCompanion | V8.5+V9 | `WearWorkoutCompanion.kt` | Wear | train companion | phone link + metric availability | CONNECTED/SYNCING/… | glance only | haptics | heading | `WearWorkoutCompanionHonestyTest` |
 | EliteButton | EOS | `elite-button.tsx` | many | UI | — | loading/disabled | click | — | min-h-11 | elite-os.test |
+
+## Wave 3 additions
+
+| Component | Source | Screen | Domain | Data | State | Interaction | Motion | A11y | Test |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| MealPlanExperience | components/nutrition/meal-plan-experience.tsx | /nutrition/meals | meal-planner + meal-swap | targets?view=meal-plan | LOADING/AVAILABLE/EMPTY/ERROR/UNAVAILABLE | detail + swap confirm | Zenith tokens | buttons/labels | e2e + unit |
+| GroceryExperience | components/nutrition/grocery-experience.tsx | /nutrition/grocery | grocery.buildGroceryList | meal-plan grocery | same + purchased | check/add/remove/regen | tokens | checkbox aria | e2e + unit |
+| RecipeExperience | components/nutrition/recipe-experience.tsx | /nutrition/recipes | recipes | targets?view=recipes | same | open/log/favorite | tokens | labels | e2e + unit |
+| meal-swap route | app/api/v1/nutrition/meal-swap | API | meal-swap | FOOD_SEED | confirm gate | suggest/apply | n/a | n/a | unit + e2e |

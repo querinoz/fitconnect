@@ -8,6 +8,8 @@ import {
 import { generateWeeklyMealPlan, mealPlanAllergenSafe } from "./meal-planner";
 import { buildGroceryList } from "./grocery";
 import { computeRecipeNutrition, getRecipeById } from "./recipes";
+import { suggestMealSwaps, applyMealSwap } from "./meal-swap";
+import { emptyNutritionProfile } from "./nutrition-repository";
 import { searchFoods, getFoodById } from "./sources/food-catalog";
 import type { NutritionProfile } from "./types";
 
@@ -148,5 +150,43 @@ describe("food catalog", () => {
     expect(hits.length).toBeGreaterThan(0);
     expect(hits[0]!.source).toBe("PORTFIR");
     expect(hits[0]!.caveat).toBeTruthy();
+  });
+});
+
+describe("meal swap", () => {
+  it("suggests allergen-safe alternatives without mutating diary", () => {
+    const profile = emptyNutritionProfile("athlete-1");
+    profile.countryLocale = "pt-PT";
+    const plan = generateWeeklyMealPlan({
+      profile,
+      sportNutritionKey: "endurance",
+      trainingDayKind: "moderate",
+      bodyMassKg: 70,
+      sessionDurationMin: 45,
+      weekStartISO: "2026-09-14"
+    });
+    const slot = plan.days[0]!.slots[0]!;
+    const options = suggestMealSwaps({ current: slot, profile, limit: 3 });
+    expect(options.length).toBeGreaterThan(0);
+    expect(options.every((o) => !slot.foodIds.includes(o.foodId))).toBe(true);
+  });
+
+  it("apply requires explicit next food and updates slot foods only", () => {
+    const profile = emptyNutritionProfile("athlete-1");
+    const plan = generateWeeklyMealPlan({
+      profile,
+      sportNutritionKey: "endurance",
+      trainingDayKind: "moderate",
+      bodyMassKg: 70,
+      sessionDurationMin: 45,
+      weekStartISO: "2026-09-14"
+    });
+    const slot = plan.days[0]!.slots[0]!;
+    const options = suggestMealSwaps({ current: slot, profile, limit: 1 });
+    expect(options[0]).toBeTruthy();
+    const next = applyMealSwap(slot, options[0]!.foodId);
+    expect(next).not.toBeNull();
+    expect(next!.foodIds).toEqual([options[0]!.foodId]);
+    expect(next!.foods[0]!.foodId).toBe(options[0]!.foodId);
   });
 });

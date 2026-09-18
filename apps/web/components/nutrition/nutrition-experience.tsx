@@ -175,6 +175,15 @@ export function NutritionExperience() {
             <Link href="/train">TRAIN</Link>
           </EliteButton>
           <EliteButton asChild size="sm" variant="ghost">
+            <Link href="/nutrition/meals">Meals</Link>
+          </EliteButton>
+          <EliteButton asChild size="sm" variant="ghost">
+            <Link href="/nutrition/grocery">Grocery</Link>
+          </EliteButton>
+          <EliteButton asChild size="sm" variant="ghost">
+            <Link href="/nutrition/recipes">Recipes</Link>
+          </EliteButton>
+          <EliteButton asChild size="sm" variant="ghost">
             <Link href="/profile">Sport identity</Link>
           </EliteButton>
         </div>

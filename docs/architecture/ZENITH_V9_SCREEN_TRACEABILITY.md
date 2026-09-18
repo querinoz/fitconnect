@@ -12,3 +12,11 @@
 ## Ascend route note
 
 Athlete Ascend is `/achievements` (not `/ascend`). V9 fixed dashboard CTA that pointed at a dead `/ascend` path.
+
+## Wave 3 screens
+
+| Screen | Visual | Functional | Data | Responsive | A11y | Perf | Test |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| /nutrition/meals | Elite OS | swap+detail | meal-plan | mobile-first | labels | light fetch | e2e |
+| /nutrition/grocery | Elite OS | list actions | reconciled | mobile-first | checkbox labels | light | e2e |
+| /nutrition/recipes | Elite OS | detail+log | recipe seed | mobile-first | labels | light | e2e |

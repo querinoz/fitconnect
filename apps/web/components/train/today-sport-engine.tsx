@@ -207,6 +207,21 @@ export function TodaySportEngine({ readiness, userId, legacySportFilter, onStart
           Starts the linked catalog session in the existing TRAIN engine (offline-capable).
         </p>
       </div>
+      <div className="flex flex-wrap gap-3">
+        <a
+          href="/nutrition"
+          className="min-h-11 rounded-full border border-eos-outline px-4 text-sm font-semibold uppercase tracking-wide text-eos-on-surface inline-flex items-center"
+        >
+          Nutrition
+        </a>
+        <a
+          href="/nutrition/meals"
+          className="min-h-11 rounded-full border border-eos-outline px-4 text-sm font-semibold uppercase tracking-wide text-eos-on-surface inline-flex items-center"
+        >
+          Meals
+        </a>
+      </div>
+
     </BentoCard>
   );
 }

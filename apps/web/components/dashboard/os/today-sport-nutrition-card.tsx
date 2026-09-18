@@ -183,6 +183,15 @@ export function TodaySportNutritionCard({ athleteId }: Props) {
           <Link href="/nutrition">Nutrition</Link>
         </EliteButton>
         <EliteButton asChild variant="ghost" size="sm">
+          <Link href="/nutrition/meals">Meals</Link>
+        </EliteButton>
+        <EliteButton asChild variant="ghost" size="sm">
+          <Link href="/nutrition/grocery">Grocery</Link>
+        </EliteButton>
+        <EliteButton asChild variant="ghost" size="sm">
+          <Link href="/nutrition/recipes">Recipes</Link>
+        </EliteButton>
+        <EliteButton asChild variant="ghost" size="sm">
           <Link href="/achievements">Ascend</Link>
         </EliteButton>
       </div>

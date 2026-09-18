@@ -1,33 +1,49 @@
-# Zenith V9 — Master Report (in progress)
+# Zenith V9 — Master Report
 
 **Branch:** `feat/zenith-v9-product-excellence`  
 **From:** V8.5 tip `48a43bd`  
 **Frozen baseline:** `c78c2fd` (untouched)  
-**Status:** **V9 IN PROGRESS** — wave 1 shipped; not COMPLETE
+**Status:** **V9 COMPLETE — EXTERNAL VERIFICATION PENDING**
 
-## Wave 1 implemented
+## Waves
 
-1. Design contract (`ZENITH_V9_DESIGN_CONTRACT.md`) — brand-locked EOS tokens  
-2. Nutrition athlete surface `/nutrition` + confirm-gated food log UI  
-3. Foods search API `GET /api/v1/nutrition/foods`  
-4. Dashboard TODAY CTAs: Nutrition + Ascend (`/achievements`) — removed dead `/ascend`  
-5. Profile renamed from Placeholder; nutrition deep-link  
-6. Android Profile Goals: dead `onClick={}` → Goals dialog with EMPTY/list  
-7. Wear device honesty: `SYNCING` + `ERROR` states + unit tests  
+### Wave 1
+1. Design contract (`ZENITH_V9_DESIGN_CONTRACT.md`)
+2. `/nutrition` + foods API + confirm-gated log
+3. Dashboard TODAY CTAs: Nutrition + Ascend
+4. Android Profile Goals dialog
+5. Wear honesty: SYNCING + ERROR + unit tests
 
-## Wave 2 — Android TRAIN dead-click fixes
+### Wave 2
+1. Combat Finish → `popBackStack()`; Pause honesty
+2. Activity start error surface
+3. EliteShareCard → real share intent
 
-1. Combat Finish → `popBackStack()`; Pause hidden while PAUSED (Resume only)  
-2. Activity Start prepare `Err` → visible `activity_start_error`  
-3. `EliteShareCard` → real `Share summary` via `Intent.ACTION_SEND`  
+### Wave 3
+1. Meal UI `/nutrition/meals` — plan, detail, swap preview→confirm, states
+2. Grocery UI `/nutrition/grocery` — reconcile, check/uncheck/add/remove/regenerate
+3. Recipes UI `/nutrition/recipes` — detail, servings, nutrition, favorite, confirm log
+4. Meal-swap API confirm gate
+5. TRAIN + Dashboard nutrition command-center links
+6. `V9_BUTTON_INVENTORY.md` — 77 controls, 0 DEAD (scoped)
+7. Feature/screen/component evidence freeze docs
 
-## Priority backlog (next waves)
+## External pending (honest)
 
-- Full StrengthWorkoutScreen device smoke when emulator available  
-- Meal plan / grocery UI on `/nutrition`  
-- Full button inventory automation  
-- Preview deploy when credentials exist  
+| Item | Status |
+| --- | --- |
+| WearOS physical device | NOT VERIFIED (`adb devices` empty) |
+| Preview deployment | NOT VERIFIED (no credentials) |
+| Preview E2E / LH | NOT VERIFIED |
 
-## External
+## Evidence index
+- `docs/architecture/ZENITH_V9_FINAL_EVIDENCE.md`
+- `docs/qa/ZENITH_V9_FINAL_QA.md`
+- `docs/qa/V9_BUTTON_INVENTORY.md`
+- `docs/qa/V9_TEST_DEBT.md`
+- `docs/architecture/ZENITH_V9_FEATURE_TRACEABILITY.md`
+- `docs/architecture/ZENITH_V9_COMPONENT_TRACEABILITY.md`
+- `docs/architecture/ZENITH_V9_SCREEN_TRACEABILITY.md`
 
-Preview / Wear device: **NOT VERIFIED** until auth/hardware available.
+## Policy
+Landing HeroEliteOs untouched. No mocks for empty states. No silent nutrition writes. Strava never social.
