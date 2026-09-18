@@ -25,6 +25,7 @@ import { IntegrationsHub } from "@/components/dashboard/integrations-hub";
 import { GamificationPanel } from "@/components/gamification/gamification-panel";
 import { ReadinessHeroSection } from "./readiness-hero-section";
 import { TodaySportNutritionCard } from "./today-sport-nutrition-card";
+import { LiveAthleteContextCard } from "./live-athlete-context-card";
 import { MapWidget } from "./map-widget";
 import { ActivityFeedLive } from "./activity-feed-live";
 import {
@@ -227,6 +228,7 @@ export function AthleteOsDashboard({
 
             <EliteBentoMotionItem className="md:col-span-12">
               <TodaySportNutritionCard athleteId={athleteId} />
+              <LiveAthleteContextCard />
             </EliteBentoMotionItem>
 
             {!compactCockpit ? (

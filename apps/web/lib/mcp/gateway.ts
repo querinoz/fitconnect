@@ -161,11 +161,41 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
       break;
     }
     case "get_training_load": {
-      const strain = typeof args.strainScore === "number" ? args.strainScore : null;
+      const { computeTrainingLoad } = await import("@/lib/sports-intelligence/training-load");
+      const { listAthleteEvents } = await import("@/lib/sports-intelligence/event-store");
+      const events = listAthleteEvents(actor.uid, { limit: 200 });
+      const sessions = events
+        .filter((e) => e.type === "WORKOUT_COMPLETED" || e.type === "SPORT_ACTIVITY_COMPLETED")
+        .map((e) => ({
+          dateISO: e.timestamp.slice(0, 10),
+          strain:
+            typeof e.payload.strain === "number"
+              ? e.payload.strain
+              : typeof args.strainScore === "number"
+                ? args.strainScore
+                : typeof e.payload.durationMin === "number"
+                  ? e.payload.durationMin
+                  : 0
+        }))
+        .filter((s) => s.strain > 0);
+      // Allow caller-provided single strain only as ADDITIONAL session when no history
+      if (!sessions.length && typeof args.strainScore === "number") {
+        sessions.push({
+          dateISO: new Date().toISOString().slice(0, 10),
+          strain: args.strainScore
+        });
+      }
+      const load = computeTrainingLoad(sessions);
       result = {
+        ...load,
         strainScore: {
-          value: strain,
-          provenance: strain == null ? "MISSING" : "PROVIDED"
+          value: typeof args.strainScore === "number" ? args.strainScore : load.acute7d,
+          provenance:
+            typeof args.strainScore === "number"
+              ? "PROVIDED"
+              : load.provenance === "MISSING"
+                ? "MISSING"
+                : "CALCULATED"
         }
       };
       break;
@@ -186,13 +216,19 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
                 : null
       };
       break;
-    case "get_device_status":
+    case "get_device_status": {
+      const { listDeviceRegistry } = await import("@/lib/devices/platform");
+      const devices = listDeviceRegistry();
+      const anyLive = devices.some(
+        (d) => d.status === "CONNECTED" || d.status === "SYNCED" || d.status === "SYNCING"
+      );
       result = {
-        devices: [],
-        status: "NOT_CONNECTED",
-        note: "Never reports connected without a live provider session."
+        devices,
+        status: anyLive ? "PARTIAL" : "NOT_CONNECTED",
+        note: "Never reports connected without a live provider session / explicit confirm."
       };
       break;
+    }
     case "create_workout":
       result = {
         draft: true,
