@@ -102,20 +102,24 @@ fun CombatFightModeScreen(
                 }
             }
         }
-        item {
-            EliteButton(
-                label = if (snap.phase == CombatRoundPhase.IDLE || snap.phase == CombatRoundPhase.COMPLETE) "Start session" else "Pause",
-                onClick = {
-                    snap = CombatRoundEngine.reduce(
-                        snap,
-                        if (snap.phase == CombatRoundPhase.IDLE || snap.phase == CombatRoundPhase.COMPLETE) {
-                            CombatRoundCommand.Start
-                        } else {
-                            CombatRoundCommand.Pause
-                        },
-                    )
-                },
-            )
+        if (snap.phase == CombatRoundPhase.IDLE || snap.phase == CombatRoundPhase.COMPLETE) {
+            item {
+                EliteButton(
+                    label = "Start session",
+                    onClick = {
+                        snap = CombatRoundEngine.reduce(snap, CombatRoundCommand.Start)
+                    },
+                )
+            }
+        } else if (snap.phase != CombatRoundPhase.PAUSED) {
+            item {
+                EliteButton(
+                    label = "Pause",
+                    onClick = {
+                        snap = CombatRoundEngine.reduce(snap, CombatRoundCommand.Pause)
+                    },
+                )
+            }
         }
         if (snap.phase == CombatRoundPhase.PAUSED) {
             item {

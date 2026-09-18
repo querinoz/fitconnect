@@ -3,6 +3,7 @@ package com.fitconnect.android.athlete.ui.activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import android.Manifest
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -104,6 +105,7 @@ fun ActivityScreen(
     val outdoorState by outdoor.state.collectAsState()
     var pendingOutdoorStart by remember { mutableStateOf(false) }
     var followEnabled by remember { mutableStateOf(true) }
+    var startError by remember { mutableStateOf<String?>(null) }
     val roomRoute by remember(outdoorState.activityId) {
         if (outdoorState.activityId.isBlank()) {
             flowOf(emptyList())
@@ -163,10 +165,13 @@ fun ActivityScreen(
             scope.launch {
                 when (outdoor.prepare(sport.wireKey)) {
                     is AppResult.Ok -> {
+                        startError = null
                         outdoor.beginCountdownAndTrack()
                         container.telemetry.wearWorkout.startWorkout(sport.wireKey)
                     }
-                    is AppResult.Err -> Unit
+                    is AppResult.Err -> {
+                        startError = "START FAILED — outdoor prepare unavailable. Check GPS permission and try again."
+                    }
                 }
             }
         } else {
@@ -311,6 +316,16 @@ fun ActivityScreen(
                 EliteFlowRow {
                     when (snap.phase) {
                         LiveActivityPhase.IDLE, LiveActivityPhase.ENDED -> {
+                            startError?.let { err ->
+                                Text(
+                                    err,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .testTag("activity_start_error"),
+                                )
+                            }
                             Box(modifier = Modifier.testTag("outdoor_start")) {
                                 EliteButton(
                                     label = "Start",
@@ -325,14 +340,18 @@ fun ActivityScreen(
                                                 scope.launch {
                                                     when (outdoor.prepare(sport.wireKey)) {
                                                         is AppResult.Ok -> {
+                                                            startError = null
                                                             outdoor.beginCountdownAndTrack()
                                                             container.telemetry.wearWorkout.startWorkout(sport.wireKey)
                                                         }
-                                                        is AppResult.Err -> Unit
+                                                        is AppResult.Err -> {
+                                                            startError = "START FAILED — outdoor prepare unavailable. Check GPS permission and try again."
+                                                        }
                                                     }
                                                 }
                                             }
                                         } else {
+                                            startError = null
                                             engine.allowSimulatedGps = true
                                             engine.arm(sport.wireKey)
                                             engine.beginCountdown()
@@ -652,6 +671,19 @@ fun ActivityScreen(
                                     it.heartRateBpm,
                                     it.altitudeM,
                                 )
+                            },
+                            onShare = {
+                                val summary =
+                                    "FitConnect · ${snap.sport}\n" +
+                                        "Distance: ${"%.2f km".format(snap.distanceM / 1000.0)}\n" +
+                                        "Time: ${LiveActivityEngine.formatElapsed(snap.elapsedMs)}\n" +
+                                        "Pace: ${LiveActivityEngine.formatPace(snap.paceSecPerKm)}\n" +
+                                        "HR: ${snap.avgHrBpm?.let { "$it bpm" } ?: "UNAVAILABLE"}"
+                                val intent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_TEXT, summary)
+                                }
+                                context.startActivity(Intent.createChooser(intent, "Share session"))
                             },
                         )
                         EliteChartZoneStrip(secondsInZone = snap.timeInZoneSec)

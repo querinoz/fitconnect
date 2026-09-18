@@ -15,10 +15,15 @@
 6. Android Profile Goals: dead `onClick={}` → Goals dialog with EMPTY/list  
 7. Wear device honesty: `SYNCING` + `ERROR` states + unit tests  
 
+## Wave 2 — Android TRAIN dead-click fixes
+
+1. Combat Finish → `popBackStack()`; Pause hidden while PAUSED (Resume only)  
+2. Activity Start prepare `Err` → visible `activity_start_error`  
+3. `EliteShareCard` → real `Share summary` via `Intent.ACTION_SEND`  
+
 ## Priority backlog (next waves)
 
-- Android TRAIN button audit (START/PAUSE/RESUME/…) end-to-end on device  
-- Wear companion action buttons when phone session active  
+- Full StrengthWorkoutScreen device smoke when emulator available  
 - Meal plan / grocery UI on `/nutrition`  
 - Full button inventory automation  
 - Preview deploy when credentials exist  

@@ -21,6 +21,7 @@ fun EliteShareCard(
     score: String,
     points: List<EliteRouteVertex>,
     modifier: Modifier = Modifier,
+    onShare: (() -> Unit)? = null,
 ) {
     EliteCard(
         variant = EliteCardVariant.Glass,
@@ -40,6 +41,14 @@ fun EliteShareCard(
             }
             if (points.size >= 2) {
                 EliteRouteMap(points = points, mode = EliteMapMode.ROUTE)
+            }
+            if (onShare != null) {
+                EliteButton(
+                    label = "Share summary",
+                    variant = EliteButtonVariant.Secondary,
+                    onClick = onShare,
+                    modifier = Modifier.testTag("activity_share_action"),
+                )
             }
         }
     }

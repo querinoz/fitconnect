@@ -212,7 +212,7 @@ fun AthleteNavHost(
             AthleteDest.FIGHT.route,
             deepLinks = listOf(navDeepLink { uriPattern = "fitconnect://app/athlete/fight" }),
         ) {
-            CombatFightModeScreen()
+            CombatFightModeScreen(onFinished = { navController.popBackStack() })
         }
         composable(AthleteDest.SPORTS.route) { SportsScreen() }
         composable(AthleteDest.PROGRAMS.route) { ProgramsScreen() }
