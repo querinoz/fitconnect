@@ -238,10 +238,10 @@ fun HomeScreen(
             }
             item {
                 EliteCard(onClick = onOpenNutrition) {
-                    EliteSysLabel("NUTRITION INTELLIGENCE")
-                    Text("Targets · meals · grocery", style = MaterialTheme.typography.titleMedium)
+                    EliteSysLabel("NUTRITION · SNAPSHOT")
+                    Text("Open Nutrition domain", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "ESTIMATE context from sport + readiness. Confirm before log.",
+                        "CTA only — diary lives under Nutrition, not Dashboard.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

@@ -1,0 +1,82 @@
+appId: com.fitconnect.android
+---
+# D — GPS / routes separation (capability-aware CTA)
+- launchApp
+- extendedWaitUntil:
+    visible: "TRAIN"
+    timeout: 45000
+- tapOn:
+    id: "athlete_train_fab"
+- extendedWaitUntil:
+    visible: "ACTIVE TRAINING SPORT"
+    timeout: 25000
+- tapOn: "CHANGE SPORT"
+- extendedWaitUntil:
+    visible:
+      id: "sport_selector_groups"
+    timeout: 15000
+- tapOn: "Endurance"
+- scrollUntilVisible:
+    element:
+      id: "sport_selector_item_running"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    id: "sport_selector_item_running"
+- scrollUntilVisible:
+    element:
+      id: "sport_selector_confirm"
+    direction: DOWN
+    timeout: 15000
+- tapOn:
+    id: "sport_selector_confirm"
+- extendedWaitUntil:
+    visible: "ACTIVE TRAINING SPORT"
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: "train_open_routes"
+    direction: DOWN
+    timeout: 20000
+- assertVisible: "OPEN ROUTES"
+- takeScreenshot: docs/qa/v12-ia/D-gps-cta
+- tapOn: "OPEN ROUTES"
+- extendedWaitUntil:
+    visible:
+      id: "athlete_routes"
+    timeout: 15000
+- assertVisible: "GPS CAPABILITY"
+- takeScreenshot: docs/qa/v12-ia/D-routes-hub
+- back
+- scrollUntilVisible:
+    element:
+      id: "train_change_sport"
+    direction: UP
+    timeout: 20000
+- tapOn:
+    id: "train_change_sport"
+- extendedWaitUntil:
+    visible:
+      id: "sport_selector_groups"
+    timeout: 15000
+- tapOn: "Strength"
+- scrollUntilVisible:
+    element:
+      id: "sport_selector_item_strength"
+    direction: DOWN
+    timeout: 15000
+- tapOn:
+    id: "sport_selector_item_strength"
+- scrollUntilVisible:
+    element:
+      id: "sport_selector_confirm"
+    direction: DOWN
+    timeout: 15000
+- tapOn:
+    id: "sport_selector_confirm"
+- extendedWaitUntil:
+    visible: "ACTIVE TRAINING SPORT"
+    timeout: 20000
+- assertNotVisible:
+    id: "train_open_routes"
+- takeScreenshot: docs/qa/v12-ia/D-no-fake-gps

@@ -1,0 +1,23 @@
+appId: com.fitconnect.android
+---
+# B — Plan separation (summary CTA → dedicated plan)
+- launchApp
+- extendedWaitUntil:
+    visible: "TRAIN"
+    timeout: 45000
+- tapOn:
+    id: "athlete_train_fab"
+- extendedWaitUntil:
+    visible:
+      id: "train_plan_summary"
+    timeout: 25000
+- assertNotVisible: "PLAN OVERVIEW"
+- assertVisible: "OPEN PLAN"
+- takeScreenshot: docs/qa/v12-ia/B-train-plan-summary
+- tapOn: "OPEN PLAN"
+- extendedWaitUntil:
+    visible:
+      id: "athlete_train_plan"
+    timeout: 15000
+- assertVisible: "ACTIVE CATALOG"
+- takeScreenshot: docs/qa/v12-ia/B-train-plan-dedicated

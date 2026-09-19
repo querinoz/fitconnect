@@ -1,0 +1,46 @@
+appId: com.fitconnect.android
+---
+# E — Domain separation assertions
+- launchApp
+- extendedWaitUntil:
+    visible: "Feed"
+    timeout: 45000
+- assertVisible: "Feed"
+- assertVisible: "Ascend"
+- assertVisible: "Dashboard"
+- assertVisible: "Profile"
+- assertNotVisible: "Nutrition"
+- takeScreenshot: docs/qa/v12-ia/E-primary-nav
+- tapOn: "Feed"
+- extendedWaitUntil:
+    visible:
+      id: "athlete_feed"
+    timeout: 20000
+- assertNotVisible: "FOOD SEARCH"
+- assertNotVisible: "CONFIRM BEFORE LOG"
+- takeScreenshot: docs/qa/v12-ia/E-feed-social
+- tapOn: "Dashboard"
+- extendedWaitUntil:
+    visible:
+      id: "athlete_home"
+    timeout: 20000
+- scrollUntilVisible:
+    element: "NUTRITION"
+    direction: DOWN
+    timeout: 20000
+- assertVisible: "NUTRITION · SNAPSHOT"
+- tapOn: "NUTRITION"
+- extendedWaitUntil:
+    visible:
+      id: "athlete_nutrition"
+    timeout: 15000
+- takeScreenshot: docs/qa/v12-ia/E-dashboard-nutrition-cta
+- back
+- tapOn: "Profile"
+- extendedWaitUntil:
+    visible:
+      id: "athlete_profile"
+    timeout: 20000
+- assertNotVisible: "FOOD SEARCH"
+- assertNotVisible: "CONFIRM BEFORE LOG"
+- takeScreenshot: docs/qa/v12-ia/E-profile-no-diary

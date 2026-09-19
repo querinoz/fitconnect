@@ -1,0 +1,85 @@
+appId: com.fitconnect.android
+---
+# A — Sport selector groups → confirm
+- launchApp
+- runFlow:
+    when:
+      visible: "Get Started"
+    commands:
+      - tapOn: "Get Started"
+      - extendedWaitUntil:
+          visible: "Continue"
+          timeout: 20000
+      - tapOn: "Continue"
+      - runFlow: ../_unified_email_login_athlete.yaml
+      - repeat:
+          times: 10
+          commands:
+            - runFlow:
+                when:
+                  visible: "Continue"
+                commands:
+                  - tapOn: "Continue"
+            - runFlow:
+                when:
+                  visible: "Skip for now"
+                commands:
+                  - tapOn: "Skip for now"
+            - runFlow:
+                when:
+                  visible:
+                    id: "onboarding_finish"
+                commands:
+                  - tapOn:
+                      id: "onboarding_finish"
+            - runFlow:
+                when:
+                  visible: "Enter Athlete OS"
+                commands:
+                  - tapOn: "Enter Athlete OS"
+- extendedWaitUntil:
+    visible: "TRAIN"
+    timeout: 45000
+- tapOn:
+    id: "athlete_train_fab"
+- extendedWaitUntil:
+    visible: "ACTIVE TRAINING SPORT"
+    timeout: 25000
+- assertVisible:
+    id: "train_change_sport"
+- tapOn: "CHANGE SPORT"
+- extendedWaitUntil:
+    visible:
+      id: "athlete_sport_selector"
+    timeout: 15000
+- assertVisible:
+    id: "sport_selector_groups"
+- takeScreenshot: docs/qa/v12-ia/A-sport-groups
+- tapOn: "Endurance"
+- extendedWaitUntil:
+    visible:
+      id: "sport_selector_level2"
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: "sport_selector_item_running"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "sport_selector_item_running"
+- tapOn:
+    id: "sport_selector_item_running"
+- scrollUntilVisible:
+    element:
+      id: "sport_selector_confirm"
+    direction: DOWN
+    timeout: 15000
+- assertVisible:
+    id: "sport_selector_confirm"
+- tapOn:
+    id: "sport_selector_confirm"
+- extendedWaitUntil:
+    visible: "ACTIVE TRAINING SPORT"
+    timeout: 20000
+- assertVisible: "Running"
+- takeScreenshot: docs/qa/v12-ia/A-sport-confirmed

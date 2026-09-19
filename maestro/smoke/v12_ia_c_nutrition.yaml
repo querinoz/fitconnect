@@ -1,0 +1,35 @@
+appId: com.fitconnect.android
+---
+# C — Nutrition separation (CTA → subsurface host)
+- launchApp
+- extendedWaitUntil:
+    visible: "TRAIN"
+    timeout: 45000
+- tapOn:
+    id: "athlete_train_fab"
+- extendedWaitUntil:
+    visible: "ACTIVE TRAINING SPORT"
+    timeout: 25000
+- scrollUntilVisible:
+    element:
+      id: "train_nutrition_cta"
+    direction: DOWN
+    timeout: 25000
+- assertVisible:
+    id: "train_nutrition_cta"
+- assertNotVisible: "NUTRITION INTELLIGENCE"
+- assertVisible: "OPEN NUTRITION"
+- tapOn: "OPEN NUTRITION"
+- extendedWaitUntil:
+    visible:
+      id: "athlete_nutrition"
+    timeout: 15000
+- assertVisible: "Today"
+- assertVisible: "Targets"
+- assertVisible: "Meals"
+- assertVisible: "Foods"
+- takeScreenshot: docs/qa/v12-ia/C-nutrition-host
+- tapOn: "Foods"
+- assertVisible:
+    id: "nutrition_food_search"
+- takeScreenshot: docs/qa/v12-ia/C-nutrition-foods

@@ -9,22 +9,12 @@ import {
   persistSportsIdentity,
   loadSportsIdentityCache
 } from "@/lib/sport-intelligence/identity-store";
-import { listSports, type SportId } from "@/lib/sport-intelligence/sport-registry";
+import { listSports, listSportGroups, gpsSupported, type SportId, type SportGroupId } from "@/lib/sport-intelligence/sport-registry";
 import { recommendSessionAdaptation } from "@/lib/sports-intelligence/adaptive-training";
 import { computeTrainingLoad } from "@/lib/sports-intelligence/training-load";
 import type { ReadinessView } from "@/lib/train/types";
 import { cn } from "@/lib/utils";
-
-const QUICK_SPORTS: SportId[] = [
-  "STRENGTH",
-  "RUNNING",
-  "CYCLING",
-  "SWIMMING",
-  "FOOTBALL",
-  "MARTIAL_ARTS",
-  "HYROX",
-  "GENERAL_FITNESS"
-];
+import Link from "next/link";
 
 type Props = {
   readiness: ReadinessView;
@@ -36,12 +26,15 @@ type Props = {
 
 export function TodaySportEngine({ readiness, userId, legacySportFilter, onStartLegacyPlan }: Props) {
   const [sportId, setSportId] = useState<SportId>("STRENGTH");
+  const [groupId, setGroupId] = useState<SportGroupId | null>(null);
+  const [sportQuery, setSportQuery] = useState("");
   const [fuel, setFuel] = useState<{
     kcal: number | null;
     confidence: string;
     flags: string[];
   } | null>(null);
   const [adaptationConfirmed, setAdaptationConfirmed] = useState(false);
+  const groups = useMemo(() => listSportGroups(), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -145,26 +138,78 @@ export function TodaySportEngine({ readiness, userId, legacySportFilter, onStart
   }, [sportId, card.session.durationMin, card.trainingLoadLabel]);
 
   return (
-    <BentoCard label="TODAY · SPORT ENGINE" className="space-y-4" data-testid="today-sport-engine">
-      <div className="flex flex-wrap gap-2" role="listbox" aria-label="Primary sport">
-        {QUICK_SPORTS.map((id) => (
-          <button
-            key={id}
-            type="button"
-            role="option"
-            aria-selected={sportId === id}
-            className={cn(
-              "min-h-11 rounded-full border px-3 text-xs font-semibold uppercase tracking-wide",
-              sportId === id
-                ? "border-eos-voltline bg-eos-voltline/15 text-eos-voltline"
-                : "border-eos-outline-variant text-eos-on-surface-muted"
-            )}
-            onClick={() => selectSport(id)}
-          >
-            {listSports().find((s) => s.id === id)?.label ?? id}
-          </button>
-        ))}
-      </div>
+    <BentoCard label="TODAY · TRAINING HUB" className="space-y-4" data-testid="today-sport-engine">
+      {!groupId ? (
+        <div className="space-y-2" data-testid="sport-selector-groups">
+          <p className="eos-label-caps text-eos-telemetry">LEVEL 1 · SPORT GROUPS</p>
+          <div className="flex flex-wrap gap-2" role="listbox" aria-label="Sport groups">
+            {groups.map((g) => (
+              <button
+                key={g.id}
+                type="button"
+                role="option"
+                className="min-h-11 rounded-full border border-eos-outline-variant px-3 text-xs font-semibold uppercase tracking-wide text-eos-on-surface-muted"
+                onClick={() => {
+                  setGroupId(g.id);
+                  setSportQuery("");
+                }}
+              >
+                {g.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-2" data-testid="sport-selector-level2">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="eos-label-caps text-eos-telemetry">
+              LEVEL 2 · {groups.find((g) => g.id === groupId)?.label}
+            </p>
+            <button
+              type="button"
+              className="min-h-10 rounded-full border border-eos-outline px-3 text-xs font-semibold uppercase"
+              onClick={() => setGroupId(null)}
+            >
+              Back to groups
+            </button>
+          </div>
+          <input
+            type="search"
+            value={sportQuery}
+            onChange={(e) => setSportQuery(e.target.value)}
+            placeholder="Search sports"
+            className="min-h-11 w-full rounded-xl border border-eos-outline-variant bg-transparent px-3 text-sm"
+            data-testid="sport-selector-search"
+          />
+          <div className="flex flex-wrap gap-2" role="listbox" aria-label="Sports in group">
+            {(groups.find((g) => g.id === groupId)?.sports ?? [])
+              .filter(
+                (s) =>
+                  !sportQuery.trim() ||
+                  s.label.toLowerCase().includes(sportQuery.trim().toLowerCase()) ||
+                  s.id.toLowerCase().includes(sportQuery.trim().toLowerCase())
+              )
+              .map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  role="option"
+                  aria-selected={sportId === s.id}
+                  className={cn(
+                    "min-h-11 rounded-full border px-3 text-xs font-semibold uppercase tracking-wide",
+                    sportId === s.id
+                      ? "border-eos-voltline bg-eos-voltline/15 text-eos-voltline"
+                      : "border-eos-outline-variant text-eos-on-surface-muted"
+                  )}
+                  onClick={() => selectSport(s.id)}
+                >
+                  {s.label}
+                  {gpsSupported(s.id) ? " · GPS" : ""}
+                </button>
+              ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Meta label="SPORT" value={listSports().find((s) => s.id === card.sportId)?.label ?? card.sportId} />
@@ -207,17 +252,6 @@ export function TodaySportEngine({ readiness, userId, legacySportFilter, onStart
           <span className="font-semibold text-eos-on-surface">DATA: </span>
           {card.session.explanation.dataUsed.join(" · ")}
         </p>
-        <p>
-          <span className="font-semibold text-eos-on-surface">FUELING: </span>
-          {card.fuelingHint}
-        </p>
-        {fuel ? (
-          <p>
-            <span className="font-semibold text-eos-on-surface">NUTRITION CONTEXT (ESTIMATE): </span>
-            {fuel.kcal != null ? `${fuel.kcal} kcal · confidence ${fuel.confidence}` : `unavailable · ${fuel.confidence}`}
-            {fuel.flags[0] ? ` — ${fuel.flags[0]}` : null}
-          </p>
-        ) : null}
       </div>
 
       <div
@@ -273,21 +307,24 @@ export function TodaySportEngine({ readiness, userId, legacySportFilter, onStart
           Starts the linked catalog session in the existing TRAIN engine (offline-capable).
         </p>
       </div>
-      <div className="flex flex-wrap gap-3">
-        <a
+      <div className="flex flex-wrap gap-3" data-testid="train-domain-ctas">
+        <Link
           href="/nutrition"
           className="min-h-11 rounded-full border border-eos-outline px-4 text-sm font-semibold uppercase tracking-wide text-eos-on-surface inline-flex items-center"
         >
-          Nutrition
-        </a>
-        <a
-          href="/nutrition/meals"
-          className="min-h-11 rounded-full border border-eos-outline px-4 text-sm font-semibold uppercase tracking-wide text-eos-on-surface inline-flex items-center"
-        >
-          Meals
-        </a>
+          Open nutrition
+          {fuel?.kcal != null ? ` · ${fuel.kcal} kcal EST` : ""}
+        </Link>
+        {gpsSupported(sportId) ? (
+          <Link
+            href="/map"
+            className="min-h-11 rounded-full border border-eos-outline px-4 text-sm font-semibold uppercase tracking-wide text-eos-on-surface inline-flex items-center"
+            data-testid="train-open-routes"
+          >
+            Open routes
+          </Link>
+        ) : null}
       </div>
-
     </BentoCard>
   );
 }

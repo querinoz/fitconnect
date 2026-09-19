@@ -94,6 +94,9 @@ fun ActivityScreen(
     onOpenNutrition: () -> Unit = {},
     onOpenGuided: () -> Unit = {},
     onOpenFight: () -> Unit = {},
+    onOpenSportSelector: () -> Unit = {},
+    onOpenTrainPlan: () -> Unit = {},
+    onOpenRoutes: () -> Unit = {},
 ) {
     val container = LocalAthleteContainer.current
     val engine = container.liveActivity
@@ -501,6 +504,9 @@ fun ActivityScreen(
                     onStartGuided = onOpenGuided,
                     onOpenFight = onOpenFight,
                     onOpenNutrition = onOpenNutrition,
+                    onOpenSportSelector = onOpenSportSelector,
+                    onOpenTrainPlan = onOpenTrainPlan,
+                    onOpenRoutes = onOpenRoutes,
                 )
             }
         }

@@ -683,6 +683,78 @@ export function getSport(id: SportId): SportProfile {
   return SPORT_REGISTRY[id];
 }
 
+/** FitConnect sport groups for IA selector (not Strava type dump). */
+export type SportGroupId =
+  | "STRENGTH"
+  | "ENDURANCE"
+  | "TEAM"
+  | "RACKET"
+  | "COMBAT"
+  | "HYBRID"
+  | "OUTDOOR"
+  | "OTHER";
+
+export const SPORT_GROUPS: Record<SportGroupId, { label: string; sportIds: SportId[] }> = {
+  STRENGTH: {
+    label: "Strength",
+    sportIds: ["STRENGTH", "BODYBUILDING", "POWERLIFTING", "GENERAL_FITNESS"]
+  },
+  ENDURANCE: {
+    label: "Endurance",
+    sportIds: ["RUNNING", "TRAIL_RUNNING", "CYCLING", "MOUNTAIN_BIKING", "SWIMMING", "TRIATHLON", "ROWING"]
+  },
+  TEAM: {
+    label: "Team",
+    sportIds: ["FOOTBALL", "BASKETBALL", "VOLLEYBALL"]
+  },
+  RACKET: {
+    label: "Racket",
+    sportIds: ["TENNIS", "PADEL"]
+  },
+  COMBAT: {
+    label: "Combat",
+    sportIds: ["MARTIAL_ARTS", "BOXING", "MMA", "WRESTLING"]
+  },
+  HYBRID: {
+    label: "Hybrid",
+    sportIds: ["HYROX", "CROSSFIT", "HIIT"]
+  },
+  OUTDOOR: {
+    label: "Outdoor",
+    sportIds: ["CLIMBING", "HIKING", "SKIING"]
+  },
+  OTHER: {
+    label: "Other",
+    sportIds: []
+  }
+};
+
+/** GPS-capable sports for TRAIN metrics — no fake GPS for strength. */
+export const GPS_SUPPORTED_SPORTS = new Set<SportId>([
+  "RUNNING",
+  "TRAIL_RUNNING",
+  "CYCLING",
+  "MOUNTAIN_BIKING",
+  "TRIATHLON",
+  "HIKING",
+  "SKIING",
+  "ROWING"
+]);
+
+export function gpsSupported(id: SportId): boolean {
+  return GPS_SUPPORTED_SPORTS.has(id);
+}
+
+export function listSportGroups(): { id: SportGroupId; label: string; sports: SportProfile[] }[] {
+  return (Object.keys(SPORT_GROUPS) as SportGroupId[])
+    .map((id) => ({
+      id,
+      label: SPORT_GROUPS[id].label,
+      sports: SPORT_GROUPS[id].sportIds.map((sid) => SPORT_REGISTRY[sid]).filter(Boolean)
+    }))
+    .filter((g) => g.sports.length > 0);
+}
+
 export function sportFromLegacyTrainSport(legacy: string): SportId {
   const hit = listSports().find((s) => s.legacyTrainSports.includes(legacy));
   return hit?.id ?? "GENERAL_FITNESS";

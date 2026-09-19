@@ -9,6 +9,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.fitconnect.android.athlete.ui.activity.ActivityRouteDetailScreen
 import com.fitconnect.android.athlete.ui.activity.ActivityScreen
+import com.fitconnect.android.athlete.ui.activity.RoutesHubScreen
 import com.fitconnect.android.athlete.ui.ai.AthleteAiScreen
 import com.fitconnect.android.athlete.ui.community.CommunityScreen
 import com.fitconnect.android.athlete.ui.daily.DailyActivityScreen
@@ -24,6 +25,8 @@ import com.fitconnect.android.athlete.ui.settings.SettingsScreen
 import com.fitconnect.android.athlete.ui.sleep.SleepScreen
 import com.fitconnect.android.athlete.ui.sports.SportsScreen
 import com.fitconnect.android.athlete.ui.telemetry.TelemetryScreen
+import com.fitconnect.android.athlete.ui.train.SportSelectorScreen
+import com.fitconnect.android.athlete.ui.train.TrainPlanScreen
 import com.fitconnect.android.athlete.ui.training.CombatFightModeScreen
 import com.fitconnect.android.athlete.ui.training.SessionDetailScreen
 import com.fitconnect.android.athlete.ui.training.TrainingScreen
@@ -52,6 +55,9 @@ enum class AthleteDest(
     // Train action (FAB / not a tab)
     ACTIVITY("athlete/activity", "Train", "T", bottom = false),
     ACTIVITY_ROUTE("athlete/activity/route/{activityId}", "Route", "M", bottom = false),
+    SPORT_SELECTOR("athlete/sport-selector", "Sport", "Z", bottom = false),
+    TRAIN_PLAN("athlete/train-plan", "Plan", "L", bottom = false),
+    ROUTES("athlete/routes", "Routes", "G", bottom = false),
     WORKOUT("athlete/workout", "Guided", "W", bottom = false),
     TRAINING("athlete/training", "Sessions", "S"),
     SESSION("athlete/training/{sessionId}", "Session", "T"),
@@ -179,6 +185,37 @@ fun AthleteNavHost(
                 onOpenNutrition = { navController.navigate(AthleteDest.NUTRITION.route) },
                 onOpenGuided = { navController.navigate(AthleteDest.WORKOUT.route) },
                 onOpenFight = { navController.navigate(AthleteDest.FIGHT.route) },
+                onOpenSportSelector = { navController.navigate(AthleteDest.SPORT_SELECTOR.route) },
+                onOpenTrainPlan = { navController.navigate(AthleteDest.TRAIN_PLAN.route) },
+                onOpenRoutes = { navController.navigate(AthleteDest.ROUTES.route) },
+            )
+        }
+        composable(
+            AthleteDest.SPORT_SELECTOR.route,
+            deepLinks = listOf(navDeepLink { uriPattern = "fitconnect://app/athlete/sport-selector" }),
+        ) {
+            SportSelectorScreen(
+                onConfirmed = { navController.popBackStack() },
+            )
+        }
+        composable(
+            AthleteDest.TRAIN_PLAN.route,
+            deepLinks = listOf(navDeepLink { uriPattern = "fitconnect://app/athlete/train-plan" }),
+        ) {
+            TrainPlanScreen(
+                onOpenGuided = { navController.navigate(AthleteDest.WORKOUT.route) },
+                onOpenSession = { id -> navController.navigate("athlete/training/$id") },
+            )
+        }
+        composable(
+            AthleteDest.ROUTES.route,
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "fitconnect://app/athlete/routes" },
+                navDeepLink { uriPattern = "fitconnect://app/routes" },
+            ),
+        ) {
+            RoutesHubScreen(
+                onOpenRoute = { id -> navController.navigate("athlete/activity/route/$id") },
             )
         }
         composable(

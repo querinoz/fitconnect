@@ -30,6 +30,8 @@ object PreferenceKeys {
     val PROFILE_AVATAR_PATH = stringPreferencesKey("profile.avatar_path")
     /** Absolute path under app filesDir for profile banner bitmap. */
     val PROFILE_BANNER_PATH = stringPreferencesKey("profile.banner_path")
+    /** Active Training Sport wire/local id — session fallback when identity API unreachable. */
+    val ACTIVE_TRAINING_SPORT = stringPreferencesKey("train.active_sport")
 
     fun flagKey(flag: String) = stringPreferencesKey("flag.$flag")
     fun identityRoleSelected(uid: String) = stringPreferencesKey("identity.role_selected.$uid")

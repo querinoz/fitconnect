@@ -8,15 +8,19 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.fitconnect.android.athlete.domain.AthleteDataProvenance
 import com.fitconnect.android.athlete.domain.Provenanced
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
@@ -24,14 +28,14 @@ import com.fitconnect.android.athlete.ui.home.TodaySportSessionCard
 import com.fitconnect.android.athlete.ui.home.honestReadiness
 import com.fitconnect.android.designui.components.EliteButton
 import com.fitconnect.android.designui.components.EliteButtonVariant
-import com.fitconnect.android.designui.components.EliteChip
-import com.fitconnect.android.designui.components.EliteFlowRow
 import com.fitconnect.android.designui.components.EliteSysLabel
 import com.fitconnect.android.designui.neumorphic.EosPremiumCard
 import com.fitconnect.android.designui.theme.EliteSpace
 import com.fitconnect.android.foundation.a11y.Accessibility
 import com.fitconnect.android.foundation.common.AppResult
+import com.fitconnect.android.foundation.storage.PreferenceKeys
 import com.fitconnect.android.sports.domain.SportId
+import com.fitconnect.android.sports.domain.gpsSupported
 import com.fitconnect.android.sports.guided.catalog.GuidedPlanCatalog
 import com.fitconnect.android.sports.intelligence.AdaptationAction
 import com.fitconnect.android.sports.intelligence.AdaptationConfidence
@@ -43,11 +47,10 @@ import com.fitconnect.android.sports.intelligence.SportWireIds
 import com.fitconnect.android.sports.intelligence.TrainingLoadLabel
 import com.fitconnect.android.sports.intelligence.TrainingLoadView
 import com.fitconnect.android.sports.intelligence.TodaySessionRecommendation
-import kotlinx.coroutines.launch
 
 /**
- * TRAIN intelligence hub — sport registry, identity, plan overview, today, adaptation confirm.
- * Live free-session execution stays on [ActivityScreen]; this surfaces the product gap fill.
+ * TRAIN hub — training-only. Nutrition / GPS / full plan catalog are contextual CTAs
+ * to dedicated owners (CONTEXTUAL LINKS ≠ AGGLUTINATION).
  */
 @Composable
 fun TrainIntelligenceHub(
@@ -56,29 +59,57 @@ fun TrainIntelligenceHub(
     onStartGuided: () -> Unit,
     onOpenFight: () -> Unit,
     onOpenNutrition: () -> Unit,
+    onOpenSportSelector: () -> Unit = {},
+    onOpenTrainPlan: () -> Unit = {},
+    onOpenRoutes: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val container = LocalAthleteContainer.current
-    val scope = rememberCoroutineScope()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var resumeTick by remember { mutableIntStateOf(0) }
     var selectedSport by remember { mutableStateOf(SportId.STRENGTH) }
     var identityLabel by remember { mutableStateOf<String?>(null) }
     var identityBackend by remember { mutableStateOf<String?>(null) }
     var serverTodayName by remember { mutableStateOf<String?>(null) }
     var nutritionHint by remember { mutableStateOf<String?>(null) }
     var adaptationConfirmed by remember { mutableStateOf(false) }
-    var persistMessage by remember { mutableStateOf<String?>(null) }
+    var gpsOk by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                resumeTick += 1
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    LaunchedEffect(resumeTick) {
+        val localSport = container.platform.keyValueStore
+            .get(PreferenceKeys.ACTIVE_TRAINING_SPORT)
+            ?.let { SportId(it) }
         when (val id = container.sportsIdentity.getIdentity()) {
             is AppResult.Ok -> {
-                id.value.primarySport?.let { selectedSport = it }
-                identityLabel = id.value.primarySport?.let {
-                    SportIntelligenceCatalog.get(it)?.displayName ?: it.value
+                val resolved = id.value.primarySport ?: localSport
+                resolved?.let { selectedSport = it }
+                identityLabel = resolved?.let {
+                    container.sportsEngine.registry().get(it)?.displayName
+                        ?: SportIntelligenceCatalog.get(it)?.displayName
+                        ?: it.value
                 }
                 identityBackend = id.value.backend
+                gpsOk = resolved?.let {
+                    container.sportsEngine.registry().get(it)?.gpsSupported()
+                } == true
             }
             is AppResult.Err -> {
                 identityBackend = "offline/local"
+                localSport?.let { selectedSport = it }
+                identityLabel = localSport?.let {
+                    container.sportsEngine.registry().get(it)?.displayName ?: it.value
+                }
+                gpsOk = container.sportsEngine.registry().get(selectedSport)?.gpsSupported() == true
             }
         }
         when (val today = container.trainingToday.getToday(SportWireIds.toWire(selectedSport))) {
@@ -89,10 +120,13 @@ fun TrainIntelligenceHub(
                 nutritionHint = when {
                     n == null -> null
                     n.kcal != null ->
-                        "Fuel ESTIMATE ${n.kcal} kcal · ${n.confidence} · ${n.estimateKind}"
-                    else -> "Fuel ${n.estimateKind} · ${n.confidence} (no kcal without mass/profile)"
+                        "Fuel ESTIMATE ${n.kcal} kcal · ${n.confidence}"
+                    else -> "Fuel ${n.estimateKind} · ${n.confidence}"
                 }
                 today.value.identity?.primarySport?.let { selectedSport = it }
+                gpsOk = container.sportsEngine.registry().get(selectedSport)?.gpsSupported() == true
+                identityLabel = container.sportsEngine.registry().get(selectedSport)?.displayName
+                    ?: identityLabel
             }
             is AppResult.Err -> Unit
         }
@@ -131,7 +165,10 @@ fun TrainIntelligenceHub(
         )
     }
 
-    val plans = remember { GuidedPlanCatalog.cards() }
+    val planCount = remember { GuidedPlanCatalog.cards().size }
+    val featuredName = remember {
+        GuidedPlanCatalog.cards().firstOrNull()?.plan?.name ?: "Guided plan"
+    }
 
     Column(
         modifier = modifier
@@ -141,68 +178,24 @@ fun TrainIntelligenceHub(
     ) {
         EosPremiumCard(modifier = Modifier.fillMaxWidth().testTag("train_sport_identity")) {
             Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
-                EliteSysLabel("SPORT IDENTITY")
+                EliteSysLabel("ACTIVE TRAINING SPORT")
                 Text(
-                    identityLabel?.let { "Primary · $it" } ?: "Primary sport not set",
+                    identityLabel ?: "Sport not set",
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    "Backend ${identityBackend ?: "—"} · registry ${SportIntelligenceCatalog.all().size} sports",
+                    "Backend ${identityBackend ?: "—"} · change via sport groups",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                EliteFlowRow {
-                    SportIntelligenceCatalog.all().forEach { profile ->
-                        EliteChip(
-                            label = profile.displayName,
-                            selected = selectedSport == profile.sportId,
-                            onClick = {
-                                selectedSport = profile.sportId
-                                adaptationConfirmed = false
-                                scope.launch {
-                                    when (
-                                        val put = container.sportsIdentity.putIdentity(
-                                            primarySport = SportWireIds.toWire(profile.sportId),
-                                            primaryGoal = "PERFORMANCE",
-                                            sportLevel = null,
-                                        )
-                                    ) {
-                                        is AppResult.Ok -> {
-                                            identityLabel = profile.displayName
-                                            identityBackend = put.value.backend
-                                            persistMessage = "Identity saved"
-                                        }
-                                        is AppResult.Err -> {
-                                            persistMessage =
-                                                "Identity saved locally for this session (server unreachable)"
-                                        }
-                                    }
-                                    when (
-                                        val today = container.trainingToday.getToday(
-                                            SportWireIds.toWire(profile.sportId),
-                                        )
-                                    ) {
-                                        is AppResult.Ok -> {
-                                            serverTodayName = today.value.today?.sessionName
-                                            val n = today.value.nutrition
-                                            nutritionHint = n?.let {
-                                                if (it.kcal != null) {
-                                                    "Fuel ESTIMATE ${it.kcal} kcal · ${it.confidence}"
-                                                } else {
-                                                    "Fuel ${it.estimateKind} · ${it.confidence}"
-                                                }
-                                            }
-                                        }
-                                        is AppResult.Err -> Unit
-                                    }
-                                }
-                            },
-                        )
-                    }
-                }
-                persistMessage?.let {
-                    Text(it, style = MaterialTheme.typography.bodySmall)
-                }
+                EliteButton(
+                    label = "CHANGE SPORT",
+                    onClick = onOpenSportSelector,
+                    variant = EliteButtonVariant.Secondary,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("train_change_sport"),
+                )
             }
         }
 
@@ -231,32 +224,26 @@ fun TrainIntelligenceHub(
             )
         }
 
-        EosPremiumCard(modifier = Modifier.fillMaxWidth().testTag("train_plan_overview")) {
+        EosPremiumCard(modifier = Modifier.fillMaxWidth().testTag("train_plan_summary")) {
             Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
-                EliteSysLabel("PLAN OVERVIEW")
+                EliteSysLabel("PLAN SUMMARY")
                 Text(
-                    "Phase · active catalog · ${plans.size} sessions",
+                    "$featuredName · $planCount sessions in catalog",
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    "Week blocks are executable guided plans. Completions are MANUAL — not fabricated biometrics.",
+                    "Full plan lives on Train Plan — not inside this hub.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                plans.take(4).forEach { card ->
-                    Text(
-                        "· ${card.plan.name} · ${card.plan.estimatedDurationMin} min · ${card.difficulty} · ${card.structure.joinToString(" → ")}",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
                 EliteButton(
-                    label = "OPEN GUIDED PLAN",
-                    onClick = onStartGuided,
+                    label = "OPEN PLAN",
+                    onClick = onOpenTrainPlan,
                     variant = EliteButtonVariant.Secondary,
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = Accessibility.PREFERRED_TOUCH_TARGET_DP.dp)
-                        .testTag("train_open_guided"),
+                        .testTag("train_open_plan"),
                 )
             }
         }
@@ -274,15 +261,6 @@ fun TrainIntelligenceHub(
                 Text(
                     "CONFIDENCE · ${adaptation.confidence.name}",
                     style = MaterialTheme.typography.labelLarge,
-                )
-                Text(
-                    if (adaptationConfirmed) {
-                        "Confirmed for this session · action ${adaptation.action.name} (not auto-applied)"
-                    } else {
-                        "Not applied until you confirm. Auto-apply is forbidden."
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 if (adaptation.action != AdaptationAction.KEEP) {
                     EliteButton(
@@ -302,17 +280,12 @@ fun TrainIntelligenceHub(
             }
         }
 
-        EosPremiumCard(modifier = Modifier.fillMaxWidth().testTag("train_nutrition_entry")) {
+        EosPremiumCard(modifier = Modifier.fillMaxWidth().testTag("train_nutrition_cta")) {
             Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
-                EliteSysLabel("NUTRITION INTELLIGENCE")
+                EliteSysLabel("NUTRITION · CTA")
                 Text(
-                    nutritionHint ?: "Open nutrition for sport-aware ESTIMATE targets, meals, grocery.",
+                    nutritionHint ?: "Sport-aware fuel estimates live in Nutrition.",
                     style = MaterialTheme.typography.bodyMedium,
-                )
-                Text(
-                    "ESTIMATE context only — logging requires explicit confirm.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 EliteButton(
                     label = "OPEN NUTRITION",
@@ -322,6 +295,26 @@ fun TrainIntelligenceHub(
                         .fillMaxWidth()
                         .testTag("train_open_nutrition"),
                 )
+            }
+        }
+
+        if (gpsOk) {
+            EosPremiumCard(modifier = Modifier.fillMaxWidth().testTag("train_gps_cta")) {
+                Column(verticalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
+                    EliteSysLabel("ROUTES · CTA")
+                    Text(
+                        "GPS supported for this sport — open Routes hub.",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    EliteButton(
+                        label = "OPEN ROUTES",
+                        onClick = onOpenRoutes,
+                        variant = EliteButtonVariant.Secondary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("train_open_routes"),
+                    )
+                }
             }
         }
 
