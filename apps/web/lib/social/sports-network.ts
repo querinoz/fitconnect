@@ -98,13 +98,30 @@ export function createEvent(event: SportEvent): SportEvent {
   return event;
 }
 
-export function joinEvent(eventId: string, userId: string): SportEvent | null {
+export type JoinEventResult =
+  | { ok: true; event: SportEvent }
+  | { ok: false; reason: "not_found" | "forbidden" };
+
+/**
+ * Join is visibility-gated:
+ * - public: anyone authenticated
+ * - private / secret: owner or existing participant only (invite path not client-assertable)
+ * - followers: treated as private until a real followers graph is wired
+ */
+export function joinEvent(eventId: string, userId: string): JoinEventResult {
   const e = events.get(eventId);
-  if (!e) return null;
-  if (!e.participantIds.includes(userId)) {
+  if (!e) return { ok: false, reason: "not_found" };
+
+  const already = e.participantIds.includes(userId);
+  if (already) return { ok: true, event: e };
+
+  const isOwner = e.ownerId === userId;
+  if (e.visibility === "public" || isOwner) {
     e.participantIds = [...e.participantIds, userId];
+    return { ok: true, event: e };
   }
-  return e;
+
+  return { ok: false, reason: "forbidden" };
 }
 
 export function createChallenge(c: Challenge): Challenge {

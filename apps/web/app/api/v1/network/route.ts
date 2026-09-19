@@ -86,9 +86,14 @@ export async function POST(request: Request) {
 
   if (action === "join_event") {
     const eventId = typeof b.eventId === "string" ? b.eventId : "";
-    const event = joinEvent(eventId, auth.user.id);
-    if (!event) return NextResponse.json({ error: "event_not_found" }, { status: 404 });
-    return NextResponse.json({ event });
+    const result = joinEvent(eventId, auth.user.id);
+    if (!result.ok) {
+      return NextResponse.json(
+        { error: result.reason === "forbidden" ? "forbidden" : "event_not_found" },
+        { status: result.reason === "forbidden" ? 403 : 404 }
+      );
+    }
+    return NextResponse.json({ event: result.event });
   }
 
   return NextResponse.json({ error: "unknown_action" }, { status: 400 });

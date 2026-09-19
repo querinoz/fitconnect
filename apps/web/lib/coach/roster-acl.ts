@@ -1,6 +1,9 @@
 /**
  * V10.5 Coach roster ACL — explicit relationship + scope.
  * Cross-tenant denial by default.
+ *
+ * Production path: links must come from a persisted consent store.
+ * In-memory upsert is TEST/DEMO only — HTTP route never creates links unilaterally.
  */
 
 export type CoachAthleteLink = {
@@ -9,6 +12,8 @@ export type CoachAthleteLink = {
   scopes: Array<"training" | "recovery" | "performance" | "nutrition" | "notes">;
   active: boolean;
   revokedAt: string | null;
+  /** Athlete must have accepted — coach cannot self-grant */
+  athleteConsentAt: string | null;
 };
 
 const links = new Map<string, CoachAthleteLink>(); // key coachId:athleteId
@@ -17,6 +22,9 @@ function key(coachId: string, athleteId: string) {
   return `${coachId}:${athleteId}`;
 }
 
+/**
+ * Test/seed helper. Production HTTP must not call this without athleteConsentAt.
+ */
 export function upsertCoachAthleteLink(link: CoachAthleteLink): void {
   links.set(key(link.coachId, link.athleteId), link);
 }
@@ -35,7 +43,7 @@ export function revokeCoachAthleteLink(coachId: string, athleteId: string): void
 
 export type CoachAccessResult =
   | { ok: true; scopes: CoachAthleteLink["scopes"] }
-  | { ok: false; reason: "not_linked" | "revoked" | "scope_denied" | "self_ok" };
+  | { ok: false; reason: "not_linked" | "revoked" | "scope_denied" | "consent_missing" | "self_ok" };
 
 export function coachMayAccessAthlete(params: {
   coachId: string;
@@ -48,12 +56,15 @@ export function coachMayAccessAthlete(params: {
   const link = links.get(key(params.coachId, params.athleteId));
   if (!link) return { ok: false, reason: "not_linked" };
   if (!link.active || link.revokedAt) return { ok: false, reason: "revoked" };
+  if (!link.athleteConsentAt) return { ok: false, reason: "consent_missing" };
   if (!link.scopes.includes(params.scope)) return { ok: false, reason: "scope_denied" };
   return { ok: true, scopes: link.scopes };
 }
 
 export function listCoachAthletes(coachId: string): CoachAthleteLink[] {
-  return [...links.values()].filter((l) => l.coachId === coachId && l.active);
+  return [...links.values()].filter(
+    (l) => l.coachId === coachId && l.active && Boolean(l.athleteConsentAt)
+  );
 }
 
 export function __resetCoachRosterAcl(): void {

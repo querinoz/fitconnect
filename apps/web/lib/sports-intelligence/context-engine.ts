@@ -88,7 +88,24 @@ export function buildAthleteContext(params: {
   };
 
   const sources = new Set<string>();
-  let hydration = 0;
+  let hydrationToday = 0;
+  const todayPrefix = nowIso.slice(0, 10);
+
+  /** Device-backed biometric sources may be REAL; client/manual/MCP are ESTIMATED. */
+  function metricProvenance(
+    source: string,
+    value: number | null
+  ): MetricSample["provenance"] {
+    if (value == null) return "MISSING";
+    const deviceBacked = new Set([
+      "WEAROS",
+      "HEALTH_CONNECT",
+      "HEALTHKIT",
+      "GARMIN",
+      "WHOOP"
+    ]);
+    return deviceBacked.has(source) ? "REAL" : "ESTIMATED";
+  }
 
   for (const e of params.events) {
     sources.add(e.source);
@@ -107,7 +124,8 @@ export function buildAthleteContext(params: {
         break;
       case "WORKOUT_COMPLETED":
       case "SPORT_ACTIVITY_COMPLETED":
-        ctx.training.phase = "COMPLETED";
+        // After completion with no active session → IDLE (COMPLETED is transitional)
+        ctx.training.phase = "IDLE";
         ctx.training.lastCompletedAt = e.timestamp;
         ctx.training.activeSessionId = null;
         break;
@@ -120,9 +138,9 @@ export function buildAthleteContext(params: {
           sourceId: typeof e.payload.sourceId === "string" ? e.payload.sourceId : null,
           timestamp: e.timestamp,
           ingestedAt: nowIso,
-          confidence: v == null ? "NOT_AVAILABLE" : "MEDIUM",
+          confidence: v == null ? "NOT_AVAILABLE" : metricProvenance(e.source, v) === "REAL" ? "MEDIUM" : "LOW",
           freshness: freshnessFrom(e.timestamp),
-          provenance: v == null ? "MISSING" : "REAL"
+          provenance: metricProvenance(e.source, v)
         };
         break;
       }
@@ -134,9 +152,9 @@ export function buildAthleteContext(params: {
           source: e.source,
           timestamp: e.timestamp,
           ingestedAt: nowIso,
-          confidence: v == null ? "NOT_AVAILABLE" : "MEDIUM",
+          confidence: v == null ? "NOT_AVAILABLE" : metricProvenance(e.source, v) === "REAL" ? "MEDIUM" : "LOW",
           freshness: freshnessFrom(e.timestamp),
-          provenance: v == null ? "MISSING" : "REAL"
+          provenance: metricProvenance(e.source, v)
         };
         break;
       }
@@ -148,9 +166,9 @@ export function buildAthleteContext(params: {
           source: e.source,
           timestamp: e.timestamp,
           ingestedAt: nowIso,
-          confidence: v == null ? "NOT_AVAILABLE" : "MEDIUM",
+          confidence: v == null ? "NOT_AVAILABLE" : metricProvenance(e.source, v) === "REAL" ? "MEDIUM" : "LOW",
           freshness: freshnessFrom(e.timestamp),
-          provenance: v == null ? "MISSING" : "REAL"
+          provenance: metricProvenance(e.source, v)
         };
         break;
       }
@@ -191,8 +209,10 @@ export function buildAthleteContext(params: {
         break;
       case "HYDRATION_LOGGED": {
         const ml = num(e.payload.ml);
-        if (ml != null) hydration += ml;
-        ctx.nutrition.hydrationMlToday = hydration;
+        if (ml != null && e.timestamp.slice(0, 10) === todayPrefix) {
+          hydrationToday += ml;
+          ctx.nutrition.hydrationMlToday = hydrationToday;
+        }
         break;
       }
       default:
@@ -205,7 +225,7 @@ export function buildAthleteContext(params: {
   if (load.label === "SPIKE") {
     ctx.safety.flags.push("TRAINING_LOAD_SPIKE");
     ctx.safety.note =
-      "Acute:chronic workload ratio elevated. Suggestion only — not a medical diagnosis. Consider volume caution.";
+      "ACWR-lite auxiliary signal elevated — not a medical diagnosis, injury prediction, or readiness guarantee. Consider volume caution.";
   }
 
   ctx.dataSources = [...sources];

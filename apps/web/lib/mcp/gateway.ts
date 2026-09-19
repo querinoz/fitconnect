@@ -168,17 +168,10 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
         .filter((e) => e.type === "WORKOUT_COMPLETED" || e.type === "SPORT_ACTIVITY_COMPLETED")
         .map((e) => ({
           dateISO: e.timestamp.slice(0, 10),
-          strain:
-            typeof e.payload.strain === "number"
-              ? e.payload.strain
-              : typeof args.strainScore === "number"
-                ? args.strainScore
-                : typeof e.payload.durationMin === "number"
-                  ? e.payload.durationMin
-                  : 0
+          strain: typeof e.payload.strain === "number" ? e.payload.strain : 0
         }))
         .filter((s) => s.strain > 0);
-      // Allow caller-provided single strain only as ADDITIONAL session when no history
+      // Caller-provided strainScore ONLY when athlete has no session history
       if (!sessions.length && typeof args.strainScore === "number") {
         sessions.push({
           dateISO: new Date().toISOString().slice(0, 10),
@@ -186,8 +179,12 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
         });
       }
       const load = computeTrainingLoad(sessions);
+      const usedProvidedOnly = sessions.length === 1 && typeof args.strainScore === "number" &&
+        events.filter((e) => e.type === "WORKOUT_COMPLETED" || e.type === "SPORT_ACTIVITY_COMPLETED")
+          .every((e) => typeof e.payload.strain !== "number");
       result = {
         ...load,
+        confidence: usedProvidedOnly ? "LOW" : load.confidence,
         strainScore: {
           value: typeof args.strainScore === "number" ? args.strainScore : load.acute7d,
           provenance:
@@ -196,7 +193,8 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
               : load.provenance === "MISSING"
                 ? "MISSING"
                 : "CALCULATED"
-        }
+        },
+        note: "ACWR-lite is an auxiliary training-load signal — not a medical diagnosis or injury prediction."
       };
       break;
     }
@@ -218,14 +216,14 @@ export async function dispatchMcp(actor: McpActor, call: McpCall): Promise<McpRe
       break;
     case "get_device_status": {
       const { listDeviceRegistry } = await import("@/lib/devices/platform");
-      const devices = listDeviceRegistry();
+      const devices = listDeviceRegistry(actor.uid);
       const anyLive = devices.some(
         (d) => d.status === "CONNECTED" || d.status === "SYNCED" || d.status === "SYNCING"
       );
       result = {
         devices,
         status: anyLive ? "PARTIAL" : "NOT_CONNECTED",
-        note: "Never reports connected without a live provider session / explicit confirm."
+        note: "Per-actor registry. Never reports connected without a live provider session."
       };
       break;
     }

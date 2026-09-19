@@ -3,6 +3,7 @@ import {
   normalizeMetric,
   resolveMetricConflict,
   listDeviceRegistry,
+  setDeviceRegistryEntry,
   __resetDeviceRegistry,
   computeFreshness
 } from "./platform";
@@ -12,12 +13,26 @@ describe("V10.1 device platform", () => {
     __resetDeviceRegistry();
   });
 
-  it("lists devices as NOT_CONNECTED by default", () => {
-    const list = listDeviceRegistry();
+  it("lists devices as NOT_CONNECTED by default (per user)", () => {
+    const list = listDeviceRegistry("athlete-a");
     expect(list.length).toBeGreaterThan(0);
     expect(list.every((d) => d.status === "NOT_CONNECTED" || d.status === "UNSUPPORTED")).toBe(
       true
     );
+  });
+
+  it("isolates registry state across users", () => {
+    setDeviceRegistryEntry("athlete-a", {
+      ...listDeviceRegistry("athlete-a").find((d) => d.providerId === "HEALTH_CONNECT")!,
+      status: "DISCONNECTED",
+      note: "a-only"
+    });
+    expect(
+      listDeviceRegistry("athlete-a").find((d) => d.providerId === "HEALTH_CONNECT")!.status
+    ).toBe("DISCONNECTED");
+    expect(
+      listDeviceRegistry("athlete-b").find((d) => d.providerId === "HEALTH_CONNECT")!.status
+    ).toBe("NOT_CONNECTED");
   });
 
   it("computes freshness bands", () => {

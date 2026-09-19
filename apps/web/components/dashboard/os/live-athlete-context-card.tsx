@@ -103,15 +103,18 @@ export function LiveAthleteContextCard() {
               }
             />
             <Meta
-              label="TRAINING LOAD"
+              label="TRAINING LOAD (AUX)"
               value={
                 data?.trainingLoad
-                  ? `${data.trainingLoad.label}${data.trainingLoad.acwr != null ? ` · ACWR ${data.trainingLoad.acwr}` : ""} · ${data.trainingLoad.provenance}`
+                  ? `${data.trainingLoad.label}${data.trainingLoad.acwr != null ? ` · ACWR-lite ${data.trainingLoad.acwr}` : ""} · ${data.trainingLoad.provenance}`
                   : "MISSING"
               }
             />
             <Meta label="CONTEXT CONFIDENCE" value={ctx.confidence} />
           </div>
+          <p className="text-[10px] uppercase tracking-wide text-eos-on-surface-subtle">
+            ACWR-lite is an auxiliary training-load signal — not medical diagnosis or injury prediction.
+          </p>
           {data?.adaptationSuggestion && data.adaptationSuggestion.action !== "NONE" ? (
             <div className="rounded-xl border border-eos-outline px-3 py-3 text-sm">
               <p className="font-semibold text-eos-voltline">{data.adaptationSuggestion.what}</p>

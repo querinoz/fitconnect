@@ -102,7 +102,41 @@ describe("MCP gateway", () => {
   it("get_device_status never pretends connected", async () => {
     const res = await dispatchMcp(athlete, { tool: "get_device_status" });
     expect(res.ok).toBe(true);
-    expect(res.result).toMatchObject({ status: "NOT_CONNECTED", devices: [] });
+    expect(res.result).toMatchObject({ status: "NOT_CONNECTED" });
+    const devices = (res.result as { devices: Array<{ status: string }> }).devices;
+    expect(Array.isArray(devices)).toBe(true);
+    expect(devices.length).toBeGreaterThan(0);
+    expect(devices.every((d) => d.status === "NOT_CONNECTED" || d.status === "UNSUPPORTED")).toBe(
+      true
+    );
+  });
+
+  it("get_training_load does not stamp strainScore onto history sessions", async () => {
+    const { ingestAthleteEvent, __resetAthleteEventStore } = await import(
+      "@/lib/sports-intelligence/event-store"
+    );
+    __resetAthleteEventStore();
+    ingestAthleteEvent({
+      type: "WORKOUT_COMPLETED",
+      timestamp: "2026-09-10T12:00:00.000Z",
+      userId: athlete.uid,
+      source: "TRAIN",
+      payload: { strain: 40 }
+    });
+    const res = await dispatchMcp(athlete, {
+      tool: "get_training_load",
+      arguments: { strainScore: 999 }
+    });
+    expect(res.ok).toBe(true);
+    const body = res.result as {
+      acute7d: number;
+      strainScore: { value: number; provenance: string };
+      note: string;
+    };
+    // History session strain must win — caller 999 must not inflate acute from history
+    expect(body.acute7d).toBeLessThan(200);
+    expect(body.strainScore.provenance).toBe("PROVIDED");
+    expect(body.note.toLowerCase()).toContain("auxiliary");
   });
 
   it("get_activity returns UNAVAILABLE without inventing sessions", async () => {

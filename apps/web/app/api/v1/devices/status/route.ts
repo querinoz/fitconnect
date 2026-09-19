@@ -3,24 +3,33 @@ import { requireAuth } from "@/lib/api/require-auth";
 import {
   listDeviceRegistry,
   setDeviceRegistryEntry,
+  isCatalogProvider,
   type DeviceStatus
 } from "@/lib/devices/platform";
 import type { ProviderId } from "@fitconnect/types";
 import { constraintsFor } from "@fitconnect/types";
 import { ingestAthleteEvent } from "@/lib/sports-intelligence/event-store";
 
+/** Statuses athletes may explicitly declare without a live adapter session proof */
+const ALLOWED_MANUAL_STATUS: DeviceStatus[] = [
+  "NOT_CONNECTED",
+  "DISCONNECTED",
+  "PERMISSION_REQUIRED",
+  "ERROR"
+];
+
 export async function GET(request: Request) {
   const auth = await requireAuth(request);
   if (!auth.ok) return auth.response;
   return NextResponse.json({
-    devices: listDeviceRegistry(),
-    note: "Statuses are honest. NOT_CONNECTED until a live authorization exists."
+    devices: listDeviceRegistry(auth.user.id),
+    note: "Per-user status only. NOT_CONNECTED until a live provider session exists."
   });
 }
 
 /**
- * Explicit athlete intent to update device connection state.
- * Never marks CONNECTED without confirm:true.
+ * Explicit athlete intent to update device connection state for THIS user only.
+ * CONNECTED/SYNCED/SYNCING require a future adapter-backed session — rejected here.
  */
 export async function POST(request: Request) {
   const auth = await requireAuth(request);
@@ -41,38 +50,46 @@ export async function POST(request: Request) {
     );
   }
 
-  const providerId = b.providerId as ProviderId;
+  const providerId = b.providerId as string;
   const status = b.status as DeviceStatus;
   if (!providerId || !status) {
     return NextResponse.json({ error: "provider_and_status_required" }, { status: 422 });
   }
+  if (!isCatalogProvider(providerId)) {
+    return NextResponse.json({ error: "provider_not_in_catalog" }, { status: 422 });
+  }
 
-  const constraints = constraintsFor(providerId);
+  const constraints = constraintsFor(providerId as ProviderId);
   if (!constraints.enabled) {
     return NextResponse.json({ error: "provider_unsupported" }, { status: 422 });
   }
 
-  const entry = listDeviceRegistry().find((d) => d.providerId === providerId)!;
+  if (!ALLOWED_MANUAL_STATUS.includes(status)) {
+    return NextResponse.json(
+      {
+        error: "adapter_session_required",
+        message:
+          "CONNECTED/SYNCING/SYNCED require a live provider adapter session — cannot be client-asserted."
+      },
+      { status: 422 }
+    );
+  }
+
+  const current = listDeviceRegistry(auth.user.id).find((d) => d.providerId === providerId)!;
   const next = {
-    ...entry,
+    ...current,
     status,
-    lastSyncAt: status === "SYNCED" ? new Date().toISOString() : entry.lastSyncAt,
-    note: typeof b.note === "string" ? b.note : entry.note
+    lastSyncAt: current.lastSyncAt,
+    note: typeof b.note === "string" ? b.note : current.note
   };
-  setDeviceRegistryEntry(next);
+  setDeviceRegistryEntry(auth.user.id, next);
 
   const eventType =
-    status === "CONNECTED"
-      ? "DEVICE_CONNECTED"
-      : status === "DISCONNECTED"
-        ? "DEVICE_DISCONNECTED"
-        : status === "SYNCING"
-          ? "SYNC_STARTED"
-          : status === "SYNCED"
-            ? "SYNC_COMPLETED"
-            : status === "ERROR"
-              ? "SYNC_FAILED"
-              : null;
+    status === "DISCONNECTED"
+      ? "DEVICE_DISCONNECTED"
+      : status === "ERROR"
+        ? "SYNC_FAILED"
+        : null;
 
   if (eventType) {
     ingestAthleteEvent({

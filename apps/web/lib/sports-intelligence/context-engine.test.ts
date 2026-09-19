@@ -103,4 +103,56 @@ describe("V10 context engine", () => {
     expect(suggestion.requiresConfirm).toBe(true);
     expect(suggestion.action).not.toBe("NONE");
   });
+
+  it("does not treat MANUAL HR as REAL", () => {
+    ingestAthleteEvent({
+      type: "HEART_RATE_UPDATED",
+      timestamp: new Date().toISOString(),
+      userId: "u1",
+      source: "MANUAL",
+      payload: { bpm: 120 }
+    });
+    const ctx = buildAthleteContext({ userId: "u1", events: listAthleteEvents("u1") });
+    expect(ctx.metrics.heartRate?.provenance).toBe("ESTIMATED");
+    expect(ctx.metrics.heartRate?.confidence).toBe("LOW");
+  });
+
+  it("counts hydration only for today", () => {
+    ingestAthleteEvent({
+      type: "HYDRATION_LOGGED",
+      timestamp: "2020-01-01T12:00:00.000Z",
+      userId: "u1",
+      source: "NUTRITION",
+      payload: { ml: 2000 }
+    });
+    ingestAthleteEvent({
+      type: "HYDRATION_LOGGED",
+      timestamp: new Date().toISOString(),
+      userId: "u1",
+      source: "NUTRITION",
+      payload: { ml: 250 }
+    });
+    const ctx = buildAthleteContext({ userId: "u1", events: listAthleteEvents("u1") });
+    expect(ctx.nutrition.hydrationMlToday).toBe(250);
+  });
+
+  it("returns IDLE after workout completion", () => {
+    ingestAthleteEvent({
+      type: "WORKOUT_STARTED",
+      timestamp: "2026-09-18T10:00:00.000Z",
+      userId: "u1",
+      source: "TRAIN",
+      payload: { sessionId: "s1" }
+    });
+    ingestAthleteEvent({
+      type: "WORKOUT_COMPLETED",
+      timestamp: "2026-09-18T11:00:00.000Z",
+      userId: "u1",
+      source: "TRAIN",
+      payload: { sessionId: "s1" }
+    });
+    const ctx = buildAthleteContext({ userId: "u1", events: listAthleteEvents("u1") });
+    expect(ctx.training.phase).toBe("IDLE");
+    expect(ctx.training.lastCompletedAt).toBe("2026-09-18T11:00:00.000Z");
+  });
 });

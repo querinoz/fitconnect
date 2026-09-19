@@ -10,6 +10,8 @@ import {
   createSpot,
   getVisibleSpot,
   listPublicSpots,
+  createEvent,
+  joinEvent,
   __resetSportsNetwork
 } from "@/lib/social/sports-network";
 import { periodizeNutritionDay } from "@/lib/nutrition/periodization";
@@ -48,7 +50,8 @@ describe("V10.5 coach roster ACL", () => {
       athleteId: "ath1",
       scopes: ["training", "recovery"],
       active: true,
-      revokedAt: null
+      revokedAt: null,
+      athleteConsentAt: "2026-09-18T12:00:00.000Z"
     });
     expect(
       coachMayAccessAthlete({ coachId: "coach1", athleteId: "ath1", scope: "training" }).ok
@@ -60,6 +63,24 @@ describe("V10.5 coach roster ACL", () => {
     expect(
       coachMayAccessAthlete({ coachId: "coach1", athleteId: "ath1", scope: "training" }).ok
     ).toBe(false);
+  });
+
+  it("denies link without athlete consent", () => {
+    upsertCoachAthleteLink({
+      coachId: "coach1",
+      athleteId: "ath1",
+      scopes: ["training"],
+      active: true,
+      revokedAt: null,
+      athleteConsentAt: null
+    });
+    const access = coachMayAccessAthlete({
+      coachId: "coach1",
+      athleteId: "ath1",
+      scope: "training"
+    });
+    expect(access.ok).toBe(false);
+    if (!access.ok) expect(access.reason).toBe("consent_missing");
   });
 });
 
@@ -110,6 +131,21 @@ describe("V11 sports network privacy", () => {
     expect(getVisibleSpot("secret1", "stranger").spot).toBeNull();
     expect(getVisibleSpot("secret1", "u1").spot?.exactLat).toBe(1);
     expect(getVisibleSpot("secret1", "u2").spot?.dangerFlag).toBe(true);
+  });
+
+  it("rejects joining private events without ownership", () => {
+    createEvent({
+      eventId: "priv1",
+      sport: "RUNNING",
+      title: "Private run",
+      startsAt: "2026-09-20T10:00:00.000Z",
+      locationLabel: null,
+      visibility: "private",
+      participantIds: ["owner"],
+      ownerId: "owner"
+    });
+    expect(joinEvent("priv1", "stranger").ok).toBe(false);
+    expect(joinEvent("priv1", "owner").ok).toBe(true);
   });
 });
 

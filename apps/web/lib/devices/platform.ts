@@ -157,7 +157,7 @@ export function resolveMetricConflict(
   };
 }
 
-/** Registry of adapter status — honest NOT_CONNECTED until wired */
+/** Per-user registry — NEVER share connection state across identities */
 export type DeviceRegistryEntry = {
   providerId: ProviderId;
   status: DeviceStatus;
@@ -166,41 +166,65 @@ export type DeviceRegistryEntry = {
   note: string;
 };
 
-const registry = new Map<ProviderId, DeviceRegistryEntry>();
+const CATALOG: ProviderId[] = [
+  "HEALTH_CONNECT",
+  "HEALTHKIT",
+  "GARMIN",
+  "WHOOP",
+  "STRAVA"
+];
 
-export function listDeviceRegistry(): DeviceRegistryEntry[] {
-  const defaults: ProviderId[] = [
-    "HEALTH_CONNECT",
-    "HEALTHKIT",
-    "GARMIN",
-    "WHOOP",
-    "STRAVA"
-  ];
-  return defaults.map((providerId) => {
-    const existing = registry.get(providerId);
-    if (existing) return existing;
-    const c = constraintsFor(providerId);
-    return {
-      providerId,
-      status: c.enabled ? "NOT_CONNECTED" : "UNSUPPORTED",
-      capabilities: {
-        heartRate: providerId !== "STRAVA",
-        hrv: providerId === "WHOOP" || providerId === "OURA" || providerId === "HEALTH_CONNECT" || providerId === "HEALTHKIT",
-        sleep: providerId === "WHOOP" || providerId === "OURA" || providerId === "HEALTH_CONNECT" || providerId === "HEALTHKIT",
-        gps: providerId === "GARMIN" || providerId === "HEALTH_CONNECT" || providerId === "HEALTHKIT",
-        workoutControl: providerId === "HEALTH_CONNECT" || providerId === "HEALTHKIT"
-      },
-      lastSyncAt: null,
-      note:
-        providerId === "STRAVA"
-          ? "Owner-only. Never social. Never ML training."
-          : "NOT_CONNECTED until athlete authorizes a live session."
-    };
+/** key = `${userId}:${providerId}` */
+const registry = new Map<string, DeviceRegistryEntry>();
+
+function registryKey(userId: string, providerId: ProviderId): string {
+  return `${userId}:${providerId}`;
+}
+
+function defaultEntry(providerId: ProviderId): DeviceRegistryEntry {
+  const c = constraintsFor(providerId);
+  return {
+    providerId,
+    status: c.enabled ? "NOT_CONNECTED" : "UNSUPPORTED",
+    capabilities: {
+      heartRate: providerId !== "STRAVA",
+      hrv:
+        providerId === "WHOOP" ||
+        providerId === "OURA" ||
+        providerId === "HEALTH_CONNECT" ||
+        providerId === "HEALTHKIT",
+      sleep:
+        providerId === "WHOOP" ||
+        providerId === "OURA" ||
+        providerId === "HEALTH_CONNECT" ||
+        providerId === "HEALTHKIT",
+      gps: providerId === "GARMIN" || providerId === "HEALTH_CONNECT" || providerId === "HEALTHKIT",
+      workoutControl: providerId === "HEALTH_CONNECT" || providerId === "HEALTHKIT"
+    },
+    lastSyncAt: null,
+    note:
+      providerId === "STRAVA"
+        ? "Owner-only. Never social. Never ML training."
+        : "NOT_CONNECTED until athlete authorizes a live provider session."
+  };
+}
+
+export function isCatalogProvider(providerId: string): providerId is ProviderId {
+  return (CATALOG as string[]).includes(providerId);
+}
+
+export function listDeviceRegistry(userId: string): DeviceRegistryEntry[] {
+  return CATALOG.map((providerId) => {
+    const existing = registry.get(registryKey(userId, providerId));
+    return existing ?? defaultEntry(providerId);
   });
 }
 
-export function setDeviceRegistryEntry(entry: DeviceRegistryEntry): void {
-  registry.set(entry.providerId, entry);
+export function setDeviceRegistryEntry(userId: string, entry: DeviceRegistryEntry): void {
+  if (!isCatalogProvider(entry.providerId)) {
+    throw new Error("provider_not_in_catalog");
+  }
+  registry.set(registryKey(userId, entry.providerId), entry);
 }
 
 export function __resetDeviceRegistry(): void {
