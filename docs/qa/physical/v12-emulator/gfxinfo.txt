@@ -1,0 +1,4 @@
+Total frames rendered: 60
+Janky frames: 14 (23.33%)
+Janky frames (legacy): 35 (58.33%)
+Number Missed Vsync: 3

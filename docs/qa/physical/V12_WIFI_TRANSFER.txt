@@ -1,0 +1,6 @@
+﻿# WiFi transfer ready
+URL: http://192.168.1.76:8765/FitConnectV12.apk
+APK: FitConnectV12.apk (151149647 bytes)
+Package: com.fitconnect.android
+VersionCode: 16
+VersionName: 0.1.0-rc.1-polish5

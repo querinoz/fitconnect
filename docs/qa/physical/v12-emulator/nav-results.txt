@@ -1,0 +1,14 @@
+FEED_COLD=PASS
+TAP:Ascend@1268,348
+SCREEN_Ascend texts=17 sample=
+TAP:Dashboard@734,2283
+SCREEN_Dashboard texts=32 sample=
+TAP:Profile@958,2283
+SCREEN_Profile texts=20 sample=
+TAP:Feed@122,2283
+SCREEN_Feed texts=26 sample=
+TAP:TRAIN@540,2225
+SCREEN_TRAIN texts=17 sample=
+RESUME_FROM_HOME=OK
+ROTATION=EXERCISED
+RESTART_PID=8008

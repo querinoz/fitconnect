@@ -1,0 +1,17 @@
+TAP_BOTTOM:Ascend@344,2232
+ASCEND_HAS_READINESS=ASCEND PROGRESSION EVERY REP. EVERY CHOICE. ASCEND. Ascend
+ASCEND_SAMPLE=Good afternoon, | Inês | LEVEL | 1 | 0 XP | 200 XP TO LEVEL 2 | ASCEND PROGRESSION | STREAK | 0 | DAYS | TELEMETRY | EVERY REP. EVERY CHOICE. ASCEND. | PERFORMANCE VAULT | STREAK · 7 WEEKS | Feed
+TAP_BOTTOM:Dashboard@734,2232
+DASH_TODAY=True
+DASH_LIVE_CONTEXT=False
+DASH_SAMPLE=TODAY | Good evening, Inês | How you are · what to do · what changed | Readiness | 59% | STATUS: BUILD | RECOVERY: 7h 18m | Load | 38% | LOAD: OPTIMAL | ACTIVITY: STEADY | READINESS | DEMO | 59 | /100 | Green light for quality work — keep volume controlled. | Sleep 7h 18m · load 58% | Keep intensity moderate; prioritize quality over volume. | Open recovery | TODAY · SPORT SESSION
+TAP_BOTTOM:Profile@958,2232
+PROFILE_ATHLETE_COACH=True
+PROFILE_NO_SECOND_LOGIN=True
+COACH_LOCKED_HONEST=True
+TAP_BOTTOM:TRAIN@540,2225
+TRAIN_PAUSED_LOCAL=True
+TRAIN_NO_SILENT_APPLY=True
+TAP_BOTTOM:Feed@122,2232
+GFX=Total frames rendered: 60; Janky frames: 14 (23.33%); Janky frames (legacy): 35 (58.33%); Number Missed Vsync: 3
+FATAL_AFTER_NAV=0
