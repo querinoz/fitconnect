@@ -16,6 +16,7 @@ import com.fitconnect.android.athlete.ui.discover.DiscoverScreen
 import com.fitconnect.android.athlete.ui.feed.FeedScreen
 import com.fitconnect.android.athlete.ui.home.HomeScreen
 import com.fitconnect.android.athlete.ui.notifications.NotificationsScreen
+import com.fitconnect.android.athlete.ui.nutrition.NutritionScreen
 import com.fitconnect.android.athlete.ui.profile.ProfileScreen
 import com.fitconnect.android.athlete.ui.programs.ProgramsScreen
 import com.fitconnect.android.athlete.ui.recovery.RecoveryScreen
@@ -55,6 +56,8 @@ enum class AthleteDest(
     TRAINING("athlete/training", "Sessions", "S"),
     SESSION("athlete/training/{sessionId}", "Session", "T"),
     FIGHT("athlete/fight", "Fight", "K"),
+    /** Nutrition Intelligence — entry from Dashboard/TRAIN, never a 5th tab. */
+    NUTRITION("athlete/nutrition", "Nutrition", "U", bottom = false),
 
     // Secondary / drawer
     DISCOVER("athlete/discover", "Discover", "C"),
@@ -135,6 +138,7 @@ fun AthleteNavHost(
                 onOpenSleep = { navController.navigate(AthleteDest.SLEEP.route) },
                 onOpenDaily = { navController.navigate(AthleteDest.DAILY.route) },
                 onOpenVault = { navController.navigate(AthleteDest.ASCEND.route) },
+                onOpenNutrition = { navController.navigate(AthleteDest.NUTRITION.route) },
             )
         }
         // Legacy aliases
@@ -154,6 +158,7 @@ fun AthleteNavHost(
                 onOpenSleep = { navController.navigate(AthleteDest.SLEEP.route) },
                 onOpenDaily = { navController.navigate(AthleteDest.DAILY.route) },
                 onOpenVault = { navController.navigate(AthleteDest.ASCEND.route) },
+                onOpenNutrition = { navController.navigate(AthleteDest.NUTRITION.route) },
             )
         }
         composable(AthleteDest.VAULT.route) { PerformanceVaultScreen() }
@@ -171,7 +176,19 @@ fun AthleteNavHost(
                 onOpenRouteDetail = { id ->
                     navController.navigate("athlete/activity/route/$id")
                 },
+                onOpenNutrition = { navController.navigate(AthleteDest.NUTRITION.route) },
+                onOpenGuided = { navController.navigate(AthleteDest.WORKOUT.route) },
+                onOpenFight = { navController.navigate(AthleteDest.FIGHT.route) },
             )
+        }
+        composable(
+            AthleteDest.NUTRITION.route,
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "fitconnect://app/athlete/nutrition" },
+                navDeepLink { uriPattern = "fitconnect://app/nutrition" },
+            ),
+        ) {
+            NutritionScreen()
         }
         composable(
             route = AthleteDest.ACTIVITY_ROUTE.route,

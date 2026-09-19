@@ -24,6 +24,9 @@ import com.fitconnect.android.foundation.programs.EmptyProgramRemote
 import com.fitconnect.android.foundation.programs.HttpProgramRemote
 import com.fitconnect.android.geo.di.GeoContainer
 import com.fitconnect.android.sports.di.SportsContainer
+import com.fitconnect.android.sports.intelligence.HttpSportsIdentityRemote
+import com.fitconnect.android.sports.intelligence.HttpTrainingTodayRemote
+import com.fitconnect.android.sports.nutrition.HttpNutritionRemote
 import com.fitconnect.android.sports.registry.SportsEngine
 import com.fitconnect.android.sports.guided.runtime.GuidedWorkoutRuntime
 import com.fitconnect.android.telemetry.di.TelemetryContainer
@@ -47,6 +50,9 @@ interface AthleteContainer {
     val routeRepository: CanonicalRouteRepository
     val ascend: AscendEngine
     val guidedWorkout: GuidedWorkoutRuntime
+    val sportsIdentity: HttpSportsIdentityRemote
+    val trainingToday: HttpTrainingTodayRemote
+    val nutritionRemote: HttpNutritionRemote
 }
 
 class DefaultAthleteContainer(
@@ -120,6 +126,12 @@ class DefaultAthleteContainer(
         logger = platform.logger,
     )
     override val routeRepository: CanonicalRouteRepository = CanonicalRouteRepository(gpsRouteStore)
+    override val sportsIdentity: HttpSportsIdentityRemote =
+        HttpSportsIdentityRemote { platform.apiClient }
+    override val trainingToday: HttpTrainingTodayRemote =
+        HttpTrainingTodayRemote { platform.apiClient }
+    override val nutritionRemote: HttpNutritionRemote =
+        HttpNutritionRemote { platform.apiClient }
 
     init {
         AscendDemo.seed(ascend, LocalAthleteRepository.ATHLETE_ID)

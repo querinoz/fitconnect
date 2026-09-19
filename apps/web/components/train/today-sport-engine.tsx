@@ -10,6 +10,8 @@ import {
   loadSportsIdentityCache
 } from "@/lib/sport-intelligence/identity-store";
 import { listSports, type SportId } from "@/lib/sport-intelligence/sport-registry";
+import { recommendSessionAdaptation } from "@/lib/sports-intelligence/adaptive-training";
+import { computeTrainingLoad } from "@/lib/sports-intelligence/training-load";
 import type { ReadinessView } from "@/lib/train/types";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +41,7 @@ export function TodaySportEngine({ readiness, userId, legacySportFilter, onStart
     confidence: string;
     flags: string[];
   } | null>(null);
+  const [adaptationConfirmed, setAdaptationConfirmed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,6 +64,7 @@ export function TodaySportEngine({ readiness, userId, legacySportFilter, onStart
 
   function selectSport(next: SportId) {
     setSportId(next);
+    setAdaptationConfirmed(false);
     void persistSportsIdentity({
       ...loadSportsIdentityCache(userId),
       userId,
@@ -77,6 +81,30 @@ export function TodaySportEngine({ readiness, userId, legacySportFilter, onStart
       recentPlanIds: []
     });
   }, [userId, sportId, readiness]);
+
+  const adaptation = useMemo(() => {
+    const load = computeTrainingLoad([]);
+    const label =
+      card.trainingLoadLabel === "HIGH"
+        ? ("HIGH" as const)
+        : card.trainingLoadLabel === "LOW"
+          ? ("LOW" as const)
+          : card.trainingLoadLabel === "MODERATE"
+            ? ("MODERATE" as const)
+            : load.label;
+    return recommendSessionAdaptation({
+      trainingLoad: { ...load, label },
+      readinessScore: card.readinessScore,
+      readinessState:
+        card.readinessState === "AVAILABLE"
+          ? "HIGH"
+          : card.readinessState === "MISSING" || card.readinessState === "NOT_CONNECTED"
+            ? "NOT_AVAILABLE"
+            : "LOW",
+      availableMin: null,
+      plannedDurationMin: card.session.durationMin
+    });
+  }, [card]);
 
   useEffect(() => {
     let cancelled = false;
@@ -189,6 +217,44 @@ export function TodaySportEngine({ readiness, userId, legacySportFilter, onStart
             {fuel.kcal != null ? `${fuel.kcal} kcal · confidence ${fuel.confidence}` : `unavailable · ${fuel.confidence}`}
             {fuel.flags[0] ? ` — ${fuel.flags[0]}` : null}
           </p>
+        ) : null}
+      </div>
+
+      <div
+        className="rounded-2xl border border-eos-outline-variant/40 bg-eos-surface-container/40 p-4 space-y-2"
+        data-testid="train-adaptation-confirm"
+      >
+        <p className="eos-label-caps text-eos-telemetry">ADAPTATION · CONFIRM ONLY</p>
+        <p className="text-sm">
+          <span className="font-semibold">WHAT: </span>
+          {adaptation.what}
+        </p>
+        <p className="text-sm text-eos-on-surface-muted">
+          <span className="font-semibold text-eos-on-surface">WHY: </span>
+          {adaptation.why}
+        </p>
+        <p className="text-sm text-eos-on-surface-muted">
+          <span className="font-semibold text-eos-on-surface">DATA: </span>
+          {adaptation.data.join(" · ")}
+        </p>
+        <p className="text-sm">
+          <span className="font-semibold">CONFIDENCE: </span>
+          {adaptation.confidence}
+        </p>
+        <p className="text-xs text-eos-on-surface-muted">
+          {adaptationConfirmed
+            ? `Confirmed for this session · ${adaptation.action} (not auto-applied)`
+            : "Not applied until you confirm. Auto-apply is forbidden."}
+        </p>
+        {adaptation.action !== "KEEP" ? (
+          <button
+            type="button"
+            className="min-h-11 rounded-full border border-eos-voltline px-4 text-xs font-bold uppercase tracking-wide text-eos-voltline disabled:opacity-50"
+            disabled={adaptationConfirmed}
+            onClick={() => setAdaptationConfirmed(true)}
+          >
+            {adaptationConfirmed ? "Confirmed" : "Confirm adaptation"}
+          </button>
         ) : null}
       </div>
 

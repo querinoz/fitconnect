@@ -370,9 +370,12 @@ fun AthleteOsApp(
                             modifier = Modifier.testTag("athlete_bottom_nav"),
                             items = navItems,
                             onTrainClick = {
-                                navController.navigate(AthleteDest.WORKOUT.route)
+                                navController.navigate(AthleteDest.ACTIVITY.route)
                             },
-                            trainSelected = current == AthleteDest.WORKOUT.route,
+                            trainSelected = current == AthleteDest.ACTIVITY.route ||
+                                current == AthleteDest.WORKOUT.route ||
+                                current == AthleteDest.FIGHT.route ||
+                                current == AthleteDest.NUTRITION.route,
                         )
                     }
                 },
@@ -380,9 +383,11 @@ fun AthleteOsApp(
                     if (!hideNav && useRail) {
                         EosTrainActionFab(
                             onClick = {
-                                navController.navigate(AthleteDest.WORKOUT.route)
+                                navController.navigate(AthleteDest.ACTIVITY.route)
                             },
-                            selected = current == AthleteDest.WORKOUT.route,
+                            selected = current == AthleteDest.ACTIVITY.route ||
+                                current == AthleteDest.WORKOUT.route ||
+                                current == AthleteDest.FIGHT.route,
                             modifier = Modifier.testTag("athlete_train_fab"),
                         )
                     }

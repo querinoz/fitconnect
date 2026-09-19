@@ -97,8 +97,12 @@ object SportIntelligenceCatalog {
 
     fun all(): List<SportProfile> = profiles.values.toList()
 
-    fun get(id: SportId): SportProfile? = profiles[id.value]
-        ?: profiles[normalizeAlias(id)]
+    fun get(id: SportId): SportProfile? {
+        val key = SportWireIds.catalogKey(id)
+        return profiles[key]
+            ?: profiles[id.value]
+            ?: profiles[normalizeAlias(id)]
+    }
 
     fun require(id: SportId): SportProfile =
         get(id) ?: error("No SportProfile for ${id.value}")

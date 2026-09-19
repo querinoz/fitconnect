@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -62,6 +63,7 @@ fun HomeScreen(
     onOpenSleep: () -> Unit = {},
     onOpenDaily: () -> Unit = {},
     onOpenVault: () -> Unit = {},
+    onOpenNutrition: () -> Unit = {},
 ) {
     val container = LocalAthleteContainer.current
     val scope = rememberCoroutineScope()
@@ -71,6 +73,7 @@ fun HomeScreen(
     var sessionLocalDemo by remember { mutableStateOf(false) }
     var athleteId by remember { mutableStateOf(LocalAthleteRepository.ATHLETE_ID) }
     var recentSessions by remember { mutableStateOf<List<TodaySessionCardUi>>(emptyList()) }
+    var primarySport by remember { mutableStateOf(SportId.STRENGTH) }
 
     suspend fun loadSessions(includeDemoFallback: Boolean) {
         val uid = container.platform.sessionStore.canonicalAthleteId()
@@ -107,6 +110,10 @@ fun HomeScreen(
             ?.value
             ?.displayName
             ?.uppercase()
+        when (val id = container.sportsIdentity.getIdentity()) {
+            is AppResult.Ok -> id.value.primarySport?.let { primarySport = it }
+            is AppResult.Err -> Unit
+        }
         reload()
         container.platform.productRealtime.start()
     }
@@ -216,9 +223,9 @@ fun HomeScreen(
                 }
             }
             item {
-                val sportRecommendation = remember(readinessUi?.readinessPercent) {
+                val sportRecommendation = remember(readinessUi?.readinessPercent, primarySport) {
                     SportIntelligenceCatalog.recommendToday(
-                        sportId = SportId.STRENGTH,
+                        sportId = primarySport,
                         honesty = SessionHonestyBundle(
                             readiness = honestReadiness(readinessUi?.readinessPercent),
                         ),
@@ -228,6 +235,17 @@ fun HomeScreen(
                     recommendation = sportRecommendation,
                     onStart = onOpenActivity,
                 )
+            }
+            item {
+                EliteCard(onClick = onOpenNutrition) {
+                    EliteSysLabel("NUTRITION INTELLIGENCE")
+                    Text("Targets · meals · grocery", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "ESTIMATE context from sport + readiness. Confirm before log.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
             item {
                 TodaySessionHeroSection(
@@ -251,6 +269,16 @@ fun HomeScreen(
                         variant = EliteButtonVariant.Primary,
                         modifier = Modifier.weight(1f),
                     )
+                    EliteButton(
+                        label = "NUTRITION",
+                        onClick = onOpenNutrition,
+                        variant = EliteButtonVariant.Secondary,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(EliteSpace.Sm)) {
                     EliteButton(
                         label = "PROGRAMS",
                         onClick = onOpenPrograms,

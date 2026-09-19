@@ -62,8 +62,8 @@ android {
         applicationId = "com.fitconnect.android"
         minSdk = 26
         targetSdk = 35
-        versionCode = 16
-        versionName = "0.1.0-rc.1-polish5"
+        versionCode = 17
+        versionName = "0.1.0-rc.1-train-nutrition"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

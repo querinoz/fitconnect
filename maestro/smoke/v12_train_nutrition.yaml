@@ -1,0 +1,87 @@
+appId: com.fitconnect.android
+---
+- launchApp
+- runFlow:
+    when:
+      visible: "Get Started"
+    commands:
+      - tapOn: "Get Started"
+      - extendedWaitUntil:
+          visible: "Continue"
+          timeout: 20000
+      - tapOn: "Continue"
+      - runFlow: ../_unified_email_login_athlete.yaml
+      - repeat:
+          times: 10
+          commands:
+            - runFlow:
+                when:
+                  visible: "Continue"
+                commands:
+                  - tapOn: "Continue"
+            - runFlow:
+                when:
+                  visible: "Skip for now"
+                commands:
+                  - tapOn: "Skip for now"
+            - runFlow:
+                when:
+                  visible:
+                    id: "onboarding_finish"
+                commands:
+                  - tapOn:
+                      id: "onboarding_finish"
+            - runFlow:
+                when:
+                  visible: "Enter Athlete OS"
+                commands:
+                  - tapOn: "Enter Athlete OS"
+- extendedWaitUntil:
+    visible: "TRAIN"
+    timeout: 45000
+- tapOn:
+    id: "athlete_train_fab"
+- extendedWaitUntil:
+    visible: "SPORT IDENTITY"
+    timeout: 25000
+- assertVisible: "PLAN OVERVIEW"
+- takeScreenshot: docs/qa/v12-train-nutrition/02-train-hub
+- scrollUntilVisible:
+    element:
+      id: "train_adaptation_card"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "train_adaptation_card"
+- scrollUntilVisible:
+    element: "OPEN NUTRITION"
+    direction: DOWN
+    timeout: 15000
+- assertVisible: "NUTRITION INTELLIGENCE"
+- tapOn: "OPEN NUTRITION"
+- extendedWaitUntil:
+    visible: "Nutrition Intelligence"
+    timeout: 15000
+- assertVisible:
+    text: ".*TARGETS.*"
+- assertVisible:
+    text: ".*MEALS.*"
+- takeScreenshot: docs/qa/v12-train-nutrition/03-nutrition-from-train
+- back
+- tapOn: "Dashboard"
+- extendedWaitUntil:
+    visible:
+      id: "athlete_home"
+    timeout: 20000
+- takeScreenshot: docs/qa/v12-train-nutrition/04-dashboard
+- scrollUntilVisible:
+    element: "NUTRITION"
+    direction: DOWN
+    timeout: 20000
+- tapOn: "NUTRITION"
+- extendedWaitUntil:
+    visible: "Nutrition Intelligence"
+    timeout: 15000
+- assertVisible:
+    text: ".*FOOD SEARCH.*"
+- takeScreenshot: docs/qa/v12-train-nutrition/05-nutrition-from-dashboard

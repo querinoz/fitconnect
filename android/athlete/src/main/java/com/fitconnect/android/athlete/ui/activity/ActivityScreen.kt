@@ -34,11 +34,16 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.fitconnect.android.athlete.ascend.ActivityAscendBridge
 import com.fitconnect.android.athlete.data.LocalAthleteRepository
+import com.fitconnect.android.athlete.data.canonicalAthleteId
 import com.fitconnect.android.athlete.demo.AthleteContentResolver
 import com.fitconnect.android.athlete.demo.AthleteDemoBanner
 import com.fitconnect.android.athlete.demo.AthleteDemoCatalog
+import com.fitconnect.android.athlete.domain.AthleteDataProvenance
+import com.fitconnect.android.athlete.domain.Provenanced
 import com.fitconnect.android.athlete.ui.LocalAthleteContainer
 import com.fitconnect.android.athlete.ui.components.AthleteScreenScaffold
+import com.fitconnect.android.athlete.ui.home.honestReadiness
+import com.fitconnect.android.athlete.ui.train.TrainIntelligenceHub
 import com.fitconnect.android.capture.GpsFeedStatus
 import com.fitconnect.android.capture.LiveActivityEngine
 import com.fitconnect.android.capture.LiveActivityPhase
@@ -86,6 +91,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun ActivityScreen(
     onOpenRouteDetail: (activityId: String) -> Unit = {},
+    onOpenNutrition: () -> Unit = {},
+    onOpenGuided: () -> Unit = {},
+    onOpenFight: () -> Unit = {},
 ) {
     val container = LocalAthleteContainer.current
     val engine = container.liveActivity
@@ -100,6 +108,19 @@ fun ActivityScreen(
     var processedSession by remember { mutableStateOf<String?>(null) }
     val locale by container.platform.localeManager.observe().collectAsState(initial = AppLocale.EN)
     val context = LocalContext.current
+    var hubReadiness by remember { mutableStateOf<Provenanced<Int>?>(null) }
+
+    LaunchedEffect(Unit) {
+        val uid = container.platform.sessionStore.canonicalAthleteId()
+        val home = container.athleteRepository.home()
+        if (home is AppResult.Ok) {
+            hubReadiness = AthleteContentResolver.todayReadiness(
+                athleteId = uid,
+                home = home.value,
+                telemetry = container.telemetry.athleteFacade,
+            )?.readinessPercent
+        }
+    }
 
     val outdoor = container.outdoorCapture
     val outdoorState by outdoor.state.collectAsState()
@@ -471,6 +492,17 @@ fun ActivityScreen(
                 visible = !container.platform.config.visualQaChromeDiet && trainUi.isDemoCapture,
                 modifier = Modifier.testTag("activity_demo_banner"),
             )
+        }
+        if (snap.phase == LiveActivityPhase.IDLE) {
+            item {
+                TrainIntelligenceHub(
+                    readinessProvenanced = hubReadiness,
+                    onStartFreeSession = { /* free-session Start controls remain below */ },
+                    onStartGuided = onOpenGuided,
+                    onOpenFight = onOpenFight,
+                    onOpenNutrition = onOpenNutrition,
+                )
+            }
         }
         item {
             EosPremiumCard(modifier = Modifier.fillMaxWidth()) {

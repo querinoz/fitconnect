@@ -38,10 +38,14 @@ class HttpSportsIdentityRemote(
         secondarySports: List<String> = emptyList(),
     ): AppResult<AthleteSportsIdentity> {
         val body = JSONObject().apply {
-            put("primarySport", primarySport)
+            // Web registry expects UPPER_SNAKE wire ids.
+            put("primarySport", SportWireIds.toWire(SportWireIds.fromWire(primarySport)))
             if (primaryGoal != null) put("primaryGoal", primaryGoal)
             if (sportLevel != null) put("sportLevel", sportLevel)
-            put("secondarySports", JSONArray(secondarySports))
+            put(
+                "secondarySports",
+                JSONArray(secondarySports.map { SportWireIds.toWire(SportWireIds.fromWire(it)) }),
+            )
         }
         return when (val result = api().put("/api/v1/sports/identity", body.toString())) {
             is AppResult.Err -> result
@@ -59,7 +63,7 @@ class HttpSportsIdentityRemote(
             if (arr != null) {
                 for (i in 0 until arr.length()) {
                     val id = arr.optString(i)
-                    if (id.isNotBlank()) secondary += SportId(id)
+                    if (id.isNotBlank()) secondary += SportWireIds.fromWire(id)
                 }
             }
             val missing = mutableListOf<String>()
@@ -71,7 +75,7 @@ class HttpSportsIdentityRemote(
             }
             AppResult.Ok(
                 AthleteSportsIdentity(
-                    primarySport = primary?.let { SportId(it) },
+                    primarySport = primary?.let { SportWireIds.fromWire(it) },
                     secondarySports = secondary,
                     primaryGoal = profile.optString("primaryGoal", "").takeIf { it.isNotBlank() },
                     sportLevel = profile.optString("sportLevel", "").takeIf { it.isNotBlank() },
