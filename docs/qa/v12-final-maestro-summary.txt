@@ -1,0 +1,5 @@
+maestro/smoke/v12_ia_a_sport.yaml EXIT=0
+maestro/smoke/v12_ia_b_plan.yaml EXIT=0
+maestro/smoke/v12_ia_c_nutrition.yaml EXIT=0
+maestro/smoke/v12_ia_d_gps.yaml EXIT=0
+MISSING maestro/smoke/v12_ia_e_domain_separation.yaml
