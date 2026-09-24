@@ -692,3 +692,22 @@ must be read as "optional Lighthouse failed", not "CI blocked".
 **Risk:** HC write API without Settings toggle could be miswired to silent write — mitigated by `userOptIn` required true and NOT_OPTED_IN default path.
 
 **Validation:** Android unit tests (rest/export/HC mapper) PASS; web `elite-os.test.tsx` 8/8 PASS including ZenithGlass.
+
+---
+
+## Decision — Sports Intelligence Map extends training_spots (not a second spots DB)
+
+**Date:** 2026-09-24 · **Area:** maps / geo
+
+**Problem:** Mega-prompt asked for a Spots platform while MapLibre + `training_spots` + privacy views already exist; in-memory `/api/v1/network` was a parallel store.
+
+**Options considered:**
+1. New `spots` table + PostGIS mandatory.
+2. Extend `training_spots` (021/033/034), add `037` intelligence columns + haversine, wire `/api/v1/spots` + Geoapify server proxy, athlete `/map` uses real viewport queries (no DEMO_HOTSPOTS).
+3. Keep DEMO_HOTSPOTS as product data — rejected (fake data).
+
+**Selected:** 2.
+
+**Why:** Preserves RLS/privacy invariants; PostGIS optional later; OpenFreeMap stays swappable via `MAP_STYLE_URL`; Geoapify key stays server-only.
+
+**Validation:** `lib/spots/spots.test.ts` 5/5 PASS; web `tsc --noEmit` PASS.

@@ -1,7 +1,7 @@
 "use client";
 
 import { AuthGate } from "@/components/auth-gate";
-import { FitConnectMap } from "@/components/map/fit-connect-map";
+import { SportsIntelligenceMap } from "@/components/map/sports-intelligence-map";
 import { EliteAppPage } from "@/components/shell/elite";
 import { useLocale } from "@/lib/i18n-provider";
 
@@ -11,14 +11,10 @@ function MapPageBody() {
   return (
     <EliteAppPage
       eyebrow={hub.map.title}
-      title={dashboard.map.title}
+      title="Sports Intelligence Map"
       subtitle={dashboard.map.subtitle}
     >
-      <FitConnectMap
-        mode="athlete"
-        height="min(70vh, 560px)"
-        className="overflow-hidden rounded-[var(--eos-radius-card)] border border-eos-outline"
-      />
+      <SportsIntelligenceMap height="min(72vh, 640px)" />
     </EliteAppPage>
   );
 }
