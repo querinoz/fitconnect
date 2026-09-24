@@ -144,6 +144,31 @@ fun SettingsScreen(
         item {
             EliteCard {
                 EliteStack {
+                    Text("Health Connect", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "When enabled, completed guided workouts can be written to Health Connect. Off by default — FitConnect never writes silently.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    val hcWriteOptIn by container.fitness.healthConnectWritePrefs.observeOptIn()
+                        .collectAsState(initial = false)
+                    EliteSwitch(
+                        checked = hcWriteOptIn,
+                        onCheckedChange = { enabled ->
+                            scope.launch {
+                                container.fitness.healthConnectWritePrefs.setOptIn(enabled)
+                            }
+                        },
+                        modifier = Modifier
+                            .testTag("athlete_hc_write_opt_in")
+                            .semantics { contentDescription = "Write completed workouts to Health Connect" },
+                    )
+                }
+            }
+        }
+        item {
+            EliteCard {
+                EliteStack {
                     Text("Notifications", style = MaterialTheme.typography.titleMedium)
                     Text(
                         "Push uses FCM when google-services.json is present. Device delivery remains PENDING_HUMAN until Firebase Console + Play credentials exist.",

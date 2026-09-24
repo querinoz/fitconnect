@@ -34,4 +34,19 @@ object SyncStatusVocabulary {
             SyncLifecycleStatus.FAILED_PERMANENT,
             SyncLifecycleStatus.CONFLICT -> SyncUiStatus.SYNC_ERROR
         }
+
+    /** Athlete-facing chip / status line — never invent success. */
+    fun label(status: SyncLifecycleStatus): String =
+        when (status) {
+            SyncLifecycleStatus.LOCAL_ONLY -> "On device"
+            SyncLifecycleStatus.QUEUED -> "Queued"
+            SyncLifecycleStatus.SYNCING -> "Syncing"
+            SyncLifecycleStatus.SYNCED -> "Synced"
+            SyncLifecycleStatus.FAILED_RETRYABLE -> "Retry sync"
+            SyncLifecycleStatus.FAILED_PERMANENT -> "Sync failed"
+            SyncLifecycleStatus.CONFLICT -> "Conflict — review"
+        }
+
+    fun labelFromUi(status: SyncUiStatus, retryable: Boolean = true): String =
+        label(fromUi(status, retryable))
 }

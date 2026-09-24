@@ -34,9 +34,15 @@ import com.fitconnect.android.geo.booking.HttpBookingRemote
 import com.fitconnect.android.geo.booking.PrefsBookingBlobBackend
 import com.fitconnect.android.geo.di.DefaultGeoContainer
 import com.fitconnect.android.geo.di.GeoContainer
+import com.fitconnect.android.sports.guided.completion.GuidedCompletionSideEffect
 import com.fitconnect.android.sports.guided.notifications.GatewayWorkoutNotificationPort
 import com.fitconnect.android.sports.guided.runtime.GuidedWorkoutRuntime
 import com.fitconnect.android.sports.guided.store.room.createRoomGuidedWorkoutStore
+import com.fitconnect.android.fitness.domain.Sport
+import com.fitconnect.android.fitness.domain.WorkoutSession
+import com.fitconnect.android.fitness.healthconnect.AndroidHealthConnectPermissionGateway
+import com.fitconnect.android.fitness.healthconnect.HealthConnectExerciseSessionWriter
+import com.fitconnect.android.fitness.healthconnect.HealthConnectWritePrefs
 import com.fitconnect.android.capture.store.GpsRouteStore
 import com.fitconnect.android.capture.store.RoomGpsRouteStore
 import com.fitconnect.android.capture.store.room.CaptureRoomDatabase
@@ -107,6 +113,29 @@ class FitConnectApplication : Application() {
                 offline = container.offline,
                 syncQueue = container.syncQueue,
                 notifications = GatewayWorkoutNotificationPort(container.notifications),
+                completionSideEffect = GuidedCompletionSideEffect { snapshot ->
+                    val prefs = HealthConnectWritePrefs(container.keyValueStore)
+                    if (!prefs.isOptedIn()) return@GuidedCompletionSideEffect
+                    val started = snapshot.startedAtMs ?: return@GuidedCompletionSideEffect
+                    val ended = snapshot.completedAtMs ?: started
+                    if (ended <= started) return@GuidedCompletionSideEffect
+                    val writer = HealthConnectExerciseSessionWriter(
+                        context = this@FitConnectApplication,
+                        permissionGateway = AndroidHealthConnectPermissionGateway(this@FitConnectApplication),
+                    )
+                    writer.writeCompleted(
+                        session = WorkoutSession(
+                            id = snapshot.sessionId,
+                            userId = snapshot.userId,
+                            providerId = com.fitconnect.shared.fitness.ProviderId.HEALTH_CONNECT,
+                            externalId = snapshot.sessionId,
+                            sport = Sport.STRENGTH,
+                            startedAtEpochMs = started,
+                            endedAtEpochMs = ended,
+                        ),
+                        userOptIn = true,
+                    )
+                },
             ).also {
                 guidedWorkoutRef = it
                 startupTracer.mark("guided_workout_ready")
@@ -189,9 +218,13 @@ class FitConnectApplication : Application() {
                 geoContainer,
                 telemetryContainer,
                 aiContainer,
-                fitness = DefaultFitnessContainer(this) {
-                    com.fitconnect.android.athlete.data.LocalAthleteRepository.ATHLETE_ID
-                },
+                fitness = DefaultFitnessContainer(
+                    this,
+                    userId = {
+                        com.fitconnect.android.athlete.data.LocalAthleteRepository.ATHLETE_ID
+                    },
+                    keyValueStore = container.keyValueStore,
+                ),
                 ascend = ascendEngine,
                 guidedWorkout = guidedWorkout,
                 gpsRouteStore = gpsRouteStore,

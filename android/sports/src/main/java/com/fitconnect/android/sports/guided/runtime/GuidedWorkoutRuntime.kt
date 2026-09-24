@@ -10,6 +10,8 @@ import com.fitconnect.android.foundation.session.SessionStore
 import com.fitconnect.android.sports.guided.catalog.DefaultGuidedPlan
 import com.fitconnect.android.sports.guided.catalog.GuidedPlanCatalog
 import com.fitconnect.android.sports.guided.completion.ActivityCompletionFactory
+import com.fitconnect.android.sports.guided.completion.GuidedCompletionSideEffect
+import com.fitconnect.android.sports.guided.completion.NoOpGuidedCompletionSideEffect
 import com.fitconnect.android.sports.guided.domain.FakeWorkoutClock
 import com.fitconnect.android.sports.guided.domain.GuidedSessionSnapshot
 import com.fitconnect.android.sports.guided.domain.PendingSyncRecord
@@ -46,6 +48,7 @@ class GuidedWorkoutRuntime(
     private val syncQueue: SyncQueue? = null,
     private val clock: WorkoutClock = SystemWorkoutClock,
     private val notifications: WorkoutNotificationPort = NoOpWorkoutNotificationPort,
+    private val completionSideEffect: GuidedCompletionSideEffect = NoOpGuidedCompletionSideEffect,
     private val idFactory: () -> String = { UUID.randomUUID().toString() },
 ) {
     private val mutex = Mutex()
@@ -387,6 +390,10 @@ class GuidedWorkoutRuntime(
             ),
         )
         WorkoutLog.event(logger, "activity_sync_started", snapshot.sessionId)
+        runCatching { completionSideEffect.onSessionCompleted(snapshot) }
+            .onFailure { err ->
+                logger.w("GuidedWorkout", "completion side-effect failed: ${err.message}", err)
+            }
         val pending = WorkoutSessionMachine.reduce(
             snapshot,
             WorkoutCommand.MarkSyncPending(completion.activityId),

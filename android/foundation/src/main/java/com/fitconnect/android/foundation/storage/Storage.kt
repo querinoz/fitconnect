@@ -32,6 +32,11 @@ object PreferenceKeys {
     val PROFILE_BANNER_PATH = stringPreferencesKey("profile.banner_path")
     /** Active Training Sport wire/local id — session fallback when identity API unreachable. */
     val ACTIVE_TRAINING_SPORT = stringPreferencesKey("train.active_sport")
+    /**
+     * Explicit opt-in to write completed workouts to Health Connect.
+     * Values: "true" | "false" | absent (= false). Never write when absent/false.
+     */
+    val HEALTH_CONNECT_WRITE_OPT_IN = stringPreferencesKey("hc.write_opt_in")
 
     fun flagKey(flag: String) = stringPreferencesKey("flag.$flag")
     fun identityRoleSelected(uid: String) = stringPreferencesKey("identity.role_selected.$uid")

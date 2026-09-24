@@ -57,7 +57,7 @@
 | Xiaomi ADB physical | blocked-external |
 | Play signing keystore | human-required |
 | Production deploy of V12 APIs/routes | human-required / CI |
-| Wire HC write opt-in toggle in athlete Settings UI | pending |
+| Wire HC write opt-in toggle in athlete Settings UI | **done** (`athlete_hc_write_opt_in` + completion side-effect) |
 | Rest notification POST_NOTIFICATIONS runtime prompt QA | pending (device) |
 
 ## Done definition (ecosystem)
