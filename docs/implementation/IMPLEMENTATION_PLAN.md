@@ -27,7 +27,7 @@
 
 | Item | Status |
 | --- | --- |
-| Sync state vocabulary tests | pending |
+| Sync state vocabulary tests | **done** (`SyncStatusVocabulary` + unit test) |
 | Rest timer notification | pending |
 | Health Connect workout write | pending |
 | WorkoutShareCard confirm-gated | pending |
