@@ -439,6 +439,45 @@ body {
   border: 1px solid var(--eos-glass-border);
 }
 
+/* ZenithGlass — selective premium glass with hard fallback (no QuickLiquid required). */
+.zenith-glass {
+  position: relative;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--eos-voltline) 12%, transparent),
+    0 12px 40px color-mix(in srgb, #000 45%, transparent);
+}
+
+.zenith-glass[data-intensity="subtle"] {
+  --eos-glass-blur: 10px;
+  background: color-mix(in srgb, var(--eos-floor) 72%, transparent);
+}
+
+.zenith-glass[data-intensity="standard"] {
+  --eos-glass-blur: 16px;
+  background: color-mix(in srgb, var(--eos-floor) 58%, transparent);
+}
+
+.zenith-glass[data-intensity="premium"] {
+  --eos-glass-blur: 22px;
+  background: color-mix(in srgb, var(--eos-floor) 48%, transparent);
+}
+
+.zenith-glass[data-floating="true"] {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--eos-telemetry) 18%, transparent),
+    0 18px 48px color-mix(in srgb, #000 55%, transparent);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .zenith-glass,
+  .eos-glass.zenith-glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: color-mix(in srgb, var(--eos-floor) 92%, var(--eos-elevation-1));
+    border-color: color-mix(in srgb, var(--eos-outline) 80%, var(--eos-voltline));
+  }
+}
+
 /* ── Bento card ── */
 .eos-bento-card {
   position: relative;

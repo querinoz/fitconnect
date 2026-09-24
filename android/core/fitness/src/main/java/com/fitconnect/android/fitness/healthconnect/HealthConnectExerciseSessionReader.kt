@@ -58,7 +58,11 @@ class HealthConnectExerciseSessionReader(
         val token = hc.getChangesToken(
             ChangesTokenRequest(setOf(ExerciseSessionRecord::class)),
         )
-        return response.records.map { it.toDto() } to token
+        // Skip FitConnect-originated writes to avoid FitConnect → HC → FitConnect loops.
+        val sessions = response.records
+            .filterNot { HealthConnectWriteMapper.isFitConnectOrigin(it.metadata.clientRecordId) }
+            .map { it.toDto() }
+        return sessions to token
     }
 
     private suspend fun incrementalChanges(
@@ -68,7 +72,9 @@ class HealthConnectExerciseSessionReader(
         val changes = hc.getChanges(token)
         val sessions = changes.changes.mapNotNull { change ->
             when (change) {
-                is UpsertionChange -> (change.record as? ExerciseSessionRecord)?.toDto()
+                is UpsertionChange -> (change.record as? ExerciseSessionRecord)
+                    ?.takeUnless { HealthConnectWriteMapper.isFitConnectOrigin(it.metadata.clientRecordId) }
+                    ?.toDto()
                 is DeletionChange -> null
                 else -> null
             }

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { BentoCard, EliteButton, EliteChip, LabelCaps, MetricDisplay, CornerTicks, CrosshairBg, EliteReadinessNeumorphic } from "@/components/elite-os";
+import { BentoCard, EliteButton, EliteChip, LabelCaps, MetricDisplay, CornerTicks, CrosshairBg, EliteReadinessNeumorphic, ZenithGlass } from "@/components/elite-os";
 
 describe("Elite OS design system", () => {
   it("renders bento card with telemetry label", () => {
@@ -11,6 +11,20 @@ describe("Elite OS design system", () => {
     );
     expect(screen.getByText("Readiness")).toBeInTheDocument();
     expect(screen.getByText("82")).toBeInTheDocument();
+  });
+
+  it("renders ZenithGlass with intensity and fallback class", () => {
+    const { container } = render(
+      <ZenithGlass intensity="premium" floating data-testid="zenith-glass">
+        Command
+      </ZenithGlass>
+    );
+    const el = screen.getByTestId("zenith-glass");
+    expect(el).toHaveClass("zenith-glass");
+    expect(el).toHaveAttribute("data-intensity", "premium");
+    expect(el).toHaveAttribute("data-floating", "true");
+    expect(container.querySelector(".eos-glass")).toBeTruthy();
+    expect(screen.getByText("Command")).toBeInTheDocument();
   });
 
   it("renders primary elite button", () => {

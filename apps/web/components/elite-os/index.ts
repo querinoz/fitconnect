@@ -1,6 +1,8 @@
 export { EliteButton } from "./elite-button";
 export { BentoCard } from "./bento-card";
 export { EliteGlass } from "./elite-glass";
+export { ZenithGlass } from "./zenith-glass";
+export type { ZenithGlassProps, ZenithGlassIntensity } from "./zenith-glass";
 export { EliteInput } from "./elite-input";
 export { EliteChip } from "./elite-chip";
 export { LabelCaps, MetricDisplay, DisplayTitle, Headline, BodyText } from "./typography";

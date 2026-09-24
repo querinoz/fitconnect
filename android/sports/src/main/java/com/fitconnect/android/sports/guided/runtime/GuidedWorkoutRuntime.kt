@@ -22,9 +22,12 @@ import com.fitconnect.android.sports.guided.domain.WorkoutIds
 import com.fitconnect.android.sports.guided.domain.WorkoutPhase
 import com.fitconnect.android.sports.guided.machine.WorkoutSessionMachine
 import com.fitconnect.android.sports.guided.notifications.NoOpWorkoutNotificationPort
+import com.fitconnect.android.sports.guided.notifications.RestTimerNotificationEvent
+import com.fitconnect.android.sports.guided.notifications.RestTimerNotificationState
 import com.fitconnect.android.sports.guided.notifications.WorkoutNotificationPort
 import com.fitconnect.android.sports.guided.observability.WorkoutLog
 import com.fitconnect.android.sports.guided.store.GuidedWorkoutStore
+import com.fitconnect.android.sports.guided.timer.MonotonicTimer
 import com.fitconnect.android.sports.progression.PreviousSetPerformance
 import com.fitconnect.android.sports.progression.ProgressionEngine
 import com.fitconnect.android.sports.progression.ProgressionInput
@@ -204,6 +207,7 @@ class GuidedWorkoutRuntime(
     private suspend fun persistUnlocked(
         result: com.fitconnect.android.sports.guided.domain.ReduceResult,
     ): AppResult<GuidedSessionSnapshot> {
+        val before = _snapshot.value
         var snapshot = result.snapshot
         if (snapshot.phase == WorkoutPhase.COMPLETED && snapshot.progressionRationale == null) {
             snapshot = applyProgression(snapshot)
@@ -212,10 +216,95 @@ class GuidedWorkoutRuntime(
         store.appendEvents(result.events)
         result.events.forEach { WorkoutLog.event(logger, it.type, snapshot.sessionId) }
         _snapshot.value = snapshot.copy(lastError = result.rejected ?: snapshot.lastError)
+        if (result.rejected == null) {
+            emitRestTimerNotification(before, snapshot, result.events.map { it.type })
+        }
         if (result.rejected != null) {
             return AppResult.Err(com.fitconnect.android.foundation.common.AppError.Unexpected(result.rejected))
         }
         return AppResult.Ok(snapshot)
+    }
+
+    /**
+     * Bridges RestTimerState machine phases to a single notification id per session.
+     * Skip → CANCELLED; natural rest expiry → COMPLETED; pause/resume keep the same tray entry.
+     */
+    private suspend fun emitRestTimerNotification(
+        before: GuidedSessionSnapshot,
+        after: GuidedSessionSnapshot,
+        eventTypes: List<String>,
+    ) {
+        val sessionId = after.sessionId.ifBlank { before.sessionId }
+        if (sessionId.isBlank()) return
+
+        val skipped = "rest_skipped" in eventTypes
+        val finishedWorkout = after.phase == WorkoutPhase.COMPLETED ||
+            after.phase == WorkoutPhase.COMPLETING ||
+            after.phase == WorkoutPhase.SYNC_PENDING ||
+            after.phase == WorkoutPhase.SYNCED
+
+        when {
+            after.phase == WorkoutPhase.REST -> {
+                val rest = after.rest ?: return
+                notifications.restTimer(
+                    RestTimerNotificationEvent(
+                        sessionId = sessionId,
+                        state = RestTimerNotificationState.RUNNING,
+                        remainingMs = MonotonicTimer.restRemaining(rest, clock),
+                        durationMs = rest.durationMs,
+                    ),
+                )
+            }
+            after.phase == WorkoutPhase.PAUSED && after.pausedFrom == WorkoutPhase.REST -> {
+                val rest = after.rest
+                notifications.restTimer(
+                    RestTimerNotificationEvent(
+                        sessionId = sessionId,
+                        state = RestTimerNotificationState.PAUSED,
+                        remainingMs = rest?.remainingMs ?: 0L,
+                        durationMs = rest?.durationMs ?: 0L,
+                    ),
+                )
+            }
+            after.phase == WorkoutPhase.INTERRUPTED && after.pausedFrom == WorkoutPhase.REST -> {
+                notifications.restTimer(
+                    RestTimerNotificationEvent(
+                        sessionId = sessionId,
+                        state = RestTimerNotificationState.PAUSED,
+                        remainingMs = after.rest?.remainingMs ?: 0L,
+                        durationMs = after.rest?.durationMs ?: 0L,
+                    ),
+                )
+            }
+            skipped -> {
+                notifications.restTimer(
+                    RestTimerNotificationEvent(
+                        sessionId = sessionId,
+                        state = RestTimerNotificationState.CANCELLED,
+                    ),
+                )
+            }
+            before.phase == WorkoutPhase.REST &&
+                after.phase != WorkoutPhase.REST &&
+                after.phase != WorkoutPhase.PAUSED &&
+                after.phase != WorkoutPhase.INTERRUPTED -> {
+                notifications.restTimer(
+                    RestTimerNotificationEvent(
+                        sessionId = sessionId,
+                        state = RestTimerNotificationState.COMPLETED,
+                    ),
+                )
+            }
+            finishedWorkout &&
+                (before.phase == WorkoutPhase.REST || before.pausedFrom == WorkoutPhase.REST) -> {
+                notifications.restTimer(
+                    RestTimerNotificationEvent(
+                        sessionId = sessionId,
+                        state = RestTimerNotificationState.CANCELLED,
+                    ),
+                )
+            }
+        }
     }
 
     private fun applyProgression(snapshot: GuidedSessionSnapshot): GuidedSessionSnapshot {

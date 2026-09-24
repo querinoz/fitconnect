@@ -30,12 +30,13 @@
 
 ## P0/P1 backlog (implementation)
 
-1. **P0** Document + unit-test sync state mapping (no behavior break)  
-2. **P1** Rest-timer local notification  
-3. **P1** Health Connect write ExerciseSession (opt-in; no duplicate loops)  
-4. **P1** Confirm-gated WorkoutShareCard (authorized fields only)  
-5. **P2** Export/import ZIP for guided sessions  
-6. **P2** Conflict UI when dual-device edits collide  
+1. **P0** Document + unit-test sync state mapping (no behavior break) — **DONE**
+2. **P1** Rest-timer local notification — **DONE** (`GatewayWorkoutNotificationPort` + `GuidedWorkoutRuntime` bridge)
+3. **P1** Health Connect write ExerciseSession (opt-in; no duplicate loops) — **DONE** (writer + reader filter; Settings UI consent still pending)
+4. **P1** Confirm-gated WorkoutShareCard (authorized fields only) — **DONE** (domain PRIVATE default)
+5. **P1** Export CSV/JSON/ZIP for guided sessions — **DONE** (`GuidedWorkoutExporter`)
+6. **P2** Conflict UI when dual-device edits collide
+7. **P2** Athlete Settings toggle → `ExerciseSessionWriter.writeCompleted(..., userOptIn=true)` 
 
 ## Explicit non-goals
 

@@ -28,17 +28,17 @@
 | Item | Status |
 | --- | --- |
 | Sync state vocabulary tests | **done** (`SyncStatusVocabulary` + unit test) |
-| Rest timer notification | pending |
-| Health Connect workout write | pending |
-| WorkoutShareCard confirm-gated | pending |
-| Export ZIP harden | pending |
+| Rest timer notification | **done** (`WorkoutNotificationPort.restTimer` + runtime bridge + unit tests) |
+| Health Connect workout write | **done** (opt-in writer + loop filter on reader + unit tests; UI consent surface pending) |
+| WorkoutShareCard confirm-gated | **done** (domain + PRIVATE default + confirmShare) |
+| Export ZIP harden | **done** (`GuidedWorkoutExporter` JSON/CSV/ZIP + multi-session manifest) |
 
 ## Phase 3 — Web glass (selective)
 
 | Item | Status |
 | --- | --- |
-| `ZenithGlass` abstraction | pending |
-| QuickLiquid MIT evaluate + integrate (nav/FAB only) | pending |
+| `ZenithGlass` abstraction | **done** (native frost + `@supports` fallback; QuickLiquid not required) |
+| QuickLiquid MIT evaluate + integrate (nav/FAB only) | pending (optional enhancement) |
 | OriginKit targeted fetch (API key / daily limit) | human-required if key needed |
 | Lighthouse ≥90 campaign | pending (prod still behind branch) |
 
@@ -57,6 +57,8 @@
 | Xiaomi ADB physical | blocked-external |
 | Play signing keystore | human-required |
 | Production deploy of V12 APIs/routes | human-required / CI |
+| Wire HC write opt-in toggle in athlete Settings UI | pending |
+| Rest notification POST_NOTIFICATIONS runtime prompt QA | pending (device) |
 
 ## Done definition (ecosystem)
 

@@ -671,3 +671,24 @@ seo **92** versus mins 84 / 90 / 95 / 95.
 **Why:** (1) hides a real score miss. (2) is weakening a stated gate without a landing
 perf program. Release-gate already encodes which jobs are required. Workflow-level red
 must be read as "optional Lighthouse failed", not "CI blocked".
+
+---
+
+## Decision — Phase 1 extend guided stack; ZenithGlass before QuickLiquid
+
+**Date:** 2026-09-24 · **Area:** offline training / web glass
+
+**Problem:** Mega-prompt asked for rest notifications, HC write, share, export, and QuickLiquid glass without duplicating engines.
+
+**Options considered:**
+1. New offline DB + timer service.
+2. Extend `GuidedWorkoutRuntime` / `WorkoutNotificationPort` / HC reader-writer; native `ZenithGlass` before vendoring QuickLiquid.
+3. Copy GymMane timer/UX code (GPL) — rejected.
+
+**Selected:** 2.
+
+**Why:** Room guided path already covers persist/reboot/outbox. QuickLiquid is optional enhancement; frost `@supports` fallback must ship first so UI never breaks.
+
+**Risk:** HC write API without Settings toggle could be miswired to silent write — mitigated by `userOptIn` required true and NOT_OPTED_IN default path.
+
+**Validation:** Android unit tests (rest/export/HC mapper) PASS; web `elite-os.test.tsx` 8/8 PASS including ZenithGlass.

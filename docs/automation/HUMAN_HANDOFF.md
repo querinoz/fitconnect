@@ -1,56 +1,23 @@
 # FitConnect Human Handoff
 
-**Rewritten 2026-09-12 after Cursor recovered the shell.** Engineering that can run in
-the repo is no longer blocked. What remains is secrets, dashboards, devices, and
-irreversible promotion.
+**Updated:** 2026-09-24 · Branch `feat/fitconnect-roadmap-v10-v11`
+
+Engineering continues on the V10–V12 tip. Do **not** reset onto `feat/elite-os-v2`.
 
 ---
 
-## What Cursor did
+## Human Required (genuine)
 
-Workspace `D:\fitconnect`, branch `feat/elite-os-v2`, remote
-`https://github.com/querinoz/fitconnect.git`.
-
-Local gates: typecheck, lint, unit (524), auth-prod (76), production-critical audit (0),
-Next 15.5.25 build, schema reconcile (0 errors), CI validator (0 errors).
-
-The previous claim that "no git, in any session" is **obsolete**.
-
----
-
-## Human Required (ordered)
-
-1. **Rotate `STRAVA_CLIENT_SECRET`.** Precautionary. `StravaConnection` has 0 rows; this
-   is not incident response. Update GitHub/Vercel secrets after rotation.
-2. **Enable Supabase leaked-password protection** in the dashboard.
-3. **Map visual smoke** on `/map` after MapLibre 6.9.0 (markers, locate/`flyTo`,
-   OpenFreeMap attribution).
-4. **Physical Android** — install the new debug APK; ONE LOGIN, Feed, Profile, Athlete,
-   Coach, mode switch. If MIUI blocks taps, that step stays human.
-5. **Vercel production promotion** — required GitHub **release-gate is green** on
-   `14827a3` (run `34682319883`). Lighthouse mobile is still FAIL. A human must accept
-   that optional miss or wait for landing perf/a11y/seo work before promoting. Do not
-   promote automatically if the SHA is not the intended release.
-6. **Triage 22 production high advisories** when convenient (`fast-uri`, `sharp`, …) —
-   not release-blocking (criticals are 0).
+1. **Xiaomi physical ADB** — USB “Unauthorized” / MIUI input blocks. Wi‑Fi HTTP APK handoff works; full Maestro on device needs authorized ADB.
+2. **Play App Signing / upload keystore** — `assembleRelease` SIGN-02 not verified without keystore secrets.
+3. **Rotate `STRAVA_CLIENT_SECRET`** — preventive; `StravaConnection` = 0 rows (not a breach).
+4. **Vercel production promote** of V12 routes (`/nutrition`, `/ascend`, V10–V12 APIs) after required CI green on this branch tip.
+5. **Cursor skill installs** (Superpowers / Matt TDD) on the developer machine — not vendored into the app.
+6. **POST_NOTIFICATIONS** runtime grant on a physical device to visually confirm rest-timer tray updates.
+7. **Health Connect write consent UX** — product copy for Settings toggle (engineering API ready; do not silent-write).
 
 ---
 
-## Not human, not blocked
+## Not blocked for Cursor
 
-- Applying `ci.yml`
-- `pnpm` install / typecheck / lint / test / build
-- Schema reconcile against production (read-only script)
-- Commit and push to `feat/elite-os-v2`
-- Reading and fixing GitHub CI
-
-Those belong to Cursor's loop.
-
----
-
-## Classification that must not regress
-
-- Empty Strava tables ≠ breach.
-- `android.yml` 50-second Success on an unrelated path filter ≠ Android build.
-- Playwright green under `NEXT_PUBLIC_DEMO_MODE=true` ≠ production auth evidence.
-- SKIPPED ≠ PASS.
+Rest notifications · HC writer · share card domain · guided export · ZenithGlass · sync vocabulary · further web Lighthouse / Wear audits.

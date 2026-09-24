@@ -33,6 +33,10 @@ object HealthConnectPermissionMapper {
             .map { HealthPermission.getReadPermission(it) }
             .toSet()
 
+    /** Explicit WRITE for completed workouts — never bundled into silent onboarding. */
+    fun writePermissionsForExerciseSession(): Set<String> =
+        setOf(HealthPermission.getWritePermission(ExerciseSessionRecord::class))
+
     fun accessPermissions(): Set<String> = setOf(
         HealthPermission.PERMISSION_READ_HEALTH_DATA_HISTORY,
         HealthPermission.PERMISSION_READ_HEALTH_DATA_IN_BACKGROUND,

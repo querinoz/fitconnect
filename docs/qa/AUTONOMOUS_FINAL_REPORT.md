@@ -1,52 +1,51 @@
-# Autonomous final report — Zenith ecosystem Phase 0
+# Autonomous final report — Zenith Phase 0 + Phase 1 offline
 
 **Date:** 2026-09-24  
-**Git tip:** `6b97698` on `feat/fitconnect-roadmap-v10-v11`  
-**Prompt requested branch:** `feat/elite-os-v2` — **not switched** (would discard V12 lineage context); merge later deliberately.
+**Branch:** `feat/fitconnect-roadmap-v10-v11`  
+**Baseline before Phase 1:** `a092912`  
+**Do not switch to:** `feat/elite-os-v2`
 
-## Research
+## Executed phases
 
-Adopted user’s architecture: Process (Superpowers/Matt/Karpathy) · Product (Compose/M3, Wear M3, iOS HIG, Web QuickLiquid) · Reference (GymMane/AppShot/Component Gallery).  
-GymMane confirmed GPL-3.0 + CC BY-SA art → **reference only**.
-
-## Delivered this phase
-
-| Artifact | Path |
+| Phase | Status |
 | --- | --- |
-| Legal matrix | `docs/legal/THIRD_PARTY_COMPONENT_MATRIX.md` |
-| GymMane analysis | `docs/research/GYMMANE_FEATURE_ANALYSIS.md` |
-| Skills matrix | `docs/architecture/AGENT_SKILLS_MATRIX.md` |
-| Design contract | `docs/design/CROSS_PLATFORM_DESIGN_CONTRACT.md` |
-| Offline gap map | `docs/implementation/OFFLINE_TRAINING_GAP_MAP.md` |
-| Living plan | `docs/implementation/IMPLEMENTATION_PLAN.md` |
-| Karpathy rule | `.cursor/rules/karpathy-engineering.mdc` |
+| Phase 0 ecosystem docs / legal / skills matrix | PASS |
+| Sync vocabulary mapper | PASS |
+| Phase 1 rest-timer notification | PASS |
+| Phase 1 Health Connect write (opt-in API) | PASS (Settings UI consent still pending) |
+| Phase 1 WorkoutShareCard PRIVATE default | PASS |
+| Phase 1 Guided export JSON/CSV/ZIP | PASS |
+| ZenithGlass abstraction + CSS fallback | PASS |
+| QuickLiquid / OriginKit vendoring | NOT RUN (deferred; ZenithGlass native first) |
+| Wear / iOS | NOT RUN this slice |
+| Lighthouse ≥90 | NOT RUN this slice |
+| Production deploy | HUMAN REQUIRED |
 
-## Not done (correctly deferred)
+## Features added / improved
 
-- Installing ECC/Superpowers into the **repo** (belongs in Cursor user config; selective)  
-- QuickLiquid/OriginKit code integration (needs license lock + visual budget + build gate)  
-- Health Connect write / rest notifications (Phase 2 code)  
-- Full PRD/TRD rewrite (merge with existing product docs next; avoid duplicate walls)  
-- Push to remote / CI green claim without new product commits beyond docs  
-- Windows iOS runtime (vphone-cli NOT EXECUTABLE here)
+- Rest timer local notifications (RUNNING / PAUSED / COMPLETED / CANCELLED) on guided path
+- HC `ExerciseSession` write with `userOptIn` gate + FitConnect clientRecordId loop filter on read
+- Confirm-gated share card domain model
+- Offline multi-session ZIP export with manifest + media refs
+- `ZenithGlass` wrapping EliteGlass (intensity + `@supports` frost fallback)
 
-## Offline engine truth
+## Tests
 
-Guided strength already has Room + reboot recovery + sync outbox. Gap is vocabulary/notifications/HC write/export — not greenfield.
+| Suite | Result |
+| --- | --- |
+| `RestTimerNotificationTest` | PASS |
+| `GuidedExportAndShareTest` | PASS |
+| `HealthConnectWriteMapperTest` | PASS |
+| `elite-os.test.tsx` (ZenithGlass) | PASS (8/8) |
 
-## Final phase-0 state
+## Human-only
+
+Xiaomi ADB · Play signing keystore · Strava client-secret rotation · Cursor Superpowers/Matt installs · Vercel promote V12 routes · HC write Settings toggle UX copy approval optional
+
+## Final
 
 ```text
 🟡 HUMAN ACTIONS REMAIN
 ```
 
-Human: Cursor skill installs (Superpowers/Matt), keystore, Xiaomi wireless ADB, OriginKit API key if fetching, production deploy of V12.
-
-Technical blockers for “COMPLETE”: none for Phase 0 docs; Phase 2+ code remains.
-
-## Next autonomous increment (when continuing)
-
-1. Unit tests for sync-status mapping  
-2. Rest-timer notification on Android guided path  
-3. HC write opt-in design + tests  
-4. Web `ZenithGlass` scaffold without shipping QuickLiquid until MIT notice + Lighthouse check
+Technical offline core gaps for Phase 1 are closed at the domain/port layer; UI consent + device QA remain.
