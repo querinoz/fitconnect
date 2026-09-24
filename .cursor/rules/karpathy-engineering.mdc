@@ -1,0 +1,23 @@
+---
+description: Karpathy-style engineering defaults — think, simplify, surgical, goal-driven
+alwaysApply: true
+---
+
+# Karpathy engineering defaults (FitConnect)
+
+Apply on every non-trivial change:
+
+## 1. Think before coding
+State the goal, constraints, and failure modes in one short block before edits. Prefer reading existing SoT over inventing parallel systems.
+
+## 2. Simplicity first
+Prefer the smallest change that preserves architecture rules (`AGENTS.md`, Strava-never-social, Health Connect core). Reject dependency bloat and second databases without necessity.
+
+## 3. Surgical changes
+One PR / one concern. Do not refactor outside the requested scope. Do not rewrite working offline/workout paths to rename enums unless product requires it.
+
+## 4. Goal-driven execution
+Define the acceptance evidence (test, AVD, API) before claiming done. Optional CI jobs are still quality signals — investigate failures; do not silently skip.
+
+## Conflicts
+Architecture + security rules win over this file. Tooling governance wins over “install everything.”

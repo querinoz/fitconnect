@@ -2,6 +2,7 @@
 
 | Reference | License (verify upstream) | Assets used? | Code used? | Decision |
 |-----------|---------------------------|--------------|------------|----------|
+| InlitX/GymMane | GPL-3.0 code; CC BY-SA 4.0 exercise art | No | No | **REFERENCE ONLY** — offline workout UX caps; never vendor (see `docs/research/GYMMANE_FEATURE_ANALYSIS.md`) |
 | norrdev/OpenGym | Check repo LICENSE | No | No | Concept only — weekly plans, RIR/RPE, supersets, warm-up, deload UX patterns |
 | DuarteSantos8/openGym | Check LICENSE | No | No | Concept only |
 | feMoraes0/fitness-ui | Check LICENSE | No | No | Concept only — mobile fitness UI patterns |
